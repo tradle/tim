@@ -3,94 +3,121 @@
 import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
-import gql from 'graphql-tag'
-import deepEqual from 'deep-equal'
-import tradle, { utils as tradleUtils } from '@tradle/engine'
-import { ApolloClient, createNetworkInterface } from 'apollo-client'
+// import gql from 'graphql-tag'
+import { utils as tradleUtils } from '@tradle/engine'
+// import { ApolloClient, createNetworkInterface } from 'apollo-client'
+import { GraphQLClient } from 'graphql-request'
 import constants from '@tradle/constants'
-import { print as printQuery } from 'graphql/language/printer'
+// import { print as printQuery } from 'graphql/language/printer'
 import utils from '../../utils/utils'
 const {
   TYPE,
   SIG,
   ROOT_HASH,
   CUR_HASH,
-  PREV_HASH
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE, MODEL } = constants.TYPES
+const { MONEY, ENUM, ORGANIZATION, MESSAGE, MODEL } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
 const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
+const NETWORK_FAILURE = 'Failed to fetch'
+const INVALID_QUERY = 'Syntax Error GraphQL request'
 
+const MAX_ATTEMPTS = 3
+
+var messageMap = {
+  [NETWORK_FAILURE]: 'networkFailure',
+  [INVALID_QUERY]: 'invalidQuery'
+}
+const useApollo = false
 var search = {
   initClient(meDriver, url) {
-    // let graphqlEndpoint
-    // let orgId = me.organization.id
-    // let url = me.organization.url
-    // if (!url)
-    //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
-    // if (url)
-    let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
+    // debugger
+    // if (useApollo)
+    //   return this.initClientApollo(meDriver, url)
     // else
-    //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+      return this.initClientGraphQLRequest(meDriver, url)
+  },
+
+  // initClientApollo(meDriver, url) {
+  //   // let graphqlEndpoint
+  //   // let orgId = me.organization.id
+  //   // let url = me.organization.url
+  //   // if (!url)
+  //   //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
+  //   // if (url)
+  //   let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
+  //   // else
+  //   //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+  //   if (!graphqlEndpoint)
+  //     return
+
+  //   // graphqlEndpoint = `http://localhost:21012/graphql`
+  //   const networkInterface = createNetworkInterface({
+  //     uri: graphqlEndpoint
+  //   })
+
+  //   networkInterface.use([{
+  //     applyMiddleware: async (req, next) => {
+  //       const body = tradleUtils.stringify({
+  //         ...req.request,
+  //         query: printQuery(req.request.query)
+  //       })
+
+  //       const result = await meDriver.sign({
+  //         object: {
+  //           [TYPE]: 'tradle.GraphQLQuery',
+  //           body,
+  //           _time: Date.now()
+  //         }
+  //       })
+
+  //       if (!req.options.headers) {
+  //         req.options.headers = {}
+  //       }
+
+  //       req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
+  //       next()
+  //     }
+  //   }])
+
+  //   // networkInterface.useAfter([
+  //   //   {
+  //   //     applyAfterware(result, next) {
+  //   //       const { response } = result
+  //   //       if (response.status > 300) {
+  //   //         const err = Error('request failed')
+  //   //         err.status = response.status
+  //   //         err.statusText = response.statusText
+  //   //         err.response = response
+  //   //         throw err
+  //   //       }
+
+  //   //       next()
+  //   //     }
+  //   //   }
+  //   // ])
+
+  //   return new ApolloClient({ networkInterface })
+  // },
+
+  initClientGraphQLRequest(meDriver, url, headers) {
+    // debugger
+    let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
     if (!graphqlEndpoint)
       return
-
-    // graphqlEndpoint = `http://localhost:21012/graphql`
-    const networkInterface = createNetworkInterface({
-      uri: graphqlEndpoint
-    })
-
-    networkInterface.use([{
-      applyMiddleware: async (req, next) => {
-        const body = tradleUtils.stringify({
-          ...req.request,
-          query: printQuery(req.request.query)
-        })
-
-        const result = await meDriver.sign({
-          object: {
-            [TYPE]: 'tradle.GraphQLQuery',
-            body,
-            _time: Date.now()
-          }
-        })
-
-        if (!req.options.headers) {
-          req.options.headers = {}
-        }
-
-        req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
-        next()
-      }
-    }])
-
-    networkInterface.useAfter([
-      {
-        applyAfterware(result, next) {
-          const { response } = result
-          if (response.status > 300) {
-            const err = Error('request failed')
-            err.status = response.status
-            err.statusText = response.statusText
-            err.response = response
-            throw err
-          }
-
-          next()
-        }
-      }
-    ])
-
-    return new ApolloClient({ networkInterface })
+    this.graphqlEndpoint = graphqlEndpoint
+    this.meDriver = meDriver
+    // Not needed but just to make it generic
+    return new GraphQLClient(graphqlEndpoint, { headers })
   },
 
   async searchServer(params) {
-    let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, properties, select} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit,
+         endCursor, properties, select, excludeProps} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -114,6 +141,8 @@ var search = {
       LTE: '',
     }
     let exclude = [ROOT_HASH, CUR_HASH, TYPE]
+    if (excludeProps)
+      exclude.concat(excludeProps)
     if (filterResource) {
       for (let p in filterResource) {
         if (exclude.indexOf(p) !== -1)
@@ -196,7 +225,7 @@ var search = {
             op.NEQ += `\n   ${p}: true,`
         }
         else if (props[p].type === 'number')
-          self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+          this.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
 
         else if (props[p].type === 'object') {
           // if (Array.isArray(val)) {
@@ -212,14 +241,27 @@ var search = {
           if (Array.isArray(val)) {
             if (!val.length)
               continue
-            let s = `${p}___permalink: [`
-            val.forEach((r, i) => {
-              if (i)
-                s += ', '
-              s += `"${r[ROOT_HASH]}"`
-            })
-            s += ']'
-            inClause.push(s)
+            let isEnum = props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM
+            if (isEnum) {
+              let s = `${p}__id: [`
+              val.forEach((r, i) => {
+                if (i)
+                  s += ', '
+                s += `"${r.id}"`
+              })
+              s += ']'
+              inClause.push(s)
+            }
+            else {
+              let s = `${p}___permalink: [`
+              val.forEach((r, i) => {
+                if (i)
+                  s += ', '
+                s += `"${r[ROOT_HASH]}"`
+              })
+              s += ']'
+              inClause.push(s)
+            }
           }
           else {
             if (props[p].ref === MONEY) {
@@ -298,7 +340,7 @@ var search = {
     query += `edges {\n node {\n`
 
     if (!select) {
-      select = this.getSearchProperties({model, properties, isList: true})
+      select = this.getSearchProperties({model, properties, isList: true, excludeProps})
     }
 
     query += `${select.join('   \n')}`
@@ -306,23 +348,89 @@ var search = {
     query += `\n}`   // close 'edges'
     query += `\n}`   // close properties block
     query += `\n}`   // close query
-    try {
-      let data = await client.query({
-          fetchPolicy: 'network-only',
-          errorPolicy: 'all',
-          query: gql(`${query}`),
-          variables: versionId  &&  {modelsVersionId: versionId}
-        })
-      return data.data[table]
-    } catch(error) {
-      // debugger
-      console.log(error)
-      // throw error
+
+    let error, retry = true
+    for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
+      let data = await this.execute({client, query, table, versionId})
+      if (data.result) {
+        return { result:  data.result }
+      }
+      ({ error='',  excludeProps={}, retry=true } = await this.checkError(data, model))
+      if (excludeProps.length) {
+        params.excludeProps = excludeProps
+        return await this.searchServer(params)
+      }
+      if (error  &&  error === NETWORK_FAILURE  ||  !retry)
+        break
+
+    //   let message, graphQLErrors, networkError
+    //   if (useApollo) {
+    //     ({ message, graphQLErrors, networkError } = data.error)
+    //   }
+    //   else {
+    //     if (data.error.response) {
+    //       graphQLErrors = data.error.response.errors
+    //       message = INVALID_QUERY
+    //     }
+    //     else {
+    //       graphQLErrors = []
+    //       if (data.error.message === 'Failed to fetch') {
+    //         error = NETWORK_FAILURE
+    //         break
+    //       }
+    //       else
+    //         message = data.error.message
+    //     }
+    //   }
+    //   // let { message, graphQLErrors, networkError } = data.error
+    //   if (graphQLErrors  &&  graphQLErrors.length) {
+    //     let excludeProps = []
+    //     let str = 'Cannot query field \"'
+    //     let len = str.length
+    //     graphQLErrors.forEach(err => {
+    //       if (err.path) {
+    //         let prop
+    //         for (let i=err.path.length - 1  &&  !prop; i>=0; i--) {
+    //           let p = err.path[i]
+    //           if (props[p])
+    //             prop = p
+    //         }
+    //         excludeProps.push(prop)
+    //         return
+    //       }
+    //       let msg = err.message
+    //       let idx = msg.indexOf(str)
+    //       if (idx !== 0)
+    //         return
+    //       idx = msg.indexOf('\"', len)
+    //       excludeProps.push(msg.substring(len, idx))
+    //     })
+    //     if (excludeProps.length) {
+    //       params.excludeProps = excludeProps
+    //       return await this.searchServer(params)
+    //     }
+    //     else {
+    //       debugger
+    //       return
+    //     }
+    //   }
+    //   if (networkError  &&  networkError.message === NETWORK_FAILURE) {
+    //     error = NETWORK_FAILURE
+    //     break
+    //   }
+    //   retry = false
+    //   if (message.indexOf(INVALID_QUERY) === 0)
+    //     message = INVALID_QUERY
+    //   else
+    //     debugger
+    //   await utils.submitLog(true)
+    //   error = message
     }
 
-    function prettify (obj) {
-      return JSON.stringify(obj, null, 2)
-    }
+    console.log(error)
+    return { error: messageMap[error] || error, retry }
+      // throw error
+
     function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
       let isMoney = prop.ref === MONEY
       let p = prop.name
@@ -352,7 +460,7 @@ var search = {
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, recipient, client, context, filterResource, limit, endCursor, direction, application } = params
+    let { author, client, context, filterResource, limit, endCursor, application } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
     let limitP = limit ? `limit:  ${limit}` : ''
@@ -410,6 +518,7 @@ var search = {
       }
     }
     eq += filter
+
     if (context)
       eq += `             context: "${context}"`
     eq += `
@@ -421,29 +530,36 @@ var search = {
       neq = `
             NEQ: {
               context: $context
+              _payloadType: "${MESSAGE}"
             }
             `
     }
-
+    if (!neq  &&  application) {
+      neq = `
+            NEQ: {
+              _payloadType: "${MESSAGE}"
+            }
+            `
+    }
     let query = queryHeader + eq + neq + queryFooter
+
     try {
-      let result = await client.query({
-          fetchPolicy: 'network-only',
-          errorPolicy: 'all',
-          query: gql(`${query}`),
-          variables: filterResource || context ? null : {context: context}
-        })
-      return result  &&  result.data[table]
+      let result = await this.execute({client, query, table})
+      // let result = await client.query({
+      //     fetchPolicy: 'network-only',
+      //     errorPolicy: 'all',
+      //     query: gql(`${query}`),
+      //     variables: filterResource || context ? null : {context: context}
+      //   })
+      return result  &&  result.result
     } catch (err) {
       debugger
     }
 
   },
   getSearchProperties(params) {
-    let {model, inlined, properties, currentProp, isList, backlink} = params
+    let {model, inlined, properties, backlink} = params
     let props = backlink ? {[backlink.name]: backlink} : model.properties
-
-    let isApplication = model.id === APPLICATION
 
     let arr
     if (utils.isInlined(model))
@@ -482,7 +598,7 @@ var search = {
       )
     }
 
-    if (ref === COUNTRY) {//   ||  ref === CURRENCY)
+    else if (ref === COUNTRY) {//   ||  ref === CURRENCY)
       return (
         `${p} {
           id
@@ -516,11 +632,13 @@ var search = {
       }`
     )
   },
-  addProps({isList, backlink, props, currentProp, arr, model}) {
+  addProps({isList, backlink, props, currentProp, arr, model, excludeProps}) {
     if (!arr)
       arr = []
     let isApplication = model  &&  model.id === APPLICATION
     for (let p in props) {
+      if (excludeProps  &&  excludeProps.indexOf(p) !== -1)
+        continue
       if (p.charAt(0) === '_')
         continue
       if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
@@ -530,68 +648,7 @@ var search = {
         continue
       let ptype = prop.type
       if (ptype === 'array') {
-        // HACK
-        if (p === 'verifications')
-          continue
-
-        if (isApplication) {
-          if (isList  &&  p !== 'relationshipManagers')
-            continue
-          if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
-            continue
-        }
-        let iref = prop.items.ref
-        if (iref) {
-          if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-            if (isList  &&  !isApplication)
-              continue
-            arr.push(`${p} {
-              edges {
-                node {
-                  ${this.getSearchProperties({model: utils.getModel(iref)})}
-                }
-              }
-            }`)
-          }
-          else if (prop.inlined) {
-            if (currentProp  &&  currentProp === prop)
-              continue
-            arr.push(this.addInlined(prop))
-          }
-          // else if (iref === model.id) {
-          //   arr.push(
-          //     `${p} {
-          //       ${TYPE}
-          //       _permalink
-          //       _link
-          //       _displayName
-          //     }`
-          //   )
-          // }
-          // else if (prop.inlined)
-          //   arr.push(this.addInlined(prop))
-          else
-            arr.push(
-              `${p} {
-                ${TYPE}
-                _permalink
-                _link
-                _displayName
-              }`
-            )
-        }
-        else {
-          let allProps = this.addProps({isList, props: prop.items.properties})
-          if (allProps.length) {
-            arr.push(
-              `${p} {
-                ${allProps.toString().replace(/,/g, '\n')}
-              }`
-            )
-          }
-          else
-            arr.push(p)
-        }
+        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp})
         continue
       }
       if (ptype !== 'object') {
@@ -607,7 +664,7 @@ var search = {
       if (ref === ORGANIZATION)
         continue
 
-      if (prop.inlined)
+      if (prop.inlined  ||  utils.getModel(ref).inlined)
         arr.push(this.addInlined(prop))
       else {
         arr.push(this.addRef(prop))
@@ -618,6 +675,73 @@ var search = {
       }
     }
     return arr
+  },
+  addArrayProperty({prop, model, arr, isList, backlink, currentProp}) {
+    let p = prop.name
+    let isApplication = model  &&  model.id === APPLICATION
+    if (p === 'verifications')
+      return
+
+    if (isApplication) {
+      if (isList  &&  p !== 'relationshipManagers')
+        return
+      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+        return
+    }
+    let iref = prop.items.ref
+    if (iref) {
+      let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
+
+      if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
+        if (isList  &&  !isApplication)
+          return
+        arr.push(`${p} {
+          edges {
+            node {
+              ${this.getSearchProperties({model: utils.getModel(iref)})}
+            }
+          }
+        }`)
+      }
+      else if (prop.inlined  ||  isInlined) {
+        if (currentProp  &&  currentProp === prop)
+          return
+        arr.push(this.addInlined(prop))
+      }
+      // else if (iref === model.id) {
+      //   arr.push(
+      //     `${p} {
+      //       ${TYPE}
+      //       _permalink
+      //       _link
+      //       _displayName
+      //     }`
+      //   )
+      // }
+      // else if (prop.inlined)
+      //   arr.push(this.addInlined(prop))
+      else
+        arr.push(
+          `${p} {
+            ${TYPE}
+            _permalink
+            _link
+            _displayName
+          }`
+        )
+    }
+    else {
+      let allProps = this.addProps({isList, props: prop.items.properties})
+      if (allProps.length) {
+        arr.push(
+          `${p} {
+            ${allProps.toString().replace(/,/g, '\n')}
+          }`
+        )
+      }
+      else
+        arr.push(p)
+    }
   },
   addInlined(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
@@ -646,7 +770,7 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink) {
+  async getItem(id, client, backlink, excludeProps) {
     let parts = id.split('_')
 
     let modelName = parts[0]
@@ -660,22 +784,80 @@ var search = {
     let _permalink = parts[1]
     let query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    let arr = this.getSearchProperties({model, backlink})
+    let arr = this.getSearchProperties({model, backlink, excludeProps})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
-      let result = await client.query({
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-        query: gql(`${query}`)
-      })
-      return result.data[table]
+      let result = await this.execute({client, query, table})
+      if (result.error  &&  !excludeProps) {
+        let { excludeProps, error } = await this.checkError(result, model)
+        if (excludeProps)
+          return await this.getItem(id, client, backlink, excludeProps)
+      }
+      return result.result
     }
     catch(err) {
       console.log('graphQL._getItem', err)
       debugger
     }
   },
+  async checkError(result, model) {
+    let message, graphQLErrors, networkError, excludeProps
+    if (useApollo) {
+      ({ message, graphQLErrors, networkError } = result.error)
+    }
+    else {
+      if (result.error.response) {
+        graphQLErrors = result.error.response.errors
+        message = INVALID_QUERY
+      }
+      else {
+        graphQLErrors = []
+        if (result.error.message === 'Failed to fetch')
+          return { error: NETWORK_FAILURE }
+        message = result.error.message
+      }
+    }
+    if (graphQLErrors  &&  graphQLErrors.length) {
+      excludeProps = []
+      let str = 'Cannot query field \"'
+      let len = str.length
+      let props = model.properties
+      graphQLErrors.forEach(err => {
+        if (err.path) {
+          if (err.path === 1)
+            return
+          let prop
+          for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
+            let p = err.path[i]
+            if (props[p])
+              prop = p
+          }
+          excludeProps.push(prop)
+          return
+        }
+
+        let msg = err.message
+        let idx = msg.indexOf(str)
+        if (idx !== 0)
+          return
+        idx = msg.indexOf('\"', len)
+        excludeProps.push(msg.substring(len, idx))
+      })
+
+      if (excludeProps.length)
+        return { excludeProps }
+      return { error: message, retry: message === NETWORK_FAILURE }
+    }
+    if (networkError  &&  networkError.message === NETWORK_FAILURE)
+      return { error: NETWORK_FAILURE }
+
+    if (message.indexOf(INVALID_QUERY) === 0)
+      message = INVALID_QUERY
+    await utils.submitLog(true)
+    return { error: message, retry: false }
+  },
+
   // TODO: rename _getItem to getItem
   // getItem: (...args) => search._getItem(...args),
   async getObjects(links, client) {
@@ -690,15 +872,18 @@ var search = {
         }
      }`
     try {
-      let result = await client.query({
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-        query: gql(`${query}`)
-      })
-      return result.data[table]  &&  result.data[table].objects
+      let result = await this.execute({client, query, table})
+      return result.result  &&  result.result.objects  || []
+      // let result = await client.query({
+      //   fetchPolicy: 'network-only',
+      //   errorPolicy: 'all',
+      //   query: gql(`${query}`)
+      // })
+      // return result.data[table]  &&  result.data[table].objects
     }
     catch(err) {
       console.log('graphQL._getItem', err)
+      return []
       debugger
     }
   },
@@ -735,10 +920,62 @@ var search = {
     if (isEmpty(results)) throw new Error(`identity not found with link: ${link}`)
 
     return results[0]
+  },
+//   async executeApollo({client, query, table, versionId}) {
+// let start = Date.now()
+//     try {
+//       let data = await client.query({
+//           fetchPolicy: 'network-only',
+//           errorPolicy: 'all',
+//           query: gql(`${query}`),
+//           variables: versionId  &&  {modelsVersionId: versionId}
+//         })
+// console.log('searchServer.apollo ' + (Date.now() - start))
+//       return { result: data.data[table] }
+//     } catch(error) {
+//       // debugger
+//       console.log(error)
+//       return { error }
+//     }
+//   },
+
+  async execute(params) {
+    if (useApollo)
+      return this.executeApollo(params)
+    var {query, table, versionId} = params
+    // debugger
+    const body = tradleUtils.stringify({
+      query
+    })
+    let start = Date.now()
+    const result = await this.meDriver.sign({
+      object: {
+        [TYPE]: 'tradle.GraphQLQuery',
+        body,
+        _time: Date.now()
+      }
+    })
+
+    const headers = {
+      'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
+    }
+    let client = new GraphQLClient(this.graphqlEndpoint, { headers })
+
+    let variables = versionId  &&  {modelsVersionId: versionId} || undefined
+    try {
+      let data = await client.rawRequest(query, variables)
+      if (data.data)
+        return {result: data.data[table]}
+      else
+        return {error: JSON.stringify(data.errors  &&  data.errors || data)}
+    } catch (error) {
+debugger
+      return { error }
+    }
   }
 }
 
-const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
+// const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
 const getFirstNode = result => getPropertyAtPath(result, ['edges', '0', 'node'])
 
 module.exports = search
@@ -952,3 +1189,6 @@ module.exports = search
   //   }
 
   // },
+    // function prettify (obj) {
+    //   return JSON.stringify(obj, null, 2)
+    // }

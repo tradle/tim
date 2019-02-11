@@ -1,6 +1,3 @@
-console.log('requiring NoResources.js')
-'use strict'
-
 import {
   Text,
   StyleSheet,
@@ -9,17 +6,16 @@ import {
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/Ionicons'
 
-import utils from '../utils/utils'
 import React, { Component } from 'react'
 class NoResources extends Component {
-  props: {
+  static propTypes = {
     filter: PropTypes.string,
     message: PropTypes.string,
     icon: PropTypes.string,
     iconColor: PropTypes.string,
     iconSize: PropTypes.number,
     iconStyle: PropTypes.object,
-    isLoading: PropTypes.boolean
+    isLoading: PropTypes.bool
   };
   render() {
     let noRes

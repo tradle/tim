@@ -1,8 +1,5 @@
-console.log('requiring ResourceRow.js')
-'use strict';
 
 import {
-  Image,
   Alert,
   Platform,
   TouchableHighlight,
@@ -21,6 +18,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import constants from '@tradle/constants'
 
+import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import LinearGradient from 'react-native-linear-gradient';
 import ArticleView from './ArticleView'
@@ -32,12 +30,10 @@ import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
-// import Pie from 'react-native-progress/Pie';
-import ProgressBar from './ProgressBar';
 
-import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
-import { Text } from './Text'
+import Image from './Image'
+
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
@@ -62,6 +58,24 @@ const DEFAULT_CURRENCY_SYMBOL = '£'
 const MAX_LENGTH = 70
 
 class ResourceRow extends Component {
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    showRefResources: PropTypes.func,
+    hideMode: PropTypes.bool,
+    hideResource: PropTypes.func,
+    isOfficialAccounts: PropTypes.bool,
+    isChooser: PropTypes.bool,
+    selectModel: PropTypes.func,
+    onCancel: PropTypes.func,
+    changeSharedWithList: PropTypes.func,
+    newContact: PropTypes.object,
+    multiChooser: PropTypes.bool,
+    chosen: PropTypes.object,
+    parentComponent: PropTypes.func,
+  };
+
   constructor(props) {
     super(props)
     this.state = {
@@ -109,6 +123,10 @@ class ResourceRow extends Component {
 
       break
     }
+  }
+  componentWillReceiveProps(props) {
+    if (props.isOfficialAccounts)
+      this.state.resource = props.resource
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
@@ -160,7 +178,6 @@ class ResourceRow extends Component {
       resource = this.state.application
     let photo;
     let isContact = rType === PROFILE;
-    let isOrg = rType === ORGANIZATION
     let noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
     let style
@@ -239,7 +256,7 @@ class ResourceRow extends Component {
               </View>
     }
 
-    let rId = utils.getId(this.props.resource)
+    // let rId = utils.getId(this.props.resource)
     // let cancelResource = (this.props.onCancel ||  this.state)
     //                    ? <TouchableHighlight onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
     //                        <View>
@@ -388,7 +405,6 @@ class ResourceRow extends Component {
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype);
     let viewCols = model.gridCols || model.viewCols;
-    let renderedViewCols
 
     if (!viewCols  &&  model.id !== APPLICATION) {
       if (model.id === PARTIAL) {
@@ -419,10 +435,8 @@ class ResourceRow extends Component {
     let vCols = [];
     let properties = model.properties;
     let first = true
-    let datePropIdx;
     let datePropsCounter = 0;
     let backlink;
-    let cnt = 10;
     for (let i=0; i<viewCols.length; i++) {
       let v = viewCols[i];
       if (properties[v].type === 'array') {
@@ -435,8 +449,6 @@ class ResourceRow extends Component {
       if (resource[v]) {
         if (v === 'dateSubmitted') { // || v === 'lastMessageTime') {
           this.dateProp = v;
-          if (!datePropsCounter)
-            datePropIdx = i;
           datePropsCounter++;
         }
       }
@@ -445,7 +457,7 @@ class ResourceRow extends Component {
       this.dateProp = null;
 
     let isOfficialAccounts = this.props.isOfficialAccounts
-    let color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
+    let color = isOfficialAccounts && style ? {color: style.listColor} : {}
     let isContact = rtype === PROFILE;
     viewCols.forEach((v) => {
       if (v === this.dateProp)
@@ -549,7 +561,7 @@ class ResourceRow extends Component {
         first = false;
       }
     });
-
+    let renderedViewCols
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
@@ -558,8 +570,9 @@ class ResourceRow extends Component {
     }
     if (!backlink)
       return renderedViewCols
+    const { showRefResources, parentComponent } = this.props
     return [
-      <TouchableHighlight key={this.getNextKey()} onPress={this.props.showRefResources.bind(this, resource, backlink)} underlayColor='transparent'>
+      <TouchableHighlight key={this.getNextKey()} onPress={showRefResources.bind(this, {resource, prop: backlink, component: parentComponent})} underlayColor='transparent'>
         <View key={this.getNextKey()}>
           {renderedViewCols}
         </View>
@@ -574,7 +587,7 @@ class ResourceRow extends Component {
 
     let props = model.properties
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-    let color, dateCompleted, dateEvaluated, dateStarted
+    let dateCompleted, dateEvaluated, dateStarted
     if (resource.dateStarted) {
       dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
                       <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
@@ -655,17 +668,22 @@ class ResourceRow extends Component {
     // progressBar = <View style={styles.progress}>
     //                 <ProgressBar progress={progress} width={utils.dimensions().width - 30} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
     //               </View>
-    let draft
-    if (resource.draft) {
-      let width = utils.dimensions(ResourceRow).width
-      draft = <View style={{position: 'absolute', top: 0, width}}>
-                 <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
-              </View>
-    }
+    // let draft
+    // if (resource.draft) {
+    //   let width = utils.dimensions(ResourceRow).width
+    //   draft = <View style={{position: 'absolute', top: 0, width}}>
+    //              <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
+    //           </View>
+    // }
+
+    if (!m)
+      m = utils.getModel(resource.requestFor)
+    let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
+
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : translate(utils.getModel(resource.requestFor))}</Text>
+                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{mTitle}</Text>
                   {formsCount}
                 </View>
                 {applicant}
@@ -735,12 +753,8 @@ var styles = StyleSheet.create({
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
-    // flex: 1,
     fontSize: 20,
-    // fontWeight: '400',
     color: '#555555'
-    // paddingTop: 18,
-    // marginBottom: 2,
   },
   description: {
     // flex: 1,
@@ -756,7 +770,6 @@ var styles = StyleSheet.create({
   row: {
     backgroundColor: '#ffffff',
     justifyContent: 'center',
-    // justifyContent: 'space-around',
     flexDirection: 'row',
     padding: 5,
   },
@@ -765,42 +778,17 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#ffffff'
   },
-  formsCount: {
-    // flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // backgroundColor: '#7AAAc3',
-    paddingVertical: 1,
-    borderColor: '#7AAAc3',
-    borderRadius: 3,
-    borderWidth: 1,
-    height: 20,
-    marginRight: 12,
-    width: 20,
-    alignSelf: 'center'
-  },
-  formsCountText: {
-    paddingVertical: 1,
-    fontSize: 14,
-    alignSelf: 'center'
-  },
   cellRoundImage: {
-    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#7AAAc3',
     paddingVertical: 1,
-    // borderColor: '#7AAAc3',
     borderRadius: 30,
-    // borderWidth: 1,
     height: 60,
     marginRight: 10,
     width: 60,
     alignSelf: 'center'
   },
   cellText: {
-    // marginTop: 12,
-    // alignSelf: 'center',
     color: '#ffffff',
     fontSize: 20,
     backgroundColor: 'transparent'
@@ -816,9 +804,6 @@ var styles = StyleSheet.create({
     height: 60,
     marginRight: 10,
     width: 60,
-    // borderColor: '#7AAAc3',
-    // borderRadius: 30,
-    // borderWidth: 1,
   },
   cellNoImage: {
     backgroundColor: '#dddddd',
@@ -836,31 +821,17 @@ var styles = StyleSheet.create({
     marginLeft: 4,
   },
   icon: {
-    // width: 40,
-    // height: 40,
     alignSelf: 'center',
     marginLeft: 10,
     marginTop: 7,
-    // color: '#7AAAc3'
   },
   online: {
     backgroundColor: '#ffffff',
     borderRadius: 10,
     alignItems: 'center',
-    // alignSelf: 'flex-end',
-    // marginLeft: -25,
-    // marginRight: 25,
-    // width: 16,
-    // height: 16,
     position: 'absolute',
     top: 40,
     left: 43,
-    // borderWidth: 1,
-    // borderColor: '#ffffff'
-  },
-  contextOwners: {
-    fontSize: 14,
-    color: '#b4c3cb'
   },
   verySmallLetters: {
     fontSize: 12,
@@ -914,11 +885,11 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
   },
-  progress: {
-    marginTop: 10,
-    justifyContent: 'center',
-    alignSelf: 'center'
-  },
+  // progress: {
+  //   marginTop: 10,
+  //   justifyContent: 'center',
+  //   alignSelf: 'center'
+  // },
   providerLogo: {
     flexDirection: 'row',
     alignItems: 'center'

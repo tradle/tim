@@ -1,25 +1,21 @@
-console.log('requiring OnePropFormMixin.js')
-'use strict';
-
-import React from 'react'
 import { Alert } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
-const debug = require('debug')('tradle:app:OnePropForm')
 import _ from 'lodash'
 import Zoom from 'react-native-facetec-zoom'
 
+import Errors from '@tradle/errors'
 import constants from '@tradle/constants'
 var {
   TYPE
 } = constants
 
-import utils from '../utils/utils'
-const translate = utils.translate
+import utils, { translate, isWeb } from '../utils/utils'
 import Actions from '../Actions/Actions'
-import CameraView from './CameraView'
-import VideoCamera from './VideoCamera'
+// import CameraView from './CameraView'
+// import VideoCamera from './VideoCamera'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
+import { capture } from '../utils/camera'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -30,7 +26,7 @@ var OnePropFormMixin = {
     if (!item)
       return;
 
-    let resource = this.props.resource
+    let { resource, isRefresh } = this.props
 
     let formRequest
     if (resource[TYPE] === FORM_REQUEST) {
@@ -49,13 +45,13 @@ var OnePropFormMixin = {
     if (!resource[prop.name])
       this.props.navigator.pop()
     resource[prop.name] = item
-    let params = {resource}
+    let params = {resource, isRefresh}
     if (formRequest)
       params.disableFormRequest = formRequest
     Actions.addChatItem(params)
   },
   showSignatureView(prop, onSet) {
-    const { navigator, bankStyle } = this.props
+    const { navigator, bankStyle, isRefresh } = this.props
     let sigView
     navigator.push({
       title: translate(prop), //m.title,
@@ -80,31 +76,31 @@ var OnePropFormMixin = {
     })
   },
 
-  showCamera(params) {
-    let { prop } = params
+  async showCamera(params) {
+    let { prop, resource } = params
     // if (utils.isAndroid()) {
     //   return Alert.alert(
     //     translate('oops') + '!',
     //     translate('noScanningOnAndroid')
     //   )
     // }
-    let props = utils.getModel(this.props.resource[TYPE]).properties
-    let scanner = prop.scanner
     let pname = prop.name
+    let scanner = prop.scanner
     if (scanner) {
       if (scanner === 'id-document') {
         if (pname === 'scan')  {
-          if (this.state.resource.documentType  &&  this.state.resource.country) {
-            this.showBlinkIDScanner(pname)
-          }
-          else
-            Alert.alert('Please choose country and document type first')
+          debugger
+          // if (this.state.resource.documentType  &&  this.state.resource.country) {
+          //   this.showBlinkIDScanner(pname)
+          // }
+          // else
+          //   Alert.alert('Please choose country and document type first')
           return
         }
       }
       else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
-          this.scanCard(prop)
+        if (!isWeb())
+          this.scanPaymentCard(prop)
         return
       }
     }
@@ -121,18 +117,23 @@ var OnePropFormMixin = {
     //   }
     // });
 
-    this.props.navigator.push({
-      // title: 'Take a pic',
-      backButtonTitle: 'Back',
-      noLeftButton: true,
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        cameraType: prop.cameraType,
-        onTakePic: this.onTakePic.bind(this, params)
-      }
-    });
+    let { navigator, bankStyle } = this.props
+    if (!resource)
+      resource = this.props.resource
+    let model = utils.getModel(utils.getType(resource.form || resource[TYPE]))
+
+    const result = await capture({
+      navigator,
+      title: isWeb() &&  translate(prop, model),
+      backButtonTitle: translate('back'),
+      cameraType: utils.isAgent()  ? 'back' : prop.cameraType,
+      quality: utils.getCaptureImageQualityForModel(model),
+    })
+
+    if (result) {
+      this.onTakePic(params, result)
+      return result
+    }
   },
   // verify liveness with facetec ZOOM
   async verifyLiveness(params) {
@@ -225,27 +226,34 @@ var OnePropFormMixin = {
   onTakePic(params, photo) {
     if (!photo)
       return
-    let { prop } = params
-    let { width, height, base64 } = photo
+    let { width, height, url } = photo
+    let { isRefresh } = this.props
 
-    let resource = this.props.resource
+    let { prop, resource } = params
+    if (!resource)
+      resource = this.props.resource
     let isFormError = resource[TYPE] === FORM_ERROR
-    Actions.addChatItem({
-      disableFormRequest: resource,
-      resource: {
-        [TYPE]: isFormError ? resource.prefill[TYPE] : resource.form,
-        [prop.name]: {
-          width,
-          height,
-          url: base64
-        },
+    let r
+    if (isRefresh)
+      r = resource
+    else {
+      r = {
+        [TYPE]: isFormError && resource.prefill || resource.form,
         _context: resource._context,
         from: utils.getMe(),
-        to: resource.from
+        to: isRefresh && resource.to || resource.from
       }
+    }
+    _.extend(r, {
+        [prop.name]: { width, height, url }
+      })
+    Actions.addChatItem({
+      disableFormRequest: !isRefresh  &&  resource,
+      isRefresh,
+      resource: r
     })
 
-    this.props.navigator.pop();
+    // this.props.navigator.pop();
   },
   async scanPaymentCard(prop) {
     let cardJson
@@ -270,7 +278,7 @@ var OnePropFormMixin = {
       return
     }
 
-    let resource = this.props.resource
+    let { resource, isRefresh } = this.props
     let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
     let props = utils.getModel(r[TYPE]).properties
     for (let p in cardJson) {
@@ -283,7 +291,7 @@ var OnePropFormMixin = {
     r[prop.name + 'Json'] = cardJson
     this.setState({ r })
 
-    Actions.addChatItem({resource: r, disableFormRequest: resource})
+    Actions.addChatItem({resource: r, disableFormRequest: resource, isRefresh})
   },
 }
 module.exports = OnePropFormMixin;

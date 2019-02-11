@@ -14,3 +14,48 @@
 
 issue: app built for device doesn't run on simulator
 solution: from Xcode, run Release to install on a simulator. Then find the Tradle.app file in ~/Library/Developer/Xcode/DerivedData/Tradle-xxxx/Build/Products/Release-iphonesimulator/Tradle.app . You can drag it onto the simulator of your choice on another machine.
+
+## Releases
+
+### Codepush
+
+#### iOS
+
+All steps take place in iOS dir:
+
+Scenario:
+- You have 1.1.8 in the App Store
+- You have 1.1.8, 1.1.9 in TestFlight
+- 1.1.9 may have different native code
+
+1. codepush to Staging for 1.1.9 (Staging deployments live in TestFlight): 
+fastlane codepush
+
+this pushes to the Staging deployment (the one created with `fastlane beta`)
+
+load 1.1.9 from TestFlight, receive the code push, check that you have the right git hash in the Home Page footer. Test functionality.
+
+2. if you haven't already, check out a v1.1.8-ios branch from the last v1.1.8.x-ios tag, say v1.1.8.12-ios
+
+git checkout -b v1.1.8 v1.1.8.12
+git merge master
+# resolve any conflicts
+
+# fix Info.plist CFBundleVersion and CFBundleShortVersionString to specify 1.1.8, 1.1.8.12
+git add Tradle/Info.plist
+git amend
+
+3. check that this version works
+
+4. codepush to Staging for v1.1.8
+fastlane codepush
+
+load 1.1.8.x from TestFlight, receive the code push, check that you have the right git hash in the Home Page footer. Test functionality.
+
+5. promote to prod
+
+fastlane codepush_promote_to_release
+
+6. go back to master
+
+git checkout master

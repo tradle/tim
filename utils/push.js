@@ -1,10 +1,5 @@
-console.log('requiring push.js')
-
-'use strict'
-
 import {
   AppState,
-  Alert,
   Platform
 } from 'react-native'
 
@@ -18,12 +13,40 @@ import PushImpl from './push-impl'
 import { constants } from '@tradle/engine'
 import Actions from '../Actions/Actions'
 
+// class Pusher extends EventEmitter {
+//   constructor() {
+//     super()
+//     this._promiseInitialized = new Promise(resolve => {
+//       this.once('init', resolve)
+//     })
+
+//     this._promiseRegistered = new Promise(resolve => {
+//       this.once('register', resolve)
+//     })
+//   }
+
+//   register = async () => {
+//     // make sure initialization is done first
+//     await this._promiseInitialized
+//     // register
+//     this.emit('register')
+//   }
+
+//   subscribe = async () => {
+//     // make sure registration has already been done
+//     await this._promiseRegistered
+//     // subscribe
+//   }
+
+//   init = once(async () => {
+//     // do init stuff
+//     this.emit('init')
+//   })
+// }
+
 const { translate, waitsFor } = utils
 const TYPE = constants.TYPE
-const DENIED_ERROR = new Error('denied')
-// import PushModal from '../Components/PushModal'
 const pushServerURL = ENV.pushServerURL
-const isMobile = () => Platform.OS === 'ios' || Platform.OS === 'android'
 const NOTIFICATION_CAN_HAVE_DATA = Platform.OS === 'ios' || Platform.OS === 'web'
 
 let onInitialized
@@ -76,7 +99,6 @@ function createPusher (opts) {
   if (registered) onRegistered()
 
   let regPromise
-  const unread = me.unreadPushNotifications || 0
   PushImpl.init({ onNotification, node })
 
   return {
@@ -190,11 +212,17 @@ function createPusher (opts) {
 //     data: {}, // OBJECT: The push data
 // }
 
-    debug('NOTIFICATION:', notification)
     const appIsActive = AppState.currentState === 'active'
-    const unread = appIsActive ? 0 : utils.getMe().unreadPushNotifications
-    const { foreground, userInteraction, data } = notification
-    if (foreground) return
+    const { userInteraction, data } = notification
+    debug('notification:', {
+      notification,
+      appIsActive,
+    })
+
+    if (appIsActive) {
+      debug(`ignoring notification, i'm in foreground`)
+      return
+    }
 
     if (appIsActive) resetBadgeNumber()
 
@@ -209,24 +237,15 @@ function createPusher (opts) {
     // }
 
     // Actions.updateMe({ unreadPushNotifications: unread + 1 })
-    //
-    // show 1, because receiving a push notification
-    // doesn't actually mean there's a message to be received,
-    // as "poking" clients is something any tradle mycloud can do
-    Actions.updateMe({ unreadPushNotifications: 1 })
 
-    const unsubscribe = Store.listen(function (event) {
-      if (AppState.currentState === 'active') return unsubscribe()
-      if (event.action !== 'receivedMessage') return
+    // don't show local notification until
+    // we know we have a message in our inbox
+    const showLocalNotification = ({ message }) => {
+      // show 1, because receiving a push notification
+      // doesn't actually mean there's a message to be received,
+      // as "poking" clients is something any tradle mycloud can do
+      Actions.updateMe({ unreadPushNotifications: 1 })
 
-      const { deepPayloadType } = event
-      if (ENV.SILENT_TYPES.includes(deepPayloadType)) return
-
-      unsubscribe()
-      showLocalNotification({ message: event.msg })
-    })
-
-    function showLocalNotification ({ message }) {
       const localNotification = {
         message: translate('unreadMessages')
       }
@@ -261,7 +280,25 @@ function createPusher (opts) {
       PushImpl.localNotification(localNotification)
     }
 
-    setTimeout(unsubscribe, 20000)
+    const unsubscribe = Store.listen(function (event) {
+      if (AppState.currentState === 'active') return unsubscribe()
+      if (event.action !== 'receivedMessage') return
+
+      const { deepPayloadType } = event
+      if (ENV.SILENT_TYPES.includes(deepPayloadType)) {
+        debug('ignoring silent type', deepPayloadType)
+        return
+      }
+
+      unsubscribe()
+      showLocalNotification({ message: event.msg })
+    })
+
+    debug(`waiting for a message...`)
+    setTimeout(() => {
+      debug(`giving up waiting for messages`)
+      unsubscribe()
+    }, 20000)
 
     // example
     // const foreground = notification.foreground ? 'foreground' : 'background'

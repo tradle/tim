@@ -1,27 +1,22 @@
-console.log('requiring TouchIDOptIn.js')
-
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableHighlight,
-  Dimensions
 } from 'react-native'
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import ArticleView from './ArticleView'
+import Image from './Image'
 import utils from '../utils/utils'
-import ENV from '../utils/env'
 import TOUCH_ID_IMG from '../img/touchid2.png'
 
-const BG_IMAGE = ENV.brandBackground
 const LINK_COLOR = '#7AAAC3'
 const BTN_COLOR = LINK_COLOR
 
 class TouchIDOptIn extends Component {
-  props: {
+  static propTypes = {
     optIn: PropTypes.func.isRequired,
     navigator: PropTypes.object.isRequired
   };
@@ -37,7 +32,7 @@ class TouchIDOptIn extends Component {
   }
   render() {
         // <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
-    let { width, height } = utils.dimensions(TouchIDOptIn)
+    let { width } = utils.dimensions(TouchIDOptIn)
           // <Text style={[styles.text, { paddingTop: 20, fontSize: 15 }]}>
           //   You can always enable/disable it on your profile
           // </Text>

@@ -1,4 +1,3 @@
-'use strict'
 
 import {
   View,
@@ -15,7 +14,7 @@ class ProgressBar extends Component {
   //   recipient: PropTypes.string.isRequired
   // };
   render() {
-    let { progress, width, color, borderWidth, borderRadius, height } = this.props
+    let { progress, width, color, height } = this.props
     progress *= 10
     return (
       <View style={[styles.row, {borderColor: color, width: width}]}>

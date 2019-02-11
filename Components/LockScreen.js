@@ -1,6 +1,5 @@
-console.log('requiring LockScreen.js')
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import {
   View,
   Text,

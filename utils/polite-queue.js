@@ -1,4 +1,3 @@
-console.log('requiring polite-queue.js')
 
 import { race } from 'bluebird'
 import createQueue from 'ya-promise-queue'

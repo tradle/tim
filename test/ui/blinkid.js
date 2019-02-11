@@ -8,12 +8,16 @@ import {
   Text,
 } from 'react-native'
 
-import { scan, recognizers } from '../../Components/BlinkID'
+import { scan, recognizers as RecognizerImpls } from '../../Components/BlinkID'
+import SplashScreen from 'react-native-splash-screen'
+
+if (SplashScreen) {
+  SplashScreen.hide()
+}
 
 const bigText = (text, style) => <Text style={[styles.bigText, style]}>{text}</Text>
-const wrapWithView = children => <View>{children}</View>
-const createButton = ({ text, onPress }) => (
-  <TouchableHighlight onPress={onPress} style={styles.button}>
+const createButton = ({ text, ...props }) => (
+  <TouchableHighlight {...props} style={styles.button}>
     {bigText(text, styles.buttonText)}
   </TouchableHighlight>
 )
@@ -26,15 +30,9 @@ const baseOpts = {
   tooltip: 'Center that shit',
 }
 
-const variants = [
-  'mrtd',
-  'eudl',
-  'nzdl',
-  ['usdl', 'face'],
-  'barcode',
-].map(recognizers => ({
+const variants = Object.keys(RecognizerImpls).map(recognizer => ({
   ...baseOpts,
-  recognizers: [].concat(recognizers),
+  recognizers: [recognizer],
 }))
 
 class Blink extends React.Component {
@@ -45,8 +43,9 @@ class Blink extends React.Component {
   }
   scan = async (opts) => {
     try {
+      const result = await scan(opts)
       this.setState({
-        result: await scan(opts),
+        result,
         error: null,
       })
     } catch (err) {
@@ -68,17 +67,25 @@ class Blink extends React.Component {
       </View>
     )
   }
-  renderVariant = (opts) => {
+  renderVariant = (opts, i) => {
     return createButton({
+      key: `variant${i}`,
       text: opts.recognizers.join(' + '),
-      onPress: () => this.scan(opts)
+      onPress: () => this.scan({
+        ...opts,
+        country: {},
+        recognizers: opts.recognizers.map(name => RecognizerImpls[name]),
+        firstSideInstructions: 'this is the first side of many!',
+        secondSideInstructions: 'just kidding, there are only two!',
+        firstSideInstructionsRID: parseInt('0x7f0c004f'),
+      })
     })
   }
   renderResult = () => {
-    return wrapWithView(bigText(prettify(this.state.result)))
+    return <View key='result'>{bigText(prettify(this.state.result))}</View>
   }
   renderError = () => {
-    return wrapWithView(bigText(prettify(this.state.error)))
+    return <View key='error'>{bigText(prettify(this.state.error))}</View>
   }
 }
 

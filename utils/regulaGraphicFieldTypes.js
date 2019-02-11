@@ -1,0 +1,23 @@
+module.exports = {
+  gf_Portrait: 201,
+  gf_Fingerprint: 202,
+  gf_Eye: 203,
+  gf_Signature: 204,
+  gt_BarCode: 205,
+  gt_Proof_Of_Citizenship: 206,
+  gt_Document_Front: 207,
+  gt_Document_Rear: 208,
+  gf_ColorDynamic: 209,
+  gf_GhostPortrait: 210,
+  gt_Other: 250,
+  gf_Finger_LeftThumb: 300,
+  gf_Finger_LeftIndex: 301,
+  gf_Finger_LeftMiddle: 302,
+  gf_Finger_LeftRing: 303,
+  gf_Finger_LeftLittle: 304,
+  gf_Finger_RightThumb: 305,
+  gf_Finger_RightIndex: 306,
+  gf_Finger_RightMiddle: 307,
+  gf_Finger_RightRing: 308,
+  gf_Finger_RightLittle: 309
+}

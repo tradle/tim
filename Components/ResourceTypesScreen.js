@@ -1,5 +1,3 @@
-console.log('requiring ResourceTypesScreen.js')
-'use strict';
 
 import MessageTypeRow from './MessageTypeRow'
 import NewResource from './NewResource'

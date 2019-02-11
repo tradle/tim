@@ -1,9 +1,3 @@
-console.log('requiring password-prompts.js')
-
-import {
-  Platform
-} from 'react-native'
-
 // maps to strings_en.json
 const TEXT_PASSWORD_PROMPTS = {
   promptSet: 'setPassword',

@@ -1,4 +1,3 @@
-'use strict';
 
 const pathModule = require('path');
 const builtinModules = new Set(require('builtin-modules/static'));

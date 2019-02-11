@@ -1,4 +1,3 @@
-console.log('requiring QRCode.js')
 import {
   StyleSheet,
   View,
@@ -6,11 +5,7 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 
-import ActivityIndicator from './ActivityIndicator'
-
-import extend from 'xtend'
 import QRCode from 'react-native-qrcode'
-var DEFAULT_DIM = 370
 
 import React, { Component } from 'react'
 

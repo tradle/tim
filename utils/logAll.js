@@ -1,4 +1,3 @@
-console.log('requiring logAll.js')
 // Store apply and call
 global.logAll = true
 ;['setTimeout', 'setInterval', 'setImmediate'].forEach(method => {
@@ -29,7 +28,7 @@ function log(str) {
     console.log(str)
 }
 
-var times = {}
+// var times = {}
 // import { Alert } from 'react-native'
 // setInterval(function () {
 //   var big = {}

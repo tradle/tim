@@ -1,4 +1,3 @@
-console.log('requiring env.js')
 import {
   Platform
 } from 'react-native'
@@ -7,7 +6,6 @@ import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment-cloud.json'
 
-// const DEV_PUSH_SERVER = 'https://push1.tradle.io'
 const LOCAL_IP = (function () {
   if (Platform.OS === 'web') {
     return 'localhost'
@@ -21,22 +19,21 @@ const LOCAL_IP = (function () {
   return require('./localIP')
 })()
 
-const DEV_PUSH_SERVER = 'https://push1.tradle.io' //`http://${LOCAL_IP}:48284`
 const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
 
 const splash = {
   get tradle() { return require('../img/splash1536x2048.png') },
-  get aviva() { return require('../img/Aviva.png') }
+  // get aviva() { return require('../img/Aviva.png') }
 }
 
 const splashContrastColor = {
   tradle: '#eeeeee',
-  aviva: '#004db5'
+  // aviva: '#004db5'
 }
 
 const brandBG = {
   get tradle() { return require('../img/bg.png') },
-  get aviva() { return require('../img/Aviva.png') }
+  // get aviva() { return require('../img/Aviva.png') }
 }
 
 const navBarHeight = Platform.select({
@@ -63,26 +60,27 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVERS: [
-    // `http://${LOCAL_IP}:21012`,
+    `http://${LOCAL_IP}:21012`,
     // // silly
     // 'https://4uxjw2j0cc.execute-api.ap-southeast-2.amazonaws.com/dev',
     // // `http://${LOCAL_IP}:21013`,
     // hats
     // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
-    // // friendly.io
-    // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
+    // friendly.io
+    'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
-    // safere.io
-    'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
+    // // safere.io
+    // 'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
     // 'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
     // // perpetualguardian.co.nz
     // 'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
     // // r3.com
     // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
+    // lenka
+    // 'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
   ],
-  // pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
@@ -102,7 +100,9 @@ const merged = extend({
 
     return __DEV__
   },
-  serverToSendLog: __DEV__ ? `http://${LOCAL_IP}:44444/userlog` : 'https://azure1.tradle.io/userlog',
+  // userLogEndpoint: 'https://azure1.tradle.io/userlog',
+  userLogEndpoint: 'https://mc84jjb1a6.execute-api.us-east-1.amazonaws.com/dev/logs/userlog',
+  userLogEndpointAPIKey: null,
   showMyQRCode: true,
   homePage: true,
   useKeychain: true,
@@ -119,6 +119,7 @@ const merged = extend({
     language: DeviceInfo.getDeviceLocale(),
     country: DeviceInfo.getDeviceCountry()
   },
+  // documentScanner: 'blinkid',
   // timeout after partial scan results have been processed
   blinkIDScanTimeoutInternal: 10000,
   // timeout from beginning to end of scan operation
@@ -152,8 +153,8 @@ const merged = extend({
   paintContextIds: false,
   tradleAPIKey: null,
   tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
+  resetCheckpoint: 0,
   APP_URL,
-  resetCheckpoint: 1,
   SILENT_TYPES: [
     'tradle.Seal',
     'tradle.CustomerWaiting',
@@ -165,7 +166,7 @@ const merged = extend({
     'tradle.AssignRelationshipManager',
   ],
   // JPEG compression
-  imageQuality: 0.2,
+  imageQuality: 1, //0.2,
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

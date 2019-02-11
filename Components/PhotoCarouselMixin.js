@@ -1,7 +1,3 @@
-console.log('requiring PhotoCarouselMixin.js')
-'use strict';
-
-import PropTypes from 'prop-types'
 import { TYPE } from '@tradle/constants'
 import PhotoCarousel from './PhotoCarousel'
 import Navigator from './Navigator'
@@ -15,7 +11,7 @@ var PhotoCarouselMixin = {
     //                        ? utils.translate('backTo', utils.getDisplayName(this.props.chat)) : utils.translate('backToResults')
     this.props.navigator.push({
       id: 14,
-      title: utils.translate(utils.getModel(this.props.resource[TYPE])),
+      // title: utils.translate(utils.getModel(this.props.resource[TYPE])),
       // noLeftButton: true,
       backButtonTitle: 'Back',
       component: PhotoCarousel,

@@ -1,10 +1,7 @@
-console.log('requiring PasswordCheck.js')
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import {
   View,
-  Image,
-  Dimensions,
   StyleSheet
 } from 'react-native'
 
@@ -15,8 +12,6 @@ import reactMixin from 'react-mixin'
 
 import PasswordGesture from 'react-native-gesture-password'
 import utils from '../utils/utils'
-var MIN_LENGTH = 5
-var Password1 = ''
 var BG_IMAGE = ENV.brandBackground
 var MODES = {
   check: 'check',
@@ -55,7 +50,6 @@ class PasswordCheck extends Component {
   constructor(props) {
     super(props)
 
-    var state
     if (this.props.mode === MODES.check) {
       var message = this.props.isChange
         ? this.props.promptCheckCurrent

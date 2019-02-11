@@ -1,0 +1,23 @@
+{
+  "_t": "tradle.Refresh",
+  "additionalForms": [{
+      "product": "tradle.WealthManagementAccount",
+      "forms": [
+        "tradle.PhotoID",
+        "tradle.Selfie"
+      ]
+    },
+    {
+      "product": "nl.tradle.DigitalPassport",
+      "forms": [
+        "tradle.HandSignature"
+      ]
+    },
+    {
+      "product": "tradle.CorporateBankAccount",
+      "forms": [
+        "tradle.PersonalInfo"
+      ]
+    }
+  ]
+}

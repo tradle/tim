@@ -1,9 +1,7 @@
-console.log('requiring google-analytics.js')
-
 import {
   GoogleAnalyticsTracker,
-  GoogleTagManager,
-  GoogleAnalyticsSettings
+  // GoogleTagManager,
+  // GoogleAnalyticsSettings
 } from 'react-native-google-analytics-bridge'
 
 import ENV from './env.js'
@@ -69,9 +67,9 @@ function setAppName (appName) {
   TRACKER.setAppName(appName)
 }
 
-function setDryRun (bool=false) {
-  GoogleAnalyticsSettings.setDryRun(bool)
-}
+// function setDryRun (bool=false) {
+//   GoogleAnalyticsSettings.setDryRun(bool)
+// }
 
 function prefixDev (str) {
   return __DEV__ ? 'dev:' + str : str

@@ -1,5 +1,3 @@
-console.log('requiring FormMessageRow.js')
-'use strict';
 
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
@@ -21,16 +19,15 @@ import { Text } from './Text'
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const SENT = 'Sent'
+const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
+const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
+// const SENT = 'Sent'
 
-const { IDENTITY, ENUM, VERIFICATION } = constants.TYPES
+const { IDENTITY, ENUM } = constants.TYPES
 var { TYPE, SIG } = constants
 import {
-  // StyleSheet,
-  // Text,
   TouchableHighlight,
   View,
-  Image
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -38,6 +35,14 @@ import React, { Component } from 'react'
 
 class FormMessageRow extends Component {
   static displayName = 'FormMessageRow'
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+    application: PropTypes.object,
+    onSelect: PropTypes.func
+  };
   constructor(props) {
     super(props);
     this.onPress = this.onPress.bind(this)
@@ -76,7 +81,8 @@ class FormMessageRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
-    let model = utils.getModel(resource[TYPE])
+    let rtype = utils.getType(resource)
+    let model = utils.getModel(rtype)
     let photos = utils.getResourcePhotos(model, resource)
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
@@ -112,12 +118,12 @@ class FormMessageRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
     if (photos) {
-      isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
+      isSharedContext = utils.isContext(utils.getType(to)) && utils.isReadOnlyChat(resource._context)
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (resource[TYPE] !== PRODUCT_REQUEST  &&  resource[SIG])
-      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
+    if (rtype !== PRODUCT_REQUEST  &&  resource[SIG])
+      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, {resource})} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
 
@@ -150,7 +156,7 @@ class FormMessageRow extends Component {
     let isShared = this.isShared()
     // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
-    let { bankStyle, application } = this.props
+    // let { bankStyle, application } = this.props
     // if (application)
     //   width -= 50 // provider icon and padding
 
@@ -164,7 +170,7 @@ class FormMessageRow extends Component {
     let headerStyle = [chatStyles.verifiedHeader, notSigned && styles.notSignedHeaderStyle || styles.headerStyle]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
-    let model = utils.getModel(resource[TYPE])
+    let model = utils.getModel(utils.getType(resource))
     if (noContent) {
       let prop = model.properties._time
       if (prop  &&  resource[prop.name]) {
@@ -192,12 +198,16 @@ class FormMessageRow extends Component {
     let prefillProp = utils.getPrefillProperty(model)
     let mTitle = prefillProp ? 'Draft' : translate(model)
     let headerTitle = mTitle + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
+    let { bankStyle } = this.props
+    let color = isMyMessage && bankStyle.myMessageLinkColor
+    if (!color)
+      color = '#ffffff'
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1}, chatStyles.verificationBody]}>
           <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
-           <Text style={[chatStyles.verificationHeaderText, {width: '97%'}]}>{headerTitle}
+           <Text style={[chatStyles.verificationHeaderText, {width: '97%', color }]}>{headerTitle}
               {sealedStatus}
             </Text>
             {arrowIcon}
@@ -210,11 +220,13 @@ class FormMessageRow extends Component {
   }
   formatRow(isMyMessage, renderedRow, styles) {
     let resource = this.props.resource;
-    let model = utils.getModel(resource[TYPE] || resource.id);
+    let rtype = utils.getType(resource)
+    let model = utils.getModel(rtype);
     let prefillProp = utils.getPrefillProperty(model)
     if (prefillProp) {
       resource = resource[prefillProp.name]
       model = utils.getModel(resource[TYPE])
+      rtype = model.id
     }
 
     let viewCols = model.gridCols || model.viewCols;
@@ -223,15 +235,14 @@ class FormMessageRow extends Component {
       if (!viewCols)
         return
     }
-    let first = true;
-
     let properties = model.properties;
-    let onPressCall;
+    // let onPressCall;
 
     let vCols = [];
     let isShared = this.isShared()
     if (viewCols)
       viewCols = utils.ungroup(model, viewCols)
+    let isProductRequest = resource[TYPE] === PRODUCT_REQUEST
 
     viewCols.forEach((v) => {
       if (vCols.length >= MAX_PROPS_IN_FORM)
@@ -254,10 +265,8 @@ class FormMessageRow extends Component {
       let ref = properties[v].ref
           // debugger
       if (ref) {
-        if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY) {
+        if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY)
           vCols.push(this.getPropRow(properties[v], resource, resource[v].title || resource[v]))
-          first = false;
-        }
         return;
       }
       let style = chatStyles.resourceTitle
@@ -269,7 +278,7 @@ class FormMessageRow extends Component {
       else if (resource[v]                 &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = this.onPress;
+        // onPressCall = this.onPress;
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
       else if (!model.autoCreate) {
@@ -279,8 +288,12 @@ class FormMessageRow extends Component {
           val = resource[v] ? dateformat(new Date(resource[v]), 'mmm d, yyyy') : null
         else if (properties[v].displayAs)
           val = utils.templateIt(properties[v], resource)
-        else if (properties[v].range === 'model')
-          val = translate(utils.getModel(resource[v]))//utils.makeModelTitle(utils.getModel(resource[v]))
+        else if (properties[v].range === 'model') {
+          let pValue = resource[v]
+          if (isProductRequest  &&  utils.isAgent()  &&  resource[v] === EMPLOYEE_ONBOARDING)
+            pValue = AGENT_ONBOARDING
+          val = translate(utils.getModel(pValue))//utils.makeModelTitle(utils.getModel(resource[v]))
+        }
         else
           val = properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
 
@@ -297,8 +310,6 @@ class FormMessageRow extends Component {
           return
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
-      first = false;
-
     });
 
     if (vCols.length > MAX_PROPS_IN_FORM)
@@ -316,7 +327,7 @@ class FormMessageRow extends Component {
 }
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
-  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
+  let { bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
   let moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 10 }
   // let moreHeader = isMyMessage || isShared
   //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
@@ -366,7 +377,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       justifyContent: 'space-between',
       paddingLeft: 5,
       paddingRight: 7,
-      backgroundColor: signedBg
+      backgroundColor: signedBg,
     },
     notSignedHeaderStyle: {
       ...moreHeader,

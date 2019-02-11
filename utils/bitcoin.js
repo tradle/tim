@@ -1,4 +1,3 @@
-console.log('requiring bitcoin.js')
 
 import Networks from '@tradle/bitcoin-adapter'
 

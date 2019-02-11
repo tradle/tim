@@ -1,6 +1,6 @@
 
-import '../utils/errors'
-import '../utils/shim'
+import '../../utils/errors'
+import '../../utils/shim'
 import React, { Component } from 'react'
 import {
   View,
@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 
 import { RNCamera } from 'react-native-camera'
-import ImageInput from './Components/ImageInput'
+import ImageInput from '../../Components/ImageInput'
 
 const pickDimensions = props => {
   const { width, height } = props

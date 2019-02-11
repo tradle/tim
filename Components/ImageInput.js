@@ -1,32 +1,37 @@
-console.log('requiring ImageInput.js')
 
 import React, {
   Component
 } from 'react'
 
 import {
-  Platform,
   TouchableHighlight,
-  Linking,
-  Alert
+  Platform,
 } from 'react-native'
 import PropTypes from 'prop-types'
 import ImagePicker from 'react-native-image-picker'
-import _ from 'lodash'
+import pick from 'lodash/pick'
+import extend from 'lodash/extend'
 const debug = require('debug')('tradle:app:ImageInput')
 
 import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
+import { normalizeImageCaptureData } from '../utils/image-utils'
+import { requestCameraAccess } from '../utils/camera'
 
-const BASE64_PREFIX = 'data:image/jpeg;base64,'
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
-  prop: PropTypes.string.isRequired,
+  allowPicturesFromLibrary: PropTypes.bool,
+  cameraType: PropTypes.string,
+  nonImageAllowed: PropTypes.bool,
   onImage: PropTypes.func.isRequired
 }
 
 class ImageInput extends Component {
-  props: imageInputPropTypes;
+  static propTypes = imageInputPropTypes;
+  static defaultProps = {
+    quality: ENV.imageQuality,
+  }
+
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
@@ -60,15 +65,17 @@ class ImageInput extends Component {
     }
   }
   async _doShowImagePicker () {
-    const { prop, onImage } = this.props
+    const { allowPicturesFromLibrary, cameraType, onImage, quality } = this.props
     let options = {
       returnIsVertical: true,
-      quality: this.props.quality || ENV.imageQuality,
-      cameraType: this.props.prop.cameraType || 'back',
+      quality,
+      cameraType: cameraType || 'back',
       cancelButtonTitle: translate('cancel'),
       // due to out-of-memory issues
       // maxWidth: 1536,
       // maxHeight: 1536,
+      noData: Platform.OS !== 'web',
+      addToImageStore: true,
       storageOptions: {
         skipBackup: true,
         store: false
@@ -80,37 +87,43 @@ class ImageInput extends Component {
     let action
     if (utils.isIOS() && utils.isSimulator())
       action = 'launchImageLibrary'
-    else if (!prop.allowPicturesFromLibrary)
+    else if (!allowPicturesFromLibrary)
       action = 'launchCamera'
     else {
       action = 'showImagePicker'
-      _.extend(options, {
+      extend(options, {
         chooseFromLibraryButtonTitle: 'Choose from Library',
         takePhotoButtonTitle: 'Take Photo…',
       })
     }
 
-    const allowed = utils.isSimulator()
-      ? true //await ImagePicker.checkPhotosPermissions()
-      : await utils.requestCameraAccess()
-
+    const allowed = requestCameraAccess()
     if (!allowed) return
 
-    ImagePicker[action](options, (response) => {
-      if (response.didCancel)
-        return
-
-      if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error);
+    ImagePicker[action](options, async ({ didCancel, error, data, isVertical, width, height, imageTag }) => {
+      if (didCancel) return
+      if (error) {
+        console.log('ImagePickerManager Error: ', error);
         return
       }
 
-      onImage({
-        url: BASE64_PREFIX + utils.cleanBase64(response.data),
-        isVertical: response.isVertical,
-        width: response.width,
-        height: response.height
+      const normalized = await normalizeImageCaptureData({
+        extension: quality === 1 ? 'png' : 'jpeg',
+        base64: data,
+        isVertical,
+        width,
+        height,
+        imageTag,
       })
+
+      if (Platform.OS !== 'web') {
+        normalized.url = await require('../utils/keeper')
+          .getGlobalKeeper()
+          .importFromImageStore(imageTag)
+      }
+
+      const result = pick(normalized, ['isVertical', 'width', 'height', 'url'])
+      onImage(result)
     })
   }
 }

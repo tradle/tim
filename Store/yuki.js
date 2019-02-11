@@ -1,6 +1,5 @@
-console.log('requiring yuki.js')
 import { AsyncStorage } from 'react-native'
-import { utils } from '@tradle/engine'
+// import { utils } from '@tradle/engine'
 import ENV from '../utils/env'
 import { generateIdentity } from '../utils/identity'
 import Yuki from '@tradle/yuki'
@@ -30,7 +29,7 @@ async function load ({ node, db }) {
 }
 
 async function create({ node, db }) {
-  const { networkName } = node
+  // const { networkName } = node
   const yukiInfo = await generateIdentity({
     // yuki doesn't need blockchain keys
     networks: {}

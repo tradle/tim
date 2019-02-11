@@ -1,5 +1,3 @@
-console.log('requiring ShowRefList.js')
-'use strict';
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -7,15 +5,10 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  TouchableHighlight,
-  Platform,
 } from 'react-native'
-import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import ScrollableTabView from 'react-native-scrollable-tab-view'
-import Icon from 'react-native-vector-icons/Ionicons'
 
 import GridList from './GridList'
 import utils, {
@@ -62,12 +55,10 @@ class ShowRefList extends Component {
     let propsToShow = []
 
     let currentBacklink = backlink
-    let hasPropsToShow = this.hasPropsToShow(resource)
+    let hasPropsToShow = hasPropertiesToShow(resource)
     showDetails = !isProfile  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
 
     let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
-
-    let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
 
     let hasItemBacklinks = []
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
@@ -93,7 +84,6 @@ class ShowRefList extends Component {
     }
     let isMessage = utils.isMessage(resource)
     this.tabDetail = {}
-    let moreIconsIdx = 0
     // Show supporting docs
     if (isMessage) {
       let rId = utils.getId(resource)
@@ -106,7 +96,7 @@ class ShowRefList extends Component {
         docs = this.state.docs
       else {
         docs = []
-        this.getDocs(resource.verifications, rId, docs)
+        getDocs(resource.verifications, rId, docs)
       }
       if (docs  &&  docs.length) {
         this.tabDetail.Documents = {icon: 'ios-paper-outline', action: this.showDocs.bind(this, docs)}
@@ -149,10 +139,12 @@ class ShowRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark';
       let cnt = resource['_' + p + 'Count'] // &&  resource[p].length
-      if (!hasBacklinks  &&  props[p].allowToAdd)
+      if (!hasBacklinks  &&  (props[p].allowToAdd || cnt))
         hasBacklinks = true
       this.tabDetail[propTitle] = { icon, action: this.exploreBacklink.bind(this, resource, props[p]), count: cnt }
       refList.push(<View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel={propTitle}/>)
+      if (!currentBacklink  &&  !showDetails)
+        currentBacklink = props[p]
     })
     const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
     if (showQR  &&  this.props.showQR) {
@@ -236,40 +228,40 @@ class ShowRefList extends Component {
 
     return children || <View/>
   }
-  getDocs(varr, rId, docs) {
-    if (!varr)
-      return
-    varr.forEach((v) => {
-      if (v.method) {
-        if (utils.getId(v.document) !== rId)
-          docs.push(v.document)
-      }
-      else if (v.sources)
-        this.getDocs(v.sources, rId, docs)
-    })
-  }
-  hasPropsToShow(resource) {
-    let m = utils.getModel(resource[TYPE])
-    let viewCols = m.viewCols
-    if (!viewCols)
-      viewCols = utils.getViewCols(m)
-    viewCols = utils.ungroup(m, viewCols)
-    let vCols = []
-    let props = m.properties
-    viewCols.forEach((pr) => {
-      if (props[pr].group)
-        props[pr].group.forEach((gp) => vCols.push(gp))
-      else
-        vCols.push(pr)
-    })
+  // getDocs(varr, rId, docs) {
+  //   if (!varr)
+  //     return
+  //   varr.forEach((v) => {
+  //     if (v.method) {
+  //       if (utils.getId(v.document) !== rId)
+  //         docs.push(v.document)
+  //     }
+  //     else if (v.sources)
+  //       this.getDocs(v.sources, rId, docs)
+  //   })
+  // }
+  // hasPropsToShow(resource) {
+  //   let m = utils.getModel(resource[TYPE])
+  //   let viewCols = m.viewCols
+  //   if (!viewCols)
+  //     viewCols = utils.getViewCols(m)
+  //   viewCols = utils.ungroup(m, viewCols)
+  //   let vCols = []
+  //   let props = m.properties
+  //   viewCols.forEach((pr) => {
+  //     if (props[pr].group)
+  //       props[pr].group.forEach((gp) => vCols.push(gp))
+  //     else
+  //       vCols.push(pr)
+  //   })
 
-    for (let p in resource) {
-      if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
-        continue
-      if (vCols  &&  vCols.indexOf(p) !== -1)
-        return true
-    }
-  }
+  //   for (let p in resource) {
+  //     if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
+  //       continue
+  //     if (vCols  &&  vCols.indexOf(p) !== -1)
+  //       return true
+  //   }
+  // }
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
   }
@@ -281,6 +273,40 @@ class ShowRefList extends Component {
   }
   getRefResource(resource, prop) {
     this.showRefResource(resource, prop)
+  }
+}
+function getDocs(varr, rId, docs) {
+  if (!varr)
+    return
+  varr.forEach((v) => {
+    if (v.method) {
+      if (utils.getId(v.document) !== rId)
+        docs.push(v.document)
+    }
+    else if (v.sources)
+      getDocs(v.sources, rId, docs)
+  })
+}
+function hasPropertiesToShow(resource) {
+  let m = utils.getModel(resource[TYPE])
+  let viewCols = m.viewCols
+  if (!viewCols)
+    viewCols = utils.getViewCols(m)
+  viewCols = utils.ungroup(m, viewCols)
+  let vCols = []
+  let props = m.properties
+  viewCols.forEach((pr) => {
+    if (props[pr].group)
+      props[pr].group.forEach((gp) => vCols.push(gp))
+    else
+      vCols.push(pr)
+  })
+
+  for (let p in resource) {
+    if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
+      continue
+    if (vCols  &&  vCols.indexOf(p) !== -1)
+      return true
   }
 }
 

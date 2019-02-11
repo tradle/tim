@@ -1,32 +1,33 @@
-console.log('requiring MyProductMessageRow.js')
-'use strict'
-
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import {
-  Image,
   StyleSheet,
   Text,
-  TouchableHighlight,
-  Alert,
+  TouchableOpacity,
   View,
 } from 'react-native'
 import PropTypes from 'prop-types'
-
 import React, { Component } from 'react'
-
-import utils from '../utils/utils'
-var translate = utils.translate
-import ArticleView from './ArticleView'
-import NewResource from './NewResource'
 import Icon from 'react-native-vector-icons/Ionicons';
+
 import constants from '@tradle/constants'
+
+import utils, { translate } from '../utils/utils'
+import ArticleView from './ArticleView'
 import RowMixin from './RowMixin'
 import chatStyles from '../styles/chatStyles'
 
 const MAX_PROPS_IN_FORM = 1
 
 class MyProductMessageRow extends Component {
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    application: PropTypes.object,
+    onSelect: PropTypes.func,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+  };
   constructor(props) {
     super(props);
   }
@@ -79,6 +80,10 @@ class MyProductMessageRow extends Component {
                                <Text style={styles.issuedBy}>{issuedBy}</Text>
                             </View>
                             );
+    // HACK
+    if (utils.isAgent()  &&   model.id === 'tradle.MyEmployeeOnboarding')
+      model = utils.getModel('tradle.MyAgentOnboarding')
+    // end Hack
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
@@ -87,7 +92,7 @@ class MyProductMessageRow extends Component {
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
     let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
     let messageBody =
-      <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+      <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={vStyle}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
@@ -96,7 +101,7 @@ class MyProductMessageRow extends Component {
            </View>
           </View>
         </View>
-      </TouchableHighlight>
+      </TouchableOpacity>
 
 
     let viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: bankStyle.BACKGROUND_COLOR }
@@ -122,14 +127,12 @@ class MyProductMessageRow extends Component {
 
     let viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
-      return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+      return {onPressCall: this.props.onSelect.bind(this, { resource })}
     let first = true;
 
     let properties = model.properties;
-    let noMessage = !resource.message  ||  !resource.message.length;
     let onPressCall;
 
-    let cnt = 0;
     let { bankStyle, onSelect } =  this.props
     let vCols = [];
     viewCols.forEach((v) => {
@@ -196,7 +199,7 @@ class MyProductMessageRow extends Component {
     }
     if (onPressCall)
       return {onPressCall: onPressCall}
-    return {onPressCall: onSelect.bind(this, resource, null)}
+    return {onPressCall: onSelect.bind(this, { resource })}
   }
 }
 

@@ -1,34 +1,17 @@
-console.log('requiring TourRow.js')
-'use strict';
 
 import utils from '../utils/utils'
-var translate = utils.translate
-import uiUtils from './uiUtils'
 import Icon from 'react-native-vector-icons/Ionicons';
-import constants from '@tradle/constants'
-const {
-  TYPE,
-  ROOT_HASH
-} = constants
-
-const LIMIT = 20
 import RowMixin from './RowMixin'
-import ResourceMixin from './ResourceMixin'
 import TourPage from './TourPage'
 import { makeResponsive } from 'react-native-orient'
 import StyleSheet from '../StyleSheet'
 import reactMixin from 'react-mixin'
 import chatStyles from '../styles/chatStyles'
 
-const TOUR = 'tradle.Tour'
-
 import {
-  Image,
-  // StyleSheet,
   Text,
   TouchableHighlight,
   View,
-  Platform,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -41,7 +24,7 @@ class TourRow extends Component {
   }
   render() {
     let styles = createStyles()
-    let { resource, to, bankStyle, navigator } = this.props
+    let { resource } = this.props
     // let width = utils.dimensions(TourRow).width * 0.8
     let ownerPhoto = this.getOwnerPhoto(false)
     let cellStyle = [chatStyles.verificationBody, styles.mstyle]
@@ -64,14 +47,14 @@ class TourRow extends Component {
   }
   showTour() {
     let {resource, navigator, to, bankStyle} = this.props
-    this.props.navigator.push({
+    navigator.push({
       title: "",
       component: TourPage,
       id: 35,
       backButtonTitle: null,
       // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
-        bankStyle: bankStyle,
+        bankStyle,
         resource: to,
         tour: resource,
       }
@@ -80,7 +63,7 @@ class TourRow extends Component {
 }
 
 var createStyles = utils.styleFactory(TourRow, function ({ dimensions }) {
-  var { width, height } = utils.dimensions(TourRow)
+  var { width } = utils.dimensions(TourRow)
   return StyleSheet.create({
     resourceTitle: {
       fontSize: 18,

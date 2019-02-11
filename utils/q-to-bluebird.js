@@ -1,4 +1,3 @@
-console.log('requiring q-to-bluebird.js')
 import mockery from 'mockery'
 mockery.enable({
   warnOnReplace: false,

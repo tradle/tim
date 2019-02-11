@@ -1,4 +1,3 @@
-console.log('requiring identity.js')
 import Q from 'q'
 import { utils as tradleUtils } from '@tradle/engine'
 import { useKeychain, isWeb } from './env'

@@ -1,12 +1,9 @@
-console.log('requiring ContextChooser.js')
-'use strict';
 
 import {
   ListView,
   // Text,
   // StyleSheet,
   View,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -14,9 +11,8 @@ import React, { Component } from 'react'
 
 import constants from '@tradle/constants'
 
-import utils, { translate } from '../utils/utils'
+import { translate } from '../utils/utils'
 import { Text } from './Text'
-import MessageList from './MessageList'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
 import reactMixin from 'react-mixin'
@@ -28,11 +24,16 @@ import StyleSheet from '../StyleSheet'
 
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const CONTEXT = 'tradle.Context'
 
 const { TYPE } = constants
 
 class ContextChooser extends Component {
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    bankStyle: PropTypes.object,
+    selectContext: PropTypes.func.isRequired
+  };
   constructor(props) {
     super(props);
 
@@ -45,8 +46,6 @@ class ContextChooser extends Component {
     };
   }
   componentWillMount() {
-    let r = this.props.resource
-    let id = r[constants.TYPE] === constants.TYPES.PROFILE ? utils.getId(utils.getMe().organization) : utils.getId(r)
     Actions.getAllContexts({to: this.props.resource})
   }
   componentDidMount() {
@@ -65,8 +64,6 @@ class ContextChooser extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id)
-
     return (
       <MessageTypeRow
         onSelect={() => this.props.selectContext(resource)}

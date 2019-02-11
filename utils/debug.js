@@ -1,5 +1,3 @@
-console.log('requiring debug.js')
-
 import { EventEmitter } from 'events'
 import debug from 'debug'
 
@@ -26,7 +24,7 @@ const enabled = [
   'tradle:*',
   'sendy:ws:client',
   'multiqueue:*',
-  '@tradle/aws-client'
+  '@tradle/*'
 ].concat(consoleMethods.map(method => 'console.' + method))
 
 if (__DEV__) {
@@ -40,7 +38,6 @@ if (__DEV__) {
 debug.enable(enabled.join(','))
 
 const rawConsole = {}
-const debugConsole = {}
 
 consoleMethods.forEach(method => {
   const orig = console[method]
@@ -85,27 +82,31 @@ debug.log = function (...args) {
   }
 }
 
-debug.get = function () {
-  return lines.slice()
-}
+debug.getLines = () => lines.slice()
+debug.get = debug.getLines
 
 debug.clear = function () {
   lines.length = 0
 }
 
-debug.post = function (url) {
-  const body = debug
-    .get()
-    .map(debug.stripColors)
-    .map(line => Array.isArray(line) ? line.join(' ') : line)
-    .join('\n')
+debug.getText = () => debug
+  .get()
+  .map(debug.lineToPlainText)
+  .join('\n')
 
+debug.lineToPlainText = line => debug.stripColors(line)
+  .map(line => Array.isArray(line) ? line.join(' ') : line)
+
+debug.post = (url, opts={}) => {
+  const log = debug.getText()
+  const { headers={} } = opts
   return fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'text'
+      'Content-Type': 'text/plain',
+      ...headers,
     },
-    body
+    body: log
   })
 }
 

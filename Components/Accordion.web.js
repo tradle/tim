@@ -1,6 +1,3 @@
-console.log('requiring Accordion.web.js')
-'use strict';
-
 import React, {Component} from  'react'
 
 import AccordionForWeb from 'react-native-accordion'

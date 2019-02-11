@@ -1,5 +1,3 @@
-console.log('requiring ResourceList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import {
@@ -7,11 +5,9 @@ import {
   RefreshControl,
   Alert,
   TouchableOpacity,
-  Image,
   StatusBar,
   View,
   // Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
 import Reflux from 'reflux'
@@ -29,12 +25,10 @@ import NewResource from './NewResource'
 import MessageList from './MessageList'
 import MessageView from './MessageView'
 import PageView from './PageView'
-import TourPage from './TourPage'
-import SplashPage from './SplashPage'
 import GridList from './GridList'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
-import utils, { translate, translateModel } from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
@@ -54,14 +48,12 @@ import ConversationsIcon from './ConversationsIcon'
 
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
-const CONFIRMATION = 'tradle.Confirmation'
 const BOOKMARK = 'tradle.Bookmark'
 
 const LIMIT = 10
 const SCAN_QR_CODE_VIEW = 16
 const {
   MESSAGE,
-  IDENTITY,
   ORGANIZATION,
   PROFILE,
   CUSTOMER_WAITING,
@@ -77,7 +69,7 @@ const {
 } = constants
 
 class ResourceList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     resource: PropTypes.object,
@@ -124,7 +116,7 @@ class ResourceList extends Component {
       let resource = this.props.resource
       let prop = this.props.prop
       if (prop  &&  resource[prop.name])
-        resource[prop.name].forEach((r) => this.state.chosen[utils.getId(r)] = r)
+        resource[prop.name].forEach(r => this.state.chosen[utils.getId(r)] = r)
     }
     let isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
@@ -187,7 +179,7 @@ class ResourceList extends Component {
       });
       return
     }
-    let me = utils.getMe()
+    // let me = utils.getMe()
     // if (me  &&  me.isEmployee && officialAccounts) {
     //   utils.onNextTransitionEnd(navigator, () => {
     //     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
@@ -233,13 +225,15 @@ class ResourceList extends Component {
     // else
     if (isBacklink)
       Actions.list(params)
-    else
+    else {
+      let self = this
       utils.onNextTransitionEnd(navigator, () => {
         Actions.list(params)
-        if (officialAccounts  &&  modelName === ORGANIZATION)
+        if (officialAccounts  &&  modelName === ORGANIZATION  && !self.props.isDeepLink)
           Actions.hasTestProviders()
         // StatusBar.setHidden(false);
       });
+    }
   }
 
   componentDidMount() {
@@ -279,8 +273,8 @@ class ResourceList extends Component {
       this.setState({isConnected: params.isConnected})
       return
     }
-    let { modelName, officialAccounts } = this.props
-    if (action == 'newStyles'  &&  modelName === ORGANIZATION) {
+    let { modelName, officialAccounts, isDeepLink } = this.props
+    if (action === 'newStyles'  &&  modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
       return
     }
@@ -296,12 +290,12 @@ class ResourceList extends Component {
       if (resource._inactive  &&  modelName === ORGANIZATION) {
         let r
         if (resource._isTest)
-          r = this.state.testProviders.find(r => r[ROOT_HASH] === resource[ROOT_HASH])
+          r = this.state.testProviders.find(rr => rr[ROOT_HASH] === resource[ROOT_HASH])
         else
-          r = this.state.list.find(r => r[ROOT_HASH] === resource[ROOT_HASH])
+          r = this.state.list.find(rr => rr[ROOT_HASH] === resource[ROOT_HASH])
 
         if (r) {
-          let l = this.state.list.filter(r => r[ROOT_HASH] !== resource[ROOT_HASH])
+          let l = this.state.list.filter(rr => rr[ROOT_HASH] !== resource[ROOT_HASH])
           this.setState({list: l, dataSource: this.state.dataSource.cloneWithRows(l)})
           return
         }
@@ -391,7 +385,7 @@ class ResourceList extends Component {
       this.setState(state)
       return
     }
-    if (action === 'hasTestProviders'  &&  officialAccounts) {
+    if (action === 'hasTestProviders'  &&  officialAccounts  &&  !isDeepLink) {
       if (!params.list  ||  !params.list.length)
         return
 
@@ -442,7 +436,7 @@ class ResourceList extends Component {
       let type = list[0][TYPE];
       if (type  !== modelName) {
         let m = utils.getModel(type);
-        if (!m.subClassOf  ||  m.subClassOf != modelName)
+        if (!m.subClassOf  ||  m.subClassOf !== modelName)
           return;
       }
       if (this.props.multiChooser  &&  !this.props.isChooser) {
@@ -452,7 +446,8 @@ class ResourceList extends Component {
         })
       }
     }
-    list = this.addTestProvidersRow(list)
+    if (!isDeepLink)
+      list = this.addTestProvidersRow(list)
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -556,7 +551,6 @@ class ResourceList extends Component {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
-    let model = utils.getModel(modelName);
     let isContact = modelName === PROFILE;
     let rType = resource[TYPE]
     let isVerificationR  = rType === VERIFICATION
@@ -647,7 +641,6 @@ class ResourceList extends Component {
     }
     else
       title = resource.name //utils.getDisplayName(resource, model.properties);
-    let self = this;
     let style = this.mergeStyle(resource.style)
 
     if (officialAccounts) {
@@ -667,56 +660,6 @@ class ResourceList extends Component {
       if (isOrganization) {
         if (this.showTourOrSplash({resource, action: action || 'push', callback: this.selectResource}))
           return
-      //   if (resource._tour  &&  !resource._noTour) {
-      //     StatusBar.setHidden(true)
-      //     navigator.push({
-      //       title: "",
-      //       component: TourPage,
-      //       id: 35,
-      //       backButtonTitle: null,
-      //       // backButtonTitle: __DEV__ ? 'Back' : null,
-      //       passProps: {
-      //         bankStyle: bankStyle,
-      //         noTransitions: true,
-      //         tour: resource._tour,
-      //         callback: () => {
-      //           resource._noTour = true
-      //           resource._noSplash = true
-      //           Actions.addItem({resource: resource})
-      //           // resource._noSplash = true
-      //           this.selectResource(resource, 'replace')
-      //         }
-      //       }
-      //     })
-      //     return
-      //   }
-      //   if (!resource._noSplash)  {
-      //     StatusBar.setHidden(true)
-      //     let splashscreen = resource.style  &&  resource.style.splashscreen
-      //     if (splashscreen) {
-      //       let resolvePromise
-      //       let promise = new Promise(resolve => {
-      //         navigator.push({
-      //           title: "",
-      //           component: SplashPage,
-      //           id: 36,
-      //           backButtonTitle: null,
-      //           passProps: {
-      //             splashscreen: splashscreen
-      //           }
-      //         })
-      //         resolvePromise = resolve
-      //       })
-      //       // return
-      //       setTimeout(() => {
-      //         resolvePromise()
-      //         resource._noSplash = true
-      //         Actions.addItem({resource: resource})
-      //         this.selectResource(resource, 'replace')
-      //       }, 2000)
-      //       return
-      //     }
-      //   }
       }
     }
     StatusBar.setHidden(false);
@@ -749,7 +692,7 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: utils.getModel(resource[TYPE]),
+            model: utils.getModel(utils.getType(resource)),
             resource: resource,
             currency: currency,
           }
@@ -813,7 +756,6 @@ class ResourceList extends Component {
     if (me                       &&
        !model.isInterface  &&
        (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
-      let self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
@@ -828,55 +770,6 @@ class ResourceList extends Component {
       };
     }
     this.props.navigator.push(route);
-  }
-  showRefResources(resource, prop) {
-    let props = utils.getModel(resource[TYPE]).properties;
-    let propJson = props[prop];
-    let resourceTitle = utils.getDisplayName(resource);
-    resourceTitle = utils.makeTitle(resourceTitle);
-
-    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
-    backlinksTitle = utils.makeTitle(backlinksTitle);
-    let modelName = propJson.items.ref;
-
-    this.props.navigator.push({
-      title: backlinksTitle,
-      id: 10,
-      component: ResourceList,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        prop: prop,
-        bankStyle: this.props.style,
-        modelName: modelName
-      },
-      rightButtonTitle: translate('details'),
-      onRightButtonPress: {
-        title: resourceTitle,
-        id: 3,
-        component: ResourceView,
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: resourceTitle,
-          id: 4,
-          component: NewResource,
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel(resource[TYPE]),
-            bankStyle: this.props.style,
-            resource: resource
-          }
-        },
-
-        passProps: {
-          bankStyle: this.props.style,
-          resource: resource,
-          currency: this.props.currency
-        }
-      }
-    });
   }
 
   onSearchChange(filter) {
@@ -908,7 +801,7 @@ class ResourceList extends Component {
       return
     }
 
-    let {to, prop, listView, resource, modelName} = this.props
+    let { prop, listView, resource, modelName } = this.props
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
       query: this.state.filter,
@@ -946,7 +839,6 @@ class ResourceList extends Component {
       return (<VerificationRow
                 lazy={this.props.lazy}
                 onSelect={this.selectResource}
-                key={resource[ROOT_HASH]}
                 navigator={this.props.navigator}
                 prop={this.props.prop}
                 modelName={this.props.modelName}
@@ -956,9 +848,7 @@ class ResourceList extends Component {
                 resource={resource} />
       )
     return (<ResourceRow
-      lazy={this.props.lazy}
       onSelect={isSharedContext ? this.openSharedContextChat : this.selectResource}
-      key={resource[ROOT_HASH]}
       hideResource={this.hideResource.bind(this)}
       hideMode={this.state.hideMode}
       navigator={this.props.navigator}
@@ -968,6 +858,7 @@ class ResourceList extends Component {
       isOfficialAccounts={this.props.officialAccounts}
       multiChooser={this.props.multiChooser}
       isChooser={this.props.isChooser}
+      parentComponent={ResourceList}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
       chosen={this.state.chosen} />
@@ -1166,7 +1057,7 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, backlinkList } = this.props
+    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly } = this.props
     let model = utils.getModel(modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1200,7 +1091,6 @@ class ResourceList extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    let me = utils.getMe()
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = (actionSheet || this.state.hideMode) && this.renderFooter()
     let searchBar
@@ -1221,7 +1111,6 @@ class ResourceList extends Component {
     let network
     if (!isChooser && officialAccounts && modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-    let hasSearchBar = isBacklink && backlinkList && backlinkList.length > 10
     let contentSeparator = utils.getContentSeparator(this.state.bankStyle)
     let style = {backgroundColor: '#fff'}
     // let isProfile = modelName === PROFILE
@@ -1266,7 +1155,7 @@ class ResourceList extends Component {
           onPress: this.onSettingsPressed
         },
         {
-          text: translate(hideText, translateModel(utils.getModel(this.props.modelName), true)),
+          text: translate(hideText, translate(utils.getModel(this.props.modelName), true)),
           onPress: () => this.setState({hideMode: !this.state.hideMode, dataSource: this.state.dataSource.cloneWithRows(utils.clone(this.state.list))})
         },
         {
@@ -1289,17 +1178,35 @@ class ResourceList extends Component {
   async scanQRAndProcess(prop) {
     const result = await this.scanFormsQRCode()
     const { schema, data } = result
-    if (schema !== 'AddProvider') {
-      Alert.alert(translate('tryProviderQrCode'))
+    if (schema === 'ImportData') {
+      Actions.importData(data)
       return
     }
-    if (result  &&  result.data) {
-      let { host, provider } = result.data
+
+    if (schema === 'AddProvider') {
+      const { host, provider } = data
       // Actions.addApp({ url: host, permalink: provider })
       Actions.addApp({ url: host, permalink: provider, addSettings: true })
+      return
     }
+
+    Alert.alert(translate('invalidQR'), translate('supportedQrCodes'))
   }
 
+  areYouSure() {
+    Alert.alert(
+      translate('areYouSureYouAreDone'),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Ok'), onPress: () => {
+          this.props.navigator.pop()
+        }},
+      ]
+    )
+  }
   hideResource(resource) {
     Alert.alert(
       translate('areYouSureYouWantToDelete', translate(resource.name)),
@@ -1327,6 +1234,7 @@ class ResourceList extends Component {
     let bookmarks
     let conversations
     let testProviders
+    let newCustomer
     let isOrg = this.props.modelName === ORGANIZATION
     let isProfile = this.props.modelName === PROFILE
     if (!isOrg  &&  !isProfile)
@@ -1351,18 +1259,61 @@ class ResourceList extends Component {
       // )
     }
     let search
+    let me = utils.getMe()
     if (isProfile) {
-      search = <View style={styles.searchRow}>
-          <TouchableOpacity onPress={this.showSearch.bind(this)}>
+      if (utils.isAgent()) {
+        let color = '#1F59A3'
+        newCustomer = <View style={styles.newCustomerRow}>
+          <TouchableOpacity onPress={this.newCustomer.bind(this)}>
             <View style={styles.row}>
-              <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
+              <Icon name='ios-people-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
               <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
+                <Text style={styles.resourceTitle}>{translate('newCustomer')}</Text>
               </View>
             </View>
           </TouchableOpacity>
         </View>
-      // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+      }
+      else {
+        search = <View style={styles.searchRow}>
+            <TouchableOpacity onPress={this.showSearch.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+
+
+        if (this.state.hasPartials)
+          partial = (
+            <View>
+              <View style={styles.statisticsRow}>
+                <TouchableOpacity onPress={this.showPartials.bind(this)}>
+                  <View style={styles.row}>
+                    <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.partialsRow}>
+                <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+                  <View style={styles.row}>
+                    <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+        )
+      }
       conversations = <View style={styles.conversationsRow}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
             <View style={styles.row}>
@@ -1373,33 +1324,6 @@ class ResourceList extends Component {
             </View>
           </TouchableOpacity>
         </View>
-
-
-      if (this.state.hasPartials)
-        partial = (
-          <View>
-            <View style={styles.statisticsRow}>
-              <TouchableOpacity onPress={this.showPartials.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.partialsRow}>
-              <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-      )
       if (this.state.bookmarksCount) {
         let color = '#6C4EA3'
         bookmarks = (
@@ -1418,6 +1342,7 @@ class ResourceList extends Component {
             </View>
           )
       }
+
       if (this.state.sharedContextCount)
         sharedContext = (
           <View style={styles.sharedContextRow}>
@@ -1438,6 +1363,7 @@ class ResourceList extends Component {
     return  (
       <View style={{paddingHorizontal: 20}}>
         {search}
+        {newCustomer}
         {conversations}
         {bookmarks}
         {sharedContext}
@@ -1445,6 +1371,23 @@ class ResourceList extends Component {
         {testProviders}
       </View>
     )
+  }
+  newCustomer() {
+    const { navigator, bankStyle } = this.props
+    let me = utils.getMe()
+    let route = {
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      title: me.organization.title,
+      passProps: {
+        onLeftButtonPress: this.areYouSure.bind(this),
+        resource: me.organization,
+        bankStyle,
+        newCustomer: true
+      }
+    }
+    this.props.navigator.push(route)
   }
   showSearch() {
     this.props.navigator.push({
@@ -1559,6 +1502,9 @@ var styles = StyleSheet.create({
   conversationsRow: prettifyRow({
     backgroundColor: '#CDE4F7'
   }),
+  newCustomerRow: prettifyRow({
+    backgroundColor: '#FBFFE5'
+  }),
   statisticsRow: prettifyRow({
     backgroundColor: '#BADFCD'
   }),
@@ -1663,3 +1609,52 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ResourceList;
+  // showRefResources(resource, prop) {
+  //   let rType = utils.getType(resource)
+  //   let props = utils.getModel(rtype).properties;
+  //   let propJson = props[prop];
+  //   let resourceTitle = utils.getDisplayName(resource);
+  //   resourceTitle = utils.makeTitle(resourceTitle);
+
+  //   let backlinksTitle = propJson.title + ' - ' + resourceTitle;
+  //   backlinksTitle = utils.makeTitle(backlinksTitle);
+  //   let modelName = propJson.items.ref;
+  //   let { style, currency, navigator } = this.props
+  //   navigator.push({
+  //     title: backlinksTitle,
+  //     id: 10,
+  //     component: ResourceList,
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       resource: resource,
+  //       prop: prop,
+  //       bankStyle: style,
+  //       modelName: modelName
+  //     },
+  //     rightButtonTitle: translate('details'),
+  //     onRightButtonPress: {
+  //       title: resourceTitle,
+  //       id: 3,
+  //       component: ResourceView,
+  //       backButtonTitle: 'Back',
+  //       rightButtonTitle: 'Edit',
+  //       onRightButtonPress: {
+  //         title: resourceTitle,
+  //         id: 4,
+  //         component: NewResource,
+  //         backButtonTitle: 'Back',
+  //         rightButtonTitle: 'Done',
+  //         passProps: {
+  //           model: utils.getModel(rType),
+  //           bankStyle: style,
+  //           resource: resource
+  //         }
+  //       },
+  //       passProps: {
+  //         bankStyle: style,
+  //         resource: resource,
+  //         currency: currency
+  //       }
+  //     }
+  //   });
+  // }

@@ -1,5 +1,3 @@
-console.log('requiring ProgressInfo.js')
-'use strict'
 
 import {
   View,
@@ -73,7 +71,7 @@ class ProgressInfo extends Component {
       const bigInc = (dest - progress) / 3
       progress += Math.max(bigInc, 0.01)
       progress = Math.min(dest, progress)
-      debug(`updating ${recipient} progress: ${progress}`)
+      // debug(`updating ${recipient} progress: ${progress}`)
       this.setState({ progress })
     }, 30)
   }

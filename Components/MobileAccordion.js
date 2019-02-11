@@ -1,6 +1,3 @@
-console.log('requiring MobileAccordion.js')
-'use strict';
-
 import React, {Component} from  'react'
 
 import Accordion from 'react-native-collapsible/Accordion'

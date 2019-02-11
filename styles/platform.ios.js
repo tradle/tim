@@ -1,12 +1,9 @@
-'use strict';
 
-import DeviceInfo from 'react-native-device-info'
 import StyleSheet from '../StyleSheet'
 import { circled } from './utils'
-import { dimensions } from '../utils/utils'
+import { dimensions, isIphone10orMore } from '../utils/utils'
 
-const deviceID = DeviceInfo.getDeviceId()
-const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
+const isIphone10 = isIphone10orMore()
 
 const footerButton = {
   ...circled(50),
@@ -25,10 +22,10 @@ export default StyleSheet.create({
     marginTop: isIphone10 ? -1 : 3
   },
   navBarSeparator: {
-    height: isIphone10 ? 15 : 0
+    height: isIphone10 ? 10 : 0
   },
   navBarMargin: {
-    marginTop: isIphone10 ? 15 : 0,
+    marginTop: isIphone10 ? 10 : 1,
   },
   navBarText: {
     marginTop: 8,
@@ -37,12 +34,12 @@ export default StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
-    marginTop: isIphone10 ? 20 : 5
+    marginTop: isIphone10 ? 16 : 5
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 10,
-    marginTop: isIphone10 ? 22 : 7
+    marginTop: isIphone10 ? 19 : 7
   },
 
   // navBar: {
@@ -67,7 +64,7 @@ export default StyleSheet.create({
     height: 25,
   }
 })
-
+export const chatTextInputHeight = isIphone10 ? 60 : 45
 export const menuButtonObject = {
   ...footerButton,
   backgroundColor: 'red'

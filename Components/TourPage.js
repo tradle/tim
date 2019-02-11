@@ -1,4 +1,3 @@
-console.log('requiring TourPage.js')
 import _ from 'lodash'
 import React, { Component } from 'react'
 import {
@@ -17,14 +16,14 @@ const PageModel = models['tradle.TourPage']
 const pageProps = Object.keys(PageModel.properties)
 
 class TourPage extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
-    tour: PropTypes.string.isRequired,
+    tour: PropTypes.object.isRequired,
     callback: PropTypes.func,
     customStyles: PropTypes.object
   };
   render() {
-    const {pages, doneBtnLabel, skipBtnLabel, nextBtnLabel, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
+    const {pages, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
     if (!pages)
       return <View/>
     StatusBar.setHidden(true)

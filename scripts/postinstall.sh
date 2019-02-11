@@ -2,12 +2,6 @@
 
 set -euo pipefail
 
-ZOOM_VERSION=$(cat package.json | jq -r '.dependencies["react-native-facetec-zoom"]')
-if [ "$ZOOM_VERSION" != "null" ];
-then
-  ./scripts/fetch-zoom-framework.sh &
-fi
-
 echo "removing react-native peer deps that prevent shrinkwrap from being written"
 ./scripts/rm-rn-peerdeps.js
 
@@ -17,6 +11,9 @@ npm run loadsecrets
 ./fbdedupe.sh
 ./hooks/update_version.sh
 npm run fixasyncstorage
+node ./scripts/rm-unused-components.js
+node ./scripts/fix-node_modules.js
+node ./scripts/dedupe-deps.js
 npm run clean:node_modules
 
 sed -i '' "s/EMULATOR_LOCALHOST = \"10\.0\.2\.2\";/EMULATOR_LOCALHOST = \"localhost\";/" "./node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/systeminfo/AndroidInfoHelpers.java"
@@ -28,5 +25,3 @@ fi
 cp node_modules/react-native-camera/postinstall_project/projectWithoutFaceDetection.pbxproj node_modules/react-native-camera/ios/RNCamera.xcodeproj/project.pbxproj
 
 npm run fix:staging
-
-wait

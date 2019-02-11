@@ -1,5 +1,3 @@
-console.log('requiring HomePageMixin.js')
-'use strict';
 
 import React from 'react'
 import _ from 'lodash'
@@ -21,20 +19,15 @@ import {
   Alert,
   StatusBar
 } from 'react-native'
-import PropTypes from 'prop-types'
 
-const debug = require('debug')('tradle:app:HomePageMixin')
 const {
   TYPE
 } = constants
 const {
-  PROFILE,
   ORGANIZATION,
   MESSAGE,
-  IDENTITY
 } = constants.TYPES
 
-const DATA_CLAIM = 'tradle.DataClaim'
 const APPLICATION = 'tradle.Application'
 
 var HomePageMixin = {
@@ -215,15 +208,13 @@ var HomePageMixin = {
   renderGridHeader() {
     let { modelName, navigator, multiChooser } = this.props
     if (modelName === APPLICATION)
-      return <View/>
-    let model = utils.getModel(modelName)
-    let props = model.properties
+      return
     let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (gridCols)
-    return (
-      // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
-      <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)}/>
-    )
+      return (
+        // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
+        <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)}/>
+      )
   },
   getGridCols() {
     let model = utils.getModel(this.props.modelName)
@@ -252,15 +243,67 @@ var HomePageMixin = {
   sort(prop) {
     let order = this.state.order || {}
     let curOrder = order[prop]
+    let { resource } = this.state
 
     order[prop] = curOrder ? false : true
     this.setState({order: order, sortProperty: prop, list: []})
 
     let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
-    if (this.props.search)
-      _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
+    if (this.props.search) {
+console.log('HomePageMixin: filterResource', resource)
+      _.extend(params, {search: true, filterResource: resource, limit: this.limit, first: true})
+    }
     Actions.list(params)
   },
+  showRefResources({resource, prop, component}) {
+    let rType = utils.getType(resource)
+    let props = utils.getModel(rType).properties;
+    let propJson = props[prop];
+    let resourceTitle = utils.getDisplayName(resource);
+    resourceTitle = utils.makeTitle(resourceTitle);
+
+    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
+    backlinksTitle = utils.makeTitle(backlinksTitle);
+    let modelName = propJson.items.ref;
+    let { style, currency, navigator } = this.props
+    navigator.push({
+      title: backlinksTitle,
+      id: 10,
+      component,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        prop: prop,
+        bankStyle: style,
+        modelName: modelName
+      },
+      rightButtonTitle: translate('details'),
+      onRightButtonPress: {
+        title: resourceTitle,
+        id: 3,
+        component: ResourceView,
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: resourceTitle,
+          id: 4,
+          component: NewResource,
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel(rType),
+            bankStyle: style,
+            resource: resource
+          }
+        },
+        passProps: {
+          bankStyle: style,
+          resource: resource,
+          currency: currency
+        }
+      }
+    });
+  }
 }
 
 module.exports = HomePageMixin;

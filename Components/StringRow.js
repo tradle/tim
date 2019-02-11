@@ -1,16 +1,12 @@
-console.log('requiring StringRow.js')
-'use strict';
 
 import utils from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
-var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
 import {
   // Text,
-  TouchableHighlight,
-  View
+  TouchableOpacity,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -20,31 +16,50 @@ import { Text } from './Text'
 class StringRow extends Component {
   constructor(props) {
     super(props);
-    PRODUCT_ROW_BG_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.productRowBgColor) || DEFAULT_PRODUCT_ROW_BG_COLOR
-    PRODUCT_ROW_TEXT_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.productRowTextColor) || DEFAULT_PRODUCT_ROW_TEXT_COLOR
   }
   render() {
-    let title = this.props.title
-    let renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]} numberOfLines={2}>{title}</Text>;
-
-    var viewStyle = { marginVertical: StyleSheet.hairlineWidth, backgroundColor: PRODUCT_ROW_BG_COLOR }
+    let { title, bankStyle, description } = this.props
+    let styles = createStyles({bankStyle, description})
+    let d
+    if (description)
+      d = <Text style={styles.modelDescription}>{description}</Text>
     return (
-      <TouchableHighlight style={viewStyle} onPress={this.props.callback} underlayColor='transparent'>
-        {renderedRow}
-      </TouchableHighlight>
+      <TouchableOpacity style={styles.viewStyle} onPress={this.props.callback}>
+        <Text style={styles.modelTitle}>{title}</Text>
+        {d}
+      </TouchableOpacity>
     );
   }
 }
 
-var styles = StyleSheet.create({
-  modelTitle: {
-    flex: 1,
-    flexWrap: 'wrap',
-    fontSize: 20,
-    fontWeight: '400',
-    marginVertical: 15,
-    marginLeft: 15
-  },
-});
+var createStyles = utils.styleFactory(StringRow, function ({ bankStyle, description }) {
+  return StyleSheet.create({
+    modelTitle: {
+      flex: 1,
+      flexWrap: 'wrap',
+      fontSize: 20,
+      fontWeight: '400',
+      marginTop: 15,
+      marginBottom: description ? 7 : 15,
+      marginLeft: 15,
+      color: bankStyle  &&  bankStyle.productRowTextColor || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    },
+    modelDescription: {
+      flex: 1,
+      flexWrap: 'wrap',
+      fontSize: 14,
+      fontWeight: '400',
+      marginTop: 0,
+      marginBottom: 15,
+      fontStyle: 'italic',
+      marginLeft: 15,
+      color: bankStyle  &&  bankStyle.productRowTextColor || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    },
+    viewStyle: {
+      marginVertical: StyleSheet.hairlineWidth,
+      backgroundColor: bankStyle  &&  bankStyle.productRowBgColor || DEFAULT_PRODUCT_ROW_BG_COLOR
+    }
+  })
+})
 
 module.exports = StringRow;

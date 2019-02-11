@@ -3,8 +3,6 @@
   a bootstrap like style
 
 */
-'use strict';
-
 import {StyleSheet} from 'react-native'
 var verificationStyles = Object.freeze({
   verifiedHeader: {

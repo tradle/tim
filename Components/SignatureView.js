@@ -1,19 +1,13 @@
-console.log('requiring SignatureView.js')
-'use strict';
 
 import utils, { translate } from '../utils/utils'
 import PageView from './PageView'
-import extend from 'extend'
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
 
 import {
-  Platform,
   View,
   // Text,
-  ScrollView,
   TouchableOpacity
 } from 'react-native'
 import PropTypes from 'prop-types';
@@ -24,10 +18,8 @@ import SignaturePad from 'react-native-signature-pad'
 
 class SignatureView extends Component {
   static displayName = 'SignatureView';
-  props: {
-    navigator: PropTypes.object.isRequired,
-    onSignature: PropTypes.func,
-    returnRoute: PropTypes.object,
+  static propTypes = {
+    onSignature: PropTypes.func
   };
 
   constructor(props) {
@@ -41,14 +33,16 @@ class SignatureView extends Component {
     };
   }
   done() {
-    this.props.onSignature(this.getSignature())
+    let sig = this.getSignature()
+    this.props.onSignature(sig)
+    return sig
   }
   onScroll(e) {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
     let { sigViewStyle } = this.props
-    const { width, height } = utils.dimensions(SignatureView)
+    const { width } = utils.dimensions(SignatureView)
     let separator = utils.getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
     return (

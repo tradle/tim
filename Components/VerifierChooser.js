@@ -1,5 +1,3 @@
-console.log('requiring VerifierChooser.js')
-'use strict';
 
 import ResourceRow from './ResourceRow'
 import MessageList from './MessageList'
@@ -11,27 +9,26 @@ import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
-import buttonStyles from '../styles/buttonStyles'
+var {
+  TYPE
+} = constants
+var {
+  ORGANIZATION,
+  MESSAGE,
+  PROFILE
+} = constants.TYPES
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import StyleSheet from '../StyleSheet'
 import TimerMixin from 'react-timer-mixin'
 
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const PROFILE = 'tradle.Profile'
 
 import React, { Component } from 'react'
 import {
   ListView,
-  // StyleSheet,
-  Alert,
-  // AlertIOS,
-  // ActionSheetIOS,
-  TouchableOpacity,
   StatusBar,
   View,
-  Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -40,7 +37,7 @@ import platformStyles from '../styles/platform'
 const SETTINGS = 'tradle.Settings'
 
 class VerifierChooser extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     resource: PropTypes.object.isRequired,
@@ -51,10 +48,10 @@ class VerifierChooser extends Component {
     super(props);
 
     let v = props.originatingMessage.verifiers.map((rr) => {
-      let p = rr.provider ? rr.provider.split('_') : [constants.TYPES.ORGANIZATION]
+      let p = rr.provider ? rr.provider.split('_') : [ORGANIZATION]
       return {
-        [constants.TYPE]: p[0],
-        // [constants.ROOT_HASH]: p[1],
+        [TYPE]: p[0],
+        // [ROOT_HASH]: p[1],
         name: rr.name,
         url: rr.url,
         photos: [{url: rr.photo}],
@@ -118,7 +115,6 @@ class VerifierChooser extends Component {
               resource={resource} />
   }
   render() {
-    var model = utils.getModel(this.props.modelName);
     var content = <ListView
           dataSource={this.state.dataSource}
           enableEmptySections={true}
@@ -149,7 +145,7 @@ class VerifierChooser extends Component {
     Actions.addItem({
       meta: utils.getModel(SETTINGS),
       resource: {
-        [constants.TYPE]: SETTINGS,
+        [TYPE]: SETTINGS,
         url: resource.url,
         id: verifier.id,
         botId: utils.makeId(PROFILE, verifier.permalink)
@@ -158,9 +154,9 @@ class VerifierChooser extends Component {
     })
   }
   verifyByTrustedProvider(resource, product) {
-    let provider = this.props.provider
+    // let provider = this.props.provider
     let msg = {
-      [constants.TYPE]: PRODUCT_REQUEST,
+      [TYPE]: PRODUCT_REQUEST,
       product: product,
       from: utils.getMe(),
       to:   resource
@@ -196,7 +192,7 @@ class VerifierChooser extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
-        modelName: constants.TYPES.MESSAGE,
+        modelName: MESSAGE,
         currency: this.props.currency,
         bankStyle:  bankStyle,
         // returnChat: provider,

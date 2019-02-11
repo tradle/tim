@@ -1,10 +1,7 @@
-console.log('requiring ApplicationTabs.js')
-'use strict';
-
 import { makeResponsive } from 'react-native-orient'
 import {
   View,
-  Text,
+  // Text,
   StyleSheet,
   TouchableOpacity,
   Platform,
@@ -12,16 +9,17 @@ import {
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
-import Icon from 'react-native-vector-icons/Ionicons'
+// import Icon from 'react-native-vector-icons/Ionicons'
 import ScrollableTabView from 'react-native-scrollable-tab-view'
 
+import { Text } from './Text'
 import ProgressBar from './ProgressBar'
 import constants from '@tradle/constants'
 import utils, {
   translate
 } from '../utils/utils'
 
-import buttonStyles from '../styles/buttonStyles'
+// import buttonStyles from '../styles/buttonStyles'
 import appStyle from '../styles/appStyle.json'
 import reactMixin from 'react-mixin'
 import RowMixin from './RowMixin'
@@ -33,8 +31,7 @@ import ENV from '../utils/env'
 import GridList from './GridList'
 
 const {
-  TYPE,
-  ROOT_HASH
+  TYPE
 } = constants
 
 const {
@@ -45,6 +42,14 @@ const {
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    showDetails: PropTypes.bool,
+    bankStyle: PropTypes.object,
+    approve: PropTypes.func.isRequired,
+    deny: PropTypes.func.isRequired
+  };
   constructor(props) {
     super(props);
   }
@@ -53,14 +58,13 @@ class ApplicationTabs extends Component {
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
-    var me = utils.getMe()
     let propsToShow = []
 
     let currentProp = backlink
     showDetails = !backlink  ||  showDetails
     let styles = createStyles({bankStyle})
 
-    let currentMarker = <View style={styles.marker} />
+    // let currentMarker = <View style={styles.marker} />
 
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
     if (itemProps)
@@ -68,7 +72,7 @@ class ApplicationTabs extends Component {
 
     this.tabDetail = {}
 
-    let showCurrent = showDetails ? currentMarker : null
+    // let showCurrent = showDetails ? currentMarker : null
 
     this.tabDetail.Details = {icon: 'ios-paper-outline', action: this.showDetails.bind(this)}
     refList.push(<View key={this.getNextKey()} tabLabel='Details' />)
@@ -176,7 +180,7 @@ class ApplicationTabs extends Component {
                                     bankStyle={bankStyle}
                                     excludedProperties={['photos']}
                                     navigator={navigator} />
-      if (!resource.draft  && utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
+      if (/*!resource.draft  &&*/ utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
                    <View style={styles.buttons}>

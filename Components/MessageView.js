@@ -1,6 +1,3 @@
-console.log('requiring MessageView.js')
-'use strict';
-
 import React, { Component } from 'react'
 import {
   // StyleSheet,
@@ -21,12 +18,9 @@ import { makeResponsive } from 'react-native-orient'
 import constants from '@tradle/constants'
 const {
   TYPE,
-  ROOT_HASH
 } = constants
 const {
   VERIFICATION,
-  ENUM,
-  MONEY,
   FORM
 } = constants.TYPES
 
@@ -42,23 +36,16 @@ import PageView from './PageView'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
-import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import Navigator from './Navigator'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 
-const PHOTO = 'tradle.Photo'
-const ITEM = 'tradle.Item'
-// const DRAFT_APPLICATION = 'tradle.DraftApplication'
-// const FORM_PREFILL = 'tradle.FormPrefill'
-// import Prompt from 'react-native-prompt'
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 class MessageView extends Component {
   static displayName = 'MessageView';
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     verification: PropTypes.object,
@@ -103,19 +90,7 @@ class MessageView extends Component {
     let vCols = utils.getViewCols(m)
     if (!vCols)
       return
-    let props = m.properties
-    let runGetItem
-    vCols.forEach((col) => {
-      if (!resource[col])
-        return
-      let ref = props[col].ref
-      if (ref  &&  ref !== MONEY  &&  utils.getModel(ref).subClassOf !== ENUM) {
-        if (resource[col].id)
-          runGetItem = true
-      }
-    })
-    // if (runGetItem)
-      Actions.getItem({resource, search, application})
+    Actions.getItem({resource, search, application})
   }
 
   componentDidMount() {
@@ -180,7 +155,7 @@ class MessageView extends Component {
     // if to is passed then resources only of this container need to be returned
     let r = {[TYPE]: ref};
     let rType = resource[TYPE]
-    let rModel = utils.getModel(rType)
+    // let rModel = utils.getModel(rType)
 
     let blModel = utils.getModel(ref)
     // let refProps = utils.getPropertiesWithAnnotation(blModel, 'ref')
@@ -217,7 +192,7 @@ class MessageView extends Component {
         prop: itemBl,
         search,
         // containerResource: resource,
-        doNotSend: true,
+        // doNotSend: true,
         defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
         callback: (resource) => {
@@ -230,7 +205,6 @@ class MessageView extends Component {
   verifyOrCreateError() {
     let { application } = this.props
     let { resource } = this.state
-    let model = utils.getModel(resource[TYPE])
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
         translate('verifyPrompt'), // + utils.getDisplayName(resource),
@@ -300,8 +274,6 @@ class MessageView extends Component {
   }
 
   getRefResource(resource, prop) {
-    let model = utils.getModel(utils.getType(resource));
-
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);
     this.showRefResource(resource, prop)
@@ -313,10 +285,8 @@ class MessageView extends Component {
     let model = utils.getModel(document[TYPE]);
     let title = model.title; //utils.getDisplayName(resource, model.properties);
     let newTitle = title;
-    let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !resource && utils.isVerifier(document)
-    let isEmployee = utils.isEmployee(this.props.resource)
     let route = {
       title: newTitle,
       id: 5,
@@ -325,10 +295,10 @@ class MessageView extends Component {
       parentMeta: model,
       passProps: {
         bankStyle: this.state.bankStyle || this.props.bankStyle,
-        resource: resource,
+        resource,
         currency: this.props.currency,
-        document: document,
-        isVerifier: isVerifier
+        document,
+        isVerifier
       }
     }
     this.props.navigator.push(route);
@@ -337,7 +307,7 @@ class MessageView extends Component {
     let { backlink, bankStyle, resource } = this.state
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: MessageView})
-    let { lensId, style, search, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
+    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
 
     let rModel = utils.getModel(utils.getType(resource))
     let isWrapper = utils.getPrefillProperty(rModel)
@@ -352,19 +322,24 @@ class MessageView extends Component {
       date = utils.formatDate(new Date(t), true)
     else
       date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
-    let photos = resource.photos
+    // let photos = resource.photos
     let mainPhoto, inRow
-
+    let photos = utils.getResourcePhotos(model, resource)
     if (!backlink) {
-      if (!photos  ||  !photos.length) {
-        photos = utils.getResourcePhotos(model, resource)
-        let mainPhotoProp = utils.getMainPhotoProperty(model)
-        mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+      let mainPhotoProp = utils.getMainPhotoProperty(model)
+      if (mainPhotoProp) {
+        mainPhoto = resource[mainPhotoProp]
+        if (photos) {
+          if (mainPhotoProp !== 'photos')
+            photos = photos.filter(p => p.url !== mainPhoto)
+        }
       }
-      else //if (photos.length === 1)
+      else if (!photos  ||  !photos.length) {
+        photos = utils.getResourcePhotos(model, resource)
+        mainPhoto = photos && photos[0]
+      }
+      if (!mainPhoto  &&  photos)
         mainPhoto = photos[0]
-      // if (photos  &&  photos.length)
-      //   photos.splice(0, 1)
 
       inRow = photos ? photos.length - 1 : 0
       if (inRow  &&  inRow > 4)
@@ -380,18 +355,22 @@ class MessageView extends Component {
                                         currency={currency}
                                         showVerification={this.showVerification}/>
     // Don't show photostrip on backlink tab
-    let photoList
-    if (!backlink && photos  &&  photos.length > 1) {
-      // Don't show the main photo in the strip
-      photoList = photos.slice()
-      photoList.splice(0, 1)
+    let photoStrip
+    let checkProps
+    if (!isVerification && isVerifier) /* && !utils.isReadOnlyChat(resource)*/
+      checkProps = this.onCheck
+    if (!checkProps) {
+      let photoList
+      if (!backlink && photos  &&  photos.length > 1) {
+        // Don't show the main photo in the strip
+        photoList = photos.slice()
+        photoList.splice(0, 1)
+      }
+
+      photoStrip = <View style={styles.photoListStyle}>
+                    <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
+                   </View>
     }
-
-    let photoStrip = <View style={styles.photoListStyle}>
-                      <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
-                    </View>
-
-
     let content = <View style={styles.rowContainer}>
                     {msg}
                     {propertySheet}
@@ -399,7 +378,6 @@ class MessageView extends Component {
                     {verificationTxID}
                   </View>
 
-    let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
     let actionPanel, allowToAddBacklink
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
@@ -627,10 +605,6 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
       // paddingTop: 3,
       // marginTop: -10,
     },
-    // rowContainer: {
-    //   paddingBottom: 10,
-    //   // paddingHorizontal: 10
-    // },
     date: {
       fontSize: 14,
       marginTop: 5,

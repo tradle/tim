@@ -1,27 +1,17 @@
-console.log('requiring StringChooser.js')
-'use strict';
 
 import React, { Component } from 'react'
-import _ from 'lodash'
-import constants from '@tradle/constants'
 import StringRow from './StringRow'
 import utils, { translate } from '../utils/utils'
-import MessageList from './MessageList'
 
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
 import {
   ListView,
-  // Text,
-  StyleSheet,
-  View,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
-import { Text } from './Text'
 
 class StringChooser extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     strings: PropTypes.array.isRequired,
     bankStyle: PropTypes.object,
@@ -43,18 +33,25 @@ class StringChooser extends Component {
       this.props.navigator.pop();
     this.props.callback(modelId)
   }
-  renderRow(modelId)  {
-    let model = utils.getModel(modelId)
+  renderRow(product)  {
+    if (typeof product === 'string')
+      product = { product }
+    let { id, title, description } = product
+
+    let model = utils.getModel(id)
     if (!model)
       return null
+    if (!title)
+      title = translate(model)
 
     return (
       <StringRow
-        onSelect={() => this.selectResource(modelId)}
-        title={translate(model)}
+        onSelect={() => this.selectResource(id)}
+        title={title}
+        description={description}
         bankStyle={this.props.bankStyle}
         navigator={this.props.navigator}
-        callback={() => this.selectResource(modelId)}
+        callback={() => this.selectResource(id)}
         />
       );
   }
@@ -76,7 +73,6 @@ class StringChooser extends Component {
       bgStyle = {backgroundColor: bankStyle.backgroundColor}
     else
       bgStyle = {backgroundColor: '#ffffff'}
-      // <View style={[styles.container, bgStyle]}>
     let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={contentSeparator} bankStyle={bankStyle}>
@@ -85,18 +81,5 @@ class StringChooser extends Component {
     );
   }
 }
-
-var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  // listview: {
-  //   marginTop: 64,
-  //   borderWidth: 0,
-  //   marginHorizontal: -1,
-  //   borderBottomWidth: StyleSheet.hairlineWidth,
-  //   borderColor: '#ffffff',
-  // },
-});
 
 module.exports = StringChooser;

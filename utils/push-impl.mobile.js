@@ -1,4 +1,3 @@
-console.log('requiring push-impl.mobile.js')
 import { Platform } from 'react-native'
 import Push from 'react-native-push-notification'
 import once from 'once'

@@ -1,16 +1,12 @@
-console.log('requiring RowMixin.js')
-'use strict';
 
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
-import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
   // Text,
   View,
   Alert,
   Platform,
-  Image,
 } from 'react-native'
 import { coroutine as co } from 'bluebird'
 
@@ -19,22 +15,18 @@ import constants from '@tradle/constants'
 import utils, { translate, translateEnum } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
-import Navigator from './Navigator'
 import ENV from '../utils/env'
 import IProov from '../utils/iproov'
 import { Text } from './Text'
+import chatStyles from '../styles/chatStyles'
+import Image from './Image'
 
 const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
-const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
-const PHOTO = 'tradle.Photo'
-const IPROOV_SELFIE = 'tradle.IProovSelfie'
-const PRODUCT_REQUEST = 'tradle.ProductRequest'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
 var {
@@ -131,8 +123,9 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    let { to, resource, application, context, bankStyle } = this.props
-    let isContext = utils.isContext(to[TYPE])
+    let { to, resource, application, bankStyle } = this.props
+    let toType = utils.getType(to)
+    let isContext = utils.isContext(toType)
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(to)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
       return <View/>
@@ -176,7 +169,7 @@ var RowMixin = {
   getTime(resource) {
     if (!resource._time)
       return
-    let { to, isAggregation, previousMessageTime } = this.props
+    let { isAggregation, previousMessageTime } = this.props
     let showTime = !previousMessageTime  ||  isAggregation;
 
     if (!showTime)  {
@@ -190,6 +183,10 @@ var RowMixin = {
 
     if (showTime)
       return utils.formatDate(resource._time);
+  },
+  getChatDate(resource) {
+    let val = this.getTime(resource);
+    return val  && <Text style={chatStyles.date}>{val}</Text>
   },
   isMyMessage(to) {
     let { resource, isAggregation, application } = this.props
@@ -264,10 +261,11 @@ var RowMixin = {
     // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
     if (/*!resource.organization  || */ utils.isReadOnlyChat(resource))
       return false
-    if (to[TYPE] === PROFILE)
+    let toType = utils.getType(to)
+    if (toType === PROFILE)
       return false
     let me = utils.getMe()
-    if (utils.isContext(to[TYPE])  &&  utils.isReadOnlyChat(to)) {
+    if (utils.isContext(toType)  &&  utils.isReadOnlyChat(to)) {
       if (utils.getId(resource.from) === utils.getId(me))
         return false
     }

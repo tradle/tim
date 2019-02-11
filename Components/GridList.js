@@ -1,5 +1,3 @@
-console.log('requiring GridList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import {
@@ -8,7 +6,6 @@ import {
   Alert,
   TouchableOpacity,
   ActivityIndicator,
-  Image,
   StatusBar,
   View,
   // Text,
@@ -30,7 +27,6 @@ import NoResources from './NoResources'
 // import ResourceRow from './ResourceRow'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
-import GridHeader from './GridHeader'
 import ResourceView from './ResourceView'
 import ApplicationView from './ApplicationView'
 import VerificationRow from './VerificationRow'
@@ -39,8 +35,9 @@ import MessageList from './MessageList'
 import MessageView from './MessageView'
 import PageView from './PageView'
 import uiUtils from './uiUtils'
-import SupervisoryView from './SupervisoryView'
+// import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
+import NotFoundRow from './NotFoundRow'
 import utils, {
   translate
 } from '../utils/utils'
@@ -58,7 +55,7 @@ import ENV from '../utils/env'
 import SearchBar from './SearchBar'
 import formDefaults from '../data/formDefaults'
 
-const PARTIAL = 'tradle.Partial'
+// const PARTIAL = 'tradle.Partial'
 const FORM_ERROR = 'tradle.FormError'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 
@@ -71,7 +68,6 @@ var {
 
 var {
   PROFILE,
-  IDENTITY,
   ORGANIZATION,
   FINANCIAL_PRODUCT,
   VERIFICATION,
@@ -81,14 +77,10 @@ var {
   FORM,
   ENUM,
   SETTINGS,
-  MONEY,
-  MODEL,
 } = constants.TYPES
 
-const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION = 'tradle.Application'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
-const PHOTO = 'tradle.Photo'
 
 const METHOD = 'tradle.Method'
 const BOOKMARK = 'tradle.Bookmark'
@@ -124,7 +116,7 @@ var excludeFromBrowsing = [
 var cnt = 0
 
 class GridList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     resource: PropTypes.object,
@@ -151,11 +143,9 @@ class GridList extends Component {
         return true
       }
     })
-    let {resource, officialAccounts, modelName, prop, filter, serverOffline, search} = this.props
+    let {resource, modelName, prop, filter, serverOffline, search} = this.props
     let model = utils.getModel(modelName)
 
-    let viewCols = this.getGridCols()
-    let size = viewCols ? viewCols.length : 1
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     this.limit = 20 //this.isSmallScreen ? 20 : 40
     this.state = {
@@ -172,10 +162,9 @@ class GridList extends Component {
       refreshing: false,
       // hasPartials: false,
       // bookmarksCount: 0,
-      // hasTestProviders: false,
       notFoundMap: {},
       resource: search  &&  resource,
-      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
+      isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -218,7 +207,7 @@ class GridList extends Component {
     this.props.callback(orgs)
   }
   componentWillReceiveProps(props) {
-    let { resource, isBacklink, prop, isForwardlink, search, forwardlink, application } = props
+    let { resource, isBacklink, prop, search, forwardlink, application } = props
     if (isBacklink) {
       // if (!props.resource['_' + props.prop.name + 'Count'])
       //   return
@@ -313,7 +302,6 @@ class GridList extends Component {
     if (!prop)
       return params
 
-    let m = utils.getModel(resource[TYPE])
     // case when for example clicking on 'Verifications' on Form page
     if (isBacklink) {
       params.backlink = prop
@@ -341,7 +329,7 @@ class GridList extends Component {
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, navigator, officialAccounts, search, application, prop,
+    let { chat, resource, navigator, search, application, prop,
           modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
@@ -352,8 +340,13 @@ class GridList extends Component {
     if (search  ||  application) {
       if (isModel) {
         let me = utils.getMe()
-        if (me.isEmployee)
+        if (me.isEmployee) {
+          // Show models that are present and call for all
+          let list = Object.values(utils.getModels())
+          this.state.list = list
+          this.state.dataSource = this.state.dataSource.cloneWithRows(list)
           Actions.getModels(utils.getId(me.organization))
+        }
         else {
           let modelsArr = this.filterModels()
           this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
@@ -369,6 +362,7 @@ class GridList extends Component {
         }
       }
       else if (!isForwardlink) {
+console.log('GridList.componentWillMount: filterResource', resource)
         Actions.list({
           modelName: modelName,
           filterResource: resource,
@@ -378,12 +372,6 @@ class GridList extends Component {
         })
         return
       }
-    }
-    let me = utils.getMe()
-    if (me  &&  me.isEmployee  &&  officialAccounts) {
-      utils.onNextTransitionEnd(navigator, () => {
-        Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-      });
     }
     let params = this.getParamsForBacklinkList(this.props)
     StatusBar.setHidden(false);
@@ -401,9 +389,6 @@ class GridList extends Component {
     else
       utils.onNextTransitionEnd(navigator, () => {
         Actions.list(params)
-        if (officialAccounts  &&  modelName === ORGANIZATION)
-          Actions.hasTestProviders()
-        // StatusBar.setHidden(false);
       });
   }
 
@@ -494,15 +479,19 @@ class GridList extends Component {
         navigator.push(route)
       return
     }
-    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, lens } = this.props
+    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
         if (params.alert)
           Alert.alert(params.alert)
         else if (search  &&  !isModel) {
-          if (params.isSearch  &&   resource)
-            Alert.alert('No resources were found for this criteria')
+          if (params.isSearch  &&   resource) {
+            if (params.errorMessage)
+              this.errorAlert(params.errorMessage, params.query)
+            else if (!this.state.refreshing)
+              this.errorAlert('noResourcesForCriteria')
+          }
           this.setState({refreshing: false, isLoading: false})
         }
         else if (prop  &&  prop.allowToAdd)
@@ -549,7 +538,6 @@ class GridList extends Component {
           return utils.getId(r) !== sharingChatId
         })
       }
-      let m = utils.getModel(modelName)
       if (isChooser)
         list = utils.applyLens({prop, list})
       if (search) {
@@ -588,8 +576,6 @@ class GridList extends Component {
         // }
       }
     }
-
-    list = this.addTestProvidersRow(list)
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -637,16 +623,6 @@ class GridList extends Component {
 
     this.setState(state)
   }
-  addTestProvidersRow(l) {
-    if (!l  ||  !this.props.officialAccounts || this.props.modelName !== ORGANIZATION)
-      return l
-    l.push({
-      [TYPE]: ORGANIZATION,
-      name: 'Sandbox',
-      _isTest: true
-    })
-    return l
-  }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
@@ -693,7 +669,7 @@ class GridList extends Component {
   selectResource({resource}) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    let { modelName, search, callback, bankStyle, navigator, currency } = this.props
+    let { modelName, search, bankStyle, navigator, currency } = this.props
     let isContact = modelName === PROFILE;
 
     let isOrganization = modelName === ORGANIZATION
@@ -702,7 +678,7 @@ class GridList extends Component {
       this.selectMessage(resource)
       return;
     }
-    let { prop, officialAccounts } = this.props
+    let { prop } = this.props
     if (prop) {
       if (me) {
         if  (modelName != PROFILE) {
@@ -796,20 +772,6 @@ class GridList extends Component {
         }
       }
     }
-    if (officialAccounts) {
-      if (isOrganization)
-        route.title = resource.name
-      let msg = {
-        // message: translate('customerWaiting', me.firstName),
-        _t: CUSTOMER_WAITING,
-        from: me,
-        to: utils.isEmployee(resource) ? me.organization : resource,
-        time: new Date().getTime()
-      }
-
-      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-    }
-
     navigator.push(route);
   }
   selectMessage(resource) {
@@ -829,10 +791,8 @@ class GridList extends Component {
       uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
       return
     }
-    let model = utils.getModel(modelName);
     let rType = utils.getType(resource)
     let rModel = utils.getModel(rType)
-    let isMessage = utils.isMessage(resource)
     let isStub = utils.isStub(resource)
     let isFormError = rType === FORM_ERROR
     let isForm = rModel.subClassOf === FORM
@@ -901,12 +861,12 @@ class GridList extends Component {
       }
     }
     // Edit verifications
-    // let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
-    // if (!canEdit  &&  !isVerification)
-    //   canEdit = utils.isMyMessage({resource})
+    let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
+    if (!canEdit  &&  !isVerification  &&  !rModel.notEditable)
+      canEdit = utils.isMyMessage({resource})
     // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
     // if (canEdit) {
-    if (!isStub  ||  utils.isMyMessage({resource})) {
+    if (!isStub  &&  canEdit) { //||  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -1009,60 +969,6 @@ class GridList extends Component {
     }
     navigator.push(route);
   }
-  showRefResources(resource, prop) {
-    let rType = utils.getType(resource)
-    let props = utils.getModel(rType).properties;
-    let propJson = props[prop];
-    let resourceTitle = utils.getDisplayName(resource);
-    resourceTitle = utils.makeTitle(resourceTitle);
-
-    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
-    backlinksTitle = utils.makeTitle(backlinksTitle);
-    let modelName = propJson.items.ref;
-    let { style, currency, navigator } = this.props
-    navigator.push({
-      title: backlinksTitle,
-      id: 10,
-      component: GridList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        resource: resource,
-        prop: prop,
-        bankStyle: style,
-        modelName: modelName
-      },
-      rightButtonTitle: translate('details'),
-      onRightButtonPress: {
-        title: resourceTitle,
-        id: 3,
-        component: ResourceView,
-        titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: resourceTitle,
-          id: 4,
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel(rType),
-            bankStyle: style,
-            resource: resource
-          }
-        },
-
-        passProps: {
-          bankStyle: style,
-          resource: resource,
-          currency: currency
-        }
-      }
-    });
-  }
-
 
   selectModel(model) {
     let { navigator, bankStyle, currency, exploreData } = this.props
@@ -1151,7 +1057,7 @@ class GridList extends Component {
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, officialAccounts,
+    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy,
           currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1187,7 +1093,6 @@ class GridList extends Component {
             currency={currency}
             rowId={rowId}
             gridCols={viewCols}
-            isOfficialAccounts={officialAccounts}
             multiChooser={multiChooser}
             isChooser={isChooser}
             resource={resource}
@@ -1195,14 +1100,8 @@ class GridList extends Component {
             chosen={this.state.chosen} />
           );
     }
-    let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
-    let isForm = model.id === FORM || model.subClassOf === FORM
-    let isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-
     let selectedResource = resource
 
-    if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
-      return this.renderTestProviders()
     let isApplication = modelName === APPLICATION
     let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
     if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
@@ -1232,9 +1131,9 @@ class GridList extends Component {
       navigator={navigator}
       changeSharedWithList={chat ? this.changeSharedWithList.bind(this) : null}
       currency={currency}
-      isOfficialAccounts={officialAccounts}
       multiChooser={multiChooser}
       isChooser={isChooser}
+      parentComponent={GridList}
       selectModel={this.selectModel.bind(this)}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
@@ -1242,6 +1141,7 @@ class GridList extends Component {
     );
   }
   searchWithFilter(filterResource) {
+console.log('GridList.searchWithFilter: filterResource', filterResource)
     this.setState({resource: filterResource})
     Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true})
   }
@@ -1280,11 +1180,13 @@ class GridList extends Component {
     // if (this.offset < this.contentHeight / 2)
     //   return
     // debugger
-    let { list=[], order, sortProperty, endCursor, prevEndCursor } = this.state
+    let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
     if (endCursor === prevEndCursor  &&  utils.getModel(this.props.modelName).subClassOf !== ENUM)
       return
     let { modelName, search, resource } = this.props
     this.state.refreshing = true
+console.log('GridList._loadMoreContentAsync: filterResource', resource)
+
     Actions.list({
       modelName: modelName,
       sortProperty: sortProperty,
@@ -1323,30 +1225,6 @@ class GridList extends Component {
     this.state.sharedWith[id] = value
   }
 
-  renderTestProviders() {
-    if (!this.state.hasTestProviders  ||  this.props.isTest)
-      return <View/>
-    return (
-      <View>
-        <View style={styles.testProvidersRow} key={'testProviders_1'}>
-          <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
-            <View style={styles.row}>
-              <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={styles.cellImage} />
-              <View style={styles.textContainer}>
-                <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
-              </View>
-              <View style={styles.testProviders}>
-                <Text style={styles.testProvidersCounter}>{this.state.testProviders.length}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.testProvidersContainer}>
-          <Text style={styles.testProvidersDescription}>{translate('sandboxDescription')}</Text>
-        </View>
-      </View>
-    )
-  }
   renderFooter() {
     // let me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
@@ -1421,7 +1299,7 @@ class GridList extends Component {
     this.props.navigator.push(route)
   }
   addNew() {
-    let { modelName, prop, resource, isChooser, bankStyle, navigator } = this.props
+    let { modelName, prop, resource, bankStyle, navigator } = this.props
     let model = utils.getModel(modelName);
     let r;
     this.setState({hideMode: false})
@@ -1455,10 +1333,11 @@ class GridList extends Component {
       r.to = resource.to
       r._context = resource._context
     }
-
+    // if (utils.isSimulator()) {
     let isPrefilled = ENV.prefillForms && model.id in formDefaults
     if (isPrefilled)
       _.extend(r, formDefaults[model.id])
+    // }
     let self = this
     navigator.push({
       title: model.title,
@@ -1497,7 +1376,7 @@ class GridList extends Component {
   }
   render() {
     let content;
-    let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected, allLoaded} = this.state
+    let { filter, dataSource, isLoading, list, isConnected, allLoaded} = this.state
     let { isChooser, modelName, isModel, application,
           isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
     let model = utils.getModel(modelName);
@@ -1515,7 +1394,7 @@ class GridList extends Component {
                   <NoResources
                     message={translate('pleaseClickOnAddButton', prop && prop.title || translate(model))}
                     iconColor={'#ffffff'}
-                    iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
+                    iconStyle= {StyleSheet.flatten([buttonStyles.menuButton, styles.noResourcesIcon])}
                     model={model}
                     isLoading={isLoading}>
                   </NoResources>
@@ -1543,10 +1422,13 @@ class GridList extends Component {
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
     let searchBar
-    let { search, _readOnly, officialAccounts } = this.props
+    let { search, _readOnly } = this.props
 
     if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
-      let hasSearch = isModel
+      let hasSearch = isModel  ||  utils.isEnum(model)
+      // Check if the starting - no filter list - is small
+      if (hasSearch  &&  (!filter  &&  list  &&  list.length < SEARCH_LIMIT))
+        hasSearch = false
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
         if (hasSearch)
@@ -1570,8 +1452,6 @@ class GridList extends Component {
         if (org)
           network = <NetworkInfoProvider connected={isConnected} serverOffline={!org._online} />
       }
-      // if (officialAccounts && modelName === ORGANIZATION)
-      //   network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
       else
         network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     }
@@ -1584,9 +1464,13 @@ class GridList extends Component {
         showLoadingIndicator = false
       else if (isBacklink  ||  isForwardlink) {
         let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
-        if (!resource['_' + pName + 'Count']) {
+        let cnt = resource['_' + pName + 'Count']
+        if (!cnt) {
           if (!resource[pName]  || !resource[pName].length)
             showLoadingIndicator = false
+        }
+        else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
+          showLoadingIndicator = false
         }
       }
       if (showLoadingIndicator)
@@ -1666,6 +1550,26 @@ class GridList extends Component {
       />
     )
   }
+  errorAlert(message, query) {
+    if (query)
+      Alert.alert(
+        translate(message),
+        null,
+        [
+          {text: translate('cancel'), onPress: () => {
+            this.setState({hideMode: false})
+            console.log('Canceled!')
+          }},
+          {text: translate('Retry'), onPress: () => {
+            this.setState({isLoading: true})
+            Actions.list(query)
+          }},
+        ]
+      )
+    else
+      Alert.alert(translate(message))
+  }
+
   hideResource(resource) {
     Alert.alert(
       translate('areYouSureYouWantToDelete', translate(resource.name)),
@@ -1754,37 +1658,6 @@ var styles = StyleSheet.create({
     width: 50,
     paddingLeft: 5
   },
-  testProviders: {
-    position: 'absolute',
-    right: 5,
-    top: 20,
-    width: 20,
-    height:20,
-    justifyContent: 'center',
-    borderRadius: 10,
-    backgroundColor: appStyle.TEST_PROVIDERS_ROW_FG_COLOR
-  },
-  testProvidersCounter: {
-    fontSize: 12,
-    alignSelf: 'center',
-    color: appStyle.TEST_PROVIDERS_ROW_BG_COLOR
-  },
-  testProvidersText: {
-    color: appStyle.TEST_PROVIDERS_ROW_FG_COLOR
-  },
-  testProvidersRow: {
-    padding: 5,
-    flex: 1,
-    backgroundColor: appStyle.TEST_PROVIDERS_ROW_BG_COLOR
-  },
-  testProvidersDescription: {
-    fontSize: 16,
-    color: '#757575'
-  },
-  testProvidersContainer: {
-    padding: 10,
-    backgroundColor: 'transparent'
-  },
   col: {
     paddingVertical: 5,
     // paddingLeft: 7
@@ -1852,6 +1725,12 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: 'transparent',
     marginTop: 20
+  },
+  noResourcesIcon: {
+    opacity: 0.4,
+    marginTop: 0,
+    width: 30,
+    height: 30
   }
 });
 
@@ -2129,4 +2008,54 @@ module.exports = GridList;
   //   if (this.props.search)
   //     _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
   //   Actions.list(params)
+  // }
+  // showRefResources(resource, prop) {
+  //   let rType = utils.getType(resource)
+  //   let props = utils.getModel(rType).properties;
+  //   let propJson = props[prop];
+  //   let resourceTitle = utils.getDisplayName(resource);
+  //   resourceTitle = utils.makeTitle(resourceTitle);
+
+  //   let backlinksTitle = propJson.title + ' - ' + resourceTitle;
+  //   backlinksTitle = utils.makeTitle(backlinksTitle);
+  //   let modelName = propJson.items.ref;
+  //   let { style, currency, navigator } = this.props
+  //   navigator.push({
+  //     title: backlinksTitle,
+  //     id: 10,
+  //     component: GridList,
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       resource: resource,
+  //       prop: prop,
+  //       bankStyle: style,
+  //       modelName: modelName
+  //     },
+  //     rightButtonTitle: translate('details'),
+  //     onRightButtonPress: {
+  //       title: resourceTitle,
+  //       id: 3,
+  //       component: ResourceView,
+  //       backButtonTitle: 'Back',
+  //       rightButtonTitle: 'Edit',
+  //       onRightButtonPress: {
+  //         title: resourceTitle,
+  //         id: 4,
+  //         component: NewResource,
+  //         backButtonTitle: 'Back',
+  //         rightButtonTitle: 'Done',
+  //         passProps: {
+  //           model: utils.getModel(rType),
+  //           bankStyle: style,
+  //           resource: resource
+  //         }
+  //       },
+
+  //       passProps: {
+  //         bankStyle: style,
+  //         resource: resource,
+  //         currency: currency
+  //       }
+  //     }
+  //   });
   // }

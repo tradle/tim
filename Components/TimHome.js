@@ -1,5 +1,3 @@
-console.log('requiring TimHome.js')
-'use strict';
 
 import Q from 'q'
 import debounce from 'debounce'
@@ -9,12 +7,9 @@ import {
   // Text,
   View,
   TouchableOpacity,
-  Image,
   // NetInfo,
-  ScrollView,
   // Linking,
   // StatusBar,
-  Modal,
   Alert,
   Platform
 } from 'react-native'
@@ -54,7 +49,6 @@ import {
 import { SyncStatus } from 'react-native-code-push'
 import Linking from '../utils/linking'
 import AutomaticUpdates from '../utils/automaticUpdates'
-import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
@@ -68,7 +62,7 @@ try {
 } catch (err) {
   // no version info available
 }
-
+const actions = ['chat', 'profile', 'applyForProduct', 'r']
 var {
   TYPE
 } = constants
@@ -79,21 +73,18 @@ var {
 } = constants.TYPES
 // import Progress from 'react-native-progress'
 
-const BOOKMARK = 'tradle.Bookmark'
-
 const BG_IMAGE = ENV.splashBackground
 const SUBMIT_LOG_TEXT = {
   submit: translate('submitLog'),
   submitting: translate('submitting') + '...',
   submitted: translate('restartApp')
 }
-const isAndroid = Platform.OS === 'android'
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 
 class TimHome extends Component {
   static displayName = 'TimHome'
   static orientation = 'PORTRAIT';
-  props: {
+  static propTypes = {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
   };
@@ -146,9 +137,19 @@ class TimHome extends Component {
     // this._checkConnectivity()
 
     try {
-      const url = await Linking.getInitialURL() || ENV.initWithDeepLink
+      // const url = await Linking.getInitialURL() || ENV.initWithDeepLink
+      let url = await Linking.getInitialURL()
+      if (url) {
+        let action = url.match(/.*\/([^?]+)/)
+        if (!action  ||  actions.indexOf(action[1]) === -1)
+          url = null
+        else
+          this.setState({isDeepLink: true})
+       }
+      if (!url)
+        url = ENV.initWithDeepLink
       if (url)
-        this._handleOpenURL({url})
+        await this._handleOpenURL({url})
       if (ENV.landingPage)
         this.show()
     } catch (err) {
@@ -210,10 +211,9 @@ class TimHome extends Component {
         return
     }
 
-    let qs = query ? require('querystring').parse(query) : {}
+    let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
 
-    let state = {firstPage: pathname}
-    extend(state, {qs: qs})
+    let state = {firstPage: pathname, qs, isDeepLink: true}
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -275,6 +275,7 @@ class TimHome extends Component {
       //   INSTALLING_UPDATE: 8
       try {
         await AutomaticUpdates.sync({
+          timeout: 10000,
           onSyncStatusChanged: status => {
             if (status === SyncStatus.DOWNLOADING_PACKAGE) {
               this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
@@ -339,7 +340,7 @@ class TimHome extends Component {
       })
     }
 
-    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.isDeepLink) {
+    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
     return this.showFirstPage()
@@ -348,7 +349,7 @@ class TimHome extends Component {
   async handleEvent(params) {
     let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted, url} = params
     var nav = this.props.navigator
-
+    let { wasDeepLink } = this.state
     switch(action) {
     case 'busy':
       this.setState({
@@ -367,10 +368,10 @@ class TimHome extends Component {
       utils.setModels(models);
       return
     case 'applyForProduct':
-      this.showChatPage({resource: provider, action: this.wasDeepLink ? 'push' : 'replace', showProfile: this.wasDeepLink})
+      this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink})
       break
     case 'openURL':
-      this.isDeepLink = true
+      this.setState({isDeepLink: true})
       Actions.openURL(url)
       break
     case 'getProvider':
@@ -417,10 +418,10 @@ class TimHome extends Component {
     case 'offerKillSwitchAfterApplication':
       if (utils.isWeb()) {
         Alert.alert(
-          translate('enterPasswordOrWipeOutTheDevice'),
+          translate('enterPasswordOrWipeOutTheAppData'),
           null,
           [
-            {text: translate('wipeTheDevice'), onPress: () => Actions.requestWipe()},
+            {text: translate('wipeTheAppData'), onPress: () => Actions.requestWipe()},
             {text: translate('enterPassword'), onPress: () => {
               signIn(nav, null, true)
                 .then(() => nav.pop())
@@ -493,10 +494,11 @@ class TimHome extends Component {
     });
   }
   showFirstPage(noResetNavStack) {
-    let firstPage = this.state.firstPage
-    if (this.isDeepLink) {
-      this.state.firstPage = ENV.initWithDeepLink
-      this.wasDeepLink = true
+    let { firstPage, isDeepLink, qs } = this.state
+    let state = {}
+    if (isDeepLink) {
+      state.firstPage = ENV.initWithDeepLink
+      state.wasDeepLink = true
     }
     let replace
     if (!noResetNavStack) {
@@ -508,7 +510,7 @@ class TimHome extends Component {
         nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     }
 
-    this.isDeepLink = false
+    state.isDeepLink = false
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let action = replace ? 'replace' : 'push'
     let me = utils.getMe()
@@ -516,8 +518,9 @@ class TimHome extends Component {
       this.showContacts(action)
       return
     }
-    this.state.firstPage = null
-    this.state.inTour = false
+    state.firstPage = null
+    state.inTour = false
+    this.setState(state)
     let navigator = this.props.navigator
     if (firstPage) {
       switch (firstPage) {
@@ -526,13 +529,13 @@ class TimHome extends Component {
         //   permalink: this.state.permalink,
         //   url: this.state.url
         // })
-        Actions.getProvider(this.state.qs)
+        Actions.getProvider(qs)
         break
       case 'r':
-        Actions.getResourceFromLink(this.state.qs)
+        Actions.getResourceFromLink(qs)
         break
       case 'applyForProduct':
-        Actions.applyForProduct(this.state.qs)
+        Actions.applyForProduct(qs)
         break
       // case 'applyForProduct':
       //   Actions.applyForProduct({host: this.state.host, provider: this.state.provider, product: this.state.product })
@@ -595,8 +598,6 @@ class TimHome extends Component {
   }
 
   showChatPage({resource, termsAccepted, action, showProfile}) {
-    let me = utils.getMe()
-
     if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(resource, ENV.landingPage)
       return
@@ -706,13 +707,6 @@ class TimHome extends Component {
   }
   showOfficialAccounts(action) {
     const me = utils.getMe()
-    let passProps = {
-      filter: '',
-      modelName: ORGANIZATION,
-      sortProperty: 'lastMessageTime',
-      officialAccounts: true,
-      bankStyle: defaultBankStyle
-    };
     Actions.hasPartials()
     let title = me.firstName;
     let route = {
@@ -722,6 +716,7 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
+        isDeepLink: this.state.wasDeepLink,
         isConnected: this.state.isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
@@ -884,7 +879,7 @@ class TimHome extends Component {
       return
     }
     // var url = Linking.getInitialURL();
-    var {width, height} = utils.dimensions(TimHome)
+    var { height } = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
 
     if (!__DEV__ && ENV.landingPage) {
@@ -897,7 +892,6 @@ class TimHome extends Component {
 
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    var myId = utils.getMe();
     var me = utils.getMe()
     var settings = <View/>
 
@@ -1032,9 +1026,8 @@ class TimHome extends Component {
     )
   }
 
-  getSplashScreen() {
+  getSplashScreen(h) {
     const version = __DEV__ && this.renderVersion()
-    const { width, height } = utils.dimensions(TimHome)
     const updateIndicator = this.getUpdateIndicator()
     const submitLogButton = this.getSubmitLogButton()
     const busyReason = updateIndicator ? null : this.getBusyReason()
@@ -1053,7 +1046,7 @@ class TimHome extends Component {
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <Wrapper { ...wrapperProps }>
-          <View style={styles.flexGrow}/>
+          <View style={h ? {height: h} : styles.flexGrow}/>
           <View style={styles.bottom}>
             {spinner}
             {busyReason}
@@ -1107,12 +1100,6 @@ var styles = (function () {
       // padding: 30,
       // marginTop: height / 4,
       alignItems: 'center',
-    },
-    tradle: {
-      // color: '#7AAAC3',
-      color: FOOTER_TEXT_COLOR,
-      fontSize: height > 450 ? 35 : 25,
-      alignSelf: 'center',
     },
     updateIndicator: {
       color: FOOTER_TEXT_COLOR,

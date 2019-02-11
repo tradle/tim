@@ -1,4 +1,3 @@
-console.log('requiring navs.js')
 
 const navs = new Map()
 

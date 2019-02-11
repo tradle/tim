@@ -1,6 +1,4 @@
 
-import { StyleSheet } from 'react-native'
-
 export const centered = diameter => ({
   width: diameter,
   height: diameter,

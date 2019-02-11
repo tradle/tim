@@ -1,5 +1,3 @@
-console.log('requiring makeStylish.js')
-'use strict'
 // export default class StyleProvider {
 //   constructor(props) {
 //     super(props)
@@ -21,10 +19,10 @@ console.log('requiring makeStylish.js')
 // }
 
 import React, { Component } from 'react'
+import _ from 'lodash'
 
 import reactMixin from 'react-mixin'
 import Store from '../Store/Store'
-import extend from 'extend'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import Reflux from 'reflux'
 
@@ -40,8 +38,8 @@ export function makeStylish (WrappedComponent) {
       const { action, provider } = event
       if (action === 'customStyles') {
         let style = {}
-        extend(style, defaultBankStyle)
-        extend(style, provider.style)
+        _.extend(style, defaultBankStyle)
+        _.extend(style, provider.style)
         this.setState({ provider, bankStyle: style })
       }
     }

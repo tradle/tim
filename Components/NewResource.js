@@ -1,6 +1,3 @@
-console.log('requiring NewResource.js')
-'use strict'
-
 import _ from 'lodash'
 import { CardIOUtilities } from 'react-native-awesome-card-io';
 import Reflux from 'reflux'
@@ -10,20 +7,14 @@ import t from 'tcomb-form-native'
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
-const debug = require('debug')('NewResource')
 
-import Native, {
-  // StyleSheet,
+import {
   View,
   Text,
-  TextInput,
   ScrollView,
-  Image,
   Platform,
-  // StatusBar,
   Alert,
   TouchableOpacity,
-  Animated
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -37,8 +28,6 @@ const {
   SETTINGS,
   ENUM,
   PROFILE,
-  FINANCIAL_PRODUCT,
-  SIMPLE_MESSAGE,
   ORGANIZATION,
   MONEY
 } = constants.TYPES
@@ -48,7 +37,6 @@ import NewItem from './NewItem'
 import ResourceList from './ResourceList'
 import GridList from './GridList'
 import GridItemsList from './GridItemsList'
-import PhotoView from './PhotoView'
 import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
@@ -66,7 +54,6 @@ import SignatureView from './SignatureView'
 import termsAndConditions from '../termsAndConditions.json'
 import StyleSheet from '../StyleSheet'
 import ImageInput from './ImageInput'
-import chatStyles from '../styles/chatStyles'
 import TextInputState from 'TextInputState'
 import CustomIcon from '../styles/customicons'
 import stylesheet from '../styles/styles'
@@ -75,6 +62,8 @@ import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
+import chatStyles from '../styles/chatStyles'
+import Image from './Image'
 
 const BG_IMAGE = ENV.brandBackground
 const FORM_ERROR = 'tradle.FormError'
@@ -86,10 +75,10 @@ var Form = t.form.Form;
 
 class NewResource extends Component {
   static displayName = 'NewResource';
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
-    resource: PropTypes.object.isRequired,
+    resource: PropTypes.object,
     originatingMessage: PropTypes.object,
     editCols: PropTypes.string,
     callback: PropTypes.func,
@@ -125,11 +114,17 @@ class NewResource extends Component {
     this.onChange = this.onChange.bind(this)
     this.cancelItem = this.cancelItem.bind(this)
 
-    let currentRoutes = this.props.navigator.getCurrentRoutes()
+    let currentRoutes = props.navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
-    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
-            ? this.getSearchResult.bind(this)
-            : this.onSavePressed
+
+    if (props.isRefresh)
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.refresh.bind(this)
+    else if (props.search)
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.getSearchResult.bind(this)
+    else
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed
+
+
     // HACK
     let editProps = !props.exploreData  &&  utils.getEditableProperties(r)
     if (editProps.length  &&  editProps.length === 1) {
@@ -145,6 +140,13 @@ class NewResource extends Component {
       scrollEventThrottle: 50,
       onScroll: this.onScroll.bind(this)
     };
+  }
+  refresh() {
+    this.onSavePressed()
+    if (this.state.missedRequiredOrErrorValue  &&  !utils.isEmpty(this.state.missedRequiredOrErrorValue))
+      this.state.submitted = false
+    else
+      this.props.action()
   }
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
@@ -207,11 +209,12 @@ class NewResource extends Component {
 
 
   componentDidUpdate() {
-    if (!this.state.missedRequiredOrErrorValue  ||  utils.isEmpty(this.state.missedRequiredOrErrorValue)) return
+    let { missedRequiredOrErrorValue, noScroll } = this.state
+    if (!missedRequiredOrErrorValue  ||  utils.isEmpty(missedRequiredOrErrorValue)) return
 
     let viewCols = this.props.model.viewCols
     let first
-    for (let p in this.state.missedRequiredOrErrorValue) {
+    for (let p in missedRequiredOrErrorValue) {
       if (!viewCols) {
         first = p
         break
@@ -224,7 +227,7 @@ class NewResource extends Component {
     let ref = this.refs.form.getComponent(first) || this.refs[first]
     if (!ref) return
 
-    if (!utils.isEmpty(this.state.missedRequiredOrErrorValue)  &&  !this.state.noScroll) {
+    if (!utils.isEmpty(missedRequiredOrErrorValue)  &&  !noScroll) {
       utils.scrollComponentIntoView(this, ref)
       this.state.noScroll = true
     }
@@ -232,13 +235,14 @@ class NewResource extends Component {
 
   onAction(params) {
     let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
-    let { navigator, prop, containerResource, callback, modelName, originatingMessage, bankStyle, model, currency, chat } = this.props
+    let { navigator, prop, containerResource, callback, originatingMessage, bankStyle, model, currency, chat, isRefresh } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
       return
     }
     if (action === 'noChanges') {
-      this.setState({err: translate('nothingChanged'), submitted: false})
+      if (!isRefresh)
+        this.setState({err: translate('nothingChanged'), submitted: false})
       return
     }
     if (action === 'getItem'  &&  utils.getId(this.state.resource) === utils.getId(resource)) {
@@ -286,7 +290,7 @@ class NewResource extends Component {
       this.setState({
         resource: r,
         isUploading: false,
-        requestedProperties: requestedProperties
+        requestedProperties
       })
       return
     }
@@ -306,16 +310,13 @@ class NewResource extends Component {
       Alert.alert(
         error,
       )
-      let actionParams = {
-        query: this.state.filter,
-        modelName: modelName,
-        to: this.props.resource,
-      }
       return
     }
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
     }
+    if (isRefresh)
+      return
     if (this.state.resource[TYPE] !== resource[TYPE]) {
       if (!prop  ||  !containerResource)
         return
@@ -350,7 +351,7 @@ class NewResource extends Component {
     let isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
-    if (isMessage) {
+    if (isMessage  &&  !isRefresh) {
       if (originatingMessage  &&  resource[ROOT_HASH] !== originatingMessage[ROOT_HASH]) {
         let params = {
           value: {_documentCreated: true, _document: utils.getId(resource)},
@@ -461,7 +462,7 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let { model, currency, originatingMessage, lensId, chat, doNotSend, prop, containerResource } = this.props
+    let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource, isRefresh } = this.props
     let props = model.properties
     let required = utils.ungroup(model, model.required)
     if (!required) {
@@ -516,6 +517,8 @@ class NewResource extends Component {
         missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       this.setState(state)
+      // HACK for REFRESH
+      this.state.missedRequiredOrErrorValue = missedRequiredOrErrorValue
       return;
     }
     if (!value)
@@ -537,19 +540,23 @@ class NewResource extends Component {
       resource: r,
       meta: model,
       lens: lensId,
-      isRegistration: this.state.isRegistration
+      isRegistration: this.state.isRegistration,
+      isRefresh,
+      doNotSend,
+      chat
     };
-    if (chat)
-      params.chat = chat
+
     if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
       params.lens = this.floatingProps._lens
 
-    params.doNotSend = doNotSend
     // HACK
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
-    else
+    else {
+      if (originatingMessage)
+        params.disableFormRequest = originatingMessage
       Actions.addChatItem(params)
+    }
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
@@ -580,36 +587,37 @@ class NewResource extends Component {
         else if (typeof v === 'object')  {
           let ref = props[p].ref
           if (ref) {
-            let rModel = utils.getModel(ref)
-            if (ref === MONEY) {
-              if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
-                missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-                return
-              }
-              if (!v.currency) {
-                if (resource[p].currency)
-                  v.currency = resource[p].currency
-                // else if (currency)
-                //   v.currency = currency
-                else {
-                  missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-                  return
-                }
-              }
-            }
-            else if (ref === 'tradle.Photo')
-              return
-            else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
-              let units = props[p].units
-              if (units)
-                v = v.value
-              else {
-                if (v.value === '')
-                  v = null
-                delete json[p]
-              }
-              return
-            }
+            this.checkRef(v, props[p], json, missedRequiredOrErrorValue)
+            // let rModel = utils.getModel(ref)
+            // if (ref === 'tradle.Photo')
+            //   return
+            // if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
+            //   let units = props[p].units
+            //   if (units)
+            //     v = v.value
+            //   else {
+            //     if (v.value === '')
+            //       v = null
+            //     delete json[p]
+            //   }
+            //   return
+            // }
+            // if (ref === MONEY) {
+            //   if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
+            //     missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+            //     return
+            //   }
+            //   if (!v.currency) {
+            //     if (resource[p].currency)
+            //       v.currency = resource[p].currency
+            //     // else if (currency)
+            //     //   v.currency = currency
+            //     else {
+            //       missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+            //       return
+            //     }
+            //   }
+            // }
           }
           else if (props[p].type === 'array'  &&  !v.length) {
             missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
@@ -639,6 +647,39 @@ class NewResource extends Component {
       }
     })
 
+  }
+  checkRef(v, prop, json, missedRequiredOrErrorValue) {
+    let ref = prop.ref
+    let p = prop.name
+    if (ref === PHOTO)
+      return
+    let rModel = utils.getModel(ref)
+    if (rModel.subClassOf === ENUM)
+      return
+    let resource = this.state.resource
+    if (ref === MONEY) {
+      if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
+        missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+        return
+      }
+      if (v.currency)
+        return
+      if (resource[p].currency)
+        v.currency = resource[p].currency
+      // else if (currency)
+      //   v.currency = currency
+      else
+        missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+      return
+    }
+    let units = prop.units
+    if (units)
+      v = v.value
+    else {
+      if (v.value === '')
+        v = null
+      delete json[p]
+    }
   }
   addFormValues() {
     let value = this.refs.form.getValue();
@@ -748,7 +789,6 @@ class NewResource extends Component {
     if (this.state.isUploading)
       return <View/>
 
-    let parentBG = {backgroundColor: '#7AAAC3'};
     let resource = this.state.resource;
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
@@ -762,18 +802,11 @@ class NewResource extends Component {
                       this.onSetSignatureProperty(eProp, this.sigView.getSignature())
                     }} />
                  </View>
-        // ref: ref => {
-        //   sigView = ref
-        // },
-        // bankStyle,
-        // sigViewStyle: bankStyle
-
-        // return this.showSignatureView(eProp)
       }
     }
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, search, exploreData } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -782,15 +815,6 @@ class NewResource extends Component {
     let model = {};
     let arrays = [];
     _.extend(data, resource);
-    let isMessage = utils.isMessage(resource)
-    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === FINANCIAL_PRODUCT
-    let showSendVerificationForm = false;
-    let formToDisplay;
-    if (isMessage) {
-      let len = resource.message  &&  utils.splitMessage(resource.message).length;
-      if (len < 2)
-        showSendVerificationForm = true;
-    }
     let params = {
         meta: meta,
         data: data,
@@ -845,9 +869,7 @@ class NewResource extends Component {
     else
       itemsMeta = utils.getItemsMeta(meta);
 
-    let self = this;
     let arrayItems
-    let itemsArray
     if (!search) {
       for (let p in itemsMeta) {
         let bl = itemsMeta[p]
@@ -860,9 +882,7 @@ class NewResource extends Component {
           arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
           continue
         }
-        let blmodel = meta
-        itemsArray = null
-        let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+        // let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
         if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
@@ -874,12 +894,11 @@ class NewResource extends Component {
     else
       Form.stylesheet = stylesheet
 
-    let {width, height} = utils.dimensions(NewResource)
+    let { height } = utils.dimensions(NewResource)
     if (!options)
       options = {}
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    let photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
     let button
     if (isRegistration)
       button = <View>
@@ -950,7 +969,7 @@ class NewResource extends Component {
     //             </View>
     // StatusBar.setHidden(true);
     let submit
-    if (!isRegistration) {
+    if (!isRegistration  &&  !isRefresh) {
       let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
       if (this.state.err) {
         Alert.alert(this.state.err)
@@ -987,12 +1006,11 @@ class NewResource extends Component {
           onStartShouldSetResponderCapture={(e) => {
             if (Platform.OS === 'android') {
               const focusField = TextInputState.currentlyFocusedField();
-
               if (focusField != null && e.nativeEvent.target != focusField)
                 dismissKeyboard();
             }
           }}>
-          <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
+          <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 0}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
             {formsToSign}
             {button}
@@ -1155,10 +1173,8 @@ class NewResource extends Component {
     let meta = this.props.model
     let blmodel = meta
     let lcolor = this.getLabelAndBorderColor(bl.name)
-    let bankStyle = this.props.bankStyle || defaultBankStyle
-    let linkColor = bankStyle.linkColor
 
-    let actionableItem, itemsArray
+    let actionableItem
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
@@ -1180,7 +1196,6 @@ class NewResource extends Component {
 
     }
     else {
-      // let acStyle = [{flex: 1, position: 'absolute', right: 0, width, paddingBottom: 3}, count ? {paddingTop: 0} : {paddingBottom: 7}]
       actionableItem = <View style={{width}}>
                        <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
                          <View style={[styles.items, {paddingBottom: 5}]}>
@@ -1196,12 +1211,6 @@ class NewResource extends Component {
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
 
-    // let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    // let actionableItem = <View style={aiStyle}>{itemsArray}</View>
-      // actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-      //                   {itemsArray}
-      //                 </TouchableOpacity>
-
     let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
     if (err)
       istyle.push({marginBottom: 10})
@@ -1212,13 +1221,6 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     istyle = StyleSheet.flatten(istyle)
-    // let acStyle = [{flex: 1, justifyContent: 'center'}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
-    // let acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {paddingBottom: 7}]
-    // let actionableCounter
-    // if (!count)
-    //   actionableCounter = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-    //                         {counter}
-    //                       </TouchableOpacity>
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
@@ -1261,7 +1263,6 @@ class NewResource extends Component {
       itemsArray = <Text style={styles.noItemsText}>{label}</Text>
     }
     counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} />
-    let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
     let actionableItem
     if (count)
       actionableItem = <TouchableOpacity
@@ -1271,7 +1272,8 @@ class NewResource extends Component {
                        </TouchableOpacity>
     else
       actionableItem = <ImageInput
-                         prop={bl}
+                         cameraType={bl.cameraType}
+                         allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                          underlayColor='transparent'
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
@@ -1341,20 +1343,11 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // alignSelf: 'center',
       paddingLeft: 10
     },
-    // itemsCounterEmpty: {
-    //   paddingHorizontal: 5,
-    //   justifyContent: 'center',
-    //   marginTop: -5
-    // },
-    // itemsCounter: {
-      // marginTop: 40,
-      // justifyContent: 'flex-end',
-      // paddingHorizontal: 5
-    // },
     actionIcon: {
       flex: 1,
       justifyContent: 'flex-end',
       alignItems: 'flex-end',
+      paddingBottom: 2
       // paddingRight: 5
     },
     itemButton: {
@@ -1413,15 +1406,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       marginRight: 2,
       borderRadius: 5
     },
-    // error: {
-    //   marginTop: -10,
-    //   backgroundColor: 'transparent'
-    // },
-    // errorText: {
-    //   fontSize: 14,
-    //   marginLeft: 10,
-    //   color: '#a94442'
-    // },
     items: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -1436,6 +1420,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     photoStrip: {
       paddingBottom: 5,
+      marginHorizontal: 5,
       marginTop: 0
     },
     row: {
@@ -1445,11 +1430,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       opacity: 0.7,
       alignSelf: 'flex-end',
     },
-    // submitButton: {
-    //   paddingBottom: 30,
-    //   justifyContent: 'center',
-    //   alignSelf: 'center'
-    // },
     noRegistration: {
       flex: 1,
       justifyContent: 'flex-start'
@@ -1505,7 +1485,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       justifyContent: 'center',
       backgroundColor: bankStyle.errorBgColor || '#990000',
       alignSelf: 'stretch',
-      alignItems: 'center'
+      alignItems: 'center',
+      paddingHorizontal: 7
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
@@ -1533,14 +1514,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       fontSize: 24,
       color: bankStyle.contextTextColor
     },
-    logoNeedsText: {
-      backgroundColor: bankStyle.contextBackgroundColor,
-      borderTopColor: bankStyle.contextBackgroundColor,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      height: 25,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
     arrayItems: {
       marginTop: isRegistration ? 0 : -10,
       paddingBottom: 20
@@ -1552,6 +1525,38 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
+    // error: {
+    //   marginTop: -10,
+    //   backgroundColor: 'transparent'
+    // },
+    // errorText: {
+    //   fontSize: 14,
+    //   marginLeft: 10,
+    //   color: '#a94442'
+    // },
+    // itemsCounterEmpty: {
+    //   paddingHorizontal: 5,
+    //   justifyContent: 'center',
+    //   marginTop: -5
+    // },
+    // itemsCounter: {
+      // marginTop: 40,
+      // justifyContent: 'flex-end',
+      // paddingHorizontal: 5
+    // },
+    // submitButton: {
+    //   paddingBottom: 30,
+    //   justifyContent: 'center',
+    //   alignSelf: 'center'
+    // },
+    // logoNeedsText: {
+    //   backgroundColor: bankStyle.contextBackgroundColor,
+    //   borderTopColor: bankStyle.contextBackgroundColor,
+    //   borderTopWidth: StyleSheet.hairlineWidth,
+    //   height: 25,
+    //   justifyContent: 'center',
+    //   alignItems: 'center'
+    // },
     // itemsWithCount: {
     //   flex: 7,
     //   paddingTop: 15

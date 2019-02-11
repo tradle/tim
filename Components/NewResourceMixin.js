@@ -1,43 +1,31 @@
-console.log('requiring NewResourceMixin.js')
- 'use strict';
-
 import React from 'react'
 import {
-  Text,
+  // Text,
   View,
   TouchableOpacity,
-  Platform,
   Image,
-  Alert,
-  Switch,
   DatePickerAndroid,
 } from 'react-native'
-import PropTypes from 'prop-types';
 
 import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
-import dateformat from 'dateformat'
+// import dateformat from 'dateformat'
 import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
 import DatePicker from 'react-native-datepicker'
-const debug = require('debug')('tradle:app:blinkid')
 
 import constants from '@tradle/constants'
 
-import Navigator from './Navigator'
-import GridList from './GridList'
+import { Text, getFontMapping } from './Text'
 import utils, {
   translate
 } from '../utils/utils'
 import EnumList from './EnumList'
 import StyleSheet from '../StyleSheet'
-import ENV from '../utils/env'
-import ImageInput from './ImageInput'
 import RefPropertyEditor from './RefPropertyEditor'
-import Analytics from '../utils/analytics'
 import MarkdownPropertyEdit from './MarkdownPropertyEdit'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
@@ -45,7 +33,6 @@ import Actions from '../Actions/Actions'
 const DEFAULT_CURRENCY_SYMBOL = '£';
 
 const {
-  ENUM,
   MONEY,
   SETTINGS,
   FORM,
@@ -57,8 +44,6 @@ const {
   ROOT_HASH
 } = constants
 
-const COUNTRY = 'tradle.Country'
-const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const INTERSECTION = 'tradle.Intersection'
 
 const PHOTO = 'tradle.Photo'
@@ -66,8 +51,6 @@ const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
-const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
-const TIMEOUT_ERROR = new Error('timed out')
 
 var cnt = 0;
 var propTypesMap = {
@@ -78,12 +61,6 @@ var propTypesMap = {
 };
 
 const DEFAULT_LINK_COLOR = '#a94442'
-// import transform from 'tcomb-json-schema'
-// var DEFAULT_BLINK_ID_OPTS = {
-//   mrtd: { showFullDocument: true },
-//   eudl: { showFullDocument: true },
-//   usdl: {}
-// }
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -93,14 +70,14 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, bankStyle, editCols, originatingMessage, search, exploreData, errs, requestedProperties } = this.props
+    let { currency, editCols, originatingMessage, search, exploreData, errs, requestedProperties } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
     let meta = this.props.model  ||  this.props.metadata;
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
-    let chooser = this.chooser  ||  this.props.chooser
+    // let chooser = this.chooser  ||  this.props.chooser
 
     meta = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
 
@@ -133,38 +110,43 @@ var NewResourceMixin = {
     }
 
 
-    let eCols
-    if (editCols) {
-      eCols = {};
-      editCols.forEach((r) => eCols[r] = props[r])
-    }
+    let eCols = []
+    if (editCols)
+      eCols = editCols.slice();
+      // editCols.forEach((r) => eCols[r] = props[r])
     else {
-      eCols = utils.getEditCols(meta)
-      if (!eCols || utils.isEmpty(eCols)) {
-        eCols = {}
+      eCols = utils.getEditCols(meta).map(p => p.name)
+      if (!eCols.length) {
         if (meta.required)
-          meta.required.forEach((p) => eCols[p] = props[p])
+          eCols = meta.required.slice
         else
-          eCols = props
+          eCols = Object.keys(props)
       }
       else if (exploreData) {
+        let vColsList = utils.getViewCols(meta)
+        vColsList.forEach(p => {
+          if (eCols.indexOf(p) === -1)
+            eCols.push(p)
+        })
+
         let exclude = ['time', 'context', 'lens']
         let prefillProp = utils.getPrefillProperty(meta)
         if (prefillProp)
           exclude.push(prefillProp.name)
         for (let p in props) {
-          if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  exclude.indexOf(p) === -1)
-            eCols[p] = props[p]
+          if (eCols.indexOf(p) === -1  &&
+              !props[p].items              &&
+              p.charAt(0) !== '_'          &&
+              exclude.indexOf(p) === -1)
+            eCols.push(p)
         }
       }
-      // else
-      //   eCols = Object.values(eCols)
     }
     let showReadOnly = true
-    for (let p in eCols) {
+    eCols.forEach(p => {
       if (!props[p].readOnly)
         showReadOnly = false
-    }
+    })
 
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
@@ -175,15 +157,16 @@ var NewResourceMixin = {
         formErrors = params.formErrors
       }
       for (let p in requestedProperties) {
-        if (eCols[p]) {
+        // if (eCols.some((prop) => prop.name === p) {
+        if (eCols.indexOf(p) !== -1)
           // this.addError(p, params)
           continue
-        }
+
         let idx = p.indexOf('_group')
-        eCols[p] = props[p]
+        eCols.push(p)
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
-            eCols[pp] = props[pp]
+            eCols.push(pp)
             requestedProperties[pp] = ''
             // this.addError(p, params)
           })
@@ -194,8 +177,8 @@ var NewResourceMixin = {
     }
     else if (data) {
       for (let p in data) {
-        if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
-          eCols[p] = props[p]
+        if (eCols.indexOf(p) === -1  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+          eCols.push(p)
       }
       // // filter out the backlink on which the adding resource was initiated
       // let prop = this.props.prop
@@ -211,7 +194,8 @@ var NewResourceMixin = {
 
     let options = {fields: {}}
     let resource = this.state.resource
-    for (let p in eCols) {
+    for (let i=0; i<eCols.length; i++) {
+      let p = eCols[i]
       if (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
@@ -255,26 +239,9 @@ var NewResourceMixin = {
         error: errMessage, //'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
       }
-      let isRange
       if (props[p].units) {
-        if (props[p].units.charAt(0) === '[') {
+        if (props[p].units.charAt(0) === '[')
           options.fields[p].placeholder = label  + ' ' + props[p].units
-          // isRange = type === 'number'  &&  props[p].units == '[min - max]'
-          // if (isRange) {
-          //   formType = t.Str
-          //   let Range = t.refinement(t.Str, function (n) {
-          //     let s = s.split(' - ')
-          //     if (s.length < 2  ||  s > 3)
-          //       return false
-
-          //     if (!s[0].match(/\d{1,2}[\,.]{1}\d{1,2}/)  ||  !s[1].match(/\d{1,2}[\,.]{1}\d{1,2}/))
-          //       return false
-          //     return true
-          //   });
-          //   model[p] = maybe ? t.maybe(Range) : Range;
-
-          // }
-        }
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
@@ -399,20 +366,6 @@ var NewResourceMixin = {
             options.fields[p].maxLength = props[p].maxLength;
         }
       }
-      // else if (type === 'enum') {
-      //   model[p] = t.Str;
-      //   this.myEnumTemplate({
-      //         prop:     props[p],
-      //         enumProp: props[p],
-      //         required: params.required,
-      //         value:    data[p],
-      //         errors:   params.errors,
-      //         // noError:  params.errors && params.errors[params.prop],
-      //         noError: true
-      //       })
-      //   options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
-      //   options.fields[p].onEndEditing = onEndEditing.bind(this, p);
-      // }
       else {
         let ref = props[p].ref;
         if (!ref) {
@@ -426,10 +379,6 @@ var NewResourceMixin = {
         }
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
-          // if (data[p]  &&  (typeof data[p] != 'number'))
-          //   data[p] = data[p].value
-          let units = props[p].units
-          // options.fields[p].onFocus = chooser.bind(this, props[p], p)
           let value = data[p]
           if (value) {
             if (typeof value !== 'object') {
@@ -492,7 +441,7 @@ var NewResourceMixin = {
     }
 
     // HACK for video
-    if (eCols.video) {
+    if (eCols.indexOf('video') !== -1) {
       let maybe = required  &&  !required.hasOwnProperty('video');
 
       model.video = maybe ? t.maybe(t.Str) : t.Str;
@@ -589,11 +538,7 @@ var NewResourceMixin = {
   },
 
   myMarkdownTextInputTemplate(params) {
-    let {prop, required, model, editable, value} = params
-    let label = translate(prop, model)
-    if (required)
-      label += ' *'
-
+    let {prop, value} = params
     let {bankStyle} = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
@@ -604,7 +549,6 @@ var NewResourceMixin = {
 
     let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
-    let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.paintHelp(prop)
     let st = {paddingBottom: 10}
     if (!help)
@@ -656,12 +600,12 @@ var NewResourceMixin = {
   },
 
   mySignatureTemplate(params) {
-    let {prop, required, model, editable, value} = params
+    let {prop, required, model, value} = params
     let label = translate(prop, model)
     if (required)
       label += ' *'
 
-    let {bankStyle} = this.props
+    let { bankStyle } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
       value = format(value, this.state.resource).trim()
@@ -696,7 +640,7 @@ var NewResourceMixin = {
       title = utils.translate('Please click here to sign')
       sig = <View style={vStyle}>
               <Text style={lStyle}>{title}</Text>
-              <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
+              <Icon name='md-create' size={25}  color={bankStyle.linkColor} />
             </View>
     }
 
@@ -731,6 +675,7 @@ var NewResourceMixin = {
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
     // }
+
     let lcolor = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
@@ -740,11 +685,13 @@ var NewResourceMixin = {
     // Especially for money type props
     if (!help)
       st.flex = 5
+    let { bankStyle } = this.props
+    let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
         <FloatLabel
-          labelStyle={[lStyle, {color: lcolor}]}
+          labelStyle={[lStyle, fontF, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
           editable={editable}
@@ -766,12 +713,12 @@ var NewResourceMixin = {
   },
   paintHelp(prop) {
     if (!prop.description)
-      return <View style={styles.help}/>
+      return <View style={styles.help1}/>
 
     // borderBottomColor: '#cccccc',
     return (
       <View style={styles.help}>
-        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, true)}>
+        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, false)}>
           {prop.description}
         </Markdown>
       </View>
@@ -808,9 +755,10 @@ var NewResourceMixin = {
     let addStyle = {
       paddingVertical: 3,
       marginTop: prop.type === 'object' ||  prop.type === 'date' ||  prop.items ? 0 : 2,
-      backgroundColor: bankStyle.errorBgColor  ||  '#990000'
+      backgroundColor: bankStyle.errorBgColor  ||  '#990000',
+      paddingHorizontal: 10,
     }
-    return <View style={[styles.err, {paddingHorizontal: 10}]} key={this.getNextKey()}>
+    return <View style={[styles.err]} key={this.getNextKey()}>
              <View style={addStyle}>
                <Text style={styles.font14, {paddingLeft: 5, color: bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
              </View>
@@ -819,10 +767,9 @@ var NewResourceMixin = {
 
   myBooleanTemplate(params) {
     let {prop, model, value, required, component} = params
-    let { bankStyle, search } = this.props
+    let { search } = this.props
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
-    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     let lcolor = this.getLabelAndBorderColor(prop.name)
 
     let resource = this.state.resource
@@ -884,6 +831,7 @@ var NewResourceMixin = {
       </View>
     )
 
+// let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 // <SwitchSelector options={options} initial={0} onPress={value => console.log("Call onPress with value: ", value)}/>
 // <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={linkColor} style={styles.contentLeft}/>
   },
@@ -892,22 +840,13 @@ var NewResourceMixin = {
     let { search, bankStyle } = this.props
 
     let resource = this.state.resource
-    let label, style, propLabel
-    let hasValue = resource && resource[prop.name]
-
+    let propLabel
     let lcolor = this.getLabelAndBorderColor(prop.name)
-    if (resource && resource[prop.name]) {
-      label = resource[prop.name].title
+    if (resource && resource[prop.name])
       propLabel = <Text style={[styles.dateLabel, {color: lcolor}]}>{params.label}</Text>
-    }
-    else {
-      label = params.label
+    else
       propLabel = <View style={styles.floatingLabel}/>
-    }
-    if (!search  &&  required)
-      label += ' *'
 
-    let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'LL'
     // let format = 'MMMM Do, YYYY'
     // let format = 'YYYY-MM-DD'
@@ -928,7 +867,7 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
-    let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    let st = utils.isWeb() ? {marginHorizontal: 15, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {marginHorizontal: 5}
 
     // convert from UTC date to local, so DatePicker displays it correctly
     // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
@@ -944,7 +883,7 @@ var NewResourceMixin = {
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
-            style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 20}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -1070,7 +1009,7 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, bankStyle, metadata, country, search } = this.props
+    let { model, metadata } = this.props
     let props
     if (model)
       props = model.properties
@@ -1098,6 +1037,7 @@ var NewResourceMixin = {
                              component={params.component}
                              error={error}
                              inFocus={this.state.inFocus}
+                             required={params.required}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
@@ -1107,6 +1047,8 @@ var NewResourceMixin = {
     let p = prop.name
     let resource = this.state.resource
     if (resource[p]  ||  resource[ROOT_HASH])
+      return
+    if (this.floatingProps  &&  this.floatingProps.hasOwnProperty(p))
       return
     let defaults = this.props.defaultPropertyValues
     let value
@@ -1224,13 +1166,14 @@ var NewResourceMixin = {
           this.floatingProps[propName] = resource[propName]
         }
         else if (prop.items.ref) {
-          if (resource[propName]) {
-            let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
-            if (!some)
-              resource[propName].push(value)
-          }
-          else
-            resource[propName] = [value]
+          resource[propName] = null
+          // if (resource[propName]) {
+          //   let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
+          //   if (!some)
+          //     resource[propName].push(value)
+          // }
+          // else
+          //   resource[propName] = [value]
         }
         else {
           delete resource[propName]
@@ -1240,7 +1183,6 @@ var NewResourceMixin = {
       }
     }
     else {
-      let id = utils.getId(value)
       resource[propName] = utils.buildRef(value)
 
       if (!this.floatingProps)
@@ -1324,15 +1266,13 @@ var NewResourceMixin = {
                   })
         }
       </View>
-      {this.paintError({prop})}
+      {this.paintError({prop, errors})}
       {this.paintHelp(prop)}
       </View>
     );
   },
 
   myEnumTemplate(params) {
-    let label
-
     let { prop, enumProp, errors } = params
     let error
     if (!params.noError) {
@@ -1372,8 +1312,6 @@ var NewResourceMixin = {
       resource = {};
       resource[TYPE] = model.id;
     }
-
-    let value = this.refs.form.input;
 
     let currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
@@ -1567,7 +1505,7 @@ var styles= StyleSheet.create({
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
     justifyContent: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     // marginBottom: 10,
     flex: 1
   },
@@ -1586,12 +1524,12 @@ var styles= StyleSheet.create({
     alignSelf: 'stretch'
   },
   chooserContainer: {
-    minHeight: 60,
+    minHeight: 55,
     marginTop: 10,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     // justifyContent: 'center',
     position: 'relative',
     // marginBottom: 10,
@@ -1617,7 +1555,7 @@ var styles= StyleSheet.create({
   formInput: {
     // borderBottomWidth: 1,
     // borderBottomColor: '#eeeeee',
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     paddingLeft: 0,
     // borderColor: '#cccccc',
   },
@@ -1643,7 +1581,7 @@ var styles= StyleSheet.create({
     borderRadius: 5
   },
   err: {
-    paddingLeft: 10,
+    // paddingLeft: 10,
     // backgroundColor: 'transparent'
   },
   element: {
@@ -1658,7 +1596,8 @@ var styles= StyleSheet.create({
   },
   labelDirty: {
     marginTop: 21,
-    marginLeft: 10,
+    // marginLeft: 10,
+    paddingLeft: 15,
     color: '#AAA',
     position: 'absolute',
     fontSize: 12,
@@ -1667,6 +1606,14 @@ var styles= StyleSheet.create({
   photoIcon: {
     position: 'absolute',
     right: 0,
+    bottom: 3
+  },
+  photoIconEmpty: {
+    position: 'absolute',
+    right: 0,
+    marginTop: 12
+  },
+  immutable: {
     marginTop: 15
   },
   input: {
@@ -1681,7 +1628,7 @@ var styles= StyleSheet.create({
     flex: 1,
     height: 35,
     paddingBottom: 5,
-    marginTop: 5,
+    // marginTop: 5,
     // borderWidth: 1,
     borderColor: 'transparent',
     // borderBottomColor: '#eeeeee',
@@ -1708,7 +1655,8 @@ var styles= StyleSheet.create({
     borderColor: 'transparent',
     borderWidth: 1.5,
     marginTop: 10,
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
+    paddingHorizontal: 10,
     marginBottom: 5
   },
   dividerText: {
@@ -1733,7 +1681,8 @@ var styles= StyleSheet.create({
   dateLabel: {
     marginLeft: 10,
     fontSize: 12,
-    marginVertical: 5,
+    marginTop: 5,
+    // marginVertical: 5,
     paddingBottom: 5
   },
   noItemsText: {
@@ -1745,18 +1694,30 @@ var styles= StyleSheet.create({
   markdown: {
     backgroundColor: '#f7f7f7',
     paddingVertical: 10,
-    marginHorizontal: -10,
-    paddingHorizontal: 20,
+    // marginHorizontal: -10,
+    // paddingHorizontal: 20,
   },
   container: {
     flex: 1
   },
+  help1: {
+    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
+    // marginHorizontal: 10,
+    paddingHorizontal: 15,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc'
+  },
   help: {
-    backgroundColor: utils.isAndroid() ? '#efefef' : '#f7f7f7',
-    marginHorizontal: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc'
+    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
+    // marginHorizontal: 10,
+    paddingHorizontal: 15,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    paddingBottom: 15
   },
   bottom10: {
     paddingBottom: 10
@@ -1773,23 +1734,22 @@ var styles= StyleSheet.create({
   }
 })
 
-function formatDate (date) {
-  if (typeof date === 'string') {
-    return dateformat(date, 'mmm dS, yyyy')
-  }
-
-  return dateformat(new Date(date), 'UTC:mmm dS, yyyy')
-}
-
-function getDocumentTypeFromTitle (title='') {
-  title = title.toLowerCase()
-  const match = title.match(/(licen[cs]e|passport)/)
-  if (!match) return
-
-  return match[1] === 'passport' ? 'passport' : 'license'
-}
-
 module.exports = NewResourceMixin
+// function formatDate (date) {
+//   if (typeof date === 'string') {
+//     return dateformat(date, 'mmm dS, yyyy')
+//   }
+
+//   return dateformat(new Date(date), 'UTC:mmm dS, yyyy')
+// }
+
+// function getDocumentTypeFromTitle (title='') {
+//   title = title.toLowerCase()
+//   const match = title.match(/(licen[cs]e|passport)/)
+//   if (!match) return
+
+//   return match[1] === 'passport' ? 'passport' : 'license'
+// }
   // showSignatureView1(prop) {
   //   const { navigator, bankStyle } = this.props
   //   let sigView

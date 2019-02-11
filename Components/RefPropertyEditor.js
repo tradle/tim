@@ -3,16 +3,13 @@ import {
   View,
   // Text,
   TouchableOpacity,
-  Image,
   Alert,
-  Platform
 } from 'react-native'
 import _ from 'lodash'
 const debug = require('debug')('tradle:app:blinkid')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
-import { scan } from 'react-native-passport-reader'
-import dateformat from 'dateformat'
+import debounce from 'p-debounce'
 
 import constants from '@tradle/constants'
 const {
@@ -27,22 +24,25 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, translateEnum, isWeb, isSimulator, buildStubByEnumTitleOrId } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
-import StyleSheet from '../StyleSheet'
-import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
-import BlinkID from './BlinkID'
+// import BlinkID from './BlinkID'
+import Regula from './Regula'
 import Navigator from './Navigator'
-import CameraView from './CameraView'
 import GridList from './GridList'
+import NewResource from './NewResource'
+import { capture } from '../utils/camera'
+import Errors from '@tradle/errors'
+import Image from './Image'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
-const TIMEOUT_ERROR = new Error('timed out')
+const PHOTO_ID = 'tradle.PhotoID'
+const ID_CARD = 'tradle.IDCardType'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -50,6 +50,7 @@ class RefPropertyEditor extends Component {
     this.state = {
       isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH])
     }
+    this.regulaScan = !isSimulator() && !isWeb()  &&  debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
   shouldComponentUpdate(nextProps, nextState) {
     let prop = this.props.prop
@@ -63,21 +64,17 @@ class RefPropertyEditor extends Component {
       if (!this.props.error || this.props.error !== nextProps.error)
         return true
     }
+    // in case document type was changed a different scanning could be replaced by taking a photo and vice versa
+    if (prop.scanner  &&  !this.props.resource[pName])
+      return true
     return false
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country,
-          search, photo, floatingProps, component, paintError, paintHelp } = this.props
+          search, photo, component, paintError, paintHelp, required } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
-    // if (model)
-    //   props = model.properties
-    // else if (metadata.items.properties)
-    //   props = metadata.items.properties
-    // else
-    //   props = utils.getModel(metadata.items.ref).properties
-    // let prop = props[params.prop]
     let pName = prop.name
 
     let lcolor = {color: this.getLabelAndBorderColor(pName)}
@@ -85,8 +82,8 @@ class RefPropertyEditor extends Component {
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
     let isIdentity = prop.ref === IDENTITY
 
-    let required = model  &&  utils.ungroup(model.required)
-    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(pName)) {
+    // let required = model  &&  utils.ungroup(model.required)
+    if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName])
         resource[pName] = country
@@ -94,56 +91,18 @@ class RefPropertyEditor extends Component {
     let val = resource && resource[pName]
     if (Array.isArray(val)  &&  !val.length)
       val = null
-    let label, style, propLabel, isImmutable
-    if (val) {
-      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
-      if (isPhoto) {
-        label = translate(prop, model)
-        // floatingProps[pName] = resource[pName]
-      }
-      else {
-        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
-        // let m = utils.getId(resource[pName]).split('_')[0]
-        if (rModel.subClassOf === ENUM) {
-          if (prop.type === 'array') {
-            let l = resource[pName].map(r => translate(r))
-            label = l.join(',')
-          }
-          else
-            label = utils.translateEnum(resource[pName])
-        }
-        else
-          label = utils.getDisplayName(resource[pName], rModel)
-        if (!label) {
-          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
-          // if (utils.isEnum(rModel)  &&  Array.isArray(resource[pName])) {
-          //   label = ''
-          //   resource[pName].forEach((r) => {
-          //     let title = utils.getDisplayName(r)
-          //     label += label ? ', ' + title : title
-          //   })
-          // }
-          // else {
-            label = resource[pName].title
-            if (!label)
-              label = prop.title
-          // }
-        }
-        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
-          if (!label)
-            label = resource[pName]
-          label = utils.createAndTranslate(label, true)
-        }
-      }
-      style = textStyle
-      propLabel = <Text style={[styles.labelDirty, lcolor]}>{translate(prop, model)}</Text>
-    }
+
+    let pLabel = this.getPropertyLabel(prop) + (!search  &&  required ? ' *' : '')
+    let label, propLabel, isImmutable
+    if (!val)
+      label = pLabel
     else {
-      label = translate(prop, model)
-      if (!search  &&  required)
-        label += ' *'
-      style = [labelStyle, lcolor]
-      propLabel = <View/>
+      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
+      if (isPhoto)
+        label = pLabel
+      else
+        label = this.getRefLabel(prop, resource)
+      propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
     let isRegistration = this.state.isRegistration
@@ -151,52 +110,50 @@ class RefPropertyEditor extends Component {
     let color
     if (isRegistration)
       color = '#eeeeee'
-    else if (val) {
-      color = isImmutable  &&  linkColor || '#757575'
-    }
+    else if (val)
+      color = /*isImmutable  &&  linkColor ||*/ '#555555'
     else
       color = '#AAAAAA'
     let propView
     if (photoR)
-      propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5, marginTop: 15}]} />
+      propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0 }}>
+                   <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+                 </View>
     else {
       let img = photo
       if (img) {
-        propView = <View style={{flexDirection: 'row'}}>
+        propView = <View style={{flexDirection: 'row', marginTop: 15, marginBottom: 5}}>
                       <Image source={{uri: img.url}} style={styles.thumb} />
-                      <Text style={[styles.input, color]}>{' ' + label}</Text>
+                      <Text style={[styles.input, {color}]}>{' ' + label}</Text>
                    </View>
       }
       else {
-        let marginTop
-        if (val  ||  !utils.isAndroid())
-          marginTop = 15
-        else
-          marginTop = 15
+        let marginTop = 15
         let width = utils.dimensions(component).width - 60
-        propView = <Text style={[styles.input, {marginTop, color, width}]}>{label}</Text>
+        propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
       }
     }
-    // let maxChars = (utils.dimensions(component).width - 20)/10
-    // if (maxChars < label.length)
-    //   label = label.substring(0, maxChars - 3) + '...'
-    // if (isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[pName])
-    //   label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
 
-    let fontSize = styles.font20 //isRegistration ? styles.font20 : styles.font18
-    // let fontSize = styles.font18 //isRegistration ? styles.font20 : styles.font18
-    let iconColor = isRegistration && '#eeeeee' || linkColor
+    let iconColor
+    if (isRegistration)
+      iconColor =  '#eeeeee'
+    else if (isImmutable)
+      iconColor = '#555'
+    else
+      iconColor = linkColor
     let icon
     if (!isImmutable) {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={[val && styles.photoIcon || (styles.photoIconEmpty, {marginTop: 15})]}/>
       else if (isIdentity)
-        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
+        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else
-        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
+        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor} style={styles.customIcon} />
     }
+    else
+      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.immutable} />
     let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                     {propView}
                     {icon}
@@ -204,39 +161,34 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isIdentity && !utils.isWeb())
+    if (isImmutable)
+      actionItem = content
+    else if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                       {content}
                     </TouchableOpacity>
     else if (isVideo ||  isPhoto) {
       // HACK
-      const isScan = pName === 'scan'
-      let useImageInput
-      if (utils.isWeb()) {
-        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
-      } else {
-        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
-      }
-
-      if (useImageInput) {
-        let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0, paddingBottom: help ? 0 : 7}
-        let m = utils.getModel(prop.ref)
-        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+      if (useImageInput({resource, prop})) {
+        let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
+        actionItem = <ImageInput nonImageAllowed={isVideo} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
       }
       else
-        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop: prop})}>
+        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>
                        {content}
                      </TouchableOpacity>
     }
+    else if (!utils.isEnum(prop.ref  ||  prop.items.ref)  && (prop.inlined  ||  utils.getModel(prop.ref).inlined)) {
+      actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
+                     {content}
+                   </TouchableOpacity>
+    }
     else {
-      if (isImmutable)
-        actionItem = content
-      else
-        actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
-                       {content}
-                     </TouchableOpacity>
+      actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
+                     {content}
+                   </TouchableOpacity>
     }
     return (
       <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
@@ -247,8 +199,66 @@ class RefPropertyEditor extends Component {
       </View>
     );
   }
+  getRefLabel(prop, resource) {
+    let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
+    // let m = utils.getId(resource[pName]).split('_')[0]
+    let pName = prop.name
+    let label
+    if (utils.isEnum(rModel)) {
+      if (prop.type === 'array') {
+        let l = resource[pName].map(r => translateEnum(r))
+        label = l.join(',')
+      }
+      else {
+        let val = resource[pName]
+        if (Array.isArray(val))
+          label = val.map(r => translateEnum(r)).join(',')
+        else
+          label = translateEnum(val)
+      }
+    }
+    else
+      label = utils.getDisplayName(resource[pName], rModel)
+    if (!label) { // see if stub
+      label = resource[pName].title
+      if (!label)
+        label = prop.title
+    }
+    return label
+  }
+  createNew(prop) {
+    let { navigator, bankStyle, model, resource, currency } = this.props
+    let refModel = utils.getModel(prop.ref)
+    navigator.push({
+      id: 4,
+      title: translate('addNew', translate(refModel)), // Add new ' + bl.title,
+      backButtonTitle: 'Back',
+      component: NewResource,
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: refModel,
+        bankStyle,
+        prop,
+        parentResource: resource,
+        parentMeta: model,
+        currency
+      }
+    });
+  }
+  getPropertyLabel(prop) {
+    const { model, metadata } = this.props
+    if (model)
+      return translate(prop, model)
+    let m
+    if (!metadata.items)
+      m = metadata
+    else
+      m = utils.getModel(metadata.items.ref)
+
+    return translate(prop, m)
+  }
   onSetMediaProperty(propName, item) {
-    debugger
+    // debugger
     if (!item)
       return;
     let { model, floatingProps, resource } = this.props
@@ -266,14 +276,13 @@ class RefPropertyEditor extends Component {
     // this.setState(state);
     this.props.onChange(state)
   }
-  showCameraView(params) {
+  async showCameraView(params) {
     // if (utils.isAndroid()) {
     //   return Alert.alert(
     //     translate('oops') + '!',
     //     translate('noScanningOnAndroid')
     //   )
     // }
-
     let { resource, model, prop } = this.props
     let pName = prop.name
     let props = model.properties
@@ -281,37 +290,51 @@ class RefPropertyEditor extends Component {
     if (scanner) {
       if (scanner === 'id-document') {
         if (pName === 'scan')  {
-          if (resource.documentType  &&  resource.country) {
-            this.showBlinkIDScanner(pName)
+          if (resource.documentType) { //  &&  resource.country) {
+            this.showRegulaScanner(params)
+            // this.showBlinkIDScanner(pName)
           }
           else
-            Alert.alert('Please choose country and document type first')
+            Alert.alert(translate('pleaseChooseDT'))
           return
         }
       }
       else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
+        if (!isWeb())
           this.scanCard(pName)
         return
       }
     }
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: this.onTakePicture.bind(this, params)
-      }
-    });
+    // else if (pName === 'otherSideScan') {
+    //   this.showBlinkIDScanner(pName)
+    //   return
+    // }
+
+    const result = await capture({
+      navigator: this.props.navigator,
+      title: translate(prop, model),
+      backButtonTitle: translate('back'),
+      quality: utils.getCaptureImageQualityForModel(model),
+    })
+
+    if (result) {
+      this.onTakePicture(params, result)
+    }
   }
   onTakePicture(params, data) {
     if (!data)
       return
-    this.props.resource.video = data
-    this.props.floatingProps.video = data
-    this.props.navigator.pop();
+
+    let { prop } = params
+    if (prop.ref === PHOTO) {
+      let { width, height, url } = data
+      let d = { width, height, url }
+      this.onSetMediaProperty(prop.name, d)
+    }
+    else {
+      this.props.resource.video = data
+      this.props.floatingProps.video = data
+    }
   }
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle
@@ -322,189 +345,218 @@ class RefPropertyEditor extends Component {
     else
       return '#b1b1b1'
   }
-
-  async scanPassport(resource) {
-    // 1. start a scan
-    // 2. press the back of your android phone against the passport
-    // 3. wait for the scan(...) Promise to get resolved/rejected
-    try {
-      // const {
-      //   firstName,
-      //   lastName,
-      //   gender,
-      //   issuer,
-      //   nationality,
-      //   photo
-      // } =
-      return await scan({
-        // yes, you need to know a bunch of data up front
-        // this is data you can get from reading the MRZ zone of the passport
-        documentNumber: resource.documentNumber,
-        dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
-        dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
-      })
-    } catch (err) {
-      debugger
-    }
-  }
-  async showBlinkIDScanner(prop) {
-    let { resource } = this.props
-    const { documentType, country } = resource
-    const type = getDocumentTypeFromTitle(documentType.title)
-    let recognizers
-    let tooltip
-    let isPassport
-    switch (type) {
-    case 'passport':
-      tooltip = translate('centerPassport')
-      isPassport = true
-      // machine readable travel documents (passport)
-      recognizers = BlinkID.recognizers.mrtd
-      break
-    case 'card':
-      tooltip = translate('centerIdCard')
-      // machine readable travel documents (passport)
-      // should be combined
-      recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
-      // recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
-      break
-    case 'license':
-    case 'licence':
-      tooltip = translate('centerLicence')
-      if (country.title === 'United States') {
-        recognizers = BlinkID.recognizers.usdlCombined
-        // recognizers = BlinkID.recognizers.usdl
-      }
-      else if (country.title === 'New Zealand')
-        recognizers = BlinkID.recognizers.nzdl
-      else
-        recognizers = BlinkID.recognizers.eudl
-      break
-    default:
-      tooltip = translate('centerID')
-      break
-    }
-
-    const blinkIDOpts = {
-      // quality: 0.2,
-      // base64: true,
-      // timeout: ENV.blinkIDScanTimeoutInternal,
-      documentType,
-      country,
-      tooltip,
-      recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
-    }
-
-    // const promiseTimeout = new Promise((resolve, reject) => {
-    //   setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
-    // })
-
+  async showRegulaScanner(params) {
+    let { resource, model, prop, navigator } = this.props
+    const type = getDocumentTypeFromTitle(resource.documentType.title)
     Analytics.sendEvent({
       category: 'widget',
       action: 'scan_document',
-      label: `blinkid:${type}`
+      label: `regula:${type}`
     })
-
+    let bothSides = type !== 'passport'  &&  type !== 'other'
     let result
     try {
-      result = await BlinkID.scan(blinkIDOpts)
-      // result = await Promise.race([
-      //   BlinkID.scan(blinkIDOpts),
-      //   promiseTimeout
-      // ])
+      result = await this.regulaScan({bothSides}) //Regula.regulaScan({bothSides})
     } catch (err) {
-      debug('scan failed:', err.message)
+      debug('regula scan failed:', err.message)
       debugger
-
-      // const canceled = /canceled/i.test(err.message)
-      // const timedOut = !canceled && /time/i.test(err.message)
-      // if (!canceled && typeof BlinkID.dismiss === 'function') {
-      //   // cancel programmatically
-      //   BlinkID.dismiss()
-      // }
-
-      // give the BlinkID view time to disappear
-      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      // await utils.promiseDelay(800)
-      // debug('BlinkID scan failed', err.stack)
-
-      // if (canceled || timedOut) {
-      //   return Alert.alert(
-      //     translate('documentNotScanning', documentType.title),
-      //     translate('retryScanning', documentType.title.toLowerCase())
-      //   )
-      // }
-
-      // if (canceled) return
-
-      // return Alert.alert(
-      //   translate('documentNotScanning'),
-      //   translate('retryScanning', documentType.title)
-      // )
     }
-// debugger
-    if (!result)
+    if (result.canceled)
       return
+    if (!result) {
+      Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
+      return
+    }
 
-    // const tradleObj = utils.fromMicroBlink(result)
-    const r = _.cloneDeep(resource)
-    if (result.image) {
-      r[prop] = {
-        url: result.image.base64,
-        width: result.image.width,
-        height: result.image.height
+    if (result.documentType  &&  type !== 'other') {
+      let docTypeModel = utils.getModel(ID_CARD)
+      let rDocumentType = result.documentType.charAt(0)
+      let documentType
+      if (rDocumentType === 'P')
+        documentType = buildStubByEnumTitleOrId(docTypeModel, 'passport')
+      else if (rDocumentType === 'I')
+        documentType = buildStubByEnumTitleOrId(docTypeModel, 'id')
+      else if (rDocumentType === 'D')
+        documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
+      if (documentType.id !== resource.documentType.id) {
+        Alert.alert(translate('wrongDocumentTypePleaseTryAgain'))
+        return
       }
     }
-    if (result.images) {
-      let { faceImage, signatureImage } = result.images
-      if (faceImage)
-        r.faceImage = { url: faceImage }
-      if (signatureImage)
-        r.signatureImage = { url: signatureImage }
-    }
 
+    const r = _.cloneDeep(resource)
+    r.scanJson = result.scanJson
+    // r.documentType = result.documentType
+    r.country = result.country
+
+    if (result.imageFront) {
+      r[prop.name] = {
+        url: result.imageFront,
+      }
+    }
+    if (result.imageBack) {
+      // HACK
+      if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
+        r.otherSideScan = {
+          url: result.imageBack,
+        }
+      }
+    }
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
-
-    let dateOfExpiry, dateOfBirth, documentNumber
-    ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl'].some(docType => {
-      const scan = result[docType]
-      if (!scan) return
-
-      const { personal, document } = scan
-      documentNumber = document.documentNumber
-      if (document.dateOfExpiry)
-        dateOfExpiry = document.dateOfExpiry
-      if (personal.dateOfBirth)
-        dateOfBirth = personal.dateOfBirth
-      // if (document.dateOfIssue) {
-      //   document.dateOfIssue = formatDate(document.dateOfIssue)
-      // }
-
-      r[prop + 'Json'] = scan
-      return
-    })
-
-    if (dateOfExpiry && dateOfExpiry < Date.now()) {
-      // give the BlinkID view time to disappear
-      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      await utils.promiseDelay(800)
-      Alert.alert(
-        translate('documentExpiredTitle'),
-        translate('documentExpiredMessage')
-      )
-
-      return
-    }
-    // let chipScan
-    // if (isPassport  &&  Platform.OS === 'android') {
-    //   Alert.alert('Please press the back of your android phone against the passport')
-    //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
-    // }
-
-    this.afterScan(r, prop)
+      r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')
+    this.afterScan(r, prop.name)
   }
+  // async showBlinkIDScanner(prop) {
+  //   let { resource } = this.props
+  //   const { documentType, country } = resource
+  //   const type = getDocumentTypeFromTitle(documentType.title)
+  //   let recognizers
+  //   let tooltip
+  //   let firstSideInstructions, secondSideInstructions
+  //   let scanBothSides
+  //   // let isPassport
+  //   // HACK
+  //   if (!recognizers  &&  prop === 'otherSideScan')
+  //     recognizers = BlinkID.recognizers.documentFace
+  //   else {
+  //     switch (type) {
+  //     case 'passport':
+  //       tooltip = translate('centerPassport')
+  //       // isPassport = true
+  //       // machine readable travel documents (passport)
+  //       recognizers = BlinkID.recognizers.mrtd
+  //       firstSideInstructions = translate('scanPassport')
+  //       break
+  //     case 'card':
+  //       firstSideInstructions = translate('centerIdCard')
+  //       // machine readable travel documents (passport)
+  //       // should be combined
+  //       // if (country.title === 'Bangladesh')
+  //       //   recognizers = BlinkID.recognizers.mrtd
+  //       //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
+  //       // else if (country.title === "Philippines")
+  //       //   recognizers = BlinkID.recognizers.pdf417
+  //       // else
+  //         // recognizers = BlinkID.recognizers.mrtd
+  //       recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
+  //       break
+  //     case 'license':
+  //     case 'licence':
+  //       firstSideInstructions = translate('centerLicence')
+  //       if (country.title === 'United States') {
+  //         secondSideInstructions = translate('documentBackSide')
+  //         recognizers = BlinkID.recognizers.usdlCombined
+  //         // recognizers = BlinkID.recognizers.usdl
+  //       }
+  //       else if (country.title === 'New Zealand')
+  //         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
+  //       else if (country.title === 'Australia') {
+  //         scanBothSides = true
+  //         recognizers = [BlinkID.recognizers.australiaFront, BlinkID.recognizers.australiaBack]
+  //       }
+  //       else {
+  //         recognizers = BlinkID.recognizers.eudl
+  //       }
+  //       break
+  //     default:
+  //       tooltip = translate('centerID')
+  //       break
+  //     }
+  //   }
+
+  //   const blinkIDOpts = {
+  //     // quality: 0.2,
+  //     // base64: true,
+  //     // timeout: ENV.blinkIDScanTimeoutInternal,
+  //     documentType,
+  //     country,
+  //     firstSideInstructions,
+  //     secondSideInstructions,
+  //     scanBothSides,
+  //     recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
+  //   }
+
+  //   Analytics.sendEvent({
+  //     category: 'widget',
+  //     action: 'scan_document',
+  //     label: `blinkid:${type}`
+  //   })
+
+  //   let result
+  //   try {
+  //     result = await BlinkID.scan(blinkIDOpts)
+  //   } catch (err) {
+  //     debug('scan failed:', err.message)
+  //     debugger
+  //   }
+  //   if (!result)
+  //     return
+
+  //   const r = _.cloneDeep(resource)
+  //   if (result.image) {
+  //     r[prop] = {
+  //       url: result.image.base64,
+  //     }
+  //   }
+  //   if (result.backImage) {
+  //     // HACK
+  //     if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
+  //       r.otherSideScan = {
+  //         url: result.backImage.base64,
+  //       }
+  //     }
+  //   }
+  //   if (result.images) {
+  //     let { faceImage, signatureImage } = result.images
+  //     if (faceImage)
+  //       r.faceImage = { url: faceImage }
+  //     if (signatureImage)
+  //       r.signatureImage = { url: signatureImage }
+  //   }
+
+  //   let dateOfExpiry //, dateOfBirth, documentNumber
+  //   ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
+  //     const scan = result[docType]
+  //     if (!scan) return
+
+  //     // const { personal, document } = scan
+  //     // documentNumber = document.documentNumber
+  //     // if (personal.dateOfBirth)
+  //     //   dateOfBirth = personal.dateOfBirth
+  //     // if (document.dateOfIssue) {
+  //     //   document.dateOfIssue = formatDate(document.dateOfIssue)
+  //     // }
+  //     const { document } = scan
+  //     if (document.dateOfExpiry)
+  //       dateOfExpiry = document.dateOfExpiry
+
+  //     r[prop + 'Json'] = scan
+  //     return
+  //   })
+
+  //   if (dateOfExpiry && dateOfExpiry < Date.now()) {
+  //     // give the BlinkID view time to disappear
+  //     // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+  //     await utils.promiseDelay(800)
+  //     Alert.alert(
+  //       translate('documentExpiredTitle'),
+  //       translate('documentExpiredMessage')
+  //     )
+
+  //     return
+  //   }
+  //   // let chipScan
+  //   // if (isPassport  &&  Platform.OS === 'android') {
+  //   //   Alert.alert('Please press the back of your android phone against the passport')
+  //   //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
+  //   // }
+
+  //   let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
+  //   if (docScannerProps  &&  docScannerProps.length)
+  //     r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
+  //   this.afterScan(r, prop)
+  // }
 
   afterScan(resource, prop) {
     this.props.floatingProps[prop] = resource[prop]
@@ -579,7 +631,7 @@ class RefPropertyEditor extends Component {
     }
 
     let route = {
-      title: translate(prop, model), //m.title,
+      title: this.getPropertyLabel(prop), //m.title,
       id:  30,
       component: GridList,
       backButtonTitle: 'Back',
@@ -608,7 +660,7 @@ class RefPropertyEditor extends Component {
     navigator.push(route)
   }
   multiChooser(prop, values) {
-    const { navigator, parent, onChange } = this.props
+    const { navigator, onChange } = this.props
     let vArr = []
     for (let v in values)
       vArr.push(values[v])
@@ -626,9 +678,22 @@ class RefPropertyEditor extends Component {
     Actions.getIdentity({prop, ...result.data })
   }
 }
+function useImageInput({resource, prop}) {
+  let pName = prop.name
+  const isScan = pName === 'scan'
+  let rtype = utils.getType(resource)
+  let { documentType } = resource
+  if (isWeb()  ||  isSimulator())
+    return isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
+  else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
+    return true
+  else
+    return prop.allowPicturesFromLibrary  &&  (!isScan  ||  !prop.scanner)
+    // return prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
+}
 function getDocumentTypeFromTitle (title='') {
   title = title.toLowerCase()
-  const match = title.match(/(licen[cs]e|passport|card)/)
+  const match = title.match(/(licen[cs]e|passport|card|other)/)
   if (!match) return
   switch (match[1]) {
   case 'passport':
@@ -638,6 +703,8 @@ function getDocumentTypeFromTitle (title='') {
     return 'license'
   case 'card':
     return 'card'
+  case 'other':
+    return 'other'
   }
 }
 module.exports = RefPropertyEditor;
@@ -788,4 +855,28 @@ module.exports = RefPropertyEditor;
   //   }
 
   //   this.props.navigator.pop()
+  // }
+  // async scanPassport(resource) {
+  //   // 1. start a scan
+  //   // 2. press the back of your android phone against the passport
+  //   // 3. wait for the scan(...) Promise to get resolved/rejected
+  //   try {
+  //     // const {
+  //     //   firstName,
+  //     //   lastName,
+  //     //   gender,
+  //     //   issuer,
+  //     //   nationality,
+  //     //   photo
+  //     // } =
+  //     return await scan({
+  //       // yes, you need to know a bunch of data up front
+  //       // this is data you can get from reading the MRZ zone of the passport
+  //       documentNumber: resource.documentNumber,
+  //       dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
+  //       dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
+  //     })
+  //   } catch (err) {
+  //     debugger
+  //   }
   // }

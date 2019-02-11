@@ -1,5 +1,3 @@
-console.log('requiring SearchBar.js')
-'use strict'
 
 import React, { Component } from 'react'
 import {
@@ -9,8 +7,6 @@ import {
   TextInput
 } from 'react-native'
 import PropTypes from 'prop-types'
-
-import ActivityIndicator from './ActivityIndicator'
 
 class SearchBar extends Component {
   render() {

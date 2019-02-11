@@ -1,20 +1,12 @@
-console.log('requiring MessageRow.js')
-'use strict';
-
 import extend from 'extend'
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import {
-  Image,
-  // StyleSheet,
   Text,
-  TouchableHighlight,
-  Alert,
+  TouchableOpacity,
   View,
-  Platform,
   WebView,
-  processColor
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -26,11 +18,8 @@ import utils, {
 import { circled } from '../styles/utils'
 
 import ArticleView from './ArticleView'
-import MessageView from './MessageView'
 import ResourceView from './ResourceView'
 import NewResource from './NewResource'
-import ProductChooser from './ProductChooser'
-import SplashPage from './SplashPage'
 import PhotoList from './PhotoList'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
@@ -38,7 +27,6 @@ import uiUtils from './uiUtils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import formDefaults from '../data/formDefaults'
-import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
 import ENV from '../utils/env'
@@ -62,31 +50,32 @@ const {
 } = constants
 
 const {
-  MESSAGE,
   SIMPLE_MESSAGE,
   FORGET_ME,
   FORGOT_YOU,
-  VERIFICATION,
-  FORM,
   SELF_INTRODUCTION,
   CUSTOMER_WAITING,
-  ENUM,
-  // PRODUCT_LIST
 } = constants.TYPES
-const LIMIT = 20
 const MESSAGE_WITH_LINK_REGEX = /(?:__|[*#])|\[(.*?)\]\(.*?\)/
 
 // const MESSAGE_WITH_LINK_REGEX = /\[(?:[^\]]+)\]\(https?:\/\/[^)]+\)/ig
 
 class MessageRow extends Component {
   static displayName = 'MessageRow';
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    onSelect: PropTypes.func,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+  };
   constructor(props) {
     super(props);
     this.showMyData = this.showMyData.bind(this)
     // this.verify = this.verify.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let {to, resource, orientation} = this.props
+    let { to, resource } = this.props
     return !equal(resource, nextProps.resource)   ||
            !equal(to, nextProps.to)               ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
@@ -98,8 +87,6 @@ class MessageRow extends Component {
     let { resource, to, bankStyle, navigator } = this.props
     let styles = createStyles({bankStyle})
 
-    let me = utils.getMe();
-
     let isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
@@ -107,32 +94,36 @@ class MessageRow extends Component {
     let renderedRow = [];
     let ret = this.formatRow(isMyMessage, renderedRow, styles);
     let onPressCall = ret ? ret.onPressCall : null
-    let isConfirmation = resource[TYPE] === CONFIRMATION
+
+    let rtype = utils.getType(resource)
+    let isConfirmation = rtype === CONFIRMATION
+    let isBookmark = rtype === BOOKMARK
+    let isSimpleMessage = rtype === SIMPLE_MESSAGE
 
     let photoUrls = [];
     let photoListStyle = {height: 3};
     let addStyle
 
-    let model = utils.getModel(utils.getType(resource));
+    let model = utils.getModel(rtype);
 
     let isContext = utils.isContext(model)
     let message = isContext ? ret.message : resource.message
 
     let noMessage = !message  ||  !message.length;
-    let isSimpleMessage = resource[TYPE] === SIMPLE_MESSAGE
 
     let isCheck = model.subClassOf === CHECK
 
     let noBg = isCheck  ||  (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
 
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
+    let isDataBundle = rtype === DATA_BUNDLE
+
     if (!renderedRow.length) {
       let vCols = noMessage ? null : utils.getDisplayName(resource);
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
     else {
-      let fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
           addStyle = [chatStyles.myCell,  noBg  && styles.noBg || styles.bg]
@@ -145,7 +136,7 @@ class MessageRow extends Component {
         else {
           let mstyle = {
             borderColor: '#efefef',
-            backgroundColor: model.id === DATA_BUNDLE ? '#eeffee' : '#ffffff',
+            backgroundColor: isDataBundle ? bankStyle.currentContextBackgroundColor : '#ffffff',
             borderTopLeftRadius: 0
           }
           addStyle = [chatStyles.verificationBody, mstyle]
@@ -160,26 +151,17 @@ class MessageRow extends Component {
       //   let st = {backgroundColor: bankStyle.contextBackgroundColor}
       //   addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       // }
-      let isDataBundle = resource[TYPE] === DATA_BUNDLE
       if (isMyMessage  &&  !isSimpleMessage  &&  !isDataBundle) {
-        let st = {backgroundColor: noBg ? '#ffffff' : bankStyle.contextBackgroundColor, borderColor: bankStyle.linkColor}
+        let st = {backgroundColor: noBg ? '#ffffff' : bankStyle.contextBackgroundColor, borderColor: isBookmark && bankStyle.productBgColor || bankStyle.linkColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
     let properties = model.properties
     let inRow
-    let verPhoto;
     if (properties.photos) {
       if (resource.photos) {
         let len = resource.photos.length;
         inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-        let style;
-        if (inRow === 1)
-          style = chatStyles.bigImage;
-        else if (inRow === 2)
-          style = chatStyles.mediumImage;
-        else
-          style = chatStyles.image;
         resource.photos.forEach((p) => {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
@@ -193,15 +175,9 @@ class MessageRow extends Component {
           marginBottom: 3,
         }
       }
-      else
-        verPhoto = <View style={styles.noPhotos} />
     }
     let rowStyle = isSimpleMessage ? {backgroundColor: 'transparent'} : [chatStyles.row, {backgroundColor: 'transparent'}];
     // let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
-    let val = this.getTime(resource);
-    let date = val
-             ? <Text style={chatStyles.date}>{val}</Text>
-             : <View />;
 
     let showMessageBody;
     if (noMessage) {
@@ -284,9 +260,9 @@ class MessageRow extends Component {
 
       messageBody = isSimpleMessage || isContext || isConfirmation
                   ? msgContent
-                  : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+                  : <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                       {msgContent}
-                    </TouchableHighlight>
+                    </TouchableOpacity>
     }
     else
       messageBody = <View style={{height: 5}}/>
@@ -319,7 +295,7 @@ class MessageRow extends Component {
     let contextId = this.getContextId(resource)
     return (
       <View style={[viewStyle, {backgroundColor: bg}]}>
-        {date}
+        {this.getChatDate(resource)}
         {messageBody}
         {contextId}
         <View style={photoListStyle}>
@@ -402,7 +378,7 @@ class MessageRow extends Component {
   }
 
   formatRow(isMyMessage, renderedRow, styles) {
-    let { resource, bankStyle, navigator, to, isLast, currency } = this.props
+    let { resource, bankStyle, navigator, to, isLast } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
@@ -451,7 +427,7 @@ class MessageRow extends Component {
                 </View>
 
       renderedRow.push(msg)
-      return {onPressCall: () => this.props.onSelect(resource)}
+      return {onPressCall: () => this.props.onSelect({resource})}
     }
     if (model.id === APPLICATION_DENIAL  ||  (model.id === CONFIRMATION  &&  isMyMessage)) {
       let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon'
@@ -575,7 +551,6 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === BOOKMARK) {
-      let params = {filterResource: resource, search: true, modelName: resource[TYPE], limit: LIMIT * 2, first: true}
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('Bookmark was created')}</Text>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || translate(model)}</Text>
@@ -598,13 +573,11 @@ class MessageRow extends Component {
     let first = true;
 
     let properties = model.properties;
-    let noMessage = !resource.message  ||  !resource.message.length;
     let onPressCall;
 
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isSimpleMessage = model.id === SIMPLE_MESSAGE
     let isConfirmation = model.id === CONFIRMATION
-    let cnt = 0;
 
     let vCols = [];
 
@@ -621,13 +594,13 @@ class MessageRow extends Component {
       }
       let style = isSimpleMessage ? chatStyles.resourceTitle : chatStyles.description; //resourceTitle; //(first) ? chatStyles.resourceTitle : styles.description;
       if (isMyMessage)
-        style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
+        style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : bankStyle.myMessageLinkColor ||  '#ffffff'}]; //'#ffffff'}];
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         if (resource[v].trim().indexOf(' ') === -1) {
-          let {width, height} = utils.dimensions(MessageRow)
+          let { width } = utils.dimensions(MessageRow)
           vCols.push(<WebView key={this.getNextKey()} style={{width, height: 150}}
              source={{uri: resource[v]}}
              startInLoadingState={true}
@@ -742,18 +715,18 @@ class MessageRow extends Component {
             text = pVal.substring(textIdx + 1, linkIdx - 1)
             linkIdx = textIdx
           }
-          vCols.push(<TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={this.getNextKey()}>
+          vCols.push(<TouchableOpacity underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={this.getNextKey()}>
                       <Text style={style}>
                         {pVal.substring(0, linkIdx)}
                         <Text style={[style, {color: bankStyle.linkColor}]}>{text || link} </Text>
                         {pVal.substring(endLink + 1)}
                       </Text>
-                     </TouchableHighlight>
+                     </TouchableOpacity>
           // vCols.push(<Text key={this.getNextKey()}>
           //               <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
-          //               <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
+          //               <TouchableOpacity underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
           //                 <Text style={[style, {color: bankStyle.bankStyle.linkColor}]}>{text || link}</Text>
-          //               </TouchableHighlight>
+          //               </TouchableOpacity>
           //               <Text style={style}>{pVal.substring(endLink + 1)}</Text>
           //             </Text>
             )
@@ -773,7 +746,7 @@ class MessageRow extends Component {
 
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
-              let {width, height} = utils.dimensions(MessageRow)
+              let {width} = utils.dimensions(MessageRow)
               vCols.push(<WebView key={this.getNextKey()} style={{width, height: 150}}
                  source={{uri: resource[v]}}
                  startInLoadingState={true}
@@ -809,7 +782,7 @@ class MessageRow extends Component {
       return {onPressCall: onPressCall}
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
-    return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+    return {onPressCall: this.props.onSelect.bind(this, {resource})}
   }
   messageHasLink(message) {
     return MESSAGE_WITH_LINK_REGEX.test(message)
@@ -832,7 +805,8 @@ class MessageRow extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: me,
-        bankStyle: this.props.bankStyle
+        bankStyle: this.props.bankStyle,
+        backlink: utils.getModel(me[TYPE]).properties.myForms,
       }
     })
     // let n = this.props.navigator.getCurrentRoutes().length

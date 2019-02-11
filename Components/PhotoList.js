@@ -1,32 +1,25 @@
-console.log('requiring PhotoList.js')
-'use strict';
-
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import reactMixin from 'react-mixin'
-import Icon from 'react-native-vector-icons/Ionicons'
 import _ from 'lodash'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import { makeResponsive } from 'react-native-orient'
-import constants from '@tradle/constants'
-
+import { TYPE, ROOT_HASH } from '@tradle/constants'
 import utils from '../utils/utils'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
-import chatStyles from '../styles/chatStyles'
 import RowMixin from './RowMixin'
 
 import {
   StyleSheet,
-  Image,
   View,
   ListView,
-  Text,
   Animated,
-  Easing,
-  Platform,
-  TextInput,
   TouchableHighlight,
 } from 'react-native'
+
+import Image from './Image'
+
+const PHOTO = 'tradle.Photo'
 
 // import Animated from 'Animated'
 class PhotoList extends Component {
@@ -52,7 +45,7 @@ class PhotoList extends Component {
     ).start();
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
+    if (this.props.resource[ROOT_HASH] !== nextProps.resource[ROOT_HASH])
       return true
 
     return nextProps.forceUpdate  ||  !_.isEqual(this.props.resource.photos, nextProps.resource.photos)  ||
@@ -121,14 +114,17 @@ class PhotoList extends Component {
       return
     let { isView, callback } = this.props
     let source = {uri: uri};
-    if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
+    let isDataUrl = utils.isImageDataURL(photo.url)
+    let isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
+    if (isDataUrl  ||  uri.charAt(0) == '/')
       source.isStatic = true;
+    let item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
 
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
         <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
-          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
-             <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
+          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, photo, isView)}>
+             {item}
           </TouchableHighlight>
         </Animated.View>
       </Col>

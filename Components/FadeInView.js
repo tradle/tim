@@ -1,12 +1,8 @@
-console.log('requiring FadeInView.js')
-'use strict'
 
 import React, { Component } from 'react'
-import {Animated, TouchableHighlight, Text, View} from 'react-native'
-import PropTypes from 'prop-types'
-import {translate} from '../utils/utils'
+import { Animated } from 'react-native'
 
-class FadeInView extends React.Component {
+class FadeInView extends Component {
   state: any;
 
   constructor(props) {

@@ -1,6 +1,3 @@
-console.log('requiring NetworkInfoProvider.js')
-'use strict'
-
 import {
   View,
   StyleSheet,
@@ -19,6 +16,12 @@ const TYPE = constants.TYPE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 
 class NetworkInfoProvider extends Component {
+  static propTypes = {
+    resource: PropTypes.object,
+    online: PropTypes.bool,
+    isConnected: PropTypes.bool,
+    serverOffline: PropTypes.bool,
+  };
   constructor(props) {
     super(props)
     this.state = {

@@ -1,5 +1,3 @@
-console.log('requiring SimpleModal.js')
-'use strict'
 /*
   To use SimpleModal you need to write something like that
 
@@ -27,12 +25,11 @@ import {
   TouchableOpacity,
   View,
   // Text,
-  Dimensions,
   Platform,
   ActivityIndicator
 } from 'react-native'
 import PropTypes from 'prop-types'
-import omit from 'object.omit'
+import omit from 'lodash/omit'
 
 import { Text } from './Text'
 

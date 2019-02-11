@@ -4,13 +4,16 @@ import React from 'react'
 import {
   Alert,
   AppRegistry,
-  TouchableHighlight,
   StyleSheet,
   View,
-  Text,
 } from 'react-native'
 
 import { RNCamera } from 'react-native-camera'
+import SplashScreen from 'react-native-splash-screen'
+
+if (SplashScreen) {
+  SplashScreen.hide()
+}
 
 const prettify = obj => obj ? JSON.stringify(obj, null, 2) : ''
 

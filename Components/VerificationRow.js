@@ -1,10 +1,5 @@
-console.log('requiring VerificationRow.js')
-'use strict';
 
 import {
-  // Image,
-  // StyleSheet,
-  Platform,
   // Text,
   TouchableOpacity,
   Alert,
@@ -13,8 +8,11 @@ import {
 import PropTypes from 'prop-types';
 import {
   LazyloadView as View,
-  LazyloadImage as Image
+  // LazyloadImage as Image
 } from 'react-native-lazyload'
+
+// import ImageComponent from './Image'
+import Image from './Image'
 
 import React, { Component } from 'react'
 import _ from 'lodash'
@@ -35,7 +33,6 @@ import { Text } from './Text'
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 
-const ITEM = 'tradle.Item'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_PREFILL = 'tradle.FormPrefill'
@@ -43,13 +40,10 @@ const BOOKMARK = 'tradle.Bookmark'
 
 const { TYPE } = constants
 const {
-  PROFILE,
-  VERIFICATION,
   ORGANIZATION,
   FORM,
   ENUM,
   MONEY,
-  SIMPLE_MESSAGE
 } = constants.TYPES
 
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
@@ -61,15 +55,14 @@ const INTERSECTION = 'tradle.Intersection'
 const IMAGE_PLACEHOLDER = utils.whitePixel
 
 class VerificationRow extends Component {
-  props: {
-    key: PropTypes.string.isRequired,
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
     prop: PropTypes.object,
-    currency: PropTypes.object,
-    isChooser: PropTypes.boolean,
-    multiChooser: PropTypes.boolean,
+    isChooser: PropTypes.bool,
+    multiChooser: PropTypes.bool,
+    // currency: PropTypes.object,
   };
   constructor(props) {
     super(props);
@@ -122,9 +115,10 @@ class VerificationRow extends Component {
         photo = photos  &&  photos.length ? photos[0] : null
       }
     }
-    let hasPhoto = photo != null
-    if (photo)
-      photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+    if (photo) {
+      // photo = <Image imageComponent={ImageComponent} host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+      photo = <Image resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+    }
     else if (model.icon  ||  isForm) {
       let icon = model.icon
       if (!icon)
@@ -144,25 +138,10 @@ class VerificationRow extends Component {
                             ? utils.getModel(utils.getType(resource.document))
                             : model
 
-    let rows = [];
-
     let notAccordion = true //!isMyProduct  &&  !isVerification && !prop === null || resource.sources || resource.method || isForm
-    // if (r  &&  !notAccordion) {
-    //   this.formatDoc(verificationRequest, r, rows);
-    //   let backlink = prop &&  prop.items  &&  prop.items.backlink;
-    //   if (resource.txId)
-    //     rows.push(
-    //         <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-    //           <Text style={styles.resourceTitleL}>{translate('verificationTransactionID')}</Text>
-    //           <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
-    //         </View>
-    //       )
-    // }
 
     let verifiedBy, org
     if (!isChooser  && !this.props.search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
-      let contentRows = [];
-
       if (isMyProduct)
         org = resource.from.organization
       else if (isForm)
@@ -193,7 +172,7 @@ class VerificationRow extends Component {
       else if (isCheck)
         dateP = 'dateChecked'
       if (!dateP)
-        dateP = resource.date && 'date' || 'time'
+        dateP = resource.date && 'date' || '_time'
       let dateVal = resource[dateP]
       if (dateVal) {
         let dateFormatted = dateformat(dateVal, 'mmm dS, yyyy h:MM TT')
@@ -272,27 +251,24 @@ class VerificationRow extends Component {
           let checkIcon
           if (statusM) {
             const { icon, color } = statusM
+            let style, size, icolor
+            if (statusId === 'warning'  ||  statusId === 'error') {
+              // style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
+              size = 37
+              icolor = color
+            }
+            else {
+              style = [styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]
+              size = 30
+              icolor = '#ffffff'
+            }
+
             if (icon) {
-              checkIcon = <View style={[styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]}>
-                            <Icon color='#ffffff' size={30} name={icon} />
+              checkIcon = <View style={style}>
+                            <Icon color={icolor} size={size} name={icon} />
                           </View>
             }
           }
-          // switch (resource.status.title) {
-          //   case 'Pass':
-          //   color = 'green'
-          //   icon = 'ios-checkmark'
-          //   break
-          // case 'Fail':
-          // case 'Error':
-          //   color = 'red'
-          //   icon = 'ios-close'
-          //   break
-          // default:
-          //   color = 'blue'
-          //   icon = 'ios-information-outline'
-          //   break
-          // }
           titleComponent = <View style={styles.titleView}>
                              {checkIcon}
                              <View style={{justifyContent: 'center', paddingLeft: 10}}>
@@ -352,7 +328,6 @@ class VerificationRow extends Component {
     let sharedFrom
     if (isForm  &&  prop  &&  parentResource[TYPE] === ORGANIZATION) {
       if (utils.getId(resource.to.organization) !== utils.getId(parentResource)) {
-        let img
         if (resource.to.photo)
           sharedFrom = <View style={styles.sharedView}>
                         <Image source={{uri: utils.getImageUri(resource.to.photo)}}  style={styles.recipientPhoto} />
@@ -446,7 +421,7 @@ class VerificationRow extends Component {
     else
       title = resource.to.title
     Alert.alert(
-      translate('confirmRevoke', resource.to.organization.title),
+      translate('confirmRevoke', title),
       null,
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
@@ -472,14 +447,10 @@ class VerificationRow extends Component {
     // let viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
-    let verPhoto;
     let vCols = [];
 
     let properties = model.properties;
-    let noMessage = !resource.message  ||  !resource.message.length;
-    let onPressCall;
 
-    let isSimpleMessage = model.id === SIMPLE_MESSAGE;
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL
     viewCols.forEach((v) => {
@@ -531,7 +502,6 @@ class VerificationRow extends Component {
         else if (criteria  &&  criteria.length) {
           criteria = criteria.replace(/\*/g, '')
           let idx = val.indexOf(criteria)
-          let part
           let parts = []
           if (idx > 0) {
             parts.push(<Text style={style} key={this.getNextKey()}>{val.substring(0, idx)}</Text>)
@@ -594,7 +564,6 @@ class VerificationRow extends Component {
         viewCols.push(p)
     }
 
-    let onPressCall;
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL
     let vCols = []

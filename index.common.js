@@ -1,48 +1,45 @@
-'use strict'
 
 import './utils/errors'
 import './utils/shim'
+import './utils/debug'
+import './utils/automaticUpdates'
 import React, { Component } from 'react'
-import Reflux from 'reflux'
-import Icon from 'react-native-vector-icons/Ionicons'
-import reactMixin from 'react-mixin'
-import Orientation from 'react-native-orientation'
-var ReactPerf //= __DEV__ && require('ReactPerf')
-import SplashScreen from 'react-native-splash-screen'
-import 'stream'
-import debounce from 'debounce'
-import _ from 'lodash'
-import Navigator from './Components/Navigator'
 import {
   Image,
   View,
   TouchableOpacity,
-  Dimensions,
-  Alert,
-  Platform,
   AppState,
   AppRegistry,
   // Text,
   BackHandler
 } from 'react-native';
+import Orientation from 'react-native-orientation'
+import { makeResponsive } from 'react-native-orient'
+import Reflux from 'reflux'
+import Icon from 'react-native-vector-icons/Ionicons'
+import reactMixin from 'react-mixin'
+import SplashScreen from 'react-native-splash-screen'
+import 'stream'
+import debounce from 'debounce'
+var ReactPerf //= __DEV__ && require('ReactPerf')
+import Navigator from './Components/Navigator'
 
 var constants = require('@tradle/constants');
 const {
   TYPE
 } = constants
 const {
-  PROFILE
+  PROFILE,
+  MESSAGE
 } = constants.TYPES
 // console.disableYellowBox = true
 // import './utils/logAll'
 // import './utils/perf'
 
 // see issue: https://github.com/facebook/react-native/issues/6227
-import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
+// import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
 
 // require('react-native-level')
-import Debug from './utils/debug'
-var debug = Debug('tradle:app')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 // import './utils/crypto'
@@ -57,7 +54,7 @@ import GridList from './Components/GridList'
 import TimHome from './Components/TimHome'
 import MarkdownPropertyEdit from './Components/MarkdownPropertyEdit'
 import SignatureView from './Components/SignatureView'
-import AvivaIntroView from './Components/AvivaIntroView'
+// import AvivaIntroView from './Components/AvivaIntroView'
 import TourPage from './Components/TourPage'
 import SplashPage from './Components/SplashPage'
 
@@ -76,7 +73,7 @@ import ArticleView from './Components/ArticleView'
 import IdentitiesList from './Components/IdentitiesList'
 import SupervisoryViewPerProvider from './Components/SupervisoryViewPerProvider'
 import SupervisoryView from './Components/SupervisoryView'
-import ProductChooser from './Components/ProductChooser'
+// import ProductChooser from './Components/ProductChooser'
 import StringChooser from './Components/StringChooser'
 import ContextChooser from './Components/ContextChooser'
 import CameraView from './Components/CameraView'
@@ -86,14 +83,10 @@ import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
-import VideoCamera from './Components/VideoCamera'
 
-import utils from './utils/utils'
-var translate = utils.translate
-
+import utils, { isWeb } from './utils/utils'
 import Actions from './Actions/Actions'
-import * as AutomaticUpdates from './utils/automaticUpdates';
-import { signIn } from './utils/localAuth'
+import AutomaticUpdates from './utils/automaticUpdates';
 import Store from './Store/Store'
 import StyleSheet from './StyleSheet'
 
@@ -108,7 +101,7 @@ const PASSWORD_CHECK = 20
 const REMEDIATION = 29
 const TOUR_PAGE = 35
 const MATCH_VIEW = 40
-const AVIVA_INTRO_VIEW = 50
+// const AVIVA_INTRO_VIEW = 50
 
 const LOGO_HEIGHT = 27
 const VERIFY_OR_CORRECT = 'VerifyOrCorrect'
@@ -120,7 +113,7 @@ let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
   return {
     ...originalGetDefaultProps(),
-    allowFontScaling: !utils.isWeb()
+    allowFontScaling: !isWeb()
   };
 };
 
@@ -133,10 +126,10 @@ import Analytics from './utils/analytics'
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
 const landingPageMapping = {
-  AvivaIntroView: {
-    component: AvivaIntroView,
-    id: AVIVA_INTRO_VIEW
-  },
+  // AvivaIntroView: {
+  //   component: AvivaIntroView,
+  //   id: AVIVA_INTRO_VIEW
+  // },
   TourPage: {
     component: TourPage,
     id: TOUR_PAGE
@@ -218,7 +211,7 @@ class TiMApp extends Component {
     // and check if authentication expired in store
 
     let dateAppStateChanged = Date.now()
-    let lastDateAppStateChanged = this.state.dateAppStateChanged
+    // let lastDateAppStateChanged = this.state.dateAppStateChanged
     let newState = { currentAppState, dateAppStateChanged }
     let me = utils.getMe()
 
@@ -227,6 +220,7 @@ class TiMApp extends Component {
         return
       case 'active':
         utils.updateEnv()
+        // fire off async, don't wait
         AutomaticUpdates.hasUpdate().then(has => {
           if (has) return AutomaticUpdates.install()
 
@@ -309,7 +303,7 @@ class TiMApp extends Component {
           r[TYPE] = 'tradle.Organization';
       }
     }
-    let props = {modelName: 'tradle.Message'};
+    let props = {modelName: MESSAGE};
 
     if (this.state.navigator) {
       let currentRoutes = this.state.navigator.getCurrentRoutes();
@@ -320,7 +314,7 @@ class TiMApp extends Component {
         id: 11,
         passProps: {
           resource: r, //{'_t': type, '_r': rId},
-          modelName: 'tradle.Message',
+          modelName: MESSAGE,
           // prop: prop
         }
       }
@@ -338,7 +332,7 @@ class TiMApp extends Component {
           id: 11,
           passProps: {
             resource: r, //{'_t': type, '_r': rId},
-            modelName: 'tradle.Message',
+            modelName: MESSAGE,
             // prop: prop
           }
         },
@@ -485,7 +479,7 @@ class TiMApp extends Component {
       return <ResourceView navigator={nav} {...props } />
     case NEW_RESOURCE: // 4
       return <NewResource navigator={nav} {...props } />
-    case 5:
+    case MESSAGE_VIEW:
       return <MessageView navigator={nav} {...props} />
     case 6:
       return <NewItem navigator={nav} {...props} />
@@ -517,8 +511,8 @@ class TiMApp extends Component {
 
     case 14:
       return <PhotoCarousel {...props} />
-    case 15:
-      return <ProductChooser navigator={nav} {...props} />
+    // case 15:
+    //   return <ProductChooser navigator={nav} {...props} />
     case 16:
       return <QRCodeScanner navigator={nav}
                 onread={props.onread} />
@@ -553,8 +547,8 @@ class TiMApp extends Component {
       return <RemediationItemsList navigator={nav} {...props} />
     // case 30:
     //   return <HomePage navigator={nav} {...props} />
-    case AVIVA_INTRO_VIEW:
-      return <AvivaIntroView navigator={nav} {...props} />
+    // case AVIVA_INTRO_VIEW:
+    //   return <AvivaIntroView navigator={nav} {...props} />
     case 30:
       return <GridList navigator={nav} {...props} />
     case 31:
@@ -573,8 +567,6 @@ class TiMApp extends Component {
       return <ShareResourceList navigator={nav} {...props } />
     case 40:
       return <MatchImages navigator={nav} {...props } />
-    case 41:
-      return <VideoCamera navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -585,7 +577,7 @@ class TiMApp extends Component {
 reactMixin(TiMApp.prototype, Reflux.ListenerMixin)
 
 const goBack = debounce(function (nav) {
-  const { routes, route, index } = Navs.getCurrentRouteInfo(nav)
+  const { route, index } = Navs.getCurrentRouteInfo(nav)
   if (index === 0 || route.component.backButtonDisabled) return false
 
   nav.pop()
@@ -600,7 +592,7 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW) // Camera view
+    if (route.id === CAMERA_VIEW ) // Camera view
       color = '#ffffff'
     else if (bankStyle)
       color = bankStyle.navBarColor ||  bankStyle.linkColor
@@ -634,13 +626,11 @@ var NavigationBarRouteMapper = {
     // if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
     //   Actions.cleanup()
 
-    let status = <View/>
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
         onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
         <View style={platformStyles.navBarLeftButton}>
-          {status}
           {title}
         </View>
       </TouchableOpacity>
@@ -655,7 +645,6 @@ var NavigationBarRouteMapper = {
     // else if (route.passProps.bankStyle)
     //   style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
     let rbTitle = route.rightButtonTitle
-    let iconIdx = rbTitle.indexOf('|')
     let icon
     let symbol
     let iconSize = 25
@@ -689,13 +678,17 @@ var NavigationBarRouteMapper = {
       if (!icon) {
         icon = 'ios-send'
         iconSize = 28
-        if (isAndroid)
-          viewStyle = {paddingTop: 14}
       }
-      style = {marginTop: isAndroid ? 2 : -2}
+      if (isAndroid)
+        viewStyle = {paddingTop: 14}
+      style = {marginTop: -2} //isAndroid ? 0 : -2}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}
+      break
+    case 'Confirm':
+      icon = 'md-checkmark-circle-outline'
+      iconSize = 28
       break
     case 'View':
       icon = 'md-eye'
@@ -765,30 +758,32 @@ var NavigationBarRouteMapper = {
       <View style={viewStyle}>
       <TouchableOpacity
         hitSlop={HIT_SLOP}
-        onPress={() => {
-                  // 'Done' button case for creating new resources
-                  if (typeof route.onRightButtonPress === 'function') {
-                    route.onRightButtonPress()
-                  }
-                  else if (isProfile)
-                    HomePageMixin.showProfile(navigator)
-                  else if (route.onRightButtonPress.stateChange) {
-                    if (route.onRightButtonPress.before)
-                      route.onRightButtonPress.before();
-                    route.onRightButtonPress.stateChange();
-                    if (route.onRightButtonPress.after)
-                      route.onRightButtonPress.after();
-                  }
-                  else
-                    navigator.push(route.onRightButtonPress)
-               }
-        }>
+        onPress={() => this.rightButtonHandler({route, navigator})}>
         <View style={platformStyles.navBarRightButton}>
           {title}
         </View>
       </TouchableOpacity>
       </View>
     );
+  },
+
+  rightButtonHandler: function({navigator, route}) {
+    // 'Done' button case for creating new resources
+    let isProfile = route.rightButtonTitle.toLowerCase() === 'profile'
+    if (typeof route.onRightButtonPress === 'function') {
+                    route.onRightButtonPress()
+                  }
+    else if (isProfile)
+      HomePageMixin.showProfile(navigator)
+    else if (route.onRightButtonPress.stateChange) {
+      if (route.onRightButtonPress.before)
+        route.onRightButtonPress.before();
+      route.onRightButtonPress.stateChange();
+      if (route.onRightButtonPress.after)
+        route.onRightButtonPress.after();
+    }
+    else
+      navigator.push(route.onRightButtonPress)
   },
 
   Title: function(route, navigator, index, navState) {
@@ -805,8 +800,6 @@ var NavigationBarRouteMapper = {
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
           // if (route.passProps.resource.organization)
       org = <Text style={style}> - {resource.organization.title}</Text>
-    else
-      org = <View />;
     let photo, uri
     let photoObj
     // let noLogo = route.id === RESOURCE_VIEW  &&  route.passProps.resource[TYPE] === PROFILE
@@ -825,46 +818,62 @@ var NavigationBarRouteMapper = {
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
     let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
-    if (!logoNeedsText  &&  resource) {
-      if (route.id !== ARTICLE_VIEW)  { // ArticleView
-        if (route.id !== MESSAGE_LIST)
-          logoNeedsText = true
-        else {
-          let me = utils.getMe()
-          if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
-            logoNeedsText = true
-        }
+    if (!logoNeedsText) {
+      switch (route.id) {
+      case ARTICLE_VIEW:
+        break
+      case MESSAGE_LIST:
+        if (resource) {
+           let me = utils.getMe()
+           if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+             logoNeedsText = true
+         }
+        break
+      default:
+        logoNeedsText = true
       }
     }
+    // if (!logoNeedsText  &&  resource) {
+    //   if (route.id !== ARTICLE_VIEW)  { // ArticleView
+    //     if (route.id !== MESSAGE_LIST)
+    //       logoNeedsText = true
+    //     else {
+    //       let me = utils.getMe()
+    //       if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+    //         logoNeedsText = true
+    //     }
+    //   }
+    // }
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
     let color
     if (uri) {
-      if (logoNeedsText)
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo]} />
+      let { width, height } = photoObj
+      if (width  &&  height)
+        width = width * LOGO_HEIGHT / height
       else
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo]} />
+        width = bankStyle.barLogo ? LOGO_HEIGHT * 1.7 : LOGO_HEIGHT
+        // width = LOGO_HEIGHT * 2
+
+      height = LOGO_HEIGHT
+      if (logoNeedsText)
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />
+      else
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
     }
 
-    if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW)  // Camera view
+    if (route.id === CAMERA_VIEW)  // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
       st.color = color = bankStyle.navBarColor || bankStyle.linkColor
     else
-      color = '#7AAAC3'
+      st.color = '#7AAAC3'
 
     let style = [platformStyles.navBarText, t.length === 1 && styles.navBarTitleText || styles.navBarTitleText1, st]
     let text, tArr
     if (logoNeedsText  ||  !uri) {
       if (route.titleTextColor)
         style.push({color: route.titleTextColor});
-      else {
-        let model
-        if (modelName)
-          model = utils.getModel(modelName)
-        else if (resource)
-          model = utils.getModel(utils.getType(resource))
-      }
 
       let width = navBarTitleWidth(route.component)
       for (let i=1; i<t.length; i++) {
@@ -875,7 +884,7 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
-      let tstyle = utils.isWeb() ? {} : {width}
+      let tstyle = isWeb() ? {} : { width }
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
@@ -903,7 +912,7 @@ var styles = StyleSheet.create({
     marginRight: 5,
     marginTop: 7,
     marginLeft: 0,
-    width: LOGO_HEIGHT,
+    width: LOGO_HEIGHT * 2,
   },
   msgImageNoText: {
     height: LOGO_HEIGHT,
@@ -951,7 +960,7 @@ var styles = StyleSheet.create({
     paddingLeft: 15,
   }
 });
-
+TiMApp = makeResponsive(TiMApp)
 AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 
 function isPortraitOnlyRoute (route) {

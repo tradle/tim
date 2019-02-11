@@ -1,18 +1,10 @@
-console.log('requiring SupervisoryView.js')
-'use strict';
 
 import PageView from './PageView'
-import ActionSheet from 'react-native-actionsheet'
 import utils from '../utils/utils'
-var translate = utils.translate
 import reactMixin from 'react-mixin'
-import extend from 'extend'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import Reflux from 'reflux'
-import constants from '@tradle/constants'
-import Icon from 'react-native-vector-icons/Ionicons';
-import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import SupervisoryViewPerProvider from './SupervisoryViewPerProvider'
 import StyleSheet from '../StyleSheet'
@@ -23,24 +15,16 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import React, { Component } from 'react'
 import {
   ListView,
-  // StyleSheet,
-  Alert,
-  // AlertIOS,
-  // ActionSheetIOS,
   TouchableOpacity,
-  Image,
-  StatusBar,
   View,
   Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
-import ENV from '../utils/env'
 
 class SupervisoryView extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
   };

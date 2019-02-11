@@ -1,4 +1,3 @@
-'use strict';
 
 var Reflux = require('reflux');
 var debug = require('debug')('Actions')
@@ -78,7 +77,8 @@ var asyncActions = [
   'getIdentity',
   'openURL',
   'requestWipe',
-  'verifyOrCorrect'
+  'verifyOrCorrect',
+  'importData',
 ]
 
 var syncActions = [

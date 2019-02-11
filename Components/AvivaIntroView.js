@@ -1,30 +1,20 @@
-console.log('requiring AvivaIntroView.js')
-'use strict';
-
 import utils from '../utils/utils'
 var translate = utils.translate
 import PageView from './PageView'
 import Icon from 'react-native-vector-icons/Ionicons';
-import Actions from '../Actions/Actions'
-import ResourceMixin from './ResourceMixin'
-import QRCode from './QRCode'
-import MessageList from './MessageList'
-import ResourceView from './ResourceView'
-import defaultBankStyle from '../styles/defaultBankStyle.json'
-import ENV from '../utils/env'
+// import ResourceMixin from './ResourceMixin'
+// import MessageList from './MessageList'
+// import ResourceView from './ResourceView'
 import StyleSheet from '../StyleSheet'
-import extend from 'extend'
 import ArticleView from './ArticleView'
-import termsAndConditions from '../termsAndConditions.json'
+// import termsAndConditions from '../termsAndConditions.json'
 import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
-import { makeResponsive } from 'react-native-orient'
-import ConversationsIcon from './ConversationsIcon'
+// import { makeResponsive } from 'react-native-orient'
 
-const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
+// const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
 // const MESSAGE = 'tradle.Message'
 const LEARN_MORE_URL = 'https://www.fca.org.uk/news/press-releases/financial-conduct-authority-unveils-successful-sandbox-firms-second-anniversary'// 'https://www.aviva.com/tradle/learnmore'
-const CONTACT_US_URL = 'https://www.aviva.co.uk/contact-us/'
 
 // const LEARN_MORE_URL = 'https://www.aviva.com/tradle/learnmore'
 // const CONTACT_US_ADDRESS = 'tradlesupport@aviva.com'
@@ -32,15 +22,13 @@ const CONTACT_US_URL = 'https://www.aviva.co.uk/contact-us/'
 import {
   // StyleSheet,
   ScrollView,
-  Image,
   View,
   Text,
   TouchableOpacity,
   Linking,
-  Dimensions,
   Platform
 } from 'react-native'
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 

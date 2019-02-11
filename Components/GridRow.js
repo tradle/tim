@@ -1,5 +1,3 @@
-console.log('requiring GridRow.js')
-'use strict';
 
 import React, { Component } from 'react'
 import {
@@ -7,7 +5,6 @@ import {
   Image,
   View,
   Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -19,10 +16,9 @@ import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
+// import ResourceView from './ResourceView'
+// import MessageView from './MessageView'
 import RowMixin from './RowMixin'
-import PageView from './PageView'
 import ArticleView from './ArticleView'
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
@@ -44,15 +40,16 @@ var {
 
 const PHOTO = 'tradle.Photo'
 const OBJECT = 'tradle.Object'
+const CHECK = 'tradle.Check'
 
 class GridRow extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     gridCols: PropTypes.array.isRequired,
-    multiChooser: PropTypes.boolean,
-    isSmallScreen: PropTypes.boolean,
-    chosen: PropTypes.boolean,
+    multiChooser: PropTypes.bool,
+    isSmallScreen: PropTypes.bool,
+    chosen: PropTypes.bool,
   };
   constructor(props) {
     super(props)
@@ -74,9 +71,9 @@ class GridRow extends Component {
     this.listenTo(Store, 'onRowUpdate');
   }
   componentWillReceiveProps(props) {
-    let { chosen } = props
-    if (props.multiChooser)  {
-      if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
+    let { chosen, multiChooser, resource } = props
+    if (multiChooser)  {
+      if (chosen  &&  chosen[utils.getId(resource)])
         this.state.isChosen = true
       else
         this.state.isChosen = false
@@ -154,7 +151,7 @@ class GridRow extends Component {
     return false
   }
   render()  {
-    let { multiChooser, search, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
+    let { multiChooser, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
     let size
     if (gridCols) {
       let model = utils.getModel(modelName)
@@ -260,19 +257,19 @@ class GridRow extends Component {
       else {
         let title = utils.getDisplayName(resource[pName])
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
+
         if (refM.subClassOf === ENUM) {
           let eVal = refM.enum.find(r => r.id === this.getEnumID(resource[pName].id))
           if (eVal) {
             let { icon, color } = eVal
-            if (icon)
-              row = <View key={this.getNextKey(resource)} style={styles.row}>
-                      <View style={[styles.button, {alignItems: 'center', backgroundColor: color}]}>
-                        <Icon name={icon} color='#ffffff' size={25}/>
-                      </View>
+            if (icon) {
+              row = <View key={this.getNextKey(this.props.resource)} style={styles.row}>
+                      {this.paintIcon(model, eVal)}
                       <View style={{paddingLeft: 5, justifyContent: 'center'}}>
                         {row}
                       </View>
                     </View>
+            }
           }
         }
         else if (refM.isInterface || refM.id === FORM  || refM.id === OBJECT) {
@@ -349,6 +346,26 @@ class GridRow extends Component {
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }
   }
+
+  paintIcon(model, eVal) {
+    let isCheck = model.subClassOf === CHECK
+    let icolor = '#ffffff'
+    let size = 25
+    let style = {}
+    let buttonStyles
+    let { icon, color } = eVal
+    if (isCheck  &&  (eVal.id === 'error' ||  eVal.id === 'warning')) {
+      icolor = color
+      color = 'transparent'
+      buttonStyles = {}
+      size = 30
+    }
+    else
+      buttonStyles = styles.button
+    return <View style={[buttonStyles, {alignItems: 'center', backgroundColor: color}]}>
+             <Icon name={icon} color={icolor} size={size}/>
+            </View>
+  }
   onPress(resource) {
     let title = utils.makeTitle(utils.getDisplayName(resource));
     this.props.navigator.push({
@@ -362,7 +379,6 @@ class GridRow extends Component {
   highlightCriteria(resource,val, criteria, style) {
     criteria = criteria.replace(/\*/g, '')
     let idx = val.indexOf(criteria)
-    let part
     let parts = []
 
     if (idx > 0) {

@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Alert,
 } from 'react-native'
@@ -28,3 +27,5 @@ export const alert = (title, message, buttons, options, type) => Alert.alert(
   options,
   type,
 )
+
+export default { alert }

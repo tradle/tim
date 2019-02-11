@@ -1,17 +1,9 @@
-console.log('requiring SupervisoryViewPerProvider.js')
-'use strict';
 
 import PageView from './PageView'
-import ActionSheet from 'react-native-actionsheet'
-import utils, { translate } from '../utils/utils'
+import utils from '../utils/utils'
 import reactMixin from 'react-mixin'
-import extend from 'extend'
 import Store from '../Store/Store'
-import Actions from '../Actions/Actions'
 import Reflux from 'reflux'
-import constants from '@tradle/constants'
-import Icon from 'react-native-vector-icons/Ionicons';
-import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import StyleSheet from '../StyleSheet'
 import { makeResponsive } from 'react-native-orient'
@@ -20,31 +12,23 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 
 import React, { Component } from 'react'
 import {
-  TouchableOpacity,
   ScrollView,
-  Image,
-  StatusBar,
   View,
   Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
-import ENV from '../utils/env'
-import SearchBar from './SearchBar'
 
 const MILLIS_IN_DAY = 86400000
 
 class SupervisoryViewPerProvider extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
   };
   constructor(props) {
     super(props);
-
-    let provider = props.provider
 
     this.state = {
       applicants: props.applicants,

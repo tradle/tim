@@ -1,7 +1,4 @@
-console.log('requiring QRCodeScanner.js')
-
 import {
-  StyleSheet,
   TouchableHighlight
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -10,7 +7,6 @@ import React, { Component } from 'react'
 import Camera from 'react-native-camera'
 import debounce from 'debounce'
 
-var ICON_BORDER_COLOR = '#D7E6ED'
 import Icon from 'react-native-vector-icons/Ionicons'
 var Dir = Camera.constants.Type
 

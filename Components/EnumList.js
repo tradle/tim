@@ -1,22 +1,17 @@
-console.log('requiring EnumList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import {
   ListView,
-  // StyleSheet,
   TouchableHighlight,
   View,
-  Platform,
-  Text
 } from 'react-native'
 import PropTypes from 'prop-types'
 import { translate } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 import SearchBar from './SearchBar'
-
+import { Text } from './Text'
 class EnumList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     returnRoute: PropTypes.object,

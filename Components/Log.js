@@ -1,4 +1,3 @@
-console.log('requiring Log.js')
 
 import debug from '../utils/debug'
 import React, { Component } from 'react'
@@ -7,87 +6,67 @@ import reactMixin from 'react-mixin'
 
 import {
   View,
-  ListView,
+  ScrollView,
   Text,
   StyleSheet
 } from 'react-native'
-import PropTypes from 'prop-types'
 
 export default class Log extends Component {
   constructor(props) {
     super(props)
     this.onChange = this.onChange.bind(this)
-    this.renderRow = this.renderRow.bind(this)
-    const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
     this.state = {
-      log: ds.cloneWithRows(debug.get())
+      text: debug.getText(),
     }
    }
   componentWillMount() {
-    this._unmounting = false
     debug.on('change', this.onChange)
   }
-  componentDidMount() {
-    if (this._updateOnMount) {
-      this._updateOnMount = false
-      this.setState(this.state)
-    }
-  }
   componentWillUnmount() {
-    this._unmounting = true
+    clearTimeout(this._updateTimeout)
     debug.removeListener('change', this.onChange)
   }
-  componentWillUpdate() {
-    this._unmounting = false
-  }
   onChange(line) {
-    const self = this
+    line = debug.lineToPlainText(line)
 
     // debounce a bit
     clearTimeout(this._updateTimeout)
-    this._updateTimeout = this.setTimeout(function () {
-      const lines = debug.get()
-      self.state = {
-        lines,
-        log: self.state.log.cloneWithRows(lines)
+    this._updateTimeout = this.setTimeout(() => {
+      const newState = {
+        text: this.state.text + '\n' + line,
       }
 
-      if (self._unmounting) {
-        self._updateOnMount = true
-      } else {
-        self.setState(self.state)
-      }
+      this.setState(newState)
     }, 50)
   }
   render() {
     return (
-      <View style={styles.container}>
-        <ListView
-          dataSource={this.state.log}
-          renderRow={this.renderRow}
-        />
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
+        directionalLockEnabled={true}
+        bounces={true}
+        scrollsToTop={false}
+      >
+        <View style={styles.container}>
+          <Text>{this.state.text}</Text>
+        </View>
+      </ScrollView>
     );
-  }
-  renderRow(line) {
-    const color = debug.getColor(line)
-    line = debug.stripColors(line)
-
-    return line.length && (
-      <Text style={{color, fontSize:10}}>
-        {line.join(' ')}
-      </Text>
-    )
   }
 }
 reactMixin(Log.prototype, TimerMixin);
 
 const styles = StyleSheet.create({
-  container: {
+  contentContainer: {
     paddingTop: 60,
+    paddingHorizontal: 10,
+  },
+  container: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'center'
+    justifyContent: 'flex-start'
   }
 })

@@ -1,3 +1,29 @@
+# Tradle App
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Development](#development)
+  - [Prerequisites](#prerequisites)
+    - [iOS](#ios)
+  - [Install](#install)
+    - [Mobile](#mobile)
+    - [Web](#web)
+  - [Run in Dev Mode](#run-in-dev-mode)
+    - [Mobile](#mobile-1)
+      - [Web](#web-1)
+  - [Release](#release)
+    - [Prerequisites](#prerequisites-1)
+    - [Mobile](#mobile-2)
+      - [Version and tag](#version-and-tag)
+      - [Code Push](#code-push)
+      - [App Store](#app-store)
+        - [iOS](#ios-1)
+        - [Android](#android)
+- [Troubleshooting](#troubleshooting)
+  - [Troubleshooting iOS builds](#troubleshooting-ios-builds)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 *tim = Trust in Motion*
 
@@ -8,7 +34,7 @@ Welcome to the main repo for the Tradle app! On mobile we use React Native (RN),
 ## Prerequisites
 
 - node 8.10
-- npm 3.10
+- npm 3.10 (if you have a newer one, downgrade it: npm install -g npm@3.10
 - [React Native Debugger](https://github.com/jhen0409/react-native-debugger)
 
 ### iOS
@@ -33,14 +59,17 @@ npm install
 # install more dependencies via CocoaPods
 cd iOS
 pod install
-cd fastlane
 bundle install # install fastlane and other gems
+cd fastlane
+fastlane install_plugins
 cd ../../
 
 # Android
-cd android/fastlane
+cd android
 bundle install
-cd ../../
+cd fastlane
+fastlane install_plugins
+cd ../
 ```
 
 ### Web
@@ -130,9 +159,9 @@ fastlane inc_major
 ```sh
 # in iOS/ or android/
 # dry run
-fastlane codepush 
+fastlane codepush dry_run:true 
 # actually build and push
-fastlane codepush dry_run:false 
+fastlane codepush 
 # promote from Staging to Release
 fastlane codepush_promote_to_release
 ```
@@ -159,13 +188,13 @@ fastlane release
 
 ##### Android
 
-Build + deploy a staging release to Crashlytics (Fabric):
+Deploy a release to the Google Play Store internal track (private to Tradle devs and individually added users).
 
 ```sh
-fastlane beta
+fastlane release_staging
 ```
 
-Deploy a release to the Google Play Store alpha/beta track:
+Deploy a release to the Google Play Store closed alpha or open beta tracks:
 
 ```sh
 fastlane release_alpha
@@ -195,3 +224,19 @@ watchman watch-del-all
 npm start -- --reset-cache # start packager with clean cache
 ```
 
+## iOS builds
+
+- if you're building Staging and see an error during archive that mentions Pods, try running: `./scripts/fix-staging.js` and then trying again
+
+## Android dev
+
+**Symptom**: red screen of death: 'Unable to load script from assets main.jsbundle...' or 'Could not connect to development server'  
+**Causes**: your Android device is not connected, or can't reach your React Native packager's local http server  
+**Fix**: Check your device is connected: `adb devices`. Once you see it there, run `adb reverse tcp:8081 tcp:8081` and then refresh on your device  
+
+**Symptom**: red screen of death: Unexpected character '*'  
+**Cause**: iOS and Android (in dev mode) need different .babelrc settings  
+**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change  
+
+**Symptom**: **adb devices** command returns empty list when the device is USB connected.
+**Fix**: Make sure your device is not connected as a media device. On your Android phone got Settings -> Developer options -> Networking -> Select USB Configuration

@@ -1,16 +1,17 @@
-console.log('requiring BackgroundImage.js')
 import React, { Component } from 'react'
 import {
-  Platform,
   StyleSheet,
-  Image,
+  // Image,
   Dimensions
 } from 'react-native'
-import PropTypes from 'prop-types'
 
-import { makeResponsive, getDimensions } from 'react-native-orient'
+import { makeResponsive } from 'react-native-orient'
+import Image from './Image'
 
 class BackgroundImage extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.props.source.uri !== nextProps.source.uri
+  }
   render() {
     const props = this.props
     const { width, height } = Dimensions.get('window')

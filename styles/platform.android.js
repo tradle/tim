@@ -1,14 +1,11 @@
-'use strict';
 
 import StyleSheet from '../StyleSheet'
-import {Platform} from 'react-native';
-import { getFontSize } from '../utils/utils'
 import { dimensions } from '../utils/utils'
 
 export default StyleSheet.create({
   container: {
     backgroundColor: '#f7f7f7',
-    marginTop: 60, //56,
+    marginTop: 56,
     flex: 1,
   },
   // navBarText: {
@@ -18,10 +15,11 @@ export default StyleSheet.create({
   navBarSeparator: {
   },
   navBarMargin: {
+    marginTop: 1
   },
   navBarText: {
     fontSize: 17,
-    marginTop: 14,
+    marginTop: 15,
   },
   navBarLeftButton: {
     paddingLeft: 10,
@@ -32,6 +30,9 @@ export default StyleSheet.create({
     // paddingLeft: 25,
     paddingRight: 10,
     marginTop: 7
+  },
+  navBarRightIcon: {
+    marginTop: -2
   },
   // menuButtonNarrow: {
   //   marginTop: 2,
@@ -54,7 +55,7 @@ export default StyleSheet.create({
     alignSelf: 'flex-start'
   },
   logo: {
-    marginTop: 18
+    marginTop: 16
   },
   navBarMultiRowTitle: {
     flexDirection: 'column',

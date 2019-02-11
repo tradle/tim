@@ -1,5 +1,3 @@
-console.log('requiring VerificationView.js')
-'use strict';
 
 import ArticleView from './ArticleView'
 import utils from '../utils/utils'
@@ -33,7 +31,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 class VerificationView extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     currency: PropTypes.string,
@@ -90,7 +88,6 @@ class VerificationView extends Component {
 
   renderVerification(resource, model, vTree, currentLayer, styles) {
     resource = resource || this.props.resource;
-    let vModel = utils.getModel(VERIFICATION)
     let bankStyle = this.props.bankStyle
     if (resource.method) {
       let displayName = utils.getDisplayName(resource.method)
@@ -105,9 +102,9 @@ class VerificationView extends Component {
                 </TouchableOpacity>)
     }
     else if (resource.sources) {
-      let arrow = ''
-      for (let i=0; i<currentLayer; i++)
-        arrow += '→'
+      // let arrow = ''
+      // for (let i=0; i<currentLayer; i++)
+      //   arrow += '→'
       resource.sources.forEach((r) => {
         if (r.method)
           this.renderVerification(r, model, vTree, currentLayer, styles)
@@ -176,7 +173,6 @@ class VerificationView extends Component {
       }
     }
     let first = true;
-    let self = this
     let style = [styles.textContainer, {padding: 10}]
     let retCols = []
     if (isVerification) {

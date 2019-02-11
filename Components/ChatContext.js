@@ -1,5 +1,3 @@
-console.log('requiring ChatContext.js')
-'use strict'
 
 import {
   View,
@@ -19,12 +17,14 @@ import PageView from './PageView'
 import { Text } from './Text'
 
 const REMEDIATION = 'tradle.Remediation'
+const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
+const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {
-  props: {
+  static propTypes = {
     chat: PropTypes.object.isRequired,
-    context: PropTypes.object.isRequired,
+    context: PropTypes.object,
     contextChooser: PropTypes.func.isRequired,
     shareWith: PropTypes.func.isRequired,
     bankStyle: PropTypes.object.isRequired,
@@ -36,13 +36,14 @@ class ChatContext extends Component {
 
   render() {
     let { context, application, allContexts, bankStyle, chat, contextChooser, shareWith } = this.props
-    if (!context  ||  context.requestFor === REMEDIATION)
+    if (!context  ||  !context.requestFor  ||  context.requestFor === REMEDIATION)
       return <View/>
     let m = utils.getModel(context.requestFor)
     if (!m)
       return <View/>
     let me = utils.getMe()
-    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
+    let ctype = utils.getType(chat)
+    let isChattingWithPerson = ctype === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return <View/>
@@ -53,11 +54,16 @@ class ChatContext extends Component {
     // if (!context  ||  context._readOnly)
     //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    let isShareContext = utils.isContext(chat[constants.TYPE]) && isReadOnlyChat
-    let product = utils.getProduct(context)
+    let isShareContext = utils.isContext(ctype) && isReadOnlyChat
+    let product = context.requestFor
+    // HACK
+    let isAgent = utils.isAgent()
+    if (isAgent  &&  product === EMPLOYEE_ONBOARDING)
+      product = AGENT_ONBOARDING
+
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
-    if (context  &&  isShareContext || application)
+    if (isAgent  ||  (context  &&  isShareContext || application))
       chooser = <View style={styles.contextBar}>{content}</View>
     else
       chooser = <TouchableOpacity onPress={contextChooser} style={styles.contextBar}>

@@ -1,6 +1,3 @@
-console.log('requiring NoModel.js')
-'use strict'
-
 import {
   Text,
   // StyleSheet,
@@ -15,9 +12,9 @@ import { circled } from '../styles/utils'
 import StyleSheet from '../StyleSheet'
 
 class NotFoundRow extends Component {
-  props: {
+  static propTypes = {
     text: PropTypes.string,
-    id: PropTypes.number.required
+    id: PropTypes.number.isRequired
   };
   render() {
     // return <View/>
