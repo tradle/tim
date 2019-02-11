@@ -29,15 +29,20 @@ platform :ios do
     ENV['GYM_XCCONFIG'] = "./release.xcconfig"
     ENV['PROJECT'] = "./Tradle.xcodeproj"
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
-    ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
+    ENV['CODE_PUSH_APP_NAME_IOS'] = 'mark-zz43-07/tim-ios'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
+    ENV['APP_NAME'] = 'Tradle'
+  end
+
+  private_lane :update_version_file do
+    sh "../../hooks/update_version.sh"
   end
 
   private_lane :build_prereq do
     clean_build_artifacts
     cocoapods
     sh "../../scripts/fix-staging.js"
-    sh "../../hooks/update_version.sh"
+    update_version_file
     ensure_git_status_clean
   end
 
@@ -56,6 +61,16 @@ platform :ios do
       tag: "v#{version}-ios",
       message: message
     )
+  end
+
+  lane :backup_release do |options|
+    scheme = options[:scheme]
+    if scheme.nil?
+      UI.user_error!("expected 'scheme', e.g. backup_release scheme:Staging")
+    end
+
+    version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    sh "../../scripts/backup-release.sh ios #{scheme} #{version}"
   end
 
   lane :inc_major do
@@ -80,6 +95,10 @@ platform :ios do
       use_automatic_signing: false,
       profile_name: ENV['PROFILE_DEV']
     )
+
+    # get_certificates(
+    #   development: true,
+    # )
   end
 
   lane :sign_prod do
@@ -88,6 +107,10 @@ platform :ios do
       use_automatic_signing: false,
       profile_name: ENV['PROFILE_PROD']
     )
+
+    # get_certificates(
+    #   development: false,
+    # )
   end
 
   lane :sign_auto do
@@ -110,7 +133,19 @@ platform :ios do
     beta_testflight(options)
     unless options[:dry_run]
       upload_to_fabric(options)
+      if options[:codepush]
+        codepush_prebuilt
+      end
     end
+  end
+
+  lane :codepush_prebuilt do |options|
+    target_binary_version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleShortVersionString")
+    full_version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
+    bundle_name = 'main.jsbundle'
+    release_dir = "../../release/ios/#{full_version}/#{commit}"
+    sh "code-push release #{ENV['CODE_PUSH_APP_NAME_IOS']} #{release_dir} #{target_binary_version} -d Staging"
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
@@ -124,14 +159,9 @@ platform :ios do
       ensure_build_not_in_testflight
     end
 
-    sign_prod
-    match(type: 'appstore')
+    sign_dev
+    sync_code_signing(type: 'development')
     gym_staging
-    notification(
-      title: "Beta Built!",
-      message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
-    )
-
     unless options[:dry_run]
       upload_to_testflight
       notification(
@@ -142,11 +172,34 @@ platform :ios do
   end
 
   lane :gym_staging do
-    gymit(scheme: "Staging")
+    gym(
+      workspace: ENV['WORKSPACE'],
+      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+      # see log in iOS/fastlane/staging-broken.log
+      scheme: 'Staging',
+      configuration: 'Staging',
+      export_method: 'development',
+      xcconfig: 'staging.xcconfig',
+      clean: true
+    )
+
+    backup_release(scheme: "Staging")
   end
 
   lane :gym_release do
-    gymit(scheme: "Release")
+    gym(
+      workspace: ENV['WORKSPACE'],
+      codesigning_identity: 'iPhone Distribution: Tradle Inc (94V7783F74)',
+      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+      # see log in iOS/fastlane/staging-broken.log
+      scheme: 'Release',
+      configuration: 'Release',
+      export_method: 'app-store',
+      xcconfig: 'release.xcconfig',
+      clean: true
+    )
+
+    backup_release(scheme: "Release")
   end
 
   lane :ensure_build_not_in_testflight do
@@ -159,37 +212,58 @@ platform :ios do
     end
   end
 
-  private_lane :gymit do |options|
-    scheme = options[:scheme] || 'Release'
-    lScheme = scheme.downcase
-    gym(
-      workspace: ENV['WORKSPACE'],
-      codesigning_identity: 'iPhone Distribution: Tradle Inc (94V7783F74)',
-      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
-      # see log in iOS/fastlane/staging-broken.log
-      scheme: scheme,
-      configuration: scheme,
-      export_method: 'app-store',
-      xcconfig: "#{lScheme}.xcconfig",
-      clean: true
-    )
+  # private_lane :gymit do |options|
+  #   scheme = options[:scheme] || 'Release'
+  #   lScheme = scheme.downcase
+  #   export_method = scheme == 'Release' ? 'app-store' : 'development'
+  #   # codesigning_identity = nil
+  #   # if scheme == 'Release'
+  #   #   codesigning_identity = 'iPhone Distribution: Tradle Inc (94V7783F74)'
+  #   # else
+  #   #   codesigning_identity = 'iPhone Development: Tradle Inc (94V7783F74)'
+  #   # end
+
+  #   gym(
+  #     workspace: ENV['WORKSPACE'],
+  #     # codesigning_identity: codesigning_identity,
+  #     # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+  #     # see log in iOS/fastlane/staging-broken.log
+  #     scheme: scheme,
+  #     configuration: scheme,
+  #     export_method: export_method,
+  #     xcconfig: "#{lScheme}.xcconfig",
+  #     clean: true
+  #   )
+  # end
+
+  lane :prepare_release do
+    sign_prod
+    sync_code_signing(type: 'appstore')
+    gym_release
   end
 
   desc "Deploy a new version to the App Store"
-  lane :release do
+  lane :release do |options|
     #snapshot
-    sign_prod
-    match(type: 'appstore')
-    gym_release
-    deliverit
+    unless options[:dry_run]
+      ensure_build_not_in_testflight
+    end
+
+    prepare_release
+    unless options[:dry_run]
+      deliverit(options)
+    end
     # frameit
   end
 
-  lane :deliverit do
-    changelog = prompt(
-      text: "What's new in this version? ",
-      multi_line_end_keyword: 'END'
-    )
+  lane :deliverit do |options|
+    changelog = options[:changelog]
+    if changelog.nil?
+      changelog = prompt(
+        text: "What's new in this version? ",
+        multi_line_end_keyword: 'END'
+      )
+    end
 
     deliver(
       force: true,
@@ -198,9 +272,9 @@ platform :ios do
         'en-US' => changelog,
         'en-UK' => changelog
       }),
-      skip_metadata: false,
+      skip_metadata: true,
       skip_screenshots: true,
-      skip_binary_upload: true
+      # skip_binary_upload: false
     )
   end
 
@@ -211,7 +285,7 @@ platform :ios do
     end
 
     # build your iOS app
-    # match(
+    # sync_code_signing(
     #   force_for_new_devices: true
     # )
 
@@ -249,7 +323,7 @@ platform :ios do
       add_to_search_list: true
     )
 
-    match(
+    sync_code_signing(
       type: 'appstore',
       readonly: true,
       keychain_name: "MATCH_KEYCHAIN_NAME",
@@ -272,31 +346,63 @@ platform :ios do
   desc "build & codepush an ios bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_ios_promote"
   lane :codepush do |options|
-    version = options[:version]
-    if version.nil?
-      version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+    ensure_git_status_clean
+    update_version_file
+    target_binary_version = options[:version]
+    if target_binary_version.nil?
+      target_binary_version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleShortVersionString")
     end
 
-    # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
-    # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
-    dry_run = options[:dry_run] == false ? false : true
     # see config opts for code_push plugin here
     # https://github.com/manuelkch/fastlane-plugin-code_push
     mandatory = options[:mandatory] || false
+    deployment = options[:deployment] || 'Staging'
+
+    # offset from project root
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
+    bundle_name = 'main.jsbundle'
+    output_dir = "release/ios/#{target_binary_version}/#{commit}"
+    sh "mkdir -p #{output_dir}"
+
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_IOS'],
       platform: 'ios',
+      deployment: deployment,
+      target_binary_version: target_binary_version,
       description: options[:description] || 'no description for release',
-      deployment: options[:deployment] || 'Staging',
-      target_binary_version: version,
-      dry_run: dry_run,
+      dry_run: options[:dry_run],
       execution_dir_path: '../',
-      mandatory: mandatory
+      bundle_name: bundle_name,
+      mandatory: mandatory,
+      output_dir: output_dir,
+      sourcemap_output: "#{output_dir}/#{bundle_name}.map"
     )
+
+    unless options[:dry_run]
+      sh "../../scripts/backup-bundle.sh ios #{output_dir}"
+      notification(
+        title: "iOS Code Pushed!",
+        message: "deployment: #{deployment}, version: #{target_binary_version}, mandatory: #{mandatory}"
+      )
+    end
   end
 
   lane :codepush_promote_to_release do
     code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_IOS'])
+  end
+
+  lane :install do |options|
+    ipa = options[:ipa]
+    if ipa.nil?
+      version = options[:version]
+      if version.nil?
+        UI.user_error!("expected 'ipa' or 'version'")
+      end
+    else
+      install_on_device(
+        ipa: ipa,
+      )
+    end
   end
 
   # You can define as many lanes as you want

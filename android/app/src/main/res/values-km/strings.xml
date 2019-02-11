@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strLookingDocument">កំពុងស្វែងរកឯកសារ ...</string>
+<string name="strNfcTagNotFound">ស្លាក NFC មិនត្រូវបានរកឃើញ! សូមផ្លាស់ទីទូរស័ព្ទរបស់អ្នកកាន់តែខិតទៅជិតស្លាក NFC</string>
+<string name="strApplicationDoNotHavePermission">កម្មវិធីមិនមានសិទ្ធិប្រើកាមេរ៉ាទេសូមផ្លាស់ប្តូរការកំណត់ឯកជនភាព</string>
+<string name="strUnableCaptureMedia">ការកំណត់រចនាសម្ព័ន្ធកាមេរ៉ាបានបរាជ័យ</string>
+<string name="strCameraUnavailable">កាមេរ៉ាមិនមានទេ</string>
+<string name="strTorchUnavailable">មិនមានភ្លើងឆេះ</string>
+<string name="strHoldDocumentStraight">កាន់ឯកសារត្រង់</string>
+<string name="RSDT_RFID_READING_FINISHED">ការអានទិន្នន័យ RFID ត្រូវបានបញ្ចប់</string>
+<string name="strReadingRFID">អានទិន្នន័យឈីប RFID</string>
+<string name="strProcessingDocument">ដំណើរការឯកសារ ...</string>
+<string name="strPlacePhoneOnDoc">ដាក់ទូរស័ព្ទនៅលើឯកសារសូម</string>
+<string name="strReadingRFIDDG">អានទិន្នន័យរបស់ RFID% s</string>
+<string name="strValue">តម្លៃ</string>
+<string name="strKeepDeviceStill">សង្កត់ឧបករណ៍នៅដដែល</string>
+<string name="strPrepareCamera">កំពុងរៀបចំកាមេរ៉ា ...</string>
+<string name="strDocumentTooSmall">ដាក់ឯកសារចូលក្នុងស៊ុម</string>
+<string name="strPhotoProcessing">ដំណើរការរូបថត ...</string>
+<string name="strGlaresOnDocument">ចៀសវាងពន្លឺនៅលើឯកសារ</string>
+</resources>

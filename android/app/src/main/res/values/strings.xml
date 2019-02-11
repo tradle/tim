@@ -1,5 +1,24 @@
 <resources>
+    <string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey"></string>
     <string name="app_name">Tradle</string>
     <string name="branch_app_link">link.tradle.io</string>
     <string name="branch_path_prefix">/HvsP</string>
+    <string name="strLookingDocument">Searching for a document…</string>
+    <string name="strApplicationDoNotHavePermission">The application doesn\'t have permission to use the camera, please change the privacy settings</string>
+    <string name="strProcessingDocument">Document processing...</string>
+    <string name="strPhotoProcessing">Photo processing…</string>
+    <string name="strKeepDeviceStill">Hold the device still</string>
+    <string name="strHoldDocumentStraight">Hold the document straight</string>
+    <string name="strGlaresOnDocument">Avoid glare on the document</string>
+    <string name="strPrepareCamera">Preparing the camera…</string>
+    <string name="strUnableCaptureMedia">Camera configuration failed</string>
+    <string name="strDocumentTooSmall">Fit the document into the frame</string>
+    <string name="strPlacePhoneOnDoc">Place the phone on the document please</string>
+    <string name="strValue">Value</string>
+    <string name="strReadingRFID">Reading RFID chip data</string>
+    <string name="strReadingRFIDDG">Reading RFID %s data</string>
+    <string name="RSDT_RFID_READING_FINISHED">RFID data reading is finished</string>
+    <string name="strCameraUnavailable">Camera unavailable</string>
+    <string name="strTorchUnavailable">Torch unavailable</string>
+    <string name="strNfcTagNotFound">NFC tag not detected! Please move your phone closer to the NFC tag</string>
 </resources>

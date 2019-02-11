@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strLookingDocument">Rechercher un document…</string>
+<string name="RSDT_RFID_READING_FINISHED">La lecture des données RFID est terminée</string>
+<string name="strPrepareCamera">Préparer la caméra…</string>
+<string name="strValue">Valeur</string>
+<string name="strReadingRFID">Lecture des données d\'une puce RFID</string>
+<string name="strTorchUnavailable">Torche indisponible</string>
+<string name="strUnableCaptureMedia">Échec de la configuration de la caméra</string>
+<string name="strNfcTagNotFound">NFC tag non détecté! Veuillez rapprocher votre téléphone du tag NFC</string>
+<string name="strDocumentTooSmall">Ajuster le document dans le cadre</string>
+<string name="strKeepDeviceStill">Tenez l\'appareil immobile</string>
+<string name="strCameraUnavailable">Caméra indisponible</string>
+<string name="strPlacePhoneOnDoc">Placez le téléphone sur le document s\'il vous plaît</string>
+<string name="strHoldDocumentStraight">Tenez le document bien droit</string>
+<string name="strGlaresOnDocument">Évitez les reflets sur le document</string>
+<string name="strProcessingDocument">Traitement de documents ...</string>
+<string name="strReadingRFIDDG">Lecture des données RFID% s</string>
+<string name="strPhotoProcessing">Traitement photo…</string>
+<string name="strApplicationDoNotHavePermission">L’application n’est pas autorisée à utiliser la caméra, veuillez modifier les paramètres de confidentialité</string>
+</resources>

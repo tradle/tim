@@ -12,20 +12,21 @@
 # This is the minimum version number required.
 # Update this, if you use features of a newer version
 fastlane_version "2.28.2"
+fastlane_require 'dotenv'
 
 default_platform :android
 
 platform :android do
   before_all do
     # weird to have them declared here, but .env is loaded from s3
-    ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'tim-android'
+    ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'mark-zz43-07/tim-android'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
-    ensure_git_status_clean
     sh "../../hooks/update_version.sh"
   end
 
   private_lane :inc_version do |options|
+    ensure_git_status_clean
     part = options[:part]
     sh "../../scripts/inc-android-version.js #{part}"
     Dotenv.load('../gradle.properties')
@@ -58,13 +59,9 @@ platform :android do
     inc_version(part: "build")
   end
 
-  desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
-  end
-
   desc "Assemble a Staging Release"
   lane :build_staging do
+    ensure_git_status_clean
     gradle(task: "assembleReleaseStaging")
     notification(
       title: "Staging Release Built!",
@@ -74,6 +71,7 @@ platform :android do
 
   desc "Submit a new Staging release to Crashlytics (Fabric)"
   lane :beta do |options|
+    ensure_git_status_clean
     Dotenv.load('../app/fabric.properties')
     api_token = ENV['apiKey']
     build_secret = ENV['apiSecret']
@@ -109,13 +107,32 @@ platform :android do
     if !remote.nil?
       UI.message("Current Build: #{local}".green)
       UI.message("Current Build in Play Store \"#{track}\" track: #{remote}".green)
-      unless local.to_i > remote.to_i
+      if local.to_i == remote.to_i
         UI.user_error!("this build already exists in the Play Store \"#{track}\" track!")
       end
     end
   end
 
+  lane :backup_release do |options|
+    usage = """e.g. backup_release stage:release apk_dir:/path/to/ or
+  backup_release stage:release apk_dir:/path/to/"""
+
+    stage = options[:stage]
+    if stage.nil?
+      UI.user_error!("expected 'stage', #{usage}")
+    end
+
+    apk_dir = options[:apk_dir]
+    if apk_dir.nil?
+      UI.user_error!("expected 'apk_dir', #{usage}")
+    end
+
+    version = (sh "../../scripts/get-android-version.sh full").strip
+    sh "../../scripts/backup-release.sh android #{stage} #{version} #{apk_dir}"
+  end
+
   private_lane :releaseit do |options|
+    ensure_git_status_clean
     track = options[:track]
     if track.nil?
       UI.user_error!("expected 'track' option, e.g. track:internal or track:production")
@@ -137,21 +154,37 @@ platform :android do
 
     gradle(task: task)
 
-    unless options[:dry_run]
-      stage = "release"
-      if track == "internal"
-        stage = "releaseStaging"
-      end
+    stage = "release"
+    if track == "internal"
+      stage = "releaseStaging"
+    end
 
-      apk = "./app/build/outputs/apk/#{stage}/app-#{stage}.apk"
-      UI.message("uploading apk #{apk}".green)
-      upload_to_play_store(
+    # apk_paths_from_proj = Dir.glob("app/build/outputs/apk/#{stage}/*.apk")
+    apk_dir = "app/build/outputs/apk/#{stage}"
+    apk_dir_from_root = "android/#{apk_dir}"
+    backup_release(
+      apk_dir: apk_dir_from_root,
+      stage: stage
+    )
+
+    unless options[:dry_run]
+      push_to_play_store(
         track: track,
-        skip_upload_screenshots: options[:skip_upload_screenshots] != false,
-        skip_upload_images: options[:skip_upload_images] != false,
-        apk: apk
+        dir: apk_dir
       )
     end
+  end
+
+  lane :push_to_play_store do |options|
+    # Dir.pwd() returns "android/fastlane"
+    apk_paths = Dir.glob("../#{options[:dir]}/*.apk").map{ |p| File.expand_path(p) }
+    UI.message("uploading apks from dir #{options[:dir]}: #{apk_paths.join(',')}".green)
+    upload_to_play_store(
+      track: options[:track],
+      skip_upload_screenshots: options[:skip_upload_screenshots] != false,
+      skip_upload_images: options[:skip_upload_images] != false,
+      apk_paths: apk_paths
+    )
   end
 
   desc "Deploy a new version to the Google Play internal track"
@@ -162,7 +195,7 @@ platform :android do
 
   desc "Deploy a new version to the Google Play alpha track"
   lane :release_alpha do |options|
-    options[:track] = "alpha"
+    options[:track] = "internal"
     releaseit(options)
   end
 
@@ -201,33 +234,40 @@ platform :android do
   desc "build & codepush android bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_android_promote"
   lane :codepush do |options|
+    ensure_git_status_clean
     current_version = sh "../../scripts/get-android-version.sh semver"
     # current_version = sh("env $(grep -v '^#' \"../gradle.properties\" | xargs) echo \"$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH\"")
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
-    dry_run = options[:dry_run] == false ? false : true
+
     # see config opts for code_push plugin here
     # https://github.com/manuelkch/fastlane-plugin-code_push
     target_binary_version = (options[:target_binary_version] || current_version).strip
     mandatory = options[:mandatory] || false
     deployment = options[:deployment] || 'Staging'
-    commit = last_git_commit
+
+    # offset from project root
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
     bundle_name = 'main.jsbundle'
+    output_dir = "release/android/#{target_binary_version}/#{commit}"
+    sh "mkdir -p #{output_dir}"
+
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'],
       platform: 'android',
       deployment: deployment,
       target_binary_version: target_binary_version,
       description: options[:description] || 'no description for release',
-      dry_run: dry_run,
+      dry_run: options[:dry_run],
       execution_dir_path: '../',
       bundle_name: bundle_name,
       mandatory: mandatory,
-      output_dir: "./release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}",
-      sourcemap_output: "./release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}/#{bundle_name}.map"
+      output_dir: output_dir,
+      sourcemap_output: "#{output_dir}/#{bundle_name}.map"
     )
 
     unless options[:dry_run]
+      sh "../../scripts/backup-bundle.sh android #{output_dir}"
       notification(
         title: "Android Code Pushed!",
         message: "deployment: #{deployment}, version: #{target_binary_version}, mandatory: #{mandatory}"

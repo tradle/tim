@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1.7</string>
+	<string>1.2.13</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.1.7.4</string>
+	<string>1.2.13.0</string>
 	<key>CodePushDeploymentKey</key>
 	<string>$(CODE_PUSH_KEY)</string>
 	<key>Fabric</key>
@@ -65,7 +65,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>take photos, scan documents and QR codes</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>choose photos from library</string>
 	<key>UIAppFonts</key>

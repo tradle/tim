@@ -1,10 +1,69 @@
-rootProject.name = 'Tradle'
-include ':zoom-authentication-hybrid-6.8.0'
-project(':zoom-authentication-hybrid-6.8.0').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-facetec-zoom/android/zoom-authentication-hybrid-6.8.0')
+include ':app'
 include ':react-native-facetec-zoom'
 project(':react-native-facetec-zoom').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-facetec-zoom/android')
-include ':blinkid-react-native'
-project(':blinkid-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/blinkid-react-native/src/android')
+include ':rn-fetch-blob'
+project(':rn-fetch-blob').projectDir = new File(rootProject.projectDir, '../node_modules/rn-fetch-blob/android')
+include ':react-native-vector-icons'
+project(':react-native-vector-icons').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-vector-icons/android')
+include ':react-native-udp'
+project(':react-native-udp').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-udp/android')
+include ':react-native-tradle-keeper'
+project(':react-native-tradle-keeper').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tradle-keeper/android')
+include ':react-native-tcp'
+project(':react-native-tcp').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tcp/android')
+include ':react-native-splash-screen'
+project(':react-native-splash-screen').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-splash-screen/android')
+include ':react-native-regula-document-reader'
+project(':react-native-regula-document-reader').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-regula-document-reader/android')
+include ':react-native-randombytes'
+project(':react-native-randombytes').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-randombytes/android')
+include ':react-native-push-notification'
+project(':react-native-push-notification').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-push-notification/android')
+include ':react-native-os'
+project(':react-native-os').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-os/android')
+include ':react-native-orientation'
+project(':react-native-orientation').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-orientation/android')
+include ':react-native-localization'
+project(':react-native-localization').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-localization/android')
+include ':react-native-local-auth'
+project(':react-native-local-auth').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-local-auth/android')
+include ':react-native-linear-gradient'
+project(':react-native-linear-gradient').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-linear-gradient/android')
+include ':react-native-keychain'
+project(':react-native-keychain').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-keychain/android')
+include ':react-native-image-store'
+project(':react-native-image-store').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-image-store/android')
+include ':react-native-image-picker'
+project(':react-native-image-picker').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-image-picker/android')
+include ':react-native-fabric'
+project(':react-native-fabric').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fabric/android')
+include ':react-native-exception-handler'
+project(':react-native-exception-handler').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-exception-handler/android')
+include ':react-native-ecc'
+project(':react-native-ecc').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-ecc/android')
+include ':react-native-device-info'
+project(':react-native-device-info').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-device-info/android')
+include ':react-native-code-push'
+project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
+include ':react-native-camera'
+project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-camera/android')
+include ':react-native-branch'
+project(':react-native-branch').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-branch/android')
+include ':react-native-awesome-card-io'
+project(':react-native-awesome-card-io').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-awesome-card-io/android')
+include ':react-native-async-storage-snappy'
+project(':react-native-async-storage-snappy').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-async-storage-snappy/android')
+include ':react-native-regula-document-reader'
+project(':react-native-regula-document-reader').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-regula-document-reader/android')
+rootProject.name = 'Tradle'
+include ':react-native-image-store'
+project(':react-native-image-store').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-image-store/android')
+include ':rn-fetch-blob'
+project(':rn-fetch-blob').projectDir = new File(rootProject.projectDir, '../node_modules/rn-fetch-blob/android')
+include ':react-native-tradle-keeper'
+project(':react-native-tradle-keeper').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tradle-keeper/android')
+// include ':blinkid-react-native'
+// project(':blinkid-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/blinkid-react-native/src/android')
 include ':react-native-awesome-card-io'
 project(':react-native-awesome-card-io').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-awesome-card-io/android')
 include ':react-native-splash-screen'
@@ -21,8 +80,6 @@ include ':react-native-os'
 project(':react-native-os').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-os/android')
 include ':react-native-exception-handler'
 project(':react-native-exception-handler').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-exception-handler/android')
-
-include ':app'
 include ':react-native-fabric'
 project(':react-native-fabric').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fabric/android')
 include ':react-native-async-storage-snappy'

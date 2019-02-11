@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strPlacePhoneOnDoc">Поместите телефон на документ, пожалуйста</string>
+<string name="strApplicationDoNotHavePermission">Приложение не имеет разрешения на использование камеры, пожалуйста, измените настройки конфиденциальности</string>
+<string name="strValue">Значение</string>
+<string name="strTorchUnavailable">Факел недоступен</string>
+<string name="strNfcTagNotFound">Тэг NFC не обнаружен! Пожалуйста, переместите телефон ближе к тегу NFC</string>
+<string name="strCameraUnavailable">Камера недоступна</string>
+<string name="RSDT_RFID_READING_FINISHED">Завершение чтения данных RFID</string>
+<string name="strDocumentTooSmall">Установите документ в рамку</string>
+<string name="strHoldDocumentStraight">Держите документ прямо</string>
+<string name="strPrepareCamera">Подготовка камеры ...</string>
+<string name="strLookingDocument">Поиск документа ...</string>
+<string name="strReadingRFID">Чтение данных чипов RFID</string>
+<string name="strKeepDeviceStill">Удерживайте устройство еще</string>
+<string name="strUnableCaptureMedia">Сбой конфигурации камеры</string>
+<string name="strGlaresOnDocument">Избегайте бликов на документе</string>
+<string name="strReadingRFIDDG">Чтение данных RFID% s</string>
+<string name="strPhotoProcessing">Обработка фото…</string>
+<string name="strProcessingDocument">Обработка документов ...</string>
+</resources>

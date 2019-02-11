@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="RSDT_RFID_READING_FINISHED">Het lezen van RFID-gegevens is voltooid</string>
+<string name="strReadingRFIDDG">Gegevens van RFID% s lezen</string>
+<string name="strUnableCaptureMedia">Cameraconfiguratie mislukt</string>
+<string name="strProcessingDocument">Documentverwerking ...</string>
+<string name="strPlacePhoneOnDoc">Plaats de telefoon alstublieft op het document</string>
+<string name="strValue">Waarde</string>
+<string name="strReadingRFID">RFID-chipgegevens lezen</string>
+<string name="strPhotoProcessing">Fotobewerking ...</string>
+<string name="strKeepDeviceStill">Houd het apparaat stil</string>
+<string name="strCameraUnavailable">Camera niet beschikbaar</string>
+<string name="strGlaresOnDocument">Vermijd verblinding op het document</string>
+<string name="strPrepareCamera">De camera voorbereiden ...</string>
+<string name="strApplicationDoNotHavePermission">De toepassing heeft geen toestemming om de camera te gebruiken, wijzig de privacy-instellingen</string>
+<string name="strDocumentTooSmall">Plaats het document in het frame</string>
+<string name="strHoldDocumentStraight">Houd het document recht</string>
+<string name="strNfcTagNotFound">NFC-tag niet gedetecteerd! Verplaats uw telefoon dichter bij de NFC-tag</string>
+<string name="strLookingDocument">Zoeken naar een document ...</string>
+<string name="strTorchUnavailable">Torch niet beschikbaar</string>
+</resources>

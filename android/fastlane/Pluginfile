@@ -2,4 +2,4 @@
 #
 # Ensure this file is checked in to source control!
 
-gem 'fastlane-plugin-code_push', git: "https://github.com/mvayngrib/fastlane-plugin-code_push"
+gem 'fastlane-plugin-code_push', git: 'https://github.com/mvayngrib/fastlane-plugin-code_push'

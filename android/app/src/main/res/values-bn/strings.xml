@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strApplicationDoNotHavePermission">অ্যাপ্লিকেশনটি ক্যামেরা ব্যবহার করার অনুমতি নেই, দয়া করে গোপনীয়তা সেটিংস পরিবর্তন করুন</string>
+<string name="strValue">মান</string>
+<string name="strPlacePhoneOnDoc">দয়া করে নথিতে ফোন রাখুন</string>
+<string name="RSDT_RFID_READING_FINISHED">RFID তথ্য পড়া শেষ হয়</string>
+<string name="strPrepareCamera">ক্যামেরা প্রস্তুত করা হচ্ছে ...</string>
+<string name="strPhotoProcessing">ছবির প্রক্রিয়াজাতকরণ ...</string>
+<string name="strReadingRFIDDG">RFID% s তথ্য পড়া</string>
+<string name="strKeepDeviceStill">ডিভাইস এখনও রাখা</string>
+<string name="strDocumentTooSmall">ফ্রেম মধ্যে নথি ফিট করুন</string>
+<string name="strGlaresOnDocument">নথির উপর নজর এড়িয়ে চলুন</string>
+<string name="strProcessingDocument">নথি প্রক্রিয়াজাতকরণ ...</string>
+<string name="strLookingDocument">একটি নথির জন্য অনুসন্ধান করা হচ্ছে ...</string>
+<string name="strReadingRFID">RFID চিপ তথ্য পড়া</string>
+<string name="strTorchUnavailable">টর্চ অনুপলব্ধ</string>
+<string name="strHoldDocumentStraight">ডকুমেন্ট সোজা রাখা</string>
+<string name="strCameraUnavailable">ক্যামেরা অনুপলব্ধ</string>
+<string name="strUnableCaptureMedia">ক্যামেরা কনফিগারেশন ব্যর্থ হয়েছে</string>
+<string name="strNfcTagNotFound">এনএফসি ট্যাগ সনাক্ত না! আপনার ফোনটি NFC ট্যাগের কাছাকাছি সরান</string>
+</resources>

@@ -1,0 +1,978 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>strAGY</key>
+	<string>AGY</string>
+	<key>strAKADateofBirth</key>
+	<string>AKA Date of birth</string>
+	<key>strAKAGivenNames</key>
+	<string>AKA Given name</string>
+	<key>strAKANamePrefix</key>
+	<string>AKA Name prefix</string>
+	<key>strAKANameSuffix</key>
+	<string>AKA Name suffix</string>
+	<key>strAKASocialSecurityNumber</key>
+	<string>AKA Social Insurance Number</string>
+	<key>strAKASurname</key>
+	<string>AKA Surname</string>
+	<key>strAKASurnameAndGivenNames</key>
+	<string>AKA Full name</string>
+	<key>strALTCode</key>
+	<string>ALT Code</string>
+	<key>strAcademicTitle</key>
+	<string>Academic title</string>
+	<key>strAccessibilityCameraButton</key>
+	<string>Capture an image and start processing</string>
+	<key>strAccessibilityCloseButton</key>
+	<string>Close</string>
+	<key>strAccessibilityTorchButton</key>
+	<string>Torch</string>
+	<key>strAccompaniedby</key>
+	<string>Accompanied by</string>
+	<key>strAddress</key>
+	<string>Address</string>
+	<key>strAddressArea</key>
+	<string>Area</string>
+	<key>strAddressBuilding</key>
+	<string>Building</string>
+	<key>strAddressCity</key>
+	<string>City</string>
+	<key>strAddressCountry</key>
+	<string>Country</string>
+	<key>strAddressFlat</key>
+	<string>Apartment</string>
+	<key>strAddressHouse</key>
+	<string>Unit</string>
+	<key>strAddressJurisdictionCode</key>
+	<string>Jurisdiction code</string>
+	<key>strAddressLocation</key>
+	<string>Location</string>
+	<key>strAddressMunicipality</key>
+	<string>Municipality</string>
+	<key>strAddressPostalCode</key>
+	<string>Postal code</string>
+	<key>strAddressState</key>
+	<string>State</string>
+	<key>strAddressStreet</key>
+	<string>Street</string>
+	<key>strAdministrativeNumber</key>
+	<string>Administrative number</string>
+	<key>strAge</key>
+	<string>Age</string>
+	<key>strAirlineDesignatorofboardingpassissuer</key>
+	<string>Airline designator of boarding pass issuer</string>
+	<key>strAirlineName</key>
+	<string>Airline name</string>
+	<key>strAirlineNameFrequentFlyer</key>
+	<string>Airline loyalty program for frequent flyers</string>
+	<key>strAirlineNumericCode</key>
+	<string>Airline numeric code</string>
+	<key>strAirportFrom</key>
+	<string>Airport of departure</string>
+	<key>strAirportTo</key>
+	<string>Airport of arrival</string>
+	<key>strAllergies</key>
+	<string>Allergies</string>
+	<key>strApplicationDoNotHavePermission</key>
+	<string>The application doesn't have permission to use the camera, please change the privacy settings</string>
+	<key>strArtisticName</key>
+	<string>Pseudonym</string>
+	<key>strAuditInformation</key>
+	<string>Number for validation</string>
+	<key>strAuthority</key>
+	<string>Issuing authority</string>
+	<key>strAuthorityCode</key>
+	<string>Issuing authority code</string>
+	<key>strAuthorityRUS</key>
+	<string>Issuing authority (National)</string>
+	<key>strBDBType</key>
+	<string>BDB type</string>
+	<key>strBankCardNumber</key>
+	<string>Bank card number</string>
+	<key>strBankCardValidThru</key>
+	<string>Bank card validity</string>
+	<key>strBanknoteNumber</key>
+	<string>Banknote number</string>
+	<key>strBarcode</key>
+	<string>Barcode</string>
+	<key>strBenefitsNumber</key>
+	<string>Benefits number</string>
+	<key>strBinaryCode</key>
+	<string>Binary code</string>
+	<key>strBiometricFormatOwner</key>
+	<string>Biometric format owner</string>
+	<key>strBiometricFormatType</key>
+	<string>Biometric format type</string>
+	<key>strBiometricProductID</key>
+	<string>Biometric product ID</string>
+	<key>strBiometricSubtype</key>
+	<string>Biometric subtype</string>
+	<key>strBiometricType</key>
+	<string>Biometric type</string>
+	<key>strBloodGroup</key>
+	<string>Blood group</string>
+	<key>strBookletNumber</key>
+	<string>Booklet number</string>
+	<key>strCCWUntil</key>
+	<string>CCW Until</string>
+	<key>strCDLClass</key>
+	<string>CDL Class</string>
+	<key>strCSCCode</key>
+	<string>CSC Code</string>
+	<key>strCameraUnavailable</key>
+	<string>Camera unavailable</string>
+	<key>strCardAccessNumber</key>
+	<string>Card access number</string>
+	<key>strCategory</key>
+	<string>Category</string>
+	<key>strCenturyDateOfBirth</key>
+	<string>Century of birth</string>
+	<key>strChassisNumber</key>
+	<string>Chassis number</string>
+	<key>strCheckInSequenceNumber</key>
+	<string>Check-in sequence number</string>
+	<key>strChildren</key>
+	<string>Children</string>
+	<key>strCivilStatus</key>
+	<string>Civil status</string>
+	<key>strColorDynamic</key>
+	<string>Color dynamic</string>
+	<key>strCommercialVehicleCodes</key>
+	<string>Commercial vehicle code</string>
+	<key>strCompanyName</key>
+	<string>Company name</string>
+	<key>strCompartmentCode</key>
+	<string>Compartment code</string>
+	<key>strComplexion</key>
+	<string>Complexion</string>
+	<key>strComplianceType</key>
+	<string>Compliance type</string>
+	<key>strConditions</key>
+	<string>Conditions</string>
+	<key>strConfiguration</key>
+	<string>Configuration</string>
+	<key>strControlNo</key>
+	<string>Control #</string>
+	<key>strCopy</key>
+	<string>Copy</string>
+	<key>strCourtCode</key>
+	<string>Court code</string>
+	<key>strCty</key>
+	<string>County</string>
+	<key>strCurrentDate</key>
+	<string>Current date</string>
+	<key>strCustodyInfo</key>
+	<string>Custody info</string>
+	<key>strDLCDLRestrictionCode</key>
+	<string>CDL Restriction Code</string>
+	<key>strDLClass</key>
+	<string>DL class</string>
+	<key>strDLClassCodeA1From</key>
+	<string>DL class code A1 From</string>
+	<key>strDLClassCodeA1Notes</key>
+	<string>DL class code A1 Notes</string>
+	<key>strDLClassCodeA1To</key>
+	<string>DL class code A1 To</string>
+	<key>strDLClassCodeA2From</key>
+	<string>DL class code A2 From</string>
+	<key>strDLClassCodeA2Notes</key>
+	<string>DL class code A2 Notes</string>
+	<key>strDLClassCodeA2To</key>
+	<string>DL class code A2 To</string>
+	<key>strDLClassCodeA3From</key>
+	<string>DL class code A3 From</string>
+	<key>strDLClassCodeA3Notes</key>
+	<string>DL class code A3 Notes</string>
+	<key>strDLClassCodeA3To</key>
+	<string>DL class code A3 To</string>
+	<key>strDLClassCodeAFrom</key>
+	<string>DL class code A From</string>
+	<key>strDLClassCodeAMFrom</key>
+	<string>DL class code AM From</string>
+	<key>strDLClassCodeAMNotes</key>
+	<string>DL class code AM Notes</string>
+	<key>strDLClassCodeAMTo</key>
+	<string>DL class code AM To</string>
+	<key>strDLClassCodeANotes</key>
+	<string>DL class code A Notes</string>
+	<key>strDLClassCodeATo</key>
+	<string>DL class code A To</string>
+	<key>strDLClassCodeB1From</key>
+	<string>DL class code B1 From</string>
+	<key>strDLClassCodeB1Notes</key>
+	<string>DL class code B1 Notes</string>
+	<key>strDLClassCodeB1To</key>
+	<string>DL class code B1 To</string>
+	<key>strDLClassCodeB2EFrom</key>
+	<string>DL class code B2E From</string>
+	<key>strDLClassCodeB2ENotes</key>
+	<string>DL class code B2E Notes</string>
+	<key>strDLClassCodeB2ETo</key>
+	<string>DL class code B2E To</string>
+	<key>strDLClassCodeB2From</key>
+	<string>DL class code B2 From</string>
+	<key>strDLClassCodeB2Notes</key>
+	<string>DL class code B2 Notes</string>
+	<key>strDLClassCodeB2To</key>
+	<string>DL class code B2 To</string>
+	<key>strDLClassCodeBEFrom</key>
+	<string>DL class code BE From</string>
+	<key>strDLClassCodeBENotes</key>
+	<string>DL class code BE Notes</string>
+	<key>strDLClassCodeBETo</key>
+	<string>DL class code BE To</string>
+	<key>strDLClassCodeBFrom</key>
+	<string>DL class code B From</string>
+	<key>strDLClassCodeBNotes</key>
+	<string>DL class code B Notes</string>
+	<key>strDLClassCodeBTo</key>
+	<string>DL class code B To</string>
+	<key>strDLClassCodeC1EFrom</key>
+	<string>DL class code C1E From</string>
+	<key>strDLClassCodeC1ENotes</key>
+	<string>DL class code C1E Notes</string>
+	<key>strDLClassCodeC1ETo</key>
+	<string>DL class code C1E To</string>
+	<key>strDLClassCodeC1From</key>
+	<string>DL class code C1 From</string>
+	<key>strDLClassCodeC1Notes</key>
+	<string>DL class code C1 Notes</string>
+	<key>strDLClassCodeC1To</key>
+	<string>DL class code C1 To</string>
+	<key>strDLClassCodeC2From</key>
+	<string>DL class code C2 From</string>
+	<key>strDLClassCodeC2Notes</key>
+	<string>DL class code C2 Notes</string>
+	<key>strDLClassCodeC2To</key>
+	<string>DL class code C2 To</string>
+	<key>strDLClassCodeCEFrom</key>
+	<string>DL class code CE From</string>
+	<key>strDLClassCodeCENotes</key>
+	<string>DL class code CE Notes</string>
+	<key>strDLClassCodeCETo</key>
+	<string>DL class code CE To</string>
+	<key>strDLClassCodeCFrom</key>
+	<string>DL class code C From</string>
+	<key>strDLClassCodeCNotes</key>
+	<string>DL class code C Notes</string>
+	<key>strDLClassCodeCTo</key>
+	<string>DL class code C To</string>
+	<key>strDLClassCodeD1EFrom</key>
+	<string>DL class code D1E From</string>
+	<key>strDLClassCodeD1ENotes</key>
+	<string>DL class code D1E Notes</string>
+	<key>strDLClassCodeD1ETo</key>
+	<string>DL class code D1E To</string>
+	<key>strDLClassCodeD1From</key>
+	<string>DL class code D1 From</string>
+	<key>strDLClassCodeD1Notes</key>
+	<string>DL class code D1 Notes</string>
+	<key>strDLClassCodeD1To</key>
+	<string>DL class code D1 To</string>
+	<key>strDLClassCodeD2From</key>
+	<string>DL class code D2 From</string>
+	<key>strDLClassCodeD2Notes</key>
+	<string>DL class code D2 Notes</string>
+	<key>strDLClassCodeD2To</key>
+	<string>DL class code D2 To</string>
+	<key>strDLClassCodeDEFrom</key>
+	<string>DL class code DE From</string>
+	<key>strDLClassCodeDENotes</key>
+	<string>DL class code DE Notes</string>
+	<key>strDLClassCodeDETo</key>
+	<string>DL class code DE To</string>
+	<key>strDLClassCodeDFrom</key>
+	<string>DL class code D From</string>
+	<key>strDLClassCodeDNotes</key>
+	<string>DL class code D Notes</string>
+	<key>strDLClassCodeDTo</key>
+	<string>DL class code D To</string>
+	<key>strDLClassCodeGFrom</key>
+	<string>DL class code G From</string>
+	<key>strDLClassCodeGNotes</key>
+	<string>DL class code G Notes</string>
+	<key>strDLClassCodeGTo</key>
+	<string>DL class code G To</string>
+	<key>strDLClassCodeJFrom</key>
+	<string>DL class code J From</string>
+	<key>strDLClassCodeJNotes</key>
+	<string>DL class code J Notes</string>
+	<key>strDLClassCodeJTo</key>
+	<string>DL class code J To</string>
+	<key>strDLClassCodeLCFrom</key>
+	<string>DL class code LC From</string>
+	<key>strDLClassCodeLCNotes</key>
+	<string>DL class code LC Notes</string>
+	<key>strDLClassCodeLCTo</key>
+	<string>DL class code LC To</string>
+	<key>strDLClassCodeLFrom</key>
+	<string>DL class code L From</string>
+	<key>strDLClassCodeLNotes</key>
+	<string>DL class code L Notes</string>
+	<key>strDLClassCodeLTo</key>
+	<string>DL class code L To</string>
+	<key>strDLClassCodeMFrom</key>
+	<string>DL class code M From</string>
+	<key>strDLClassCodeMNotes</key>
+	<string>DL class code M Notes</string>
+	<key>strDLClassCodeMTo</key>
+	<string>DL class code M To</string>
+	<key>strDLClassCodeTFrom</key>
+	<string>DL class code T From</string>
+	<key>strDLClassCodeTNotes</key>
+	<string>DL class code T Notes</string>
+	<key>strDLClassCodeTTo</key>
+	<string>DL class code T To</string>
+	<key>strDLDuplicateDate</key>
+	<string>Duplicate date</string>
+	<key>strDLEndorsed</key>
+	<string>DL Endorsed</string>
+	<key>strDLIssType</key>
+	<string>Iss. Type</string>
+	<key>strDLRecordCreated</key>
+	<string>Record created</string>
+	<key>strDLRestrictionCode</key>
+	<string>DL Restriction Code</string>
+	<key>strDLUnder18Date</key>
+	<string>Date of 18th birthday</string>
+	<key>strDLUnder19Date</key>
+	<string>Date of 19th birthday</string>
+	<key>strDLUnder21Date</key>
+	<string>Date of 21th birthday</string>
+	<key>strDSCertificateIssuer</key>
+	<string>DS Certificate Issuer</string>
+	<key>strDSCertificateSubject</key>
+	<string>DS Certificate Subject</string>
+	<key>strDSCertificateValidFrom</key>
+	<string>DS Certificate Valid From</string>
+	<key>strDSCertificateValidTo</key>
+	<string>DS Certificate Valid To</string>
+	<key>strDUFNumber</key>
+	<string>DUF Number</string>
+	<key>strDataDiscriminator</key>
+	<string>Data discriminator</string>
+	<key>strDateofBirth</key>
+	<string>Date of birth</string>
+	<key>strDateofBirthCheckDigit</key>
+	<string>Check digit for date of birth</string>
+	<key>strDateofBirthChecksum</key>
+	<string>Checksum for date of birth</string>
+	<key>strDateofCreation</key>
+	<string>Creation date</string>
+	<key>strDateofExpiry</key>
+	<string>Date of expiry</string>
+	<key>strDateofExpiryCheckDigit</key>
+	<string>Check digit for date of expiry</string>
+	<key>strDateofExpiryChecksum</key>
+	<string>Checksum for date of expiry</string>
+	<key>strDateofFlight</key>
+	<string>Date of flight</string>
+	<key>strDateofIssue</key>
+	<string>Date of issue</string>
+	<key>strDateofIssueBoardingPass</key>
+	<string>Date of boarding pass issue</string>
+	<key>strDateofIssueCheckDigit</key>
+	<string>Check digit for date of issue</string>
+	<key>strDateofIssueChecksum</key>
+	<string>Checksum for date of issue</string>
+	<key>strDateofPersonalization</key>
+	<string>Personalization date</string>
+	<key>strDateofRegistration</key>
+	<string>Date of registration</string>
+	<key>strDay</key>
+	<string>Day</string>
+	<key>strDepartment</key>
+	<string>Department</string>
+	<key>strDeptNumber</key>
+	<string>Department number</string>
+	<key>strDestination</key>
+	<string>Destination</string>
+	<key>strDiscretionaryData</key>
+	<string>Discretionary data</string>
+	<key>strDoDNumber</key>
+	<string>DoD number</string>
+	<key>strDocumentClassCode</key>
+	<string>Document class code</string>
+	<key>strDocumentClassName</key>
+	<string>Document сlass</string>
+	<key>strDocumentDiscriminator</key>
+	<string>Document discriminator</string>
+	<key>strDocumentFront</key>
+	<string>Document front side</string>
+	<key>strDocumentNumber</key>
+	<string>Document #</string>
+	<key>strDocumentNumberCheckDigit</key>
+	<string>Check digit for document number</string>
+	<key>strDocumentNumberChecksum</key>
+	<string>Checksum for document number</string>
+	<key>strDocumentRear</key>
+	<string>Document reverse side</string>
+	<key>strDocumentSeries</key>
+	<string>Document series</string>
+	<key>strDocumentTooSmall</key>
+	<string>Fit the document into the frame</string>
+	<key>strDonor</key>
+	<string>Donor</string>
+	<key>strDossierNumber</key>
+	<string>Dossier number</string>
+	<key>strDurationofStay</key>
+	<string>Duration of stay</string>
+	<key>strECEnvironmentalType</key>
+	<string>Vehicle environmental type</string>
+	<key>strEQVCode</key>
+	<string>EQV Code</string>
+	<key>strElectronicTicketIndicator</key>
+	<string>Electronic ticket indicator</string>
+	<key>strEndorsementExpirationDate</key>
+	<string>Endorsement expiration date</string>
+	<key>strEngineModel</key>
+	<string>Engine model</string>
+	<key>strEngineNumber</key>
+	<string>Engine number</string>
+	<key>strEnginePower</key>
+	<string>Engine power</string>
+	<key>strEngineVolume</key>
+	<string>Engine volume</string>
+	<key>strError</key>
+	<string>Error</string>
+	<key>strExamDate</key>
+	<string>Exam date</string>
+	<key>strExeptInTanks</key>
+	<string>Except in tanks</string>
+	<key>strEye</key>
+	<string>Iris</string>
+	<key>strEyesColor</key>
+	<string>Eye color</string>
+	<key>strFamilyName</key>
+	<string>Surname/given name at birth</string>
+	<key>strFamilyNameTruncation</key>
+	<string>Truncated surname/given name at birth </string>
+	<key>strFastTrack</key>
+	<string>Fast Track service</string>
+	<key>strFathersName</key>
+	<string>Father's name</string>
+	<key>strFathersNameRUS</key>
+	<string>Father's name (National)</string>
+	<key>strFederalElections</key>
+	<string>Federal elections</string>
+	<key>strFee</key>
+	<string>Fee</string>
+	<key>strFieldFromMRZ</key>
+	<string>Field from MRZ</string>
+	<key>strFinalCheckDigit</key>
+	<string>Final check digit</string>
+	<key>strFinalChecksum</key>
+	<string>Final checksum</string>
+	<key>strFingerprint</key>
+	<string>Fingerprint</string>
+	<key>strFirstIssueDate</key>
+	<string>First issue date</string>
+	<key>strFirstNameTruncation</key>
+	<string>First name truncation</string>
+	<key>strFlightNumber</key>
+	<string>Flight number</string>
+	<key>strFolioNumber</key>
+	<string>Folio number</string>
+	<key>strFreeBaggageAllowance</key>
+	<string>Free baggage allowance</string>
+	<key>strFrequentFlyerAirlineDesignator</key>
+	<string>Frequent Flyer airline designator</string>
+	<key>strFrequentFlyerNumber</key>
+	<string>Frequent flyer number</string>
+	<key>strFromAirportCode</key>
+	<string>Сode of the airport of departure</string>
+	<key>strFuelType</key>
+	<string>Fuel type</string>
+	<key>strGNIBNumber</key>
+	<string>GNIB Number</string>
+	<key>strGhostPortrait</key>
+	<string>Ghost portrait</string>
+	<key>strGivenNames</key>
+	<string>Given name</string>
+	<key>strGivenNamesRUS</key>
+	<string>Given name (National)</string>
+	<key>strGlaresOnDocument</key>
+	<string>Avoid glare on the document</string>
+	<key>strGrandfatherName</key>
+	<string>Grandfather's name</string>
+	<key>strHairColor</key>
+	<string>Hair сolor</string>
+	<key>strHealthNumber</key>
+	<string>Health insurance number</string>
+	<key>strHeight</key>
+	<string>Height</string>
+	<key>strHoldDocumentStraight</key>
+	<string>Hold the document straight</string>
+	<key>strISOIssuerIDNumber</key>
+	<string>ISO issuer ID number</string>
+	<key>strIdentifier</key>
+	<string>Identifier</string>
+	<key>strIdentityCardNumber</key>
+	<string>Identity card number</string>
+	<key>strIdentityCardNumberCheckDigit</key>
+	<string>Check digit for identity card number</string>
+	<key>strIdentityCardNumberChecksum</key>
+	<string>Checksum for identity card number</string>
+	<key>strInTanks</key>
+	<string>In tanks</string>
+	<key>strInventoryNumber</key>
+	<string>Inventory number</string>
+	<key>strInvitationNumber</key>
+	<string>Invitation number</string>
+	<key>strInvitationNumberCheckDigit</key>
+	<string>Check digit for invitaiton number</string>
+	<key>strInvitationNumberChecksum</key>
+	<string>Checksum for invitation number</string>
+	<key>strInvitedBy</key>
+	<string>Invited by</string>
+	<key>strIssueTimestamp</key>
+	<string>Issue time</string>
+	<key>strIssuingStateCode</key>
+	<string>Issuing state code</string>
+	<key>strIssuingStateName</key>
+	<string>Issuing state</string>
+	<key>strJurisdictionEndorsementCode</key>
+	<string>Jurisdiction endorsement code</string>
+	<key>strJurisdictionRestrictionCode</key>
+	<string>Jurisdiction restriction code</string>
+	<key>strJurisdictionVehicleClass</key>
+	<string>Jurisdiction vehicle class</string>
+	<key>strKeepDeviceStill</key>
+	<string>Hold the device still</string>
+	<key>strLicenseNumber</key>
+	<string>License number</string>
+	<key>strLimitedDurationDocumentIndicator</key>
+	<string>Indicator of document limited duration</string>
+	<key>strLine1CheckDigit</key>
+	<string>Check digit for line 1</string>
+	<key>strLine1Checksum</key>
+	<string>Checksum for line 1</string>
+	<key>strLine1OptionalData</key>
+	<string>Optional data from line 1</string>
+	<key>strLine2CheckDigit</key>
+	<string>Check digit for line 2</string>
+	<key>strLine2Checksum</key>
+	<string>Checksum for line 2</string>
+	<key>strLine2OptionalData</key>
+	<string>Optional data from line 2</string>
+	<key>strLine3CheckDigit</key>
+	<string>Check digit for line 3</string>
+	<key>strLine3Checksum</key>
+	<string>Checksum for line 3</string>
+	<key>strLine3OptionalData</key>
+	<string>Optional data from line 3</string>
+	<key>strLookingDocument</key>
+	<string>Searching for a document…</string>
+	<key>strMCNoviceDate</key>
+	<string>Expiry date of Motorcycle Novice status</string>
+	<key>strMRZLinesICAORFID</key>
+	<string>MRZ lines from ICAO RFID</string>
+	<key>strMRZString1</key>
+	<string>MRZ line 1</string>
+	<key>strMRZString2</key>
+	<string>MRZ line 2</string>
+	<key>strMRZString3</key>
+	<string>MRZ line 3</string>
+	<key>strMRZStrings</key>
+	<string>MRZ lines</string>
+	<key>strMRZStringsWithCorrectCheckSums</key>
+	<string>MRZ lines with correct checksums</string>
+	<key>strMRZType</key>
+	<string>MRZ Type</string>
+	<key>strMailingAddressCity</key>
+	<string>Mailing address - city</string>
+	<key>strMailingAddressJurisdictionCode</key>
+	<string>Mailing address - jurisdiction code</string>
+	<key>strMailingAddressPostalCode</key>
+	<string>Mailing address - postal code</string>
+	<key>strMailingAddressStreet</key>
+	<string>Mailing address - street</string>
+	<key>strMaritalStatus</key>
+	<string>Marital status</string>
+	<key>strMaxMassofTrailerBraked</key>
+	<string>Max mass of trailer (braked)</string>
+	<key>strMaxMassofTrailerUnbraked</key>
+	<string>Max mass of trailer (unbraked)</string>
+	<key>strMaxSpeed</key>
+	<string>Max speed</string>
+	<key>strMedicalIndicatorCodes</key>
+	<string>Medical indicator/code</string>
+	<key>strMiddleName</key>
+	<string>Middle name</string>
+	<key>strMiddleNameTruncation</key>
+	<string>Middle name truncation</string>
+	<key>strMilitaryBookNumber</key>
+	<string>Military book number</string>
+	<key>strMonth</key>
+	<string>Month</string>
+	<key>strMothersName</key>
+	<string>Mother's name</string>
+	<key>strNamePrefix</key>
+	<string>Name prefix</string>
+	<key>strNameSuffix</key>
+	<string>Name suffix</string>
+	<key>strNationality</key>
+	<string>Nationality</string>
+	<key>strNationalityCode</key>
+	<string>Nationality сode</string>
+	<key>strNonResidentIndicator</key>
+	<string>Non-resident indicator</string>
+	<key>strNumberOfCardIssuance</key>
+	<string>Number of card issuances</string>
+	<key>strNumberOfCardIssuanceCheckDigit</key>
+	<string>Сheck digit for number of card issuances</string>
+	<key>strNumberOfCardIssuanceChecksum</key>
+	<string>Сhecksum for number of card issuances </string>
+	<key>strNumberofAxels</key>
+	<string>Number of axels</string>
+	<key>strNumberofDuplicates</key>
+	<string>Number of duplicates</string>
+	<key>strNumberofEntries</key>
+	<string>Number of entries</string>
+	<key>strNumberofSeats</key>
+	<string>Number of seats</string>
+	<key>strNumberofStandingPlaces</key>
+	<string>Number of standing places</string>
+	<key>strOCRNumber</key>
+	<string>OCR number</string>
+	<key>strOK</key>
+	<string>OK</string>
+	<key>strObservations</key>
+	<string>Observations</string>
+	<key>strOptionalData</key>
+	<string>Optional data</string>
+	<key>strOptionalDataCheckDigit</key>
+	<string>Check digit for optional data</string>
+	<key>strOptionalDataChecksum</key>
+	<string>Checksum for optional data</string>
+	<key>strOrganization</key>
+	<string>Organization</string>
+	<key>strOther</key>
+	<string>Other</string>
+	<key>strOtherName</key>
+	<string>Other name</string>
+	<key>strOtherPersonName</key>
+	<string>Other person, name</string>
+	<key>strOtherValidID</key>
+	<string>Other valid IDs</string>
+	<key>strOwner</key>
+	<string>Owner</string>
+	<key>strPDF417Codec</key>
+	<string>PDF417 codec</string>
+	<key>strPNRCode</key>
+	<string>PNR code</string>
+	<key>strParrentsGivenNames</key>
+	<string>Parents' given names</string>
+	<key>strPassportNumber</key>
+	<string>Passport #</string>
+	<key>strPassportNumberCheckDigit</key>
+	<string>Check digit for Passport #</string>
+	<key>strPassportNumberChecksum</key>
+	<string>Checksum for Passport #</string>
+	<key>strPatronHeaderVersion</key>
+	<string>Patron header version</string>
+	<key>strPaused</key>
+	<string>Paused</string>
+	<key>strPayGrade</key>
+	<string>Pay grade</string>
+	<key>strPayloadCapacity</key>
+	<string>Payload capacity</string>
+	<key>strPermissibleAxleLoad</key>
+	<string>Permissible axle load</string>
+	<key>strPermitDLClass</key>
+	<string>Permit сlass</string>
+	<key>strPermitDateofExpiry</key>
+	<string>Permit expiry date</string>
+	<key>strPermitDateofIssue</key>
+	<string>Permit issue date</string>
+	<key>strPermitEndorsed</key>
+	<string>Permit endorsement code</string>
+	<key>strPermitIdentifier</key>
+	<string>Permit identifier</string>
+	<key>strPermitRestrictionCode</key>
+	<string>Permit restriction code</string>
+	<key>strPersonToNotifyAddress</key>
+	<string>Notify person: Address</string>
+	<key>strPersonToNotifyDateofRecord</key>
+	<string>Notify person: Date of record</string>
+	<key>strPersonToNotifyName</key>
+	<string>Notify person: Name</string>
+	<key>strPersonToNotifyPhone</key>
+	<string>Notify person: Phone</string>
+	<key>strPersonalNumber</key>
+	<string>Personal #</string>
+	<key>strPersonalNumberCheckDigit</key>
+	<string>Check digit for personal # </string>
+	<key>strPersonalNumberChecksum</key>
+	<string>Checksum for personal #</string>
+	<key>strPersonalSummary</key>
+	<string>Personal data summary</string>
+	<key>strPersonalizationSN</key>
+	<string>Serial number of personalization </string>
+	<key>strPhone</key>
+	<string>Phone</string>
+	<key>strPhotoProcessing</key>
+	<string>Photo processing…</string>
+	<key>strPlaceOfBirthRUS</key>
+	<string>Place of birth (National)</string>
+	<key>strPlaceOfBirthStateCode</key>
+	<string>State code of birthplace</string>
+	<key>strPlaceOfIssue</key>
+	<string>Place of issue</string>
+	<key>strPlaceofBirth</key>
+	<string>Place of birth</string>
+	<key>strPlaceofBirthArea</key>
+	<string>Area of birthplace</string>
+	<key>strPlaceofRegistration</key>
+	<string>Place of registration</string>
+	<key>strPoliceDistrict</key>
+	<string>Police district</string>
+	<key>strPortrait</key>
+	<string>Portrait</string>
+	<key>strPowerWeightRatio</key>
+	<string>Power–to–weight ratio</string>
+	<key>strPoweredByRegula</key>
+	<string>powered by Regula</string>
+	<key>strPrecinct</key>
+	<string>Precinct</string>
+	<key>strPrepareCamera</key>
+	<string>Preparing the camera…</string>
+	<key>strPresentNextPage</key>
+	<string>Please provide the next page</string>
+	<key>strPreviousType</key>
+	<string>Type/number of the previous document</string>
+	<key>strProcessingDocument</key>
+	<string>Document processing...</string>
+	<key>strProfession</key>
+	<string>Profession</string>
+	<key>strProofOfCitizenship</key>
+	<string>Proof of citizenship</string>
+	<key>strPseudoCode</key>
+	<string>Pseudocode</string>
+	<key>strPurposeOfEntry</key>
+	<string>Purpose of entry</string>
+	<key>strRaceEthnicity</key>
+	<string>Race/ethnicity</string>
+	<key>strRank</key>
+	<string>Rank</string>
+	<key>strReferenceNumber</key>
+	<string>Unique number</string>
+	<key>strReferenceNumberCheckDigit</key>
+	<string>Unique number check digit</string>
+	<key>strReferenceNumberChecksum</key>
+	<string>Unique number checksum</string>
+	<key>strRegCertBodyNumber</key>
+	<string>Body number</string>
+	<key>strRegCertBodyType</key>
+	<string>Body type</string>
+	<key>strRegCertCarColor</key>
+	<string>Vehicle color</string>
+	<key>strRegCertCarMark</key>
+	<string>Vehicle make</string>
+	<key>strRegCertCarModel</key>
+	<string>Vehicle model</string>
+	<key>strRegCertCarType</key>
+	<string>Vehicle type</string>
+	<key>strRegCertMaxWeight</key>
+	<string>Max permissible weight</string>
+	<key>strRegCertRegNumber</key>
+	<string>Registration number</string>
+	<key>strRegCertRegNumberCheckDigit</key>
+	<string>Check digit for registration number</string>
+	<key>strRegCertRegNumberChecksum</key>
+	<string>Checksum for registration number</string>
+	<key>strRegCertVIN</key>
+	<string>Vehicle identification number</string>
+	<key>strRegCertVINCheckDigit</key>
+	<string>Check digit for VIN </string>
+	<key>strRegCertVINChecksum</key>
+	<string>Checksum for VIN</string>
+	<key>strRegCertVehicleITSCode</key>
+	<string>Vehicle ITS code</string>
+	<key>strRegCertWeight</key>
+	<string>Unladen mass</string>
+	<key>strRelationship</key>
+	<string>Relationship</string>
+	<key>strReligion</key>
+	<string>Religion</string>
+	<key>strRemainderTerm</key>
+	<string>Months to expire</string>
+	<key>strResidentFrom</key>
+	<string>Resident from</string>
+	<key>strResidentUntil</key>
+	<string>Resident until</string>
+	<key>strRevisionDate</key>
+	<string>Revision date</string>
+	<key>strRoomNumber</key>
+	<string>Room number</string>
+	<key>strSBHIntegrityOptions</key>
+	<string>SBH integrity options</string>
+	<key>strSBHSecurityOptions</key>
+	<string>SBH security options</string>
+	<key>strSeatNumber</key>
+	<string>Seat number</string>
+	<key>strSecondSurname</key>
+	<string>Second surname</string>
+	<key>strSection</key>
+	<string>Section</string>
+	<key>strSelecteeIndicator</key>
+	<string>Selectee indicator</string>
+	<key>strSequenceNumber</key>
+	<string>Sequence number</string>
+	<key>strSerialNumber</key>
+	<string>Serial number</string>
+	<key>strSettings</key>
+	<string>Settings</string>
+	<key>strSex</key>
+	<string>Sex</string>
+	<key>strSignature</key>
+	<string>Signature</string>
+	<key>strSkinColor</key>
+	<string>Skin color</string>
+	<key>strSocialSecurityNumber</key>
+	<string>Social insurance number</string>
+	<key>strSpCode</key>
+	<string>SP code</string>
+	<key>strSpecialNotes</key>
+	<string>Special notes</string>
+	<key>strSponsor</key>
+	<string>Sponsor</string>
+	<key>strSponsorSSN</key>
+	<string>Sponsor SSN</string>
+	<key>strSponsorService</key>
+	<string>Sponsor service</string>
+	<key>strSponsorStatus</key>
+	<string>Sponsor status</string>
+	<key>strStampNumber</key>
+	<string>Stamp number</string>
+	<key>strStatusDateofExpiry</key>
+	<string>Status Expiry Date</string>
+	<key>strSurname</key>
+	<string>Surname</string>
+	<key>strSurnameAndGivenNames</key>
+	<string>Surname and given names</string>
+	<key>strSurnameAndGivenNamesCheckDigit</key>
+	<string>Check digit for surname and given names</string>
+	<key>strSurnameAndGivenNamesChecksum</key>
+	<string>Checksum for surname and given names</string>
+	<key>strSurnameAndGivenNamesRUS</key>
+	<string>Surname and given names (National)</string>
+	<key>strSurnameAtBirth</key>
+	<string>Surname at birth</string>
+	<key>strSurnameofSpose</key>
+	<string>Spouse's surname </string>
+	<key>strTax</key>
+	<string>Tax</string>
+	<key>strTaxNumber</key>
+	<string>Tax number</string>
+	<key>strTelexCode</key>
+	<string>Telegraph code</string>
+	<key>strTerritorialValidity</key>
+	<string>Territorial validity</string>
+	<key>strTicketNumber</key>
+	<string>Ticket number</string>
+	<key>strTitle</key>
+	<string>Position</string>
+	<key>strToAirportCode</key>
+	<string>Сode of the airport of arrival</string>
+	<key>strTorchUnavailable</key>
+	<string>Torch unavailable</string>
+	<key>strTrackingNumber</key>
+	<string>Tracking number</string>
+	<key>strTrailerHitch</key>
+	<string>Trailer hitch</string>
+	<key>strTransactionNumber</key>
+	<string>Transaction number</string>
+	<key>strTransmissionType</key>
+	<string>Transmission type</string>
+	<key>strTypeApprovalNumber</key>
+	<string>Type approval number</string>
+	<key>strUSCIS</key>
+	<string>USCIS</string>
+	<key>strUnableCaptureMedia</key>
+	<string>Camera configuration failed</string>
+	<key>strUniqueCustomerIdentifier</key>
+	<string>Unique сustomer identifier</string>
+	<key>strVRCDataObjectEntry</key>
+	<string>Vehicle data from the DG1 data group</string>
+	<key>strValidityPeriod</key>
+	<string>Validity period</string>
+	<key>strVehicleCategory</key>
+	<string>Vehicle category</string>
+	<key>strVeteran</key>
+	<string>Veteran</string>
+	<key>strVisaClass</key>
+	<string>Visa Class</string>
+	<key>strVisaID</key>
+	<string>Visa ID</string>
+	<key>strVisaIDCheckDigit</key>
+	<string>Check digit for visa ID</string>
+	<key>strVisaIDChecksum</key>
+	<string>Checksum for visa ID</string>
+	<key>strVisaIDRUS</key>
+	<string>Visa ID (National)</string>
+	<key>strVisaNumber</key>
+	<string>Visa Number</string>
+	<key>strVisaNumberCheckDigit</key>
+	<string>Check digit for visa number</string>
+	<key>strVisaNumberChecksum</key>
+	<string>Checksum for visa number</string>
+	<key>strVisaSubClass</key>
+	<string>Visa subclass</string>
+	<key>strVisaType</key>
+	<string>Visa type</string>
+	<key>strVisaValidFrom</key>
+	<string>Visa valid from</string>
+	<key>strVisaValidUntil</key>
+	<string>Visa valid until</string>
+	<key>strVisaValidUntilCheckDigit</key>
+	<string>Check digit for visa expiry date</string>
+	<key>strVisaValidUntilChecksum</key>
+	<string>Checksum for visa expiry date</string>
+	<key>strVoter</key>
+	<string>Voter</string>
+	<key>strVoterKey</key>
+	<string>Voter Key</string>
+	<key>strWeight</key>
+	<string>Weight</string>
+	<key>strWeightPound</key>
+	<string>Weight (pound)</string>
+	<key>strYear</key>
+	<string>Year</string>
+	<key>streIDPlaceOfBirthCity</key>
+	<string>Place Of Birth: City</string>
+	<key>streIDPlaceOfBirthCountry</key>
+	<string>Place Of Birth: Country</string>
+	<key>streIDPlaceOfBirthState</key>
+	<string>Place Of Birth: State</string>
+	<key>streIDPlaceOfBirthStreet</key>
+	<string>Place Of Birth: Street</string>
+	<key>streIDPlaceOfBirthZipcode</key>
+	<string>Place Of Birth: Postal code</string>
+	<key>streIDResidencePermit1</key>
+	<string>Residence permit 1</string>
+	<key>streIDResidencePermit2</key>
+	<string>Residence permit 2</string>
+	<key>strfppLeftIndexFinger</key>
+	<string>Left index finger</string>
+	<key>strfppLeftLittleFinger</key>
+	<string>Left little finger</string>
+	<key>strfppLeftMiddleFinger</key>
+	<string>Left middle finger</string>
+	<key>strfppLeftRingFinger</key>
+	<string>Left ring finger</string>
+	<key>strfppLeftThumb</key>
+	<string>Left thumb</string>
+	<key>strfppRightIndexFinger</key>
+	<string>Right index finger</string>
+	<key>strfppRightLittleFinger</key>
+	<string>Right little finger</string>
+	<key>strfppRightMiddleFinger</key>
+	<string>Right middle finger</string>
+	<key>strfppRightRingFinger</key>
+	<string>Right ring finger</string>
+	<key>strfppRightThumb</key>
+	<string>Right thumb</string>
+</dict>
+</plist>

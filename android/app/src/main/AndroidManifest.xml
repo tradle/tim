@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="io.tradle.dev">
 
     <uses-permission android:name="android.permission.CAMERA" />
@@ -13,6 +14,15 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.NFC"/>
+
+    <!-- START suppress permissions requested by regula -->
+
+    <uses-permission android:name="android.permission.BLUETOOTH" tools:node="remove"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove"/>
+
+    <!-- END suppress permissions requested by regula -->
 
     <supports-screens
         android:smallScreens="true"
@@ -21,11 +31,13 @@
         android:xlargeScreens="true" />
 
     <application
+      xmlns:tools="http://schemas.android.com/tools"
       android:name=".MainApplication"
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:allowBackup="false"
-      android:theme="@style/AppTheme">
+      android:theme="@style/AppTheme"
+      tools:replace="androidandroid:allowBackup">
       <meta-data android:name="io.branch.sdk.BranchKey" android:value="@string/branch_key" />
       <receiver android:name="io.branch.referral.InstallListener" android:exported="true">
         <intent-filter>
