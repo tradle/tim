@@ -23,9 +23,10 @@ if (SplashScreen) {
 Zoom.preload()
 
 const bigText = (text, style) => <Text style={[styles.bigText, style]}>{text}</Text>
+const hugeText = (text, style) => <Text style={[styles.hugeText, style]}>{text}</Text>
 const createButton = ({ text, ...props }) => (
   <TouchableHighlight {...props} style={styles.button}>
-    {bigText(text, styles.buttonText)}
+    {hugeText(text, styles.buttonText)}
   </TouchableHighlight>
 )
 
@@ -70,15 +71,19 @@ class ZoomUI extends React.Component {
         }
       }
     })
+    let result = this.renderResult()
+    let error = this.state.error  &&  <View>
+                                        {bigText('Error:')}
+                                        {this.renderError()}
+                                      </View>
 
     return (
       <View style={styles.container}>
         {bigText('Variants:')}
         {button}
         {bigText('Result:')}
-        {this.renderResult()}
-        {bigText('Error:')}
-        {this.renderError()}
+        {result}
+        {error}
       </View>
     )
   }
@@ -97,7 +102,7 @@ class ZoomUI extends React.Component {
     )
   }
   renderError = () => {
-    return <View key='error'>{bigText(prettify(this.state.error))}</View>
+    return this.state.error  &&  <View key='error'>{bigText(prettify(this.state.error))}</View>
   }
 }
 
@@ -117,11 +122,15 @@ const styles = StyleSheet.create({
     color: 'blue',
   },
   bigText: {
-    fontSize: 30,
+    fontSize: 20,
+  },
+  hugeText: {
+    fontSize: 30
   },
   image: {
     flex:1,
-    minWidth: 100,
-    minHeight: 100,
+    resizeMode: 'contain',
+    minWidth: 300,
+    minHeight: 300,
   },
 })
