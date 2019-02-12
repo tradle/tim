@@ -167,6 +167,7 @@ const merged = extend({
   ],
   // JPEG compression
   imageQuality: 1, //0.2,
+  zoomSDK: null,
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

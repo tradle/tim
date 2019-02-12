@@ -1,0 +1,51 @@
+//
+// This is a generated file.  Do not manually edit this and commit changes.
+//
+
+"zoom_action_continue" = "CONTINUE";
+"zoom_action_try_again" = "TRY AGAIN";
+"zoom_action_ok" = "OK";
+"zoom_action_im_ready" = "I'M READY";
+
+"zoom_camera_permission_header" = "Camera Access";
+"zoom_camera_permission_message_enroll" = "To get started with ZoOm,\nenable access to your selfie camera.";
+"zoom_camera_permission_message_auth" = "ZoOm has detected your camera permissions are disabled. Tap the button below to launch your OS settings.";
+"zoom_camera_permission_enable_camera" = "ENABLE CAMERA";
+"zoom_camera_permission_launch_settings" = "LAUNCH SETTINGS";
+
+"zoom_feedback_center_face" = "Center Your Face";
+"zoom_feedback_face_not_found" = "Frame Your Face";
+"zoom_feedback_face_not_looking_straight_ahead" = "Look Straight Ahead";
+"zoom_feedback_face_not_upright" = "Keep Your Head Straight";
+"zoom_feedback_hold_steady" = "Hold Steady";
+"zoom_feedback_move_phone_away" = "Move Phone Away";
+"zoom_feedback_move_tablet_away" = "Move Tablet Away";
+"zoom_feedback_move_phone_closer" = "Move Phone Closer";
+"zoom_feedback_move_phone_even_closer" = "Even Closer";
+"zoom_feedback_move_tablet_closer" = "Move Tablet In";
+"zoom_feedback_move_phone_to_eye_level" = "Move Phone Up To Eye Level";
+"zoom_feedback_move_tablet_to_eye_level" = "Move Tablet Up To Eye Level";
+"zoom_feedback_use_even_lighting" = "Light Face More Evenly";
+
+"zoom_locked_header" = "ZoOm is Locked";
+"zoom_locked_header_ready" = "ZoOm is Ready";
+"zoom_locked_try_again_in" = "Please try again in:";
+"zoom_locked_button" = "Locked Out";
+
+"zoom_pre_enroll_header" = "Face Capture";
+"zoom_pre_enroll_header_lighting" = "Light Face Evenly";
+"zoom_pre_enroll_header_face_angle" = "Raise Camera\nUp To Eye Level";
+"zoom_pre_enroll_header_ready" = "All Set!";
+"zoom_pre_enroll_message" = "Let's take\na quick video selfie.";
+"zoom_pre_enroll_message_lighting" = "Please check your environment to ensure that you have good lighting.";
+"zoom_pre_enroll_message_face_angle" = "Make sure the phone is on your eye level. Get ready to ZoOm!";
+
+"zoom_retry_generic_header" = "Check Lighting\nand Phone Position";
+"zoom_retry_generic_message" = "Hold the phone in front of your face and make sure you are in good lighting before proceeding.\n\nFor best results, wipe off your camera lens so your face is clear and crisp in the camera.";
+"zoom_retry_bad_lighting_header" = "Light Face Evenly";
+"zoom_retry_bad_lighting_message" = "Something about your environment lighting is making it hard to authenticate you.\n\nMake sure you are in a well-lit and not too bright location.";
+"zoom_retry_face_angle_header" = "Raise Camera\nUp to Eye Level";
+
+"zoom_token_issue_header" = "Uh oh...";
+"zoom_token_issue_message" = "The ZoOm Developer Token for this application could not be validated. Please verify your token and network connection and try again.";
+
