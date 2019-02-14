@@ -90,9 +90,9 @@ class ZoomUI extends React.Component {
   renderResult = () => {
     const { result } = this.state
     if (!result) return
-
+debugger
     const { faceMetrics={} } = result
-    const { auditTrail=[] } = faceMetrics
+    const { facemap, auditTrail=[] } = faceMetrics
     const images = auditTrail.map((uri, i) => <Image key={`image${i}`} style={styles.image} source={{uri}} />)
     return (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
