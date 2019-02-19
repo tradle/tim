@@ -22,6 +22,7 @@
         - [Android](#android)
 - [Troubleshooting](#troubleshooting)
   - [Troubleshooting iOS builds](#troubleshooting-ios-builds)
+- [Alerts localization](#localization) 
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -240,3 +241,16 @@ npm start -- --reset-cache # start packager with clean cache
 
 **Symptom**: **adb devices** command returns empty list when the device is USB connected.
 **Fix**: Make sure your device is not connected as a media device. On your Android phone got Settings -> Developer options -> Networking -> Select USB Configuration
+
+# Localization - messages, alerts, etc.
+
+When a new message added in the app to **utils/strings_en.js** it needs to be translated to all the languages the app supports.
+_These are the messages that are displayed as alerts, greeting/standard messages to the customer, or in progress popups._
+
+All the translation files reside in S3.
+
+That is why the translation script should be ran with AWS_PROFILE environment variable like this:
+
+```
+AWS_PROFILE=[profile] npm run translate:strings
+```
