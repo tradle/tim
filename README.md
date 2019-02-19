@@ -242,7 +242,7 @@ npm start -- --reset-cache # start packager with clean cache
 **Symptom**: **adb devices** command returns empty list when the device is USB connected.
 **Fix**: Make sure your device is not connected as a media device. On your Android phone got Settings -> Developer options -> Networking -> Select USB Configuration
 
-# Localization - messages, alerts, etc.
+# Localization
 
 When a new message added in the app to **utils/strings_en.js** it needs to be translated to all the languages the app supports.
 _These are the messages that are displayed as alerts, greeting/standard messages to the customer, or in progress popups._
