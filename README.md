@@ -22,7 +22,7 @@
         - [Android](#android)
 - [Troubleshooting](#troubleshooting)
   - [Troubleshooting iOS builds](#troubleshooting-ios-builds)
-- [Alerts localization](#localization) 
+- [Localization](#localization) 
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
