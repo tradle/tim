@@ -252,6 +252,7 @@
   },
   "devDependencies": {
     "@google-cloud/translate": "^1.1.0",
+    "aws-sdk": "^2.407.0",
     "babel-eslint": "7.1.1",
     "babel-plugin-inline-package-json": "^2.0.0",
     "babel-plugin-lodash": "^3.3.4",

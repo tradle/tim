@@ -20,9 +20,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, {
-  translate
-} from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 import EnumList from './EnumList'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -719,7 +717,7 @@ var NewResourceMixin = {
     return (
       <View style={styles.help}>
         <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, false)}>
-          {prop.description}
+          {translate(prop, this.props.model, true)}
         </Markdown>
       </View>
     )
