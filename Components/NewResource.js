@@ -1273,6 +1273,7 @@ class NewResource extends Component {
     else
       actionableItem = <ImageInput
                          cameraType={bl.cameraType}
+                         style={{paddingHorizontal: 5}}
                          allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                          underlayColor='transparent'
                          onImage={item => this.onAddItem(bl.name, item)}>
