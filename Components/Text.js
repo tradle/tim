@@ -10,14 +10,11 @@ var fonts = {
   "Benton Sans": "BentonSans Regular"
 }
 // import { translate } from '../utils/utils'
-const fonts = {
-  'Benton Sans': 'BentonSans Regular'
-}
 
 export function setFontFamily(style) {
-  if (!style.fontFamily)
-    fontFamily = 'BentonSans Regular'
-  else
+  // if (!style.fontFamily)
+  //   fontFamily = 'BentonSans Regular'
+  // else
   fontFamily = Platform.OS === 'android'  &&  style.fontFamilyAndroid  ||  style.fontFamily
   if (fonts[fontFamily])
     fontFamily = fonts[fontFamily]

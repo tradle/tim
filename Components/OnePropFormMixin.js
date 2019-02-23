@@ -1,4 +1,4 @@
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 import _ from 'lodash'
 import Zoom from 'react-native-facetec-zoom'
@@ -16,6 +16,7 @@ import Actions from '../Actions/Actions'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 import { capture } from '../utils/camera'
+import ENV from '../utils/env'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -139,29 +140,34 @@ var OnePropFormMixin = {
   async verifyLiveness(params) {
     // ensure zoom is initialized
     // this only needs to be done once
+    if (!ENV.ZoomSDK) {
       this.showCamera(params)
       return
-
+    }
     let result
     try {
-      const { success, status } = await Zoom.initialize({
-        appToken: 'die6CRNhYAk0ZtA3W5TaBOvqpxd1HIVH',
-        // optional customization options
-        // see defaults.js for the full list
-        showZoomIntro: false,
-        showPreEnrollmentScreen: false,
-        showUserLockedScreen: false,
-        showSuccessScreen: false,
-        showFailureScreen: false,
-      })
+      if (!ENV.ZoomSDK.initialized) {
+        const { success, status } = await Zoom.initialize({
+          appToken: Platform.select(ENV.ZoomSDK.token),
+          // optional customization options
+          // see defaults.js for the full list
+          // showZoomIntro: false,
+          showPreEnrollmentScreen: false,
+          showUserLockedScreen: false,
+          showRetryScreen: false,
+          // showSuccessScreen: false,
+          // showFailureScreen: false,
+        })
 
-      if (!success) {
-        // see constants.js SDKStatus for explanations of various
-        // reasons why initialize might not have gone through
-        throw new Error(`failed to init. SDK status: ${status}`)
+        if (!success) {
+          // see constants.js SDKStatus for explanations of various
+          // reasons why initialize might not have gone through
+          throw new Error(`failed to init. SDK status: ${status}`)
+        }
+        else
+          ENV.ZoomSDK.initialized = true
       }
-
-      // launch Zoom's verification process
+        // launch Zoom's verification process
       result = await Zoom.verify({
         // no options at this point
       })
@@ -179,7 +185,7 @@ var OnePropFormMixin = {
       return
     }
 
-    let { livenessResult, livenessScore, auditTrail } = result.faceMetrics
+    let { livenessResult, livenessScore, auditTrail, facemap } = result.faceMetrics
     let { width, height } = utils.dimensions()
     let selfie = {
       from: utils.getMe(),
@@ -187,18 +193,22 @@ var OnePropFormMixin = {
       _context: this.props.resource._context,
       [TYPE]: SELFIE,
       selfie: {
-        url: 'data:image/png;base64,' + auditTrail[0],
+        url: auditTrail[0],
         width,
         height
       }
     }
-    auditTrail.splice(0, 1)
-    if (auditTrail.length > 1) {
-      selfie.additionalImages = auditTrail.map((url) => {
-        url: 'data:image/png;base64,' + url,
-        width,
-        height
-      })
+    if (facemap)
+      selfie.facemap = facemap
+    if (auditTrail) {
+      auditTrail.splice(0, 1)
+      if (auditTrail.length > 1) {
+        selfie.additionalImages = auditTrail.map((url) => {
+          url, //: 'data:image/png;base64,' + url,
+          width,
+          height
+        })
+      }
     }
     selfie.selfieJson = result
 

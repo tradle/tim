@@ -868,7 +868,12 @@ class FormRequestRow extends Component {
               actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: (item) => this.onSetMediaProperty(prop.name, item), useImageInput})
             else {
               let isSelfie = resource.form === SELFIE
-              actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: () => isSelfie  &&  this.verifyLiveness.bind(this, {prop}) || this.showCamera({prop: prop}), useImageInput})
+              actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: () => {
+                if (isSelfie)
+                  this.verifyLiveness({prop})
+                else
+                  this.showCamera({prop: prop}), useImageInput}
+              })
               // actionItem = <TouchableOpacity underlayColor='transparent' onPress={isSelfie && this.verifyLiveness.bind(this, {prop}) || this.showCamera.bind(this, {prop})}>
               //                <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
               //              </TouchableOpacity>
