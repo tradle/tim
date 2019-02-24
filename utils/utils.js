@@ -116,7 +116,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const STATUS = 'tradle.Status'
 
-var dictionary, language //= dictionaries[Strings.language]
+var dictionary, language, strings //= dictionaries[Strings.language]
 
 var models, me
 var DEFAULT_FETCH_TIMEOUT = 5000
@@ -158,7 +158,7 @@ var utils = {
     }
     return true;
   },
-  setMe(meR) {
+  async setMe(meR) {
     me = meR;
     if (!me)
       return
@@ -173,8 +173,8 @@ var utils = {
     if (language === lang)
       return
     language = lang
-    Strings.setLanguage(lang)
-    let d = dictionaries(lang)
+    strings = await Strings.setLanguage(lang)
+    let d = await dictionaries(lang)
     if (d) {
       const enD = getDictionary()
       dictionary = _.extend({}, enD, d)
@@ -400,19 +400,27 @@ var utils = {
     if (typeof args[0] === 'string')
       return utils.translateString(...args)
     if (args.length === 1)
-      return utils.translateModel(args[0])
+      return utils.translateModel(...args)
     else
-      return utils.translateProperty(args[0], args[1])
+      return utils.translateProperty(...args)
   },
-  translateProperty(property, model) {
+  translateProperty(property, model, needDescription) {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
     let translations = dictionary.properties[property.name]
     let val
-    if (translations)
-      val = translations[model.id] || translations.Default
-
-    return val || property.title || utils.makeLabel(property.name)
+    if (translations) {
+      if (needDescription)
+        val = translations[model.id + '_d'] || translations.Default_d
+      else
+        val = translations[model.id] || translations.Default
+    }
+    if (val)
+      return val
+    if (needDescription)
+      return property.description
+    else
+      return property.title || utils.makeLabel(property.name)
   },
   translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
@@ -449,7 +457,7 @@ var utils = {
     }
   },
   translateString(...args) {
-    const { strings } = Strings
+    // const { strings } = Strings
     if (!strings)
       return utils.makeLabel(args[0])
 
@@ -457,19 +465,6 @@ var utils = {
     if (!s)
       return utils.makeLabel(args[0])
 
-    // if (args.length === 2  &&  typeof args[1] === 'object') {
-    //   let pos = 0
-    //   do {
-    //     let i1 = s.indexOf('{', pos)
-    //     if (i1 === -1)
-    //       break
-    //     let i2 = s.indexOf('}, i1')
-    //     if (i2 === -1)
-    //       break
-    //     s = s.substring(0, i1) + args[1][s.substring(i1 + 1, i2)] + s.substring(i2 + 1)
-    //   } while(true)
-    // }
-    // else
     if (args.length > 1) {
       for (let i=1; i<args.length; i++) {
         let insert = '{' + i + '}'
@@ -992,6 +987,7 @@ var utils = {
     let lang = language || 'en'
     switch (lang) {
     case 'fil':
+    case 'tl':
       lang = 'tl-ph'
       require('moment/locale/tl-ph')
       break

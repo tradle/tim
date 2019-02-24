@@ -160,7 +160,6 @@
     "react-native-exception-handler": "2.2.0",
     "react-native-fabric": "^0.4.1",
     "react-native-fabric-crashlytics": "0.1.8",
-    "react-native-facetec-zoom": "github:tradle/react-native-facetec-zoom",
     "react-native-flexbox-grid": "github:tradle/react-native-flexbox-grid",
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#dev",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password",
@@ -253,6 +252,7 @@
   },
   "devDependencies": {
     "@google-cloud/translate": "^1.1.0",
+    "aws-sdk": "^2.407.0",
     "babel-eslint": "7.1.1",
     "babel-plugin-inline-package-json": "^2.0.0",
     "babel-plugin-lodash": "^3.3.4",

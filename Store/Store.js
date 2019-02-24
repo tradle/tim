@@ -479,7 +479,7 @@ var Store = Reflux.createStore({
 
     // storeUtils.init({db, list, contextIdToResourceId, models})
     storeUtils.addModels({models, enums})
-    this.loadModels()
+    await this.loadModels()
     // await storeUtils.loadModels()
     // utils.setModels(models);
     utils.setModels(this.getModels())
@@ -511,7 +511,7 @@ var Store = Reflux.createStore({
     me._termsAccepted = true;
     await this.dbPut(utils.getId(me), me)
 
-    this.setMe(me)
+    await this.setMe(me)
     let bot = this._getItem(utils.makeId(PROFILE, params.bot))
     let provider = this._getItem(bot.organization)
     this.trigger({action: 'getProvider', provider: provider, termsAccepted: true})
@@ -900,11 +900,11 @@ debug('sent:', r)
     if (changed)
       await this.dbPut(utils.getId(me), me)
 
-    this.setMe(me)
+    await this.setMe(me)
     this._setItem(utils.getId(me), me)
     return me
   },
-  setMe(newMe) {
+  async setMe(newMe) {
     me = newMe
     if (me.isEmployee) {
       let org = this._getItem(me.organization)
@@ -921,13 +921,13 @@ debug('sent:', r)
         }
       }
     }
-    utils.setMe(me)
+    await utils.setMe(me)
     this._resolveWithMe(me)
   },
   async onUpdateMe(params) {
     let r = _.clone(me)
     _.extend(r, params)
-    this.setMe(r)
+    await this.setMe(r)
     let meId = utils.getId(r)
     this._setItem(meId, r)
     await this.dbPut(meId, r)
@@ -2182,6 +2182,7 @@ debug('sent:', r)
 
   // Gets info about companies in this app, their bot representatives and their styles
   async getServiceProviders(params) {
+    await this._loadedResourcesDefer.promise
     let originalUrl = params.url
     let { retry, id, newServer, notTestProvider } = params
     // return Q.race([
@@ -2213,6 +2214,15 @@ debug('sent:', r)
         language = this._getItem(utils.getId(language))
         languageCode = language[ROOT_HASH]
       }
+      else {
+        let locale = ENV.locale
+        if (locale) {
+          languageCode = locale.language
+          if (languageCode.length > 2  &&  languageCode !== 'zh-TW')
+            languageCode = languageCode.split('-')[0]
+          language = this._getItem(`${LANGUAGE}_${language}`)
+        }
+      }
     }
     if (!languageCode)
       languageCode = utils.getDefaultLanguage()
@@ -2231,7 +2241,7 @@ debug('sent:', r)
         me.dictionary = dictionary
         if (language)
           me.language = language
-        this.setMe(me)
+        await this.setMe(me)
       }
     }
     let newProviders
@@ -2246,7 +2256,7 @@ debug('sent:', r)
       promises.push(this.addInfo({sp, url: originalUrl, newServer, notTestProvider}))
     })
     if (utils.getMe())
-      this.setMe(utils.getMe())
+      await this.setMe(utils.getMe())
     let results = await Q.allSettled(promises)
 
     let isSandbox = json.providers[0].sandbox
@@ -2505,7 +2515,7 @@ debug('sent:', r)
       return
     myOrg._canShareContext = org._canShareContext
     myOrg._hasSupportLine = org._hasSupportLine
-    this.setMe(me)
+    await this.setMe(me)
     await this.dbPut(utils.getId(me), me)
   },
   async configProvider(sp, org) {
@@ -3475,7 +3485,7 @@ debug('sent:', r)
         doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
         this.dbBatchPut(docId, doc, batch);
         await this.addBacklinksTo(ADD, me, r, batch)
-        this.setMe(me)
+        await this.setMe(me)
         this.trigger({action: 'addItem', resource: utils.clone(me)})
         await this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
       }
@@ -4972,7 +4982,7 @@ if (!res[SIG]  &&  res._message)
           id: utils.makeId(LEGAL_ENTITY, params.legalEntity)
         }//await this._getItemFromServer(utils.makeId(LEGAL_ENTITY, params.legalEntity))
         let meId = utils.getId(me)
-        utils.setMe(me)
+        await utils.setMe(me)
         await db.put(meId, me)
         this._setItem(meId, me)
       }
@@ -5502,8 +5512,8 @@ if (!res[SIG]  &&  res._message)
         return 'Please add "' + meta.properties[prop].title + '"';
     }
   },
-  onReloadModels() {
-    this.loadModels()
+  async onReloadModels() {
+    await this.loadModels()
   },
   async onRequestWipe(opts={}) {
     if (opts.confirmed) {
@@ -6977,7 +6987,7 @@ if (!res[SIG]  &&  res._message)
 
       var meId = utils.makeId(PROFILE, testMe)
       me = this._getItem(meId);
-      this.setMe(me);
+      await this.setMe(me);
       var myIdentities = this._getItem(MY_IDENTITIES);
       if (myIdentities)
         myIdentities.currentIdentity = meId;
@@ -7589,7 +7599,7 @@ if (!res[SIG]  &&  res._message)
 
       let meId = utils.makeId(PROFILE, testMe)
       me = this._getItem(meId);
-      this.setMe(me);
+      await this.setMe(me);
       let myIdentities = this._getItem(MY_IDENTITIES);
       if (myIdentities)
         myIdentities.currentIdentity = meId;
@@ -8772,7 +8782,7 @@ if (!res[SIG]  &&  res._message)
       let sample = utils.clone(sampleProfile)
       _.extend(sample, value)
       value = sample
-      return this.registration(value)
+      return await this.registration(value)
     }
 
     if (value[TYPE] === SETTINGS)
@@ -8794,7 +8804,7 @@ if (!res[SIG]  &&  res._message)
         this.dbBatchPut(meId, me, batch)
         this._setItem(meId, me)
       }
-      this.setMe(me)
+      await this.setMe(me)
       if (!noTrigger)
         this.trigger({action: 'addItem', resource: me})
 
@@ -8843,15 +8853,17 @@ if (!res[SIG]  &&  res._message)
         }
 
         Object.assign(me, value)
-        this.setMe(me)
-        if (newLanguage) {
+
+        if (!newLanguage)
+          await this.setMe(me)
+        else {
           let lang = this._getItem(utils.getId(me.language))
           value.languageCode = lang[ROOT_HASH]
 
           me.language = lang
           me.languageCode = lang[ROOT_HASH]
           await this.dbPut(iKey, value)
-          this.setMe(me)
+          await this.setMe(me)
           var urls = []
           // if (SERVICE_PROVIDERS.length) {
           SERVICE_PROVIDERS.forEach((sp) => {
@@ -9080,9 +9092,9 @@ if (!res[SIG]  &&  res._message)
     if (!isProfile)
       this.trigger({action: 'updateRow', resource: resource, forceUpdate: true})
   },
-  registration(value) {
+  async registration(value) {
     isLoaded = true;
-
+debugger
     me = value
     // meDriver = null
     var pKey = utils.getId(me)
@@ -9112,24 +9124,21 @@ if (!res[SIG]  &&  res._message)
       // me.languageCode = me.language.code
     // }
     batch.push({type: 'put', key: iKey, value: identity});
-    return db.batch(batch)
-    .then(() => {
-      var  params = {action: 'addItem', resource: value, me: value, isRegistration: true};
-      this.setMe(me)
-      return this.trigger(params);
-    })
-    .then((value) => {
-      this._setItem(iKey, identity)
-      this._setItem(pKey, me)
-      if (mid)
-        this._setItem(MY_IDENTITIES, mid)
+    try {
+      await db.batch(batch)
+    } catch(err) {
+      console.log(err.message, err.stack);
+    }
+    var  params = {action: 'addItem', resource: value, me: value, isRegistration: true};
+    await this.setMe(me)
+    this.trigger(params);
+    this._setItem(iKey, identity)
+    this._setItem(pKey, me)
+    if (mid)
+      this._setItem(MY_IDENTITIES, mid)
 
-      this.monitorTim()
+    this.monitorTim()
       // return this.initIdentity(me)
-    })
-    .catch((err) => {
-      err = err;
-    });
   },
   // !!! review and remove the legacy code for several providers on one server
   addSettings: co(function* addSettings (value, maxAttempts, getAllProviders) {
@@ -10399,7 +10408,7 @@ await fireRefresh(val.from.organization)
       me.organization = self.buildRef(org)
 
       me.isAgent = true
-      utils.setMe(me)
+      await utils.setMe(me)
       self._setItem(meId, me)
       await self.dbPut(meId, me)
       let bookmark = {
@@ -10561,7 +10570,7 @@ await fireRefresh(val.from.organization)
       fr.formatted = utils.templateIt(this.getModel(PROFILE).properties.formatted, fr)
       this._setItem(fromId, fr)
       if (isMe)
-        this.setMe(fr)
+        await this.setMe(fr)
       await this.dbPut(fromId, fr)
       return fr
     }
@@ -10595,78 +10604,25 @@ await fireRefresh(val.from.organization)
     if (fr.formatted)
       fr.formatted = firstName + ' ' + lastName
     if (isMe)
-      this.setMe(fr)
+      await this.setMe(fr)
 
     this._setItem(fromId, fr)
     await this.dbPut(fromId, fr)
     return fr
   },
-  loadMyResources() {
-    //   this._loadedResourcesDefer.resolve()
-    // return
-    const self = this;
+  async loadMyResources() {
     let myId
     // console._time('dbStream')
-    var orgContacts = {}
-    return storeUtils.dangerousReadDB(db)
-    .then((results) => {
-      if (!results.length)
+    let orgContacts = {}
+    try {
+      if (!await this.load(orgContacts))
         return
-        // return self.loadModels();
+      if (me)
+        await this.setMe(me)
 
-      results.forEach((data) => {
-        if (data.value == null) return
-        let dtype = data.value.type
-        if (dtype === MODEL) {
-          let m = data.value
-          if (models[data.key])
-            return
-          models[data.key] = data;
-          self.setPropertyNames(m.properties)
-          if (utils.isEnum(m))
-            storeUtils.createEnumResources(m, enums)
-          return
-        }
-        if (data.value[TYPE] === LENS) {
-          let lens = data.value
-          if (lenses[lens.id])
-            return
-          lenses[lens.id] = lens
-        }
-        if (dtype === CUSTOMER_WAITING  ||  dtype === SELF_INTRODUCTION  ||  (dtype === FORM_REQUEST && data.value.product === PRODUCT_REQUEST))
-          return
-        isLoaded = true
-        if (!myId  &&  data.key === MY_IDENTITIES) {
-          myId = data.value.currentIdentity;
-          if (list[myId]) {
-            me = this._getItem(myId)
-            utils.setMe(me)
-          }
-        }
-        if (!me  &&  myId  && data.key == myId) {
-          me = data.value
-          utils.setMe(me)
-        }
-        let rtype = data.value[TYPE]
-        if (rtype === PROFILE) {
-          if (data.value.securityCode)
-            employees[data.value.securityCode] = data.value
-
-          const org = data.value.organization
-          if (org) {
-            const orgId = utils.getId(org)
-            if (!orgContacts[orgId])
-              orgContacts[orgId] = []
-            var c = orgContacts[orgId]
-            c.push(self.buildRef(data.value))
-          }
-        }
-
-        self._setItem(data.key, data.value)
-      })
       // Set some props from provider
-      if (me  &&  me.isEmployee)
-        this.setMe(me)
+      // if (me  &&  me.isEmployee)
+      //   await this.setMe(me)
       var sameContactList = {}
       for (let p in orgContacts) {
         if (!list[p])
@@ -10692,25 +10648,19 @@ await fireRefresh(val.from.organization)
         else
           sameContactList[p] = p
       }
-      // this.loadStaticData()
-
       for (var s in sameContactList)
         delete orgContacts[s]
       if (!utils.isEmpty(orgContacts)) {
-        var results = this.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', modelName: ORGANIZATION, list: results})
+        let result = this.searchNotMessages({modelName: ORGANIZATION})
+        this.trigger({action: 'list', modelName: ORGANIZATION, list: result})
       }
 
       console.log('Stream ended');
-      // var noModels = utils.isEmpty(models);
-      // if (noModels)
-      //   return self.loadModels();
       if (me  &&  (!list[utils.getId(me)] || !list[utils.makeId(IDENTITY, me[ROOT_HASH])]))
         me = null
       console.log('Stream closed');
-      utils.setModels(self.getModels()) //models);
-    })
-    .then(() => {
+      utils.setModels(this.getModels()) //models);
+
       if (me  &&  me.isEmployee) {
         let changed
         let orgId = utils.getId(me.organization)
@@ -10725,40 +10675,86 @@ await fireRefresh(val.from.organization)
         }
         if (changed) {
           let meId = utils.getId(me)
-          db.put(meId, me)
-          self._setItem(meId, me)
+          await db.put(meId, me)
+          this._setItem(meId, me)
         }
       }
       if (me  &&  utils.isEmpty(chatMessages)) {
-        return this.initChats()
-        // if (me) {
-        //   // db resource do not have properties needed for rendering
-        //   let allMessages = self.searchMessages({modelName: MESSAGE, to: me})
-        //   if (allMessages) {
-        //     allMessages.forEach((r) => {
-        //       r = self.addVisualProps(r)
-        //       self._setItem(utils.getId(r), r)
-        //     })
-        //   }
-        // }
+        await this.initChats()
       }
-    })
-    .then(() => {
       if (SERVICE_PROVIDERS.length)
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
       else {
-        let orgs = self.searchNotMessages({modelName: ORGANIZATION, all: true})
+        let orgs = this.searchNotMessages({modelName: ORGANIZATION, all: true})
         if (orgs.length)
           orgs.forEach((org) => {
-            self._getItem(utils.getId(org))._online = false
+            this._getItem(utils.getId(org))._online = false
           })
       }
+    } finally {
       this._loadedResourcesDefer.resolve()
+    }
+  },
+  async load(orgContacts) {
+    let results
+    try {
+      results = await storeUtils.dangerousReadDB(db)
+    } catch(err) {
+      debug('Loading resources fails', err)
+      return null
+    }
+    if (!results.length)
+      return null
+    let myId
+    results.forEach(async (data) => {
+      if (data.value == null) return
+      let dtype = data.value.type
+      if (dtype === MODEL) {
+        let m = data.value
+        if (models[data.key])
+          return
+        models[data.key] = data;
+        this.setPropertyNames(m.properties)
+        if (utils.isEnum(m))
+          storeUtils.createEnumResources(m, enums)
+        return
+      }
+      if (data.value[TYPE] === LENS) {
+        let lens = data.value
+        if (lenses[lens.id])
+          return
+        lenses[lens.id] = lens
+      }
+      if (dtype === CUSTOMER_WAITING  ||  dtype === SELF_INTRODUCTION  ||  (dtype === FORM_REQUEST && data.value.product === PRODUCT_REQUEST))
+        return
+      isLoaded = true
+      if (!myId  &&  data.key === MY_IDENTITIES) {
+        myId = data.value.currentIdentity;
+        if (list[myId]) {
+          me = this._getItem(myId)
+        }
+      }
+      if (!me  &&  myId  && data.key == myId) {
+        me = data.value
+      }
+      let rtype = data.value[TYPE]
+      if (rtype === PROFILE) {
+        if (data.value.securityCode)
+          employees[data.value.securityCode] = data.value
+
+        const org = data.value.organization
+        if (org) {
+          const orgId = utils.getId(org)
+          if (!orgContacts[orgId])
+            orgContacts[orgId] = []
+          var c = orgContacts[orgId]
+          c.push(this.buildRef(data.value))
+        }
+      }
+
+      this._setItem(data.key, data.value)
     })
-    .catch(err => {
-      debugger
-      console.error('err: ' + err.message, err.stack);
-    })
+    return results
   },
   // Received by employee/bot request from customer. And all the customer resources on FI side gets deleted
   async forgetMe(resource) {
@@ -11134,9 +11130,9 @@ await fireRefresh(val.from.organization)
     });
   },
 
-  loadModels() {
+  async loadModels() {
     this.setBusyWith('loadingResources')
-    return this.loadMyResources();
+    await this.loadMyResources();
   },
 
   async onIdle() {
@@ -11288,30 +11284,6 @@ await fireRefresh(val.from.organization)
     })
     if (hasMultiEntry)
       return productToForms
-
-    // let allFormRequests = await this.searchMessages({modelName: FORM, to: to, context: context})
-    // if (!allFormRequests)
-    //   return
-    // let productToForms = {}
-    // let hasMultiEntry
-    // allFormRequests.forEach((r) => {
-    //   if (!multiEntryForms.includes(r.form) || !r._documentCreated  ||  !r._document  ||  !r.product)
-    //     return
-    //   hasMultiEntry = true
-    //   var l = productToForms[r.product]
-    //   if (!l) {
-    //     l = {}
-    //     productToForms[r.product] = l
-    //   }
-    //   let forms = l[r.form]
-    //   if (!forms) {
-    //     forms = []
-    //     l[r.form] = forms
-    //   }
-    //   forms.push(r._document)
-    // })
-    // if (hasMultiEntry)
-    //   return productToForms
   },
 
   onViewChat({ permalink }) {
@@ -11484,673 +11456,3 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   return userId
 }
-
-// function midpoint (a, b) {
-//   return (a + b) / 2
-// }
-
-// const failOneOutOf = (function () {
-//   let i = 0
-//   return function failOneOutOf (n=2) {
-//     i = (i + 1) % n
-//     return i === 0
-//   }
-// }())
-// // search index
-// await collect(myCustomIndexes.subClassOf({
-//   eq: 'tradle.Form',
-//   keys: false,
-//   // get the actual object, not just metadata
-//   body: true
-// }))
-
-// // search index
-// await collect(myCustomIndexes.fromAndSubClassOf({
-//   eq: swissre.permalnk + '!' + 'tradle.Form',
-//   keys: false,
-//   // get the actual object, not just metadata
-//   body: true
-// }))
-
-
-
-  // initClient(meDriver) {
-  //   let me = utils.getMe()
-  //   if (!me.isEmployee)
-  //     return
-
-  //   let graphqlEndpoint
-  //   let myOrgId = me.organization.id
-  //   let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
-  //   if (myEmployer)
-  //     graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
-  //   // else
-  //   //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-  //   if (!graphqlEndpoint)
-  //     return
-
-  //   // graphqlEndpoint = `http://localhost:21012/graphql`
-  //   const networkInterface = createNetworkInterface({
-  //     uri: graphqlEndpoint
-  //   })
-
-  //   networkInterface.use([{
-  //     applyMiddleware: async (req, next) => {
-  //       import printer from 'graphql/language/printer'
-  //       const body = tradleUtils.stringify({
-  //         ...req.request,
-  //         query: printer.print(req.request.query)
-  //       })
-
-  //       const { sig } = await meDriver.sign({
-  //         object: {
-  //           [TYPE]: 'tradle.GraphQLQuery',
-  //           body,
-  //           // time: Date.now()
-  //         }
-  //       })
-
-  //       if (!req.options.headers) {
-  //         req.options.headers = {}
-  //       }
-
-  //       req.options.headers['x-tradle-sig'] = sig
-  //       next()
-  //     }
-  //   }])
-
-  //   this.client = new ApolloClient({ networkInterface })
-  // },
-
-  /*
-  onGetEmployeeInfo(code) {
-    let parts = code.split(';')
-
-    let orgId = utils.makeId(ORGANIZATION, parts[1])
-    let serviceProvider =  SERVICE_PROVIDERS  ? SERVICE_PROVIDERS.filter((json) => json.org === orgId) : null
-
-    serviceProvider = (serviceProvider  &&  serviceProvider.length) ? serviceProvider[0] : null
-      // let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.url === serverUrl)
-
-    var org = this._getItem(orgId)
-    let promise = serviceProvider ? Q() : this.getInfo({serverUrls: [parts[0]]})
-
-    return promise
-    .then(() => {
-      if (!serviceProvider)
-        serviceProvider = SERVICE_PROVIDERS.filter((json) => json.org === orgId)[0]
-
-      return Q.race([
-        fetch(utils.joinURL(serviceProvider.url, serviceProvider.id + '/employee/' + parts[2]), { headers: { cache: 'no-cache' }}),
-        Q.Promise(function (resolve, reject) {
-          setTimeout(function () {
-            reject(new Error('timed out'))
-          }, 5000)
-        })]
-      )
-    })
-    // return Q(employee)
-    .then((response) => {
-      return response.clone().json()
-    })
-    .then((data) => {
-      let r = this._getItem(orgId)
-      let info = {
-        bot: data,
-        org: r,
-        style: r.style,
-        isEmployee: true
-      }
-      return this.addInfo(info)
-    })
-    .then((provider) => {
-      this.addProvider(provider)
-      this.addToSettings(provider)
-
-      this.addContactIdentity({ identity: provider.identity })
-
-      let employee = this._getItem(utils.makeId(PROFILE, provider.hash))
-      currentEmployees[utils.getId(org)] = employee
-      let myIdentities = this._getItem(MY_IDENTITIES)
-      let currentIdentity = myIdentities.currentIdentity
-      let identity = myIdentities.allIdentities.filter((i) => {
-        if (i.id === currentIdentity)
-          return true
-      })[0].publishedIdentity
-
-      this.trigger({action: 'talkToEmployee', to: org, myIdentity: identity})
-    })
-    .catch((err) => {
-      debugger
-    })
-  },
-  */
-  // getResourceToSend(document) {
-  //   let d = utils.clone(document)
-  //   let props = this.getModel(d[TYPE]).properties
-
-  //   let exclude = ['__typename']
-  //   for (let p in d) {
-  //     if (p === TYPE  ||  p === SIG  ||  p === '_time')
-  //       continue
-  //     if (d[PREV_HASH]  &&  (p === ROOT_HASH || p === PREV_HASH))
-  //       continue
-  //     if (!props[p])
-  //       delete d[p]
-  //     else if (p === 'from'  ||  p === 'to')
-  //       delete d[p]
-  //     else if (!d[p])
-  //       delete d[p] // continue
-  //     else if (props[p].type === 'object') {
-  //       let stub = d[p]
-  //       let newStub = {}
-  //       for (let op in stub) {
-  //         if (exclude.indexOf(op) === -1)
-  //           newStub[op] = stub[op]
-  //       }
-  //       d[p] = newStub
-  //     }
-  //   }
-  //   return d
-  // },
-  // loadAddressBook() {
-  //   return // method not used currently
-
-  //   var self = this;
-  //   return Q.ninvoke(AddressBook, 'checkPermission')
-  //   .then(function(permission) {
-  //     // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
-  //     if(permission === AddressBook.PERMISSION_UNDEFINED)
-  //       return Q.ninvoke(AddressBook, 'requestPermission')
-  //              .then(function(permission) {
-  //                if (permission === AddressBook.PERMISSION_AUTHORIZED)
-  //                  return self.storeContacts.bind(self);
-  //              });
-  //     else if (permission === AddressBook.PERMISSION_AUTHORIZED)
-  //       return self.storeContacts()
-  //     else if (permission === AddressBook.PERMISSION_DENIED) {
-  //       //handle permission denied
-  //       return
-  //     }
-  //   })
-  // },
-  // PAIRING FIRST TAKE
-  // Devices one
-  // onGenPairingData() {
-  //   if (!SERVICE_PROVIDERS.length) {
-  //     this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
-  //     return
-  //   }
-  //   let pairingData = {
-  //     nonce: crypto.randomBytes(32).toString('base64'),
-  //     identity: meDriver.link,
-  //     firstName: me.firstName,
-  //     rendezvous: {
-  //       url: SERVICE_PROVIDERS[0].url + '/' + SERVICE_PROVIDERS[0].id
-  //     }
-  //   }
-  //   let dbPairingData = utils.clone(pairingData)
-  //   dbPairingData[TYPE] = PAIRING_DATA
-  //   // db.put(PAIRING_DATA + '_1', pairingData)
-  //   list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
-  //   this.trigger({action: 'genPairingData', pairingData: JSON.stringify(pairingData)})
-  // },
-
-  // onSendPairingRequest (pairingData) {
-  //   // device 2 sends pairing request
-  //   let publishedIdentity
-  //   let deviceId
-
-  //   let myIdentities = this._getItem(MY_IDENTITIES)
-  //   if (myIdentities) {
-  //     publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
-  //     deviceId = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).deviceId
-  //   }
-
-  //   let promise = myIdentities
-  //               ? Q()
-  //               : this.createNewIdentity()
-  //               // : Q.ninvoke(tradleUtils, 'newIdentity', {
-  //               //       networkName,
-  //               //       keys: KEY_SET
-  //               //   })
-  //   return promise
-  //   .then(({ encryptionKey, identityInfo }) => {
-  //     if (!identityInfo)
-  //       return
-  //     publishedIdentity = identityInfo.identity
-  //     let mePub = publishedIdentity.pubkeys
-  //     let mePriv = identityInfo.keys
-  //     let currentIdentity = utils.makeId(PROFILE, pairingData.identity)
-  //     var myIdentities = {
-  //       [TYPE]: MY_IDENTITIES_TYPE,
-  //       currentIdentity: currentIdentity,
-  //       allIdentities: [{
-  //         id: currentIdentity,
-  //         // title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
-  //         privkeys: mePriv,
-  //         publishedIdentity: publishedIdentity
-  //       }]
-  //     }
-  //     var profile = {
-  //       [TYPE]: PROFILE,
-  //       [ROOT_HASH]: pairingData.identity,
-  //       firstName: pairingData.firstName,
-  //       formatted: pairingData.firstName,
-  //     }
-  //     deviceId = identityInfo.link
-  //     var identity = {
-  //       [TYPE]: IDENTITY,
-  //       [ROOT_HASH]: pairingData.identity,
-  //       pubkeys: mePub,
-  //       deviceId: deviceId
-  //     }
-  //     let batch = []
-  //     list[currentIdentity] = {
-  //       key: currentIdentity,
-  //       value: profile
-  //     }
-  //     let identityId = utils.getId(identity)
-  //     list[identityId] = {
-  //       key: identityId,
-  //       value: identity
-  //     }
-  //     list[MY_IDENTITIES] = {
-  //       key: MY_IDENTITIES,
-  //       value: myIdentities
-  //     }
-  //     batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-  //     batch.push({type: 'put', key: currentIdentity, value: profile})
-  //     batch.push({type: 'put', key: utils.getId(identity), value: identity})
-  //     db.batch(batch)
-  //   })
-  //  .then(() => {
-  //     const pairingReq = {
-  //       [TYPE]: PAIRING_REQUEST,
-  //       identity: publishedIdentity
-  //     }
-
-  //     const hmac = crypto.createHmac('sha256', pairingData.nonce)
-  //     hmac.update(tradleUtils.stringify(pairingReq))
-  //     pairingReq.auth = hmac.digest('base64')
-
-  //     const url = pairingData.rendezvous.url
-  //     let transport = driverInfo.wsClients.byUrl[url]
-  //     if (!transport) {
-  //       let wsClient = this.getWsClient(url, deviceId)
-  //       transport = this.getTransport(wsClient, deviceId)
-  //       driverInfo.wsClients.byUrl[url] = transport
-  //     }
-  //     let self = this
-  //     transport.on('message', (msg, from) => {
-  //       try {
-  //         const payload = JSON.parse(msg)
-  //         if (payload[TYPE] === PAIRING_RESPONSE) {
-  //           transport.destroy()
-  //           delete driverInfo.wsClients.byUrl[url]
-
-  //           return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
-  //           .then(() => {
-  //             debugger
-  //             Alert.alert('Pairing was successful')
-  //             this.trigger({action: 'pairingSuccessful'})
-  //           })
-  //           .catch((err) => {
-  //             debugger
-  //             Alert.alert(err)
-  //           })
-  //         }
-  //       } catch (err) {
-  //         debugger
-  //       }
-  //     })
-
-  //     // if (!transport) {
-  //     //   let wsClient = this.getWsClient(url, meDriver.permalink)
-  //     //   transport = this.getTransport(wsClient, meDriver.permalink)
-  //     //   driverInfo.wsClients.byUrl[url] = transport
-  //     // }
-  //     const pairingReqStr = tradleUtils.stringify(pairingReq)
-
-  //     function send () {
-  //       return Q.ninvoke(transport, 'send', pairingData.identity, pairingReqStr)
-  //         .then(() => {
-  //           // debugger
-  //           let dbPairingData = utils.clone(pairingData)
-  //           dbPairingData[TYPE] = PAIRING_DATA
-  //           // db.put(PAIRING_DATA + '_1', pairingData)
-  //           list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
-  //         })
-  //         .catch((err) => {
-  //           debugger
-  //         })
-  //     }
-
-  //     return utils.tryWithExponentialBackoff(send)
-  //   })
-  //     // .then(() => {
-  //     //   this.trigger({action: 'sentPairingRequest', pairingData: pairingData})
-  //     // })
-  // },
-
-  // onProcessPairingRequest(pairingData, pairingReq) {
-  //   const myPubKeys = meDriver.identity.pubkeys
-  //   const alreadyPaired = pairingReq.identity.pubkeys.some(a => {
-  //     return myPubKeys.some(b => {
-  //       return a.pub === b.pub
-  //     })
-  //   })
-
-  //   const verify = crypto.createHmac('sha256', pairingData.nonce)
-  //   verify.update(tradleUtils.stringify(tradleUtils.omit(pairingReq, 'auth')))
-  //   if (verify.digest('base64') !== pairingReq.auth) {
-  //     return Promise.reject(new Error('invalidPairingRequest'))
-  //   }
-
-  //   if (alreadyPaired) {
-  //     // won't work because prev is not right
-  //     return sendResponse()
-  //   }
-
-  //   const allPubKeys = meDriver.identity.pubkeys.concat(pairingReq.identity.pubkeys)
-  //   const pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
-  //   let identity = {
-  //           keys: meDriver.keys.concat(pairingReq.identity.pubkeys),
-  //           identity: tradleUtils.clone(meDriver.identity, {
-  //             pubkeys: pubkeys // allPubKeys.map(pk => tradleUtils.clone(pk))
-  //           })
-  //         }
-  //   return Q.ninvoke(meDriver, 'updateIdentity', identity)
-  //   .then(() => {
-  //     let batch = []
-  //     batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
-  //     this.updatePubkeys(batch)
-  //     // let batch = []
-  //     // let id = IDENTITY + '_' + utils.getMe()[ROOT_HASH]
-  //     // let myIdentity = list[id].value
-
-  //     // myIdentity.pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
-
-  //     // updatePubkeys(myIdentity.pubkeys)
-  //     // let myIdentities = list[MY_IDENTITIES].value
-  //     // let currentIdentity = myIdentities.currentIdentity
-  //     // myIdentities.allIdentities.forEach((r) => {
-  //     //   if (r.id === currentIdentity)
-  //     //     r.publishedIdentity.pubkeys = utils.clone(myIdentity.pubkeys)
-  //     // })
-
-  //     // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-  //     // batch.push({type: 'put', key: id, value: myIdentity})
-  //     // batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
-
-  //     // // If pairing request was not verified what do we want to do
-  //     // db.batch(batch)
-  //   })
-  //   .then(() => {
-  //     return sendResponse()
-  //   })
-
-  //   function sendResponse () {
-  //     const getPrev = meDriver.identity[PREV_HASH] ? Q.ninvoke(meDriver.keeper, 'get',  meDriver.identity[PREV_HASH]) : Promise.resolve(meDriver.identity)
-  //     return getPrev.then(prev => {
-  //       const pairingRes = {
-  //         [TYPE]: PAIRING_RESPONSE,
-  //         // can we make it secure without sending prev?
-  //         prev: prev,
-  //         identity: meDriver.identity
-  //       }
-
-  //       const url = pairingData.rendezvous.url
-  //       let transport = driverInfo.wsClients.byUrl[url]
-  //       const pairingResStr = tradleUtils.stringify(pairingRes)
-  //       return utils.tryWithExponentialBackoff(send)
-
-  //       function send () {
-  //         return Q.ninvoke(transport, 'send', tradleUtils.hexLink(pairingReq.identity), pairingResStr)
-  //           .then(() => {
-  //             db.put(PAIRING_RESPONSE + '_1', pairingRes)
-  //             debugger
-  //           })
-  //           .catch((err) => {
-  //             debugger
-  //           })
-  //       }
-  //     })
-  //   }
-  // },
-  // updatePubkeys(batch, identity) {
-  //   let myIdentities = this._getItem(MY_IDENTITIES)
-  //   let currentIdentity = myIdentities.currentIdentity
-
-  //   let id = currentIdentity.replace(PROFILE, IDENTITY)
-  //   list[id].value = identity || meDriver.identity
-
-  //   myIdentities.allIdentities.forEach((r) => {
-  //     if (r.id === currentIdentity)
-  //       r.publishedIdentity = this._getItem(id)
-  //   })
-
-  //   batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-  //   batch.push({type: 'put', key: id, value: this._getItem(id)})
-
-  //   // If pairing request was not verified what do we want to do
-  //   db.batch(batch)
-  // },
-
-  // onProcessPairingResponse (pairingData, pairingRes) {
-  //   // device 2 validate response
-  //   if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
-  //     return Promise.reject(new Error('prev identity does not match expected'))
-
-  //   let pubkeys = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).pubkeys
-  //   const hasMyKeys = pubkeys.every(myKey => {
-  //     return pairingRes.identity.pubkeys.some(theirKey => {
-  //       return deepEqual(theirKey, myKey)
-  //     })
-  //   })
-  //   // const hasMyKeys = meDriver.identity.pubkeys.every(myKey => {
-  //   //   return pairingRes.identity.pubkeys.some(theirKey => {
-  //   //     return deepEqual(theirKey, myKey)
-  //   //   })
-  //   // })
-
-  //   if (!hasMyKeys)
-  //     return Promise.reject(new Error(translate('deviceDoesNotHaveMyKeys')))
-
-  //   let batch = []
-  //   this.updatePubkeys(batch, pairingRes.identity)
-
-
-  //   // let myIdentities = list[MY_IDENTITIES].value
-  //   // let currentIdentity = myIdentities.currentIdentity
-
-  //   // myIdentities.allIdentities.forEach((r) => {
-  //   //   if (r.id === currentIdentity)
-  //   //     r.publishedIdentity.pubkeys = pairingRes.identity.pubkeys
-  //   // })
-
-  //   // let id = IDENTITY + '_' + pairingData.identity
-  //   // list[id].value.pubkeys = utils.clone(pairingRes.identity.pubkeys)
-  //   // let batch = []
-  //   // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-  //   // batch.push({type: 'put', key: id, value: list[id].value})
-  //   // db.batch(batch)
-
-  //   let me = this._getItem(utils.makeId(PROFILE, pairingData.identity))
-  //   return this.getDriver(me)
-  //   .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
-  //   .then(() => {
-  //     Q.ninvoke(meDriver, 'setIdentity', {
-  //       keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
-  //       identity: pairingRes.identity
-  //     })
-  //   })
-  //   .then(() => {
-  //     this.setMe(me)
-  //     // let me = utils.getMe()
-  //     // let oldId = IDENTITY + '_' + me[ROOT_HASH]
-  //     // delete list[oldId]
-
-  //     // let oldProfileId = utils.getId(me)
-  //     // let profile = list[oldProfileId].value
-  //     // delete list[oldProfileId]
-
-  //     // profile[ROOT_HASH] = pairingRes.identity[ROOT_HASH]
-  //     // profile[CUR_HASH] = pairingRes.identity[ROOT_HASH]
-
-  //     // let newId = IDENTITY + '_' + pairingRes.identity[ROOT_HASH]
-  //     // list[newId] = {
-  //     //   key: newId,
-  //     //   value: utils.clone(pairingRes.identity)
-  //     // }
-  //     // let newProfileId = PROFILE + '_' +  pairingRes.identity[ROOT_HASH]
-  //     // list[newProfileId] = {
-  //     //   key: newProfileId,
-  //     //   value: profile
-  //     // }
-  //     // let myIdentities = list[MY_IDENTITIES].value
-  //     // myIdentities.currentIdentity = newProfileId
-  //     // myIdentities.allIdentities.forEach((r) => {
-  //     //   if (r.id !== oldProfileId)
-  //     //     return
-  //     //   r.id = newProfileId,
-  //     //   r.publishedIdentity.pubkeys = utils.clone(pairingRes.identity.pubkeys)
-  //     // })
-
-  //     // let batch = []
-  //     // batch.push({type: 'del', key: oldId})
-  //     // batch.push({type: 'del', key: oldProfileId})
-  //     // batch.push({type: 'put', key: MY_IDENTITIES, value: list[MY_IDENTITIES].value})
-  //     // batch.push({type: 'put', key: newId, value: list[newId].value})
-  //     // batch.push({type: 'put', key: newProfileId, value: list[newProfileId].value})
-  //     // batch.push({type: 'put', key: PAIRING_RESPONSE + '_1', value: pairingRes})
-  //     // db.batch(batch)
-  //   })
-  // },
-  // async receivePairingRequest({ payload }) {
-  //   const rootHash = storeUtils.getPermalink(payload.identity)
-  //   Alert.alert(
-  //     translate('pairingRequest'),
-  //     null,
-  //     [
-  //       {text: translate('Ok'),
-  //       onPress: () => {
-  //         this.trigger({action: 'acceptingPairingRequest', resource: payload})
-  //         // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
-  //         // .then(() => {
-  //         //   Alert.alert(translate('pairingRequestWasProcesseed'))
-  //         // })
-  //         // .catch((err) => {
-  //         //   debugger
-  //         // })
-  //       }},
-  //       {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-  //     ]
-  //   )
-  // },
-
-  // onPairingRequestAccepted(payload) {
-  //   return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
-  //   .then(() => {
-  //     this.trigger({action: 'pairingRequestAccepted'})
-  //   })
-  //   .catch((err) => {
-  //     debugger
-  //     this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
-  //   })
-  // },
-
-  // async getReviewableResources(val) {
-  //   // let dataBundle = val.dataBundle
-  //   // if (!dataBundle)
-  //   //   return
-  //   let dataBundles = this.searchNotMessages({modelName: DATA_BUNDLE})
-  //   if (!dataBundles.length)
-  //     return
-  //   let dataBundle = this._getItem(dataBundles[0])
-  //   try {
-  //     let kres = await this._keeper.get(this.getCurHash(dataBundle))
-  //     _.extend(dataBundle, kres)
-  //   } catch (err) {
-  //     debug('Store.onAddVerification', err)
-  //     debugger
-  //   }
-  //   let form = val.form
-  //   let reviewable = []
-  //   this._getItem(dataBundle).items.forEach(r => {
-  //     let rtype = utils.getType(r)
-  //     if (rtype === form)
-  //       reviewable.push(r)
-  //   })
-  //   if (!reviewable.length)
-  //     return null
-  //   let result = await this.searchMessages({modelName: form, dataBundle: utils.getId(dataBundle), to: dataBundle.from})
-  //   return result
-  // },
-  // async deleteCustomersOnDevice() {
-  //   let rl = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {requestFor: CUSTOMER_ONBOARDING, 'applicant._link': me[ROOT_HASH]}})
-  //   if (!rl.list) {
-  //     console.log(rl.errorMessage)
-  //     return
-  //   }
-  //   let list = rl.list
-  //   if (list.length < MAX_CUSTOMERS_ON_DEVICE)
-  //     return
-  //   let batch = []
-  //   let contexts = []
-  //   let subReq = []
-  //   for (let i=list.length - 1; i>MAX_CUSTOMERS_ON_DEVICE; i--) {
-  //     let r = list[i]
-  //     subReq.push(this._getItemFromServer(utils.getId(r)))
-  //     contexts.push(r.context)
-  //   }
-
-  //   debugger
-  //   let submissions = await Promise.all(subReq)
-  //   // let submissions = await this.searchServer({modelName: APPLICATION_SUBMISSION, noTrigger: true, filterResource: {'application._permalink': Object.keys(apps)}})
-
-
-  //   for (let i=0; i>submissions.length; i++) {
-  //     this.deleteAppFromDevice(submissions[i], batch)
-  //   }
-  //   let pr = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contexts}})
-  //   let prlist = pr && pr.list || []
-  //   let fr = await this.searchServer({modelName: FORM_REQUEST, noTrigger: true, filterResource: {context: contexts}})
-  //   let frlist = fr && fr.list || []
-  //   let l = [prlist, frlist]
-  //   l.forEach(list => {
-  //     if (!list.length)
-  //       return
-  //     list.forEach(r => {
-  //       let id = utils.getId(r)
-  //       this._deleteItem(id)
-  //       batch.push({type: 'del', key: id})
-  //     })
-  //   })
-
-  //   if (batch.length)
-  //     await db.batch(batch)
-  // },
-  // deleteAppFromDevice(submissions, batch) {
-  //   if (!submissions)
-  //     return
-  //   let submissionStubs
-  //   if (Array.isArray(submissions))
-  //     submissionStubs = submissions.map((sub) => sub.submission)
-  //   else {
-  //     const { submissions={} } = application
-  //     if (!submissions.edges ||  !submissions.edges.length)
-  //       return
-  //     submissionStubs = submissions.edges.map(s => s.node.submission)
-  //   }
-  //   submissionStubs.forEach(sub => {
-  //     let m = this.getModel(utils.getType(sub))
-  //     let type = m.subClassOf || m.id
-  //     let stub = this.makeStub(sub)
-  //     let item = this._getItem(stub.id)
-  //     if (item) {
-  //       this._deleteItem(stub.id)
-  //       batch.push({type: 'del', key: stub.id})
-  //     }
-  //   })
-  // },

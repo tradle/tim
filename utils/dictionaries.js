@@ -1,12 +1,42 @@
 import _ from 'lodash'
+import { fetchWithBackoff } from './utils'
 
 const dictionariesM = require('@tradle/models').dictionaries
 const dictionariesCM = require('@tradle/custom-models').dictionaries
 const dictionariesMCO = require('@tradle/models-corporate-onboarding').dictionaries
 const MODEL = 'model'
 const PROPERTY_NAME = 'propertyName'
+const URL = 'https://s3.eu-west-2.amazonaws.com/tradle.io/dictionaries/'
 
-function dictionaries(lang) {
+async function dictionaries(lang) {
+  let headers = { cache: 'no-cache', 'content-type': 'application/json' }
+  let fn = `dictionary_${lang}.json`
+  const resM = await fetchWithBackoff(`${URL}models/${fn}`, { headers }, 5000)
+  // debugger
+  const dM = await resM.json()
+
+  const resCM = await fetchWithBackoff(`${URL}custom-models/${fn}`, { headers }, 5000)
+  const dCM = await resCM.json()
+
+  const resMCO = await fetchWithBackoff(`${URL}models-corporate-onboarding/${fn}`, { headers }, 5000)
+  const dMCO = await resMCO.json()
+  let d = {models: {}, properties: {}, enums: {}}
+  if (dM) {
+    let dict = genDictionary(dM, lang, d.enums)
+    _.extend(d, dict)
+  }
+  if (dCM) {
+    let dict = genDictionary(dCM, lang, d.enums)
+    _.merge(d, dict)
+  }
+  if (dMCO) {
+    let dict = genDictionary(dMCO, lang, d.enums)
+    _.merge(d, dict)
+  }
+
+  return d
+}
+function dictionaries1(lang) {
   let d = {models: {}, properties: {}, enums: {}}
   let dM = dictionariesM  &&  dictionariesM[lang]  &&  genDictionary(dictionariesM[lang], lang, d.enums)
   if (dM)
@@ -16,7 +46,6 @@ function dictionaries(lang) {
   _.merge(d, dCM)
   let dMCO = dictionariesMCO  &&  dictionariesMCO[lang]  &&  genDictionary(dictionariesMCO[lang], lang, d.enums)
   _.merge(d, dMCO)
-
 
   return d
 }
@@ -35,6 +64,8 @@ function genDictionary(dictionary, lang, enums) {
     if (!dprops[p.name])
       dprops[p.name] = {}
     dprops[p.name][p.model] = p[lang]
+    if (p.description)
+      dprops[p.name][`${p.model}_d`] = p.description
   })
   return {
     models: dmodels,

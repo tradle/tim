@@ -1,7 +1,5 @@
 
 import {
-  // Image,
-  // StyleSheet,
   // Text,
   TouchableOpacity,
   Alert,
@@ -18,7 +16,6 @@ import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
 // const debug = require('debug')('tradle:app:FormRequestRow')
-// import Zoom from 'react-native-facetec-zoom'
 
 import constants from '@tradle/constants'
 
@@ -50,8 +47,6 @@ const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const SELFIE = 'tradle.Selfie'
-
-// const numbers = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 const REFRESH = 'tradle.Refresh'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {

@@ -105,19 +105,6 @@ var OnePropFormMixin = {
         return
       }
     }
-    // this.props.navigator.push({
-    //   // title: 'Take a pic',
-    //   backButtonTitle: 'Back',
-    //   noLeftButton: true,
-    //   id: 41,
-    //   component: VideoCamera,
-    //   sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-    //   passProps: {
-    //     cameraType: prop.cameraType,
-    //     onTakePic: this.onTakePic.bind(this, params)
-    //   }
-    // });
-
     let { navigator, bankStyle } = this.props
     if (!resource)
       resource = this.props.resource
@@ -186,7 +173,7 @@ var OnePropFormMixin = {
     }
 
     let { livenessResult, livenessScore, auditTrail, facemap } = result.faceMetrics
-    let { width, height } = utils.dimensions()
+    // let { width, height } = utils.dimensions()
     let selfie = {
       from: utils.getMe(),
       to: this.props.resource.from,
@@ -194,8 +181,8 @@ var OnePropFormMixin = {
       [TYPE]: SELFIE,
       selfie: {
         url: auditTrail[0],
-        width,
-        height
+        // width,
+        // height
       }
     }
     if (facemap)
@@ -203,10 +190,12 @@ var OnePropFormMixin = {
     if (auditTrail) {
       auditTrail.splice(0, 1)
       if (auditTrail.length > 1) {
-        selfie.additionalImages = auditTrail.map((url) => {
-          url, //: 'data:image/png;base64,' + url,
-          width,
-          height
+        selfie.auditTrail = auditTrail.map((imgUrl) => {
+          return {
+            url: imgUrl, //: 'data:image/png;base64,' + url,
+            // width,
+            // height
+          }
         })
       }
     }

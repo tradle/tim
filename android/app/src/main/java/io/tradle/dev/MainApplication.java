@@ -11,32 +11,6 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
 import com.reactlibrary.RNReactNativeZoomSdkPackage;
-import com.RNFetchBlob.RNFetchBlobPackage;
-import com.oblador.vectoricons.VectorIconsPackage;
-import com.tradle.react.UdpSocketsModule;
-import io.tradle.reactkeeper.RNTradleKeeperPackage;
-import com.peel.react.TcpSocketsModule;
-import org.devio.rn.splashscreen.SplashScreenReactPackage;
-import com.regula.documentreader.RNRegulaDocumentReaderPackage;
-import com.bitgo.randombytes.RandomBytesPackage;
-import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
-import com.peel.react.rnos.RNOSModule;
-import com.github.yamill.orientation.OrientationPackage;
-import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
-import io.tradle.reactlocalauth.LocalAuthPackage;
-import com.BV.LinearGradient.LinearGradientPackage;
-import com.oblador.keychain.KeychainPackage;
-import io.tradle.reactimagestore.ImageStorePackage;
-import com.imagepicker.ImagePickerPackage;
-import com.smixx.fabric.FabricPackage;
-import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerPackage;
-import com.rn.ecc.ECCPackage;
-import com.learnium.RNDeviceInfo.RNDeviceInfo;
-import com.microsoft.codepush.react.CodePush;
-import org.reactnative.camera.RNCameraPackage;
-import io.branch.rnbranch.RNBranchPackage;
-import com.cardio.RNCardIOPackage;
-import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
 // import com.microblink.reactnative.MicroblinkReactPackage;
 import com.cardio.RNCardIOPackage;
@@ -95,33 +69,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
-            new RNReactNativeZoomSdkPackage(),
-            new RNFetchBlobPackage(),
-            new VectorIconsPackage(),
-            new UdpSocketsModule(),
-            new RNTradleKeeperPackage(),
-            new TcpSocketsModule(),
-            new SplashScreenReactPackage(),
-            new RNRegulaDocumentReaderPackage(),
-            new RandomBytesPackage(),
-            new ReactNativePushNotificationPackage(),
-            new RNOSModule(),
-            new OrientationPackage(),
-            new ReactNativeLocalizationPackage(),
-            new LocalAuthPackage(),
-            new LinearGradientPackage(),
-            new KeychainPackage(),
-            new ImageStorePackage(),
-            new ImagePickerPackage(),
-            new FabricPackage(),
-            new ReactNativeExceptionHandlerPackage(),
-            new ECCPackage(),
-            new RNDeviceInfo(),
-            new CodePush(null, getApplicationContext(), BuildConfig.DEBUG),
-            new RNCameraPackage(),
-            new RNBranchPackage(),
-            new RNCardIOPackage(),
-            new RNAsyncSnappyStoragePackage(),
+        new RNReactNativeZoomSdkPackage(),
         new RNRegulaDocumentReaderPackage(),
         new ImageStorePackage(),
         new RNFetchBlobPackage(),

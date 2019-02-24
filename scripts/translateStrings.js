@@ -4,8 +4,11 @@ const writeFileAtomic = require('write-file-atomic')
 const Translate = require('@google-cloud/translate')
 const fs = require('fs')
 const parser = require('fast-xml-parser');
+const aws = require('aws-sdk')
+const fetch = require('node-fetch')
 
 const translate = new Translate();
+const URL = 'https://s3.eu-west-2.amazonaws.com/tradle.io/strings/'
 
 const HELP = `
   Usage:
@@ -34,6 +37,8 @@ if (help) {
 }
 new Promise(resolve => writeStrings(dictionary, languages, forceGen))
 
+var s3
+
 async function writeStrings(stringsDir, lang, forceGen) {
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     console.log('Please set environment variable GOOGLE_APPLICATION_CREDENTIALS to allow models translation')
@@ -52,8 +57,9 @@ async function writeStrings(stringsDir, lang, forceGen) {
     let promises = []
     for (let j=0; j<5 && i < languages.length; j++, i++) {
       let lang = languages[i].code
-      isRegulaXml ? await writeRegulaFile(stringsDir, lang, forceGen) : await writeFile(stringsDir, lang, forceGen)
-      // promises.push(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen))
+      // isRegulaXml ? await writeRegulaFile(stringsDir, lang, forceGen) : await writeFile(stringsDir, lang, forceGen)
+      promises.push(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen))
+      await Promise.all(promises)
     }
   }
 }
@@ -105,6 +111,79 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
   }
   strings += '\n</resources>'
   writeFileAtomic(langStrings, strings, console.log)
+}
+async function writeFile(stringsDir, lang, forceGen) {
+  if (lang === 'en')
+    return
+  let fn = 'strings_' + lang + '.js'
+  let fnStrings = path.resolve(stringsDir, fn)
+  let enFn = 'strings_en.js'
+  let stringsLang, stringsEN
+  let currentIds
+  try {
+    stringsEN = require(path.resolve(stringsDir, enFn))
+    let res = await fetch(`${URL}${fn}`) //require(fnStrings)
+    stringsLang = await res.text()
+    stringsLang = JSON.parse(stringsLang.split('=')[1].trim())
+
+    for (let p in stringsLang) {
+      if (!currentIds) currentIds = {}
+      currentIds[p] = true
+    }
+  } catch (err) {
+    console.log(err.message)
+    if (!stringsEN)
+      return
+    stringsLang = {}
+  }
+  let promises = []
+  for (let p in stringsEN) {
+    if (!stringsLang[p] || forceGen)
+      promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
+  }
+  if (promises.length)
+    await Promise.all(promises, { concurrency: 20 })
+
+  // Check if some models/props were deleted
+  let hasChanged = promises.length
+  if (!currentIds  ||  forceGen)
+    hasChanged = true
+  else {
+    for (let p in currentIds) {
+      // Cleanup not used translations
+      if (!stringsEN[p]) {
+        delete stringsLang[p]
+        hasChanged = true
+      }
+    }
+  }
+  if (!hasChanged)
+    return
+  if (!s3) {
+    s3 = new aws.S3();
+  }
+  let s = typeof stringsLang === 'string' && stringsLang || JSON.stringify(stringsLang, 0, 2)
+  var params = {
+    Body: Buffer.from('module.exports = ' + s),
+    Bucket: 'tradle.io',
+    Key: `strings/${fn}`,
+    ACL: 'public-read'
+   };
+   s3.putObject(params, function(err, data) {
+     if (err)
+       console.log(err, err.stack); // an error occurred
+     else
+       console.log(data);           // successful response
+   });
+
+    // writeFileAtomic(fnStrings, 'module.exports = ' + JSON.stringify(stringsLang, 0, 2), console.log)
+}
+async function translateText({strings, key, text, lang}) {
+  const results = await translate.translate(text, lang)
+  const translation = results[0];
+  strings[key] = translation
+}
+
 /*
     <string name="app_name">Tradle</string>
     <string name="branch_app_link">link.tradle.io</string>
@@ -128,450 +207,3 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
     <string name="strTorchUnavailable">Torch unavailable</string>
     <string name="strNfcTagNotFound">NFC tag not detected! Please move your phone closer to the NFC tag</string>
 */
-}
-async function writeFile(stringsDir, lang, forceGen) {
-  if (lang === 'en')
-    return
-  let fn = 'strings_' + lang + '.js'
-  let fnStrings = path.resolve(stringsDir, fn)
-  let enFn = 'strings_en.js'
-  let stringsLang, stringsEN
-  let currentIds
-  try {
-    stringsEN = require(path.resolve(stringsDir, enFn))
-    stringsLang = require(fnStrings)
-    for (let p in stringsLang) {
-      if (!currentIds) currentIds = {}
-      currentIds[p] = true
-    }
-  } catch (err) {
-    console.log(err.message)
-    if (!stringsEN)
-      return
-    stringsLang = {}
-  }
-  let promises = []
-  for (let p in stringsEN) {
-    if (!stringsLang[p] || forceGen)
-      promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
-  }
-  await Promise.all(promises, { concurrency: 20 })
-
-  // Check if some models/props were deleted
-  let hasChanged = promises.length
-  if (!currentIds  ||  forceGen)
-    hasChanged = true
-  else {
-    for (let p in currentIds) {
-      // Cleanup not used translations
-      if (!stringsEN[p]) {
-        delete stringsLang[p]
-        hasChanged = true
-      }
-    }
-  }
-  if (hasChanged)
-    writeFileAtomic(fnStrings, 'module.exports = ' + JSON.stringify(stringsLang, 0, 2), console.log)
-}
-async function translateText({strings, key, text, lang}) {
-  const results = await translate.translate(text, lang)
-  const translation = results[0];
-  strings[key] = translation
-}
-
-const google_languages = {
-  languages: [
-    {
-      "code": "af",
-      "name": "Afrikaans"
-    },
-    {
-      "code": "ar",
-      "name": "Arabic"
-    },
-    {
-      "code": "bn",
-      "name": "Bengali"
-    },
-    {
-      "code": "bs",
-      "name": "Bosnian"
-    },
-    {
-      "code": "bg",
-      "name": "Bulgarian"
-    },
-    {
-      "code": "ca",
-      "name": "Catalan"
-    },
-    {
-      "code": "ceb",
-      "name": "Cebuano"
-    },
-    {
-      "code": "ny",
-      "name": "Chichewa"
-    },
-    {
-      "code": "zh",
-      "name": "Chinese (Simplified)"
-    },
-    {
-      "code": "zh-TW",
-      "name": "Chinese (Traditional)"
-    },
-    {
-      "code": "co",
-      "name": "Corsican"
-    },
-    {
-      "code": "hr",
-      "name": "Croatian"
-    },
-    {
-      "code": "cs",
-      "name": "Czech"
-    },
-    {
-      "code": "da",
-      "name": "Danish"
-    },
-    {
-      "code": "nl",
-      "name": "Dutch"
-    },
-    {
-      "code": "en",
-      "name": "English"
-    },
-    {
-      "code": "eo",
-      "name": "Esperanto"
-    },
-    {
-      "code": "et",
-      "name": "Estonian"
-    },
-    {
-      "code": "tl",
-      "name": "Filipino"
-    },
-    {
-      "code": "fi",
-      "name": "Finnish"
-    },
-    {
-      "code": "fr",
-      "name": "French"
-    },
-    {
-      "code": "fy",
-      "name": "Frisian"
-    },
-    {
-      "code": "gl",
-      "name": "Galician"
-    },
-    {
-      "code": "ka",
-      "name": "Georgian"
-    },
-    {
-      "code": "de",
-      "name": "German"
-    },
-    {
-      "code": "el",
-      "name": "Greek"
-    },
-    {
-      "code": "gu",
-      "name": "Gujarati"
-    },
-    {
-      "code": "ht",
-      "name": "Haitian Creole"
-    },
-    {
-      "code": "ha",
-      "name": "Hausa"
-    },
-    {
-      "code": "haw",
-      "name": "Hawaiian"
-    },
-    {
-      "code": "iw",
-      "name": "Hebrew"
-    },
-    {
-      "code": "hi",
-      "name": "Hindi"
-    },
-    {
-      "code": "hmn",
-      "name": "Hmong"
-    },
-    {
-      "code": "hu",
-      "name": "Hungarian"
-    },
-    {
-      "code": "is",
-      "name": "Icelandic"
-    },
-    {
-      "code": "ig",
-      "name": "Igbo"
-    },
-    {
-      "code": "id",
-      "name": "Indonesian"
-    },
-    {
-      "code": "ga",
-      "name": "Irish"
-    },
-    {
-      "code": "it",
-      "name": "Italian"
-    },
-    {
-      "code": "ja",
-      "name": "Japanese"
-    },
-    {
-      "code": "jw",
-      "name": "Javanese"
-    },
-    {
-      "code": "kn",
-      "name": "Kannada"
-    },
-    {
-      "code": "kk",
-      "name": "Kazakh"
-    },
-    {
-      "code": "km",
-      "name": "Khmer"
-    },
-    {
-      "code": "ko",
-      "name": "Korean"
-    },
-    {
-      "code": "ku",
-      "name": "Kurdish (Kurmanji)"
-    },
-    {
-      "code": "ky",
-      "name": "Kyrgyz"
-    },
-    {
-      "code": "lo",
-      "name": "Lao"
-    },
-    {
-      "code": "la",
-      "name": "Latin"
-    },
-    {
-      "code": "lv",
-      "name": "Latvian"
-    },
-    {
-      "code": "lt",
-      "name": "Lithuanian"
-    },
-    {
-      "code": "lb",
-      "name": "Luxembourgish"
-    },
-    {
-      "code": "mk",
-      "name": "Macedonian"
-    },
-    {
-      "code": "mg",
-      "name": "Malagasy"
-    },
-    {
-      "code": "ms",
-      "name": "Malay"
-    },
-    {
-      "code": "ml",
-      "name": "Malayalam"
-    },
-    {
-      "code": "mt",
-      "name": "Maltese"
-    },
-    {
-      "code": "mi",
-      "name": "Maori"
-    },
-    {
-      "code": "mr",
-      "name": "Marathi"
-    },
-    {
-      "code": "mn",
-      "name": "Mongolian"
-    },
-    {
-      "code": "my",
-      "name": "Myanmar (Burmese)"
-    },
-    {
-      "code": "ne",
-      "name": "Nepali"
-    },
-    {
-      "code": "no",
-      "name": "Norwegian"
-    },
-    {
-      "code": "ps",
-      "name": "Pashto"
-    },
-    {
-      "code": "fa",
-      "name": "Persian"
-    },
-    {
-      "code": "pl",
-      "name": "Polish"
-    },
-    {
-      "code": "pt",
-      "name": "Portuguese"
-    },
-    {
-      "code": "pa",
-      "name": "Punjabi"
-    },
-    {
-      "code": "ro",
-      "name": "Romanian"
-    },
-    {
-      "code": "ru",
-      "name": "Russian"
-    },
-    {
-      "code": "sm",
-      "name": "Samoan"
-    },
-    {
-      "code": "gd",
-      "name": "Scots Gaelic"
-    },
-    {
-      "code": "sr",
-      "name": "Serbian"
-    },
-    {
-      "code": "st",
-      "name": "Sesotho"
-    },
-    {
-      "code": "sn",
-      "name": "Shona"
-    },
-    {
-      "code": "sd",
-      "name": "Sindhi"
-    },
-    {
-      "code": "si",
-      "name": "Sinhala"
-    },
-    {
-      "code": "sk",
-      "name": "Slovak"
-    },
-    {
-      "code": "sl",
-      "name": "Slovenian"
-    },
-    {
-      "code": "so",
-      "name": "Somali"
-    },
-    {
-      "code": "es",
-      "name": "Spanish"
-    },
-    {
-      "code": "su",
-      "name": "Sundanese"
-    },
-    {
-      "code": "sw",
-      "name": "Swahili"
-    },
-    {
-      "code": "sv",
-      "name": "Swedish"
-    },
-    {
-      "code": "tg",
-      "name": "Tajik"
-    },
-    {
-      "code": "ta",
-      "name": "Tamil"
-    },
-    {
-      "code": "te",
-      "name": "Telugu"
-    },
-    {
-      "code": "th",
-      "name": "Thai"
-    },
-    {
-      "code": "tr",
-      "name": "Turkish"
-    },
-    {
-      "code": "uk",
-      "name": "Ukrainian"
-    },
-    {
-      "code": "ur",
-      "name": "Urdu"
-    },
-    {
-      "code": "uz",
-      "name": "Uzbek"
-    },
-    {
-      "code": "vi",
-      "name": "Vietnamese"
-    },
-    {
-      "code": "cy",
-      "name": "Welsh"
-    },
-    {
-      "code": "xh",
-      "name": "Xhosa"
-    },
-    {
-      "code": "yi",
-      "name": "Yiddish"
-    },
-    {
-      "code": "yo",
-      "name": "Yoruba"
-    },
-    {
-      "code": "zu",
-      "name": "Zulu"
-    }
-  ]
-}
