@@ -183,7 +183,8 @@ var OnePropFormMixin = {
         url: auditTrail[0],
         // width,
         // height
-      }
+      },
+      sessionId: result.sessionId
     }
     if (facemap)
       selfie.facemap = facemap
