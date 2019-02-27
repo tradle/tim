@@ -181,7 +181,7 @@ async function writeFile(stringsDir, lang, forceGen) {
 async function translateText({strings, key, text, lang}) {
   const results = await translate.translate(text, lang)
   const translation = results[0];
-  strings[key] = translation
+  strings[key] =  translation.charAt(0).toUpperCase() + translation.slice(1)
 }
 
 /*
