@@ -39,7 +39,6 @@ import { circled } from '../styles/utils'
 import chatStyles from '../styles/chatStyles'
 import Image from './Image'
 
-const MY_PRODUCT = 'tradle.MyProduct'
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
@@ -288,7 +287,7 @@ class FormRequestRow extends Component {
 
     // onPressCall = prop  &&  !prop.allowPicturesFromLibrary ? this.showCamera({prop: prop}) : onPressCall
     let messageBody
-    let isMyProduct = isFormRequest  &&  utils.getModel(resource.form).subClassOf === MY_PRODUCT
+    let isMyProduct = isFormRequest  &&  utils.isMyProduct(resource.form)
     if (prop  ||  isMyProduct  ||  application  ||  resource._documentCreated)
       messageBody = msgContent
     else
@@ -409,7 +408,7 @@ class FormRequestRow extends Component {
     let docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
     let msg;
-    if (document.message  &&  docModel.subClassOf !== FORM)
+    if (document.message  &&  !utils.isForm(docModel))
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     let msgWidth = utils.getMessageWidth(FormRequestRow) - 50
     let headerStyle = {paddingLeft: 10, width: msgWidth}
@@ -418,7 +417,7 @@ class FormRequestRow extends Component {
     // let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
     let displayName
-    if (docModel.subClassOf === MY_PRODUCT)
+    if (utils.isMyProduct(docModel))
       displayName = translate(docModel)
     else
       displayName = utils.getDisplayName(document)
@@ -727,7 +726,7 @@ class FormRequestRow extends Component {
     let sameFormRequestForm
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let { product } = resource
-    let isMyProduct = utils.getModel(resource.form).subClassOf === MY_PRODUCT
+    let isMyProduct = utils.isMyProduct(resource.form)
     if (!resource._documentCreated  &&  product) {
       let multiEntryForms = utils.getModel(product).multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1  &&  productToForms) {
@@ -977,7 +976,7 @@ class FormRequestRow extends Component {
          </View>
       )
     }
-    let zoomIn = {justifyContent: 'center', transform: [{scale: this.springValue}]}
+    let zoomIn = {transform: [{scale: this.springValue}], justifyContent: 'center', paddingLeft: 5, marginLeft: -3}
     let hasSharables = this.hasSharables()
     let content = <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
                     <Animated.View style={zoomIn}>
