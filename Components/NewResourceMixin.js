@@ -183,6 +183,12 @@ var NewResourceMixin = {
       // if (prop  &&  prop.items  &&  prop.items.backlink  &&  eCols[prop.items.backlink])
       //   delete eCols[prop.items.backlink]
     }
+    // Add props for which request for corrections came, if they are not yet added
+    if (formErrors) {
+      for (let p in formErrors)
+        if (eCols.indexOf(p) === -1)
+          eCols.push(p)
+    }
     let required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
     if (validationErrors) {
@@ -226,8 +232,11 @@ var NewResourceMixin = {
           errMessage = errs[p]
       }
       if (!validationErrors  &&  formErrors  &&  formErrors[p]) {
-        if (resource[p] === this.props.resource[p])
+        if (resource[p]  &&  this.props.resource[p]  &&  _.isEqual(resource[p], this.props.resource[p]))
+        // if (resource[p] === this.props.resource[p])
           errMessage = formErrors[p]
+        else if (!resource[p] && !this.props.resource[p])
+           errMessage = formErrors[p]
         else
           delete formErrors[p]
       }
@@ -1008,7 +1017,7 @@ var NewResourceMixin = {
       onChange = this.setChosenValue.bind(this)
     let error = this.state.missedRequiredOrErrorValue  &&  this.state.missedRequiredOrErrorValue[prop.name]
     if (!error  &&  params.errors  &&  params.errors[prop.name])
-      error = params.errors[params.prop.name]
+      error = params.errors[pName]
 
     return <RefPropertyEditor {...this.props}
                              resource={this.state.resource}
