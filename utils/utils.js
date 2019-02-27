@@ -690,13 +690,21 @@ var utils = {
     return subclasses;
   },
   isSubclassOf(type, subType) {
-    if (typeof type === 'string')
-      return utils.getModel(type).subClassOf === subType
+    if (typeof type === 'string') {
+      let m = utils.getModel(type)
+      return utils.isSubclassOf(m, subType)
+    }
     if (type.type)  {
       if (type.type === 'tradle.Model')
-      return type.subClassOf === subType
+        return type.subClassOf === subType
     }
-    return utils.getModel(type[TYPE]).subClassOf === subType
+    let m = utils.getModel(type[TYPE])
+    if (m.subClassOf === subType)
+      return true
+    if (m.subClassOf)
+      return utils.isSubclassOf(m.subClassOf, subType)
+    else
+      return false
   },
   isMyProduct(type) {
     return utils.isSubclassOf(type, MY_PRODUCT)
@@ -708,6 +716,8 @@ var utils = {
     return utils.isSubclassOf(type, VERIFICATION)
   },
   isInlined(m) {
+    if (!m)
+      return false
     if (m.inlined)
       return true
     if (!m.subClassOf)
