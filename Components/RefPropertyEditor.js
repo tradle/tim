@@ -194,7 +194,7 @@ class RefPropertyEditor extends Component {
       <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
         {propLabel}
         {actionItem}
-        {paintError({errors: error && [{pName}: error] || null , prop: prop, paddingBottom: 0})}
+        {paintError({errors: error && {[pName]: error} || null , prop: prop, paddingBottom: 0})}
         {help}
       </View>
     );
@@ -460,7 +460,7 @@ class RefPropertyEditor extends Component {
   }
   chooser(prop, propName,event) {
     let { isRegistration } = this.state
-    let { resource, model, bankStyle, search, navigator, originatingMessage, onChange } = this.props
+    let { resource, model, bankStyle, search, navigator, originatingMessage, onChange, exploreData } = this.props
     if (model  &&  !resource) {
       resource = {};
       resource[TYPE] = model.id;
@@ -486,14 +486,15 @@ class RefPropertyEditor extends Component {
       backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
-        filter:         filter,
+        filter,
+        prop,
+        resource,
+        search,
+        isRegistration,
+        bankStyle,
         isChooser:      true,
-        prop:           prop,
         modelName:      propRef,
-        resource:       resource,
-        search:         search,
-        isRegistration: isRegistration,
-        bankStyle:      bankStyle,
+        isModel:        m.abstract  &&  exploreData,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       onChange
       }
