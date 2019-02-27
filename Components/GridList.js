@@ -376,7 +376,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let params = this.getParamsForBacklinkList(this.props)
     StatusBar.setHidden(false);
     if (isBacklink)
-      Actions.list(params)
+      Actions.exploreBacklink(this.props.resource, prop, true)
+      // Actions.list(params)
     else if (isForwardlink)
       Actions.getItem({resource, search, action: 'list', forwardlink})
     else if (isChooser) {
@@ -479,8 +480,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
         navigator.push(route)
       return
     }
-    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
+    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
     if (action === 'list') {
+      if (exploreData)
+        Actions.hideModal()
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
         if (params.alert)
@@ -508,7 +511,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
             if (!m.interfaces  ||  m.interfaces.indexOf(modelName) === -1)
               return
           }
-          else if (m.subClassOf !== modelName) {
+          else if (!utils.isSubclassOf(m, modelName)) {
             if (!isForwardlink  ||  !resource  ||  resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
               return
             // Application forward links
@@ -529,7 +532,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       let type = list[0][TYPE];
       if (type  !== modelName  &&  !isBacklink  &&  !isForwardlink) {
         let m = utils.getModel(type);
-        if (m.subClassOf != modelName)
+        if (!utils.isSubclassOf(m, modelName))
           return;
       }
       if (multiChooser  &&  !isChooser) {
@@ -795,9 +798,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let rModel = utils.getModel(rType)
     let isStub = utils.isStub(resource)
     let isFormError = rType === FORM_ERROR
-    let isForm = rModel.subClassOf === FORM
+    let isForm = utils.isForm(rModel)
 
-    let isVerification = rType === VERIFICATION
+    let isVerification = utils.isVerification(rModel)
     let title
     if (isVerification) {
       if (isStub)
@@ -1011,12 +1014,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let filterLower = filter && filter.toLowerCase()
     models.forEach((mm) => {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
-          !mm.isInterface                &&
-          !mm.inlined                    &&
-           mm.id !== MESSAGE             &&
-           mm.subClassOf !== ENUM        &&
-           mm.subClassOf !== METHOD      &&
-           mm.subClassOf !== FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
+          !mm.isInterface                  &&
+          !mm.inlined                      &&
+           mm.id !== MESSAGE               &&
+          !utils.isEnum(mm)                &&
+          !utils.isSubclassOf(mm, METHOD)  &&
+          !utils.isSubclassOf(mm, FINANCIAL_PRODUCT)) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
           if (translate(mm).toLowerCase().indexOf(filterLower) !== -1)
             mArr.push(mm)
@@ -1144,6 +1147,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
 console.log('GridList.searchWithFilter: filterResource', filterResource)
     this.setState({resource: filterResource})
     Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true})
+    Actions.showModal({title: translate('loading'), showIndicator: true})
   }
   getNextKey(resource) {
     return resource[ROOT_HASH] + '_' + cnt++
@@ -1181,9 +1185,9 @@ console.log('GridList.searchWithFilter: filterResource', filterResource)
     //   return
     // debugger
     let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
-    if (endCursor === prevEndCursor  &&  utils.getModel(this.props.modelName).subClassOf !== ENUM)
-      return
     let { modelName, search, resource } = this.props
+    if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
+      return
     this.state.refreshing = true
 console.log('GridList._loadMoreContentAsync: filterResource', resource)
 
@@ -1325,7 +1329,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (prop  &&  model.subClassOf === FORM) {
+    if (prop  &&  utils.isForm(model)) {
       if (!r)
         r = {}
       r[TYPE] = prop.ref || prop.items.ref;
