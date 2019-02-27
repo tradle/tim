@@ -111,7 +111,7 @@ class MessageRow extends Component {
 
     let noMessage = !message  ||  !message.length;
 
-    let isCheck = model.subClassOf === CHECK
+    let isCheck = utils.isSubclassOf(model, CHECK)
 
     let noBg = isCheck  ||  (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
 
@@ -403,7 +403,7 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return ({message: str})
     }
-    if (model.subClassOf === CHECK) {
+    if (utils.isSubclassOf(model, CHECK)) {
       let checkIcon
       if (resource.status) {
         let statusId = this.getEnumID(resource.status.id)
@@ -575,7 +575,7 @@ class MessageRow extends Component {
     let properties = model.properties;
     let onPressCall;
 
-    let isMyProduct = model.subClassOf === MY_PRODUCT
+    let isMyProduct = utils.isMyProduct(model)
     let isSimpleMessage = model.id === SIMPLE_MESSAGE
     let isConfirmation = model.id === CONFIRMATION
 
@@ -663,7 +663,7 @@ class MessageRow extends Component {
           if (msgModel) {
             // if (this.props.shareableResources  &&  !isSimpleMessage)
             //   style = /*isSimpleMessage ? chatStyles.resourceTitle : */chatStyles.description;
-            let shareMyProduct = msgModel.subClassOf === MY_PRODUCT
+            let shareMyProduct = utils.isMyProduct(msgModel)
             if (shareMyProduct) {
               color = {color: '#aaaaaa'}
               onPressCall = null

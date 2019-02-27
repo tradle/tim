@@ -566,7 +566,7 @@ class NewResource extends Component {
       if (!props[p]  ||  !props[p].ref)
         continue
       let m = utils.getModel(props[p].ref)
-      if (m.subClassOf  &&  m.subClassOf === ENUM)
+      if (utils.isEnum(m))
         json[p] = resource[p]
     }
   }
@@ -588,36 +588,6 @@ class NewResource extends Component {
           let ref = props[p].ref
           if (ref) {
             this.checkRef(v, props[p], json, missedRequiredOrErrorValue)
-            // let rModel = utils.getModel(ref)
-            // if (ref === 'tradle.Photo')
-            //   return
-            // if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
-            //   let units = props[p].units
-            //   if (units)
-            //     v = v.value
-            //   else {
-            //     if (v.value === '')
-            //       v = null
-            //     delete json[p]
-            //   }
-            //   return
-            // }
-            // if (ref === MONEY) {
-            //   if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
-            //     missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-            //     return
-            //   }
-            //   if (!v.currency) {
-            //     if (resource[p].currency)
-            //       v.currency = resource[p].currency
-            //     // else if (currency)
-            //     //   v.currency = currency
-            //     else {
-            //       missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-            //       return
-            //     }
-            //   }
-            // }
           }
           else if (props[p].type === 'array'  &&  !v.length) {
             missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
@@ -654,7 +624,7 @@ class NewResource extends Component {
     if (ref === PHOTO)
       return
     let rModel = utils.getModel(ref)
-    if (rModel.subClassOf === ENUM)
+    if (utils.isEnum(rModel))
       return
     let resource = this.state.resource
     if (ref === MONEY) {

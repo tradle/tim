@@ -49,6 +49,7 @@ import ConversationsIcon from './ConversationsIcon'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
 const BOOKMARK = 'tradle.Bookmark'
+const MY_PRODUCT =  'tradle.MyProduct'
 
 const LIMIT = 10
 const SCAN_QR_CODE_VIEW = 16
@@ -421,7 +422,7 @@ class ResourceList extends Component {
         return
       if (params.list  &&  params.list.length) {
         let m = utils.getModel(params.list[0][TYPE])
-        if (m.id !== modelName  &&  m.subClassOf !== modelName)
+        if (m.id !== modelName  &&  !utils.isSubclassOf(m, modelName))
           return
       }
     }
@@ -436,7 +437,7 @@ class ResourceList extends Component {
       let type = list[0][TYPE];
       if (type  !== modelName) {
         let m = utils.getModel(type);
-        if (!m.subClassOf  ||  m.subClassOf !== modelName)
+        if (!m.subClassOf  ||  !utils.isSubclassOf(m, modelName))
           return;
       }
       if (this.props.multiChooser  &&  !this.props.isChooser) {
@@ -819,9 +820,9 @@ class ResourceList extends Component {
     if (model.isInterface)
       model = utils.getModel(utils.getType(resource))
  // || (model.id === FORM)
-    let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
-    let isForm = model.id === FORM || model.subClassOf === FORM
-    let isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
+    let isVerification = model.id === VERIFICATION  ||  utils.isVerification(model)
+    let isForm = model.id === FORM || utils.isForm(model)
+    let isMyProduct = model.id === MY_PRODUCT  ||  utils.isMyProduct(model)
     let isSharedContext = utils.isContext(model)  &&  utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
@@ -1015,7 +1016,7 @@ class ResourceList extends Component {
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (this.props.prop  &&  model.subClassOf === FORM) {
+    if (this.props.prop  &&  utils.isForm(model)) {
       if (!r)
         r = {}
       r[TYPE] = this.props.prop.ref || this.props.prop.items.ref;

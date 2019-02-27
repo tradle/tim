@@ -29,7 +29,7 @@ class StringChooser extends Component {
   }
 
   selectResource(modelId) {
-    if (!this.props.isReplace)
+    if (!this.props.isReplace  &&  !this.props.notModel)
       this.props.navigator.pop();
     this.props.callback(modelId)
   }
@@ -37,13 +37,13 @@ class StringChooser extends Component {
     if (typeof product === 'string')
       product = { product }
     let { id, title, description } = product
-
-    let model = utils.getModel(id)
-    if (!model)
-      return null
-    if (!title)
-      title = translate(model)
-
+    if (!this.props.notModel) {
+      let model = utils.getModel(id)
+      if (!model)
+        return null
+      if (!title)
+        title = translate(model)
+    }
     return (
       <StringRow
         onSelect={() => this.selectResource(id)}

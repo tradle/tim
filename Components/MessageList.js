@@ -60,7 +60,7 @@ import BackgroundImage from './BackgroundImage'
 
 var LIMIT = 20
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH } = constants
-const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM } = TYPES
+const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE } = TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -407,7 +407,7 @@ class MessageList extends Component {
       state.currentContext = currentContext
     if (productToForms)
       state.productToForms = productToForms
-    else if (utils.getModel(rtype).subClassOf === FORM  &&  resource._context) {
+    else if (utils.isForm(rtype)  &&  resource._context) {
       let product = resource._context.requestFor
       if (this.state.productToForms)
         productToForms = _.cloneDeep(this.state.productToForms)
@@ -614,7 +614,7 @@ class MessageList extends Component {
       //   showEdit = true
     }
     else
-      showEdit = !model.notEditable  &&   r._latest  && !application  &&  model.subClassOf !== MY_PRODUCT
+      showEdit = !model.notEditable  &&   r._latest  && !application  &&  !utils.isMyProduct(model)
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
@@ -702,7 +702,7 @@ class MessageList extends Component {
       navigator: navigator,
       switchChat: isContext ? this.switchChat.bind(this, resource) : null
     }
-    if (model.subClassOf === 'tradle.MyProduct')
+    if (utils.isMyProduct(model))
       return  <MyProductMessageRow {...props} />
 
     let moreProps = {
@@ -724,7 +724,7 @@ class MessageList extends Component {
       return  <VerificationMessageRow {...props} />
     }
 
-    if (model.subClassOf === FORM || utils.isItem(model))
+    if (utils.isForm(model) || utils.isItem(model))
       return <FormMessageRow {...props} />
 
     props.isLast = rowId === this.state.list.length - 1

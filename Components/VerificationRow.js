@@ -92,8 +92,8 @@ class VerificationRow extends Component {
     let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName, multiChooser, bankStyle } = this.props
     let rType = utils.getType(resource)
     let model = utils.getModel(rType);
-    let isMyProduct = model.subClassOf === MY_PRODUCT
-    let isForm = model.subClassOf === FORM
+    let isMyProduct = utils.isMyProduct(model)
+    let isForm = utils.isForm(model)
     let isBookmark = model.id === BOOKMARK
     let isApplicationSubmission = model.id === APPLICATION_SUBMISSION
     let isVerification = resource.document != null
@@ -163,7 +163,7 @@ class VerificationRow extends Component {
     }
 
     let date
-    let isCheck = model.subClassOf === CHECK
+    let isCheck = utils.isSubclassOf(model, CHECK)
     let isStub = utils.isStub(resource)
     if (!isStub  &&  !isBookmark  &&  r) {
       let dateP
@@ -207,7 +207,7 @@ class VerificationRow extends Component {
         title = translate(utils.getModel(utils.getType(resource.submission)))
       // Case for forms on Application. forms has a type og ApplicationSubmittion but the component
       // received the submission itself
-      else if (rType !== modelName  &&  model.subClassOf !== modelName)
+      else if (rType !== modelName  &&  !utils.isSubclassOf(model, modelName))
         title = translate(model)
       else if (this.props.search) {
         if (isVerification)
@@ -586,7 +586,7 @@ class VerificationRow extends Component {
           }
           else if (resource[v].title)
             val = resource[v].title
-          else if (utils.getModel(ref).subClassOf === ENUM) {
+          else if (utils.isEnum(ref)) {
             val = ''
             resource[v].forEach((r, i) => {
               if (i)
@@ -839,110 +839,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = VerificationRow;
-  // icon: {
-  //   width: 20,
-  //   height: 20,
-  //   borderWidth: 1,
-  //   borderColor: '#7AAAc3',
-  //   borderRadius: 10,
-  //   marginRight: 10,
-  //   alignSelf: 'center',
-  // },
-
-  // formatDoc(model, resource, renderedRow) {
-  //   var viewCols = model.gridCols || model.viewCols;
-  //   if (!viewCols)
-  //     return
-  //   var verPhoto;
-  //   var vCols = [];
-  //   var self = this;
-  //   var model = utils.getModel(resource[TYPE] || resource.id);
-
-  //   var properties = model.properties;
-  //   var noMessage = !resource.message  ||  !resource.message.length;
-  //   var onPressCall;
-
-  //   var isSimpleMessage = model.id === SIMPLE_MESSAGE;
-  //   var style = styles.resourceTitle
-  //   var labelStyle = styles.resourceTitleL
-  //   viewCols.forEach(function(v) {
-  //     if (properties[v].type === 'array'  ||  properties[v].type === 'date')
-  //       return;
-  //     if (!resource[v]  &&  !properties[v].displayAs)
-  //       return
-
-  //     var units = properties[v].units && properties[v].units.charAt(0) !== '['
-  //               ? ' (' + properties[v].units + ')'
-  //               : ''
-
-  //     if (properties[v].ref) {
-  //       if (resource[v]) {
-  //         let val
-  //         if (properties[v].ref === MONEY)
-  //           val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
-  //         else if (resource[v].title)
-  //           val = resource[v].title
-  //         else
-  //           return
-
-  //         vCols.push(
-  //           <View style={styles.refPropertyRow} key={self.getNextKey()}>
-  //             <Text style={labelStyle}>{properties[v].title + units}</Text>
-  //             <Text style={style}>{val}</Text>
-  //           </View>
-  //         );
-  //       }
-
-  //       return;
-  //     }
-  //     let row
-  //     if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-  //       row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
-  //     else if (!model.autoCreate) {
-  //       var val = (properties[v].displayAs)
-  //               ? utils.templateIt(properties[v], resource)
-  //               : properties[v].type === 'object' ? null : resource[v];
-  //       if (!val)
-  //         return
-  //       let row = <Text style={style} key={self.getNextKey()}>{val}</Text>
-  //       vCols.push(
-  //         <View style={styles.refPropertyRow} key={self.getNextKey()}>
-  //           <Text style={labelStyle}>{properties[v].title + units}</Text>
-  //           {row}
-  //         </View>
-  //       )
-  //       return
-  //     }
-  //     else {
-  //       if (!resource[v]  ||  !resource[v].length)
-  //         return;
-  //       var msgParts = utils.splitMessage(resource[v]);
-  //       // Case when the needed form was sent along with the message
-  //       if (msgParts.length === 2) {
-  //         var msgModel = utils.getModel(msgParts[1]);
-  //         if (msgModel) {
-  //           vCols.push(<View key={self.getNextKey()} style={styles.msgParts}>
-  //                        <Text style={style}>{msgParts[0]}</Text>
-  //                        <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.title}</Text>
-  //                      </View>);
-  //           return;
-  //         }
-  //       }
-  //       row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
-  //     }
-  //     vCols.push(
-  //       <View style={styles.refPropertyRow} key={self.getNextKey()}>
-  //         <Text style={labelStyle}>{properties[v].title + units}</Text>
-  //         {row}
-  //       </View>
-  //     );
-  //   });
-  //   // if (model.style)
-  //   //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
-
-  //   if (vCols  &&  vCols.length) {
-  //     vCols.forEach(function(v) {
-  //       renderedRow.push(v);
-  //     });
-  //   }
-  // }

@@ -25,7 +25,6 @@ const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
-const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
@@ -38,8 +37,6 @@ var {
   MONEY,
   VERIFICATION,
   PROFILE,
-  ENUM,
-  FORM
 } = constants.TYPES
 
 var cnt = 0;
@@ -67,7 +64,7 @@ var RowMixin = {
       }
       else {
         let m = utils.getModel(prop.ref)
-        if (m.subClassOf === ENUM) {
+        if (utils.isEnum(m)) {
           // let tVal = (typeof val === 'string') && val || val.title
           val = translateEnum(resource[prop.name])
         }
@@ -96,8 +93,8 @@ var RowMixin = {
       )
     }
     else {
-      let isMyProduct = model.subClassOf === MY_PRODUCT
-      let isForm = model.subClassOf === FORM
+      let isMyProduct = utils.isMyProduct(model)
+      let isForm = utils.isForm(model)
       let isMyMessage = this.isMyMessage()
       if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, { paddingVertical: 3}]
@@ -194,64 +191,12 @@ var RowMixin = {
       return
     if (application)
       return false
-    if (utils.getModel(resource[TYPE]).subClassOf == MY_PRODUCT) {
+    if (utils.isMyProduct(resource[TYPE])) {
       let org = resource.from.organization
       if (org  &&  utils.getId(resource.from.organization) !== utils.getId(this.props.to))
         return true
     }
     return utils.isMyMessage({resource, to})
-    // if (r._inbound)
-    //   return false
-    // if (r._outbound)
-    //   return true
-    // let fromId = utils.getId(r.from);
-    // let toId = utils.getId(r.to);
-    // let me = utils.getMe()
-    // let meId = utils.getId(me)
-    // if (fromId === meId)
-    //   return true;
-    // if (toId === meId)
-    //   return false
-
-    // if (me.isEmployee) {
-    //   if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
-    //     return false
-    //   if (r._context) {
-    //     // check if the employee is the applicant
-    //     let cFrom = r._context.from
-    //     if (utils.getId(cFrom) === meId)
-    //       return true
-    //     if (cFrom.organization) {
-    //       if (cFrom.organization.id === me.organization.id)
-    //         return utils.getId(r._context.to) !== meId
-    //     }
-    //   }
-    //   let myOrgId = utils.getId(me.organization)
-    //   // bot -> bot
-    //   if (r.from.organization  &&
-    //       r.to.organization    &&
-    //       r.from.organization.id === r.to.organization.id  &&
-    //       r.from.organization.id === myOrgId) {
-    //     return false
-    //   }
-
-    //   if (r.from.organization) {
-    //     if (myOrgId === utils.getId(r.from.organization)) {
-    //       if (to  &&  utils.getId(to) === myOrgId)
-    //         return false
-    //       else
-    //         return true
-    //     }
-    //   }
-    //   if (r._context) {
-    //     if (r._context.from) {
-    //       let fOrg = r._context.from.organization
-    //       let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
-    //       if (applier  &&  fOrg === utils.getId(r.from.organization))
-    //         return true
-    //     }
-    //   }
-    // }
   },
   isShared() {
     let { resource, to, application } = this.props

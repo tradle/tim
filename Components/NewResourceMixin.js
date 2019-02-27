@@ -92,7 +92,7 @@ var NewResourceMixin = {
 
     let dModel = data  &&  utils.getModel(data[TYPE])
     if (!utils.isEmpty(data)) {
-      if (!meta.items && data[TYPE] !== meta.id && dModel.subClassOf !== meta.id) {
+      if (!meta.items && data[TYPE] !== meta.id && !utils.isSubclassOf(dModel, meta.id)) {
         let interfaces = meta.interfaces;
         if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
            return;
@@ -652,12 +652,6 @@ var NewResourceMixin = {
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
     let label = translate(prop, model)
-    // if (!this.state.isRegistration  &&  !this.state.resource[prop.name]) {
-    //   if (Platform.OS === 'web')
-    //     label = '✄ ' + label
-    //   else
-    //     label = '✂' + label
-    // }
 
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
@@ -713,7 +707,6 @@ var NewResourceMixin = {
     if (!prop.description)
       return <View style={styles.help1}/>
 
-    // borderBottomColor: '#cccccc',
     return (
       <View style={styles.help}>
         <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, false)}>
@@ -721,12 +714,6 @@ var NewResourceMixin = {
         </Markdown>
       </View>
     )
-    // else
-    //   return (
-    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title}</Text>
-    //     </View>
-    //   )
   },
 
   paintError(params) {
@@ -828,10 +815,6 @@ var NewResourceMixin = {
         {help}
       </View>
     )
-
-// let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
-// <SwitchSelector options={options} initial={0} onPress={value => console.log("Call onPress with value: ", value)}/>
-// <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={linkColor} style={styles.contentLeft}/>
   },
   myDateTemplate(params) {
     let { prop, required, component } = params
@@ -1165,13 +1148,6 @@ var NewResourceMixin = {
         }
         else if (prop.items.ref) {
           resource[propName] = null
-          // if (resource[propName]) {
-          //   let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
-          //   if (!some)
-          //     resource[propName].push(value)
-          // }
-          // else
-          //   resource[propName] = [value]
         }
         else {
           delete resource[propName]
@@ -1216,7 +1192,7 @@ var NewResourceMixin = {
 
     this.setState(state);
     if (!search) {
-      if (model.subClassOf === FORM)
+      if (utils.isForm(model))
         Actions.getRequestedProperties({resource: r, currentResource: currentR})
       if (!utils.isImplementing(r, INTERSECTION))
         Actions.saveTemporary(r)
@@ -1353,15 +1329,6 @@ var NewResourceMixin = {
       this.floatingProps[propName][enumPropName] = value[Object.keys(value)[0]]
     }
 
-    // if (this.state.isPrefilled) {
-    //   let props = (this.props.model  ||  this.props.metadata).properties
-    //   if (props[propName].ref  &&  props[propName].ref === MONEY) {
-    //     if (this.floatingProps  &&  this.floatingProps[propName]  &&  !this.floatingProps[propName].value  &&  resource[propName]  &&  resource[propName].value)
-    //       this.floatingProps[propName].value = resource[propName].value
-    //   }
-    // }
-
-    // resource[propame] = value
     let data = this.refs.form.refs.input.state.value;
     if (data) {
       for (let p in data)
@@ -1424,25 +1391,6 @@ var NewResourceMixin = {
         if (!(new RegExp(prop.pattern).test(value[p])))
           err[prop.name] = translate('invalidProperty', prop.title)
       }
-      // else if (prop.patterns) {
-      //   let cprops = []
-      //   for (let pr in properties) {
-      //     if (properties[pr].ref && properties[pr].ref === 'tradle.Country')
-      //       cprops.push(pr)
-      //   }
-      //   if (!cprops.length)
-      //     continue
-
-      //   let patternCountry = cprops.map((p) => {
-      //     let val = value[p]  ||  this.props.resource[p]
-      //     return val ? val : undefined
-      //   })
-      //   if (!patternCountry)
-      //     continue
-      //   let pattern = prop.patterns[patternCountry[0]]
-      //   if (pattern  &&  !(new RegExp(pattern).test(value[p])))
-      //     err[prop.name] = 'Invalid ' + prop.title
-      // }
     }
     if (deleteProps)
       deleteProps.forEach((p) => {
@@ -1720,9 +1668,6 @@ var styles= StyleSheet.create({
   bottom10: {
     paddingBottom: 10
   },
-  // contentLeft: {
-  //   justifyContent: 'flex-end'
-  // },
   floatingLabel: {
     marginTop: 20
   },
@@ -1733,81 +1678,3 @@ var styles= StyleSheet.create({
 })
 
 module.exports = NewResourceMixin
-// function formatDate (date) {
-//   if (typeof date === 'string') {
-//     return dateformat(date, 'mmm dS, yyyy')
-//   }
-
-//   return dateformat(new Date(date), 'UTC:mmm dS, yyyy')
-// }
-
-// function getDocumentTypeFromTitle (title='') {
-//   title = title.toLowerCase()
-//   const match = title.match(/(licen[cs]e|passport)/)
-//   if (!match) return
-
-//   return match[1] === 'passport' ? 'passport' : 'license'
-// }
-  // showSignatureView1(prop) {
-  //   const { navigator, bankStyle } = this.props
-  //   let sigView
-  //   navigator.push({
-  //     title: translate(prop), //m.title,
-  //     // titleTextColor: '#7AAAC3',
-  //     id: 32,
-  //     component: SignatureView,
-  //     backButtonTitle: 'Back',
-  //     rightButtonTitle: 'Done',
-  //     onRightButtonPress: () => {
-  //       const sig = sigView.getSignature()
-  //       navigator.pop()
-  //       this.onChangeText(prop, sig.url)
-  //     },
-  //     passProps: {
-  //       ref: ref => {
-  //         sigView = ref
-  //       },
-  //       bankStyle,
-  //       sigViewStyle: bankStyle
-  //     }
-  //   })
-  // },
-
-  // showSignatureView(prop) {
-  //   const { navigator } = this.props
-  //   navigator.push({
-  //     title: translate(prop), //m.title,
-  //     // titleTextColor: '#7AAAC3',
-  //     id: 32,
-  //     component: SignatureView,
-  //     backButtonTitle: 'Back',
-  //     rightButtonTitle: 'Done',
-  //     passProps: {
-  //       value:          this.state.resource[prop.name] || '',
-  //       style:          this.props.bankStyle,
-  //       onSignature:    ({ url, width, height }) => {
-  //         navigator.pop()
-  //         this.onChangeText(prop, url)
-  //       }
-  //     }
-  //   })
-  // },
-  // scrollDown (){
-  //   if (this.refs  &&  this.refs.scrollView) {
-  //      this.refs.scrollView.scrollTo(Dimensions.get('window').height * 2/3);
-  //   }
-  // },
-  // setting chosen from the list property on the resource like for ex. Organization on Contact
-  // setChosenValues(props) {
-  //   Object.keys(props).map(propName => {
-  //     const value = props[propName]
-  //     this._setChosenValue(propName, value)
-  //   })
-
-  //   this.setState(sttate);
-  //   if (!this.props.search) {
-  //     if (model.subClassOf === FORM)
-  //       Actions.getRequestedProperties({resource: r, currentResource: currentR})
-  //     Actions.saveTemporary(r)
-  //   }
-  // },

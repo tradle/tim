@@ -407,6 +407,151 @@ class RefPropertyEditor extends Component {
       r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')
     this.afterScan(r, prop.name)
   }
+  afterScan(resource, prop) {
+    this.props.floatingProps[prop] = resource[prop]
+    this.props.floatingProps[prop + 'Json'] = resource[prop + 'Json']
+    this.setState({ resource })
+    if (!this.props.search) {
+      Actions.getRequestedProperties({resource})
+      Actions.saveTemporary(resource)
+    }
+  }
+
+  async scanCard(prop) {
+    let cardJson
+    try {
+      const card = await CardIOModule.scanCard({
+        hideCardIOLogo: true,
+        suppressManualEntry: true,
+        // suppressConfirmation: true,
+        scanExpiry: true,
+        requireExpiry: true,
+        requireCVV: true,
+        // requirePostalCode: true,
+        requireCardholderName: true,
+        keepStatusBarStyle: true,
+        suppressScannedCardImage: true,
+        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
+        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
+      })
+      cardJson = utils.clone(card)
+    } catch (err) {
+      // user canceled
+      return
+    }
+
+    let resource = this.props.resource
+    let r = utils.clone(resource)
+    let props = utils.getModel(utils.getType(r)).properties
+    for (let p in cardJson) {
+      if (cardJson[p]  &&  props[p]) {
+        r[p] = cardJson[p]
+        this.props.floatingProps[p] = cardJson[p]
+      }
+    }
+    cardJson = utils.sanitize(cardJson)
+    for (let p in cardJson)
+      if (!cardJson[p])
+        delete cardJson[p]
+    this.props.floatingProps[prop + 'Json'] = cardJson
+    r[prop + 'Json'] = cardJson
+    this.setState({ r })
+    Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
+  }
+  chooser(prop, propName,event) {
+    let { isRegistration } = this.state
+    let { resource, model, bankStyle, search, navigator, originatingMessage, onChange } = this.props
+    if (model  &&  !resource) {
+      resource = {};
+      resource[TYPE] = model.id;
+    }
+
+    let isFinancialProduct = model  &&  utils.isSubclassOf(model, FINANCIAL_PRODUCT)
+    // let value = parent.refs.form.input // this.refs.form.input;
+
+    let filter = event.nativeEvent.text;
+    let propRef = prop.ref || prop.items.ref
+    let m = utils.getModel(propRef);
+    let currentRoutes = navigator.getCurrentRoutes();
+
+    if (originatingMessage) {
+      let pmodel = utils.getLensedModel(originatingMessage)
+      prop = pmodel.properties[propName]
+    }
+
+    let route = {
+      title: this.getPropertyLabel(prop), //m.title,
+      id:  30,
+      component: GridList,
+      backButtonTitle: 'Back',
+      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
+      passProps: {
+        filter:         filter,
+        isChooser:      true,
+        prop:           prop,
+        modelName:      propRef,
+        resource:       resource,
+        search:         search,
+        isRegistration: isRegistration,
+        bankStyle:      bankStyle,
+        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       onChange
+      }
+    }
+    if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
+      route.passProps.multiChooser = true
+      if (resource[propName])
+        route.passProps.pin = resource[propName]
+      route.rightButtonTitle = 'Done'
+      route.passProps.onDone = this.multiChooser.bind(this, prop)
+    }
+
+    navigator.push(route)
+  }
+  multiChooser(prop, values) {
+    const { navigator, onChange } = this.props
+    let vArr = []
+    for (let v in values)
+      vArr.push(values[v])
+    onChange(prop.name, vArr)
+    navigator.pop()
+  }
+
+  async scanQRAndSet(prop) {
+    const result = await this.scanFormsQRCode()
+    Actions.getIdentity({prop, ...result.data })
+  }
+}
+function useImageInput({resource, prop}) {
+  let pName = prop.name
+  const isScan = pName === 'scan'
+  let rtype = utils.getType(resource)
+  let { documentType } = resource
+  if (isWeb()  ||  isSimulator())
+    return isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
+  else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
+    return true
+  else
+    return prop.allowPicturesFromLibrary  &&  (!isScan  ||  !prop.scanner)
+    // return prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
+}
+function getDocumentTypeFromTitle (title='') {
+  title = title.toLowerCase()
+  const match = title.match(/(licen[cs]e|passport|card|other)/)
+  if (!match) return
+  switch (match[1]) {
+  case 'passport':
+    return 'passport'
+  case 'license':
+  case 'licence':
+    return 'license'
+  case 'card':
+    return 'card'
+  case 'other':
+    return 'other'
+  }
+}
+module.exports = RefPropertyEditor;
   // async showBlinkIDScanner(prop) {
   //   let { resource } = this.props
   //   const { documentType, country } = resource
@@ -558,325 +703,3 @@ class RefPropertyEditor extends Component {
   //   this.afterScan(r, prop)
   // }
 
-  afterScan(resource, prop) {
-    this.props.floatingProps[prop] = resource[prop]
-    this.props.floatingProps[prop + 'Json'] = resource[prop + 'Json']
-    this.setState({ resource })
-    if (!this.props.search) {
-      Actions.getRequestedProperties({resource})
-      Actions.saveTemporary(resource)
-    }
-  }
-
-  async scanCard(prop) {
-    let cardJson
-    try {
-      const card = await CardIOModule.scanCard({
-        hideCardIOLogo: true,
-        suppressManualEntry: true,
-        // suppressConfirmation: true,
-        scanExpiry: true,
-        requireExpiry: true,
-        requireCVV: true,
-        // requirePostalCode: true,
-        requireCardholderName: true,
-        keepStatusBarStyle: true,
-        suppressScannedCardImage: true,
-        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
-        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
-      })
-      cardJson = utils.clone(card)
-    } catch (err) {
-      // user canceled
-      return
-    }
-
-    let resource = this.props.resource
-    let r = utils.clone(resource)
-    let props = utils.getModel(utils.getType(r)).properties
-    for (let p in cardJson) {
-      if (cardJson[p]  &&  props[p]) {
-        r[p] = cardJson[p]
-        this.props.floatingProps[p] = cardJson[p]
-      }
-    }
-    cardJson = utils.sanitize(cardJson)
-    for (let p in cardJson)
-      if (!cardJson[p])
-        delete cardJson[p]
-    this.props.floatingProps[prop + 'Json'] = cardJson
-    r[prop + 'Json'] = cardJson
-    this.setState({ r })
-    Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
-  }
-  chooser(prop, propName,event) {
-    let { isRegistration } = this.state
-    let { resource, model, bankStyle, search, navigator, originatingMessage, onChange } = this.props
-    if (model  &&  !resource) {
-      resource = {};
-      resource[TYPE] = model.id;
-    }
-
-    let isFinancialProduct = model  &&  model.subClassOf  &&  model.subClassOf == FINANCIAL_PRODUCT
-    // let value = parent.refs.form.input // this.refs.form.input;
-
-    let filter = event.nativeEvent.text;
-    let propRef = prop.ref || prop.items.ref
-    let m = utils.getModel(propRef);
-    let currentRoutes = navigator.getCurrentRoutes();
-
-    if (originatingMessage) {
-      let pmodel = utils.getLensedModel(originatingMessage)
-      prop = pmodel.properties[propName]
-    }
-
-    let route = {
-      title: this.getPropertyLabel(prop), //m.title,
-      id:  30,
-      component: GridList,
-      backButtonTitle: 'Back',
-      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
-      passProps: {
-        filter:         filter,
-        isChooser:      true,
-        prop:           prop,
-        modelName:      propRef,
-        resource:       resource,
-        search:         search,
-        isRegistration: isRegistration,
-        bankStyle:      bankStyle,
-        returnRoute:    currentRoutes[currentRoutes.length - 1],
-        callback:       onChange
-      }
-    }
-    if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
-      route.passProps.multiChooser = true
-      if (resource[propName])
-        route.passProps.pin = resource[propName]
-      route.rightButtonTitle = 'Done'
-      route.passProps.onDone = this.multiChooser.bind(this, prop)
-    }
-
-    navigator.push(route)
-  }
-  multiChooser(prop, values) {
-    const { navigator, onChange } = this.props
-    let vArr = []
-    for (let v in values)
-      vArr.push(values[v])
-    onChange(prop.name, vArr)
-    navigator.pop()
-  }
-
-  async scanQRAndSet(prop) {
-    const result = await this.scanFormsQRCode()
-    // let {permalink, link, firstName, lastName} = result.data
-    // this.props.parent.setChosenValue(prop.name, {
-    //   id: utils.makeId(IDENTITY, permalink),
-    //   title: firstName
-    // })
-    Actions.getIdentity({prop, ...result.data })
-  }
-}
-function useImageInput({resource, prop}) {
-  let pName = prop.name
-  const isScan = pName === 'scan'
-  let rtype = utils.getType(resource)
-  let { documentType } = resource
-  if (isWeb()  ||  isSimulator())
-    return isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
-  else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
-    return true
-  else
-    return prop.allowPicturesFromLibrary  &&  (!isScan  ||  !prop.scanner)
-    // return prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
-}
-function getDocumentTypeFromTitle (title='') {
-  title = title.toLowerCase()
-  const match = title.match(/(licen[cs]e|passport|card|other)/)
-  if (!match) return
-  switch (match[1]) {
-  case 'passport':
-    return 'passport'
-  case 'license':
-  case 'licence':
-    return 'license'
-  case 'card':
-    return 'card'
-  case 'other':
-    return 'other'
-  }
-}
-module.exports = RefPropertyEditor;
-  // setChosenValue(propName, value) {
-  //   let { metadata, model, search, onChange, floatingProps } = this.props
-  //   let resource = _.cloneDeep(this.props.resource)
-  //   if (typeof propName === 'object')
-  //     propName = propName.name
-
-  //   let setItemCount
-  //   let isItem = metadata != null
-  //   let model = model
-  //   if (!model  &&  isItem)
-  //     model = utils.getModel(metadata.items.ref)
-
-  //   let prop = model.properties[propName]
-  //   let isEnum = prop.ref  &&  utils.isEnum(prop.ref)
-  //   let isMultichooser = search  &&  prop.ref  &&  utils.isEnum(prop.ref)
-  //   let isArray = prop.type === 'array'
-
-  //   let currentR = _.cloneDeep(resource)
-  //   // clause for the items properies - need to redesign
-  //   if (metadata  &&  metadata.type === 'array') {
-  //     if (isEnum)
-  //       value = utils.buildRef(value)
-  //     floatingProps[propName] = value
-  //     resource[propName] = value
-  //   }
-  //   else if (isArray || isMultichooser) {
-  //     let isEnum  = isArray ? utils.isEnum(prop.items.ref) : utils.isEnum(prop.ref)
-  //     if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !isEnum) {
-  //       if (!Array.isArray(value)) {
-  //         if (isArray) {
-  //           if (!resource[propName])
-  //             value = [value]
-  //           else {
-  //             let valueId = utils.getId(value)
-  //             let hasValue = resource[propName].some(r => utils.getId(r) === valueId)
-  //             if (!hasValue) {
-  //               let arr = _.cloneDeep(resource[propName]) || []
-  //               arr.push(value)
-  //               value = arr
-  //             }
-  //           }
-  //         }
-  //         else
-  //           value = [value]
-  //       }
-
-  //       let v = value.map((vv) => {
-  //         let val = utils.buildRef(vv)
-  //         if (vv.photos)
-  //           val.photo = vv.photos[0].url
-  //         return val
-  //       })
-  //       if (!resource[propName]) {
-  //         resource[propName] = []
-  //         resource[propName] = v
-  //       }
-  //       else {
-  //         let arr = resource[propName].filter((r) => {
-  //           return r.id === v.id
-  //         })
-  //         if (!arr.length)
-  //           resource[propName] = v
-  //       }
-
-  //       setItemCount = true
-  //     }
-  //     else  {
-  //       let val
-  //       if (prop.items) {
-  //         if (prop.items.ref  &&  isEnum)
-  //           val = value.map((v) => utils.buildRef(v))
-  //         else
-  //           val = value
-  //       }
-  //       else if (isEnum) {
-  //         if (value.length)
-  //           val = value.map((v) => utils.buildRef(v))
-  //       }
-  //       else
-  //         val = value
-  //       if (value.length) {
-  //         resource[propName] =  val
-  //         floatingProps[propName] = resource[propName]
-  //       }
-  //       else {
-  //         delete resource[propName]
-  //         if (floatingProps)
-  //           delete floatingProps[propName]
-  //       }
-  //     }
-  //   }
-  //   else {
-  //     let id = utils.getId(value)
-  //     resource[propName] = value[ROOT_HASH] ?  utils.buildRef(value) : value
-
-  //     floatingProps[propName] = resource[propName]
-
-  //     let data = this.refs.form.refs.input.state.value;
-  //     if (data) {
-  //       for (let p in data)
-  //         if (!resource[p])
-  //           resource[p] = data[p];
-  //     }
-  //   }
-  //   let state = {
-  //     resource: resource,
-  //     prop: propName
-  //   }
-  //   if (this.state.missedRequiredOrErrorValue)
-  //     delete this.state.missedRequiredOrErrorValue[propName]
-  //   if (setItemCount)
-  //     state.itemsCount = resource[propName].length
-
-  //   if (value.photos)
-  //     state[propName + '_photo'] = value.photos[0]
-  //   else if (model  && model.properties[propName].ref === PHOTO)
-  //     state[propName + '_photo'] = value
-  //   state.inFocus = propName
-
-
-  //   let r = _.cloneDeep(resource)
-  //   for (let p in floatingProps)
-  //     r[p] = floatingProps[p]
-
-  //   this.setState(state);
-  //   onChange(state)
-  //   if (!search) {
-  //     if (model.subClassOf === FORM)
-  //       Actions.getRequestedProperties({resource: r, currentResource: currentR})
-  //     if (!utils.isImplementing(r, INTERSECTION))
-  //       Actions.saveTemporary(r)
-  //   }
-  // }
-  // onTakePicture(params, data) {
-  //   if (!data)
-  //     return
-  //   let editProps = utils.getEditableProperties(this.props.resource)
-  //   if (editProps.length  &&  editProps.length === 1)
-  //   // if (utils.isOnePropForm(this.props.resource))
-  //     utils.onTakePic(params.prop, data, this.props.originatingMessage)
-  //   else {
-  //     data.url = data.data
-  //     delete data.data
-  //     this.props.setChosenValue(params.prop, data)
-  //   }
-
-  //   this.props.navigator.pop()
-  // }
-  // async scanPassport(resource) {
-  //   // 1. start a scan
-  //   // 2. press the back of your android phone against the passport
-  //   // 3. wait for the scan(...) Promise to get resolved/rejected
-  //   try {
-  //     // const {
-  //     //   firstName,
-  //     //   lastName,
-  //     //   gender,
-  //     //   issuer,
-  //     //   nationality,
-  //     //   photo
-  //     // } =
-  //     return await scan({
-  //       // yes, you need to know a bunch of data up front
-  //       // this is data you can get from reading the MRZ zone of the passport
-  //       documentNumber: resource.documentNumber,
-  //       dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
-  //       dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
-  //     })
-  //   } catch (err) {
-  //     debugger
-  //   }
-  // }
