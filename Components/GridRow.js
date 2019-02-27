@@ -34,7 +34,6 @@ var {
 var {
   PROFILE,
   FORM,
-  ENUM,
   MONEY
 } = constants.TYPES
 
@@ -180,7 +179,7 @@ class GridRow extends Component {
       let m = utils.getModel(modelName)
       let rModel = utils.getModel(resource[TYPE])
       let typeTitle
-      if (rModel.id !== m.id  &&  rModel.subClassOf === m.id)
+      if (rModel.id !== m.id  &&  utils.isSubclassOf(rModel, m.id))
         typeTitle = <Text style={styles.type}>{translate(rModel)}</Text>
       let cellStyle = {paddingVertical: 5, paddingLeft: 7}
       cols = [<View style={cellStyle}>
@@ -258,7 +257,7 @@ class GridRow extends Component {
         let title = utils.getDisplayName(resource[pName])
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
 
-        if (refM.subClassOf === ENUM) {
+        if (utils.isEnum(refM)) {
           let eVal = refM.enum.find(r => r.id === this.getEnumID(resource[pName].id))
           if (eVal) {
             let { icon, color } = eVal
@@ -280,25 +279,6 @@ class GridRow extends Component {
                   {row}
                 </View>
         }
-      //   if (refM.subClassOf !== ENUM) {
-      //     let isMessage = utils.isMessage(resource)
-      //     row = <TouchableOpacity onPress={() => {
-      //             this.props.navigator.push({
-      //               title: utils.getDisplayName(resource),
-      //               id: isMessage ? 5 : 3,
-      //               component: isMessage ?  MessageView : ResourceView,
-      //               // titleTextColor: '#7AAAC3',
-      //               backButtonTitle: 'Back',
-      //               passProps: {
-      //                 bankStyle: this.props.bankStyle,
-      //                 search: this.props.search,
-      //                 resource: resource[pName]
-      //               }
-      //             });
-      //             }}>
-      //             {row}
-      //           </TouchableOpacity>
-      //   }
       }
       return <View style={cellStyle}>{row}</View>
     }
@@ -348,7 +328,7 @@ class GridRow extends Component {
   }
 
   paintIcon(model, eVal) {
-    let isCheck = model.subClassOf === CHECK
+    let isCheck = utils.isSubclassOf(model, CHECK)
     let icolor = '#ffffff'
     let size = 25
     let style = {}
