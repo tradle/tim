@@ -14,14 +14,13 @@ import { translate, getModel, getContentSeparator, isMyProduct,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
-import GridList from './GridList'
-import NewResource from './NewResource'
+import GridList from '../Components/GridList'
+import NewResource from '../Components/NewResource'
+import PhotoList from '../Components/PhotoList'
+import NetworkInfoProvider from '../Components/NetworkInfoProvider'
+import PageView from '../Components/PageView'
 import chatStyles from '../styles/chatStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-
-import PhotoList from './PhotoList'
-import NetworkInfoProvider from './NetworkInfoProvider'
-import PageView from './PageView'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 
