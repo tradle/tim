@@ -2,13 +2,11 @@
 import React, { Component } from 'react'
 import {
   ListView,
-  // RefreshControl,
   Alert,
   TouchableOpacity,
   ActivityIndicator,
   StatusBar,
   View,
-  // Text,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -16,7 +14,6 @@ import debounce from 'p-debounce'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons'
-// import extend from 'extend'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
@@ -24,7 +21,6 @@ import InfiniteScrollView from 'react-native-infinite-scroll-view'
 
 import { Text } from './Text'
 import NoResources from './NoResources'
-// import ResourceRow from './ResourceRow'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import ResourceView from './ResourceView'
@@ -34,8 +30,7 @@ import NewResource from './NewResource'
 import MessageList from './MessageList'
 import MessageView from './MessageView'
 import PageView from './PageView'
-import uiUtils from './uiUtils'
-// import SupervisoryView from './SupervisoryView'
+import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
 import ActionSheet from './ActionSheet'
 import NotFoundRow from './NotFoundRow'
 import utils, {
@@ -55,7 +50,6 @@ import ENV from '../utils/env'
 import SearchBar from './SearchBar'
 import formDefaults from '../data/formDefaults'
 
-// const PARTIAL = 'tradle.Partial'
 const FORM_ERROR = 'tradle.FormError'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 
@@ -339,18 +333,7 @@ class GridList extends Component {
     }
     if (search  ||  application) {
       if (isModel) {
-        let me = utils.getMe()
-        if (me.isEmployee) {
-          // Show models that are present and call for all
-          let list = Object.values(utils.getModels())
-          this.state.list = list
-          this.state.dataSource = this.state.dataSource.cloneWithRows(list)
-          Actions.getModels(utils.getId(me.organization))
-        }
-        else {
-          let modelsArr = this.filterModels()
-          this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
-        }
+        this._prepareModels()
         return
         // Actions.listModels({modelName})
       }
@@ -396,7 +379,27 @@ console.log('GridList.componentWillMount: filterResource', resource)
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
-
+  _prepareModels() {
+    const { modelName } = this.props
+    let me = utils.getMe()
+    if (me.isEmployee) {
+      const m = utils.getModel(modelName)
+      // Show models that are present and call for all
+      let list
+      if (m.abstract)
+        list = utils.getAllSubclasses(m)
+      else {
+        list = Object.values(utils.getModels())
+        list = this.filterModels(list)
+      }
+      this.state.dataSource = this.state.dataSource.cloneWithRows(list)
+      Actions.getModels(utils.getId(me.organization))
+    }
+    else {
+      let modelsArr = this.filterModels(this.state.list)
+      this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
+    }
+  }
   onAction(params) {
     let { action, error, list, resource, endCursor } = params
     if (error)
@@ -411,6 +414,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return
     }
     if (action === 'models') {
+      list = this.filterModels(list)
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
         list: list
@@ -418,82 +422,29 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
-      let model = action === 'addMessage'
-                ? utils.getModel(modelName)
-                : utils.getModel(resource[TYPE]);
-      if (action === 'addItem'  &&  model.id !== modelName) {
-        if (model.id === BOOKMARK  &&  !isModel) {
-          if (this.state.resource  &&  this.state.resource[TYPE] === resource.bookmark[TYPE]) {
-            Alert.alert('Bookmark was created')
-          }
-        }
-        return
-      }
-      if (action === 'addMessage'  &&  modelName !== PROFILE)
-        return
-      // this.state.isLoading = true;
-      if (isBacklink)
-        Actions.exploreBacklink(this.props.resource, prop, true)
-      else
-        Actions.list({
-          query: this.state.filter,
-          modelName: model.id,
-          to: this.props.resource,
-          sortProperty: model.sort
-        });
-
-      return;
+      this._addItemOrMessage(params)
+      return
     }
     if (action === 'talkToEmployee') {
-      if (!params.to)
-        return
-      let style = this.mergeStyle(params.to.style)
-      let route = {
-        title: params.to.name,
-        component: MessageList,
-        id: 11,
-        backButtonTitle: 'Back',
-        passProps: {
-          resource: params.to,
-          filter: '',
-          modelName: MESSAGE,
-          currency: params.to.currency,
-          bankStyle: style,
-          dictionary: params.dictionary
-        },
-      }
-      let me = utils.getMe()
-
-      let msg = {
-        message: translate('customerWaiting', me.firstName),
-        _t: SELF_INTRODUCTION,
-        identity: params.myIdentity,
-        from: me,
-        to: params.to
-      }
-      // let sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
-      // Actions.addMessage(msg, true, sendNotification)
-      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg})) //, true))
-      if (navigator.getCurrentRoutes().length === 3)
-        navigator.replace(route)
-      else
-        navigator.push(route)
+      this._talkToEmployee(params)
       return
     }
     let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
     if (action === 'list') {
-      if (exploreData)
-        Actions.hideModal()
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
         if (params.alert)
           Alert.alert(params.alert)
         else if (search  &&  !isModel) {
           if (params.isSearch  &&   resource) {
-            if (params.errorMessage)
-              this.errorAlert(params.errorMessage, params.query)
-            else if (!this.state.refreshing)
-              this.errorAlert('noResourcesForCriteria')
+            // Make sure that is there was modal that it'll be closed before the message appears
+            // otherwise it stays and blocks all taps
+            // setTimeout(() => {
+              if (params.errorMessage)
+                this.errorAlert(params.errorMessage, params.query)
+              else if (!this.state.refreshing)
+                this.errorAlert('noResourcesForCriteria')
+            // }, 1)
           }
           this.setState({refreshing: false, isLoading: false})
         }
@@ -558,25 +509,11 @@ console.log('GridList.componentWillMount: filterResource', resource)
         let l = this.state.list
         if (l  &&  !isBacklink  &&  !isForwardlink) { //  &&  l.length === this.limit ) {
           let newList = []
-          // if (this.direction === 'down') {
-            // for (let i=this.limit; i<l.length; i++)
-            for (let i=0; i<l.length; i++)
-              newList.push(l[i])
-            list.forEach((r) => newList.push(r))
-            list = newList
-          // }
-          // else {
-          //   for (let i=0; i<l.length; i++)
-          //   // for (let i=0; i<this.limit; i++)
-          //     list.push(l[i])
-          // }
+          for (let i=0; i<l.length; i++)
+            newList.push(l[i])
+          list.forEach((r) => newList.push(r))
+          list = newList
         }
-        // if (params.start) {
-        //   let l = []
-        //   this.state.list.forEach((r) => l.push(r))
-        //   list.forEach((r) => l.push(r))
-        //   list = l
-        // }
       }
     }
 
@@ -626,6 +563,69 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
     this.setState(state)
   }
+  _talkToEmployee(params) {
+    if (!params.to)
+      return
+    let style = this.mergeStyle(params.to.style)
+    let route = {
+      title: params.to.name,
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: params.to,
+        filter: '',
+        modelName: MESSAGE,
+        currency: params.to.currency,
+        bankStyle: style,
+        dictionary: params.dictionary
+      },
+    }
+    let me = utils.getMe()
+
+    let msg = {
+      message: translate('customerWaiting', me.firstName),
+      _t: SELF_INTRODUCTION,
+      identity: params.myIdentity,
+      from: me,
+      to: params.to
+    }
+    // let sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
+    // Actions.addMessage(msg, true, sendNotification)
+    const { navigator } = this.props
+    utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg})) //, true))
+    if (navigator.getCurrentRoutes().length === 3)
+      navigator.replace(route)
+    else
+      navigator.push(route)
+  }
+  _addItemOrMessage(params) {
+    const { action, resource } = params
+    const { modelName, isModel, isBacklink, prop } = this.props
+    let model = action === 'addMessage'
+              ? utils.getModel(modelName)
+              : utils.getModel(resource[TYPE]);
+    if (action === 'addItem'  &&  model.id !== modelName) {
+      if (model.id === BOOKMARK  &&  !isModel) {
+        if (this.state.resource  &&  this.state.resource[TYPE] === resource.bookmark[TYPE]) {
+          Alert.alert('Bookmark was created')
+        }
+      }
+      return
+    }
+    if (action === 'addMessage'  &&  modelName !== PROFILE)
+      return
+    // this.state.isLoading = true;
+    if (isBacklink)
+      Actions.exploreBacklink(this.props.resource, prop, true)
+    else
+      Actions.list({
+        query: this.state.filter,
+        modelName: model.id,
+        to: this.props.resource,
+        sortProperty: model.sort
+      });
+  }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
@@ -646,8 +646,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     if (this.state.dataSource.getRowCount() !== nextState.dataSource.getRowCount())
       return true
-    if (this.state.hideMode !== nextState.hideMode)
-      return true
+    // if (this.state.hideMode !== nextState.hideMode)
+    //   return true
     if (this.props.provider !== nextProps.provider)
       return true
     if (this.state.serverOffline !== nextState.serverOffline)
@@ -791,7 +791,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (modelName === BOOKMARK) {
       if (!bankStyle)
         bankStyle = this.state.bankStyle
-      uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
+      showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
       return
     }
     let rType = utils.getType(resource)
@@ -1008,17 +1008,17 @@ console.log('GridList.componentWillMount: filterResource', resource)
       }
     })
   }
-  filterModels(filter) {
-    let models = this.state.list
+  filterModels(models, filter) {
     let mArr = []
     let filterLower = filter && filter.toLowerCase()
     models.forEach((mm) => {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
-          !mm.isInterface                  &&
-          !mm.inlined                      &&
-           mm.id !== MESSAGE               &&
-          !utils.isEnum(mm)                &&
-          !utils.isSubclassOf(mm, METHOD)  &&
+          !mm.isInterface                   &&
+          !mm.inlined                       &&
+           mm.id !== MESSAGE                &&
+           mm.id !== APPLICATION_SUBMISSION &&
+          !utils.isEnum(mm)                 &&
+          !utils.isSubclassOf(mm, METHOD)   &&
           !utils.isSubclassOf(mm, FINANCIAL_PRODUCT)) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
           if (translate(mm).toLowerCase().indexOf(filterLower) !== -1)
@@ -1034,7 +1034,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { search, isModel, modelName, listView, prop, resource, isChooser } = this.props
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     if (search  &&  isModel) {
-      let mArr = this.filterModels(this.state.filter)
+      let mArr = this.filterModels(this.state.list, this.state.filter)
       this.setState({dataSource: this.state.dataSource.cloneWithRows(mArr)})
       return
     }
@@ -1129,8 +1129,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
       lazy={lazy}
       onSelect={isSharedContext ? this.openSharedContextChat.bind(this) : this.selectResource.bind(this)}
       key={resource[ROOT_HASH]}
-      hideResource={this.hideResource.bind(this)}
-      hideMode={this.state.hideMode}
       navigator={navigator}
       changeSharedWithList={chat ? this.changeSharedWithList.bind(this) : null}
       currency={currency}
@@ -1144,10 +1142,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     );
   }
   searchWithFilter(filterResource) {
-console.log('GridList.searchWithFilter: filterResource', filterResource)
     this.setState({resource: filterResource})
-    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true})
-    Actions.showModal({title: translate('loading'), showIndicator: true})
+    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true, exploreData: true})
   }
   getNextKey(resource) {
     return resource[ROOT_HASH] + '_' + cnt++
@@ -1478,16 +1474,18 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
         }
       }
       if (showLoadingIndicator)
-        loading = <View style={styles.loadingView}>
-                    <View style={platformStyles.container}>
-                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{translate('loading')}</Text>
-                      <ActivityIndicator size='large' style={styles.indicator} />
-                    </View>
-                  </View>
+        loading = showLoading({bankStyle, component: GridList, message: translate('loading')})
+      // if (showLoadingIndicator)
+      //   loading = <View style={styles.loadingView}>
+      //               <View style={platformStyles.container}>
+      //                 <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{translate('loading')}</Text>
+      //                 <ActivityIndicator size='large' style={styles.indicator} />
+      //               </View>
+      //             </View>
     }
 
-    // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(bankStyle)
-    let contentSeparator = utils.getContentSeparator(bankStyle)
+    // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : uiUtils.getContentSeparator(bankStyle)
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && contentSeparator} bankStyle={bankStyle}>
         {network}
@@ -1525,24 +1523,8 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
         }
       ]
     }
-    else {
-      if (!ENV.allowAddServer) return
-
-      buttons = [
-        {
-          text: translate('addServerUrl'),
-          onPress: () => this.onSettingsPressed()
-        },
-        {
-          text: translate('hideResource', translate(utils.getModel(modelName))),
-          onPress: () => this.setState({hideMode: true})
-        },
-        {
-          text: translate('scanQRcode'),
-          onPress: () => this.scanFormsQRCode()
-        }
-      ]
-    }
+    else
+      return
 
     buttons.push({ text: translate('cancel') })
     return (
@@ -1554,7 +1536,9 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       />
     )
   }
-  errorAlert(message, query) {
+  async errorAlert(message, query) {
+    // if (this.props.exploreData)
+    //   await utils.promiseDelay(1)
     if (query)
       Alert.alert(
         translate(message),
@@ -1574,24 +1558,6 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       Alert.alert(translate(message))
   }
 
-  hideResource(resource) {
-    Alert.alert(
-      translate('areYouSureYouWantToDelete', translate(resource.name)),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {
-          this.setState({hideMode: false})
-          console.log('Canceled!')
-        }},
-        {text: translate('Ok'), onPress: () => {
-          let r = utils.clone(resource)
-          r._inactive = true
-          Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE])})
-          this.setState({hideMode: false})
-        }},
-      ]
-    )
-  }
   bookmark() {
     let resource = {
       [TYPE]: BOOKMARK,
@@ -1739,327 +1705,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = GridList;
-  // scanFormsQRCode() {
-  //   this.setState({hideMode: false})
-  //   this.props.navigator.push({
-  //     title: 'Scan QR Code',
-  //     id: 16,
-  //     component: QRCodeScanner,
-  //     titleTintColor: '#eeeeee',
-  //     backButtonTitle: 'Cancel',
-  //     // rightButtonTitle: 'ion|ios-reverse-camera',
-  //     passProps: {
-  //       onread: this.onread.bind(this)
-  //     }
-  //   })
-  // }
-
-  // onread(result) {
-  //   // Pairing devices QRCode
-  //   if (result.data.charAt(0) === '{') {
-  //     h = JSON.parse(result.data)
-  //     Actions.sendPairingRequest(h)
-  //     this.props.navigator.pop()
-  //     return
-  //   }
-  //   let h = result.data.split(';')
-
-
-  //   // post to server request for the forms that were filled on the web
-  //   let me = utils.getMe()
-  //   switch (h[0]) {
-  //   case WEB_TO_MOBILE:
-  //     let r = {
-  //       _t: 'tradle.GuestSessionProof',
-  //       session: h[1],
-  //       from: {
-  //         id: utils.getId(me),
-  //         title: utils.getDisplayName(me)
-  //       },
-  //       to: {
-  //         id: PROFILE + '_' + h[2]
-  //       }
-  //     }
-  //     Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof')}) //, disableAutoResponse: true})
-  //     break
-  //   case TALK_TO_EMPLOYEEE:
-  //     Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
-  //     break
-  //   case APP_QR_CODE:
-  //     Actions.addApp(result.data.substring(h[0].length + 1))
-  //     break
-  //   default:
-  //     // keep scanning
-  //     Alert.alert(
-  //       translate('error'),
-  //       translate('unknownQRCodeFormat')
-  //     )
-
-  //     this.props.navigator.pop()
-  //     break
-  //   }
-  // }
-  // renderGrid() {
-  //   let content = <ListView
-  //       dataSource={this.state.dataSource}
-  //       renderHeader={this.renderGridHeader.bind(this)}
-  //       enableEmptySections={true}
-  //       renderRow={this.renderGridRow.bind(this)}
-  //       automaticallyAdjustContentInsets={false}
-  //       removeClippedSubviews={false}
-  //       keyboardDismissMode='on-drag'
-  //       keyboardShouldPersistTaps="always"
-  //       initialListSize={10}
-  //       pageSize={20}
-  //       canLoadMore={true}
-  //       renderScrollComponent={props => <InfiniteScrollView {...props} />}
-  //       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
-  //       refreshControl={
-  //         <RefreshControl
-  //           refreshing={this.state.refreshing}
-  //           onRefresh={this._loadMoreContentAsync.bind(this)}
-  //         />
-  //       }
-  //       scrollRenderAhead={10}
-  //       showsVerticalScrollIndicator={false} />
-
-  //   var searchBar
-  //   if (SearchBar) {
-  //     if (!this.props._readOnly  ||  !utils.isContext(this.props.modelName)) {
-  //       if (this.state.dataSource.getRowCount() > 10 || (this.state.filter  &&  this.state.filter.length)) {
-  //         searchBar = (
-  //           <SearchBar ref='searchBar'
-  //             onChangeText={this.onSearchChange.bind(this)}
-  //             placeholder={translate('search')}
-  //             showsCancelButton={false}
-  //             hideBackground={true}
-  //             />
-  //         )
-  //       }
-  //     }
-  //   }
-
-  //   return (
-  //     <PageView style={this.props.isBacklink ? {} : platformStyles.container}>
-  //       <NetworkInfoProvider connected={this.state.isConnected} />
-  //       {searchBar}
-  //       <View style={styles.separator} />
-  //       {content}
-  //     </PageView>
-  //   );
-  // }
-  // onSearchChange2(filter) {
-  //   if (this.props.search) {
-  //     let modelName = filter
-  //     if (modelName === FORM || modelName === 'Form')
-  //       return
-  //     let model = utils.getModel(modelName)
-  //     if (!model) {
-  //       modelName = 'tradle.' + modelName
-  //       model = utils.getModel(modelName)
-  //       if (!model)
-  //         return
-  //     }
-  //     model = model
-  //     this.props.navigator.push({
-  //       title: 'Search ' + utils.makeModelTitle(model),
-  //       id: 4,
-  //       component: NewResource,
-  //       titleTextColor: '#7AAAC3',
-  //       backButtonTitle: 'Back',
-  //       rightButtonTitle: 'Done',
-  //       passProps: {
-  //         model: model,
-  //         resource: resource,
-  //         search: true,
-  //         bankStyle: this.props.bankStyle || defaultBankStyle,
-  //       }
-  //     })
-  //     return
-  //   }
-
-  //   let {to, prop, listView, resource, modelName} = this.props
-  //   this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
-  //   Actions.list({
-  //     query: this.state.filter,
-  //     modelName: modelName,
-  //     to: resource,
-  //     prop: prop,
-  //     listView: listView
-  //   });
-  // }
-  // showSearch() {
-  //   this.props.navigator.push({
-  //     title: 'Explore data',
-  //     id: 30,
-  //     component: GridList,
-  //     backButtonTitle: 'Back',
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       modelName: MESSAGE,
-  //       search: true
-  //     },
-  //   })
-  // }
-
-  // showPartials() {
-  //   Actions.getAllPartials()
-  //   this.props.navigator.push({
-  //     id: 27,
-  //     component: SupervisoryView,
-  //     backButtonTitle: 'Back',
-  //     title: translate('overviewOfApplications'),
-  //     passProps: {}
-  //   })
-  // }
-  // showBookmarks() {
-  //   Actions.list({modelName: BOOKMARK})
-  //   this.props.navigator.push({
-  //     title: 'Bookmarks',
-  //     id: 30,
-  //     component: GridList,
-  //     backButtonTitle: 'Back',
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       modelName: BOOKMARK
-  //     },
-  //   })
-  // }
-  // showAllPartials() {
-  //   Actions.list({modelName: PARTIAL})
-  //   this.props.navigator.push({
-  //     title: 'Partials',
-  //     id: 10,
-  //     component: GridList,
-  //     backButtonTitle: 'Back',
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       modelName: PARTIAL
-  //     },
-  //   })
-  // }
-  // showContexts() {
-  //   this.props.navigator.push({
-  //     title: translate('sharedContext'),
-  //     id: 10,
-  //     component: GridList,
-  //     backButtonTitle: 'Back',
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       bankStyle: this.props.style,
-  //       modelName: 'tradle.Context',
-  //       _readOnly: true
-  //     }
-  //   });
-  // }
-  // showTestProviders() {
-  //   Actions.list({modelName: ORGANIZATION, isTest: true})
-  //   this.props.navigator.push({
-  //     title: translate('testProviders'),
-  //     id: 10,
-  //     component: GridList,
-  //     backButtonTitle: 'Back',
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       modelName: ORGANIZATION,
-  //       isTest: true,
-  //       officialAccounts: true
-  //     },
-  //   })
-  // }
-  // sharedContext: {
-  //   position: 'absolute',
-  //   right: 5,
-  //   top: 20,
-  //   width: 20,
-  //   height:20,
-  //   justifyContent: 'center',
-  //   borderRadius: 10,
-  //   backgroundColor: '#246624'
-  // },
-  // sharedContextText: {
-  //   fontSize: 12,
-  //   alignSelf: 'center',
-  //   color: '#ffffff'
-  // },
-  // _onRefresh() {
-  //   this.setState({refreshing: true});
-  //   // fetchData().then(() => {
-  //   //   this.setState({refreshing: false});
-  //   // });
-  // }
-  // renderGridHeader() {
-  //   let { modelName, navigator } = this.props
-  //   if (modelName === APPLICATION)
-  //     return <View/>
-  //   let model = utils.getModel(modelName)
-  //   let props = model.properties
-  //   let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
-  //   if (viewCols)
-  //   return (
-  //     <GridHeader gridCols={viewCols} modelName={modelName} navigator={navigator} />
-  //     // <GridHeader gridCols={viewCols} multiChooser={shareMultiEntryList != null} checkAll={this.checkAll.bind(this)} modelName={modelName} navigator={navigator} />
-  //   )
-  // }
-  // sort(prop) {
-  //   let order = this.state.order || {}
-  //   let curOrder = order[prop]
-
-  //   order[prop] = curOrder ? false : true
-  //   this.setState({order: order, sortProperty: prop, list: []})
-
-  //   let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
-  //   if (this.props.search)
-  //     _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
-  //   Actions.list(params)
-  // }
-  // showRefResources(resource, prop) {
-  //   let rType = utils.getType(resource)
-  //   let props = utils.getModel(rType).properties;
-  //   let propJson = props[prop];
-  //   let resourceTitle = utils.getDisplayName(resource);
-  //   resourceTitle = utils.makeTitle(resourceTitle);
-
-  //   let backlinksTitle = propJson.title + ' - ' + resourceTitle;
-  //   backlinksTitle = utils.makeTitle(backlinksTitle);
-  //   let modelName = propJson.items.ref;
-  //   let { style, currency, navigator } = this.props
-  //   navigator.push({
-  //     title: backlinksTitle,
-  //     id: 10,
-  //     component: GridList,
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       resource: resource,
-  //       prop: prop,
-  //       bankStyle: style,
-  //       modelName: modelName
-  //     },
-  //     rightButtonTitle: translate('details'),
-  //     onRightButtonPress: {
-  //       title: resourceTitle,
-  //       id: 3,
-  //       component: ResourceView,
-  //       backButtonTitle: 'Back',
-  //       rightButtonTitle: 'Edit',
-  //       onRightButtonPress: {
-  //         title: resourceTitle,
-  //         id: 4,
-  //         component: NewResource,
-  //         backButtonTitle: 'Back',
-  //         rightButtonTitle: 'Done',
-  //         passProps: {
-  //           model: utils.getModel(rType),
-  //           bankStyle: style,
-  //           resource: resource
-  //         }
-  //       },
-
-  //       passProps: {
-  //         bankStyle: style,
-  //         resource: resource,
-  //         currency: currency
-  //       }
-  //     }
-  //   });
-  // }
