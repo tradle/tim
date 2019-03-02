@@ -187,7 +187,7 @@ var OnePropFormMixin = {
       sessionId: result.sessionId
     }
     if (facemap)
-      selfie.facemap = facemap
+      selfie.facemap = {url: facemap}
     if (auditTrail) {
       auditTrail.splice(0, 1)
       if (auditTrail.length > 1) {
