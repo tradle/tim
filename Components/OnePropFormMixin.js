@@ -10,6 +10,7 @@ var {
 } = constants
 
 import utils, { translate, isWeb } from '../utils/utils'
+import { importFromImageStore } from '../utils/image-utils'
 import Actions from '../Actions/Actions'
 // import CameraView from './CameraView'
 // import VideoCamera from './VideoCamera'
@@ -162,7 +163,6 @@ var OnePropFormMixin = {
       this.showCamera(params)
       return
     }
-    debugger
 
     if (result.status == 'FailedBecauseUserCancelled')
       return
@@ -179,27 +179,28 @@ var OnePropFormMixin = {
       to: this.props.resource.from,
       _context: this.props.resource._context,
       [TYPE]: SELFIE,
-      selfie: {
+      sessionId: result.sessionId
+    }
+    if (auditTrail) {
+      auditTrail = await Promise.all(auditTrail.map(imgUrl => importFromImageStore(imgUrl)))
+      selfie.selfie =  {
         url: auditTrail[0],
         // width,
         // height
-      },
-      sessionId: result.sessionId
-    }
-    if (facemap)
-      selfie.facemap = {url: facemap}
-    if (auditTrail) {
-      auditTrail.splice(0, 1)
+      }
       if (auditTrail.length > 1) {
-        selfie.auditTrail = auditTrail.map((imgUrl) => {
+        auditTrail.splice(0, 1)
+        selfie.auditTrail = auditTrail.map(imgUrl => {
           return {
-            url: imgUrl, //: 'data:image/png;base64,' + url,
-            // width,
-            // height
+            url: imgUrl,
           }
         })
       }
     }
+    if (facemap) {
+      selfie.facemap = {url: await importFromImageStore(facemap)}
+    }
+    debugger
     selfie.selfieJson = result
 
     Actions.addChatItem({
