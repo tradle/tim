@@ -160,6 +160,7 @@
     "react-native-exception-handler": "2.2.0",
     "react-native-fabric": "^0.4.1",
     "react-native-fabric-crashlytics": "0.1.8",
+    "react-native-facetec-zoom": "github:tradle/react-native-facetec-zoom",
     "react-native-flexbox-grid": "github:tradle/react-native-flexbox-grid",
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#dev",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password",
