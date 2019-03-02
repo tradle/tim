@@ -41,8 +41,6 @@ const BOOKMARK = 'tradle.Bookmark'
 const { TYPE } = constants
 const {
   ORGANIZATION,
-  FORM,
-  ENUM,
   MONEY,
 } = constants.TYPES
 
@@ -74,7 +72,7 @@ class VerificationRow extends Component {
     }
 
     this.state = {
-      isChosen: isChosen
+      isChosen
     }
   }
 
@@ -302,9 +300,6 @@ class VerificationRow extends Component {
               description = <Text style={style}>{title}</Text>
           }
         }
-        //!!!
-        // if (!dn)
-        //   dn = title
         if (dn)
           titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
@@ -396,21 +391,6 @@ class VerificationRow extends Component {
               {content}
             </View>
     }
-    // else {
-    //   let content = <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
-    //                     <View style={styles.textContainer}>
-    //                       {rows}
-    //                     </View>
-    //                   </TouchableOpacity>
-    //   row = <View host={lazy}>
-    //          <Accordion
-    //            header={header}
-    //            style={{alignSelf: 'stretch'}}
-    //            content={content}
-    //            underlayColor='transparent'
-    //            easing='easeOutQuad' />
-    //         </View>
-    // }
     return row
   }
   revokeDocument() {
@@ -451,8 +431,8 @@ class VerificationRow extends Component {
 
     let properties = model.properties;
 
-    let style = styles.resourceTitle
-    let labelStyle = styles.resourceTitleL
+    let style = styles.resourceTitleS
+    let labelStyle = styles.resourceLabelS
     viewCols.forEach((v) => {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -547,8 +527,6 @@ class VerificationRow extends Component {
         </View>
       );
     });
-    // if (model.style)
-    //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
 
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {
@@ -649,8 +627,6 @@ class VerificationRow extends Component {
         </View>
       );
     });
-    // if (model.style)
-    //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
 
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {
@@ -686,12 +662,8 @@ var styles = StyleSheet.create({
     paddingBottom: 5
   },
   rTitle: {
-    // flex: 1,
     fontSize: 18,
-    // marginBottom: 3,
     color: '#555555',
-    // fontWeight: '600',
-    // marginBottom: 2,
   },
   noImageBlock: {
     flex: 1,
@@ -701,18 +673,22 @@ var styles = StyleSheet.create({
     paddingVertical: 3
   },
   resourceTitle: {
-    // flex: 1,
     fontSize: 16,
     fontWeight: '400',
-    // marginBottom: 2,
+  },
+  resourceTitleS: {
+    fontSize: 12,
+  },
+  resourceLabelS: {
+    fontSize: 12,
+    paddingRight: 5,
+    color: '#999999',
   },
   resourceTitleL: {
-    // flex: 0.7,
     fontSize: 16,
     fontWeight: '400',
     paddingRight: 5,
     color: '#999999',
-    // marginBottom: 2,
   },
   description: {
     color: '#999999',
@@ -747,11 +723,6 @@ var styles = StyleSheet.create({
   },
   refPropertyRow: {
     flexDirection: 'row',
-    // justifyContent: 'space-between',
-    borderColor: '#F2FAED',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#f0f0f0',
-    paddingVertical: 3
   },
   msgParts: {
     borderColor: '#F2FAED',
