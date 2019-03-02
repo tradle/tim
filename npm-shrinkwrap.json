@@ -703,9 +703,9 @@
       }
     },
     "@tradle/aws-client": {
-      "version": "3.0.0",
+      "version": "3.1.1",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-3.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-3.1.1.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
