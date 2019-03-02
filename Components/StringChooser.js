@@ -5,6 +5,7 @@ import utils, { translate } from '../utils/utils'
 
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
+import { getContentSeparator } from '../utils/uiUtils'
 import {
   ListView,
 } from 'react-native'
@@ -73,7 +74,7 @@ class StringChooser extends Component {
       bgStyle = {backgroundColor: bankStyle.backgroundColor}
     else
       bgStyle = {backgroundColor: '#ffffff'}
-    let contentSeparator = utils.getContentSeparator(bankStyle)
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={contentSeparator} bankStyle={bankStyle}>
         {content}

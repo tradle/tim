@@ -36,6 +36,7 @@ import constants from '@tradle/constants'
 import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+import { getContentSeparator } from '../utils/uiUtils'
 
 import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
@@ -1112,7 +1113,7 @@ class ResourceList extends Component {
     let network
     if (!isChooser && officialAccounts && modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-    let contentSeparator = utils.getContentSeparator(this.state.bankStyle)
+    let contentSeparator = getContentSeparator(this.state.bankStyle)
     let style = {backgroundColor: '#fff'}
     // let isProfile = modelName === PROFILE
     // let useStyle = isProfile  &&  officialAccounts &&  defaultBankStyle || this.state.bankStyle

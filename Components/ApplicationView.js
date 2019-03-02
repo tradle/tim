@@ -28,6 +28,8 @@ import utils, {
   getFontSize as fontSize,
   translate
 } from '../utils/utils'
+import { getContentSeparator } from '../utils/uiUtils'
+
 import ApplicationTabs from './ApplicationTabs'
 import PageView from './PageView'
 import Actions from '../Actions/Actions'
@@ -218,7 +220,7 @@ class ApplicationView extends Component {
                     {assignRM}
                   </View>
                 </View>
-    let contentSeparator = utils.getContentSeparator(bankStyle)
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         {network}

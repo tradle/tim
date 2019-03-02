@@ -33,6 +33,7 @@ const {
 } = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
+import { getContentSeparator } from '../utils/uiUtils'
 import NewItem from './NewItem'
 import ResourceList from './ResourceList'
 import GridList from './GridList'
@@ -810,7 +811,7 @@ class NewResource extends Component {
 
     let options = this.getFormFields(params);
     if (!options) {
-      let contentSeparator = utils.getContentSeparator(bankStyle)
+      let contentSeparator = getContentSeparator(bankStyle)
       let height = utils.dimensions(NewResource).height - 80
 
       return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle}>
@@ -1017,7 +1018,7 @@ class NewResource extends Component {
                  </View>
       }
 
-      let contentSeparator = utils.getContentSeparator(bankStyle)
+      let contentSeparator = getContentSeparator(bankStyle)
       return <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}

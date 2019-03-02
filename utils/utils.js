@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   NativeModules,
-  Text,
   // findNodeHandle,
   Dimensions,
   Linking,
@@ -2418,72 +2417,6 @@ var utils = {
     let fromId = utils.getId(r.from)
     return toId === fromId  &&  toId === utils.getId(utils.getMe())
   },
-  getContentSeparator(bankStyle) {
-    let separator = {}
-    if (bankStyle) {
-      if (bankStyle.navBarBorderColor) {
-        separator.borderBottomColor = bankStyle.navBarBorderColor
-        separator.borderBottomWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
-      }
-    }
-    return separator
-  },
-  parseMessage(params) {
-    let { resource, message, bankStyle, noLink, idx } = params
-    let i1 = message.indexOf('**')
-    if (i1 === -1)
-      return utils.translate(message)
-    let formType = message.substring(i1 + 2)
-    let i2 = formType.indexOf('**')
-    let linkColor = noLink ? '#757575' : bankStyle.linkColor
-    let message1, message2
-    let formTitle
-    if (i2 !== -1) {
-      message1 = message.substring(0, i1).trim()
-      message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
-      formType = formType.substring(0, i2)
-      if (resource[TYPE] === FORM_REQUEST) {
-        let formModel = utils.getModel(resource.form)
-        if (formModel.subClassOf === MY_PRODUCT)
-          linkColor = '#aaaaaa'
-        let title = utils.makeModelTitle(formModel)
-        if (formType === title)
-          formTitle = utils.translate(formModel)
-      }
-    }
-    if (!formTitle)
-      formTitle = utils.translate(formType)
-    let key = utils.getDisplayName(resource).replace(' ', '_') + (idx || 0)
-    idx = idx ? ++idx : 1
-    let newParams = _.extend({}, params)
-    newParams.idx = idx
-    newParams.message = message2.trim()
-    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{utils.translate(message1) + ' '}
-             <Text style={{color: linkColor}}>{formTitle}</Text>
-             <Text>{utils.parseMessage(newParams)}</Text>
-           </Text>
-  },
-  getMarkdownStyles(bankStyle, isItalic, isMyMessage, isChat) {
-    const markdownStyles = {
-      heading1: {
-        fontSize: 24,
-        color: 'purple',
-      },
-      link: {
-        color: isMyMessage? 'lightblue' : bankStyle  &&  bankStyle.linkColor || '#555555',
-        textDecorationLine: 'none'
-      },
-      mailTo: {
-        color: 'orange',
-      },
-      text: {
-        color: isMyMessage ? '#ffffff' : '#757575',
-        fontSize: isChat ? 16 : 14,
-        fontStyle: isItalic  &&  'italic' || 'normal'
-      },
-    }
-    return markdownStyles
-  },
   addDefaultPropertyValuesFor(provider) {
     defaultPropertyValues[utils.getId(provider)] = provider._defaultPropertyValues
   },
@@ -2849,58 +2782,3 @@ function dateFromParts (parts) {
 }
 
 module.exports = utils;
-  // isVerifier(resource, application) {
-  //   if (!utils.isEmployee(resource))
-  //     return false
-  //   let me = utils.getMe()
-  //   if (!me.isEmployee)
-  //     return false
-  //   let model = utils.getModel(resource[TYPE])
-  //   if (model.subClassOf === FORM) {
-  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  utils.isReadOnlyChat(resource)) &&
-  //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-  //   }
-  //   if (model.id === VERIFICATION)
-  //     return  utils.getId(me) === utils.getId(resource.from)
-  // },
-  // measure(component, cb) {
-  //   let handle = typeof component === 'number'
-  //     ? component
-  //     : findNodeHandle(component)
-
-  //   RCTUIManager.measure(handle, cb)
-  // },
-  // used on web
-  // onTakePic(prop, data, formRequest) {
-  //   if (!data)
-  //     return
-  //   // Disable FormRequest
-  //   let isFormRequest = formRequest  && formRequest[TYPE] === FORM_REQUEST
-  //   let isFormError = formRequest  && formRequest[TYPE] === FORM_ERROR
-
-  //   if (isFormRequest) {
-  //     var params = {
-  //       value: {_documentCreated: true},
-  //       doneWithMultiEntry: true,
-  //       resource: formRequest,
-  //       meta: utils.getModel(formRequest[TYPE]).value
-  //     }
-  //     Actions.addChatItem(params)
-  //   }
-  //   let photo = {
-  //     url: data.data,
-  //     height: data.height,
-  //     width: data.width
-  //   }
-  //   let propName = (typeof prop === 'string') ? prop : prop.name
-  //   Actions.addChatItem({
-  //     disableFormRequest: isFormRequest || isFormError ? formRequest : null,
-  //     resource: {
-  //       [TYPE]: isFormRequest ? formRequest.form : formRequest.prefill[TYPE],
-  //       [propName]: photo,
-  //       _context: formRequest._context,
-  //       from: utils.getMe(),
-  //       to: formRequest.from  // FormRequest.from
-  //     }
-  //   })
-  // },

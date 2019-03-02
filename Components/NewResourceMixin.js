@@ -21,6 +21,7 @@ import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
 import utils, { translate } from '../utils/utils'
+import { getMarkdownStyles } from '../utils/uiUtils'
 import EnumList from './EnumList'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -563,7 +564,7 @@ var NewResourceMixin = {
     let markdown, title
     if (hasValue) {
       markdown = <View style={styles.markdown}>
-                   <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, true)}>
+                   <Markdown markdownStyles={getMarkdownStyles(bankStyle, true)}>
                      {value}
                    </Markdown>
                  </View>
@@ -718,7 +719,7 @@ var NewResourceMixin = {
 
     return (
       <View style={styles.help}>
-        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, false)}>
+        <Markdown markdownStyles={getMarkdownStyles(this.props.bankStyle, false)}>
           {translate(prop, this.props.model, true)}
         </Markdown>
       </View>

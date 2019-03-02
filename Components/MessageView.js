@@ -25,6 +25,7 @@ const {
 } = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
+import { getContentSeparator } from '../utils/uiUtils'
 import ArticleView from './ArticleView'
 import PhotoList from './PhotoList'
 import PhotoView from './PhotoView'
@@ -429,7 +430,7 @@ class MessageView extends Component {
     }
     let title = isVerification  ? this.makeViewTitle(model, styles) : null
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
-    let contentSeparator = utils.getContentSeparator(bankStyle)
+    let contentSeparator = getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto  &&  !checkProps)
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>

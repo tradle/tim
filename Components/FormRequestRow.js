@@ -21,6 +21,7 @@ import constants from '@tradle/constants'
 
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
+import { parseMessage } from '../utils/uiUtils'
 import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
 import RowMixin from './RowMixin'
@@ -190,7 +191,7 @@ class FormRequestRow extends Component {
       onPressCall = resource._documentCreated ? null : this.reviewFormsInContext.bind(this)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: linkColor}} size={20} name={'ios-arrow-forward'} />
       let params = { resource, message, bankStyle, noLink: application != null || resource._documentCreated }
-      let msg = utils.parseMessage(params)
+      let msg = parseMessage(params)
       if (typeof msg === 'string') {
         let idx = message.indexOf('...')
         if (idx !== -1)
@@ -717,7 +718,7 @@ class FormRequestRow extends Component {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
     let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
-    let messagePart = utils.parseMessage(params)
+    let messagePart = parseMessage(params)
     if (typeof messagePart === 'string')
       messagePart = null
 

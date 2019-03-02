@@ -15,6 +15,7 @@ import React, { Component } from 'react'
 import utils, {
   translate
 } from '../utils/utils'
+
 import { circled } from '../styles/utils'
 
 import ArticleView from './ArticleView'
@@ -23,7 +24,7 @@ import NewResource from './NewResource'
 import PhotoList from './PhotoList'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
-import uiUtils from './uiUtils'
+import uiUtils from '../utils/uiUtils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import formDefaults from '../data/formDefaults'
@@ -737,12 +738,12 @@ class MessageRow extends Component {
           let row
           if  (this.messageHasLink(resource[v]))
             row = <View style={{maxWidth: width}}  key={this.getNextKey()}>
-                    <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
+                    <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
                       {resource[v]}
                     </Markdown>
                   </View>
           else
-            row = utils.parseMessage(params)
+            row = uiUtils.parseMessage(params)
 
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
