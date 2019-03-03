@@ -162,7 +162,6 @@ const {
  FORGOT_YOU,
  MONEY,
  SETTINGS,
- ENUM
 } = constants.TYPES
 
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
@@ -1525,7 +1524,7 @@ debug('sent:', r)
         }
       }
       let m = self.getModel(r[TYPE])
-      if (m.subClassOf === FORM) {
+      if (utils.isForm(m)) {
         // set organization and photos for items properties for better displaying
         let form = self._getItem(utils.getId(r.to))
         r.to.organization = form.organization
@@ -2686,7 +2685,7 @@ debug('sent:', r)
     this.preferences = preferences
   },
 
-  onAddMessage (params) {
+  async onAddMessage (params) {
     let r = params.msg
     let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
 
@@ -2749,10 +2748,8 @@ debug('sent:', r)
     }
 
     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-    // rr[NONCE] = this.getNonce()
     let toChain = {
       [TYPE]: rr[TYPE],
-      // [NONCE]: rr[NONCE],
       time: r._time
     }
     if (rr.message)
@@ -2788,17 +2785,14 @@ debug('sent:', r)
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = utils.makeId(IDENTITY, hash)
-    rr._sendStatus = self.isConnected ? SENDING : QUEUED
-    var noCustomerWaiting
+    rr._sendStatus = this.isConnected ? SENDING : QUEUED
     // let firstTime
-    return this._loadedResourcesDefer.promise
-    .then(() => {
-      let promise = isContext
-                  ? this.searchMessages({modelName: m.id, to: toOrg})
-                  : Q()
-      return promise
-    })
-    .then((result) => {
+    await this._loadedResourcesDefer.promise
+    try {
+      let result
+      if (isContext)
+        result = await this.searchMessages({modelName: m.id, to: toOrg})
+
       if (result) {
         result = result.filter((r) => {
           return (r.message === r.message  &&  !r._documentCreated) ? true : false
@@ -2806,28 +2800,68 @@ debug('sent:', r)
         if (result.length) {
           result.forEach((r) => {
             const rid = utils.getId(r)
-            self._mergeItem(rid, { _documentCreated: true })
+            this._mergeItem(rid, { _documentCreated: true })
           })
         }
       }
-      return this.maybeWaitForIdentity({ permalink: hash })
-    })
-    .then(() => this.meDriverExec('sign', { object: toChain }))
-    .then((result) => {
+      await this.maybeWaitForIdentity({ permalink: hash })
+
+      result = await this.meDriverExec('sign', { object: toChain })
       toChain = result.object
-      let hash = protocol.linkString(result.object)
+      let hash = protocol.linkString(toChain)
 
       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
       if (isContext) {
         rr._context = r._context = {id: utils.getId(r), title: r.requestFor}
         contextIdToResourceId[rr.contextId] = rr
 
-        self.addLastMessage(r, batch)
+        this.addLastMessage(r, batch)
       }
       else if (!isWelcome  &&  !application)
-        self.addLastMessage(r, batch)
+        this.addLastMessage(r, batch)
 
-      if (!isWelcome) //  ||  utils.isEmployee(r.to))
+      let noCustomerWaiting = await checkIfNeedToPublishIdentityOrSendSelfIntro()
+      if (!isWelcome  ||  !utils.isEmpty(welcomeMessage))
+        await handleSimpleMessage(rr)
+      // SelfIntroduction or IdentityPublishRequest were just sent
+      if (!noCustomerWaiting)
+        await sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse})
+      if (me.isEmployee)
+        await this.getModelsPack(to)
+    } catch(err) {
+      debug('Something went wrong', err.stack)
+      debugger
+    } finally {
+      if (cb)
+        cb(rr)
+    }
+    // async function sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse}) {
+    async function sendCustomerWaiting() {
+      if (isReadOnlyContext) {
+        await self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
+        return
+      }
+      let pubkeys
+      let toRes = self._getItem(toId)
+      if (toRes)
+        pubkeys = toRes.pubkeys
+      else if (me.isEmployee) {
+        let rep = self.getRepresentative(me.organization)
+        pubkeys = self._getItem(utils.makeId(IDENTITY, rep[ROOT_HASH])).pubkeys
+      }
+      let sendParams = await self.packMessage(toChain, r.from, r.to, context)
+        // let sendParams = self.packMessage(r, toChain)
+      if (disableAutoResponse) {
+        if (!sendParams.other)
+          sendParams.other = {}
+        sendParams.other.disableAutoResponse = true
+      }
+      const method = toChain[SIG] ? 'send' : 'signAndSend'
+      let ret = await self.meDriverExec(method, sendParams)
+      await storeMessage(ret)
+    }
+    async function checkIfNeedToPublishIdentityOrSendSelfIntro() {
+      if (!isWelcome)
         return
       if (!orgRep)
         return
@@ -2843,132 +2877,6 @@ debug('sent:', r)
         isWelcome = false
       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
       // prevent the not needed duplicate expensive operations for obtaining ProductList
-      return checkForCustomerWaiting()
-    })
-    .then(() => {
-      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-        return;
-
-      // Temporary untill the real hash is known
-      var key = utils.getId(rr)
-
-      rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
-      rr.from = rr.from || r.from
-      if (isContext)
-        rr.to.organization = self.buildRef(to)
-      rr._outbound = true
-      rr._latest = true
-      if (!application) {
-        self._setItem(key, rr)
-
-        if (!toOrg)
-            toOrg = to.organization ? to.organization : to
-        let isDenial = rr[TYPE] === APPLICATION_DENIAL
-        let isApproval = rr[TYPE] === APPLICATION_APPROVAL
-        if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
-          self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
-        if (isApproval)
-          Actions.showModal({title: translate('inProcess'), showIndicator: true})
-
-        self.addMessagesToChat(utils.getId(toOrg), rr)
-      }
-      this.addVisualProps(rr)
-
-      var params = {
-        action: 'addMessage',
-        resource: isWelcome ? welcomeMessage : rr
-      }
-      if (error)
-        params.error = error
-      if (r[TYPE]  !== SELF_INTRODUCTION)
-        self.trigger(params)
-      if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
-        return self.getDriver(me)
-    })
-    .then(() => {
-      // SelfIntroduction or IdentityPublishRequest were just sent
-      if (noCustomerWaiting)
-        return
-      if (isReadOnlyContext)
-        return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-      let toRes = self._getItem(toId)
-      if (toRes)
-        return toRes.pubkeys
-      else if (me.isEmployee) {
-        let rep = this.getRepresentative(me.organization)
-        return this._getItem(utils.makeId(IDENTITY, rep[ROOT_HASH])).pubkeys
-      }
-    })
-    .then((pubkeys) => {
-      if (pubkeys)
-        return self.packMessage(toChain, r.from, r.to, context)
-    })
-    .then((sendParams) => {
-      if (!sendParams)
-        return
-        // let sendParams = self.packMessage(r, toChain)
-      if (disableAutoResponse) {
-        if (!sendParams.other)
-          sendParams.other = {}
-        sendParams.other.disableAutoResponse = true
-      }
-      const method = toChain[SIG] ? 'send' : 'signAndSend'
-      return self.meDriverExec(method, sendParams)
-      .catch(function (err) {
-        debugger
-      })
-    })
-    .then((result) => {
-      if (!requestForForm  &&  isWelcome)
-        return
-      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-        return
-      if (isReadOnlyContext)
-        return
-      // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
-      if (!toOrg)
-        toOrg = to.organization ? to.organization : to
-      // saving the new message
-      const data = storeUtils.toOldStyleWrapper(result.message)
-      if (data)  {
-        rr[ROOT_HASH] = data[ROOT_HASH]
-        rr[CUR_HASH] = data[CUR_HASH]
-      }
-      var key = utils.getId(rr)
-      self.dbBatchPut(key, rr, batch)
-      self._setItem(key, rr)
-      if (isContext)
-        return this.searchMessages({modelName: FORM_REQUEST, to: to})
-    })
-    .then((result) => {
-      if (result) {
-        result.forEach((r) => {
-          if (r._documentCreated  &&  !r._document) {
-            let rId = utils.getId(r)
-            batch.push({type: 'del', key: rId})
-            this.deleteMessageFromChat(orgId, r)
-            this._deleteItem(rId)
-          }
-        })
-      }
-      return db.batch(batch)
-    })
-    .then(() => {
-      if (me.isEmployee)
-        return this.getModelsPack(to)
-    })
-    .catch((err) => {
-      debug('Something went wrong', err.stack)
-      debugger
-    })
-    .finally(() => {
-      if (cb)
-        cb(rr)
-    })
-
-    async function checkForCustomerWaiting() {
-      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
-      // prevent the not needed duplicate expensive operations for obtaining ProductList
       await self.getDriver(me)
       if (!self.isConnected  ||  publishRequestSent[orgId])
         return
@@ -2978,10 +2886,11 @@ debug('sent:', r)
       if (!status/* || !self.isConnected*/)
         return
       publishRequestSent[orgId] = true
+      let noCustomerWaiting
       if (!status.watches.link  &&  !status.link  &&  !me.isEmployee) {
-        if (isCustomerWaiting)
-          noCustomerWaiting = true
-        return self.publishMyIdentity(orgRep)
+        await self.publishMyIdentity(orgRep)
+        noCustomerWaiting = true
+        return noCustomerWaiting
       }
       let id = to.organization ? utils.getId(to.organization) : utils.getId(to)
       if (chatMessages[id]  &&  chatMessages[id].length)
@@ -3005,9 +2914,82 @@ debug('sent:', r)
       }
       if (isCustomerWaiting)
         noCustomerWaiting = true
-      return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+      await self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+      return noCustomerWaiting
+    }
+    async function handleSimpleMessage(rr) {
+      // Temporary untill the real hash is known
+      var key = utils.getId(rr)
+
+      rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+      rr.from = rr.from || r.from
+      if (isContext)
+        rr.to.organization = self.buildRef(to)
+      rr._outbound = true
+      rr._latest = true
+      if (!application) {
+        self._setItem(key, rr)
+
+        if (!toOrg)
+            toOrg = to.organization ? to.organization : to
+        let isDenial = rr[TYPE] === APPLICATION_DENIAL
+        let isApproval = rr[TYPE] === APPLICATION_APPROVAL
+        if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
+          self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
+        if (isApproval)
+          Actions.showModal({title: translate('inProcess'), showIndicator: true})
+
+        self.addMessagesToChat(utils.getId(toOrg), rr)
+      }
+      self.addVisualProps(rr)
+
+      var params = {
+        action: 'addMessage',
+        resource: isWelcome ? welcomeMessage : rr
+      }
+      if (error)
+        params.error = error
+      if (r[TYPE]  !== SELF_INTRODUCTION)
+        self.trigger(params)
+      if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
+        await self.getDriver(me)
+    }
+    async function storeMessage(ret) {
+      if (!requestForForm  &&  isWelcome)
+        return
+      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+        return
+      if (isReadOnlyContext)
+        return
+      // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
+      if (!toOrg)
+        toOrg = to.organization ? to.organization : to
+      // saving the new message
+      const data = storeUtils.toOldStyleWrapper(ret.message)
+      if (data) {
+        rr[ROOT_HASH] = data[ROOT_HASH]
+        rr[CUR_HASH] = data[CUR_HASH]
+      }
+      var key = utils.getId(rr)
+      self.dbBatchPut(key, rr, batch)
+      self._setItem(key, rr)
+      let searchResult
+      if (isContext)
+        searchResult = await self.searchMessages({modelName: FORM_REQUEST, to: to})
+      if (!searchResult)
+        return
+      searchResult.forEach((r) => {
+        if (r._documentCreated  &&  !r._document) {
+          let rId = utils.getId(r)
+          batch.push({type: 'del', key: rId})
+          self.deleteMessageFromChat(orgId, r)
+          self._deleteItem(rId)
+        }
+      })
+      await db.batch(batch)
     }
   },
+
   async getModelsPack(to) {
     let type = utils.getType(to)
 
@@ -3745,13 +3727,13 @@ if (!res[SIG]  &&  res._message)
       if (!noTrigger                 &&
           application                &&
           application.verifications  &&
-          utils.getModel(r[TYPE]).subClassOf === FORM) {
+          utils.isForm(r[TYPE])) {
         // let hashes = application.verifications.map(r => this.getRootHash(r))
         // let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r, _link: [hashes]}, noTrigger: true})
         let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
         if (l) {
           r.verifications = l.list
-          r._verificationsCount = l.list.length
+          r._verificationsCount = l.list  &&  l.list.length
         }
       }
     }
@@ -3785,6 +3767,8 @@ if (!res[SIG]  &&  res._message)
           this.organizeSubmissions(r)
         if (r[linkName]) {
           list = await this.getObjects(r[linkName], link)
+          if (list.length)
+            list.sort((a, b) => b._time - a._time)
           r[linkName] = list
         }
       }
@@ -4186,7 +4170,7 @@ if (!res[SIG]  &&  res._message)
     var foundRefs = [];
     var props = meta.properties;
 
-    if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION) {
+    if (meta.id == VERIFICATION  ||  utils.isVerification(meta)) {
       // debugger
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
@@ -4499,63 +4483,11 @@ if (!res[SIG]  &&  res._message)
     async function handleMessage ({noTrigger, returnVal, lens, isRefresh, isRefreshRequest}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
-      let rtype = utils.getType(returnVal)
       if (returnVal._documentCreated)  {
-        if (rtype === FORM_REQUEST) {
-          let ptype = returnVal.product
-          if (ptype === REFRESH_PRODUCT) {
-            let r = {
-              [TYPE]: CONFIRMATION,
-              message: translate('afterRefresh')
-            }
-            let data = await self.createObject(r)
-            _.extend(r, data.object)
-            _.extend(r, {
-              [ROOT_HASH]: data.permalink,
-              [CUR_HASH]: data.link,
-              [IS_MESSAGE]: true,
-              from: returnVal.from,
-              to: returnVal.to
-            })
-            let rId = utils.getId(r)
-            await db.put(rId, r)
-            self._setItem(rId, r)
-            self.addMessagesToChat(utils.getId(r.from.organization), r)
-            self.addVisualProps(r)
-            self.trigger({action: 'addItem', resource: r})
-          }
-          else if (doneWithMultiEntry) {
-            // when all the multientry forms are filled out and next form is requested
-            // do not show the last form request for the multientry form it is confusing for the user
-            if (ptype ) {
-              let multiEntryForms = self.getModel(ptype).multiEntryForms
-              if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
-                let rid = returnVal.from.organization.id
-                self.deleteMessageFromChat(rid, returnVal)
-                let id = utils.getId(returnVal)
-                delete list[id]
-                await db.del(id)
-                let params = {action: 'addItem', resource: returnVal}
-                self.trigger(params);
-                return
-              }
-            }
-          }
-        }
-        try {
-          let res = await self._keeper.get(returnVal[CUR_HASH])
-          let r = utils.clone(res)
-          _.extend(r, returnVal)
-          self._setItem(utils.getId(returnVal), returnVal)
-          let params = {action: 'addItem', resource: r}
-          self.trigger(params);
-          await self.onIdle()
-          save(returnVal, true)
-          return
-        } catch(err) {
-          debugger
-        }
+        await this.handleDocumentCreated(returnVal)
+        return
       }
+      let rtype = utils.getType(returnVal)
       // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
       // and reset it after the real root hash will be known
       let isNew = returnVal[ROOT_HASH] == null
@@ -4587,7 +4519,7 @@ if (!res[SIG]  &&  res._message)
         }
       }
       let isContext = utils.isContext(rModel)
-      let isForm = rModel.subClassOf === FORM
+      let isForm = utils.isForm(rModel)
       returnVal[IS_MESSAGE] = true
       let prevResId, prevResCached
       let toId = utils.getId(returnVal.to)
@@ -4762,7 +4694,7 @@ if (!res[SIG]  &&  res._message)
         }
 
         try {
-          if (!noTrigger)
+          if (!noTrigger  &&  !isBookmark)
             self.trigger(params);
         } catch (err) {
           debugger
@@ -4857,7 +4789,7 @@ if (!res[SIG]  &&  res._message)
           await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
         }
-        if (!isNew  ||  self.getModel(rtype).subClassOf !== FORM)
+        if (!isNew  ||  !utils.isForm(rtype))
           return
         let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: to})
         let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
@@ -4921,6 +4853,63 @@ if (!res[SIG]  &&  res._message)
       if (params.maxAttempts)
         r.maxAttempts = params.maxAttempts
       return await self._putResourceInDB(r)
+    }
+    async function handleDocumentCreated(returnVal) {
+      let rtype = utils.getType(returnVal)
+      if (rtype === FORM_REQUEST) {
+        let ptype = returnVal.product
+        if (ptype === REFRESH_PRODUCT) {
+          let r = {
+            [TYPE]: CONFIRMATION,
+            message: translate('afterRefresh')
+          }
+          let data = await this.createObject(r)
+          _.extend(r, data.object)
+          _.extend(r, {
+            [ROOT_HASH]: data.permalink,
+            [CUR_HASH]: data.link,
+            [IS_MESSAGE]: true,
+            from: returnVal.from,
+            to: returnVal.to
+          })
+          let rId = utils.getId(r)
+          await db.put(rId, r)
+          this._setItem(rId, r)
+          this.addMessagesToChat(utils.getId(r.from.organization), r)
+          this.addVisualProps(r)
+          this.trigger({action: 'addItem', resource: r})
+        }
+        else if (doneWithMultiEntry) {
+          // when all the multientry forms are filled out and next form is requested
+          // do not show the last form request for the multientry form it is confusing for the user
+          if (ptype ) {
+            let multiEntryForms = this.getModel(ptype).multiEntryForms
+            if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
+              let rid = returnVal.from.organization.id
+              this.deleteMessageFromChat(rid, returnVal)
+              let id = utils.getId(returnVal)
+              delete list[id]
+              await db.del(id)
+              let params = {action: 'addItem', resource: returnVal}
+              this.trigger(params);
+              return
+            }
+          }
+        }
+      }
+      try {
+        let res = await this._keeper.get(returnVal[CUR_HASH])
+        let r = utils.clone(res)
+        _.extend(r, returnVal)
+        this._setItem(utils.getId(returnVal), returnVal)
+        let params = {action: 'addItem', resource: r}
+        this.trigger(params);
+        await this.onIdle()
+        await save(returnVal, true)
+        return
+      } catch(err) {
+        debugger
+      }
     }
   },
   _makeIdentityStub(r) {
@@ -5592,7 +5581,7 @@ if (!res[SIG]  &&  res._message)
         let arr = b.id.split('.')
         bTitle = utils.makeLabel(arr[arr.length - 1])
       }
-      return aTitle > bTitle ? -1 : 1
+      return aTitle < bTitle ? -1 : 1
     })
     this.trigger({action: 'models', list: retModels})
   },
@@ -5716,20 +5705,25 @@ if (!res[SIG]  &&  res._message)
   },
 
   async getList(params) {
-    let {modelName, first, prop, isAggregation, isChat, isRefresh} = params
+    let {modelName, first, prop, isAggregation, isChat, isRefresh, exploreData} = params
     var meta = this.getModel(modelName)
     let isMessage = modelName === MESSAGE || isChat || utils.isItem(meta) // utils.isMessage(meta)
     // HACK for now
     if (!isMessage)
-      isMessage = isRefresh  || meta.subClassOf === FORM  ||  modelName === VERIFICATION
+      isMessage = isRefresh  || utils.isForm(meta)  ||  modelName === VERIFICATION
     // if (params.prop)
     //   debugger
     if (params.search &&  me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION  &&  !utils.isEnum(meta)) {
+      // if (exploreData)
+      //   Actions.showModal({title: translate('searching'), showIndicator: true})
       try {
         return await this.searchServer(params)
       } catch (error) {
         Alert.alert(error.message)
         return
+      } finally {
+        // if (exploreData)
+        //   Actions.hideModal()
       }
     }
 
@@ -5962,13 +5956,13 @@ if (!res[SIG]  &&  res._message)
                 continue
               }
               // Product created in Remediation show only from profile view
-              if (m.subClassOf === MY_PRODUCT  &&  r._context) {
+              if (utils.isMyProduct(m)  &&  r._context) {
                 if (this._getItem(utils.getId(r._context)).requestFor === REMEDIATION) {
                   rmIdx.push(i)
                   continue
                 }
               }
-              if (m.subClassOf !== FORM  ||  m.id === DATA_BUNDLE)
+              if (!utils.isForm(m)  ||  m.id === DATA_BUNDLE)
                 continue
               // Case when event to display ML is before the new resource was sent
               let formCreatorId = r.to.organization
@@ -6537,14 +6531,14 @@ if (!res[SIG]  &&  res._message)
   },
   convertInlineRefs(ref, rr, isArray) {
     let pm = this.getModel(ref)
-    if (pm.abstract  ||  pm.subClassOf === ENUM)
+    if (pm.abstract  ||  utils.isEnum(pm))
       return rr
     let props = pm.properties
     for (let p in rr) {
       if (!props[p]  ||  !rr[p][TYPE])
         continue
       let m = this.getModel(rr[p][TYPE])
-      if (m.subClassOf === ENUM  ||  props[p].inlined)
+      if (utils.isEnum(m)  ||  props[p].inlined)
         continue
       rr[p] = this.makeStub(rr[p])
     }
@@ -7309,7 +7303,7 @@ if (!res[SIG]  &&  res._message)
 
     var isSharedWith //, timeResourcePair = null
     var m = this.getModel(r[TYPE])
-    var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
+    var isVerificationR = r[TYPE] === VERIFICATION  ||  utils.isVerification(m)
     if (r._sharedWith  &&  toOrgId) {
       isSharedWith = r._sharedWith.some((r) => {
         let org = this._getItem(r.bankRepresentative).organization
@@ -7320,9 +7314,9 @@ if (!res[SIG]  &&  res._message)
 
     if (chatTo) {
       // backlinks like myVerifications, myDocuments etc. on Profile
-      var isForm = m.subClassOf === FORM
+      var isForm = utils.isForm(m)
       var isItem = utils.isItem(m)
-      var isMyProduct = m.subClassOf === MY_PRODUCT
+      var isMyProduct = utils.isMyProduct(m)
       let isContext = utils.isContext(m)
       let isDataClaim = m.id == DATA_CLAIM
       if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext && !isDataClaim  &&  !isItem)
@@ -7406,11 +7400,12 @@ if (!res[SIG]  &&  res._message)
       return true
     // if (r._notSent)
     //   return true
+    let isForm = utils.isForm(m)
     if (r._context       &&
         !prop            &&
-        (m.subClassOf === FORM || m.id === VERIFICATION) &&
+        (isForm  ||  m.id === VERIFICATION) &&
         this._getItem(utils.getId(r._context)).requestFor === REMEDIATION) {
-      let org = m.subClassOf === FORM ? this._getItem(utils.getId(r.to)) : this._getItem(utils.getId(r.from))
+      let org = isForm ? this._getItem(utils.getId(r.to)) : this._getItem(utils.getId(r.from))
       let remMsg = await this.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
       if (remMsg  &&  remMsg.length)
         return r._time < remMsg[0]._time + 30000
@@ -7419,8 +7414,8 @@ if (!res[SIG]  &&  res._message)
     }
     if (r._inactive)
       return true
-    if (m.subClassOf === MY_PRODUCT  &&
-        r._context                   &&
+    if (utils.isMyProduct(m)    &&
+        r._context              &&
         this._getItem(utils.getId(r._context)).requestFor === REMEDIATION)
       return true
 
@@ -7561,14 +7556,14 @@ if (!res[SIG]  &&  res._message)
           }
         }
         // This is the case when backlinks are requested on Profile page
-        let addMessage = type === modelName  ||  (!isForm  &&  m.subClassOf === model.id)
+        let addMessage = type === modelName  ||  (!isForm  &&  utils.isSubclassOf(m, model.id))
         // if (addMessage)  {
         //   if (dataBundle  &&  r._dataBundle !== dataBundle)
         //     return
         // }
         if (!addMessage)  {
           if (isForm) {
-            if (m.subClassOf === FORM) {
+            if (utils.isForm(m)) {
               // Make sure to not return Items and Documents in this list
               let ilen = m.interfaces  &&  m.interfaces.length
               if (isForgetting  ||  !ilen  ||  (ilen === 1  &&  m.interfaces[0] === VERIFIABLE))
@@ -7632,7 +7627,7 @@ if (!res[SIG]  &&  res._message)
             if (!m.interfaces  ||  m.interfaces.indexOf(modelName) === -1)
               continue
           }
-          else if (m.subClassOf !== modelName)
+          else if (!utils.isSubclassOf(m, modelName))
             continue
         }
         if (isForm  &&  type === PRODUCT_REQUEST)
@@ -7652,7 +7647,7 @@ if (!res[SIG]  &&  res._message)
         }
         else {
           let mType = utils.getType(cMsg)
-          if (mType !== modelName  &&  this.getModel(mType).subClassOf !== modelName)
+          if (mType !== modelName  &&  !utils.isSubclassOf(mType, modelName))
             continue
         }
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
@@ -7913,7 +7908,7 @@ if (!res[SIG]  &&  res._message)
         }
         break
       default:
-        if (this.getModel(t).subClassOf === MY_PRODUCT) {
+        if (utils.isMyProduct(t)) {
           stats.myProducts.push({[t] : r})
           providerCustomerStats.myProducts.push(r)
         }
@@ -8084,7 +8079,7 @@ if (!res[SIG]  &&  res._message)
               appStats.changed = 'productApplications'
               break
             default:
-              if (self.getModel(t).subClassOf === MY_PRODUCT)
+              if (utils.isMyProduct(t))
                 appStats.changed = 'myProducts'
               else
                 appStats.changed = 'forms'
@@ -8184,7 +8179,7 @@ if (!res[SIG]  &&  res._message)
 
       if (!shareType                          &&
           msgModel                            &&
-          msgModel.subClassOf !== MY_PRODUCT  &&
+          !utils.isMyProduct(msgModel)        &&
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
         shareType = msgModel.id
@@ -8377,7 +8372,7 @@ if (!res[SIG]  &&  res._message)
       simpleLinkMessages[r.form] = r
       let msgModel = this.getModel(r.form);
       if (msgModel  &&
-          msgModel.subClassOf !== MY_PRODUCT  &&
+          !utils.isMyProduct(msgModel)        &&
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
         let productModel = this.getModel(r.product)
@@ -8597,7 +8592,7 @@ if (!res[SIG]  &&  res._message)
 
     let docType = r[TYPE]
     let docModel = this.getModel(docType)
-    let isMyProduct = docModel.subClassOf === MY_PRODUCT
+    let isMyProduct = utils.isMyProduct(docModel)
     let isItem = utils.isSavedItem(r)
     // Allow sharing only of resources that were filled out by me
     if (!isMyProduct) {
@@ -8746,7 +8741,7 @@ if (!res[SIG]  &&  res._message)
     let isInMyData = isMessage &&  utils.isSavedItem(value)
     var batch = [];
     value._time = value._time || new Date().getTime();
-    let isForm = model.subClassOf === FORM
+    let isForm = utils.isForm(model)
     if (isMessage) {
       if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
@@ -8899,7 +8894,7 @@ if (!res[SIG]  &&  res._message)
           this.onExploreBacklink(cRes, item, true)
         }
       }
-      if (model.subClassOf === FORM) {
+      if (utils.isForm(model)) {
         // let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
@@ -8956,7 +8951,7 @@ if (!res[SIG]  &&  res._message)
       let sharedWithOrg = this._getItem(utils.getId(sharedWith.organization))
       let orgName = sharedWithOrg.name
       // let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
-      if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
+      if (!utils.isMyProduct(model)  &&  !utils.isForm(model))
         return
       dn = translate('sharedForm', translate(model))
       sharedWithOrg.lastMessage = dn
@@ -8987,9 +8982,9 @@ if (!res[SIG]  &&  res._message)
       let m = this.getModel(value.requestFor)
       dn = utils.makeModelTitle(m)
     }
-    else if (model.subClassOf === MY_PRODUCT)
+    else if (utils.isMyProduct(model))
       dn = translate('receivedProduct', translate(model))
-    else if (model.subClassOf === FORM) {
+    else if (utils.isForm(model)) {
       if (isNew)
         dn = translate('submittingForm', translate(model))
       else if (fromId !== meId)
@@ -9048,7 +9043,7 @@ if (!res[SIG]  &&  res._message)
         if (!msgModel.interfaces  ||  msgModel.interfaces.indexOf(items.ref) === -1)
           continue
       }
-      else if (itemsModel.id !== msg[TYPE]  &&  msgModel.subClassOf !== itemsModel.id)
+      else if (itemsModel.id !== msg[TYPE]  &&  !utils.isSubclassOf(msgModel, itemsModel.id))
         continue
       let isForm = items.ref === FORM
       if (isForm  &&  msgModel.id === PRODUCT_REQUEST)
@@ -9094,7 +9089,6 @@ if (!res[SIG]  &&  res._message)
   },
   async registration(value) {
     isLoaded = true;
-debugger
     me = value
     // meDriver = null
     var pKey = utils.getId(me)
@@ -9488,7 +9482,7 @@ debugger
     const onSent = ({ message, object }) => {
       const type = object.object[TYPE]
       const model = this.getModel(type)
-      const isForm = model && model.subClassOf === FORM
+      const isForm = model  &&  utils.isForm(model)
       if (type === SIMPLE_MESSAGE || isForm) {
         this.registerForPushNotifications()
         node.removeListener('sent', onSent)
@@ -10196,7 +10190,7 @@ debugger
         r[ROOT_HASH] = item.permalink
         r[CUR_HASH] = item.link
         let m = this.getModel(r[TYPE])
-        let isMyMessage = r[TYPE] !== VERIFICATION  &&  m.subClassOf !== MY_PRODUCT
+        let isMyMessage = r[TYPE] !== VERIFICATION  &&  !utils.isMyProduct(m)
         r.from = isMyMessage ? this.buildRef(me) : val.from
         r.to = isMyMessage ? val.from : this.buildRef(me)
         if (!r._time)
@@ -10246,8 +10240,8 @@ await fireRefresh(val.from.organization)
       this.addMessagesToChat(utils.getId(fOrg), val)
     }
     else {
-      let isMyProduct = model.subClassOf === MY_PRODUCT
-      if (contextId  &&  me.isEmployee  &&  (isMyProduct || model.subClassOf === FORM)) {
+      let isMyProduct = utils.isMyProduct(model)
+      if (contextId  &&  me.isEmployee  &&  (isMyProduct || utils.isForm(model))) {
         // Update application row and view if on stack
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
         let app = applications  &&  applications.list.length && applications.list[0]
@@ -10818,7 +10812,7 @@ await fireRefresh(val.from.organization)
               return
             let realProductType = r[TYPE].substring(0, r[TYPE].length - 'Confirmation'.length)
             let m = this.getModel(realProductType)
-            if (!m  ||  m.subClassOf !== FINANCIAL_PRODUCT)
+            if (!m  ||  !utils.isSubclassOf(m, FINANCIAL_PRODUCT))
               return
             // This is confirmation for getting the product
             rId = utils.makeId(SIMPLE_MESSAGE, r[ROOT_HASH])
@@ -10977,7 +10971,7 @@ await fireRefresh(val.from.organization)
           r._appSubmitted = true
           putPromises.push(this.dbPut(utils.getId(r), r))
         }
-        else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
+        else if (utils.isMyProduct(rr[TYPE])) {
           r._approved = true
           putPromises.push(this.dbPut(utils.getId(r), r))
         }
@@ -11456,3 +11450,327 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   return userId
 }
+/*
+  onAddMessage (params) {
+    let r = params.msg
+    let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
+
+    if (application) {
+      r.to = application._context.from
+      r._context = application._context
+    }
+    var self = this
+    let m = this.getModel(r[TYPE])
+    let isContext = utils.isContext(m) // r[TYPE] === PRODUCT_APPLICATION
+    var props = m.properties;
+    if (!r._time)
+      r._time = new Date().getTime();
+    var toOrg
+    // r.to could be a reference to a resource
+    var to = this._getItem(r.to)
+    let toType
+    if (to)
+      toType = to[TYPE]
+    let isReadOnlyContext, orgId, orgRep
+    if (toType === ORGANIZATION) {
+      orgId = utils.getId(r.to)
+      orgRep = this.getRepresentative(orgId)
+      // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+      //   return
+      if (!orgRep) {
+        var params = {
+          action: 'addMessage',
+          error: 'No ' + r.to.name + ' representative was found'
+        }
+        this.trigger(params);
+        return
+      }
+      toOrg = r.to
+      r.to = orgRep
+    }
+    else {
+      let toM = this.getModel(toType)
+      isReadOnlyContext = utils.isContext(toM)  &&  utils.isReadOnlyChat(to)
+    }
+    let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
+
+    var rr = {};
+    var context
+    if (r._context) {
+      rr._context = r._context
+      context = this.findContext(r._context)
+    }
+    rr[IS_MESSAGE] = true
+
+    if (isContext)
+      rr.contextId = this.getNonce()
+    for (let p in r) {
+      if (!props[p])
+        continue
+      if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
+        rr[p] = this.buildRef(r[p])
+      else
+        rr[p] = r[p];
+    }
+
+    let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
+    // rr[NONCE] = this.getNonce()
+    let toChain = {
+      [TYPE]: rr[TYPE],
+      // [NONCE]: rr[NONCE],
+      time: r._time
+    }
+    if (rr.message)
+      toChain.message = rr.message
+    if (rr.photos)
+      toChain.photos = rr.photos
+    if (isSelfIntroduction)
+      toChain.profile = { firstName: me.firstName }
+    if (r.list)
+      rr.list = r.list
+    let required = m.required
+    if (required) {
+      required.forEach((p) => {
+        if (props[p].type === 'object'  &&  !props[p].inlined  &&  !this.getModel(props[p].ref).inlined)
+          toChain[p] = this.buildSendRef(rr[p])
+        else
+          toChain[p] = rr[p]
+      })
+      // HACK
+      delete toChain.from
+      delete toChain.to
+    }
+    var batch = []
+    var error
+    var welcomeMessage
+    // var promise = Q(protocol.linkString(toChain))
+    let applicant
+    if (application  &&  utils.isRM(application))
+      applicant = this._getItem(utils.getId(application.applicant))
+    else
+      applicant = r.to
+    let hash = applicant[ROOT_HASH]
+    if (!hash)
+      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+    var toId = utils.makeId(IDENTITY, hash)
+    rr._sendStatus = self.isConnected ? SENDING : QUEUED
+    var noCustomerWaiting
+    // let firstTime
+    return this._loadedResourcesDefer.promise
+    .then(() => {
+      let promise = isContext
+                  ? this.searchMessages({modelName: m.id, to: toOrg})
+                  : Q()
+      return promise
+    })
+    .then((result) => {
+      if (result) {
+        result = result.filter((r) => {
+          return (r.message === r.message  &&  !r._documentCreated) ? true : false
+        })
+        if (result.length) {
+          result.forEach((r) => {
+            const rid = utils.getId(r)
+            self._mergeItem(rid, { _documentCreated: true })
+          })
+        }
+      }
+      return this.maybeWaitForIdentity({ permalink: hash })
+    })
+    .then(() => this.meDriverExec('sign', { object: toChain }))
+    .then((result) => {
+      toChain = result.object
+      let hash = protocol.linkString(result.object)
+
+      rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
+      if (isContext) {
+        rr._context = r._context = {id: utils.getId(r), title: r.requestFor}
+        contextIdToResourceId[rr.contextId] = rr
+
+        self.addLastMessage(r, batch)
+      }
+      else if (!isWelcome  &&  !application)
+        self.addLastMessage(r, batch)
+
+      if (!isWelcome) //  ||  utils.isEmployee(r.to))
+        return
+      if (!orgRep)
+        return
+      if (orgRep.lastMessageTime) {
+        isWelcome = orgRep.lastMessage === r.message
+        if (!isWelcome)
+          return;
+      }
+      if (me.txId)
+        return
+
+      if (isContext)
+        isWelcome = false
+      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+      // prevent the not needed duplicate expensive operations for obtaining ProductList
+      return checkForCustomerWaiting()
+    })
+    .then(() => {
+      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+        return;
+
+      // Temporary untill the real hash is known
+      var key = utils.getId(rr)
+
+      rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+      rr.from = rr.from || r.from
+      if (isContext)
+        rr.to.organization = self.buildRef(to)
+      rr._outbound = true
+      rr._latest = true
+      if (!application) {
+        self._setItem(key, rr)
+
+        if (!toOrg)
+            toOrg = to.organization ? to.organization : to
+        let isDenial = rr[TYPE] === APPLICATION_DENIAL
+        let isApproval = rr[TYPE] === APPLICATION_APPROVAL
+        if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
+          self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
+        if (isApproval)
+          Actions.showModal({title: translate('inProcess'), showIndicator: true})
+
+        self.addMessagesToChat(utils.getId(toOrg), rr)
+      }
+      this.addVisualProps(rr)
+
+      var params = {
+        action: 'addMessage',
+        resource: isWelcome ? welcomeMessage : rr
+      }
+      if (error)
+        params.error = error
+      if (r[TYPE]  !== SELF_INTRODUCTION)
+        self.trigger(params)
+      if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
+        return self.getDriver(me)
+    })
+    .then(() => {
+      // SelfIntroduction or IdentityPublishRequest were just sent
+      if (noCustomerWaiting)
+        return
+      if (isReadOnlyContext)
+        return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
+      let toRes = self._getItem(toId)
+      if (toRes)
+        return toRes.pubkeys
+      else if (me.isEmployee) {
+        let rep = this.getRepresentative(me.organization)
+        return this._getItem(utils.makeId(IDENTITY, rep[ROOT_HASH])).pubkeys
+      }
+    })
+    .then((pubkeys) => {
+      if (pubkeys)
+        return self.packMessage(toChain, r.from, r.to, context)
+    })
+    .then((sendParams) => {
+      if (!sendParams)
+        return
+        // let sendParams = self.packMessage(r, toChain)
+      if (disableAutoResponse) {
+        if (!sendParams.other)
+          sendParams.other = {}
+        sendParams.other.disableAutoResponse = true
+      }
+      const method = toChain[SIG] ? 'send' : 'signAndSend'
+      return self.meDriverExec(method, sendParams)
+      .catch(function (err) {
+        debugger
+      })
+    })
+    .then((result) => {
+      if (!requestForForm  &&  isWelcome)
+        return
+      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+        return
+      if (isReadOnlyContext)
+        return
+      // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
+      if (!toOrg)
+        toOrg = to.organization ? to.organization : to
+      // saving the new message
+      const data = storeUtils.toOldStyleWrapper(result.message)
+      if (data)  {
+        rr[ROOT_HASH] = data[ROOT_HASH]
+        rr[CUR_HASH] = data[CUR_HASH]
+      }
+      var key = utils.getId(rr)
+      self.dbBatchPut(key, rr, batch)
+      self._setItem(key, rr)
+      if (isContext)
+        return this.searchMessages({modelName: FORM_REQUEST, to: to})
+    })
+    .then((result) => {
+      if (result) {
+        result.forEach((r) => {
+          if (r._documentCreated  &&  !r._document) {
+            let rId = utils.getId(r)
+            batch.push({type: 'del', key: rId})
+            this.deleteMessageFromChat(orgId, r)
+            this._deleteItem(rId)
+          }
+        })
+      }
+      return db.batch(batch)
+    })
+    .then(() => {
+      if (me.isEmployee)
+        return this.getModelsPack(to)
+    })
+    .catch((err) => {
+      debug('Something went wrong', err.stack)
+      debugger
+    })
+    .finally(() => {
+      if (cb)
+        cb(rr)
+    })
+
+    async function checkForCustomerWaiting() {
+      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+      // prevent the not needed duplicate expensive operations for obtaining ProductList
+      await self.getDriver(me)
+      if (!self.isConnected  ||  publishRequestSent[orgId])
+        return
+      // TODO:
+      // do we need identity publish status anymore
+      let status = await meDriver.identityPublishStatus()
+      if (!status) ///* || !self.isConnected*)
+        return
+      publishRequestSent[orgId] = true
+      if (!status.watches.link  &&  !status.link  &&  !me.isEmployee) {
+        if (isCustomerWaiting)
+          noCustomerWaiting = true
+        return self.publishMyIdentity(orgRep)
+      }
+      let id = to.organization ? utils.getId(to.organization) : utils.getId(to)
+      if (chatMessages[id]  &&  chatMessages[id].length)
+        return
+      var allMyIdentities = self._getItem(MY_IDENTITIES)
+      var all = allMyIdentities.allIdentities
+      var curId = allMyIdentities.currentIdentity
+
+      let identity = all.filter((id) => id.id === curId)
+      console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+      var msg = {
+        message: me.firstName + ' is waiting for the response',
+        [TYPE]: SELF_INTRODUCTION,
+        identity: identity[0].publishedIdentity,
+        name: me.firstName,
+        profile: {
+          firstName: me.firstName
+        },
+        from: me,
+        to: r.to
+      }
+      if (isCustomerWaiting)
+        noCustomerWaiting = true
+      return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+    }
+  },
+*/
