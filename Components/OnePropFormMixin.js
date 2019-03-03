@@ -167,7 +167,7 @@ var OnePropFormMixin = {
     if (result.status == 'FailedBecauseUserCancelled')
       return
     if (!result.faceMetrics) {
-      Alert.alert('Something is wrong with Zoom scan', result)
+      Alert.alert('Something is wrong with Zoom scan')
       console.log('Something is wrong with Zoom scan', result)
       return
     }
