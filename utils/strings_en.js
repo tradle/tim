@@ -86,7 +86,7 @@ module.exports = {
     "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
     "errorNotification": "Error notification has been sent to the customer to correct",
     "areYouSureAboutNextForm": "Have you finished adding {1}?",
-    "formChooser": "Form list",
+    "formChooser": "Request a Form",
     "showQR": "My QR code",
     "useTouchId": "Enable Touch ID",
     "useGesturePassword": "Enable Gesture Password",
@@ -285,6 +285,9 @@ module.exports = {
     "scanYourDocument": "Please scan your document",
     "pleaseChooseDT": "Please choose document type first",
     "dateInTheFutureError": "{1} is in the future",
+    "enterValidValue": "Please enter the valid value",
+    "rescan": "Please re-scan the same document",
+    "invalidValue": "This value is invalid. Please re-enter.",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

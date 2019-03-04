@@ -4,8 +4,11 @@ const writeFileAtomic = require('write-file-atomic')
 const Translate = require('@google-cloud/translate')
 const fs = require('fs')
 const parser = require('fast-xml-parser');
+const aws = require('aws-sdk')
+const fetch = require('node-fetch')
 
 const translate = new Translate();
+const URL = 'https://s3.eu-west-2.amazonaws.com/tradle.io/strings/'
 
 const HELP = `
   Usage:
@@ -34,14 +37,31 @@ if (help) {
 }
 new Promise(resolve => writeStrings(dictionary, languages, forceGen))
 
+var s3
+
 async function writeStrings(stringsDir, lang, forceGen) {
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     console.log('Please set environment variable GOOGLE_APPLICATION_CREDENTIALS to allow models translation')
     return
   }
-  let langs = lang.split(',')
   let isRegulaXml = stringsDir === './android/app/src/main/res/values'
-  await Promise.all(langs.map(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen)))
+  if (lang) {
+    let langs = lang.split(',')
+    await Promise.all(langs.map(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen)))
+    return
+  }
+
+  let [languages] = await translate.getLanguages()
+
+  for (let i=0; i<languages.length; ) {
+    let promises = []
+    for (let j=0; j<5 && i < languages.length; j++, i++) {
+      let lang = languages[i].code
+      // isRegulaXml ? await writeRegulaFile(stringsDir, lang, forceGen) : await writeFile(stringsDir, lang, forceGen)
+      promises.push(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen))
+      await Promise.all(promises)
+    }
+  }
 }
 async function writeRegulaFile(stringsDir, lang, forceGen) {
   if (lang === 'en')
@@ -91,6 +111,79 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
   }
   strings += '\n</resources>'
   writeFileAtomic(langStrings, strings, console.log)
+}
+async function writeFile(stringsDir, lang, forceGen) {
+  if (lang === 'en')
+    return
+  let fn = 'strings_' + lang + '.js'
+  let fnStrings = path.resolve(stringsDir, fn)
+  let enFn = 'strings_en.js'
+  let stringsLang, stringsEN
+  let currentIds
+  try {
+    stringsEN = require(path.resolve(stringsDir, enFn))
+    let res = await fetch(`${URL}${fn}`) //require(fnStrings)
+    stringsLang = await res.text()
+    stringsLang = JSON.parse(stringsLang.split('=')[1].trim())
+
+    for (let p in stringsLang) {
+      if (!currentIds) currentIds = {}
+      currentIds[p] = true
+    }
+  } catch (err) {
+    console.log(err.message)
+    if (!stringsEN)
+      return
+    stringsLang = {}
+  }
+  let promises = []
+  for (let p in stringsEN) {
+    if (!stringsLang[p] || forceGen)
+      promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
+  }
+  if (promises.length)
+    await Promise.all(promises, { concurrency: 20 })
+
+  // Check if some models/props were deleted
+  let hasChanged = promises.length
+  if (!currentIds  ||  forceGen)
+    hasChanged = true
+  else {
+    for (let p in currentIds) {
+      // Cleanup not used translations
+      if (!stringsEN[p]) {
+        delete stringsLang[p]
+        hasChanged = true
+      }
+    }
+  }
+  if (!hasChanged)
+    return
+  if (!s3) {
+    s3 = new aws.S3();
+  }
+  let s = typeof stringsLang === 'string' && stringsLang || JSON.stringify(stringsLang, 0, 2)
+  var params = {
+    Body: Buffer.from('module.exports = ' + s),
+    Bucket: 'tradle.io',
+    Key: `strings/${fn}`,
+    ACL: 'public-read'
+   };
+   s3.putObject(params, function(err, data) {
+     if (err)
+       console.log(err, err.stack); // an error occurred
+     else
+       console.log(data);           // successful response
+   });
+
+    // writeFileAtomic(fnStrings, 'module.exports = ' + JSON.stringify(stringsLang, 0, 2), console.log)
+}
+async function translateText({strings, key, text, lang}) {
+  const results = await translate.translate(text, lang)
+  const translation = results[0];
+  strings[key] =  translation.charAt(0).toUpperCase() + translation.slice(1)
+}
+
 /*
     <string name="app_name">Tradle</string>
     <string name="branch_app_link">link.tradle.io</string>
@@ -114,54 +207,3 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
     <string name="strTorchUnavailable">Torch unavailable</string>
     <string name="strNfcTagNotFound">NFC tag not detected! Please move your phone closer to the NFC tag</string>
 */
-}
-async function writeFile(stringsDir, lang, forceGen) {
-  if (lang === 'en')
-    return
-  let fn = 'strings_' + lang + '.js'
-  let fnStrings = path.resolve(stringsDir, fn)
-  let enFn = 'strings_en.js'
-  let stringsLang, stringsEN
-  let currentIds
-  try {
-    stringsEN = require(path.resolve(stringsDir, enFn))
-    stringsLang = require(fnStrings)
-    for (let p in stringsLang) {
-      if (!currentIds) currentIds = {}
-      currentIds[p] = true
-    }
-  } catch (err) {
-    console.log(err.message)
-    if (!stringsEN)
-      return
-    stringsLang = {}
-  }
-  let promises = []
-  for (let p in stringsEN) {
-    if (!stringsLang[p] || forceGen)
-      promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
-  }
-  await Promise.all(promises, { concurrency: 20 })
-
-  // Check if some models/props were deleted
-  let hasChanged = promises.length
-  if (!currentIds  ||  forceGen)
-    hasChanged = true
-  else {
-    for (let p in currentIds) {
-      // Cleanup not used translations
-      if (!stringsEN[p]) {
-        delete stringsLang[p]
-        hasChanged = true
-      }
-    }
-  }
-  if (hasChanged)
-    writeFileAtomic(fnStrings, 'module.exports = ' + JSON.stringify(stringsLang, 0, 2), console.log)
-}
-async function translateText({strings, key, text, lang}) {
-  const results = await translate.translate(text, lang)
-  const translation = results[0];
-  strings[key] = translation
-}
-

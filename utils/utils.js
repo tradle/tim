@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   NativeModules,
-  Text,
   // findNodeHandle,
   Dimensions,
   Linking,
@@ -119,7 +118,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const STATUS = 'tradle.Status'
 
-var dictionary, language //= dictionaries[Strings.language]
+var dictionary, language, strings //= dictionaries[Strings.language]
 
 var models, me
 var DEFAULT_FETCH_TIMEOUT = 5000
@@ -161,7 +160,7 @@ var utils = {
     }
     return true;
   },
-  setMe(meR) {
+  async setMe(meR) {
     me = meR;
     if (!me)
       return
@@ -176,8 +175,8 @@ var utils = {
     if (language === lang)
       return
     language = lang
-    Strings.setLanguage(lang)
-    let d = dictionaries(lang)
+    strings = await Strings.setLanguage(lang)
+    let d = await dictionaries(lang)
     if (d) {
       const enD = getDictionary()
       dictionary = _.extend({}, enD, d)
@@ -403,11 +402,11 @@ var utils = {
     if (typeof args[0] === 'string')
       return utils.translateString(...args)
     if (args.length === 1)
-      return utils.translateModel(args[0])
+      return utils.translateModel(...args)
     else
-      return utils.translateProperty(args[0], args[1])
+      return utils.translateProperty(...args)
   },
-  translateProperty(property, model) {
+  translateProperty(property, model, needDescription) {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
     // HACK for property that changes title in case it is upload or scan
@@ -416,10 +415,18 @@ var utils = {
 
     let translations = dictionary.properties[property.name]
     let val
-    if (translations)
-      val = translations[model.id] || translations.Default
-
-    return val || property.title || utils.makeLabel(property.name)
+    if (translations) {
+      if (needDescription)
+        val = translations[model.id + '_d'] || translations.Default_d
+      else
+        val = translations[model.id] || translations.Default
+    }
+    if (val)
+      return val
+    if (needDescription)
+      return property.description
+    else
+      return property.title || utils.makeLabel(property.name)
   },
   translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
@@ -456,7 +463,7 @@ var utils = {
     }
   },
   translateString(...args) {
-    const { strings } = Strings
+    // const { strings } = Strings
     if (!strings)
       return utils.makeLabel(args[0])
 
@@ -464,19 +471,6 @@ var utils = {
     if (!s)
       return utils.makeLabel(args[0])
 
-    // if (args.length === 2  &&  typeof args[1] === 'object') {
-    //   let pos = 0
-    //   do {
-    //     let i1 = s.indexOf('{', pos)
-    //     if (i1 === -1)
-    //       break
-    //     let i2 = s.indexOf('}, i1')
-    //     if (i2 === -1)
-    //       break
-    //     s = s.substring(0, i1) + args[1][s.substring(i1 + 1, i2)] + s.substring(i2 + 1)
-    //   } while(true)
-    // }
-    // else
     if (args.length > 1) {
       for (let i=1; i<args.length; i++) {
         let insert = '{' + i + '}'
@@ -702,13 +696,21 @@ var utils = {
     return subclasses;
   },
   isSubclassOf(type, subType) {
-    if (typeof type === 'string')
-      return utils.getModel(type).subClassOf === subType
+    if (typeof type === 'string') {
+      let m = utils.getModel(type)
+      return utils.isSubclassOf(m, subType)
+    }
     if (type.type)  {
       if (type.type === 'tradle.Model')
-      return type.subClassOf === subType
+        return type.subClassOf === subType
     }
-    return utils.getModel(type[TYPE]).subClassOf === subType
+    let m = utils.getModel(type[TYPE])
+    if (m.subClassOf === subType)
+      return true
+    if (m.subClassOf)
+      return utils.isSubclassOf(m.subClassOf, subType)
+    else
+      return false
   },
   isMyProduct(type) {
     return utils.isSubclassOf(type, MY_PRODUCT)
@@ -720,6 +722,8 @@ var utils = {
     return utils.isSubclassOf(type, VERIFICATION)
   },
   isInlined(m) {
+    if (!m)
+      return false
     if (m.inlined)
       return true
     if (!m.subClassOf)
@@ -999,6 +1003,7 @@ var utils = {
     let lang = language || 'en'
     switch (lang) {
     case 'fil':
+    case 'tl':
       lang = 'tl-ph'
       require('moment/locale/tl-ph')
       break
@@ -2306,11 +2311,16 @@ var utils = {
   },
   submitLog: async function (noAlert) {
     const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
+    const postOpts = { headers: {} }
+    if (ENV.userLogEndpointAPIKey) {
+      postOpts.headers['x-api-key'] = ENV.userLogEndpointAPIKey
+    }
+
     try {
-      const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
+      const res = await submitLog(ENV.userLogEndpoint + '?' + querystring.stringify({
         firstName: me.firstName,
         lastName: me.lastName
-      }))
+      }), postOpts)
 
       if (res.status > 300) {
         const why = await res.text()
@@ -2507,73 +2517,6 @@ var utils = {
     let toId = utils.getId(r.to)
     let fromId = utils.getId(r.from)
     return toId === fromId  &&  toId === utils.getId(utils.getMe())
-  },
-  getContentSeparator(bankStyle) {
-    let separator = {}
-    if (bankStyle) {
-      if (bankStyle.navBarBorderColor) {
-        separator.borderBottomColor = bankStyle.navBarBorderColor
-        separator.borderBottomWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
-        separator.width = this.dimensions().width
-      }
-    }
-    return separator
-  },
-  parseMessage(params) {
-    let { resource, message, bankStyle, noLink, idx } = params
-    let i1 = message.indexOf('**')
-    if (i1 === -1)
-      return utils.translate(message)
-    let formType = message.substring(i1 + 2)
-    let i2 = formType.indexOf('**')
-    let linkColor = noLink ? '#757575' : bankStyle.linkColor
-    let message1, message2
-    let formTitle
-    if (i2 !== -1) {
-      message1 = message.substring(0, i1).trim()
-      message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
-      formType = formType.substring(0, i2)
-      if (resource[TYPE] === FORM_REQUEST) {
-        let formModel = utils.getModel(resource.form)
-        if (formModel.subClassOf === MY_PRODUCT)
-          linkColor = '#aaaaaa'
-        let title = utils.makeModelTitle(formModel)
-        if (formType === title)
-          formTitle = utils.translate(formModel)
-      }
-    }
-    if (!formTitle)
-      formTitle = utils.translate(formType)
-    let key = utils.getDisplayName(resource).replace(' ', '_') + (idx || 0)
-    idx = idx ? ++idx : 1
-    let newParams = _.extend({}, params)
-    newParams.idx = idx
-    newParams.message = message2.trim()
-    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{utils.translate(message1) + ' '}
-             <Text style={{color: linkColor}}>{formTitle}</Text>
-             <Text>{utils.parseMessage(newParams)}</Text>
-           </Text>
-  },
-  getMarkdownStyles(bankStyle, isItalic, isMyMessage, isChat) {
-    const markdownStyles = {
-      heading1: {
-        fontSize: 24,
-        color: 'purple',
-      },
-      link: {
-        color: isMyMessage? 'lightblue' : bankStyle  &&  bankStyle.linkColor || '#555555',
-        textDecorationLine: 'none'
-      },
-      mailTo: {
-        color: 'orange',
-      },
-      text: {
-        color: isMyMessage ? '#ffffff' : '#757575',
-        fontSize: isChat ? 18 : 14,
-        fontStyle: isItalic  &&  'italic' || 'normal'
-      },
-    }
-    return markdownStyles
   },
   addDefaultPropertyValuesFor(provider) {
     defaultPropertyValues[utils.getId(provider)] = provider._defaultPropertyValues
@@ -2957,78 +2900,3 @@ function dateFromParts (parts) {
 }
 
 module.exports = utils;
-  // isVerifier(resource, application) {
-  //   if (!utils.isEmployee(resource))
-  //     return false
-  //   let me = utils.getMe()
-  //   if (!me.isEmployee)
-  //     return false
-  //   let model = utils.getModel(resource[TYPE])
-  //   if (model.subClassOf === FORM) {
-  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  utils.isReadOnlyChat(resource)) &&
-  //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-  //   }
-  //   if (model.id === VERIFICATION)
-  //     return  utils.getId(me) === utils.getId(resource.from)
-  // },
-  // measure(component, cb) {
-  //   let handle = typeof component === 'number'
-  //     ? component
-  //     : findNodeHandle(component)
-
-  //   RCTUIManager.measure(handle, cb)
-  // },
-  // groupByEveryN: function groupByEveryN<T>(array: Array<T>, n: number): Array<Array<?T>> {
-  //   var result = [];
-  //   var temp = [];
-
-  //   for (var i = 0; i < array.length; ++i) {
-  //     if (i > 0 && i % n === 0) {
-  //       result.push(temp);
-  //       temp = [];
-  //     }
-  //     temp.push(array[i]);
-  //   }
-
-  //   if (temp.length > 0) {
-  //     while (temp.length !== n) {
-  //       temp.push(null);
-  //     }
-  //     result.push(temp);
-  //   }
-
-  //   return result;
-  // used on web
-  // onTakePic(prop, data, formRequest) {
-  //   if (!data)
-  //     return
-  //   // Disable FormRequest
-  //   let isFormRequest = formRequest  && formRequest[TYPE] === FORM_REQUEST
-  //   let isFormError = formRequest  && formRequest[TYPE] === FORM_ERROR
-
-  //   if (isFormRequest) {
-  //     var params = {
-  //       value: {_documentCreated: true},
-  //       doneWithMultiEntry: true,
-  //       resource: formRequest,
-  //       meta: utils.getModel(formRequest[TYPE]).value
-  //     }
-  //     Actions.addChatItem(params)
-  //   }
-  //   let photo = {
-  //     url: data.data,
-  //     height: data.height,
-  //     width: data.width
-  //   }
-  //   let propName = (typeof prop === 'string') ? prop : prop.name
-  //   Actions.addChatItem({
-  //     disableFormRequest: isFormRequest || isFormError ? formRequest : null,
-  //     resource: {
-  //       [TYPE]: isFormRequest ? formRequest.form : formRequest.prefill[TYPE],
-  //       [propName]: photo,
-  //       _context: formRequest._context,
-  //       from: utils.getMe(),
-  //       to: formRequest.from  // FormRequest.from
-  //     }
-  //   })
-  // },

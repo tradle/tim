@@ -28,7 +28,6 @@ const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
-const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
@@ -41,8 +40,6 @@ var {
   MONEY,
   VERIFICATION,
   PROFILE,
-  ENUM,
-  FORM
 } = constants.TYPES
 
 var cnt = 0;
@@ -70,7 +67,7 @@ var RowMixin = {
       }
       else {
         let m = utils.getModel(prop.ref)
-        if (m.subClassOf === ENUM) {
+        if (utils.isEnum(m)) {
           // let tVal = (typeof val === 'string') && val || val.title
           val = translateEnum(resource[prop.name])
         }
@@ -99,8 +96,8 @@ var RowMixin = {
       )
     }
     else {
-      let isMyProduct = model.subClassOf === MY_PRODUCT
-      let isForm = model.subClassOf === FORM
+      let isMyProduct = utils.isMyProduct(model)
+      let isForm = utils.isForm(model)
       let isMyMessage = this.isMyMessage()
       if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
@@ -197,7 +194,7 @@ var RowMixin = {
       return
     if (application)
       return false
-    if (utils.getModel(resource[TYPE]).subClassOf == MY_PRODUCT) {
+    if (utils.isMyProduct(resource[TYPE])) {
       let org = resource.from.organization
       if (org  &&  utils.getId(resource.from.organization) !== utils.getId(this.props.to))
         return true

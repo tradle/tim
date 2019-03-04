@@ -17,7 +17,7 @@ const {
   CUR_HASH,
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, MESSAGE, MODEL } = constants.TYPES
+const { MONEY, ORGANIZATION, MESSAGE, MODEL } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -241,7 +241,7 @@ var search = {
           if (Array.isArray(val)) {
             if (!val.length)
               continue
-            let isEnum = props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM
+            let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
             if (isEnum) {
               let s = `${p}__id: [`
               val.forEach((r, i) => {
@@ -607,7 +607,7 @@ var search = {
       )
     }
     let m = utils.getModel(ref)
-    if (m.subClassOf === ENUM) {
+    if (utils.isEnum(m)) {
       if (m.enum)
         return (
           `${p} {
@@ -753,7 +753,7 @@ var search = {
       return p
     if (refM.abstract)
       return p
-    if (/*ref === FORM  || */ refM.isInterface  ||  refM.subClassOf === ENUM) {
+    if (/*ref === FORM  || */ refM.isInterface  ||  utils.isEnum(refM)) {
       return (
         `${p} {
           id

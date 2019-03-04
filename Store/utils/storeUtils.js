@@ -14,9 +14,7 @@ var constants = require('@tradle/constants');
 
 import AsyncStorage from '../Storage'
 import voc from '../voc'
-import { makeLabel, isEnum, getModel } from '../../utils/utils'
-
-// var models = {};
+import { makeLabel, isEnum, getModel, isForm } from '../../utils/utils'
 
 const {
   TYPE,
@@ -123,26 +121,10 @@ var storeUtils = {
   },
   addOns(m, models, enums) {
     storeUtils.addNameAndTitleProps(m)
-    // models[m.id] = {
-    //   key: m.id,
-    //   value: m
-    // }
-
-    // if (!m.properties._time) {
-    //   m.properties._time = {
-    //     type: 'date',
-    //     readOnly: true,
-    //     title: 'Date'
-    //   }
-    // }
-
-    // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-    //   org.products.push(m.id)
     if (isEnum(m))
       storeUtils.createEnumResources(m, enums)
 
-    // if (utils.isMessage(m)) {
-    if (m.subClassOf === FORM) {
+    if (isForm(m)) {
       storeUtils.addVerificationsToFormModel(m)
       storeUtils.addFromAndTo(m)
     }
@@ -181,7 +163,7 @@ var storeUtils = {
     }
   },
   addVerificationsToFormModel(m) {
-    if (m.subClassOf !== FORM  ||  m.verifications)
+    if (!isForm(m)  ||  m.verifications)
       return
     m.properties.verifications = {
       type: 'array',

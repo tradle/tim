@@ -193,6 +193,7 @@
   "devDependencies": {
     "babel-core": "^6.17.0",
     "@google-cloud/translate": "^1.1.0",
+    "aws-sdk": "^2.407.0",
     "babel-eslint": "7.1.1",
     "babel-loader": "^6.2.4",
     "babel-plugin-react-transform": "^3.0.0",

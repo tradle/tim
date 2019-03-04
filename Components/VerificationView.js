@@ -229,7 +229,7 @@ class VerificationView extends Component {
           return this.renderResource(val, utils.getModel(val[TYPE]), styles)
 
         // Could be enum like props
-        else if (utils.getModel(pMeta.ref).subClassOf === ENUM)
+        else if (utils.isEnum(pMeta.ref))
           val = val.title
         else if (this.props.showVerification) {
           let value = val[TYPE] ? utils.getDisplayName(val) : val.title

@@ -2,6 +2,7 @@
 import _ from 'lodash'
 import { makeResponsive } from 'react-native-orient'
 import ActionSheet from 'react-native-actionsheet'
+import { getContentSeparator } from '../utils/uiUtils'
 
 import {
   View,
@@ -66,7 +67,7 @@ const CHANGE_GESTURE_PASSWORD = 3
 const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const WIPE_DEVICE = 6
-const MY_PRODUCT = 'tradle.MyProduct'
+const CONFIRMATION_PRODUCT_REQUEST = 'tradle.ConfirmPackageRequest'
 
 const {
   PROFILE,
@@ -147,10 +148,10 @@ class ResourceView extends Component {
         let me = utils.getMe()
         if (action === 'addItem') {
           let m = utils.getModel(resource[TYPE])
-          if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
+          if (utils.isForm(m)  ||  m.id === VERIFICATION  ||  m.id === CONFIRMATION_PRODUCT_REQUEST  ||  utils.isMyProduct(m))
             Actions.getItem({resource: me})
         }
-        else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
+        else if (action === 'addMessage'  &&  resource[TYPE] === CONFIRMATION_PRODUCT_REQUEST)
           Actions.getItem({resource: me})
       }
       if (action !== 'getItem')
@@ -392,7 +393,7 @@ class ResourceView extends Component {
         mainPhoto = photos[0]
       photoView = <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
     }
-    let contentSeparator = utils.getContentSeparator(bankStyle)
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={platformStyles.container} bankStyle={bankStyle} separator={contentSeparator}>
         <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center', backgroundColor: '#fff'}} name={this._lazyId}>

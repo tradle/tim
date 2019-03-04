@@ -412,7 +412,7 @@ class TimHome extends Component {
       this.signInAndContinue()
       return
     case 'getMe':
-      utils.setMe(me)
+      await utils.setMe(me)
       this.setState({hasMe: me})
       if (me.isEmployee) {
         debugger

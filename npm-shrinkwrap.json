@@ -102,7 +102,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#6320b557b7ce44b906dee6937dcdd507ea44d12a"
+      "resolved": "git://github.com/tradle/custom-models.git#cfbb5b429c46068cd473352ac7f96925ec987661"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -225,7 +225,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ff759b269d51c14f7a583f00bed81f6af75b0dd4"
+      "resolved": "git://github.com/tradle/models.git#a2e6e6602c956b91bfacbad6ad5dd3adfef15465"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -235,7 +235,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#5a40ef7ec3bf25d167fabc119c89b6c305562487"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#d3671e8954f38ee62a3048acea0bb7ad20dbb1ba"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -673,6 +673,32 @@
       "version": "1.0.14",
       "from": "mvayngrib/aws-iot-device-sdk-js",
       "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#f69896f48748b890bae50cc7a1ef2db4c84d9dde"
+    },
+    "aws-sdk": {
+      "version": "2.407.0",
+      "from": "aws-sdk@latest",
+      "resolved": "http://registry.npmjs.org/aws-sdk/-/aws-sdk-2.407.0.tgz",
+      "dev": true,
+      "dependencies": {
+        "ieee754": {
+          "version": "1.1.8",
+          "from": "ieee754@1.1.8",
+          "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.1.8.tgz",
+          "dev": true
+        },
+        "sax": {
+          "version": "1.2.1",
+          "from": "sax@1.2.1",
+          "resolved": "https://registry.npmjs.org/sax/-/sax-1.2.1.tgz",
+          "dev": true
+        },
+        "uuid": {
+          "version": "3.3.2",
+          "from": "uuid@3.3.2",
+          "resolved": "http://registry.npmjs.org/uuid/-/uuid-3.3.2.tgz",
+          "dev": true
+        }
+      }
     },
     "aws-sign-web": {
       "version": "1.2.1",
@@ -3903,6 +3929,12 @@
       "version": "2.4.5",
       "from": "js-base64@>=2.1.9 <3.0.0",
       "resolved": "https://registry.npmjs.org/js-base64/-/js-base64-2.4.5.tgz",
+      "dev": true
+    },
+    "jmespath": {
+      "version": "0.15.0",
+      "from": "jmespath@0.15.0",
+      "resolved": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz",
       "dev": true
     },
     "js-sha3": {

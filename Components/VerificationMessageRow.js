@@ -311,13 +311,13 @@ class VerificationMessageRow extends Component {
     let isThirdParty = !document[TYPE]  &&  !document.title
     let type = document[TYPE] || utils.getType(document)
     var docModel = utils.getModel(type);
-    var isMyProduct = docModel.subClassOf === MY_PRODUCT
+    var isMyProduct = utils.isMyProduct(docModel)
     var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     var idx = docModelTitle.indexOf('Verification');
     var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
     var msg;
-    if (document.message  &&  docModel.subClassOf !== FORM)
+    if (document.message  &&  !utils.isForm(docModel))
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     // else if (!onPress) {
     //   msg = <View><Text style={styles.description}>{translate('seeTheForm')}</Text></View>

@@ -24,6 +24,8 @@
 #import <react-native-branch/RNBranch.h>
 // #import <Firebase.h>
 
+#define SYSTEM_VERSION_GRATERTHAN_OR_EQUALTO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+
 @implementation AppDelegate
 
 NSInteger const RNTradleSecurityOverlayTag = 101;
@@ -92,8 +94,26 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
 #endif
 
+//  if (SYSTEM_VERSION_GRATERTHAN_OR_EQUALTO(@"10.0")) {
+//    [self registerForRemoteNotifications];
+//  }
+//
   return YES;
 }
+
+//- (void) registerForRemoteNotifications {
+//  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+//  center.delegate = self;
+//  [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error){
+//    if(error) {
+//      return;
+//    }
+//
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//      [[UIApplication sharedApplication] registerForRemoteNotifications];
+//    });
+//  }];
+//}
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
   if (![RNBranch.branch application:application openURL:url sourceApplication:sourceApplication annotation:annotation]) {
@@ -138,6 +158,13 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
 {
   NSLog(@"%@", error);
 }
+
+//Called when a notification is delivered to a foreground app.
+-(void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler
+{
+  completionHandler(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge);
+}
+
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
   return [Orientation getOrientation];
 }

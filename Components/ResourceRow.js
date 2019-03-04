@@ -416,7 +416,7 @@ class ResourceRow extends Component {
               </View>
       }
       let dn
-      if (model.subClassOf  &&  model.subClassOf === ENUM)
+      if (utils.isEnum(model))
         dn = utils.translateEnum(resource)
       else
         dn = utils.getDisplayName(resource);
@@ -534,9 +534,9 @@ class ResourceRow extends Component {
               if (lastMessageType) {
                 let msgModel = utils.getModel(lastMessageType)
                 let icon
-                if (msgModel.subClassOf === FINANCIAL_PRODUCT)
+                if (utils.isSubclassOf(msgModel, FINANCIAL_PRODUCT))
                   icon = 'ios-usd'
-                else if (msgModel.subClassOf === FORM)
+                else if (utils.isForm(msgModel))
                   icon = 'ios-paper-outline'
                 // else if (model.id === VERIFICATION)
                 //   icon =
