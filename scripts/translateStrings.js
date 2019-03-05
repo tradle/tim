@@ -5,7 +5,6 @@ const Translate = require('@google-cloud/translate')
 const fs = require('fs')
 const parser = require('fast-xml-parser');
 const aws = require('aws-sdk')
-const fetch = require('node-fetch')
 const s3ls = require('s3-ls');
 
 const translate = new Translate();
