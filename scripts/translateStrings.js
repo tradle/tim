@@ -151,9 +151,7 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
 async function writeFile({stringsDir, lang, forceGen, newOnly}) {
   if (lang === 'en')
     return
-  let originalLang = lang
-  lang = originalLang.replace('-', '')
-  let fn = 'strings_' + lang + '.js'
+  let fn = 'strings_' + lang.replace('-', '') + '.js'
   // let fnStrings = path.resolve(stringsDir, fn)
   let enFn = 'strings_en.js'
   let stringsLang, stringsEN
@@ -186,7 +184,7 @@ async function writeFile({stringsDir, lang, forceGen, newOnly}) {
   let promises = []
   for (let p in stringsEN) {
     if (!stringsLang[p] || forceGen)
-      promises.push(translateText({strings: stringsLang, lang: originalLang, key: p, text: stringsEN[p]}))
+      promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
   }
   if (promises.length)
     await Promise.all(promises, { concurrency: 20 })
