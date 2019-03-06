@@ -2211,7 +2211,7 @@ debug('sent:', r)
       language = me.language
       if (language) {
         language = this._getItem(utils.getId(language))
-        languageCode = language[ROOT_HASH]
+        languageCode = language.code || language[ROOT_HASH]
       }
       else {
         let locale = ENV.locale
@@ -8853,10 +8853,11 @@ if (!res[SIG]  &&  res._message)
           await this.setMe(me)
         else {
           let lang = this._getItem(utils.getId(me.language))
-          value.languageCode = lang[ROOT_HASH]
+          let l = utils.getModel(LANGUAGE).enum.find(r => r.title === lang.language)
+          l = l.code  ||  l.id
 
           me.language = lang
-          me.languageCode = lang[ROOT_HASH]
+          value.languageCode = me.languageCode = l
           await this.dbPut(iKey, value)
           await this.setMe(me)
           var urls = []
