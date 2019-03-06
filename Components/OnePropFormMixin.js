@@ -137,6 +137,7 @@ var OnePropFormMixin = {
       if (!ENV.ZoomSDK.initialized) {
         const { success, status } = await Zoom.initialize({
           appToken: Platform.select(ENV.ZoomSDK.token),
+          facemapEncryptionKey: Platform.select(ENV.ZoomSDK.facemapEncryptionKey),
           // optional customization options
           // see defaults.js for the full list
           // showZoomIntro: false,

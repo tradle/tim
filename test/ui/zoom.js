@@ -41,6 +41,7 @@ class ZoomUI extends React.Component {
   verifyLiveness = async () => {
     const { success, status } = await Zoom.initialize({
       appToken: Platform.select(ENV.ZoomSDK.token),
+      facemapEncryptionKey: Platform.select(ENV.ZoomSDK.facemapEncryptionKey),
       showPreEnrollmentScreen: false,
       showUserLockedScreen: false,
       showRetryScreen: false,
