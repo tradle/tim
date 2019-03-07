@@ -5,6 +5,7 @@ import utils, { translate } from '../utils/utils'
 
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
+import { getContentSeparator } from '../utils/uiUtils'
 import {
   ListView,
 } from 'react-native'
@@ -29,7 +30,7 @@ class StringChooser extends Component {
   }
 
   selectResource(modelId) {
-    if (!this.props.isReplace)
+    if (!this.props.isReplace  &&  !this.props.notModel)
       this.props.navigator.pop();
     this.props.callback(modelId)
   }
@@ -37,13 +38,13 @@ class StringChooser extends Component {
     if (typeof product === 'string')
       product = { product }
     let { id, title, description } = product
-
-    let model = utils.getModel(id)
-    if (!model)
-      return null
-    if (!title)
-      title = translate(model)
-
+    if (!this.props.notModel) {
+      let model = utils.getModel(id)
+      if (!model)
+        return null
+      if (!title)
+        title = translate(model)
+    }
     return (
       <StringRow
         onSelect={() => this.selectResource(id)}
@@ -73,7 +74,7 @@ class StringChooser extends Component {
       bgStyle = {backgroundColor: bankStyle.backgroundColor}
     else
       bgStyle = {backgroundColor: '#ffffff'}
-    let contentSeparator = utils.getContentSeparator(bankStyle)
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={contentSeparator} bankStyle={bankStyle}>
         {content}

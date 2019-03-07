@@ -24,7 +24,7 @@ const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 const SELFIE = 'tradle.Selfie'
 // const SENT = 'Sent'
 
-const { IDENTITY, ENUM } = constants.TYPES
+const { IDENTITY } = constants.TYPES
 var { TYPE, SIG } = constants
 import {
   TouchableHighlight,
@@ -251,7 +251,8 @@ class FormMessageRow extends Component {
       if (properties[v].markdown)
         return
       if (properties[v].type === 'array') {
-        if (resource[v]  &&  properties[v].items.ref  &&  utils.getModel(properties[v].items.ref).subClassOf === ENUM) {
+        let ref = properties[v].items.ref
+        if (resource[v]  &&  ref  &&  utils.isEnum(ref)) {
           let val
           resource[v].forEach((r) => {
             let title = utils.getDisplayName(r)

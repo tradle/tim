@@ -285,6 +285,9 @@ module.exports = {
     "scanYourDocument": "Please scan your document",
     "pleaseChooseDT": "Please choose document type first",
     "dateInTheFutureError": "{1} is in the future",
+    "enterValidValue": "Please enter the valid value",
+    "rescan": "Please re-scan the same document",
+    "invalidValue": "This value is invalid. Please re-enter.",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

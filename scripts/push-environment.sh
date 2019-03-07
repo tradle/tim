@@ -1,0 +1,7 @@
+#!/bin/bash
+
+ENV_FILE="environment-cloud.json"
+
+aws s3 cp $ENV_FILE "s3://private.tradle.io/app-secrets/env/$ENV_FILE"
+aws s3 cp $ENV_FILE s3://private-fs-dev-fs-18eru6dvf3p8h/fs/io.tradle.dev.tim/environment.json
+aws s3 cp $ENV_FILE s3://private-fs-dev-fs-18eru6dvf3p8h/fs/io.tradle.dev/environment.json

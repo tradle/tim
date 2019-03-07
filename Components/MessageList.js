@@ -41,6 +41,7 @@ import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
 import ContextChooser from './ContextChooser'
 import NewResourceMixin from './NewResourceMixin'
+import { showLoading, getContentSeparator } from '../utils/uiUtils'
 import utils, { translate, isIphone10orMore, isAndroid } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
@@ -60,7 +61,7 @@ import BackgroundImage from './BackgroundImage'
 
 var LIMIT = 20
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH } = constants
-const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM } = TYPES
+const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE } = TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -407,7 +408,7 @@ class MessageList extends Component {
       state.currentContext = currentContext
     if (productToForms)
       state.productToForms = productToForms
-    else if (utils.getModel(rtype).subClassOf === FORM  &&  resource._context) {
+    else if (utils.isForm(rtype)  &&  resource._context) {
       let product = resource._context.requestFor
       if (this.state.productToForms)
         productToForms = _.cloneDeep(this.state.productToForms)
@@ -614,7 +615,7 @@ class MessageList extends Component {
       //   showEdit = true
     }
     else
-      showEdit = !model.notEditable  &&   r._latest  && !application  &&  model.subClassOf !== MY_PRODUCT
+      showEdit = !model.notEditable  &&   r._latest  && !application  &&  !utils.isMyProduct(model)
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
@@ -702,7 +703,7 @@ class MessageList extends Component {
       navigator: navigator,
       switchChat: isContext ? this.switchChat.bind(this, resource) : null
     }
-    if (model.subClassOf === 'tradle.MyProduct')
+    if (utils.isMyProduct(model))
       return  <MyProductMessageRow {...props} />
 
     let moreProps = {
@@ -724,7 +725,7 @@ class MessageList extends Component {
       return  <VerificationMessageRow {...props} />
     }
 
-    if (model.subClassOf === FORM || utils.isItem(model))
+    if (utils.isForm(model) || utils.isItem(model))
       return <FormMessageRow {...props} />
 
     props.isLast = rowId === this.state.list.length - 1
@@ -806,22 +807,8 @@ class MessageList extends Component {
     let content
     if (!list || !list.length) {
       if (application  ||  navigator.isConnected  &&  utils.getType(resource) === ORGANIZATION) {
-        if (isLoading) {
-          let menuBtn
-          // let menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
-          //   <View style={styles.footer}>
-          //     {this.paintMenuButton()}
-          //   </View>
-          // )
-
-          content = <View style={styles.flex1}>
-                      <View style={[platformStyles.container, bgStyle]}>
-                        <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{translate('loading')}</Text>
-                        <ActivityIndicator size='large' style={styles.indicator} />
-                      </View>
-                      {menuBtn}
-                    </View>
-        }
+        if (isLoading)
+          content = showLoading({bankStyle, component: MessageList, message: translate('loading'), resource, isConnected })
       }
     }
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
@@ -886,7 +873,7 @@ class MessageList extends Component {
        network = <NetworkInfoProvider connected={isConnected} resource={resource} online={onlineStatus} />
     if (!context  &&  isContext)
       context = resource
-    let separator = utils.getContentSeparator(bankStyle)
+    let separator = getContentSeparator(bankStyle)
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
     let hash = utils.getRootHash(progressInfoR)
@@ -1264,6 +1251,7 @@ class MessageList extends Component {
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 reactMixin(MessageList.prototype, TimerMixin)
 reactMixin(MessageList.prototype, NewResourceMixin);
+
 MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
 

@@ -4,6 +4,7 @@ import PageView from './PageView'
 
 import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
+import { getContentSeparator } from '../utils/uiUtils'
 
 import {
   View,
@@ -43,7 +44,7 @@ class SignatureView extends Component {
   render() {
     let { sigViewStyle } = this.props
     const { width } = utils.dimensions(SignatureView)
-    let separator = utils.getContentSeparator(sigViewStyle)
+    let separator = getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
     return (
       <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>

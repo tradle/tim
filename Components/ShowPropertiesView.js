@@ -1,4 +1,3 @@
-
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
@@ -8,6 +7,7 @@ import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
@@ -96,7 +96,7 @@ class ShowPropertiesView extends Component {
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
-    if (model.id !== modelName  &&  utils.getModel(modelName).subClassOf !== model.id)
+    if (model.id !== modelName  &&  !utils.isSubclassOf(modelName, model.id))
       model = utils.getModel(modelName)
     var vCols
 
@@ -145,7 +145,7 @@ class ShowPropertiesView extends Component {
       }
     }
     let isPartial = model.id === PARTIAL
-    let isMethod = model.subClassOf === METHOD
+    let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
 
     var viewCols = []
@@ -383,36 +383,38 @@ class ShowPropertiesView extends Component {
            </View>
   }
   getCheckForCorrection(pMeta) {
-    let { checkProperties, errorProps, bankStyle } = this.props
+    let { checkProperties, errorProps, bankStyle, navigator, resource } = this.props
     if (!checkProperties)
       return
     let p = pMeta.name
-    let isPromptVisible = this.state.promptVisible !== null
-
-    return <View>
-              <TouchableOpacity underlayColor='transparent' onPress={() => {
-                if (errorProps  &&  errorProps[p]) {
-                  delete errorProps[p]
-                  this.setState({promptVisible: null, uncheck: p})
-                }
-                else
-                  this.setState({promptVisible: pMeta})
-              }}>
-                <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
-              </TouchableOpacity>
-              <Prompt
-                title={translate('fieldErrorMessagePrompt')}
-                placeholder={translate('thisValueIsInvalidPlaceholder')}
-                visible={isPromptVisible}
-                onCancel={() => this.setState({ promptVisible: null })}
-                onSubmit={(value) => {
-                  this.setState({ promptVisible: null})
-                  this.props.checkProperties(this.state.promptVisible, value)
-                }}/>
-           </View>
+    let icon = errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'
+    return (
+      <View>
+        <TouchableOpacity underlayColor='transparent' onPress={() => {
+          if (errorProps  &&  errorProps[p]) {
+            delete errorProps[p]
+            this.setState({uncheck: p})
+          }
+          else {
+            this.props.checkProperties(pMeta, translate(this.genErrorMessage(pMeta)))
+          }
+        }}>
+          <Icon key={p} name={icon} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
+        </TouchableOpacity>
+     </View>
+    )
   }
   onPress(url, event) {
     Linking.openURL(url)
+  }
+  genErrorMessage(pMeta) {
+    let resource = this.props.resource
+    if (!resource[pMeta.name])
+      return 'enterValidValue'
+    if (pMeta.scanner)
+      return 'rescan'
+    else
+      return 'invalidValue'
   }
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);
@@ -475,101 +477,32 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
 
 module.exports = ShowPropertiesView;
 
-// let content
-// let header = (<View style={{padding: 10}} key={this.getNextKey()}>
-//                 <View style={[styles.textContainer, styles.row]}>
-//                   <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
-//                   <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
-//                 </View>
-//                 <View style={styles.separator} />
-//               </View>)
-// if (blockchain === 'corda') {
-//   let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
-//   content = <View style={{paddingHorizontal: 10}}>
-//              <View style={{flexDirection: 'row', paddingVertical: 3}}>
-//                <Text style={styles.dsTitle}>Blockchain: </Text>
-//                <Text style={styles.dsValue}>{blockchain}</Text>
-//              </View>
-//              <View style={{flexDirection: 'row'}}>
-//                <Text style={styles.dsTitle}>Network: </Text>
-//                <Text style={styles.dsValue}>{networkName}</Text>
-//              </View>
-//              <View>
-//                <Text style={styles.title}>TxID: </Text>
-//                <Text style={styles.dsValue}>{txId}</Text>
-//              </View>
-//              <Text style={[styles.content, {marginTop: 20}]}>{description}</Text>
-//             </View>
-// }
-// else {
-//   let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-//   let txs = (
-//     <View>
-//       {
-//         BLOCKCHAIN_EXPLORERS.map((url, i) => {
-//           url = url.replace('$TXID', txId)
-//           return this.getBlockchainExplorerRow(url, i, styles)
-//         })
-//       }
-//     </View>
-//   )
+  // getCheckForCorrection(pMeta) {
+  //   let { checkProperties, errorProps, bankStyle } = this.props
+  //   if (!checkProperties)
+  //     return
+  //   let p = pMeta.name
+  //   let isPromptVisible = this.state.promptVisible !== null
 
-//   content = <View style={{paddingHorizontal: 10}}>
-//                <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-//                  <Text style={styles.content}>{description}
-//                    <Text style={styles.learnMode}> Learn more</Text>
-//                  </Text>
-//                </TouchableOpacity>
-//                {txs}
-//               </View>
-// }
-// let self = this
-// let row = <Accordion
-//             sections={['txId']}
-//             onPress={() => {
-//               self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
-//                 if (h  &&  y > pY)
-//                   onPageLayout(pY, h)
-//               })
-//             }}
-//             header={header}
-//             content={content}
-//             underlayColor='transparent'
-//             easing='easeIn' />
-// viewCols.push(
-//     <View key={this.getNextKey()} ref='propertySheet'>
-//       {row}
-//     </View>
-//   )
-// learnMode: {
-//   color: bankStyle.linkColor,
-//   paddingHorizontal: 7
-// },
-// separator: {
-//   height: 1,
-//   marginTop: 5,
-//   marginBottom: 10,
-//   marginHorizontal: -10,
-//   alignSelf: 'stretch',
-//   backgroundColor: bankStyle.linkColor
-// },
-// dsTitle: {
-//   width: 90,
-//   fontSize: 16,
-//   // fontFamily: 'Avenir Next',
-//   marginTop: 3,
-//   marginBottom: 0,
-//   marginHorizontal: 7,
-//   color: '#9b9b9b'
-// },
-// dsValue: {
-//   fontSize: 18,
-//   marginHorizontal: 7,
-//   color: '#2E3B4E',
-// },
-// content: {
-//   color: '#9b9b9b',
-//   fontSize: 16,
-//   marginHorizontal: 7,
-//   paddingBottom: 10
-// },
+  //   return <View>
+  //             <TouchableOpacity underlayColor='transparent' onPress={() => {
+  //               if (errorProps  &&  errorProps[p]) {
+  //                 delete errorProps[p]
+  //                 this.setState({promptVisible: null, uncheck: p})
+  //               }
+  //               else
+  //                 this.setState({promptVisible: pMeta})
+  //             }}>
+  //               <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
+  //             </TouchableOpacity>
+  //             <Prompt
+  //               title={translate('fieldErrorMessagePrompt')}
+  //               placeholder={translate('thisValueIsInvalidPlaceholder')}
+  //               visible={isPromptVisible}
+  //               onCancel={() => this.setState({ promptVisible: null })}
+  //               onSubmit={(value) => {
+  //                 this.setState({ promptVisible: null})
+  //                 this.props.checkProperties(this.state.promptVisible, value)
+  //               }}/>
+  //          </View>
+  // }
