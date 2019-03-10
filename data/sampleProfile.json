@@ -7,7 +7,7 @@
     },
     "photos": [
       {
-        "url": "https://s3.amazonaws.com/tradle-public-images/Mickey_Mouse.png",
+        "url": "https://s3.amazonaws.com/tradle-public-images/profile-default.jpeg",
         "width": 220,
         "height": 220
       }
