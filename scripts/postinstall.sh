@@ -10,6 +10,11 @@ npm run installhooks
 npm run loadsecrets
 ./fbdedupe.sh
 ./hooks/update_version.sh
+
+# https://github.com/facebook/react-native/issues/16106#issuecomment-437573973
+cd node_modules/react-native ; ./scripts/ios-install-third-party.sh ; cd ../../
+cd node_modules/react-native/third-party/glog-0.3.4/ ; sh ../../scripts/ios-configure-glog.sh ; cd ../../../../
+
 npm run fixasyncstorage
 node ./scripts/rm-unused-components.js
 node ./scripts/fix-node_modules.js
