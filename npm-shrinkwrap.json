@@ -6699,6 +6699,11 @@
       "from": "react-native-splash-screen@latest",
       "resolved": "https://registry.npmjs.org/react-native-splash-screen/-/react-native-splash-screen-3.0.9.tgz"
     },
+    "react-native-step-indicator": {
+      "version": "0.0.9",
+      "from": "tradle/react-native-step-indicator",
+      "resolved": "git://github.com/tradle/react-native-step-indicator.git#8b0edf9521cd71d5d4343919b6830f40f3757c39"
+    },
     "react-native-swipeout": {
       "version": "2.3.3",
       "from": "react-native-swipeout@>=2.3.3 <3.0.0",
