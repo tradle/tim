@@ -3638,6 +3638,7 @@ debug('sent:', r)
   async onShowStepIndicator() {
     let showStepIndicator = !me._showStepIndicator
     me._showStepIndicator = showStepIndicator
+    await db.put(utils.getId(me), me)
     await this.setMe(me)
     this.trigger({action: 'showStepIndicator', showStepIndicator})
   },

@@ -419,11 +419,11 @@ class MessageList extends Component {
       state.isLoading = false
       StatusBar.setHidden(false);
     }
+    state.step = -1
     let currentContext
-    if (utils.isContext(resource)) {
+    if (utils.isContext(resource))
       currentContext = resource
-      state.step = -1
-    }
+
     else if (resource._context  &&  utils.getType(resource._context))
     // else //if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
       currentContext = resource._context
