@@ -12,7 +12,7 @@ import constants from '@tradle/constants'
 import utils, {
   translate
 } from '../utils/utils'
-
+import Actions from '../Actions/Actions'
 import PageView from './PageView'
 import { Text } from './Text'
 
@@ -63,39 +63,64 @@ class ChatContext extends Component {
 
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
+    let style = me._showStepIndicator &&  context._formsCount  &&  styles.contextBarWithSteps ||  styles.contextBar
     if (isAgent  ||  (context  &&  isShareContext || application))
-      chooser = <View style={styles.contextBar}>{content}</View>
+      chooser = <View style={style}>{content}</View>
     else
-      chooser = <TouchableOpacity onPress={contextChooser} style={styles.contextBar}>
+      chooser = <TouchableOpacity onPress={contextChooser} style={style}>
                   {content}
                 </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
-    if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
+    if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson)) {
       share = <View/>
-    // else if (utils.getMe().isEmployee  &&  chat[constants.TYPE] === constants.TYPES.PROFILE)
-    //   share = <View/>
-    else
+    }
+    else {
       share = <TouchableOpacity onPress={shareWith} style={{position: 'absolute', right: 10, padding: 10}}>
                 <Icon size={22} name='md-share' color={bankStyle.shareContextTextColor} style={{marginRight: 10, paddingLeft: 20}} />
               </TouchableOpacity>
+    }
+    let stepIndicator = this.getStepIndicator({context, bankStyle})
+
     let bar = {backgroundColor: allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
     return (
             <PageView>
-            <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
-              {chooser}
-              {share}
-            </View>
+              <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
+                {chooser}
+                {share}
+                {stepIndicator}
+              </View>
             </PageView>
             )
   }
-
+  getStepIndicator({context, bankStyle}) {
+    if (!context  ||  context._formsCount <= 1)
+      return
+    let name, color
+    let hasIndicator = utils.getMe()._showStepIndicator
+    if (hasIndicator) {
+      name = 'ios-git-commit'
+      color = bankStyle.linkColor
+    }
+    else {
+      name = 'ios-git-commit'
+      color = '#aaaaaa'
+    }
+    return <TouchableOpacity onPress={() => Actions.showStepIndicator()} style={{position: 'absolute', right: 0, top: -5, padding: 10}}>
+             <Icon size={35} name={name} color={color} style={{paddingLeft: 20}} />
+           </TouchableOpacity>
+  }
 }
 
 var styles = StyleSheet.create({
   contextBar: {
     flex: 1,
-    padding: 10
+    paddingVertical: 10,
+  },
+  contextBarWithSteps: {
+    flex: 1,
+    paddingTop: 7,
+    paddingBottom: 15
   },
   bar: {
     // borderTopColor: '#dddddd',

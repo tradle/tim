@@ -3082,8 +3082,6 @@ debug('sent:', r)
     if (context) {
       if (!sendParams.other)
         sendParams.other = {}
-      // let cId = utils.getId(context)
-      // sendParams.other.context = cId.split('_')[1]
 
       let contextId = context.contextId  || this._getItem(context).contextId
       // let contextId = this._getItem(context).contextId
@@ -3092,15 +3090,6 @@ debug('sent:', r)
       }
       if (contextId)
         sendParams.other.context = contextId
-       if (!utils.isContext(toChain[TYPE])) {
-        let c = this._getItem(context)
-        // will be null for PRODUCT_APPLICATION itself
-        if (c) {
-          c.lastMessageTime = new Date().getTime()
-          c._formsCount = c._formsCount ? ++c._formsCount : 1
-          await this.dbPut(utils.getId(context), c)
-        }
-      }
     }
     if (!sendParams.to)
       sendParams.to = { permalink: hash }
@@ -3431,12 +3420,12 @@ debug('sent:', r)
       if (me &&  me.isEmployee) {
         let rep = this.getRepresentative(me.organization)
         if (utils.getId(rep.organization) === utils.getId(r.from))
-          this.addSharedWith(r, rep, r._time)
+          this.addSharedWith({ resource: r, shareWith: rep, time: r._time })
         else
-          this.addSharedWith(r, r.from, r._time)
+          this.addSharedWith({ resource: r, shareWith: r.from, tiem: r._time })
       }
       else
-        this.addSharedWith(r, r.from, r._time)
+        this.addSharedWith({ resource: r, shareBatchId: r.from, time: r._time })
     }
     var batch = [];
     key = utils.getId(r)
@@ -3613,18 +3602,19 @@ debug('sent:', r)
   onGetFrom(resource) {
     this.onGetItem({resource: resource, action: 'getFrom'});
   },
-  addSharedWith(r, shareWith, time, shareBatchId, lens) {
-    // if (!r._sharedWith)
-    //   r._sharedWith = []
+  addSharedWith({resource, shareWith, time, shareBatchId, formRequest}) {
     let id = utils.getId(shareWith)
-    // if (id === utils.getId(utils.getMe()))
-    //   debugger
-    // let hasThisShare = r._sharedWith.some((r) => r.shareBatchId === shareBatchId)
-    let hasThisShare = r._sharedWith  &&  r._sharedWith.some((r) => r.bankRepresentative === id)
+
+    let contextId, lens
+    if (formRequest) {
+      contextId = formRequest._context  &&  this._getItem(formRequest._context).contextId
+      lens = formRequest.lens
+    }
+    let hasThisShare = resource._sharedWith  &&  resource._sharedWith.some((r) => r.bankRepresentative === id)
     if (!hasThisShare) {
-      if (!r._sharedWith)
-        r._sharedWith = []
-      r._sharedWith.push(this.createSharedWith(id, time, shareBatchId, lens))
+      if (!resource._sharedWith)
+        resource._sharedWith = []
+      resource._sharedWith.push(this.createSharedWith(id, time, shareBatchId, lens, contextId))
     }
   },
 
@@ -3635,7 +3625,22 @@ debug('sent:', r)
       photoId = await this.onGetItem({resource: photoId, search: true, noTrigger: true})
     this.trigger({action: 'matchImages', photoId, selfie})
   },
-
+  async onStepIndicatorPress({step, context, to}) {
+    let forms = await this.searchMessages({context, modelName: FORM, to})
+    let formType = context._formsTypes[step]
+    let i = forms.length - 1
+    for (; i>0  &&  forms[i][TYPE] !== formType; i--);
+    if (i === 0)
+      return
+    let resource = await this.onGetItem({noTrigger: true, resource: forms[i]})
+    this.trigger({action: 'stepIndicatorPress', resource, context, to, step})
+  },
+  async onShowStepIndicator() {
+    let showStepIndicator = !me._showStepIndicator
+    me._showStepIndicator = showStepIndicator
+    await this.setMe(me)
+    this.trigger({action: 'showStepIndicator', showStepIndicator})
+  },
   async onGetItem(params) {
     var {resource, action, noTrigger, search, backlink, backlinks} = params
     // await this._loadedResourcesDefer.promise
@@ -4484,7 +4489,7 @@ if (!res[SIG]  &&  res._message)
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
-        await this.handleDocumentCreated(returnVal)
+        await handleDocumentCreated(returnVal)
         return
       }
       let rtype = utils.getType(returnVal)
@@ -4863,7 +4868,7 @@ if (!res[SIG]  &&  res._message)
             [TYPE]: CONFIRMATION,
             message: translate('afterRefresh')
           }
-          let data = await this.createObject(r)
+          let data = await self.createObject(r)
           _.extend(r, data.object)
           _.extend(r, {
             [ROOT_HASH]: data.permalink,
@@ -4874,37 +4879,37 @@ if (!res[SIG]  &&  res._message)
           })
           let rId = utils.getId(r)
           await db.put(rId, r)
-          this._setItem(rId, r)
-          this.addMessagesToChat(utils.getId(r.from.organization), r)
-          this.addVisualProps(r)
-          this.trigger({action: 'addItem', resource: r})
+          self._setItem(rId, r)
+          self.addMessagesToChat(utils.getId(r.from.organization), r)
+          self.addVisualProps(r)
+          self.trigger({action: 'addItem', resource: r})
         }
         else if (doneWithMultiEntry) {
           // when all the multientry forms are filled out and next form is requested
           // do not show the last form request for the multientry form it is confusing for the user
           if (ptype ) {
-            let multiEntryForms = this.getModel(ptype).multiEntryForms
+            let multiEntryForms = self.getModel(ptype).multiEntryForms
             if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
               let rid = returnVal.from.organization.id
-              this.deleteMessageFromChat(rid, returnVal)
+              self.deleteMessageFromChat(rid, returnVal)
               let id = utils.getId(returnVal)
               delete list[id]
               await db.del(id)
               let params = {action: 'addItem', resource: returnVal}
-              this.trigger(params);
+              self.trigger(params);
               return
             }
           }
         }
       }
       try {
-        let res = await this._keeper.get(returnVal[CUR_HASH])
+        let res = await self._keeper.get(returnVal[CUR_HASH])
         let r = utils.clone(res)
         _.extend(r, returnVal)
-        this._setItem(utils.getId(returnVal), returnVal)
+        self._setItem(utils.getId(returnVal), returnVal)
         let params = {action: 'addItem', resource: r}
-        this.trigger(params);
-        await this.onIdle()
+        self.trigger(params);
+        await self.onIdle()
         await save(returnVal, true)
         return
       } catch(err) {
@@ -5407,10 +5412,10 @@ if (!res[SIG]  &&  res._message)
     if (!resource._sharedWith) {
       resource._sharedWith = []
       if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource))
-        this.addSharedWith(resource, resource.to, resource._time, shareBatchId)
+        this.addSharedWith({ resource, shareWith: resource.to, time: resource._time, shareBatchId, formRequest })
     }
     let time = new Date().getTime()
-    this.addSharedWith(resource, to, time, shareBatchId, formRequest.lens)
+    this.addSharedWith({ resource, shareWith: to, time, shareBatchId, formRequest })
     let orgId = utils.getId(to.organization)
     this.addMessagesToChat(orgId, resource, false, time)
 
@@ -5427,10 +5432,10 @@ if (!res[SIG]  &&  res._message)
   handleSharedVerification({resource, to, formRequest, shareBatchId, batch}) {
     if (!resource._sharedWith) {
       resource._sharedWith = []
-      this.addSharedWith(resource, resource.from, resource._time, shareBatchId)
+      this.addSharedWith({resource, shareWith: resource.from, time: resource._time, shareBatchId, formRequest})
     }
     let time = new Date().getTime()
-    this.addSharedWith(resource, to, time, shareBatchId, formRequest.lens)
+    this.addSharedWith({resource, shareWith: to, time, shareBatchId, formRequest})
     resource._sendStatus = this.isConnected ? SENDING : QUEUED
     let orgId = utils.getId(to.organization)
     this.addMessagesToChat(orgId, resource, false, time)
@@ -5478,7 +5483,7 @@ if (!res[SIG]  &&  res._message)
     //   ver._sendStatus = SENT
     // }
   },
-  createSharedWith(toId, time, shareBatchId, lens) {
+  createSharedWith(toId, time, shareBatchId, lens, contextId) {
     let stub = {
       bankRepresentative: toId,
       timeShared: time,
@@ -5486,6 +5491,8 @@ if (!res[SIG]  &&  res._message)
     }
     if (lens)
       stub.lens = lens
+    if (contextId)
+      stub.contextId = contextId
     return stub
   },
   checkRequired(resource, meta) {
@@ -8099,7 +8106,18 @@ if (!res[SIG]  &&  res._message)
     })
   },
   inContext(r, context) {
-    return r._context && utils.getId(r._context) === utils.getId(context)
+    // return r._context && utils.getId(r._context) === utils.getId(context)
+    if (!r._context)
+      return false
+    if (utils.getId(r._context) === utils.getId(context))
+      return true
+    if (!r._sharedWith)
+      return false
+    const rContext = context // this._getItem(r._context)
+    let isInContext = _.some(r._sharedWith, (rr) => {
+      return rr.contextId === rContext.contextId
+    })
+    return isInContext
   },
   getSearchResult(result) {
     return result.map((r) => {
@@ -8746,7 +8764,10 @@ if (!res[SIG]  &&  res._message)
       if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
           value._sharedWith = []
-        this.addSharedWith(value, value.to, value._time, value._time, lens)
+        this.addSharedWith({resource: value, shareWith: value.to, time: value._time, shareBatchId: value._time, formRequest: {
+          _context: value._context,
+          lens: lens
+        }})
       }
       // if (isNew)
       //   this.addVisualProps(value)
@@ -10106,8 +10127,12 @@ if (!res[SIG]  &&  res._message)
 
         if (isThirdPartySentRequest  &&  isVerification)
           isThirdPartySentRequest = utils.getId(to) !== utils.getId(context.from)  &&  utils.getId(to) !== utils.getId(context.to)
-        if (!inDB)
+        if (!inDB  &&  model.id === FORM_REQUEST  &&  utils.getModel(val.form) !== PRODUCT_REQUEST) {
           context._formsCount = context._formsCount ? ++context._formsCount : 1
+          context._formsTypes = context._formsTypes || []
+          if (!context._formsTypes.includes(val.form))
+            context._formsTypes.push(val.form)
+        }
         context.lastMessageTime = new Date().getTime()
         this.dbBatchPut(contextId, context, batch)
         val._context = this.buildRef(context)
@@ -10319,6 +10344,8 @@ await fireRefresh(val.from.organization)
     if (!noTrigger) {
       if (!context)
         context = val._context ? this._getItem(utils.getId(val._context)) : null
+      if (type === APPLICATION_SUBMITTED)
+        context._appSubmitted = true
       if (isReadOnly) {
         if (isContext)
           this.addMessagesToChat(utils.getId(val), val)
@@ -10333,8 +10360,6 @@ await fireRefresh(val.from.organization)
           // else
           if (type === APPLICATION_DENIAL)
             context._denied = true
-          else if (type === APPLICATION_SUBMITTED)
-            context._appSubmitted = true
           else if (type === APPLICATION_APPROVAL)
             context._approved = true
           else if (type !== ASSIGN_RM)
