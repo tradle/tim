@@ -3425,7 +3425,7 @@ debug('sent:', r)
           this.addSharedWith({ resource: r, shareWith: r.from, tiem: r._time })
       }
       else
-        this.addSharedWith({ resource: r, shareBatchId: r.from, time: r._time })
+        this.addSharedWith({ resource: r, shareWith: r.from, time: r._time })
     }
     var batch = [];
     key = utils.getId(r)
