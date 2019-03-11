@@ -457,7 +457,7 @@ class VerificationRow extends Component {
 
           vCols.push(
             <View style={styles.refPropertyRow} key={this.getNextKey()}>
-              <Text style={labelStyle}>{properties[v].title + units}</Text>
+              <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
               <Text style={[style, {fontWeight: '600'}]}>{val}</Text>
             </View>
           );
@@ -497,7 +497,7 @@ class VerificationRow extends Component {
         }
         vCols.push(
           <View style={styles.refPropertyRow} key={this.getNextKey()}>
-            <Text style={labelStyle}>{properties[v].title + units}</Text>
+            <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
             {row}
           </View>
         )
@@ -522,7 +522,7 @@ class VerificationRow extends Component {
       }
       vCols.push(
         <View style={styles.refPropertyRow} key={this.getNextKey()}>
-          <Text style={labelStyle}>{properties[v].title + units}</Text>
+        <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
           {row}
         </View>
       );
@@ -577,7 +577,7 @@ class VerificationRow extends Component {
 
           vCols.push(
             <View style={styles.refPropertyRow} key={this.getNextKey()}>
-              <Text style={labelStyle}>{properties[v].title + units}</Text>
+              <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
               <Text style={style}>{val}</Text>
             </View>
           );
@@ -597,7 +597,7 @@ class VerificationRow extends Component {
         let row = <Text style={style} key={this.getNextKey()}>{val}</Text>
         vCols.push(
           <View style={styles.refPropertyRow} key={this.getNextKey()}>
-            <Text style={labelStyle}>{properties[v].title + units}</Text>
+            <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
             {row}
           </View>
         )
@@ -622,7 +622,7 @@ class VerificationRow extends Component {
       }
       vCols.push(
         <View style={styles.refPropertyRow} key={this.getNextKey()}>
-          <Text style={labelStyle}>{properties[v].title + units}</Text>
+          <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
           {row}
         </View>
       );
@@ -677,12 +677,14 @@ var styles = StyleSheet.create({
     fontWeight: '400',
   },
   resourceTitleS: {
-    fontSize: 12,
+    fontSize: 14,
+    paddingTop: 3
   },
   resourceLabelS: {
-    fontSize: 12,
+    fontSize: 14,
     paddingRight: 5,
     color: '#999999',
+    paddingTop: 3
   },
   resourceTitleL: {
     fontSize: 16,
