@@ -11513,6 +11513,12 @@ await fireRefresh(val.from.organization)
           return require('../utils/regula')
         },
       },
+      {
+        path: `ZoomSDK.token.${Platform.OS}`,
+      },
+      {
+        path: `ZoomSDK.facemapEncryptionKey.${Platform.OS}`,
+      },
     ]
 
     const updateLicenseKey = async (conf) => {
