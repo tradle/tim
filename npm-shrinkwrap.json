@@ -6701,8 +6701,8 @@
     },
     "react-native-step-indicator": {
       "version": "0.0.9",
-      "from": "git://github.com/tradle/react-native-step-indicator.git#8b0edf9521cd71d5d4343919b6830f40f3757c39",
-      "resolved": "git://github.com/tradle/react-native-step-indicator.git#8b0edf9521cd71d5d4343919b6830f40f3757c39"
+      "from": "tradle/react-native-step-indicator",
+      "resolved": "git://github.com/tradle/react-native-step-indicator.git#bdbbcf5a0c69c24d894cf62b3428999e53bb42b6"
     },
     "react-native-swipeout": {
       "version": "2.3.3",
