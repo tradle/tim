@@ -29,3 +29,5 @@ rm -rf node_modules/node-libs-browser/node_modules/create-ecdh
 # rm -rf node_modules/html-minifier/node_modules/uglify-js
 
 rm -f node_modules/react-dropzone/.babelrc
+
+./hooks/update_version.sh

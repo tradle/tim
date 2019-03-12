@@ -6,26 +6,20 @@ const exists = filePath => new Promise(resolve => require('fs').exists(filePath,
 
 const REPLACEMENT_MARKER = `// Tradle: replaced as this was not used`
 const MODULE_REPLACEMENT = "module.exports = {}"
-const COMPONENT_REPLACEMENT = "module.exports = require('UnimplementedView')"
+const COMPONENT_REPLACEMENT = "module.exports = require('react-native-web/src/modules/UnimplementedView')"
 const toAbsPath = relPath => path.resolve(__dirname, '../', relPath)
 
 const unused = {
   components: [
-    "node_modules/react-native/Libraries/Lists/FlatList.js",
-    "node_modules/react-native/Libraries/Lists/VirtualizedList.js",
-    "node_modules/react-native/Libraries/Lists/VirtualizedSectionList.js",
-    "node_modules/react-native/Libraries/Lists/SectionList.js",
-    "node_modules/react-native/Libraries/Lists/MetroListView.js",
-    "node_modules/react-native/Libraries/Lists/FillRateHelper.js",
-    "node_modules/react-native/Libraries/Lists/ViewabilityHelper.js",
-    "node_modules/react-native/Libraries/Components/Navigation/NavigatoriOS.ios.js",
-    "node_modules/react-native/Libraries/Experimental/WindowedListView.js",
-    "node_modules/react-native/Libraries/Experimental/SwipeableRow/*",
-    "node_modules/react-native/Libraries/CameraRoll/*",
-    "node_modules/react-native/Libraries/ART/*",
-  ].map(toAbsPath),
-  modules: [
-    "node_modules/react-native-tcp/*",
+    "node_modules/react-native-web/src/exports/FlatList/index.js",
+    "node_modules/react-native-web/src/exports/VirtualizedList/index.js",
+    "node_modules/react-native-web/src/exports/VirtualizedSectionList/index.js",
+    "node_modules/react-native-web/src/exports/SectionList/index.js",
+    "node_modules/react-native-web/src/exports/MetroListView/index.js",
+    "node_modules/react-native-web/src/exports/FillRateHelper/index.js",
+    "node_modules/react-native-web/src/exports/ViewabilityHelper/index.js",
+    "node_modules/react-native-web/src/exports/SwipeableRow/*",
+    "node_modules/react-native-web/src/exports/ART/*",
   ].map(toAbsPath)
 }
 
@@ -64,7 +58,6 @@ ${REPLACEMENT_MARKER}`
 
 Promise.all([
   replaceContents(unused.components, COMPONENT_REPLACEMENT),
-  replaceContents(unused.modules, MODULE_REPLACEMENT),
 ])
 .catch(err => {
   process.exitCode = 1
