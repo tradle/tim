@@ -19,7 +19,7 @@ const LOCAL_IP = (function () {
   return require('./localIP')
 })()
 
-const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
+const PROD_PUSH_SERVER = 'https://mc84jjb1a6.execute-api.us-east-1.amazonaws.com/dev/pns'
 
 const splash = {
   get tradle() { return require('../img/splash1536x2048.png') },
