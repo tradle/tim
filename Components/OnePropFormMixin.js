@@ -132,6 +132,13 @@ var OnePropFormMixin = {
       this.showCamera(params)
       return
     }
+    const { component } = params
+    if (!component  ||  !component.id  ||  component.id.indexOf('_facetec') === -1) {
+      this.showCamera(params)
+      return
+    }
+
+
     let result
     try {
       if (!ENV.ZoomSDK.initialized) {
