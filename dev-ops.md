@@ -59,3 +59,11 @@ fastlane codepush_promote_to_release
 6. go back to master
 
 git checkout master
+
+## Updating the App's environment variables file
+
+The app takes various API keys from an environment-*.json file (currently environment-cloud.json). This file is downloaded during postinstall, provided you have access.
+
+If you've updated some environment variables, you can push an updated file to S3 with `npm run pushenv`
+
+To check the diff with the file in S3 run `npm run diffenv`

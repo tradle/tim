@@ -877,7 +877,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#a2e6e6602c956b91bfacbad6ad5dd3adfef15465"
+      "resolved": "git://github.com/tradle/models.git#6404401bdf10cf1574f5ba48305e47363759e08d"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -2600,6 +2600,26 @@
       "version": "0.2.0",
       "from": "decode-uri-component@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/decode-uri-component/-/decode-uri-component-0.2.0.tgz"
+    },
+    "dedupe-deps": {
+      "version": "1.0.0",
+      "from": "dedupe-deps@>=1.0.0 <1.1.0",
+      "resolved": "http://registry.npmjs.org/dedupe-deps/-/dedupe-deps-1.0.0.tgz",
+      "dev": true,
+      "dependencies": {
+        "debug": {
+          "version": "4.1.1",
+          "from": "debug@>=4.1.1 <4.2.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-4.1.1.tgz",
+          "dev": true
+        },
+        "ms": {
+          "version": "2.1.1",
+          "from": "ms@>=2.1.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.1.tgz",
+          "dev": true
+        }
+      }
     },
     "deep-equal": {
       "version": "1.0.1",
@@ -5837,6 +5857,18 @@
       "from": "p-locate@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/p-locate/-/p-locate-2.0.0.tgz"
     },
+    "p-map": {
+      "version": "1.2.0",
+      "from": "p-map@>=1.2.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/p-map/-/p-map-1.2.0.tgz",
+      "dev": true
+    },
+    "p-props": {
+      "version": "1.2.0",
+      "from": "p-props@>=1.2.0 <1.3.0",
+      "resolved": "http://registry.npmjs.org/p-props/-/p-props-1.2.0.tgz",
+      "dev": true
+    },
     "p-try": {
       "version": "1.0.0",
       "from": "p-try@>=1.0.0 <2.0.0",
@@ -6703,6 +6735,11 @@
       "version": "3.0.9",
       "from": "react-native-splash-screen@latest",
       "resolved": "https://registry.npmjs.org/react-native-splash-screen/-/react-native-splash-screen-3.0.9.tgz"
+    },
+    "react-native-step-indicator": {
+      "version": "0.0.9",
+      "from": "tradle/react-native-step-indicator",
+      "resolved": "git://github.com/tradle/react-native-step-indicator.git#bdbbcf5a0c69c24d894cf62b3428999e53bb42b6"
     },
     "react-native-swipeout": {
       "version": "2.3.3",

@@ -44,7 +44,7 @@ const StringUtils = module.exports = {
     if (currentLanguage === DEFAULT_LANGUAGE)
       strings = RAW_STRINGS[DEFAULT_LANGUAGE]
     else {
-      let fn = `strings_${languageCode}.js`
+      let fn = `strings_${languageCode.replace('-', '')}.js`
       try {
         res = await fetchWithBackoff(`${URL}${fn}`, { headers }, 5000)
         strings = await res.text()

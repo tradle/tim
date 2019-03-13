@@ -1,6 +1,6 @@
 
-import './utils/errors'
 import './utils/shim'
+import './utils/errors'
 import './utils/debug'
 import './utils/automaticUpdates'
 import React, { Component } from 'react'
