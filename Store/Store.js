@@ -3610,7 +3610,17 @@ debug('sent:', r)
       contextId = formRequest._context  &&  this._getItem(formRequest._context).contextId
       lens = formRequest.lens
     }
-    let hasThisShare = resource._sharedWith  &&  resource._sharedWith.some((r) => r.bankRepresentative === id)
+    let hasThisShare
+    if (resource._sharedWith) {
+      hasThisShare = resource._sharedWith.some((r) => {
+        if (r.bankRepresentative !== id)
+          return false
+        // Could be shared with the same provider for a different product
+        if (contextId  &&  r.contextId  &&  r.contextId !== contextId)
+          return false
+        return true
+      })
+    }
     if (!hasThisShare) {
       if (!resource._sharedWith)
         resource._sharedWith = []
@@ -7012,22 +7022,46 @@ if (!res[SIG]  &&  res._message)
     let start = j
     let refs = []
     let all = {}
+    let duplicateItems = []
     if (typeof lastId === 'undefined' || j) {
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
+        let item = this._getItem(thisChatMessages[i].id)
+        if (context) {
+          if (!item._context)
+            continue
+          if (!this.inContext(item, context))
+            continue
+          if (links.indexOf(item[CUR_HASH]) !== -1)
+            duplicateItems.push(item[CUR_HASH])
+        }
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
-          let item = this._getItem(thisChatMessages[i].id)
           if (item._originalSender  ||  item._forward)
             continue
         }
         if (!isBacklinkProp) {
-          let item = this._getItem(thisChatMessages[i].id)
           if (!this.isChatItem(item, chatId))
             continue
         }
         this.addReferenceLink(thisChatMessages[i], links, all, refs)
         if (limit  &&  links.length === limit)
           break
+
+        // if (item[TYPE] === FORM_REQUEST  &&  item._document) {
+        //   let fr, k = i - 1
+        //   for (; k>=0  &&  !fr; k--) {
+        //     if (thisChatMessages[k].id === item._document)
+        //       break
+        //     if (utils.getType(thisChatMessages[k]) === FORM_REQUEST)
+        //       fr = true
+        //   }
+
+        //   if (fr) {
+        //     let d = this._getItem(item._document)
+        //     if (d)
+        //       this.addReferenceLink({id: item._document}, links, all, refs)
+        //   }
+        // }
       }
     }
     if (!links.length)
@@ -7051,31 +7085,8 @@ if (!res[SIG]  &&  res._message)
     .then((l) => {
       if (!foundResources.length)
         return
-      // Filter FR for PR
-      // let len = foundResources.length
-      // for (let i=0; i<len; i++) {
-      //   let r = foundResources[i]
-      //   if (r[TYPE] === FORM_REQUEST  &&  r.requestFor === PRODUCT_REQUEST) {
-      //     if (i < len - 1) {
-      //       let r2 = foundResources[i + 1]
-      //       if (r2[TYPE] === FORM_REQUEST  &&  r2.requestFor === PRODUCT_REQUEST) {
-      //         foundResources.splice(i, 1)
-      //         len--
-      //       }
-      //     }
-      //   }
-      // }
       foundResources = this.filterFound({foundResources, filterProps, refsObj})
       foundResources.forEach((r) => {
-        // if (r[TYPE] === VERIFICATION)
-        //   r.document = refsObj[utils.getId(r.document)] || r.document
-        // else if (r[TYPE] === FORM_ERROR) {
-        //   let prefill = refsObj[utils.getId(r.prefill)]
-        //   if (prefill)
-        //     r.prefill = prefill
-        // }
-
-        // this.addVisualProps(r)
         // Check if this message was shared, display the time when it was shared not when created
         if (!r._sharedWith  ||  !to)
           return
@@ -7100,6 +7111,10 @@ if (!res[SIG]  &&  res._message)
           sortedFR.push(fr)
       }
       foundResources = sortedFR
+
+      if (duplicateItems.length) {
+        removeDuplicates(duplicateItems, foundResources)
+      }
       // foundResources.sort((a, b) => a._time - b._time)
 
       utils.pinFormRequest(foundResources)
@@ -7109,6 +7124,23 @@ if (!res[SIG]  &&  res._message)
     .catch((err) => {
       debugger
     })
+    function removeDuplicates(duplicateItems, foundResources) {
+      for (let i=0; i<duplicateItems.length; i++) {
+        let hash = duplicateItems[i]
+        let res
+        let a = foundResources.reduce((a, r, i) => {
+          if (r[CUR_HASH] === hash) {
+            a.push(i);
+            res = r
+          }
+          return a;
+        }, [])
+        let sharedWithIdx = _.findIndex(res._sharedWith, (r) => r.contextId === context.contextId)
+        let b = a.splice(sharedWithIdx, 1)
+        for (let i=a.length - 1; i>=0; i--)
+          foundResources.splice(a[i], 1)
+      }
+    }
   },
   addReferenceLink(stub, links, all, refs) {
     let r = this._getItem(stub)
@@ -7536,14 +7568,15 @@ if (!res[SIG]  &&  res._message)
         return
       //Object.keys(list).forEach(key => {
       let resourceId = resource ? utils.getId(resource) : null
+      let alen = allMessages.length
       allMessages.forEach((res, i) => {
-        let r = self._getItem(res.id)
+        let r = this._getItem(res.id)
         if (!r) {
           debugger
           return
         }
         let type = r[TYPE]
-        let m = self.getModel(type)
+        let m = this.getModel(type)
         if (!m) return
         if (isBacklinkProp) {
           if (resourceId)  {
@@ -8266,8 +8299,31 @@ if (!res[SIG]  &&  res._message)
       l.forEach((val) => {
         checkOneVerification(val)
         verifiedShares[utils.getId(val.document)] = val
+        // if (utils.getType(val.document) === shareType) {
+        //   let d = this._getItem(val.document)
+        //   let rr = {
+        //     [TYPE]: VERIFICATION,
+        //     document: d,
+        //     organization: this._getItem(utils.getId(d.from)).organization
+        //   }
+        //   this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+        // }
       })
     }
+    // for (let t in typeToDocs) {
+    //   let list = typeToDocs[t]
+
+    //   list.forEach((d) => {
+    //     if (verifiedShares[utils.getId(d)])
+    //       return
+    //     let rr = {
+    //       [TYPE]: VERIFICATION,
+    //       document: d,
+    //       organization: this._getItem(utils.getId(d.from)).organization
+    //     }
+    //     this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+    //   })
+    // }
     // Allow sharing non-verified forms
     let curContext = context || await this.getCurrentContext(to)
     if (hasVerifiers  &&  hasVerifiers[shareType])
@@ -8284,11 +8340,15 @@ if (!res[SIG]  &&  res._message)
       result.forEach((r) => {
         if (r.verificationsCount)
           return
-        if (verifiedShares[utils.getId(r)])
+        if (verifiedShares[utils.getId(r)]) {
+          let v = verifiedShares[utils.getId(r)]
+          v.document = r
+          this.addAndCheckShareable(v, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
           return
+        }
         if (shareType === LEGAL_ENTITY  &&  r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
           return
-        if (this.checkIfWasShared(r, to))
+        if (this.checkIfWasShared(r, to, context))
           return
         if (filter  &&  utils.getDisplayName(r).indexOf(filter) === -1)
           return
@@ -8590,7 +8650,11 @@ if (!res[SIG]  &&  res._message)
     }
     return multientryResources
   },
-  checkIfWasShared(document, to) {
+  checkIfWasShared(document, to, context) {
+    if (context  &&  document._context) {
+      if (context.requestFor  &&  document._context.requestFor  &&  context.requestFor  !==  document._context.requestFor)
+        return
+    }
     let toId
     if (utils.getType(to) === PROFILE)
       toId = utils.getId(to.organization)
@@ -8601,7 +8665,7 @@ if (!res[SIG]  &&  res._message)
         let org = this._getItem(r.bankRepresentative).organization
         return org  &&  utils.getId(org) === toId
       }))
-        return true
+      return true
     }
   },
   // Allow sharing only the last version of the resource
