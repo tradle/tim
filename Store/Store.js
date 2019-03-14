@@ -3179,9 +3179,16 @@ debug('sent:', r)
 
         if (idx !== -1) {
           let lr = list[rid]
-          if (lr  &&  r._time === lr.value._time)
-            return
-          messages.splice(idx, 1)
+          let doAdd
+          if (lr  &&  r._time === lr.value._time) {
+            if (!timeShared)
+              return
+            if (timeShared === r._time)
+              return
+            doAdd = true
+          }
+          if (!doAdd)
+            messages.splice(idx, 1)
         }
       }
     }
@@ -3616,9 +3623,9 @@ debug('sent:', r)
         if (r.bankRepresentative !== id)
           return false
         // Could be shared with the same provider for a different product
-        if (contextId  &&  r.contextId  &&  r.contextId !== contextId)
-          return false
-        return true
+        if (contextId  &&  r.contextId  &&  r.contextId === contextId)
+          return true
+        return false
       })
     }
     if (!hasThisShare) {
@@ -7032,8 +7039,9 @@ if (!res[SIG]  &&  res._message)
             continue
           if (!this.inContext(item, context))
             continue
-          if (links.indexOf(item[CUR_HASH]) !== -1)
-            duplicateItems.push(item[CUR_HASH])
+          const hash = item[CUR_HASH]
+          if (links.includes(hash)  &&  !duplicateItems.includes(hash))
+            duplicateItems.push(hash)
         }
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
           if (item._originalSender  ||  item._forward)
