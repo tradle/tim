@@ -312,7 +312,7 @@ class FormRequestRow extends Component {
   }
 
   showShareableResources(styles) {
-    let { resource, shareableResources, productToForms } = this.props
+    let { resource, shareableResources, productToForms, bankStyle } = this.props
     if (!shareableResources) // || !this.props.resource.message)
       return null
 
@@ -380,16 +380,45 @@ class FormRequestRow extends Component {
 
     var modelTitle = translate(formModel)
     let number = vtt.length //numbers[vtt.length]
-    let offerToShare
-    if (number)
-      offerToShare = 'goodNews' //`Good news! You already have ${number}. To share tap icon below.`
-    else
-      offerToShare = 'goodNewsFew'  //`Good news! You already have quite a few. To share tap icon below.`
+    let offerToShare = "orShare"
+
+
+    let or
+    if (formModel.subClassOf === 'tradle.MyProduct')
+      or = <View style={{paddingVertical: 5}}>
+            <View style={{backgroundColor: bankStyle.verifiedBg, height: 1, flex: 1, alignSelf: 'stretch'}}/>
+          </View>
+    else {
+      let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
+      or = <View style={styles.row}>
+            <View style={abStyle}/>
+            <View style={styles.assistentBox}>
+              <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{translate('orShare')}</Text>
+            </View>
+            <View style={abStyle}/>
+          </View>
+    }
+
+
+    // if (number)
+    //   offerToShare = 'goodNews' //`Good news! You already have ${number}. To share tap icon below.`
+    // else
+    //   offerToShare = 'goodNewsFew'  //`Good news! You already have quite a few. To share tap icon below.`
+    // return (
+    //   <View style={styles.shareable} key={this.getNextKey()}>
+    //     <View style={{padding: 5, marginHorizontal: -1, borderTopWidth: 1, borderBottomWidth: 1, borderColor: bankStyle.verifiedHeaderTextColor}}>
+    //       <Text style={styles.assistentText}>{translate(offerToShare, number)}</Text>
+    //     </View>
+    //     <View style={styles.container}>
+    //       <View style={styles.shareablesList}>
+    //         {vtt}
+    //       </View>
+    //     </View>
+    //   </View>
+    //  );
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
-        <View style={{padding: 10, backgroundColor: '#efefef', marginHorizontal: -1}}>
-          <Text style={styles.assistentText}>{translate(offerToShare, number)}</Text>
-        </View>
+        {or}
         <View style={styles.container}>
           <View style={styles.shareablesList}>
             {vtt}
@@ -1115,7 +1144,8 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
 
     },
     assistentText: {
-      color: '#757575',
+      // color: '#757575',
+      color: bankStyle.verifiedHeaderTextColor,
       fontStyle: 'italic',
       fontSize: 17,
       alignSelf: 'center'
@@ -1173,12 +1203,13 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       flex: 1,
       justifyContent: 'center'
     },
-    // orText: {
-    //   fontStyle: 'italic',
-    //   alignSelf: 'center',
-    //   color: '#aaaaaa',
-    //   fontSize: 16,
-    // },
+    orText: {
+      fontStyle: 'italic',
+      alignSelf: 'center',
+      color: '#aaaaaa',
+      paddingHorizontal: 5,
+      fontSize: 16,
+    },
     verifiedDate: {
       fontSize: 12,
       color: '#757575',
