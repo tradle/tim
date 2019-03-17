@@ -147,7 +147,7 @@ class MessageList extends Component {
     //   return false
     if (resource._formsTypes)
       return true
-    let isReadOnlyChat = utils.isReadOnlyChat(context)
+    let isReadOnlyChat = utils.isMessage(resource) && utils.isReadOnlyChat(context)
     if (isReadOnlyChat  &&  resource._relationshipManager)
       return true
     if (allContexts || isReadOnlyChat)
@@ -189,7 +189,7 @@ class MessageList extends Component {
       return
     }
     let chatWith = this.props.resource
-    if (to  &&  to[ROOT_HASH] !== chatWith[ROOT_HASH])
+    if (to  &&  utils.getRootHash(to) !== utils.getRootHash(chatWith))
       return
 
     let { resource, online, productToForms, shareableResources, context } = params
@@ -221,7 +221,7 @@ class MessageList extends Component {
       }
       return
     }
-    if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
+    if (action === 'addItem'  ||  action === 'insertItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       this.add(params)
       return
     }
@@ -348,7 +348,7 @@ class MessageList extends Component {
     this.setState(state)
   }
   add(params) {
-    let { action, resource, to, productToForms, shareableResources } = params
+    let { action, resource, to, productToForms, shareableResources, timeShared } = params
     if (!utils.isMessage(resource))
       return
     // HACK for Agent to not to receive messages from one customer in the chat for another
@@ -397,12 +397,16 @@ class MessageList extends Component {
       if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
         replace = true
     }
-
+    let insert = action === 'insertItem'  &&  timeShared
     let list
     list = this.state.list || []
     if (replace) {
       let resourceId = utils.getId(resource)
       list = list.map((r) => utils.getId(r) === resourceId ? resource : r)
+    }
+    else if (insert) {
+      let idx = list.findIndex((r) => r._sentTime > timeShared)
+      list.splice(idx, 0, resource)
     }
     else {
       list = list.map((r) => r)
