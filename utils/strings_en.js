@@ -320,6 +320,7 @@ module.exports = {
     "' photo of yourself that I can match against your ID document": "' photo of yourself that I can match against your ID document",
     "pleaseSign": "Please sign inside the grey box",
     "getStarted": "Get started",
+    "orShare": "Or share",
     "goodNews": "Good news! You already have {1}. To share tap the icon below",
     "goodNewsFew": "Good news! You already have quite a few. To share tap icon below.",
     // Tours buttons
