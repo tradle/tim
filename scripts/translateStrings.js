@@ -82,8 +82,8 @@ async function writeStrings(stringsDir, lang, forceGen) {
       else {
         if (newOnly  &&  fileNames.indexOf(`${STRINGS_FOLDER}strings_${lang.replace('-', '')}.js`) !== -1)
           continue
-        await writeFile({stringsDir, lang, forceGen, newOnly})
-        // promises.push(lang => writeFile({stringsDir, lang, forceGen, newOnly}))
+        // await writeFile({stringsDir, lang, forceGen, newOnly})
+        promises.push(writeFile({stringsDir, lang, forceGen, newOnly}))
       }
       j++
       // isRegulaXml ? await writeRegulaFile(stringsDir, lang, forceGen) : await writeFile(stringsDir, lang, forceGen)
@@ -92,7 +92,7 @@ async function writeStrings(stringsDir, lang, forceGen) {
       return
     await Promise.all(promises)
     if (promises.length === MAX_LANGUAGES_IN_ONE_SHOT)
-      await timeout(60000)
+      await timeout(10000)
   }
 }
 function timeout(ms) {
@@ -203,6 +203,7 @@ async function writeFile({stringsDir, lang, forceGen, newOnly}) {
   }
   if (!hasChanged)
     return
+  console.log(`Translated to ${lang}`)
   let s = typeof stringsLang === 'string' && stringsLang || JSON.stringify(stringsLang, 0, 2)
   var params = {
     Body: Buffer.from('module.exports = ' + s),
