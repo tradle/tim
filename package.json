@@ -44,8 +44,7 @@
     "build:codepush:ios": "echo 'ERROR: PLEASE BUILD IN XCODE FOR NOW'",
     "pushenv": "./scripts/push-environment.sh",
     "diffenv": "./scripts/diff-environment.sh",
-    "translate:strings": "node ./scripts/translateStrings -d ./utils -l vi,bn,fil,es,fr,nl,ru,km",
-    "translate:moreStrings": "node ./scripts/translateStrings -d ./utils -l th,km,my",
+    "translate:strings": "node ./scripts/translateStrings -d ./utils",
     "translate:xmlstrings": "node ./scripts/translateStrings -d ./android/app/src/main/res/values -l vi,bn,fil,es,fr,nl,ru,km -f",
     "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android",
     "nibble": "eslint-nibble Components/ Store/ utils/ index.common.js"
