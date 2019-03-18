@@ -105,7 +105,7 @@ class ChatContext extends Component {
       color = '#aaaaaa'
     }
     return <TouchableOpacity onPress={() => Actions.showStepIndicator()} style={{position: 'absolute', right: 0, top: -5, padding: 10}}>
-             <Icon size={35} name={name} color={color} style={{paddingLeft: 20}} />
+             <Icon size={35} name={name} color={color} style={{paddingHorizontal: 10}} />
            </TouchableOpacity>
   }
 }
@@ -114,10 +114,12 @@ var styles = StyleSheet.create({
   contextBar: {
     flex: 1,
     paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   contextBarWithSteps: {
     flex: 1,
     paddingTop: 7,
+    paddingHorizontal: 10,
     paddingBottom: 15
   },
   bar: {
