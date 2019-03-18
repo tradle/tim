@@ -225,7 +225,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#a2e6e6602c956b91bfacbad6ad5dd3adfef15465"
+      "resolved": "git://github.com/tradle/models.git#ad17db8fcd10bd344a1dd15c5cd750759de9b8d5"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -4530,6 +4530,18 @@
       "resolved": "https://registry.npmjs.org/lodash.words/-/lodash.words-3.2.0.tgz",
       "dev": true
     },
+    "lodash.trimend": {
+      "version": "4.5.1",
+      "from": "lodash.trimend@>=4.5.1 <5.0.0",
+      "resolved": "http://registry.npmjs.org/lodash.trimend/-/lodash.trimend-4.5.1.tgz",
+      "dev": true
+    },
+    "lodash.trimstart": {
+      "version": "4.5.1",
+      "from": "lodash.trimstart@>=4.5.1 <5.0.0",
+      "resolved": "http://registry.npmjs.org/lodash.trimstart/-/lodash.trimstart-4.5.1.tgz",
+      "dev": true
+    },
     "log-driver": {
       "version": "1.2.7",
       "from": "log-driver@>=1.2.5 <2.0.0",
@@ -6348,6 +6360,11 @@
       "from": "react-native-scrollable-mixin@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/react-native-scrollable-mixin/-/react-native-scrollable-mixin-1.0.1.tgz"
     },
+    "react-native-step-indicator": {
+      "version": "0.0.9",
+      "from": "git://github.com/tradle/react-native-step-indicator.git#8b0edf9521cd71d5d4343919b6830f40f3757c39",
+      "resolved": "git://github.com/tradle/react-native-step-indicator.git#8b0edf9521cd71d5d4343919b6830f40f3757c39"
+    },
     "react-native-swipeout": {
       "version": "2.3.3",
       "from": "react-native-swipeout@>=2.3.3 <3.0.0",
@@ -6896,6 +6913,12 @@
       "version": "3.1.2",
       "from": "rx-lite@>=3.1.2 <4.0.0",
       "resolved": "https://registry.npmjs.org/rx-lite/-/rx-lite-3.1.2.tgz",
+      "dev": true
+    },
+    "s3-ls": {
+      "version": "2.0.1",
+      "from": "s3-ls@latest",
+      "resolved": "http://registry.npmjs.org/s3-ls/-/s3-ls-2.0.1.tgz",
       "dev": true
     },
     "safe-buffer": {

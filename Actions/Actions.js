@@ -79,6 +79,8 @@ var asyncActions = [
   'requestWipe',
   'verifyOrCorrect',
   'importData',
+  'stepIndicatorPress',
+  'showStepIndicator'
 ]
 
 var syncActions = [

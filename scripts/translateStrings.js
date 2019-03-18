@@ -5,10 +5,13 @@ const Translate = require('@google-cloud/translate')
 const fs = require('fs')
 const parser = require('fast-xml-parser');
 const aws = require('aws-sdk')
-const fetch = require('node-fetch')
+const s3ls = require('s3-ls');
 
 const translate = new Translate();
 const URL = 'https://s3.eu-west-2.amazonaws.com/tradle.io/strings/'
+const BUCKET = 'tradle.io'
+const STRINGS_FOLDER = 'strings/'
+const MAX_LANGUAGES_IN_ONE_SHOT = 5
 
 const HELP = `
   Usage:
@@ -26,18 +29,23 @@ const argv = require('minimist')(process.argv.slice(2), {
     d: 'dictionary',
     h: 'help',
     l: 'languages',
-    f: 'forceGen'
+    f: 'forceGen',
+    n: 'newOnly'
   }
 })
-const { help, dictionary, languages, forceGen } = argv
+const { help, dictionary, languages, forceGen, newOnly } = argv
+var s3 = new aws.S3()
+aws.config.setPromisesDependency(Promise);
 
 if (help) {
   console.log(HELP)
   process.exit(0)
 }
-new Promise(resolve => writeStrings(dictionary, languages, forceGen))
-
-var s3
+if (!process.env.AWS_PROFILE) {
+  console.log('Please check if you use the correct AWS_PROFILE')
+  return
+}
+new Promise(resolve => writeStrings(dictionary, languages, forceGen, newOnly))
 
 async function writeStrings(stringsDir, lang, forceGen) {
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
@@ -47,21 +55,48 @@ async function writeStrings(stringsDir, lang, forceGen) {
   let isRegulaXml = stringsDir === './android/app/src/main/res/values'
   if (lang) {
     let langs = lang.split(',')
-    await Promise.all(langs.map(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen)))
+    await Promise.all(langs.map(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile({stringsDir, lang, forceGen})))
     return
   }
 
   let [languages] = await translate.getLanguages()
+  let fileNames
+  if (!isRegulaXml) {
+    let lister = s3ls({bucket: BUCKET});
+    try {
+      let data = await lister.ls(STRINGS_FOLDER)
+      fileNames = data.files
+    } catch (err) {
+      console.log(err.message, err.stack)
+      return
+    }
+
+  }
 
   for (let i=0; i<languages.length; ) {
     let promises = []
-    for (let j=0; j<5 && i < languages.length; j++, i++) {
+    for (let j=0; j<MAX_LANGUAGES_IN_ONE_SHOT && i < languages.length; i++) {
       let lang = languages[i].code
+      if (isRegulaXml)
+        promises.push(lang => writeRegulaFile(stringsDir, lang, forceGen))
+      else {
+        if (newOnly  &&  fileNames.indexOf(`${STRINGS_FOLDER}strings_${lang.replace('-', '')}.js`) !== -1)
+          continue
+        await writeFile({stringsDir, lang, forceGen, newOnly})
+        // promises.push(lang => writeFile({stringsDir, lang, forceGen, newOnly}))
+      }
+      j++
       // isRegulaXml ? await writeRegulaFile(stringsDir, lang, forceGen) : await writeFile(stringsDir, lang, forceGen)
-      promises.push(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen))
-      await Promise.all(promises)
     }
+    if (!promises.length)
+      return
+    await Promise.all(promises)
+    if (promises.length === MAX_LANGUAGES_IN_ONE_SHOT)
+      await timeout(60000)
   }
+}
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 async function writeRegulaFile(stringsDir, lang, forceGen) {
   if (lang === 'en')
@@ -112,26 +147,35 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
   strings += '\n</resources>'
   writeFileAtomic(langStrings, strings, console.log)
 }
-async function writeFile(stringsDir, lang, forceGen) {
+async function writeFile({stringsDir, lang, forceGen, newOnly}) {
   if (lang === 'en')
     return
-  let fn = 'strings_' + lang + '.js'
-  let fnStrings = path.resolve(stringsDir, fn)
+  let fn = 'strings_' + lang.replace('-', '') + '.js'
+  // let fnStrings = path.resolve(stringsDir, fn)
   let enFn = 'strings_en.js'
   let stringsLang, stringsEN
   let currentIds
+
+
+  var paramsGet = {
+    Bucket: BUCKET,
+    Key: `${STRINGS_FOLDER}${fn}`,
+   };
+
   try {
     stringsEN = require(path.resolve(stringsDir, enFn))
-    let res = await fetch(`${URL}${fn}`) //require(fnStrings)
-    stringsLang = await res.text()
-    stringsLang = JSON.parse(stringsLang.split('=')[1].trim())
+    let res = await s3.getObject(paramsGet).promise()
 
+    stringsLang = Buffer.from(res.Body).toString('utf8')
+    stringsLang = JSON.parse(stringsLang.split('=')[1].trim())
     for (let p in stringsLang) {
       if (!currentIds) currentIds = {}
       currentIds[p] = true
     }
   } catch (err) {
     console.log(err.message)
+    if (err.statusCode !== 404)
+      return
     if (!stringsEN)
       return
     stringsLang = {}
@@ -159,9 +203,6 @@ async function writeFile(stringsDir, lang, forceGen) {
   }
   if (!hasChanged)
     return
-  if (!s3) {
-    s3 = new aws.S3();
-  }
   let s = typeof stringsLang === 'string' && stringsLang || JSON.stringify(stringsLang, 0, 2)
   var params = {
     Body: Buffer.from('module.exports = ' + s),
@@ -169,14 +210,12 @@ async function writeFile(stringsDir, lang, forceGen) {
     Key: `strings/${fn}`,
     ACL: 'public-read'
    };
-   s3.putObject(params, function(err, data) {
+   await s3.putObject(params, function(err, data) {
      if (err)
        console.log(err, err.stack); // an error occurred
      else
        console.log(data);           // successful response
    });
-
-    // writeFileAtomic(fnStrings, 'module.exports = ' + JSON.stringify(stringsLang, 0, 2), console.log)
 }
 async function translateText({strings, key, text, lang}) {
   const results = await translate.translate(text, lang)

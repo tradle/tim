@@ -20,6 +20,7 @@ import reactMixin from 'react-mixin'
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
 import debounce from 'debounce'
+import StepIndicator from 'react-native-step-indicator'
 
 import constants from '@tradle/constants'
 
@@ -40,8 +41,8 @@ import VerifierChooser from './VerifierChooser'
 import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
 import ContextChooser from './ContextChooser'
-import utils, { translate, isAndroid } from '../utils/utils'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
+import utils, { translate, isIphone10orMore, isAndroid, isWeb } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -72,6 +73,8 @@ const REFRESH = 'tradle.Refresh'
 const SELFIE = 'tradle.Selfie'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
+const MAX_STEPS = isWeb() ? 10 : 5
+
 var currentMessageTime
 
 class MessageList extends Component {
@@ -96,7 +99,9 @@ class MessageList extends Component {
       list: [],
       limit: LIMIT,
       hasProducts: resource  &&  this.hasProducts(resource),
-      allLoaded: false
+      allLoaded: false,
+      step: -1,
+      showStepIndicator: utils.getMe()._showStepIndicator
     }
     if (application  &&  utils.isRM(application)) {
       let additionalForms = this.getAdditionalForms(application)
@@ -138,7 +143,7 @@ class MessageList extends Component {
     // No need to show context if provider has only one product and no share context
     // if ((!resource.products  ||  resource.products.length === 1)  &&  !resource._canShareContext)
     //   return false
-    if (resource._formsCount)
+    if (resource._formsTypes)
       return true
     let isReadOnlyChat = utils.isReadOnlyChat(context)
     if (isReadOnlyChat  &&  resource._relationshipManager)
@@ -206,7 +211,7 @@ class MessageList extends Component {
     if (to  &&  to[ROOT_HASH] !== chatWith[ROOT_HASH])
       return
 
-    let { resource, online, productToForms, shareableResources } = params
+    let { resource, online, productToForms, shareableResources, context } = params
     if (action === 'onlineStatus') {
       if (resource  &&  utils.getId(resource) == utils.getId(chatWith))
       // if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
@@ -237,6 +242,22 @@ class MessageList extends Component {
     }
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       this.add(params)
+      return
+    }
+    if (action === 'stepIndicatorPress') {
+      if (!context)
+        return
+      let curContext = this.state.currentContext || this.state.context
+      if (!curContext)
+        return
+      if (utils.getId(context) !== utils.getId(curContext))
+        return
+      if (utils.getId(chatWith) !== utils.getId(to))
+        return
+      this.selectResource({resource})
+    }
+    else if (action === 'showStepIndicator') {
+      this.setState({showStepIndicator: params.showStepIndicator})
       return
     }
     this.state.newItem = false
@@ -280,7 +301,7 @@ class MessageList extends Component {
       if (!doUpdate)
         return;
     }
-    let { context, list, loadEarlierMessages, switchToContext, endCursor, allLoaded } = params
+    let { list, loadEarlierMessages, switchToContext, endCursor, allLoaded } = params
     if (loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -417,9 +438,11 @@ class MessageList extends Component {
       state.isLoading = false
       StatusBar.setHidden(false);
     }
+    state.step = -1
     let currentContext
     if (utils.isContext(resource))
       currentContext = resource
+
     else if (resource._context  &&  utils.getType(resource._context))
     // else //if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
       currentContext = resource._context
@@ -489,7 +512,7 @@ class MessageList extends Component {
     )
   }
   switchToOneContext(context, to) {
-    this.setState({allContexts: false, limit: LIMIT})
+    this.setState({allContexts: false, limit: LIMIT, step: -1})
     Actions.list({
       modelName: MESSAGE,
       search: this.props.search,
@@ -516,6 +539,10 @@ class MessageList extends Component {
     if (this.state.application !== nextState.application)
       return true
     if (this.state.productList !== nextState.productList)
+      return true
+    if (this.state.step !== nextState.step)
+      return true
+    if (this.state.showStepIndicator !== nextState.showStepIndicator)
       return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
     //   return false
@@ -836,6 +863,7 @@ class MessageList extends Component {
           content = showLoading({bankStyle, component: MessageList, message: translate('loading'), resource, isConnected })
       }
     }
+    let stepIndicator = this.getStepIndicator(context)
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
     if (!content) {
       let h = utils.dimensions(MessageList).height
@@ -848,12 +876,7 @@ class MessageList extends Component {
         maxHeight -= 45
       else if (notRemediation &&  !isChooser  &&  (!isConnected  ||  (!isContext  &&  onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
-      // if (notRemediation  &&  !hideTextInput) //  &&  resource.products) //  &&  resource.products.length > 1))
-      //   maxHeight -= 45
-      // else if (ENV.allowForgetMe)
-      //   maxHeight -= 45
       if (hideTextInput)
-      //   maxHeight += 35
         maxHeight -= 10
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       var marginLeft = 10
@@ -863,6 +886,10 @@ class MessageList extends Component {
       let alignSelf = 'center'
 
       // Hide TextInput for shared context since it is read-only
+      if (stepIndicator)
+        maxHeight -= 12
+
+      let textInputHeight = isIphone10orMore() ? 60 : 45
 
       content = <GiftedMessenger style={{ marginLeft, marginRight, width, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
@@ -878,7 +905,7 @@ class MessageList extends Component {
         handleSend={this.onSubmitEditing}
         submitOnReturn={true}
         underlineColorAndroid='transparent'
-        textInputHeight={45}
+        textInputHeight={textInputHeight}
         menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
@@ -893,7 +920,7 @@ class MessageList extends Component {
       />
     }
 
-    let sepStyle = { height: 1,backgroundColor: 'transparent' }
+    let sepStyle = { height: 1, backgroundColor: 'transparent' }
     if (!allLoaded  && !navigator.isConnected  &&  isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
     let actionSheet = !hideTextInput  && this.renderActionSheet()
@@ -906,31 +933,24 @@ class MessageList extends Component {
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
     let hash = utils.getRootHash(progressInfoR)
-    if (!bgImage)
-      return (
-        <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
-          {network}
-          <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
-          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
-          <View style={ sepStyle } />
-          {content}
-          {actionSheet}
-          {alert}
-        </PageView>
-    )
-    let {width, height} = utils.dimensions(MessageList)
-    let image = [{ width, height: height - 1 }, platformStyles.navBarMargin]
+    let backgroundImage
+    if (bgImage) {
+      let {width, height} = utils.dimensions(MessageList)
+      let image = [{ width, height: height - 1 }, platformStyles.navBarMargin]
+      backgroundImage = <BackgroundImage source={{uri: bgImage}}  resizeMode='cover' style={image} />
+    }
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
-        <BackgroundImage source={{uri: bgImage}}  resizeMode='cover' style={image} />
-          {network}
-          <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
-          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
-          <View style={ sepStyle } />
-          {content}
-          {actionSheet}
-          {alert}
+        {backgroundImage}
+        {network}
+        <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
+        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
+        {stepIndicator}
+        <View style={ sepStyle } />
+        {content}
+        {actionSheet}
+        {alert}
       </PageView>
     );
   }
@@ -938,7 +958,117 @@ class MessageList extends Component {
   hasMenuButton() {
     return !!this.getActionSheetItems()
   }
+  getStepIndicator(context) {
+    if (!utils.getMe()._showStepIndicator ||  !context  ||  !context._formsTypes)
+      return
+// const customStyles = {
+//   stepIndicatorSize: 25,
+//   currentStepIndicatorSize:30,
+//   separatorStrokeWidth: 2,
+//   currentStepStrokeWidth: 3,
+//   stepStrokeCurrentColor: '#fe7013',
+//   stepStrokeWidth: 3,
+//   stepStrokeFinishedColor: '#fe7013',
+//   stepStrokeUnFinishedColor: '#aaaaaa',
+//   separatorFinishedColor: '#fe7013',
+//   separatorUnFinishedColor: '#aaaaaa',
+//   stepIndicatorFinishedColor: '#fe7013',
+//   stepIndicatorUnFinishedColor: '#ffffff',
+//   stepIndicatorCurrentColor: '#ffffff',
+//   stepIndicatorLabelFontSize: 13,
+//   currentStepIndicatorLabelFontSize: 13,
+//   stepIndicatorLabelCurrentColor: '#fe7013',
+//   stepIndicatorLabelFinishedColor: '#ffffff',
+//   stepIndicatorLabelUnFinishedColor: '#aaaaaa',
+//   labelColor: '#999999',
+//   labelSize: 13,
+//   currentStepLabelColor: '#fe7013'
+// }
+    const { bankStyle } = this.props
+    const { list, step } = this.state
+    let rgb = utils.hexToRgb(bankStyle.linkColor)
+    rgb = Object.values(rgb).join(',')
+    let unfinishedColor = `rgba(${rgb},0.5)`
 
+    let customStyles = {
+      stepStrokeCurrentColor: bankStyle.linkColor,
+      stepStrokeFinishedColor: bankStyle.linkColor,
+      separatorFinishedColor: bankStyle.linkColor,
+      stepIndicatorFinishedColor: bankStyle.linkColor,
+      stepIndicatorLabelCurrentColor: bankStyle.linkColor,
+      stepStrokeUnFinishedColor: unfinishedColor,
+      stepIndicatorUnFinishedColor: unfinishedColor,
+      currentStepLabelColor:  bankStyle.linkColor,
+      // separatorUnFinishedColor: 'transparent',
+      separatorUnFinishedColor: unfinishedColor,
+      stepIndicatorLabelUnFinishedColor: '#ffffff',
+      currentStepStrokeWidth: 3,
+      currentStepIndicatorSize: 25,
+      stepIndicatorSize: 23,
+      stepIndicatorLabelFontSize: 12,
+      currentStepIndicatorLabelFontSize: 12,
+    }
+
+    const model = utils.getModel(context.requestFor)
+    const forms = model.forms
+    let allSteps = forms.length
+    let startingPosition = Math.floor(context._formsTypes.length / MAX_STEPS) * MAX_STEPS
+    // let labels = []
+    // for (let i=startingPosition, j=0; i<allSteps  &&  j<MAX_STEPS; j++, i++) {
+    //   if (i === context._formsTypes - 1)
+    //     labels.push(utils.getModel(model.forms[i]).title)
+    // }
+    // let number
+    let stepCount
+    if (allSteps < MAX_STEPS)
+      stepCount = allSteps
+    else {
+      let lastFormR
+      for (let i=list.length - 1; i>=0; i--) {
+        let l = list[i]
+        if (l[TYPE] === FORM_REQUEST) {
+          let idx = forms.findIndex(f => f === l.form)
+          allSteps = context._formsTypes.length + (allSteps - idx)
+          break
+        }
+      }
+      stepCount = MAX_STEPS
+      if (startingPosition + MAX_STEPS > allSteps)
+        startingPosition = allSteps - MAX_STEPS
+    }
+
+    let appSubmitted = context._appSubmitted
+    let iconLeft, iconRight
+    let currentPosition = step > -1 ? step : Math.min(context._formsTypes.length - 1, allSteps)
+
+    if (currentPosition < startingPosition) {
+      for (; startingPosition>=0  && startingPosition >= currentPosition; startingPosition -= MAX_STEPS);
+      if (startingPosition < 0)
+        startingPosition = 0
+      stepCount = MAX_STEPS
+    }
+
+    if (startingPosition >= MAX_STEPS)
+      iconLeft = <TouchableOpacity onPress={() => this.setState({step: Math.max(currentPosition - MAX_STEPS, 0)})}  style={{position: 'absolute', left: 10, zIndex: 1000}}>
+                   <Icon name='md-arrow-dropleft' size={25} color={bankStyle.linkColor}/>
+                 </TouchableOpacity>
+
+    if (appSubmitted  &&  startingPosition + MAX_STEPS < allSteps) // startingPosition + MAX_STEPS < allSteps)
+      iconRight = <Icon name='md-arrow-dropright' size={25} color={bankStyle.linkColor} style={{position: 'absolute', right: 10, zIndex: 1000}}/>
+
+    return <View style={{marginTop: -15}}>
+             {iconLeft}
+             <StepIndicator
+               customStyles={customStyles}
+               startingPosition={startingPosition}
+               currentPosition={currentPosition}
+               onPress={this.onStepIndicatorPress.bind(this)}
+               numberDone={appSubmitted  &&  allSteps ||  context._formsTypes.length - 1}
+               noActionOnUnfinished={true}
+               stepCount={stepCount} />
+               {iconRight}
+           </View>
+  }
   getActionSheetItems() {
     const { application } = this.props
     const buttons = []
@@ -981,6 +1111,12 @@ class MessageList extends Component {
     })
 
     return buttons
+  }
+  onStepIndicatorPress(step) {
+    const { context, currentContext } = this.state
+    this.setState({step})
+
+    Actions.stepIndicatorPress({context: currentContext || context, step, to: this.props.resource})
   }
   chooseFormForApplication() {
     let application = this.props.application

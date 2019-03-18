@@ -159,9 +159,13 @@ class ApplicationView extends Component {
     let styles = createStyles({ hasRM, isRM, bankStyle })
 
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
-    if (isLoading)
-      return this.showLoading({bankStyle, component: ApplicationView})
-
+    let contentSeparator = getContentSeparator(bankStyle)
+    let loading
+    if (isLoading) {
+      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+        {this.showLoading({bankStyle, component: ApplicationView})}
+      </View>
+    }
     let isAndroid = utils.isAndroid()
     let color = isAndroid ? bankStyle.linkColor : '#ffffff'
     let iconName = 'ios-person-add-outline'
@@ -220,11 +224,11 @@ class ApplicationView extends Component {
                     {assignRM}
                   </View>
                 </View>
-    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
         {network}
+        {loading}
           <ApplicationTabs  lazy={this._lazyId}
                             resource={resource}
                             navigator={navigator}
