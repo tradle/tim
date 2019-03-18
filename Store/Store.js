@@ -221,6 +221,7 @@ const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
+const UNKNOWN_PAYLOAD_AUTHOR = 'UnknownPayloadAuthor'
 
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 const MAX_CUSTOMERS_ON_DEVICE = 3
@@ -1212,19 +1213,86 @@ debug('sent:', r)
         }
 
         await transport.send({ link, message })
+        if (message.object[TYPE] === VERIFICATION) {
+          // Verification was shared successfully. Time to show it
+          await showSharedVerification(message)
+        }
       } catch (err) {
         if (/timetravel/i.test(err.type)) {
           self.abortUnsent({ to: identifier })
           debug('aborting time traveler message', err.stack)
           err = new tradle.errors.WillNotSend('aborted')
         }
-
-        return cb(err)
+        if (err.type !== UNKNOWN_PAYLOAD_AUTHOR)
+          return cb(err)
+        else {
+          if (message.object[TYPE] === VERIFICATION) {
+            // Shared Verification was not accepted
+            await deleteSharedVerification(message)
+          }
+          return cb()
+        }
       }
 
       cb()
     }
+    const showSharedVerification = async (message) => {
+      let { r, context, timeShared } = await getSharedVerification(message)
+      if (!r)
+        return
+      this.trigger({action: 'insertItem', context, resource: r, to: context.to.organization, timeShared})
+    }
+    const deleteSharedVerification = async (message) => {
+      let { r, context } = await getSharedVerification(message, true)
+      if (!r)
+        return
+      let id = utils.getId(r)
+      await db.put(id, r)
+      this._setItem(id, r)
+    }
+    const getSharedVerification = async (message, doDelete) => {
+      let ver = _.clone(message.object)
+      this.rewriteStubs(ver)
+      let doc = this._getItem(ver.document)
+      let contextId = message.context
+      // let from = this._getItem(`${PROFILE}_${ver._author}_${ver._author}`)
+      // let to = this._getItem(`${PROFILE}_${message._recipient}_${message._recipient}`)
+      _.extend(ver,  {
+        from: {id: `${PROFILE}_${ver._author}_${ver._author}`},
+        to: { id: `${PROFILE}_${message._recipient}_${message._recipient}` },
+      })
 
+      let context = await this.getContext(contextId, ver)
+
+      if (!context)
+        context = doc._context
+      if (!context)
+        return {}
+      let result = await this.searchMessages({modelName: VERIFICATION, context, noTrigger: true})
+      let r = _.find(result, (r) => {
+        return r.document.id === ver.document.id
+      })
+      if (!r)
+        return { }
+      let sharedIdx = _.findIndex(r._sharedWith, (r) => {
+        return r.contextId === contextId
+      })
+      if (sharedIdx === -1)
+        return {}
+
+      let toId = utils.getId(context.to.organization)
+      let timeShared = r._sharedWith[sharedIdx].timeShared
+      debugger
+      if (doDelete) {
+        this.deleteMessageFromChat(toId, r, timeShared)
+        let id = utils.getId(r)
+        r._sharedWith.splice(sharedIdx, 1)
+      }
+      else
+        this.addMessagesToChat(toId, r, false, timeShared)
+
+      return { r, context, timeShared }
+    }
     // receive flow:
     // 1. transport
     // 2. multiqueue (persists messages until processed, enforces order of processing)
@@ -3204,20 +3272,21 @@ debug('sent:', r)
     allMessages.push(stub)
   },
   // cleanup
-  deleteMessageFromChat(id, r) {
+  deleteMessageFromChat(id, r, timeShared) {
     let rid = utils.getId(r)
 
     let allMessages = chatMessages[ALL_MESSAGES]
-    let allIdx = allMessages.findIndex(({ id }) => id === rid)
+    let allIdx = allMessages.findIndex((r) => r.id === rid  &&  (!timeShared || r.time === timeShared))
     if (allIdx !== -1)
       allMessages.splice(allIdx, 1)
 
     let messages = chatMessages[id]
-    if (messages) {
-      let idx = messages.findIndex(({ id }) => id === rid)
-      if (idx !== -1)
-        messages.splice(idx, 1)
-    }
+    if (!messages)
+      return
+    let idx = messages.findIndex((r) => r.id === rid  &&  (!timeShared || r.time === timeShared))
+    // let idx = messages.findIndex(({ id }) => id === rid)
+    if (idx !== -1)
+      messages.splice(idx, 1)
   },
   getRepresentatives(org) {
     let rep = this.getRepresentative(org)
@@ -5439,7 +5508,7 @@ if (!res[SIG]  &&  res._message)
 
     if (utils.isSavedItem(resource)) {
       resource._creationTime = resource._time
-      resource._sentTime = new Date().getTime()
+      resource._sentTime = time
       let docId = utils.getId(resource)
       resource.to = to
       this._setItem(docId, resource, batch)
@@ -5456,18 +5525,18 @@ if (!res[SIG]  &&  res._message)
     this.addSharedWith({resource, shareWith: to, time, shareBatchId, formRequest})
     resource._sendStatus = this.isConnected ? SENDING : QUEUED
     let orgId = utils.getId(to.organization)
-    this.addMessagesToChat(orgId, resource, false, time)
+    // this.addMessagesToChat(orgId, resource, false, time)
 
     this.addVisualProps(resource)
     let toOrg = this._getItem(orgId)
-    resource._sentTime = new Date().getTime()
+    resource._sentTime = time
     resource._sendStatus = SENT
     let vId = utils.getId(resource)
     if (!resource._context)
       resource._context = formRequest._context
     this._setItem(vId, resource)
     this.dbBatchPut(vId, resource, batch)
-    this.trigger({action: 'addItem', context: resource.context, resource: resource, to: toOrg})
+    // this.trigger({action: 'addItem', context: resource.context, resource: resource, to: toOrg})
   },
   async shareResource({resource, to, formRequest, shareBatchId}) {
     var time = new Date().getTime()
@@ -10356,8 +10425,16 @@ await fireRefresh(val.from.organization)
           }
         }
       }
-      if (isMyProduct)
+      if (isMyProduct) {
         Actions.hideModal()
+        if (context  &&  me.isEmployee) {
+          if (!context._approved) {
+            context._approved = true
+            let cId = utils.getId(context)
+            this.dbBatchPut(cId, context, batch)
+          }
+        }
+      }
 
       noTrigger = val.from.id === meId
     }
@@ -10643,8 +10720,8 @@ await fireRefresh(val.from.organization)
     }
     else {
       let contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
-      if (contexts  &&  contexts.list)
-        contexts = contexts.list.filter((c) => c.contextId === contextId)
+      if (contexts  &&  contexts.length)
+        contexts = contexts.filter((c) => c.contextId === contextId)
       context = contexts[0]
       context.from = utils.clone(val.from)
     }
