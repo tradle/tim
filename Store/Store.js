@@ -3757,7 +3757,10 @@ debug('sent:', r)
           kres = await this._keeper.get(r[CUR_HASH])
         else {
           let latest = this.findLatestResource(r)
-          kres = await this._keeper.get(latest[CUR_HASH])
+          if (latest)
+            kres = await this._keeper.get(latest[CUR_HASH])
+          else
+            kres = resource
         }
         this.rewriteStubs(kres)
       }
