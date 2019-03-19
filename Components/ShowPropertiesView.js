@@ -1,6 +1,7 @@
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
+import moment from 'moment'
 
 import constants from '@tradle/constants'
 import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
@@ -204,8 +205,11 @@ class ShowPropertiesView extends Component {
         else
           return;
       }
-      else if (pMeta.type === 'date')
-        val = utils.formatDate(val)
+      else if (pMeta.type === 'date') {
+        let valueMoment = moment.utc(val)
+        let date = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
+        val = utils.formatDate(date)
+      }
       else if (pMeta.ref) {
         if (pMeta.ref === PHOTO) {
           if (vCols.length === 1  &&  resource._time)
