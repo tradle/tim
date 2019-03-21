@@ -177,16 +177,21 @@ function createPusher (opts) {
     return node.sign({
       object: body
     })
-    .then(result => {
+    .then(async result => {
       // TODO: encode body with protocol buffers to save space
-      return utils.fetchWithBackoff(`${pushServerURL}/${path}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(result.object)
-      }, 10000)
+      let res
+      do {
+        res = await utils.fetchWithBackoff(`${pushServerURL}/${path}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(result.object)
+        }, 10000)
+      } while (!res.ok)
+
+      return res
     })
   }
 
@@ -340,19 +345,20 @@ function createPusher (opts) {
     if (ENV.isAndroid()) return Push.cancelAllLocalNotifications()
     if (!ENV.isIOS()) return
 
-    Push.getApplicationIconBadgeNumber(num => {
-      if (!num) return
+    Push.setApplicationIconBadgeNumber(0)
+    // Push.getApplicationIconBadgeNumber(num => {
+    //   if (!num) return
 
-      postWithRetry('/clearbadge', {
-        // TODO: add nonce to prevent replays
-        [TYPE]: 'tradle.APNSClearBadge',
-        subscriber: node.permalink
-      })
-      .then(
-        () => Push.setApplicationIconBadgeNumber(0),
-        err => console.error('failed to clear push notifications badge', err)
-      )
-    })
+    //   postWithRetry('/clearbadge', {
+    //     // TODO: add nonce to prevent replays
+    //     [TYPE]: 'tradle.APNSClearBadge',
+    //     subscriber: node.permalink
+    //   })
+    //   .then(
+    //     () => Push.setApplicationIconBadgeNumber(0),
+    //     err => console.error('failed to clear push notifications badge', err)
+    //   )
+    // })
   }
 }
 
