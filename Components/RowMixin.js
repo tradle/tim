@@ -202,7 +202,7 @@ var RowMixin = {
     return utils.isMyMessage({resource, to})
   },
   isShared() {
-    let { resource, to, application } = this.props
+    let { resource, to, application, context } = this.props
     if (application)
       return false
     // Is resource was originally created in this chat or shared from a different chat
@@ -217,7 +217,11 @@ var RowMixin = {
       if (utils.getId(resource.from) === utils.getId(me))
         return false
     }
-    return resource.organization  &&  utils.getId(resource.organization) !== utils.getId(to)
+    if (resource.organization  &&  utils.getId(resource.organization) !== utils.getId(to))
+      return true
+    if (!resource._sharedWith  ||  !context)
+      return false
+    return resource._sharedWith.findIndex(r => r.contextId === context.contextId) > 0
   },
   getSendStatus() {
     let { resource } = this.props
