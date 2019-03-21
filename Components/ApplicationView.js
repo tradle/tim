@@ -165,6 +165,8 @@ class ApplicationView extends Component {
       loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
         {this.showLoading({bankStyle, component: ApplicationView})}
       </View>
+      if (!resource[TYPE])
+        return loading
     }
     let isAndroid = utils.isAndroid()
     let color = isAndroid ? bankStyle.linkColor : '#ffffff'

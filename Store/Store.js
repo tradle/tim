@@ -211,6 +211,7 @@ const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
+const REQUEST_ERROR       = 'tradle.RequestError'
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
 const UNKNOWN_PAYLOAD_AUTHOR = 'UnknownPayloadAuthor'
@@ -3028,8 +3029,10 @@ debug('sent:', r)
         let isApproval = rr[TYPE] === APPLICATION_APPROVAL
         if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
           self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
-        if (isApproval)
+        if (isApproval) {
           Actions.showModal({title: translate('inProcess'), showIndicator: true})
+          setTimeout(() => Actions.hideModal(), 15000)
+        }
 
         self.addMessagesToChat(utils.getId(toOrg), rr)
       }
@@ -3834,7 +3837,7 @@ if (!res[SIG]  &&  res._message)
   },
   async onGetItemFromServer(params) {
     var {resource, action, noTrigger, backlink, forwardlink, application} = params
-    let isApplication = resource[TYPE] === APPLICATION
+    let isApplication = utils.getType(resource) === APPLICATION
     let rId = utils.getId(resource)
     let r
     if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink)) {
@@ -6723,6 +6726,8 @@ if (!res[SIG]  &&  res._message)
       application.editRequests = []
     if (application.products)
       application.products = []
+    if (application.requestErrors)
+      application.requestErrors = []
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
       let type = m.subClassOf || m.id
@@ -6747,6 +6752,12 @@ if (!res[SIG]  &&  res._message)
           application.editRequests = []
         application.editRequests.push(stub)
         application._editRequestsCount = application.editRequests.length
+        break
+      case REQUEST_ERROR:
+        if (!application.requestErrors)
+          application.requestErrors = []
+        application.requestErrors.push(stub)
+        application._requestErrorsCount = application.requestErrors.length
         break
       case MY_PRODUCT:
         if (!application.products)
@@ -7000,7 +7011,6 @@ if (!res[SIG]  &&  res._message)
     let lastIdx
     if (lastId)
       lastIdx = _.findIndex(enumList, (item) => utils.getId(item) === lastId) + 1
-
     else
       lastIdx = 0
     let ret = []
@@ -9995,6 +10005,12 @@ if (!res[SIG]  &&  res._message)
     }
 
     await db.batch(batch)
+
+    if (model.id === REQUEST_ERROR) {
+      Actions.hideModal()
+      Alert.alert(val.message)
+    }
+
     let triggerForModel
     if (isConfirmation  &&  isMyMessage) {
       var fOrg = from.organization
@@ -10044,11 +10060,11 @@ if (!res[SIG]  &&  res._message)
             }
           }
           if (val[TYPE] === PRODUCT_REQUEST)  {
-            if (!this.getModel([val.requestFor]))
+            if (!this.getModel(val.requestFor))
               triggerForModel = val.requestFor
           }
           else if (val[TYPE] === FORM_REQUEST) {
-            if (!this.getModel([val.form]))
+            if (!this.getModel(val.form))
               triggerForModel = val.product
           }
           else if (!this.getModel(val[TYPE]))
@@ -11575,6 +11591,12 @@ await fireRefresh(val.from.organization)
         get component() {
           return require('../utils/regula')
         },
+      },
+      {
+        path: `ZoomSDK.token.${Platform.OS}`,
+      },
+      {
+        path: `ZoomSDK.facemapEncryptionKey.${Platform.OS}`,
       },
     ]
 
