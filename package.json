@@ -27,7 +27,7 @@
     "precommit": "npm run lint",
     "prepush": "npm run lint",
     "update:models": "npm i -S tradle/models tradle/custom-models tradle/models-corporate-onboarding tradle/models-nz tradle/models-onfido tradle/models-products-bot && ./reshrink.sh",
-    "translate:strings": "node ./scripts/translateStrings -d ./utils
+    "translate:strings": "node ./scripts/translateStrings -d ./utils",
     "translate:xmlstrings": "node ./scripts/translateStrings -d ./android/app/src/main/res/values -l vi,bn,fil,es,fr,nl,ru,km -f",
     "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android",
     "nibble": "eslint-nibble Components/ Store/ utils/ index.common.js"
