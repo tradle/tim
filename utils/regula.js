@@ -131,11 +131,13 @@ const normalizeResult = async result => {
   // not necessary as long as imageStore changes are merged on the native side
   const imageFront = await importFromImageStore(result.imageFront)
   const imageBack = result.imageBack && await importFromImageStore(result.imageBack)
+  const imageFace = result.imageFace && await importFromImageStore(result.imageFace)
+  const imageSignature = result.imageSig && await importFromImageStore(result.imageSig)
 
   const results = result.jsonResult.map(normalizeJSON)
   const json = processListVerifiedFields(results)
   // see dummy response in data/sample-regula-result.json
-  return { json, results, imageFront, imageBack }
+  return { json, results, imageFront, imageBack, imageFace, imageSignature }
 }
 
 const processListVerifiedFields = results => {
@@ -171,3 +173,4 @@ const processListVerifiedFields = results => {
   })
   return json
 }
+
