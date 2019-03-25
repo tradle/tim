@@ -3,6 +3,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [Tradle App](#tradle-app)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
     - [iOS](#ios)
@@ -21,13 +22,14 @@
         - [iOS](#ios-1)
         - [Android](#android)
 - [Troubleshooting](#troubleshooting)
-  - [Troubleshooting iOS builds](#troubleshooting-ios-builds)
-  - [Troubleshooting android builds](#troubleshooting-android-builds)
-- [Localization](#localization) 
+  - [Pods](#pods)
+  - [iOS builds](#ios-builds)
+  - [Android dev](#android-dev)
+- [Localization](#localization)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-*tim = Trust in Motion*
+_tim = Trust in Motion_
 
 Welcome to the main repo for the Tradle app! On mobile we use React Native (RN), and on web React Native Web (RNW). The web app currently lives on the `web` branch.
 
@@ -126,9 +128,10 @@ npm run loadsecrets
 
 ### Mobile
 
-There are several release lifecycles, broadly: 
+There are several release lifecycles, broadly:
+
 - publishing to the app store. This is required any time there's a change to any native component (Obj-C / Java).
-- pushing a new JS bundle via [React Native Code Push](https://github.com/Microsoft/react-native-code-push) 
+- pushing a new JS bundle via [React Native Code Push](https://github.com/Microsoft/react-native-code-push)
 
 The Apple App Store takes a while to approve releases, and even the Google Play Store can take an hour to publish your latest release. And after publishing, you still need to get your users to install the latest version.
 
@@ -139,6 +142,7 @@ To build and publish releases for iOS and Android, we use [fastlane](https://git
 To see what fastlane actions are available, `cd` to the `iOS/` or `android/` dirs and run `fastlane`
 
 Potential improvements:
+
 - https://blog.bam.tech/developper-news/deploy-your-react-native-app-to-the-app-store-with-the-push-of-a-button
 
 #### Version and tag
@@ -161,9 +165,9 @@ fastlane inc_major
 ```sh
 # in iOS/ or android/
 # dry run
-fastlane codepush dry_run:true 
+fastlane codepush dry_run:true
 # actually build and push
-fastlane codepush 
+fastlane codepush
 # promote from Staging to Release
 fastlane codepush_promote_to_release
 ```
@@ -172,7 +176,7 @@ fastlane codepush_promote_to_release
 
 So you changed something on the native side? Or maybe you want to spare users the extra refresh? Let's do it.
 
-*Note: the approaches for iOS and Android a little different. It would be good to unify them*
+_Note: the approaches for iOS and Android a little different. It would be good to unify them_
 
 ##### iOS
 
@@ -293,6 +297,18 @@ SDK_DIR=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Dev
 ```
 ## Troubleshooting iOS builds
 
+## Pods
+
+Make sure you have `cocoapods` 1.5.3 installed, for some reason 1.6.1 doesn't generate `iOS/Pods/Headers/Public`
+
+To make sure:
+
+```sh
+sudo gem uninstall cocoapods
+# choose to uninstall all versions
+sudo gem install cocoapods -v 1.5.3
+```
+
 ## iOS builds
 
 - if you're building Staging and see an error during archive that mentions Pods, try running: `./scripts/fix-staging.js` and then trying again
@@ -317,11 +333,11 @@ and run `fastlane release`  or  `fastlane release_staging` again.
 
 **Symptom**: red screen of death: 'Unable to load script from assets main.jsbundle...' or 'Could not connect to development server'  
 **Causes**: your Android device is not connected, or can't reach your React Native packager's local http server  
-**Fix**: Check your device is connected: `adb devices`. Once you see it there, run `adb reverse tcp:8081 tcp:8081` and then refresh on your device  
+**Fix**: Check your device is connected: `adb devices`. Once you see it there, run `adb reverse tcp:8081 tcp:8081` and then refresh on your device
 
-**Symptom**: red screen of death: Unexpected character '*'  
+**Symptom**: red screen of death: Unexpected character '\*'  
 **Cause**: iOS and Android (in dev mode) need different .babelrc settings  
-**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change  
+**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change
 
 **Symptom**: **adb devices** command returns empty list when the device is USB connected.
 **Fix**: Make sure your device is not connected as a media device. On your Android phone got Settings -> Developer options -> Networking -> Select USB Configuration
