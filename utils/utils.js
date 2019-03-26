@@ -2490,7 +2490,7 @@ var utils = {
       let keys = r.split('_')
       return keys.length &&  keys[1] || null
     }
-    return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
+    return r[ROOT_HASH] && r[ROOT_HASH] || (r.id  &&  r.id.split('_')[1])
   },
   getMessageWidth(component) {
     let width = component ? utils.dimensions(component).width : utils.dimensions().width
