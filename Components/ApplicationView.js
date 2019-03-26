@@ -110,7 +110,8 @@ class ApplicationView extends Component {
   handleEvent(params) {
     let {resource, action, backlink, application} = params
 
-    if (resource  &&  resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+    const hash = utils.getRootHash(this.props.resource)
+    if (resource  &&  utils.getRootHash(resource) !== hash)
       return
 
     switch (action) {
@@ -136,7 +137,7 @@ class ApplicationView extends Component {
         this.setState({showDetails: true, backlink: null})
       break
     case 'assignRM_Confirmed':
-      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
+      if (utils.getRootHash(application) === hash) {
         Actions.hideModal()
         this.setState({resource: application, isLoading: false})
       }

@@ -1016,6 +1016,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                   &&
           !mm.inlined                       &&
+          !mm.abstract                      &&
            mm.id !== MESSAGE                &&
            mm.id !== APPLICATION_SUBMISSION &&
           !utils.isEnum(mm)                 &&
@@ -1139,6 +1140,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       selectModel={this.selectModel.bind(this)}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
+      bankStyle={bankStyle}
       chosen={this.state.chosen} />
     );
   }

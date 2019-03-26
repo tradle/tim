@@ -10547,13 +10547,21 @@ await fireRefresh(val.from.organization)
     }
     if (!isReadOnly) {
       if (type === MY_EMPLOYEE_PASS) {
+        let doInit = true
         if (utils.isAgent())
           await setupAgent()
-        else
-          await setupEmployee()
-        this.client = graphQL.initClient(meDriver, me.organization.url)
-        if (utils.isAgent())
-           me.entity = await this._getItemFromServer(me.entity.id)
+        else {
+          // Employee could approve other employee onboarding applications
+          if (!me.isEmployee)
+            await setupEmployee()
+          else
+            doInit = false
+        }
+        if (doInit) {
+          this.client = graphQL.initClient(meDriver, me.organization.url)
+          if (utils.isAgent())
+             me.entity = await this._getItemFromServer(me.entity.id)
+        }
       }
       else if (type === MY_AGENT_PASS) {
         await setupAgent()

@@ -2591,7 +2591,7 @@ var utils = {
       let keys = r.split('_')
       return keys.length &&  keys[1] || null
     }
-    return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
+    return r[ROOT_HASH] && r[ROOT_HASH] || (r.id  &&  r.id.split('_')[1])
   },
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
