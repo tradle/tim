@@ -394,14 +394,28 @@ class RefPropertyEditor extends Component {
         url: result.imageFront,
       }
     }
+    const rtype = utils.getType(resource)
+    const props = utils.getModel(rtype).properties
+    const { otherSideScan, face, signature } = props
     if (result.imageBack) {
       // HACK
-      if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
+      if (utils.getModel(otherSideScan)) {
         r.otherSideScan = {
           url: result.imageBack,
         }
       }
     }
+    if (result.imageFace  &&  face  &&  face.ref === PHOTO) {
+      r.face = {
+        url: result.imageFace
+      }
+    }
+    if (result.imageSignature  &&  signature  &&  signature.ref === PHOTO) {
+      r.signature = {
+        url: result.signature
+      }
+    }
+
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
       r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')

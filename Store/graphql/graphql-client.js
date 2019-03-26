@@ -842,7 +842,10 @@ var search = {
         if (idx !== 0)
           return
         idx = msg.indexOf('\"', len)
-        excludeProps.push(msg.substring(len, idx))
+        let field = msg.substring(len, idx)
+        // check if this is the table itself that is not recognized
+        if (!field.indexOf(`_${model.id.replace('.', '_')}`) === -1)
+          excludeProps.push(field)
       })
 
       if (excludeProps.length)

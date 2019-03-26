@@ -100,21 +100,22 @@ class ResourceRow extends Component {
   }
   onRowUpdate(params) {
     let { action, application, online, resource } = params
+    let hash = resource  &&  utils.getRootHash(resource)
+    let thisHash = utils.getRootHash(this.props.resource)
     switch (action) {
     case 'onlineStatus':
-      if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
+      if (hash === thisHash)
         this.setState({serverOffline: !online, resource})
       break
     case 'connectivity':
       this.setState({isConnected: params.isConnected})
       break
     case 'assignRM_Confirmed':
-      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH])
+      if (utils.getRootHash(application) === thisHash)
         this.setState({application: application, resource: application})
       break
     case 'updateRow':
-      let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
-      if (hash === this.props.resource[ROOT_HASH]) {
+      if (hash === thisHash) {
         if (params.forceUpdate)
           this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
         else
@@ -580,12 +581,12 @@ class ResourceRow extends Component {
     ];
   }
   applicationRow(resource, style) {
-    let model = utils.getModel(resource[TYPE] || resource.id);
-    let m = utils.getModel(resource.requestFor)
+    const model = utils.getModel(resource[TYPE] || resource.id);
+    const m = utils.getModel(resource.requestFor)
     // if (!m)
     //   return <View/>
 
-    let props = model.properties
+    const props = model.properties
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
     let dateCompleted, dateEvaluated, dateStarted
     if (resource.dateStarted) {
@@ -617,11 +618,12 @@ class ResourceRow extends Component {
     //             </View>
     // }
     // if (status !== 'Approved'  &&  status !== 'Denied') {
-    let aTitle = resource.applicantName || resource.applicant.title
-    let applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
+    const aTitle = resource.applicantName || resource.applicant.title
+    const applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
     let icolor
     let iname
-    let hasRM = resource.relationshipManagers
+    const hasRM = resource.relationshipManagers
+    const { bankStyle } = this.props.bankStyle
     if (utils.isRM(resource)) {
       // iname = 'md-log-out'
       iname = 'ios-person-add'
@@ -638,9 +640,28 @@ class ResourceRow extends Component {
       icolor = hasRM ? '#CA9DF2' : '#7AAAc3'
     }
     let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
+    let icon0
+    switch (resource.status) {
+      case 'approved':
+        icon0 = <Icon name='ios-done-all' size={30} color={bankStyle  &&  bankStyle.confirmationColor || '#02A5A5'}/>
+        break
+      case 'denied':
+        icon0 = <Icon name='ios-close' size={25} color='red'/>
+        break
+      case 'started':
+        icon0 = <Icon name='ios-code-working' size={25} color={bankStyle  &&  bankStyle.linkColor || '#7AAAC3'}/>
+        break
+      case 'completed':
+        icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
+        break
+    }
 
+    let icons = <View style={{flexDirection: 'row'}}>
+            {icon0}
+            {icon}
+          </View>
     let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center', marginTop: aTitle && -15 || 0}}>
-                   {icon}
+                   {icons}
                  </View>
     let formsCount, progressBar
     // let formTypes = []
@@ -676,8 +697,6 @@ class ResourceRow extends Component {
     //           </View>
     // }
 
-    if (!m)
-      m = utils.getModel(resource.requestFor)
     let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
 
     return  <View>

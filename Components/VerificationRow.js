@@ -346,8 +346,8 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    let verifiedByAndDateStyle = {marginTop: -3, flexDirection: 'row', justifyContent: 'flex-end'}
-    let header =  <View style={styles.header} key={this.getNextKey()}>
+    let isInactive = isCheck  &&  resource.isInactive
+    let header =  <View style={[styles.header, isInactive && styles.greyedContentBg || styles.contentBg]} key={this.getNextKey()}>
                     <View style={styles.row}>
                       {photo}
                       <View style={styles.noImageBlock}>
@@ -361,7 +361,7 @@ class VerificationRow extends Component {
                           {multiChooserIcon}
                         </View>
                         {sharedFrom}
-                        <View style={verifiedByAndDateStyle}>
+                        <View style={styles.verifiedByAndDateStyle}>
                           {verifiedBy}
                           {date}
                         </View>
@@ -380,14 +380,19 @@ class VerificationRow extends Component {
       let renderedRows = []
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
-      let content = <TouchableOpacity onPress={onSelect.bind(this)}>
-                      {header}
-                    </TouchableOpacity>
-      if (!isVerification)
+
+      let content
+      if (isInactive)
+        content = header
+      else
+       content = <TouchableOpacity onPress={onSelect.bind(this)}>
+                   {header}
+                 </TouchableOpacity>
+       if (!isVerification)
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                     {content}
                   </Swipeout>
-      row = <View style={styles.contentBg} host={lazy}>
+      row = <View host={lazy}>
               {content}
             </View>
     }
@@ -799,6 +804,9 @@ var styles = StyleSheet.create({
   contentBg: {
     backgroundColor: '#fff'
   },
+  greyedContentBg: {
+    opacity: 0.7
+  },
   titleView: {
     flexDirection: 'row'
   },
@@ -808,6 +816,11 @@ var styles = StyleSheet.create({
     opacity: 0.9,
     shadowRadius: 5,
     shadowColor: '#afafaf',
+  },
+  verifiedByAndDateStyle: {
+    marginTop: -3,
+    flexDirection: 'row',
+    justifyContent: 'flex-end'
   },
 });
 

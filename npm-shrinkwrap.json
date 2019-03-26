@@ -877,7 +877,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#eacfe07026d7de316692eea7397cb101b4b6f817"
+      "resolved": "git://github.com/tradle/models.git#f349a122286c9caca0f952c864194a5af63a94ad"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -6709,7 +6709,7 @@
     "react-native-regula-document-reader": {
       "version": "1.0.0",
       "from": "tradle/react-native-regula-document-reader",
-      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e56b6f4d3de4606cfb042725556816a9058e3bc7"
+      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#9c3a89039f1232cd40c0d54139d5c8150b8eb01d"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
