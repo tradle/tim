@@ -1,5 +1,4 @@
 <resources>
-    <string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey"></string>
     <string name="app_name">Tradle</string>
     <string name="branch_app_link">link.tradle.io</string>
     <string name="branch_path_prefix">/HvsP</string>
