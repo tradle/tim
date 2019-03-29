@@ -192,7 +192,7 @@ class VerificationMessageRow extends Component {
             <View style={styles.messageBody}>
               <View style={viewStyle}>
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage || isShared ? styles.headerRight : styles.headerLeft]}>
+                  <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: StyleSheet.hairlineWidth, margin: 2, borderColor: bankStyle.verifiedBorderColor}, isMyMessage || isShared ? styles.headerRight : styles.headerLeft]}>
                     <View style={[styles.image, addStyle]}>
                       {renderedRow}
                     </View>
