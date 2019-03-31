@@ -2355,13 +2355,13 @@ debug('sent:', r)
     }
     if (env.dbID)
       return
-    let dbID
-    if (SERVICE_PROVIDERS.length > 1)
-      dbID = 'Full'
-    else {
-      let newSp = SERVICE_PROVIDERS[0]
-      dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
-    }
+    let dbID = 'Full'
+    // if (SERVICE_PROVIDERS.length > 1)
+      // dbID = 'Full'
+    // else {
+    //   let newSp = SERVICE_PROVIDERS[0]
+    //   dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
+    // }
 
     // // Check is DB was already prepared
     const reg = require('../utils/regula')
