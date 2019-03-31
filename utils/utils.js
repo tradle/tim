@@ -2025,7 +2025,7 @@ var utils = {
     var mainPhoto, photos
     let props = model.properties
     for (let p in resource) {
-      if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
+      if (!props[p] ||  props[p].hidden || (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
         continue
       if (props[p].mainPhoto) {
         mainPhoto = resource[p]
