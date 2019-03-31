@@ -346,8 +346,9 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    let isInactive = isCheck  &&  resource.isInactive
-    let header =  <View style={[styles.header, isInactive && styles.greyedContentBg || styles.contentBg]} key={this.getNextKey()}>
+    // let isInactive = isCheck  &&  resource.isInactive
+    // let header =  <View style={[styles.header, isInactive && styles.greyedContentBg || styles.contentBg]} key={this.getNextKey()}>
+    let header =  <View style={[styles.header, styles.contentBg]} key={this.getNextKey()}>
                     <View style={styles.row}>
                       {photo}
                       <View style={styles.noImageBlock}>
@@ -381,14 +382,14 @@ class VerificationRow extends Component {
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
 
-      let content
-      if (isInactive)
-        content = header
-      else
-       content = <TouchableOpacity onPress={onSelect.bind(this)}>
+      // let content
+      // if (isInactive)
+      //   content = header
+      // else
+      let content = <TouchableOpacity onPress={onSelect.bind(this)}>
                    {header}
                  </TouchableOpacity>
-       if (!isVerification)
+      if (!isVerification)
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                     {content}
                   </Swipeout>
