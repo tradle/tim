@@ -6579,7 +6579,7 @@
     "react-native-facetec-zoom": {
       "version": "1.1.0",
       "from": "tradle/react-native-facetec-zoom",
-      "resolved": "git://github.com/tradle/react-native-facetec-zoom.git#1e6cf412879d8cf87df8c22822db44fb6f3514b7"
+      "resolved": "git://github.com/tradle/react-native-facetec-zoom.git#aecd2d6940d4cf45abb7069b14c8474988cb5538"
     },
     "react-native-flexbox-grid": {
       "version": "0.3.2",
