@@ -1,20 +1,12 @@
 import React, { Component } from 'react'
-import {
-  Alert,
-  AppRegistry,
-  StyleSheet,
-  View,
-  ScrollView,
-  Text,
-  Dimensions,
-} from 'react-native'
+import { Alert, AppRegistry, StyleSheet, View, ScrollView, Text, Dimensions } from 'react-native'
 
 import SplashScreen from 'react-native-splash-screen'
 if (SplashScreen && SplashScreen.hide) {
   SplashScreen.hide()
 }
 
-import { scan, Scenario } from '../../utils/regula'
+import { scan, Scenario, prepareDatabase } from '../../utils/regula'
 import Image from '../../Components/Image'
 import dummyResult from '../../data/sample-regula-result.json'
 
@@ -29,16 +21,17 @@ class App extends Component {
     let scanOpts = {
       processParams: {
         scenario: Scenario.fullProcess,
-        multipageProcessing: true
+        multipageProcessing: true,
       },
       functionality: {
-        showCaptureButton: true
-      }
+        showCaptureButton: true,
+      },
     }
 
     // if (bothSides)
     //   scanOpts.processParams.multipageProcessing = true
 
+    await prepareDatabase('Full')
     const result = await scan(scanOpts)
     this.setState(result)
   }
@@ -46,7 +39,7 @@ class App extends Component {
   render() {
     let { results, imageFront, imageBack, json } = this.state
     if (!results) {
-      return <View/>
+      return <View />
     }
     if (imageFront.startsWith('/')) {
       // data uri
@@ -54,11 +47,11 @@ class App extends Component {
     }
     if (imageBack) {
       imageBack = 'data:image/jpeg;base64,' + imageBack
-      imageBack = <Image source={{uri:imageBack}} style={styles.image} />
+      imageBack = <Image source={{ uri: imageBack }} style={styles.image} />
     }
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Image source={{uri:imageFront}} style={styles.image} />
+        <Image source={{ uri: imageFront }} style={styles.image} />
         {imageBack}
         <Text>{JSON.stringify(json, null, 2)}</Text>
       </ScrollView>
