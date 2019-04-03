@@ -190,62 +190,39 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
   let isOther = documentType.id.indexOf('_other') !== -1
   let isID = !isLicence  &&  documentType.title.indexOf('ID') !== -1
   // if (!scan) {
-    if (isLicence) {
-      requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
-      if (countryId === 'NZ')
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
-      else
-        requestedProperties.push({name: 'issuer'})
-      requestedProperties.splice(1, 0, {name: 'country'})
+  if (isLicence) {
+    switch (countryId) {
+      case 'NZ':
+        requestedProperties = [{name: 'otherSideScan'}, {name: 'country'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
+        break
+      case 'PH':
+        requestedProperties = [{name: 'otherSideScan'}, {name: 'country'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'documentNumber'}, {name: 'dateOfExpiry'}]
+        break
+      default:
+        requestedProperties = [{name: 'otherSideScan'}, {name: 'country'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'issuer'}]
     }
-    else {
-      if (isID) {
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
-        if (form.middleName)
-          requestedProperties.splice(2, 0, {name: 'middleName'})
-        requestedProperties.splice(1, 0, {name: 'country'})
-      }
-      else {
-        if (isOther)
-          requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
-        else
-          requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
-        requestedProperties.splice(0, 0, {name: 'country'})
-      }
-    }
-    return requestedProperties
-  // }
-  // let props = model.properties
-
-  // if (isID  ||  isLicence)
-  //   requestedProperties.push({name: 'otherSideScan'})
-  // for (let p in scan) {
-  //   let val = scan[p]
-  //   if (typeof val === 'object')
-  //     getRequestedProps({scan: val, model, requestedProperties, form})
-  //   else if (props[p])
-  //     requestedProperties.push({name: p})
-  // }
-  // if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
-  //   requestedProperties.push({name: 'dateOfIssue'})
-  // if (!requestedProperties.find(p => p.name === 'dateOfBirth')) {
-  //   if (form.dateOfBirth) {
-  //     requestedProperties.push({name: 'dateOfBirth'})
-  //   }
-  // }
-  // if (!isID) {
-  //   if (!requestedProperties.find(p => p.name === 'dateOfIssue')) {
-  //     if (!form.dateOfIssue) {
-  //       requestedProperties.push({name: 'dateOfIssue'})
-  //     }
-  //   }
-  //   if (!requestedProperties.find(p => p.name === 'dateOfExpiry')) {
-  //     if (!form.dateOfExpiry) {
-  //       requestedProperties.push({name: 'dateOfExpiry'})
-  //     }
-  //   }
-  // }
-  // return requestedProperties
+    // if (countryId === 'NZ')
+    //   requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
+    // else if (countryId === 'PH')
+    //   requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'documentNumber'}, {name: 'dateOfExpiry'}, {name: 'documentVersion'}]
+    // else
+    //   requestedProperties.push({name: 'issuer'})
+    // requestedProperties.splice(1, 0, {name: 'country'})
+  }
+  else if (isID) {
+    requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+    if (form.middleName)
+      requestedProperties.splice(2, 0, {name: 'middleName'})
+    requestedProperties.splice(1, 0, {name: 'country'})
+  }
+  else {
+    if (isOther)
+      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+    else
+      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+    requestedProperties.splice(0, 0, {name: 'country'})
+  }
+  return requestedProperties
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
