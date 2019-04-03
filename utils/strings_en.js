@@ -350,4 +350,6 @@ module.exports = {
     "debugLogSent": "Debug Log Sent",
     "logSentToDevTeam": "The log was sent to the Tradle developer team",
     "failedToSendLog": "Failed to send log",
+    "appStoreShortDescription": "Track the data you share, get financial products faster by sharing verified data",
+    "appStoreLongDescription": "The Tradle app is your secure line to your service providers. It lets you manage your personal data, automatically update your service providers when your situation or documentation changes, and onboard quickly for new products by sharing verified data. Its chat-like interface lets you get customer service and make purchases in one flow. And never again wonder what information you've given your service providers, or be asked to give your name/address/SSN/phone number every time you call.",
 }
