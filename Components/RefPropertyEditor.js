@@ -379,7 +379,7 @@ class RefPropertyEditor extends Component {
       else if (rDocumentType === 'D')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
       if (documentType.id !== resource.documentType.id) {
-        Alert.alert(translate('wrongDocumentTypePleaseTryAgain'))
+        Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
         return
       }
     }
