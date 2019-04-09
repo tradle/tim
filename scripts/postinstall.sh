@@ -13,12 +13,12 @@ npm run loadsecrets
 
 # https://github.com/facebook/react-native/issues/16106#issuecomment-437573973
 cd node_modules/react-native ; ./scripts/ios-install-third-party.sh ; cd ../../
-cd node_modules/react-native/third-party/glog-0.3.4/ ; sh ../../scripts/ios-configure-glog.sh ; cd ../../../../
+cd node_modules/react-native/third-party/glog-0.3.5/ ; sh ../../scripts/ios-configure-glog.sh ; cd ../../../../
 
 npm run fixasyncstorage
 node ./scripts/rm-unused-components.js
 node ./scripts/fix-node_modules.js
-npm run dedupe-deps
+# npm run dedupe-deps
 # node ./scripts/dedupe-deps.js
 npm run clean:node_modules
 

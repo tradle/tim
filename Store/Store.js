@@ -3,11 +3,12 @@ import path from 'path'
 import { parse as parseURL } from 'url'
 import {
   Alert,
-  NetInfo,
+  // NetInfo,
   Platform,
   InteractionManager
 } from 'react-native'
 import _ from 'lodash'
+import NetInfo from '@react-native-community/netinfo'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 

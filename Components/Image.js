@@ -6,8 +6,8 @@ import {
 } from 'react-native'
 
 import PropTypes from 'prop-types'
-import ImageStylePropTypes from 'ImageStylePropTypes'
-import ViewStylePropTypes from 'ViewStylePropTypes'
+import ImageStylePropTypes from 'DeprecatedImageStylePropTypes'
+import ViewStylePropTypes from 'DeprecatedViewStylePropTypes'
 import pick from 'lodash/pick'
 
 import Embed from '@tradle/embed'
