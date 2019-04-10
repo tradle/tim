@@ -42,7 +42,7 @@ import { calcLinks, omitVirtual } from '@tradle/build-resource'
 import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
-import AsyncStorage from '../Store/Storage'
+import AsyncStorage from './async-storage'
 // import Store from '../Store/Store'
 import ENV from './env'
 

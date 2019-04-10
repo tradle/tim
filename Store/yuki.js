@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native'
+import AsyncStorage from '../utils/async-storage'
 // import { utils } from '@tradle/engine'
 import ENV from '../utils/env'
 import { generateIdentity } from '../utils/identity'

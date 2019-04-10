@@ -13,7 +13,7 @@ const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
 import Analytics from '../utils/analytics'
-import AsyncStorage from './Storage'
+import AsyncStorage from '../utils/async-storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createSemaphore from 'psem'

@@ -267,6 +267,8 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':@react-native-community_viewpager')
+    implementation project(':@react-native-community_netinfo')
     implementation project(':react-native-facetec-zoom')
     implementation project(':react-native-image-store')
     implementation project(':react-native-tradle-keeper')

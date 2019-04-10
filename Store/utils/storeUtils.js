@@ -12,7 +12,7 @@ import {
 import { protocol } from '@tradle/engine'
 var constants = require('@tradle/constants');
 
-import AsyncStorage from '../Storage'
+import AsyncStorage from '../../utils/async-storage'
 import voc from '../voc'
 import { makeLabel, isEnum, getModel, isForm } from '../../utils/utils'
 

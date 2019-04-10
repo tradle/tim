@@ -1,8 +1,9 @@
-import { AsyncStorage, Alert } from 'react-native'
+import { Alert } from 'react-native'
 import Debug from 'debug'
 import { runWithTimeout } from '@tradle/promise-utils'
 import utils from './utils'
 import Actions from '../Actions/Actions'
+import AsyncStorage from './async-storage'
 
 const debug = Debug('tradle:auto-update')
 let CodePush = !__DEV__ && require('react-native-code-push')

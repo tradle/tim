@@ -800,6 +800,16 @@
         }
       }
     },
+    "@react-native-community/netinfo": {
+      "version": "2.0.0",
+      "from": "@react-native-community/netinfo@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-2.0.0.tgz"
+    },
+    "@react-native-community/viewpager": {
+      "version": "1.1.5",
+      "from": "@react-native-community/viewpager@latest",
+      "resolved": "https://registry.npmjs.org/@react-native-community/viewpager/-/viewpager-1.1.5.tgz"
+    },
     "@tradle/aws-client": {
       "version": "3.1.1",
       "from": "@tradle/aws-client@>=3.1.1 <4.0.0",
@@ -1778,24 +1788,6 @@
       "resolved": "https://registry.npmjs.org/babel-eslint/-/babel-eslint-7.1.1.tgz",
       "dev": true
     },
-    "babel-helper-function-name": {
-      "version": "6.24.1",
-      "from": "babel-helper-function-name@>=6.24.1 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.24.1.tgz",
-      "dev": true
-    },
-    "babel-helper-get-function-arity": {
-      "version": "6.24.1",
-      "from": "babel-helper-get-function-arity@>=6.24.1 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-helper-get-function-arity/-/babel-helper-get-function-arity-6.24.1.tgz",
-      "dev": true
-    },
-    "babel-helper-remap-async-to-generator": {
-      "version": "6.24.1",
-      "from": "babel-helper-remap-async-to-generator@>=6.24.1 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-helper-remap-async-to-generator/-/babel-helper-remap-async-to-generator-6.24.1.tgz",
-      "dev": true
-    },
     "babel-jest": {
       "version": "24.7.1",
       "from": "babel-jest@>=24.4.0 <25.0.0",
@@ -1864,12 +1856,6 @@
       "resolved": "https://registry.npmjs.org/babel-plugin-lodash/-/babel-plugin-lodash-3.3.4.tgz",
       "dev": true
     },
-    "babel-plugin-syntax-async-functions": {
-      "version": "6.13.0",
-      "from": "babel-plugin-syntax-async-functions@>=6.8.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-syntax-async-functions/-/babel-plugin-syntax-async-functions-6.13.0.tgz",
-      "dev": true
-    },
     "babel-plugin-syntax-object-rest-spread": {
       "version": "6.13.0",
       "from": "babel-plugin-syntax-object-rest-spread@>=6.8.0 <7.0.0",
@@ -1880,18 +1866,6 @@
       "version": "7.0.0-beta.0",
       "from": "babel-plugin-syntax-trailing-function-commas@>=7.0.0-beta.0 <8.0.0",
       "resolved": "http://registry.npmjs.org/babel-plugin-syntax-trailing-function-commas/-/babel-plugin-syntax-trailing-function-commas-7.0.0-beta.0.tgz"
-    },
-    "babel-plugin-transform-async-functions": {
-      "version": "6.22.0",
-      "from": "babel-plugin-transform-async-functions@>=6.3.13 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-transform-async-functions/-/babel-plugin-transform-async-functions-6.22.0.tgz",
-      "dev": true
-    },
-    "babel-plugin-transform-async-to-module-method": {
-      "version": "6.24.1",
-      "from": "babel-plugin-transform-async-to-module-method@>=6.24.1 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-transform-async-to-module-method/-/babel-plugin-transform-async-to-module-method-6.24.1.tgz",
-      "dev": true
     },
     "babel-plugin-transform-inline-imports-commonjs": {
       "version": "1.2.0",
@@ -1940,12 +1914,6 @@
       "version": "6.26.0",
       "from": "babel-runtime@>=6.26.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.26.0.tgz",
-      "dev": true
-    },
-    "babel-template": {
-      "version": "6.26.0",
-      "from": "babel-template@>=6.24.1 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-template/-/babel-template-6.26.0.tgz",
       "dev": true
     },
     "babel-traverse": {
@@ -2781,7 +2749,19 @@
     "create-react-class": {
       "version": "15.6.3",
       "from": "create-react-class@>=15.6.3 <16.0.0",
-      "resolved": "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.3.tgz"
+      "resolved": "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.3.tgz",
+      "dependencies": {
+        "core-js": {
+          "version": "1.2.7",
+          "from": "core-js@>=1.0.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz"
+        },
+        "fbjs": {
+          "version": "0.8.17",
+          "from": "fbjs@^0.8.9",
+          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
+        }
+      }
     },
     "cross-fetch": {
       "version": "2.2.2",
@@ -5490,26 +5470,14 @@
       "from": "merkle-proofs@1.0.3",
       "resolved": "https://registry.npmjs.org/merkle-proofs/-/merkle-proofs-1.0.3.tgz",
       "dependencies": {
+        "merkle-tree-stream": {
+          "version": "3.0.3",
+          "from": "mvayngrib/merkle-tree-stream#finalize",
+          "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
-        },
-        "string_decoder": {
-          "version": "1.1.1",
-          "from": "string_decoder@>=1.1.1 <1.2.0",
-          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz"
-        }
-      }
-    },
-    "merkle-tree-stream": {
-      "version": "3.0.3",
-      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-      "dependencies": {
-        "readable-stream": {
-          "version": "2.3.6",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
         },
         "string_decoder": {
@@ -7031,7 +6999,7 @@
     "react-native-deprecated-custom-components": {
       "version": "0.1.1",
       "from": "tradle/react-native-custom-components",
-      "resolved": "git://github.com/tradle/react-native-custom-components.git#8b48b140831f4de3c34527cbafa04b17bed4d7c1",
+      "resolved": "git://github.com/tradle/react-native-custom-components.git#eb741ef3493de976188cbe0031062b56c8eeddd1",
       "dependencies": {
         "core-js": {
           "version": "1.2.7",
@@ -7045,7 +7013,7 @@
         },
         "fbjs": {
           "version": "0.8.17",
-          "from": "fbjs@>=0.8.17 <0.9.0",
+          "from": "fbjs@>=0.8.9 <0.9.0",
           "resolved": "http://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
         }
       }
@@ -7704,9 +7672,9 @@
       }
     },
     "rn-markdown": {
-      "version": "1.3.1",
-      "from": "rn-markdown@>=1.2.1 <2.0.0",
-      "resolved": "http://registry.npmjs.org/rn-markdown/-/rn-markdown-1.3.1.tgz"
+      "version": "1.3.2",
+      "from": "rn-markdown@latest",
+      "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.3.2.tgz"
     },
     "rn-nodeify": {
       "version": "10.0.1",
