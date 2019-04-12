@@ -2310,9 +2310,13 @@ debug('sent:', r)
         let locale = ENV.locale
         if (locale) {
           languageCode = locale.language
-          if (languageCode.length > 2  &&  languageCode !== 'zh-TW')
+          if (languageCode.length === 3) {
+            if (languageCode === 'fil')
+              languageCode = 'tl'
+          }
+          else if (languageCode.length > 2  &&  languageCode !== 'zh-TW')
             languageCode = languageCode.split('-')[0]
-          language = this._getItem(`${LANGUAGE}_${language}`)
+          language = utils.buildStubByEnumTitleOrId(utils.getModel(LANGUAGE), languageCode)
         }
       }
     }
@@ -2379,13 +2383,13 @@ debug('sent:', r)
     }
     if (env.dbID)
       return
-    let dbID
-    if (SERVICE_PROVIDERS.length > 1)
-      dbID = 'Full'
-    else {
-      let newSp = SERVICE_PROVIDERS[0]
-      dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
-    }
+    let dbID = 'Full'
+    // if (SERVICE_PROVIDERS.length > 1)
+      // dbID = 'Full'
+    // else {
+    //   let newSp = SERVICE_PROVIDERS[0]
+    //   dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
+    // }
 
     // // Check is DB was already prepared
     const reg = require('../utils/regula')

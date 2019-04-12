@@ -47,8 +47,8 @@ const regulaScan = (function () {
     if (!result)
       return
     let { imageFront, imageBack, imageFace, imageSignature, results, json } = result
-    let { scanResult, country } = normalizeResult({results, json})
-    return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json})
+    let { scanResult, country, documentType } = normalizeResult({results, json})
+    return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
   }
 }());
 
@@ -98,20 +98,34 @@ const normalizeResult = ({results, json}) => {
       personal.firstName = parts[parts.length - 1]
     }
   }
+
   // debugger
   normalizeDates(result, parseDate)
-  // let docType
-  // switch (json.ft_Document_Class_Code) {
-  // case 'P':
-  //   docType = 'passport'
-  //   break
-  // case 'I':
-  //   docType = 'id'
-  //   break
-  // default:
-  //   docType = 'license'
-  // }
-
+  let documentType
+  if (json.ft_Document_Class_Code) {
+    switch (json.ft_Document_Class_Code) {
+    case 'P':
+      documentType = 'P'
+      break
+    case 'I':
+      documentType = 'I'
+      break
+    default:
+      documentType = 'DL'
+    }
+  }
+  else {
+    for (let p in json) {
+      if (p.indexOf('ft_Passport') === 0)
+        documentType = 'P'
+      else if (p.indexOf('ft_DL') === 0)
+        documentType = 'DL'
+      else if (p.indexOf('ft_Identity') === 0)
+        documentType = 'I'
+      if (documentType)
+        break
+    }
+  }
   // let docTypeM = getModel('tradle.IDCardType')
   // let documentType = buildStubByEnumTitleOrId(docTypeM, docType)
   let country, countryId
@@ -131,10 +145,10 @@ const normalizeResult = ({results, json}) => {
     }
   }
 
-  return { scanResult: result, country }
+  return { scanResult: result, country, documentType }
 }
 
-const postProcessResult = ({ result, imageFront, imageBack, imageFace, imageSignature, country, json }) => {
+const postProcessResult = ({ result, imageFront, imageBack, imageFace, imageSignature, country, json, documentType }) => {
   if (!result)
     return
   let ret = {
@@ -144,7 +158,7 @@ const postProcessResult = ({ result, imageFront, imageBack, imageFace, imageSign
     imageFace,
     imageSignature,
     country,
-    documentType: json.ft_DL_Class && 'DL' || json.ft_Document_Class_Code
+    documentType //: json.ft_DL_Class && 'DL' || json.ft_Document_Class_Code
   }
   return sanitize(ret)
 }

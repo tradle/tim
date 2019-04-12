@@ -1534,34 +1534,34 @@ var utils = {
    * it's dangerous because it relies on the underlying implementation
    * of levelup and asyncstorage-down, and their respective key/value encoding sechemes
    */
-  async dangerousReadDB(db) {
-    if (Platform.OS === 'web') {
-      return await collect(db.createReadStream())
-    }
+  // async dangerousReadDB(db) {
+  //   if (Platform.OS === 'web') {
+  //     return await collect(db.createReadStream())
+  //   }
 
-    await Q.ninvoke(db, 'open')
+  //   await Q.ninvoke(db, 'open')
 
-    const prefix = db.location + '!'
-    // dangerous!
-    const keys = db.db._down.container._keys.slice()
-    if (!keys.length) return []
+  //   const prefix = db.location + '!'
+  //   // dangerous!
+  //   const keys = db.db._down.container._keys.slice()
+  //   if (!keys.length) return []
 
-    const pairs = await AsyncStorage.multiGet(keys.map((key) => prefix + key))
-    return pairs
-      .filter((pair) => pair[1] != null)
-      .map((pair) => {
-        pair[1] = pair[1].slice(2)
-        try {
-          pair[1] = pair[1] && JSON.parse(pair[1])
-        } catch (err) {
-        }
+  //   const pairs = await AsyncStorage.multiGet(keys.map((key) => prefix + key))
+  //   return pairs
+  //     .filter((pair) => pair[1] != null)
+  //     .map((pair) => {
+  //       pair[1] = pair[1].slice(2)
+  //       try {
+  //         pair[1] = pair[1] && JSON.parse(pair[1])
+  //       } catch (err) {
+  //       }
 
-        return {
-          key: pair[0].slice(prefix.length + 2),
-          value: pair[1]
-        }
-      })
-  },
+  //       return {
+  //         key: pair[0].slice(prefix.length + 2),
+  //         value: pair[1]
+  //       }
+  //     })
+  // },
   isEmployee(resource) {
     let me = utils.getMe()
     if (!me  ||  !me.isEmployee)
@@ -2093,7 +2093,7 @@ var utils = {
     var mainPhoto, photos
     let props = model.properties
     for (let p in resource) {
-      if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
+      if (!props[p] ||  props[p].hidden || (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
         continue
       if (props[p].mainPhoto) {
         mainPhoto = resource[p]

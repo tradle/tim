@@ -33,7 +33,7 @@
     "nibble": "eslint-nibble Components/ Store/ utils/ index.common.js"
   },
   "dependencies": {
-    "@tradle/aws-client": "^3.0.0",
+    "@tradle/aws-client": "^3.1.1",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/bitcoinjs-lib": "^1.6.1",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
@@ -277,6 +277,7 @@
     "react-native-push-notification": false,
     "react-native-image-store": false,
     "react-native-regula-document-reader": false,
+    "react-native-facetec-zoom": false,
     "react-native-tradle-keeper": false,
     "rn-fetch-blob": false,
     "./utils/crashlytics.js": false,

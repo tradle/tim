@@ -112,4 +112,5 @@ debug/
 *.license
 code-push.json
 android/src/main/assets/Regula/db.dat
-.vscode/.react
+ZoomHybrid.pub
+ZoomAuthenticationHybrid.framework

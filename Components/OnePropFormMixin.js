@@ -1,6 +1,7 @@
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 import _ from 'lodash'
+import Zoom from 'react-native-facetec-zoom'
 
 import Errors from '@tradle/errors'
 import constants from '@tradle/constants'
@@ -9,14 +10,18 @@ var {
 } = constants
 
 import utils, { translate, isWeb } from '../utils/utils'
+import { importFromImageStore } from '../utils/image-utils'
 import Actions from '../Actions/Actions'
 // import CameraView from './CameraView'
+// import VideoCamera from './VideoCamera'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 import { capture } from '../utils/camera'
+import ENV from '../utils/env'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
+const SELFIE = 'tradle.Selfie'
 
 var OnePropFormMixin = {
   onSetSignatureProperty(prop, item) {
@@ -119,6 +124,114 @@ var OnePropFormMixin = {
       return result
     }
   },
+  // verify liveness with facetec ZOOM
+  async verifyLiveness(params) {
+    // ensure zoom is initialized
+    // this only needs to be done once
+    if (!ENV.ZoomSDK) {
+      this.showCamera(params)
+      return
+    }
+    const { component } = params
+    if (isWeb()  ||  !component  ||  !component.id  ||  component.id.indexOf('_facetec') === -1) {
+      this.showCamera(params)
+      return
+    }
+
+
+    let result
+    try {
+      if (!ENV.ZoomSDK.initialized) {
+        const { success, status } = await Zoom.initialize({
+          appToken: Platform.select(ENV.ZoomSDK.token),
+          facemapEncryptionKey: Platform.select(ENV.ZoomSDK.facemapEncryptionKey),
+          // optional customization options
+          // see defaults.js for the full list
+          // showZoomIntro: false,
+          showPreEnrollmentScreen: false,
+          showUserLockedScreen: false,
+          showRetryScreen: false,
+          // showSuccessScreen: false,
+          // showFailureScreen: false,
+        })
+
+        if (!success) {
+          // see constants.js SDKStatus for explanations of various
+          // reasons why initialize might not have gone through
+          throw new Error(`failed to init. SDK status: ${status}`)
+        }
+        else
+          ENV.ZoomSDK.initialized = true
+      }
+        // launch Zoom's verification process
+      result = await Zoom.verify({
+        // no options at this point
+      })
+    } catch (err) {
+      this.showCamera(params)
+      return
+    }
+
+    if (result.status == 'FailedBecauseUserCancelled')
+      return
+    if (!result.faceMetrics) {
+      Alert.alert('Something is wrong with Zoom scan')
+      console.log('Something is wrong with Zoom scan', result)
+      return
+    }
+
+    let { livenessResult, livenessScore, auditTrail, facemap } = result.faceMetrics
+    // let { width, height } = utils.dimensions()
+    let selfie = {
+      from: utils.getMe(),
+      to: this.props.resource.from,
+      _context: this.props.resource._context,
+      [TYPE]: SELFIE,
+      sessionId: result.sessionId
+    }
+    if (auditTrail) {
+      auditTrail = await Promise.all(auditTrail.map(imgUrl => importFromImageStore(imgUrl)))
+      selfie.selfie =  {
+        url: auditTrail[0],
+        // width,
+        // height
+      }
+      if (auditTrail.length > 1) {
+        auditTrail.splice(0, 1)
+        selfie.auditTrail = auditTrail.map(imgUrl => {
+          return {
+            url: imgUrl,
+          }
+        })
+      }
+    }
+    if (facemap) {
+      selfie.facemap = {url: await importFromImageStore(facemap)}
+    }
+    debugger
+    selfie.selfieJson = result
+
+    Actions.addChatItem({
+      resource: selfie
+    })
+
+    // result looks like this:
+    // {
+    //   "countOfZoomSessionsPerformed": 1,
+    //   "sessionId": "45D5D648-3B14-46B1-86B0-55A91AB9E7DD",
+    //   "faceMetrics": {
+    //     "livenessResult": "Alive",
+    //     "livenessScore": 86.69999694824219,
+    //     "auditTrail": [
+    //       "..base64 image 1..",
+    //       "..base64 image 2..",
+    //       "..base64 image 3.."
+    //     ],
+    //     "externalImageSetVerificationResult": "CouldNotDetermineMatch"
+    //   }
+    // }
+  },
+
   onTakePic(params, photo) {
     if (!photo)
       return

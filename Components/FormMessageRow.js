@@ -21,6 +21,7 @@ const PHOTO = 'tradle.Photo'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
+const SELFIE = 'tradle.Selfie'
 // const SENT = 'Sent'
 
 const { IDENTITY } = constants.TYPES
@@ -83,7 +84,7 @@ class FormMessageRow extends Component {
     let { resource, to, bankStyle, application } = this.props
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype)
-    let photos = utils.getResourcePhotos(model, resource)
+    let photos = model.id === SELFIE ? [resource.selfie] : utils.getResourcePhotos(model, resource)
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
     let isSharedContext

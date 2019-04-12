@@ -364,12 +364,12 @@ class RefPropertyEditor extends Component {
       debug('regula scan failed:', err.message)
       debugger
     }
-    if (result.canceled)
-      return
     if (!result) {
       Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return
     }
+    if (result.canceled)
+      return
 
     if (result.documentType  &&  type !== 'other') {
       let docTypeModel = utils.getModel(ID_CARD)
@@ -382,7 +382,7 @@ class RefPropertyEditor extends Component {
       else if (rDocumentType === 'D')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
       if (documentType.id !== resource.documentType.id) {
-        Alert.alert(translate('wrongDocumentTypePleaseTryAgain'))
+        Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
         return
       }
     }

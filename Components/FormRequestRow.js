@@ -46,6 +46,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const SELFIE = 'tradle.Selfie'
 const REFRESH = 'tradle.Refresh'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {
@@ -299,7 +300,7 @@ class FormRequestRow extends Component {
     let contextId = this.getContextId(resource)
     return (
       <View style={styles.formRequest}>
-        {date}
+        {this.getChatDate(resource)}
         <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 5, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
           {sendStatus}

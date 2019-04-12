@@ -49,6 +49,8 @@ mk_links() {
   # cp ./secrets/regula-db.dat ./android/src/main/assets/Regula/db.dat
   cp ./secrets/android/regula.license ./android/app/src/main/res/raw/
 
+  cp ./secrets/zoom/ZoomHybrid-enc-key-pub.pem iOS/ZoomHybrid.pub
+
   echo "placing environment files"
   cp -r ./secrets/env/* ./
 

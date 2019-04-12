@@ -10,6 +10,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.reactlibrary.RNReactNativeZoomSdkPackage;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
 // import com.microblink.reactnative.MicroblinkReactPackage;
 import com.cardio.RNCardIOPackage;
@@ -68,6 +69,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+        new RNReactNativeZoomSdkPackage(),
         new RNRegulaDocumentReaderPackage(),
         new ImageStorePackage(),
         new RNFetchBlobPackage(),
