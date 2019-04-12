@@ -802,8 +802,8 @@
     },
     "@react-native-community/netinfo": {
       "version": "2.0.0",
-      "from": "@react-native-community/netinfo@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-2.0.0.tgz"
+      "from": "@react-native-community/netinfo@latest",
+      "resolved": "http://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-2.0.0.tgz"
     },
     "@react-native-community/viewpager": {
       "version": "1.1.5",
@@ -6999,7 +6999,7 @@
     "react-native-deprecated-custom-components": {
       "version": "0.1.1",
       "from": "tradle/react-native-custom-components",
-      "resolved": "git://github.com/tradle/react-native-custom-components.git#eb741ef3493de976188cbe0031062b56c8eeddd1",
+      "resolved": "git://github.com/tradle/react-native-custom-components.git#de389af6b70098bfa80d8b9588b32be0d85b90ad",
       "dependencies": {
         "core-js": {
           "version": "1.2.7",
@@ -7014,7 +7014,7 @@
         "fbjs": {
           "version": "0.8.17",
           "from": "fbjs@>=0.8.9 <0.9.0",
-          "resolved": "http://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
+          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
         }
       }
     },

@@ -11,7 +11,7 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
 import com.reactnativecommunity.viewpager.RNCViewPagerPackage;
-import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
+// import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
 import com.reactlibrary.RNReactNativeZoomSdkPackage;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
@@ -73,7 +73,7 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
             new RNCViewPagerPackage(),
-            new AsyncStoragePackage(),
+            // new AsyncStoragePackage(),
             new NetInfoPackage(),
         new RNReactNativeZoomSdkPackage(),
         new RNRegulaDocumentReaderPackage(),

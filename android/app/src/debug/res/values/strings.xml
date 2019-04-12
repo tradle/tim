@@ -1,4 +1,5 @@
 <resources>
+	<string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">deployment-key-here</string>
     <string name="app_name">Tradle</string>
     <string name="branch_app_link">test-link.tradle.io</string>
     <string name="branch_path_prefix">/hwsP</string>
