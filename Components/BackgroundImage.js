@@ -10,7 +10,12 @@ import Image from './Image'
 
 class BackgroundImage extends Component {
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.source.uri !== nextProps.source.uri
+    if (this.props.source.uri !== nextProps.source.uri)
+      return true
+    if (this.props.orientation  !==  nextProps.orientation)
+      return true
+    else
+      return false
   }
   render() {
     const props = this.props

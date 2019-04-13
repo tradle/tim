@@ -1,7 +1,6 @@
 
 import utils from '../utils/utils'
 var translate = utils.translate
-import NewResource from './NewResource'
 import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
@@ -210,11 +209,10 @@ class FormErrorRow extends Component {
     let type = utils.getType(r)
     let model = utils.getModel(type)
     this.props.navigator.push({
-      id: 4,
       title: translate(model),
       rightButtonTitle: 'Done',
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       // titleTextColor: '#7AAAC3',
       passProps:  {
         model: utils.getLensedModel(resource), //model,

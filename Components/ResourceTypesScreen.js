@@ -1,13 +1,3 @@
-
-import MessageTypeRow from './MessageTypeRow'
-import NewResource from './NewResource'
-import utils from '../utils/utils'
-import reactMixin from 'react-mixin'
-import Store from '../Store/Store'
-import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
-import constants from '@tradle/constants'
-
 import React, { Component } from 'react'
 
 import {
@@ -18,6 +8,14 @@ import {
   AlertIOS
 } from 'react-native'
 import PropTypes from 'prop-types'
+import reactMixin from 'react-mixin'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
+
+import MessageTypeRow from './MessageTypeRow'
+import utils from '../utils/utils'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
 
 class ResourceTypesScreen extends Component {
   constructor(props) {
@@ -85,11 +83,10 @@ class ResourceTypesScreen extends Component {
     if (this.props.callback)
       page.callback = this.props.callback;
     this.props.navigator.replace({
-      id: 4,
       title: resource.title,
       rightButtonTitle: 'Done',
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       titleTextColor: '#7AAAC3',
       passProps: page
     });

@@ -35,12 +35,10 @@ import PhotoView from './PhotoView'
 import PhotoList from './PhotoList'
 import ShowRefList from './ShowRefList'
 import PageView from './PageView'
-import IdentitiesList from './IdentitiesList'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
 import QRCode from './QRCode'
-import MessageList from './MessageList'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
@@ -49,7 +47,6 @@ import HomePageMixin from './HomePageMixin'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import { signIn } from '../utils/localAuth'
-import Log from './Log'
 // import debug from '../utils/debug'
 // import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
@@ -208,9 +205,8 @@ class ResourceView extends Component {
       if (to.style)
         style = _.extend(style, to.style)
       this.props.navigator.replacePreviousAndPop({
-        component: MessageList,
+        componentName: 'MessageList',
         title: utils.getDisplayName(to),
-        id: 11,
         backButtonTitle: 'Back',
         passProps: {
           resource: to,
@@ -247,9 +243,8 @@ class ResourceView extends Component {
   }
   onShowIdentityList(params) {
     this.props.navigator.push({
-      id: 8,
       title: 'My Identities',
-      component: IdentitiesList,
+      componentName: 'IdentitiesList',
       backButtonTitle: 'Profile',
       passProps: {
         filter: '',
@@ -503,8 +498,7 @@ class ResourceView extends Component {
       return
     case VIEW_DEBUG_LOG:
       this.props.navigator.push({
-        id: 28,
-        component: Log,
+        componentName: 'Log',
         passProps: {},
         backButtonTitle: 'Back',
         rightButtonTitle: 'Send',

@@ -265,7 +265,6 @@ function lockUp (nav, err) {
   return new Promise(resolve => {
     nav.replace({
       component: LockScreen,
-      id: 24,
       noLeftButton: true,
       passProps: {
         bg: LOCK_SCREEN_BG,
@@ -283,7 +282,6 @@ function setPassword (navigator, isChangePassword) {
   return new Promise((resolve, reject) => {
     navigator.push({
       component: PasswordCheck,
-      id: 20,
       noLeftButton: true,
       passProps: {
         ...PASSWORD_PROMPTS,
@@ -314,7 +312,6 @@ function checkPassword (navigator, isChangePassword) {
   let defer = Q.defer()
   let route = {
     component: PasswordCheck,
-    id: 20,
     noLeftButton: true,
     passProps: {
       ...PASSWORD_PROMPTS,

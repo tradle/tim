@@ -1,14 +1,15 @@
 import t from 'tcomb-form-native'
+import reactMixin from 'react-mixin'
+import { makeResponsive } from 'react-native-orient'
+import _ from 'lodash'
+import constants from '@tradle/constants'
+
 import utils from '../utils/utils'
 var translate = utils.translate
-import extend from 'extend'
 import myStyles from '../styles/styles'
-import constants from '@tradle/constants'
 import NewResourceMixin from './NewResourceMixin'
 import PageView from './PageView'
-import reactMixin from 'react-mixin'
 import platformStyles from '../styles/platform'
-import { makeResponsive } from 'react-native-orient'
 const {
   TYPE
 } = constants
@@ -121,7 +122,7 @@ class NewItem extends Component {
     else {
       for (let assetUri in this.state.selectedAssets) {
         let newItem = {};
-        extend(newItem, item);
+        _.extend(newItem, item);
         newItem = {url: assetUri, title: 'photo'};
         this.props.onAddItem(propName, newItem);
       }

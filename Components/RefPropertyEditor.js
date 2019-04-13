@@ -32,8 +32,6 @@ import Actions from '../Actions/Actions'
 // import BlinkID from './BlinkID'
 import Regula from './Regula'
 import Navigator from './Navigator'
-import GridList from './GridList'
-import NewResource from './NewResource'
 import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
 import Image from './Image'
@@ -230,10 +228,9 @@ class RefPropertyEditor extends Component {
     let { navigator, bankStyle, model, resource, currency } = this.props
     let refModel = utils.getModel(prop.ref)
     navigator.push({
-      id: 4,
       title: translate('addNew', translate(refModel)), // Add new ' + bl.title,
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       rightButtonTitle: 'Done',
       passProps: {
         model: refModel,
@@ -495,8 +492,7 @@ class RefPropertyEditor extends Component {
 
     let route = {
       title: this.getPropertyLabel(prop), //m.title,
-      id:  30,
-      component: GridList,
+      componentName: 'GridList',
       backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {

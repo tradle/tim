@@ -56,8 +56,7 @@ class NewPrompt extends Component {
   showChooser() {
     this.props.navigator.push({
       title: translate('formChooser'),
-      id: 33,
-      component: StringChooser,
+      componentName: 'StringChooser',
       backButtonTitle: 'Back',
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {

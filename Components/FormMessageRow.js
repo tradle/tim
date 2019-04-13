@@ -5,7 +5,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
-import ArticleView from './ArticleView'
 import dateformat from 'dateformat'
 import PhotoList from './PhotoList'
 import constants from '@tradle/constants'
@@ -75,8 +74,7 @@ class FormMessageRow extends Component {
 
   onPress(event) {
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: this.props.resource.message}
     });
   }

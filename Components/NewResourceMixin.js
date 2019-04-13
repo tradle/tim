@@ -22,10 +22,8 @@ import constants from '@tradle/constants'
 import { Text, getFontMapping } from './Text'
 import utils, { translate } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
-import EnumList from './EnumList'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
-import MarkdownPropertyEdit from './MarkdownPropertyEdit'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
@@ -271,7 +269,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     model: meta,
                     errors: formErrors,
-                    component: component,
+                    component,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
 
@@ -296,7 +294,7 @@ var NewResourceMixin = {
                     model: meta,
                     value: v,
                     required: !maybe,
-                    component: component,
+                    component,
                     errors: formErrors,
                   })
 
@@ -350,7 +348,7 @@ var NewResourceMixin = {
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
                     errors: formErrors,
-                    component: component,
+                    component,
                     editable: params.editable,
                   })
         }
@@ -362,7 +360,7 @@ var NewResourceMixin = {
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
                     errors: formErrors,
-                    component: component,
+                    component,
                     editable: params.editable,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
@@ -409,7 +407,7 @@ var NewResourceMixin = {
                     value: value,
                     model: meta,
                     keyboard: 'numeric',
-                    component: component,
+                    component,
                     required: !maybe,
                     errors: formErrors,
                   })
@@ -440,7 +438,7 @@ var NewResourceMixin = {
             prop:  p,
             required: !maybe,
             errors: formErrors,
-            component: component,
+            component,
             chooser: options.fields[p].onFocus,
           })
 
@@ -458,7 +456,7 @@ var NewResourceMixin = {
           label: translate(props.video, meta),
           prop:  'video',
           errors: formErrors,
-          component: component,
+          component,
           required: !maybe
         })
     }
@@ -594,8 +592,7 @@ var NewResourceMixin = {
     this.props.navigator.push({
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
-      id: 31,
-      component: MarkdownPropertyEdit,
+      componentName: 'MarkdownPropertyEdit',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
@@ -1233,7 +1230,7 @@ var NewResourceMixin = {
                     noError: true,
                     // errors: errors,
                     editable: editable,
-                    component: component,
+                    component,
                     keyboard: search ? null : 'numeric',
                   })
           }
@@ -1244,7 +1241,7 @@ var NewResourceMixin = {
                     required: required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
                     // errors:   errors,
-                    component: component,
+                    component,
                     // noError:  errors && errors[prop],
                     noError: true
                   })
@@ -1301,8 +1298,7 @@ var NewResourceMixin = {
     this.props.navigator.push({
       title: enumProp.title,
       // titleTextColor: '#7AAAC3',
-      id: 22,
-      component: EnumList,
+      componentName: 'EnumList',
       backButtonTitle: 'Back',
       passProps: {
         prop:        prop,

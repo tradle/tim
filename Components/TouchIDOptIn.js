@@ -7,7 +7,6 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
-import ArticleView from './ArticleView'
 import Image from './Image'
 import utils from '../utils/utils'
 import TOUCH_ID_IMG from '../img/touchid2.png'
@@ -22,8 +21,7 @@ class TouchIDOptIn extends Component {
   };
   learnMore() {
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       backButtonTitle: 'Back',
       passProps: {
         url: 'https://support.apple.com/en-us/HT204587'

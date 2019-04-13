@@ -2,7 +2,6 @@
 import utils from '../utils/utils'
 import Icon from 'react-native-vector-icons/Ionicons';
 import RowMixin from './RowMixin'
-import TourPage from './TourPage'
 import { makeResponsive } from 'react-native-orient'
 import StyleSheet from '../StyleSheet'
 import reactMixin from 'react-mixin'
@@ -49,8 +48,7 @@ class TourRow extends Component {
     let {resource, navigator, to, bankStyle} = this.props
     navigator.push({
       title: "",
-      component: TourPage,
-      id: 35,
+      componentName: 'TourPage',
       backButtonTitle: null,
       // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {

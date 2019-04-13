@@ -12,9 +12,6 @@ var {
 import utils, { translate, isWeb } from '../utils/utils'
 import { importFromImageStore } from '../utils/image-utils'
 import Actions from '../Actions/Actions'
-// import CameraView from './CameraView'
-// import VideoCamera from './VideoCamera'
-import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 import { capture } from '../utils/camera'
 import ENV from '../utils/env'
@@ -57,9 +54,7 @@ var OnePropFormMixin = {
     let sigView
     navigator.push({
       title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 32,
-      component: SignatureView,
+      componentName: 'SignatureView',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       onRightButtonPress: () => {
@@ -208,7 +203,7 @@ var OnePropFormMixin = {
     if (facemap) {
       selfie.facemap = {url: await importFromImageStore(facemap)}
     }
-    debugger
+    // debugger
     selfie.selfieJson = result
 
     Actions.addChatItem({

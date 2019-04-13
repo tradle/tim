@@ -23,9 +23,14 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
-import ApplicationView from './ApplicationView'
+// import ApplicationView from './ApplicationView'
 import Image from './Image'
 import uiUtils from '../utils/uiUtils'
+
+const RESOURCE_VIEW = 'ResourceView'
+const MESSAGE_VIEW = 'MessageView'
+const APPLICATION_VIEW = 'ApplicationView'
+const RESOURCE_LIST = 'ResourceList'
 
 const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
@@ -72,8 +77,7 @@ var ResourceMixin = {
     let {bankStyle, search, currency, country, navigator} = this.props
     if (isMessageView) {
       navigator.push({
-        id: 5,
-        component: require('./MessageView'),
+        componentName: MESSAGE_VIEW,
         backButtonTitle: 'Back',
         title,
         passProps: {
@@ -88,8 +92,7 @@ var ResourceMixin = {
     else if (isApplicationView) {
       navigator.push({
         title: title,
-        id: 34,
-        component: ApplicationView,
+        componentName: APPLICATION_VIEW,
         // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
@@ -103,8 +106,7 @@ var ResourceMixin = {
     else {
       navigator.push({
         title: title,
-        id: 3,
-        component: require('./ResourceView'),
+        componentName: RESOURCE_VIEW,
         // rightButtonTitle: 'Edit',
         backButtonTitle: 'Back',
         passProps: {
@@ -118,10 +120,9 @@ var ResourceMixin = {
   },
   showResources(resource, prop) {
     this.props.navigator.push({
-      id: 10,
       title: translate(prop, utils.getModel(resource[TYPE])),
       backButtonTitle: 'Back',
-      component: require('./ResourceList'),
+      componentName: RESOURCE_LIST,
       passProps: {
         modelName: prop.items.ref,
         filter: '',
@@ -234,13 +235,11 @@ var ResourceMixin = {
             isMessageView = true
           else
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
-          let id = isMessageView && 5 || 3
-          let component = isMessageView && require('./MessageView') || require('./ResourceView')
+          let componentName = isMessageView && MESSAGE_VIEW || RESOURCE_VIEW
           item =  <TouchableOpacity underlayColor='transparent' style={styles.rowStyle} key={this.getNextKey()} onPress={() => {
                     navigator.push({
                      title: vTitle,
-                     id,
-                     component,
+                     componentName,
                      backButtonTitle: 'Back',
                      bankStyle,
                      passProps: {resource: v}
