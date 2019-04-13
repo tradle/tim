@@ -34,12 +34,6 @@ const {
 
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
-import NewItem from './NewItem'
-import ResourceList from './ResourceList'
-import GridList from './GridList'
-import GridItemsList from './GridItemsList'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import ShowPropertiesView from './ShowPropertiesView'
@@ -376,16 +370,14 @@ class NewResource extends Component {
       return
     }
     navigateTo({
-      id: isMessage ? 5 : 3,
       title: title,
-      component: isMessage ? MessageView : ResourceView,
+      componentName: isMessage ? 'MessageView' : 'ResourceView',
       titleTextColor: '#7AAAC3',
       rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         rightButtonTitle: 'Done',
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
@@ -413,10 +405,9 @@ class NewResource extends Component {
     if (!this.props.resource  ||  !this.props.resource._sharedWith)
       return
     this.props.navigator.replace({
-      id: 10,
       title: translate('shareChangesWith'),
       backButtonTitle: 'Back',
-      component: ResourceList,
+      componentName: 'ResourceList',
       rightButtonTitle: 'Done',
       passProps: {
         message: translate('chooseCompaniesToShareChangesWith'),
@@ -699,10 +690,9 @@ class NewResource extends Component {
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
     if (bl.items.ref  &&  bl.allowToAdd) {
       navigator.push({
-        id: 30,
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: 'Back',
-        component: GridList,
+        componentName: 'GridList',
         passProps: {
           modelName: bl.items.ref,
           to: this.state.resource.to,
@@ -717,10 +707,9 @@ class NewResource extends Component {
       return
     }
     navigator.push({
-      id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
       backButtonTitle: 'Back',
-      component: NewItem,
+      componentName: 'NewItem',
       rightButtonTitle: 'Done',
       passProps: {
         metadata: bl,
@@ -792,7 +781,7 @@ class NewResource extends Component {
         model: model,
         items: arrays,
         onEndEditing: this.onEndEditing,
-        component: NewResource,
+        componentName: 'NewResource',
         editable: this.state.disableEditing ? !this.state.disableEditing : true
       };
     if (editCols)
@@ -1050,9 +1039,8 @@ class NewResource extends Component {
   showResource(r) {
     this.props.navigator.push({
       title: r.title,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       passProps: {
         bankStyle: this.props.bankStyle,
         resource: r,
@@ -1064,8 +1052,7 @@ class NewResource extends Component {
   }
   showTermsAndConditions() {
     this.props.navigator.push({
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       title: translate('termsAndConditions'),
       backButtonTitle: 'Back',
       rightButtonTitle: 'Accept',
@@ -1123,8 +1110,7 @@ class NewResource extends Component {
     this.props.navigator.push({
       title: translate('tapToRemovePhotos'), //Tap to remove photos',
       titleTintColor: 'red',
-      id: 19,
-      component: GridItemsList,
+      componentName: 'GridItemsList',
       noLeftButton: true,
       rightButtonTitle: 'Done',
       passProps: {
@@ -1497,116 +1483,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
-    // error: {
-    //   marginTop: -10,
-    //   backgroundColor: 'transparent'
-    // },
-    // errorText: {
-    //   fontSize: 14,
-    //   marginLeft: 10,
-    //   color: '#a94442'
-    // },
-    // itemsCounterEmpty: {
-    //   paddingHorizontal: 5,
-    //   justifyContent: 'center',
-    //   marginTop: -5
-    // },
-    // itemsCounter: {
-      // marginTop: 40,
-      // justifyContent: 'flex-end',
-      // paddingHorizontal: 5
-    // },
-    // submitButton: {
-    //   paddingBottom: 30,
-    //   justifyContent: 'center',
-    //   alignSelf: 'center'
-    // },
-    // logoNeedsText: {
-    //   backgroundColor: bankStyle.contextBackgroundColor,
-    //   borderTopColor: bankStyle.contextBackgroundColor,
-    //   borderTopWidth: StyleSheet.hairlineWidth,
-    //   height: 25,
-    //   justifyContent: 'center',
-    //   alignItems: 'center'
-    // },
-    // itemsWithCount: {
-    //   flex: 7,
-    //   paddingTop: 15
-    // },
-    // itemsWithoutCount: {
-    //   flex: 7,
-    //   paddingTop: 15,
-    //   // paddingBottom: 10
-    // },
-
   })
 })
 module.exports = NewResource;
-  // showChoice(prop) {
-  //   var self = this;
-  //   ImagePicker.showImagePicker({
-  //     returnIsVertical: true,
-  //     chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-  //     takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
-  //     quality: utils.imageQuality
-  //   }, (response) => {
-  //     if (response.didCancel)
-  //       return;
-  //     if (response.error) {
-  //       console.log('ImagePickerManager Error: ', response.error);
-  //       return
-  //     }
-  //     var item = {
-  //       // title: 'photo',
-  //       url: 'data:image/jpeg;base64,' + response.data,
-  //       isVertical: response.isVertical,
-  //       width: response.width,
-  //       height: response.height,
-  //       chooseFromLibraryButtonTitle: ''
-  //     };
-  //     self.onAddItem('photos', item);
-  //   });
-  // }
-  // onSubmitEditing(msg) {
-  //   msg = msg ? msg : this.state.userInput;
-  //   let assets = this.state.selectedAssets;
-  //   let isNoAssets = utils.isEmpty(assets);
-  //   if (!msg  &&  isNoAssets)
-  //     return;
-  //   let me = utils.getMe();
-  //   let resource = {from: utils.getMe(), to: this.props.resource.to};
-  //   let model = this.props.model;
-
-  //   let toName = utils.getDisplayName(resource.to);
-  //   let meName = utils.getDisplayName(me);
-  //   let modelName = SIMPLE_MESSAGE;
-  //   let value = {
-  //     message: msg
-  //             ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
-  //             : '',
-
-  //     from: {
-  //       id: utils.getId(me),
-  //       title: meName
-  //     },
-  //     to: {
-  //       id: utils.getId(resource),
-  //       title: toName
-  //     },
-
-  //     time: new Date().getTime()
-  //   }
-  //   value[TYPE] = modelName;
-  //   if (this.props.context)
-  //     value._context = this.props.context
-
-  //   if (!isNoAssets) {
-  //     let photos = [];
-  //     for (let assetUri in assets)
-  //       photos.push({url: assetUri, title: 'photo'});
-
-  //     value.photos = photos;
-  //   }
-  //   this.setState({userInput: '', selectedAssets: {}});
-  //   Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
-  // }

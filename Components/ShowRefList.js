@@ -9,7 +9,6 @@ import {
 
 import React, { Component } from 'react'
 import ScrollableTabView from 'react-native-scrollable-tab-view'
-
 import GridList from './GridList'
 import utils, {
   translate

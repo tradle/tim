@@ -54,6 +54,7 @@ import Strings from './strings'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
+import components from '../Components/components'
 import dictionaries from './dictionaries'
 import { tryWithExponentialBackoff } from './backoff'
 
@@ -1939,7 +1940,7 @@ var utils = {
     const routes = navigator.getCurrentRoutes()
     let top
     while (top = routes.pop()) {
-      if (!top || top.component.displayName !== 'PasswordCheck') break
+      if (!top || components[top.componentName].displayName !== 'PasswordCheck') break
     }
 
     return top

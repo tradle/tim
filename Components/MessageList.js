@@ -26,7 +26,6 @@ import constants from '@tradle/constants'
 
 import { Text, setFontFamily } from './Text'
 import Navigator from './Navigator'
-import MessageView from './MessageView'
 import MessageRow from './MessageRow'
 import MyProductMessageRow from './MyProductMessageRow'
 import VerificationMessageRow from './VerificationMessageRow'
@@ -34,13 +33,9 @@ import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
 import FormErrorRow from './FormErrorRow'
 import TourRow from './TourRow'
-import NewResource from './NewResource'
+// import NewResource from './NewResource'
 // import ProductChooser from './ProductChooser'
-import StringChooser from './StringChooser'
-import VerifierChooser from './VerifierChooser'
-import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
-import ContextChooser from './ContextChooser'
 import NewResourceMixin from './NewResourceMixin'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
 import utils, { translate, isIphone10orMore, isAndroid, isWeb } from '../utils/utils'
@@ -624,9 +619,8 @@ class MessageList extends Component {
       verification = resource
     let route = {
       title: newTitle,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       parentMeta: model,
       passProps: {
         bankStyle,
@@ -685,8 +679,7 @@ class MessageList extends Component {
       if (!route.onRightButtonPress)
         route.onRightButtonPress = {
           title: newTitle, //utils.getDisplayName(resource),
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -1093,8 +1086,7 @@ class MessageList extends Component {
     let model = utils.getModel(application.requestFor)
     this.props.navigator.push({
       title: translate(model),
-      id: 33,
-      component: StringChooser,
+      componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
@@ -1149,8 +1141,7 @@ class MessageList extends Component {
     let name = utils.getType(resource) === PROFILE ? resource.formatted : resource.name
     this.props.navigator.push({
       title: translate('contextsFor') + ' ' + name,
-      id: 23,
-      component: ContextChooser,
+      componentName: 'ContextChooser',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       backButtonTitle: 'Back',
       passProps: {
@@ -1185,8 +1176,7 @@ class MessageList extends Component {
       sharingChat = this.props.resource
     this.props.navigator.push({
       title: translate(utils.getModel(this.state.context.requestFor)),
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Share',
       passProps: {
@@ -1215,11 +1205,10 @@ class MessageList extends Component {
   // listed providers
   chooseTrustedProvider(r, model, isMyMessage) {
     this.props.navigator.push({
-      id: 25,
       title: translate('trustedProviders'),
       titleTextColor: this.props.bankStyle.verifiedBorderColor,
       backButtonTitle: 'Back',
-      component: VerifierChooser,
+      componentName: 'VerifierChooser',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       // titleTextColor: '#7AAAC3',
       passProps:  {
@@ -1343,8 +1332,7 @@ class MessageList extends Component {
     let to = resource.from.organization  ||  resource.from
     this.props.navigator.push({
       title: to.title,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: to,
@@ -1368,8 +1356,7 @@ class MessageList extends Component {
       resource._context = oResource._context
     this.props.navigator.push({
       title: translate(prop, prModel),
-      id: 33,
-      component: StringChooser,
+      componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
@@ -1441,179 +1428,3 @@ var styles = StyleSheet.create({
 });
 module.exports = MessageList;
 
-/* Adding new model from URL
-    this.props.navigator.push({
-      title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Chat',
-      passProps: {
-        resource: self.props.resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        modelName: modelName,
-        sendForm: sendForm,
-        callback: this.props.callback
-      },
-      rightButtonTitle: 'ion|plus',
-      onRightButtonPress: {
-        id: 4,
-        title: 'New model url',
-        component: NewResource,
-        backButtonTitle: 'Back',
-        titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: utils.getModel('tradle.NewMessageModel'),
-          callback: this.modelAdded.bind(this)
-        }
-      }
-    });
-
-  modelAdded(resource) {
-    if (resource.url)
-      Actions.addModelFromUrl(resource.url);
-  }
-  // showEmployeeMenu() {
-  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-  //   var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
-  //   var self = this;
-
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       self.chooseFormForCustomer()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
-  // showMenu() {
-  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-  //   var self = this;
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       self.forgetMe()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
-      // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[TYPE]).properties) + '\' to forget you',
-  onAddNewPressed(sendForm) {
-    let { modelName, resource, navigator, callback } = this.props
-    if (modelName === MESSAGE)
-      return
-    let model = utils.getModel(modelName);
-    if (!model.isInterface)
-      return;
-
-    let currentRoutes = navigator.getCurrentRoutes();
-    navigator.push({
-      title: translate(utils.getModel(FINANCIAL_PRODUCT)),
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: callback,
-        type: PRODUCT_REQUEST
-      },
-      rightButtonTitle: 'ion|plus',
-      onRightButtonPress: {
-        id: 4,
-        title: translate('newProduct'),
-        component: NewResource,
-        backButtonTitle: 'Back',
-        // titleTextColor: '#999999',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: utils.getModel('tradle.NewMessageModel'),
-          currency: resource.currency,
-          country: resource.country,
-          // callback: this.modelAdded.bind(this)
-        }
-      }
-    });
-  }
-  chooseFormForCustomer() {
-    if (!this.state.context) {
-      Alert.alert(translate('formListError'), translate('formListErrorDescription'))
-      return
-    }
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    let resource = this.props.resource
-    this.setState({show: false})
-    this.props.navigator.push({
-      title: translate(utils.getModel(FORM)),
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: this.props.callback,
-        type: FORM,
-        context: this.state.context
-      },
-      // rightButtonTitle: 'ion|plus',
-      // onRightButtonPress: {
-      //   id: 4,
-      //   title: translate('newProduct'),
-      //   component: NewResource,
-      //   backButtonTitle: translate('back'),
-      //   // titleTextColor: '#999999',
-      //   rightButtonTitle: translate('done'),
-      //   passProps: {
-      //     model: utils.getModel('tradle.NewMessageModel'),
-      //     currency: resource.currency,
-      //     // callback: this.modelAdded.bind(this)
-      //   }
-      // }
-    });
-  }
-  onChooseProduct() {
-    if (this.props.isAggregation)
-      return
-    // let modelName = MESSAGE
-    // let model = utils.getModel(modelName);
-    // let isInterface = model.isInterface;
-    // if (!isInterface)
-    //   return;
-
-    let resource = this.props.resource
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
-      title: translate('iNeed'), //I need...',
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        products: this.props.resource.list,
-        callback: this.props.callback,
-        bankStyle: this.props.bankStyle
-      },
-    });
-  }
-*/

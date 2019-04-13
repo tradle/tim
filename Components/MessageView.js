@@ -29,10 +29,8 @@ import { getContentSeparator } from '../utils/uiUtils'
 import ArticleView from './ArticleView'
 import PhotoList from './PhotoList'
 import PhotoView from './PhotoView'
-// import StringChooser from './StringChooser'
 import ShowRefList from './ShowRefList'
 import VerificationView from './VerificationView'
-import NewResource from './NewResource'
 import PageView from './PageView'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
@@ -174,8 +172,7 @@ class MessageView extends Component {
 
     navigator.push({
       title: model.title,
-      id: 4,
-      component: NewResource,
+      componentName: 'NewResource',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
@@ -282,9 +279,8 @@ class MessageView extends Component {
     let isVerifier = !resource && utils.isVerifier(document)
     let route = {
       title: newTitle,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       parentMeta: model,
       passProps: {
         bankStyle: this.state.bankStyle || this.props.bankStyle,
@@ -497,8 +493,7 @@ class MessageView extends Component {
 
   onPress(url) {
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       backButtonTitle: 'Back',
       passProps: {url: url}
     });

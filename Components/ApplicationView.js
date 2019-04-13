@@ -281,8 +281,7 @@ class ApplicationView extends Component {
     let { navigator, bankStyle } = this.props
     let resource = this.state.resource || this.props.resource
     let route = {
-      component: MatchImages,
-      id: 40,
+      componentName: 'MatchImages',
       backButtonTitle: 'Back',
       title: translate('checkIfMatch'),
       passProps: {
@@ -383,8 +382,7 @@ class ApplicationView extends Component {
       title = me.organization.title
     let style = resource.style ? this.mergeStyle(resource.style) : bankStyle
     let route = {
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       title: title,
       passProps: {

@@ -1,6 +1,5 @@
 import { Platform } from 'react-native'
 import withDefaults from 'lodash/defaults'
-import CameraView from '../Components/CameraView'
 import Navigator from '../Components/Navigator'
 import CameraDefaults from './camera-defaults'
 import { onNextTransitionStart } from './utils'
@@ -34,8 +33,7 @@ export const capture = async props => {
     navigator.push({
       title,
       backButtonTitle: backButtonTitle || 'Back',
-      id: 12,
-      component: CameraView,
+      componentName: 'CameraView',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       noLeftButton: Platform.OS !== 'web',
       passProps: {

@@ -21,9 +21,7 @@ import constants from '@tradle/constants'
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import LinearGradient from 'react-native-linear-gradient';
-import ArticleView from './ArticleView'
 import RowMixin from './RowMixin'
-import ResourceView from './ResourceView'
 
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
@@ -375,8 +373,7 @@ class ResourceRow extends Component {
     let title = utils.getDisplayName(resource)
     let route = {
       title: title,
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       passProps: {
@@ -747,9 +744,8 @@ class ResourceRow extends Component {
     let model = utils.getModel(resource[TYPE] || resource.id);
     let title = utils.makeTitle(utils.getDisplayName(resource, model));
     navigator.push({
-      id: 7,
       title: title,
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: resource.url}
     });
   }

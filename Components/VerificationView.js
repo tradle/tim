@@ -1,16 +1,13 @@
-
-import ArticleView from './ArticleView'
-import utils from '../utils/utils'
-var translate = utils.translate
-import constants from '@tradle/constants'
-import RowMixin from './RowMixin'
-import MessageView from './MessageView'
-import ResourceMixin from './ResourceMixin'
-import ResourceView from './ResourceView'
 import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
+
+import utils from '../utils/utils'
+var translate = utils.translate
+import constants from '@tradle/constants'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
 
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -127,8 +124,7 @@ class VerificationView extends Component {
     let { bankStyle, navigator } = this.props
     navigator.push({
       title: translate(m),
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       passProps: {resource: r.method, bankStyle}
@@ -136,10 +132,9 @@ class VerificationView extends Component {
   }
   onPress(url, event) {
     this.props.navigator.push({
-      id: 7,
       backButtonTitle: 'Back',
       title: utils.getDisplayName(this.props.resource),
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: url ? url : this.props.resource.url}
     });
   }
@@ -302,9 +297,8 @@ class VerificationView extends Component {
   showResource(r, type) {
     let route = {
       title: translate(utils.getModel(type)),
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       passProps: {
         bankStyle: this.props.bankStyle,
         resource: r,
@@ -318,7 +312,7 @@ reactMixin(VerificationView.prototype, RowMixin);
 reactMixin(VerificationView.prototype, ResourceMixin);
 VerificationView = makeResponsive(VerificationView)
 
-var createStyles = utils.styleFactory(MessageView, function ({bankStyle}) {
+var createStyles = utils.styleFactory(VerificationView, function ({bankStyle}) {
 return StyleSheet.create({
   textContainer: {
     flex: 1,

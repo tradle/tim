@@ -1,8 +1,6 @@
 
 import utils from '../utils/utils'
 var translate = utils.translate
-import MessageView from './MessageView'
-import NewResource from './NewResource'
 import CustomIcon from '../styles/customicons'
 import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
@@ -273,8 +271,7 @@ class VerificationMessageRow extends Component {
     if (!title)
       title = translate(model)
     var route = {
-      id: 5,
-      component: MessageView,
+      componentName: 'MessageView',
       backButtonTitle: 'Back',
       passProps: passProps,
       title: title
@@ -283,9 +280,8 @@ class VerificationMessageRow extends Component {
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: 'Edit',
-        component: NewResource,
+        componentName: 'NewResource',
         // titleTextColor: '#7AAAC3',
-        id: 4,
         passProps: {
           resource: r,
           metadata: model,

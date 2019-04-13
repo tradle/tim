@@ -4,15 +4,8 @@ import _ from 'lodash'
 
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
-import QRCodeScanner from './QRCodeScanner'
 import Actions from '../Actions/Actions'
-import ResourceList from './ResourceList'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import MessageList from './MessageList'
-import ResourceView from './ResourceView'
-import NewResource from './NewResource'
-import TourPage from './TourPage'
-import SplashPage from './SplashPage'
 import GridHeader from './GridHeader'
 import qrCodeDecoder from '@tradle/qr-schema'
 import {
@@ -36,8 +29,7 @@ var HomePageMixin = {
       this.setState({hideMode: false})
       this.props.navigator.push({
         title: translate('scanQRcode'),
-        id: 16,
-        component: QRCodeScanner,
+        componentName: 'QRCodeScanner',
         titleTintColor: '#eeeeee',
         backButtonTitle: 'Cancel',
         // rightButtonTitle: 'ion|ios-reverse-camera',
@@ -76,8 +68,7 @@ var HomePageMixin = {
 
     var route = {
       title: params.to.name,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: params.to,
@@ -95,8 +86,7 @@ var HomePageMixin = {
   showBanks() {
     this.props.navigator.push({
       title: translate('officialAccounts'),
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       passProps: {
         officialAccounts: true,
@@ -112,8 +102,7 @@ var HomePageMixin = {
       StatusBar.setHidden(true)
       navigator.push({
         title: "",
-        component: TourPage,
-        id: 35,
+        componentName: 'TourPage',
         backButtonTitle: null,
         // backButtonTitle: __DEV__ ? 'Back' : null,
         passProps: {
@@ -149,8 +138,7 @@ var HomePageMixin = {
     let promise = new Promise(resolve => {
       navigator.push({
         title: "",
-        component: SplashPage,
-        id: 36,
+        componentName: 'SplashPage',
         backButtonTitle: null,
         passProps: {
           splashscreen: splashscreen
@@ -181,14 +169,12 @@ var HomePageMixin = {
 
     navigator[action || 'push']({
       title: title,
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Edit',
       onRightButtonPress: {
         title: title,
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
@@ -268,7 +254,6 @@ console.log('HomePageMixin: filterResource', resource)
     let { style, currency, navigator } = this.props
     navigator.push({
       title: backlinksTitle,
-      id: 10,
       component,
       backButtonTitle: 'Back',
       passProps: {
@@ -280,14 +265,12 @@ console.log('HomePageMixin: filterResource', resource)
       rightButtonTitle: translate('details'),
       onRightButtonPress: {
         title: resourceTitle,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: resourceTitle,
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {

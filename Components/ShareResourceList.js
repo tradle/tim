@@ -15,8 +15,6 @@ import utils, { translate } from '../utils/utils'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
 import CustomIcon from '../styles/customicons'
 import StyleSheet from '../StyleSheet'
 import Actions from '../Actions/Actions'
@@ -81,8 +79,7 @@ class ShareResourceList extends Component {
     if (utils.isMessage(resource)) {
       navigator.push({
         title: title,
-        id: 5,
-        component: MessageView,
+        componentName: 'MessageView',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource,
@@ -93,8 +90,7 @@ class ShareResourceList extends Component {
     else {
       navigator.push({
         title: title,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {

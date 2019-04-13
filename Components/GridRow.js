@@ -10,16 +10,12 @@ import PropTypes from 'prop-types'
 
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
-// import extend from 'extend'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
-// import ResourceView from './ResourceView'
-// import MessageView from './MessageView'
 import RowMixin from './RowMixin'
-import ArticleView from './ArticleView'
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
 import Store from '../Store/Store'
@@ -349,9 +345,8 @@ class GridRow extends Component {
   onPress(resource) {
     let title = utils.makeTitle(utils.getDisplayName(resource));
     this.props.navigator.push({
-      id: 7,
       title: title,
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: resource.url}
     });
   }

@@ -1,6 +1,5 @@
 
 import ResourceRow from './ResourceRow'
-import MessageList from './MessageList'
 import PageView from './PageView'
 import utils from '../utils/utils'
 import reactMixin from 'react-mixin'
@@ -187,8 +186,7 @@ class VerifierChooser extends Component {
 
     this.props.navigator.replace({
       title: resource.name,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,

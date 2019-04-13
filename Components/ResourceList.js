@@ -19,14 +19,8 @@ import _ from 'lodash'
 import { Text, resetFontFamily } from './Text'
 import NoResources from './NoResources'
 import ResourceRow from './ResourceRow'
-import ResourceView from './ResourceView'
 import VerificationRow from './VerificationRow'
-import NewResource from './NewResource'
-import MessageList from './MessageList'
-import MessageView from './MessageView'
 import PageView from './PageView'
-import GridList from './GridList'
-import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
 import utils, { translate } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
@@ -53,7 +47,6 @@ const BOOKMARK = 'tradle.Bookmark'
 const MY_PRODUCT =  'tradle.MyProduct'
 
 const LIMIT = 10
-const SCAN_QR_CODE_VIEW = 16
 const {
   MESSAGE,
   ORGANIZATION,
@@ -250,7 +243,7 @@ class ResourceList extends Component {
     let action = params.action;
     if (action === 'addApp') {
       let routes = navigator.getCurrentRoutes()
-      if (routes[routes.length - 1].id === SCAN_QR_CODE_VIEW)
+      if (routes[routes.length - 1].componentName === 'QRCodeScanner')
         navigator.pop()
       if (params.error)
         Alert.alert(params.error)
@@ -266,7 +259,7 @@ class ResourceList extends Component {
     if (action === 'newContact') {
       let routes = navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
-      if (curRoute.id === 11  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
+      if (curRoute.componentName === 'MessageList'  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
       return
@@ -329,8 +322,7 @@ class ResourceList extends Component {
       let style = this.mergeStyle(params.to.style)
       let route = {
         title: params.to.name,
-        component: MessageList,
-        id: 11,
+        componentName: 'MessageList',
         backButtonTitle: 'Back',
         passProps: {
           resource: params.to,
@@ -574,8 +566,7 @@ class ResourceList extends Component {
 
         navigator.push({
           title: title,
-          id: 5,
-          component: MessageView,
+          componentName: 'MessageView',
           backButtonTitle: 'Back',
           passProps: {
             resource: resource,
@@ -587,14 +578,12 @@ class ResourceList extends Component {
         let title = utils.makeTitle(utils.getDisplayName(resource))
         navigator.push({
           title: title,
-          id: 3,
-          component: ResourceView,
+          componentName: 'ResourceView',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Edit',
           onRightButtonPress: {
             title: title,
-            id: 4,
-            component: NewResource,
+            componentName: 'NewResource',
             backButtonTitle: 'Back',
             rightButtonTitle: 'Done',
             passProps: {
@@ -667,8 +656,7 @@ class ResourceList extends Component {
     StatusBar.setHidden(false);
 
     let route = {
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       title: title,
       passProps: {
@@ -688,8 +676,7 @@ class ResourceList extends Component {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
           title: title,
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -705,8 +692,7 @@ class ResourceList extends Component {
       route.rightButtonTitle = 'View'
       route.onRightButtonPress = {
         title: title,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         backButtonTitle: 'Back',
         passProps: {
           bankStyle: style,
@@ -735,8 +721,7 @@ class ResourceList extends Component {
 
     let route = {
       title: utils.makeTitle(newTitle),
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {
@@ -761,8 +746,7 @@ class ResourceList extends Component {
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel(resource[TYPE]),
@@ -782,8 +766,7 @@ class ResourceList extends Component {
         return
       this.props.navigator.push({
         title: translate('searchSomething', translate(model)),
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
@@ -870,8 +853,7 @@ class ResourceList extends Component {
     let route = {
       // title: translate(utils.getModel(resource.product)) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
@@ -959,11 +941,10 @@ class ResourceList extends Component {
     let model = utils.getModel(SETTINGS)
     this.setState({hideMode: false})
     let route = {
-      component: NewResource,
+      componentName: 'NewResource',
       title: 'Settings',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
-      id: 4,
       passProps: {
         model: model,
         bankStyle: this.props.style,
@@ -980,8 +961,7 @@ class ResourceList extends Component {
   showContexts() {
     this.props.navigator.push({
       title: translate('sharedContext'),
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       passProps: {
         bankStyle: this.props.style,
@@ -1028,8 +1008,7 @@ class ResourceList extends Component {
     let self = this
     this.props.navigator.push({
       title: model.title,
-      id: 4,
-      component: NewResource,
+      componentName: 'NewResource',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
@@ -1378,8 +1357,7 @@ class ResourceList extends Component {
     const { navigator, bankStyle } = this.props
     let me = utils.getMe()
     let route = {
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       title: me.organization.title,
       passProps: {
@@ -1394,8 +1372,7 @@ class ResourceList extends Component {
   showSearch() {
     this.props.navigator.push({
       title: 'Explore data',
-      id: 30,
-      component: GridList,
+      componentName: 'GridList',
       backButtonTitle: 'Back',
       passProps: {
         modelName: MESSAGE,
@@ -1409,8 +1386,7 @@ class ResourceList extends Component {
   showPartials() {
     Actions.getAllPartials()
     this.props.navigator.push({
-      id: 27,
-      component: SupervisoryView,
+      componentName: 'SupervisoryView',
       backButtonTitle: 'Back',
       title: translate('overviewOfApplications'),
       passProps: {}
@@ -1419,8 +1395,7 @@ class ResourceList extends Component {
   showBookmarks() {
     this.props.navigator.push({
       title: translate('bookmarks'),
-      id: 30,
-      component: GridList,
+      componentName: 'GridList',
       backButtonTitle: 'Back',
       passProps: {
         modelName: BOOKMARK,
@@ -1432,8 +1407,7 @@ class ResourceList extends Component {
     Actions.list({modelName: PARTIAL})
     this.props.navigator.push({
       title: 'Partials',
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       passProps: {
         bankStyle: this.state.bankStyle,
@@ -1445,8 +1419,7 @@ class ResourceList extends Component {
     Actions.list({modelName: ORGANIZATION, isTest: true})
     this.props.navigator.push({
       title: translate('testProviders'),
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Profile',
       passProps: {
@@ -1611,52 +1584,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ResourceList;
-  // showRefResources(resource, prop) {
-  //   let rType = utils.getType(resource)
-  //   let props = utils.getModel(rtype).properties;
-  //   let propJson = props[prop];
-  //   let resourceTitle = utils.getDisplayName(resource);
-  //   resourceTitle = utils.makeTitle(resourceTitle);
-
-  //   let backlinksTitle = propJson.title + ' - ' + resourceTitle;
-  //   backlinksTitle = utils.makeTitle(backlinksTitle);
-  //   let modelName = propJson.items.ref;
-  //   let { style, currency, navigator } = this.props
-  //   navigator.push({
-  //     title: backlinksTitle,
-  //     id: 10,
-  //     component: ResourceList,
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       resource: resource,
-  //       prop: prop,
-  //       bankStyle: style,
-  //       modelName: modelName
-  //     },
-  //     rightButtonTitle: translate('details'),
-  //     onRightButtonPress: {
-  //       title: resourceTitle,
-  //       id: 3,
-  //       component: ResourceView,
-  //       backButtonTitle: 'Back',
-  //       rightButtonTitle: 'Edit',
-  //       onRightButtonPress: {
-  //         title: resourceTitle,
-  //         id: 4,
-  //         component: NewResource,
-  //         backButtonTitle: 'Back',
-  //         rightButtonTitle: 'Done',
-  //         passProps: {
-  //           model: utils.getModel(rType),
-  //           bankStyle: style,
-  //           resource: resource
-  //         }
-  //       },
-  //       passProps: {
-  //         bankStyle: style,
-  //         resource: resource,
-  //         currency: currency
-  //       }
-  //     }
-  //   });
-  // }

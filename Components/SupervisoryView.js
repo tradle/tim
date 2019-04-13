@@ -1,17 +1,3 @@
-
-import PageView from './PageView'
-import utils from '../utils/utils'
-import reactMixin from 'react-mixin'
-import Store from '../Store/Store'
-import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
-import NetworkInfoProvider from './NetworkInfoProvider'
-import SupervisoryViewPerProvider from './SupervisoryViewPerProvider'
-import StyleSheet from '../StyleSheet'
-import { makeResponsive } from 'react-native-orient'
-
-import {Column as Col, Row} from 'react-native-flexbox-grid'
-
 import React, { Component } from 'react'
 import {
   ListView,
@@ -20,7 +6,17 @@ import {
   Text,
 } from 'react-native'
 import PropTypes from 'prop-types';
+import { makeResponsive } from 'react-native-orient'
+import {Column as Col, Row} from 'react-native-flexbox-grid'
+import Reflux from 'reflux'
 
+import PageView from './PageView'
+import utils from '../utils/utils'
+import reactMixin from 'react-mixin'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
 
 class SupervisoryView extends Component {
@@ -100,8 +96,7 @@ class SupervisoryView extends Component {
   showProviderDetails(resource) {
     // Actions.getAllPartials()
     this.props.navigator.push({
-      id: 26,
-      component: SupervisoryViewPerProvider,
+      componentName: 'SupervisoryViewPerProvider',
       backButtonTitle: 'Back',
       title: resource.providerInfo.title,
       passProps: {
