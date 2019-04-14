@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.4.0.3</string>
+	<string>1.4.0.4</string>
 	<key>CodePushDeploymentKey</key>
 	<string>$(CODE_PUSH_KEY)</string>
 	<key>Fabric</key>
@@ -65,7 +65,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>take photos, scan documents and QR codes</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string></string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>choose photos from library</string>
 	<key>UIAppFonts</key>
