@@ -14,6 +14,7 @@ const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from '../utils/async-storage'
+import asyncstorageDown from '../utils/asyncstorage-down'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createSemaphore from 'psem'
@@ -121,7 +122,6 @@ var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/
 import promisify from 'pify'
 var collect = promisify(require('stream-collector'))
 import debounce from 'debounce'
-import asyncstorageDown from 'asyncstorage-down'
 import levelup from 'levelup'
 // import mutexify from 'mutexify'
 // import updown from 'level-updown'
