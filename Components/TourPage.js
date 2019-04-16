@@ -7,6 +7,7 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 import AppIntro from 'react-native-app-intro'
+import ViewPager from '@react-native-community/viewpager'
 import utils, { translate } from '../utils/utils'
 
 import { makeResponsive } from 'react-native-orient'
@@ -70,9 +71,11 @@ class TourPage extends Component {
       activeDotColor: activeDotColor || '#ffffff',
       rightTextColor: rightTextColor || '#ffffff',
       leftTextColor: leftTextColor || '#ffffff',
-      customStyles: this.props.customStyles
+      customStyles: this.props.customStyles,
     }
-
+    if (utils.isAndroid()) {
+      props.component = ViewPager
+    }
     if (pageArray) {
       return <AppIntro {...props} pageArray={pageArray} />
     }
