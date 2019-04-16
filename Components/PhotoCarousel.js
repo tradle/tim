@@ -1,6 +1,7 @@
 import Carousel from 'react-native-carousel';
 import { ROOT_HASH } from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
+import ViewPager from '@react-native-community/viewpager'
 
 import {
   StyleSheet,
@@ -48,29 +49,6 @@ class PhotoCarousel extends Component {
         let style
         let isPNG = utils.isImageDataURL(photo.url)  &&  photo.url.indexOf('data:image/png;') === 0
         if (photo.width) {
-          // let w = width, h //, padding
-
-          // if (height > width) {
-          //   if (photo.width > width)
-          //     h = photo.height * width / photo.width
-          //   else {
-          //     h = photo.height
-          //     w = photo.width
-          //     // padding = (width - photo.width) / 2
-          //   }
-
-          //   if (h > 0.8 * height)
-          //     h = Math.floor(0.8 * height)
-          // }
-          // else {
-          //   h = Math.floor(0.8 * height)
-          //   if (photo.height > h)
-          //     w = photo.width * h / photo.height
-          //   else {
-          //     h = photo.height
-          //     w = photo.width
-          //   }
-          // }
           style = {width, height, backgroundColor: isPNG && '#ffffff' || 'transparent'}
         }
         else {
@@ -93,6 +71,7 @@ class PhotoCarousel extends Component {
     }
     return (
       <Carousel width={width}
+                component={utils.isAndroid()  &&  ViewPager}
                 loop={false}
                 animate={false}
                 indicatorOffset={20}
