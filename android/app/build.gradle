@@ -194,7 +194,7 @@ android {
             //
             // Before allowing 64-bit apks, see that react native supports it
             // https://github.com/facebook/react-native/issues/2814
-            // include "armeabi-v7a", "x86", "arm64-v8a", "x86-64"
+            // include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
             include "armeabi-v7a", "x86"
         }
     }
@@ -363,7 +363,7 @@ android.applicationVariants.all { variant ->
   // Assigns a different version code for each output APK
   // other than the universal APK.
   variant.outputs.each { output ->
-    // def versionCodes = ["armeabi-v7a":1, "x86":2, "arm64-v8a": 3, "x86-64": 4]
+    // def versionCodes = ["armeabi-v7a":1, "x86":2, "arm64-v8a": 3, "x86_64": 4]
 
     // Stores the value of ext.abiCodes that is associated with the ABI for this variant.
     def baseAbiVersionCode =
