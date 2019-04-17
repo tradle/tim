@@ -1688,7 +1688,7 @@
     },
     "asyncstorage-down": {
       "version": "4.2.0",
-      "from": "asyncstorage-down@latest",
+      "from": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-4.2.0.tgz",
       "resolved": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-4.2.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
@@ -6850,7 +6850,7 @@
     "react-native-app-intro": {
       "version": "1.1.5",
       "from": "tradle/react-native-app-intro#dev",
-      "resolved": "git://github.com/tradle/react-native-app-intro.git#bab39954c66acb101f196cfb750454482e2c98ca"
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#c1ca89ffc8687f03199a098051a43028c5dbc9a8"
     },
     "react-native-async-storage-rocks": {
       "version": "2.2.0",
@@ -6883,9 +6883,9 @@
       "resolved": "git://github.com/react-native-community/react-native-camera.git#fd87a3475aedf64243fc0cc5f225dcbf2484bbab"
     },
     "react-native-carousel": {
-      "version": "0.11.0",
-      "from": "react-native-carousel@>=0.11.0 <0.12.0",
-      "resolved": "https://registry.npmjs.org/react-native-carousel/-/react-native-carousel-0.11.0.tgz"
+      "version": "0.10.0",
+      "from": "tradle/react-native-carousel",
+      "resolved": "git://github.com/tradle/react-native-carousel.git#c65165acf9e765084f1a7ae9965eade799cf571f"
     },
     "react-native-code-push": {
       "version": "5.6.0",
@@ -7024,9 +7024,9 @@
       "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.21.5.tgz"
     },
     "react-native-ecc": {
-      "version": "2.1.0",
-      "from": "react-native-ecc@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-2.1.0.tgz"
+      "version": "2.2.0",
+      "from": "react-native-ecc@latest",
+      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-2.2.0.tgz"
     },
     "react-native-exception-handler": {
       "version": "2.2.0",
@@ -7094,9 +7094,9 @@
       "resolved": "git://github.com/tradle/react-native-infinite-scroll-view.git#41277e1397345cd1df7ecd19544979ad7458c088"
     },
     "react-native-keychain": {
-      "version": "0.3.1",
-      "from": "mvayngrib/react-native-keychain#rn40",
-      "resolved": "git://github.com/mvayngrib/react-native-keychain.git#68ac99fcb028de2d0f88a82fee9d04773266302c"
+      "version": "0.4.0",
+      "from": "mvayngrib/react-native-keychain",
+      "resolved": "git://github.com/mvayngrib/react-native-keychain.git#527528d8829e75c4bd6773b65594776387496755"
     },
     "react-native-lazyload": {
       "version": "1.1.0",
@@ -7186,7 +7186,7 @@
     "react-native-scrollable-tab-view": {
       "version": "0.8.0",
       "from": "tradle/react-native-scrollable-tab-view#fixes_android",
-      "resolved": "git://github.com/tradle/react-native-scrollable-tab-view.git#f356e761303216ce6eacd90dfb1e3d61cf72cef3"
+      "resolved": "git://github.com/tradle/react-native-scrollable-tab-view.git#a0a449d59ab616d70c4ab0b8223e83dea42019a7"
     },
     "react-native-search-bar": {
       "version": "3.4.2",
@@ -7223,7 +7223,7 @@
     "react-native-swiper": {
       "version": "1.4.4",
       "from": "tradle/react-native-swiper#dev",
-      "resolved": "git://github.com/tradle/react-native-swiper.git#88706d5378fc185d11c0e7956a07c9c271319b7c"
+      "resolved": "git://github.com/tradle/react-native-swiper.git#83a7c891ad3a74d07e6aad16b046a32610fbb909"
     },
     "react-native-switch-selector": {
       "version": "1.1.12",
