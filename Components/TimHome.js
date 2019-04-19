@@ -217,7 +217,7 @@ class TimHome extends Component {
     const { navigator } = this.props
     while (true) {
       let currentRoute = Navs.getCurrentRoute(navigator)
-      let { displayName } = currentRoute.component
+      let { displayName } = components[currentRoute.componentName]
       if (displayName === TimHome.displayName || displayName === PasswordCheck.displayName) {
         debug('waiting to throw up deep linked alert until we are past the home screens')
         await Q.ninvoke(utils, 'onNextTransitionEnd', navigator)
