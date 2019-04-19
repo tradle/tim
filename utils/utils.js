@@ -2326,12 +2326,13 @@ var utils = {
     return newArr
   },
   getRouteName(route) {
-    const { displayName } = route.component
+    const { componentName } = route
+    const displayName = components[componentName].displayName
     if (displayName) return displayName
-
-    if (typeof route.component === 'function') {
-      return route.component.name || route.component.toString().match(/function (.*?)\s*\(/)[1]
-    }
+debugger
+    // if (typeof route.component === 'function') {
+    //   return route.component.name || route.component.toString().match(/function (.*?)\s*\(/)[1]
+    // }
 
     return 'unknown'
   },

@@ -406,8 +406,8 @@ reactMixin(TiMApp.prototype, Reflux.ListenerMixin)
 
 const goBack = debounce(function (nav) {
   const { route, index } = Navs.getCurrentRouteInfo(nav)
-  if (index === 0 || (components[route.componentName]  &&  components[route.componentName].backButtonDisabled)) return false
-  // if (index === 0 || (route.component  &&  route.component.backButtonDisabled)) return false
+  if (index === 0 || (components[route.componentName]  &&  components[route.componentName].backButtonDisabled))
+    return false
 
   nav.pop()
   return true
@@ -452,8 +452,6 @@ var NavigationBarRouteMapper = {
               : <Text style={style}>
                   {lbTitle}
                 </Text>
-    // if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
-    //   Actions.cleanup()
 
     return (
       <TouchableOpacity

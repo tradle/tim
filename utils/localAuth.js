@@ -6,6 +6,7 @@ import Errors from 'react-native-local-auth/data/errors'
 import Q from 'q'
 import PasswordCheck from '../Components/PasswordCheck'
 import LockScreen from '../Components/LockScreen'
+import components from '../Components/components'
 import ENV from '../utils/env'
 
 // hack!
@@ -307,7 +308,7 @@ function checkPassword (navigator, isChangePassword) {
   // HACK
   let routes = navigator.getCurrentRoutes()
   let currentRoute = routes[routes.length - 1]
-  const name = currentRoute.component.displayName
+  const name = components[currentRoute.componentName].displayName
   let push = name !== PasswordCheck.displayName && name !== LockScreen.displayName
   let defer = Q.defer()
   let route = {
