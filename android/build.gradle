@@ -55,7 +55,7 @@ allprojects {
         resolutionStrategy {
             eachDependency { DependencyResolveDetails details ->
               if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
-                details.useVersion "0.59.3"
+                details.useVersion "0.59.5"
               }
             }
         }
