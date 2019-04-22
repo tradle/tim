@@ -595,7 +595,6 @@ var Store = Reflux.createStore({
     if (!objId)
       return
     let r = this._getItem(objId)
-debug('sent:', r)
     if (r && r._sendStatus !== SENT) {
       r._msg = link
       r._sendStatus = SENT
