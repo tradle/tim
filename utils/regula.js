@@ -6,6 +6,7 @@ import { Platform } from 'react-native'
 import Regula from 'react-native-regula-document-reader'
 import Q from 'q'
 
+import Actions from '../Actions/Actions'
 import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import regulaVisualFieldTypes from './regulaVisualFieldTypes'
@@ -27,26 +28,25 @@ export { Scenario }
 
 export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
-  // await Regula.prepareDatabase({dbID: 'Full'})
+  debugger
 }
-export const prepareDatabase = async (dbID) => {
+export const prepareDatabase = (dbID) => {
   // databaseID = dbID
   if (prepDB)
     return
   prepDB = new Q.defer()
   // debugger
   console.log('Prepare Regula DB')
-  try {
-    await Regula.prepareDatabase({dbID})
+  Regula.prepareDatabase({dbID})
+  .then(() => {
+    console.log('Prepare Regula DB - completed')
+    Actions.preparedRegulaDB(dbID)
     prepDB.resolve()
-  } catch (err) {
+  })
+  .catch(err => {
+    console.log('Prepare Regula DB - rejected')
     prepDB.reject(err)
-    debugger
-    return
-  }
-  console.log('Prepare Regula DB - completed')
-  await initialize()
-  console.log('Initialization Regula DB - completed')
+  })
 }
 const OptsTypeSpec = {
   processParams: {
