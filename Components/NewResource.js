@@ -1250,6 +1250,7 @@ class NewResource extends Component {
                 prop={bl}
                 underlayColor='transparent'
                 style={styles.actionIcon}
+                allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
             </ImageInput>
