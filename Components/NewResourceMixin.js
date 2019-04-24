@@ -686,7 +686,7 @@ var NewResourceMixin = {
       st.flex = 5
     let { bankStyle } = this.props
     let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
-    let autoCapitalize = this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
+    let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
         <FloatLabel
