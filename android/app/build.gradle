@@ -134,14 +134,12 @@ android {
     //     targetCompatibility JavaVersion.VERSION_1_7
     // }
 
-    // compileSdkVersion project.compileSdkVersion
     compileSdkVersion project.compileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     buildToolsVersion project.buildToolsVersion
 
     def vmajor = project.property('VERSION_MAJOR').toInteger()
@@ -157,6 +155,7 @@ android {
         // elliptic curve keys support
         // minSdkVersion project.minSdkVersion
         // targetSdkVersion project.targetSdkVersion
+        missingDimensionStrategy "RNN.reactNativeVersion", "reactNative59"
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
         versionCode vbuild
