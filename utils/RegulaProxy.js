@@ -4,7 +4,7 @@ import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 import { Platform } from 'react-native'
 import Regula from 'react-native-regula-document-reader'
-import Q from 'q'
+import once from 'once'
 
 import Actions from '../Actions/Actions'
 import { importFromImageStore } from './image-utils'
@@ -23,31 +23,12 @@ const LANDSCAPE_ANDROID = 2
 const initializeOpts = {
   licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
 }
-var prepDB //, databaseID
 export { Scenario }
 
-export const setLicenseKey = async (licenseKey) => {
-  initializeOpts.licenseKey = licenseKey
-  debugger
-}
-export const prepareDatabase = (dbID) => {
-  // databaseID = dbID
-  if (prepDB)
-    return
-  prepDB = new Q.defer()
-  // debugger
-  console.log('Prepare Regula DB')
-  Regula.prepareDatabase({dbID})
-  .then(() => {
-    console.log('Prepare Regula DB - completed')
-    Actions.preparedRegulaDB(dbID)
-    prepDB.resolve()
-  })
-  .catch(err => {
-    console.log('Prepare Regula DB - rejected')
-    prepDB.reject(err)
-  })
-}
+// export const setLicenseKey = async (licenseKey) => {
+//   initializeOpts.licenseKey = licenseKey
+// }
+
 const OptsTypeSpec = {
   processParams: {
     scenario: types.oneOf(getValues(Scenario)),
@@ -77,7 +58,6 @@ const OptsTypeSpec = {
     pictureOnBoundsReady: types.bool
   },
 }
-
 const DEFAULTS = {
   functionality: {
     // showTorchButton: false,
@@ -99,33 +79,67 @@ const DEFAULTS = {
   },
 }
 
-const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
-export const scan = async (opts={}) => {
-  try {
-    prepDB  &&  await prepDB.promise
-  } catch (err) {
-    console.log('Something went wrong', err)
-    // this.prepareDatabase(databaseID)
-    debugger
-  }
-  opts = defaultsDeep(opts, DEFAULTS)
+class RegulaProxy {
+  constructor() {
+    this._prepared = new Promise((resolve, reject) => {
+      this._prepareSucceeded = resolve
+      this._prepareFailed = reject
+    })
 
-  validateType({
-    input: opts,
-    spec: OptsTypeSpec,
-    allowExtraProps: false,
+    this._initialized = new Promise((resolve, reject) => {
+      this._initializeSucceeded = resolve
+      this._initializeFailed = reject
+    })
+  }
+
+  prepareDatabase = once(async (dbID) => {
+    try {
+      await Regula.prepareDatabase({dbID})
+      this._prepareSucceeded()
+      Actions.preparedRegulaDB(dbID)
+    } catch (err) {
+      console.log('Prepare Regula DB failed', err)
+      this._prepareFailed(err)
+    }
   })
 
-  await initialize()
-  // opts will be supported soon
-  const result = await Regula.scan(opts)
+  initialize = once(async (prepared) => {
+    !prepared  &&  await this._prepared
+    debugger
+    try {
+      await Regula.initialize(initializeOpts)
+      this._initializeSucceeded()
+    } catch (err) {
+      debugger
+      console.log('initialization Regula DB failed', err)
+      this._intializeFailed(err)
+    }
+  })
 
-  return normalizeResult(result)
+  scan = async (opts={}) => {
+    debugger
+    await this._initialized
+    /// ...scan
+    opts = defaultsDeep(opts, DEFAULTS)
+
+    validateType({
+      input: opts,
+      spec: OptsTypeSpec,
+      allowExtraProps: false,
+    })
+    // await initialize()
+    // opts will be supported soon
+    const result = await Regula.scan(opts)
+
+    return normalizeResult(result)
+  }
+  setLicenseKey = async (licenseKey) => {
+    initializeOpts.licenseKey = licenseKey
+  }
 }
-export const initialize = async () => {
-  // debugger
-  await Regula.initialize(initializeOpts)
-}
+export default new RegulaProxy()
+
+const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side

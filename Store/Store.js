@@ -31,7 +31,8 @@ import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
 import { uploadLinkedMedia } from '../utils/upload-linked-media'
 import Debug from 'debug'
-import { prepareDatabase } from '../utils/regula'
+// import { prepareDatabase } from '../utils/regula'
+import RegulaProxy from '../utils/RegulaProxy'
 import createProcessor from 'level-change-processor'
 
 const SENT = 'Sent'
@@ -2351,27 +2352,29 @@ var Store = Reflux.createStore({
   },
   async initRegula() {
     let env
-    console.log(`Check: ${MY_REGULA}`)
     try {
       env = await db.get(MY_REGULA)
-      // some props like api keys may have been updated
+      if (env.dbID) {
+        RegulaProxy.initialize(true)
+        return
+      }
     } catch (err) {
       debugger
+    }
+
+    let dbID = 'Full'
+    RegulaProxy.prepareDatabase(dbID)
+  },
+  async onPreparedRegulaDB(dbID) {
+    RegulaProxy.initialize()
+    let env
+    try {
+      env = await db.get(MY_REGULA)
+    } catch (err) {
       env = {}
     }
-
-    // Check is DB was already prepared
-    if (env.dbID)
-      return
-    let dbID = 'Full'
-
-    try {
-      await prepareDatabase(dbID)
-      _.set(env, 'dbID', dbID)
-      await db.put(MY_REGULA, env)
-    } catch(err) {
-      debug('Error preparing Regula DB', err.stack)
-    }
+    _.set(env, 'dbID', dbID)
+    await db.put(MY_REGULA, env)
   },
   parseProvider(sp, params, providerIds, newProviders) {
     if (!params)
@@ -11534,6 +11537,7 @@ await fireRefresh(val.from.organization)
       {
         path: `regula.licenseKey.${Platform.OS}`,
         get component() {
+          return RegulaProxy
           return require('../utils/regula')
         },
       },
