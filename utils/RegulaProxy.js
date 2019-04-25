@@ -104,7 +104,7 @@ class RegulaProxy {
   })
 
   initialize = once(async (prepared) => {
-    !prepared  &&  await this._prepared
+    await this._prepared
     debugger
     try {
       await Regula.initialize(initializeOpts)
