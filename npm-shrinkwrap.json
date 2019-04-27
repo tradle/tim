@@ -7031,9 +7031,9 @@
       "resolved": "https://registry.npmjs.org/react-native-fabric-crashlytics/-/react-native-fabric-crashlytics-0.1.8.tgz"
     },
     "react-native-facetec-zoom": {
-      "version": "1.1.0",
-      "from": "tradle/react-native-facetec-zoom",
-      "resolved": "git://github.com/tradle/react-native-facetec-zoom.git#aecd2d6940d4cf45abb7069b14c8474988cb5538"
+      "version": "1.2.0",
+      "from": "react-native-facetec-zoom@latest",
+      "resolved": "https://registry.npmjs.org/react-native-facetec-zoom/-/react-native-facetec-zoom-1.2.0.tgz"
     },
     "react-native-flexbox-grid": {
       "version": "0.3.2",
