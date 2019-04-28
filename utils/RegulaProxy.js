@@ -6,7 +6,6 @@ import { Platform } from 'react-native'
 import Regula from 'react-native-regula-document-reader'
 import once from 'once'
 
-import Actions from '../Actions/Actions'
 import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import regulaVisualFieldTypes from './regulaVisualFieldTypes'
@@ -20,9 +19,6 @@ const { Scenario } = Regula
 const LANDSCAPE_RIGHT_IOS = 8
 const LANDSCAPE_ANDROID = 2
 
-const initializeOpts = {
-  licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
-}
 export { Scenario }
 
 // export const setLicenseKey = async (licenseKey) => {
@@ -90,36 +86,39 @@ class RegulaProxy {
       this._initializeSucceeded = resolve
       this._initializeFailed = reject
     })
+    this.initializeOpts = {
+      licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
+    }
   }
 
   prepareDatabase = once(async (dbID) => {
     try {
       await Regula.prepareDatabase({dbID})
       this._prepareSucceeded()
-      Actions.preparedRegulaDB(dbID)
     } catch (err) {
       console.log('Prepare Regula DB failed', err)
       this._prepareFailed(err)
     }
+    return this._prepared
   })
 
   initialize = once(async (prepared) => {
     await this._prepared
     debugger
     try {
-      await Regula.initialize(initializeOpts)
+      await Regula.initialize(this.initializeOpts)
       this._initializeSucceeded()
     } catch (err) {
       debugger
       console.log('initialization Regula DB failed', err)
       this._intializeFailed(err)
     }
+    return this._initialized
   })
 
   scan = async (opts={}) => {
     debugger
     await this._initialized
-    /// ...scan
     opts = defaultsDeep(opts, DEFAULTS)
 
     validateType({
@@ -134,7 +133,7 @@ class RegulaProxy {
     return normalizeResult(result)
   }
   setLicenseKey = async (licenseKey) => {
-    initializeOpts.licenseKey = licenseKey
+    this.initializeOpts.licenseKey = licenseKey
   }
 }
 export default new RegulaProxy()

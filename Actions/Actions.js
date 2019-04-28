@@ -80,8 +80,7 @@ var asyncActions = [
   'verifyOrCorrect',
   'importData',
   'stepIndicatorPress',
-  'showStepIndicator',
-  'preparedRegulaDB'
+  'showStepIndicator'
 ]
 
 var syncActions = [

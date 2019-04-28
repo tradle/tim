@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native'
 import PropTypes from 'prop-types'
-
+import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
@@ -86,9 +86,7 @@ class MessageList extends Component {
     let { resource, filter, application, navigator } = props
     this.state = {
       isLoading: true,
-      // selectedAssets: {},
       isConnected: navigator.isConnected,
-      // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  resource  &&  utils.isEmployee(resource),
       filter: filter,
@@ -872,6 +870,7 @@ class MessageList extends Component {
         textInputHeight={textInputHeight}
         menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
+        keyboardType={'default'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
         hideTextInput={hideTextInput}
@@ -1301,8 +1300,12 @@ class MessageList extends Component {
   }
 
   onSubmitEditing(msg) {
+    if (isAndroid())
+      dismissKeyboard()
+
     if (!msg  ||  !msg.trim())
       return
+
     let me = utils.getMe();
     let { resource, application, modelName } = this.props
     if (!modelName)

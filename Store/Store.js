@@ -492,7 +492,7 @@ var Store = Reflux.createStore({
       return await this.wipe()
     }
     if (!utils.isWeb())
-      await this.initRegula()
+      this.initRegula()
 
     await this.getReady()
     // if (ENV.yukiOn) {
@@ -2359,21 +2359,14 @@ var Store = Reflux.createStore({
         return
       }
     } catch (err) {
+      env = {}
       debugger
     }
 
     let dbID = 'Full'
-    RegulaProxy.prepareDatabase(dbID)
-  },
-  async onPreparedRegulaDB(dbID) {
-    RegulaProxy.initialize()
-    let env
-    try {
-      env = await db.get(MY_REGULA)
-    } catch (err) {
-      env = {}
-    }
-    _.set(env, 'dbID', dbID)
+    await RegulaProxy.prepareDatabase(dbID)
+    await RegulaProxy.initialize()
+    env.dbID = dbID
     await db.put(MY_REGULA, env)
   },
   parseProvider(sp, params, providerIds, newProviders) {
