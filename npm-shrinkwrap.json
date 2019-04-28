@@ -7053,7 +7053,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#3ae81f57b5982f42876a93c0d01037a0137da633"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#8f4dfd43e1d98472a8ef36cc630f095751817706"
     },
     "react-native-gifted-spinner": {
       "version": "0.1.0",
