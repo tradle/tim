@@ -7033,7 +7033,7 @@
     "react-native-facetec-zoom": {
       "version": "1.2.0",
       "from": "react-native-facetec-zoom@latest",
-      "resolved": "https://registry.npmjs.org/react-native-facetec-zoom/-/react-native-facetec-zoom-1.2.0.tgz"
+      "resolved": "http://registry.npmjs.org/react-native-facetec-zoom/-/react-native-facetec-zoom-1.2.0.tgz"
     },
     "react-native-flexbox-grid": {
       "version": "0.3.2",
@@ -7053,7 +7053,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#70bcfb15b93fb1919ce6b228a7042a1bc77bb468"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#3ae81f57b5982f42876a93c0d01037a0137da633"
     },
     "react-native-gifted-spinner": {
       "version": "0.1.0",
