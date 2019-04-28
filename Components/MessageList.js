@@ -10,7 +10,6 @@ import {
   Alert,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
@@ -1300,9 +1299,6 @@ class MessageList extends Component {
   }
 
   onSubmitEditing(msg) {
-    if (isAndroid())
-      dismissKeyboard()
-
     if (!msg  ||  !msg.trim())
       return
 
