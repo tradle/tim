@@ -20,6 +20,9 @@ module.exports = {
   get ApplicationView() {
     return require('./ApplicationView')
   },
+  get SignatureView() {
+    return require('./SignatureView')
+  },
   get ArticleView() {
     return require('./ArticleView')
   },
