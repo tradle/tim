@@ -7180,11 +7180,6 @@
       "from": "react-native-search-bar@>=3.4.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/react-native-search-bar/-/react-native-search-bar-3.4.2.tgz"
     },
-    "react-native-signature-pad": {
-      "version": "0.0.8",
-      "from": "tradle/react-native-signature-pad",
-      "resolved": "git://github.com/tradle/react-native-signature-pad.git#0eaa3c6d1d2ca78a6a1a48aa05611ff917362692"
-    },
     "react-native-splash-screen": {
       "version": "3.2.0",
       "from": "react-native-splash-screen@>=3.0.9 <4.0.0",

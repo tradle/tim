@@ -199,6 +199,7 @@
     "react-native-tradle-keeper": "github:tradle/react-native-tradle-keeper",
     "react-native-udp": "^2.0.0",
     "react-native-vector-icons": "^4.1.1",
+    "react-native-webview": "^5.7.2",
     "react-timer-mixin": "^0.13.3",
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",

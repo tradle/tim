@@ -276,6 +276,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':react-native-webview')
     implementation project(':@react-native-community_viewpager')
     implementation project(':@react-native-community_netinfo')
     implementation 'com.facetec:zoom-authentication-hybrid:7.0.11'
