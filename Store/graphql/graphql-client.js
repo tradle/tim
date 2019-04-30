@@ -210,10 +210,10 @@ var search = {
               if (val.charAt(val.length - 1) === '*')
                 op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
               else
-                op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
+                op.CONTAINS = `\n   ${p}: "${val.substring(1)}",`
             }
             else if (val.charAt(len - 1) === '*')
-              op.CONTAINS = `\n   ${p}: "${val.substring(0, len - 1)}",`
+              op.STARTS_WITH = `\n   ${p}: "${val.substring(0, len - 1)}",`
           }
         }
         else if (props[p].type === 'boolean') {
