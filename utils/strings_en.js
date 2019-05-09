@@ -41,7 +41,7 @@ module.exports = {
     "enterYourName": "Enter your name",
     "addServerUrl": "Add server url",
     "search": "Search",
-    "searchSomething": "Search {1}",
+    "searchSomething": "Search - {1}",
     "hello": "Hello {1}!",
     "testForgetMe": "This is a test mechanism to reset all communications with this provider",
     "confirmForgetMe": "Are you sure you want '{1}' to forget you",
