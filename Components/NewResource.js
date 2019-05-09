@@ -163,8 +163,6 @@ class NewResource extends Component {
     if (!isUpdate)
       isUpdate = !utils.compare(this.props.resource, nextProps.resource)
     return isUpdate
-           // nextState.isModalOpen !== this.state.isModalOpen  ||
-           // this.state.modalVisible != nextState.modalVisible ||
   }
   componentWillMount() {
     let { resource } = this.state
@@ -396,8 +394,6 @@ class NewResource extends Component {
     });
     if (currentRoutesLength != 2)
       navigator.pop();
-//     console.log('onAction: submitted = false')
-//     this.state.submitted = false
   }
   // Show providers this resource was shared with and allow customer to choose
   // which providers to share the changes with
@@ -474,9 +470,6 @@ class NewResource extends Component {
     let missedRequiredOrErrorValue = {}
     let noRequiredValidation = containerResource && prop  && prop.partial
     if (noRequiredValidation) {
-      // let err = this.validateProperties(json)
-      // for (let p in err)
-      //   missedRequiredOrErrorValue[p] = err[p]
       containerResource[prop.name] = json
       if (!json[TYPE])
         json[TYPE] = resource[TYPE]
@@ -493,13 +486,6 @@ class NewResource extends Component {
     let err = this.validateProperties(json)
     for (let p in err)
       missedRequiredOrErrorValue[p] = err[p]
-
-    // if ('scanJson' in missedRequiredOrErrorValue) {
-    //   if (utils.isAndroid() || utils.isWeb()) {
-    //     delete missedRequiredOrErrorValue.scanJson
-    //     json.scanJson = { ocrNotSupported: true }
-    //   }
-    // }
 
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       console.log('onSavePressed not all required: submitted = false')
@@ -628,8 +614,6 @@ class NewResource extends Component {
         return
       if (resource[p].currency)
         v.currency = resource[p].currency
-      // else if (currency)
-      //   v.currency = currency
       else
         missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       return
@@ -682,10 +666,6 @@ class NewResource extends Component {
   onNewPressed(bl) {
     let resource = this.addFormValues();
     this.setState({resource: resource, err: '', inFocus: bl.name});
-    // if (bl.name === 'photos') {
-    //   this.showChoice(bl);
-    //   return;
-    // }
     let { bankStyle, currency, model, navigator } = this.props
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
     if (bl.items.ref  &&  bl.allowToAdd) {
@@ -917,17 +897,6 @@ class NewResource extends Component {
                     </View>
     }
 
-    // let submit
-    // if (!isRegistration)
-    //   submit = <View style={styles.submitButton}>
-    //              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
-    //                 <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
-    //                   <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
-    //                   <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
-    //                 </View>
-    //               </TouchableOpacity>
-    //             </View>
-    // StatusBar.setHidden(true);
     let submit
     if (!isRegistration  &&  !isRefresh) {
       let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
@@ -991,10 +960,6 @@ class NewResource extends Component {
         errors = <View style={styles.errors}>
                    <Text style={styles.errorsText}>{translate('fillRequiredFields')}</Text>
                  </View>
-        // errors = <View style={{height: 35, justifyContent: 'center', alignItems: 'flex-end'}}>
-        //            <Text style={{color: '#990000', fontSize: 14, paddingRight: 10}}>{'Please fill out all required properties'}</Text>
-        //          </View>
-
       }
       else if (this.state.message) {
         errors = <View style={styles.errors}>
@@ -1014,11 +979,6 @@ class NewResource extends Component {
               </PageView>
 
     }
-    // let title
-    // if (!isRegistration  &&  !bankStyle.logoNeedsText)
-    //   title = <View style={styles.logoNeedsText}>
-    //             {translate(meta)}
-    //           </View>
 
     let title = <View style={styles.logo}>
                   <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
