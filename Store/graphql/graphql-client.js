@@ -910,7 +910,7 @@ var search = {
     })
 
     if (list) {
-      const pubKeyMapping = getFirstNode(list)
+      const pubKeyMapping = getFirstNode(list.result)
       if (pubKeyMapping) {
         return search.getIdentityByLink({ link: pubKeyMapping.link, client })
       }
@@ -967,8 +967,11 @@ var search = {
     let variables = versionId  &&  {modelsVersionId: versionId} || undefined
     try {
       let data = await client.rawRequest(query, variables)
-      if (data.data)
+      if (data.data) {
+        // if (data.data[table].objects)
+        //   data.data[table].objects = data.data[table].objects.filter(r => r !== null)
         return {result: data.data[table]}
+      }
       else
         return {error: JSON.stringify(data.errors  &&  data.errors || data)}
     } catch (error) {
