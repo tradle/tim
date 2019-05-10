@@ -662,7 +662,15 @@ debug('sent:', r)
         obj.from = {[ROOT_HASH]: saved.object  &&  saved.object._org  || saved.author}
         debug('newObject (unwrapped):', originalPayload[TYPE])
       } catch (err) {
-        if (err.type !== 'exists') throw err
+        // if (err.type === 'unknownidentity') {
+        //   try {
+        //     await this.requestIdentity({[err.property]: err.value})
+        //   } catch (err) {
+        //     debugger
+        //   }
+        // }
+        // else
+          if (err.type !== 'exists') throw err
         obj.from = {[ROOT_HASH]: msg.objectinfo.author}
       }
       obj.objectinfo = msg.objectinfo
@@ -1825,9 +1833,14 @@ debug('sent:', r)
     }
 
     if (!permalink) permalink = storeUtils.getPermalink(identity)
+// debugger
     if (!(permalink in this._identityPromises)) {
       this._identityPromises[permalink] = this._enginePromise
         .then(engine => storeUtils.addContactIdentity(engine, { identity, permalink }))
+        .catch(err => {
+          debugger
+          throw err
+         })
     }
 
     // if meDriver is not available, don't lock everything up
@@ -3713,7 +3726,9 @@ debug('sent:', r)
 
     let contextId, lens
     if (formRequest) {
-      contextId = formRequest._context  &&  this._getItem(formRequest._context).contextId
+      contextId = formRequest.context
+      if (!contextId  &&  formRequest._context)
+        contextId = formRequest._context.contextId  ||  this._getItem(formRequest._context).contextId
       lens = formRequest.lens
     }
     let hasThisShare
@@ -3815,7 +3830,8 @@ if (!res[SIG]  &&  res._message)
       if (!items  ||  !items.backlink)
         continue;
       let blList = await this.getBacklinkResources(props[p], res)
-      res[p] = blList
+      if (blList)
+        res[p] = blList
     }
 
     if (noTrigger)
@@ -3882,7 +3898,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
 
-    let list
+    let list, style
     // let m = this.getModel(r[TYPE])
     if (isApplication) {
       let link = forwardlink  ||  backlink
@@ -3910,6 +3926,10 @@ if (!res[SIG]  &&  res._message)
         if (context)
           r._context = context
       }
+      let applicant = this._getItem(r.applicant.id.replace(IDENTITY, PROFILE))
+      if (applicant  &&  applicant.organization) {
+        style = this._getItem(applicant.organization).style
+      }
     }
     else if (application) {
       if (!r._context) {
@@ -3927,7 +3947,7 @@ if (!res[SIG]  &&  res._message)
       if (context)
         r._context = context
     }
-    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink}
+    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
     this.trigger(retParams)
@@ -5517,7 +5537,8 @@ if (!res[SIG]  &&  res._message)
     try {
       if (me.isEmployee) {
         await this.shareResources(documents, to, formRequest, shareBatchId)
-        documents.forEach(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId}))
+        await Promise.all(documents.map(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId})))
+        // documents.forEach(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId}))
       }
       else
         await Promise.all(documents.map(resource => this.shareForm({resource, to, formRequest, batch, shareBatchId})))
@@ -5527,11 +5548,15 @@ if (!res[SIG]  &&  res._message)
       debugger
     }
   },
-  handleSharedDoc({resource, to, batch, formRequest, shareBatchId}) {
+  async handleSharedDoc({resource, to, batch, formRequest, shareBatchId}) {
     if (!resource._sharedWith) {
       resource._sharedWith = []
-      if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource))
-        this.addSharedWith({ resource, shareWith: resource.to, time: resource._time, shareBatchId, formRequest })
+      if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource)) {
+        let shareWith = await this.getSentTo(resource)
+        if (!shareWith)
+          debugger
+        this.addSharedWith({ resource, shareWith, time: resource._time, shareBatchId, formRequest })
+      }
     }
     let time = new Date().getTime()
     this.addSharedWith({ resource, shareWith: to, time, shareBatchId, formRequest })
@@ -5545,6 +5570,28 @@ if (!res[SIG]  &&  res._message)
       resource.to = to
       this._setItem(docId, resource, batch)
       this.dbBatchPut(docId, resource)
+    }
+  },
+  async getSentTo(resource, batch) {
+    if (!me.isEmployee  ||  utils.getId(resource.from) !== utils.getId(resource.to))
+      return resource.to
+    if (resource._sentTo)
+      return this.getRepresentative(resource._sentTo.id)
+    // let shareWith = await this.getSentTo(resource)
+
+    try {
+      let msgStream = meDriver.objects.messagesWithObject({ permalink: resource[ROOT_HASH] })
+      let msgs = await collect(msgStream)
+      if (!msgs.length)
+        return
+      let msg = msgs.find(m => m.objectinfo.link === resource[CUR_HASH])
+      let forward = msg.object.forward
+      let to = this._getItem([PROFILE, forward, forward].join('_'))
+      resource._sentTo = to.organization
+      return to
+      // debugger
+    } catch(err) {
+      debugger
     }
   },
 
@@ -5591,7 +5638,7 @@ if (!res[SIG]  &&  res._message)
   },
   async shareForm({resource, to, formRequest, batch, shareBatchId}) {
     await this.shareResource({resource, to, formRequest, shareBatchId})
-    this.handleSharedDoc({resource, to, formRequest, batch, shareBatchId})
+    await this.handleSharedDoc({resource, to, formRequest, batch, shareBatchId})
   },
   async shareVerification({resource, to, formRequest, batch, shareBatchId}) {
     await this.shareResource({resource, to, formRequest, shareBatchId})
@@ -5869,16 +5916,16 @@ if (!res[SIG]  &&  res._message)
     // if (params.prop)
     //   debugger
     if (params.search &&  me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION  &&  !utils.isEnum(meta)) {
-      // if (exploreData)
-      //   Actions.showModal({title: translate('searching'), showIndicator: true})
+      if (exploreData)
+        Actions.showModal({title: translate('searching'), showIndicator: true})
       try {
         return await this.searchServer(params)
       } catch (error) {
         Alert.alert(error.message)
         return
       } finally {
-        // if (exploreData)
-        //   Actions.hideModal()
+        if (exploreData)
+          Actions.hideModal()
       }
     }
 
@@ -6682,6 +6729,16 @@ if (!res[SIG]  &&  res._message)
     rr[IS_MESSAGE] = true
     this.rewriteStubs(rr)
     if (m.id === APPLICATION) {
+      if (rr.applicant  &&  !rr.applicantName) {
+        let applicant = this._getItem(rr.applicant.id.replace(IDENTITY, PROFILE))
+        if (applicant) {
+          if (applicant.organization)
+            rr.applicantName = utils.getDisplayName(applicant.organization)
+          else
+            rr.applicantName = utils.getDisplayName(applicant)
+        }
+      }
+
       this.organizeSubmissions(rr)
     }
     this.addVisualProps(rr)
@@ -8340,10 +8397,16 @@ if (!res[SIG]  &&  res._message)
 
     this.trigger({action: 'multiEntryList', list})
   },
+  async onShowAllShareables(resource, to) {
+    let shareableResources = await this.getShareableResources({foundResources: [resource], to, context: resource._context})
+    if (!shareableResources)
+      return
+    this.trigger({action: 'showShare', shareableResources, resource})
+  },
   // Gathers resources that were created on this official account to figure out if the
   // customer has some other official accounts where he already submitted this information
   async getShareableResources(params) {
-    let {foundResources, to, context, filter} = params
+    let {foundResources, to, context, filter, limit} = params
     if (!foundResources)
       return
     if (utils.isAgent()  &&  (context.requestFor === CUSTOMER_ONBOARDING ||  context.requestFor === CUSTOMER_KYC))
@@ -8397,7 +8460,7 @@ if (!res[SIG]  &&  res._message)
     var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
     var self = this
 
-    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true })
+    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, limit: limit || 20 })
     if (productsToShare  &&   productsToShare.length) {
       productsToShare.forEach((r) => {
         // let fromId = utils.getId(r.from)
@@ -8438,7 +8501,7 @@ if (!res[SIG]  &&  res._message)
     if (!shareType)
       return {verifications: shareableResources}
     // let toId = utils.getId(to)
-    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: shareType}})
+    let l = await this.searchSharables({modelName: VERIFICATION, limit: limit || 20, filterResource: {[TYPE]: shareType}})
     // if (!l)
     //   return
     let verifiedShares = {}
@@ -8476,7 +8539,7 @@ if (!res[SIG]  &&  res._message)
     if (hasVerifiers  &&  hasVerifiers[shareType])
       return
     let verModel = this.getModel(shareType)
-    let result = await this.searchSharables({modelName: shareType}) //, context: shareType === LEGAL_ENTITY ? formRequest._context : null})
+    let result = await this.searchSharables({modelName: shareType, limit: limit || 20}) //, context: shareType === LEGAL_ENTITY ? formRequest._context : null})
     let promises = []
     if (result) {
       if (shareType === LEGAL_ENTITY)
@@ -8556,7 +8619,7 @@ if (!res[SIG]  &&  res._message)
   },
 
   async getShareableResourcesForEmployee(params) {
-    let {foundResources, to, context} = params
+    let {foundResources, to, context, limit} = params
     if (!foundResources)
       return
     // no shareable for employee in his employee chat
@@ -8653,6 +8716,7 @@ if (!res[SIG]  &&  res._message)
       modelName: shareType,
       filterResource: {_org: myRep[CUR_HASH]},
       noTrigger: true,
+      // limit: limit || 20
     })
 
     if (!ll  ||  !ll.list  ||  !ll.list.length)
@@ -8698,7 +8762,7 @@ if (!res[SIG]  &&  res._message)
 
     // let toId = utils.getId(to)
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
-    let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true,})
+    let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true}) //, limit: limit || 20})
     let verifiedShares ={}
     if (result  &&  result.list) {
       // let rep
@@ -8728,6 +8792,27 @@ if (!res[SIG]  &&  res._message)
         this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
       })
     }
+    let verifications = shareableResources[shareType]
+    if (verifications  &&  verifications.length) {
+      let document = verifications[0].document
+      if (!verifiedShares[utils.getId(document)]  &&  utils.getId(document.from) === utils.getId(document.to)) {
+        await this.getSentTo(document)
+        // try {
+        //   let msgStream = meDriver.objects.messagesWithObject({ permalink: document[ROOT_HASH] })
+        //   let msgs = await collect(msgStream)
+        //   if (msgs.length) {
+        //     let msg = msgs.find(m => m.objectinfo.link === document[CUR_HASH])
+        //     let forward = msg.object.forward
+        //     let to = this._getItem([PROFILE, forward, forward].join('_'))
+        //     document._sentTo = to.organization
+        //   }
+        //   // debugger
+        // } catch(err) {
+        //   debugger
+        // }
+      }
+    }
+
 
     let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
@@ -10338,6 +10423,12 @@ if (!res[SIG]  &&  res._message)
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
+    if (isReadOnly  &&  me.isEmployee) {
+      if (to.organization  &&  to.organization.id === me.organization.id)
+        isReadOnly = false
+      else if (from.organization  &&  to.organization.id === me.organization.id)
+        isReadOnly = false
+    }
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
     // HACK for showing verification in employee's chat
     // if (isNew)
@@ -10498,7 +10589,7 @@ await fireRefresh(val.from.organization)
       if (contextId  &&  me.isEmployee  &&  (isMyProduct || utils.isForm(model))) {
         // Update application row and view if on stack
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
-        let app = applications  &&  applications.list.length && applications.list[0]
+        let app = applications  &&  applications.list &&  applications.list.length && applications.list[0]
         if (app) {
           application = app
           if (utils.isRM(app)) {
@@ -10585,6 +10676,8 @@ await fireRefresh(val.from.organization)
       _.extend(v, val)
       this._setItem(key, v)
     }
+    this.dbBatchPut(key, val, batch)
+    this.addVisualProps(val)
     if (!noTrigger) {
       if (!context)
         context = val._context ? this._getItem(utils.getId(val._context)) : null
@@ -10644,8 +10737,6 @@ await fireRefresh(val.from.organization)
         this.addMessagesToChat(oId, val)
       }
     }
-    this.dbBatchPut(key, val, batch)
-    this.addVisualProps(val)
     this.addLastMessage(val, batch)
     return { noTrigger, application, isRM }
 
@@ -10808,8 +10899,8 @@ await fireRefresh(val.from.organization)
           meContext = list.filter((c) => c.from.id === botId)
 
         context = meContext  &&  meContext[0] ||  contexts[0]
-        context.to = utils.clone(val.from)
       }
+      context.to = utils.clone(val.from)
       this.addVisualProps(context)
     }
     else {
@@ -11475,7 +11566,7 @@ await fireRefresh(val.from.organization)
     if (typeof id !== 'string')
       id = utils.getId(id)
     if (!this.client) {
-      debugger
+      // debugger
       return
     }
     try {
