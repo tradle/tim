@@ -255,7 +255,10 @@ class ApplicationTabs extends Component {
       })
       let m = utils.getModel(resource.requestFor)
 
-      progress = formTypes.length / m.forms.length
+      if (resource.status === 'approved' || resource.status === 'completed')
+        progress = 1
+      else
+        progress = formTypes.length / m.forms.length
     }
     let progressColor = bankStyle.linkColor
     if (resource.status) {

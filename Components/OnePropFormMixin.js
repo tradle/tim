@@ -143,6 +143,8 @@ var OnePropFormMixin = {
           // optional customization options
           // see defaults.js for the full list
           // showZoomIntro: false,
+          topMargin: 1,
+          sizeRatio: 1,
           showPreEnrollmentScreen: false,
           showUserLockedScreen: false,
           showRetryScreen: false,

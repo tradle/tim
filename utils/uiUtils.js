@@ -52,7 +52,6 @@ var uiUtils = {
       onRightButtonPress: {
         title: translate('searchSomething', translate(bm)),
         componentName: NEW_RESOURCE,
-        titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {

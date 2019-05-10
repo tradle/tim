@@ -189,10 +189,10 @@ class VerificationRow extends Component {
       dn = utils.getDisplayName(resource)
     let title
     if (isChooser)
-      title = dn //utils.getDisplayName(resource, model.properties)
+      title = dn
     else if (utils.isItem(model))  {
       if (model.id === FORM_PREFILL)
-        title = translate(utils.getModel(resource.prefill[TYPE])) //utils.getDisplayName(resource, model.properties)
+        title = translate(utils.getModel(resource.prefill[TYPE]))
       else
         title = dn
     }
