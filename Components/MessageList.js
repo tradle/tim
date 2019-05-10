@@ -82,7 +82,7 @@ class MessageList extends Component {
   constructor(props) {
     super(props);
     currentMessageTime = null;
-    let { resource, filter, application, navigator } = props
+    let { resource, filter, application, navigator, bankStyle } = props
     this.state = {
       isLoading: true,
       isConnected: navigator.isConnected,
@@ -95,6 +95,7 @@ class MessageList extends Component {
       hasProducts: resource  &&  this.hasProducts(resource),
       allLoaded: false,
       step: -1,
+      bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: utils.getMe()._showStepIndicator
     }
     if (application  &&  utils.isRM(application)) {
@@ -305,8 +306,8 @@ class MessageList extends Component {
     if (!list)
       return
 
-    if (bankStyle   &&  params.bankStyle)
-      _.extend(bankStyle, params.bankStyle)
+    if (this.state.bankStyle   &&  params.bankStyle)
+      _.extend(this.state.bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
     let state = {isLoading: false, isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
@@ -610,10 +611,13 @@ class MessageList extends Component {
     if (!model.notEditable) {
       isVerifier = application  ? utils.isRM(application) : !verification && utils.isVerifier(r)
     }
-    let { resource, bankStyle, currency } = this.props
+    let { resource, currency } = this.props
     let lensId = utils.getLensId(r, resource)
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
+
+    let bankStyle = this.state.bankStyle
+
     let route = {
       title: newTitle,
       backButtonTitle: 'Back',
@@ -706,7 +710,10 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, bankStyle, originatingMessage, currency, navigator } = this.props
+    let { application, isAggregation, originatingMessage, currency, navigator } = this.props
+
+    let bankStyle = this.state.bankStyle
+
     let model = utils.getModel(utils.getType(resource))
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
@@ -716,12 +723,12 @@ class MessageList extends Component {
       context = this.props.resource
     let props = {
       onSelect: this.selectResource,
-      resource: resource,
-      bankStyle: bankStyle,
-      context: context,
+      resource,
+      bankStyle,
+      context,
       application: this.state.application || application,
       to: isAggregation ? resource.to : this.props.resource,
-      navigator: navigator,
+      navigator,
       switchChat: isContext ? this.switchChat.bind(this, resource) : null
     }
     if (utils.isMyProduct(model))
@@ -906,7 +913,7 @@ class MessageList extends Component {
         {backgroundImage}
         {network}
         <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
-        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
+        <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
         {stepIndicator}
         <View style={ sepStyle } />
         {content}
@@ -920,6 +927,9 @@ class MessageList extends Component {
     return !!this.getActionSheetItems()
   }
   getStepIndicator(context) {
+    const { application } = this.props
+    if (application)
+    return
     if (!utils.getMe()._showStepIndicator ||  !context  ||  !context._formsTypes)
       return
 // const customStyles = {
@@ -945,8 +955,7 @@ class MessageList extends Component {
 //   labelSize: 13,
 //   currentStepLabelColor: '#fe7013'
 // }
-    const { bankStyle } = this.props
-    const { list, step } = this.state
+    const { list, step, bankStyle } = this.state
     let rgb = utils.hexToRgb(bankStyle.linkColor)
     rgb = Object.values(rgb).join(',')
     let unfinishedColor = `rgba(${rgb},0.5)`
@@ -1017,7 +1026,9 @@ class MessageList extends Component {
     if (appSubmitted  &&  startingPosition + MAX_STEPS < allSteps) // startingPosition + MAX_STEPS < allSteps)
       iconRight = <Icon name='md-arrow-dropright' size={25} color={bankStyle.linkColor} style={{position: 'absolute', right: 10, zIndex: 1000}}/>
 
-    return <View style={{marginTop: -15}}>
+    let addStyle = isWeb() ? {marginTop: -15, alignSelf: 'center', width: utils.getContentWidth(MessageList) + 50, paddingBottom: 3} : {marginTop: -15}
+
+    return <View style={addStyle}>
              {iconLeft}
              <StepIndicator
                customStyles={customStyles}
@@ -1089,7 +1100,7 @@ class MessageList extends Component {
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         strings:   this.state.additionalForms, // model.additionalForms,
-        bankStyle: this.props.bankStyle,
+        bankStyle: this.state.bankStyle,
         callback:  (val) => {
           let m = utils.getModel(val)
           let msg = {
@@ -1202,19 +1213,21 @@ class MessageList extends Component {
   // Form request states taht the provider will be accepting verifications from one of the
   // listed providers
   chooseTrustedProvider(r, model, isMyMessage) {
-    this.props.navigator.push({
+    const { bankStyle } = this.state
+    const { to, currency, navigator } = this.props
+    navigator.push({
       title: translate('trustedProviders'),
-      titleTextColor: this.props.bankStyle.verifiedBorderColor,
+      titleTextColor: bankStyle.verifiedBorderColor,
       backButtonTitle: 'Back',
       componentName: 'VerifierChooser',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       // titleTextColor: '#7AAAC3',
       passProps:  {
         modelName: ORGANIZATION,
-        provider: this.props.to,
-        bankStyle: this.props.bankStyle,
+        provider: to,
+        bankStyle,
         originatingMessage: r,
-        currency: this.props.bankStyle
+        currency
       }
     });
   }
@@ -1337,33 +1350,33 @@ class MessageList extends Component {
         resource: to,
         modelName: MESSAGE,
         currency: this.props.currency,
-        bankStyle:  this.props.bankStyle
+        bankStyle:  this.state.bankStyle
       }
     })
   }
   productChooser() {
+    const { productList, bankStyle } = this.state
     let prModel = utils.getModel(PRODUCT_REQUEST)
     let prop = prModel.properties.requestFor
-    let oResource = this.state.productList
-    let model = utils.getModel(oResource.form)
+    let model = utils.getModel(productList.form)
     let resource = {
       [TYPE]: model.id,
       from: utils.getMe(),
-      to: oResource.from
+      to: productList.from
     }
-    if (oResource._context)
-      resource._context = oResource._context
+    if (productList._context)
+      resource._context = productList._context
     this.props.navigator.push({
       title: translate(prop, prModel),
       componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        strings:   oResource.chooser.oneOf,
-        bankStyle: this.props.bankStyle,
+        strings:   productList.chooser.oneOf,
+        bankStyle,
         callback:  (val) => {
           resource[prop.name] = val
-          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+          Actions.addChatItem({resource, disableFormRequest: productList})
         },
       }
     });
