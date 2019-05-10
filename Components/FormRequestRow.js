@@ -15,6 +15,7 @@ import { CardIOUtilities } from 'react-native-awesome-card-io';
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
+import Reflux from 'reflux'
 // const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
@@ -33,6 +34,7 @@ import OnePropFormMixin from './OnePropFormMixin'
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
 import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
 
 import { circled } from '../styles/utils'
@@ -131,8 +133,17 @@ class FormRequestRow extends Component {
         easing: Easing.bounce
       }        // Configuration
     ).start();
-  }
 
+    this.listenTo(Store, 'onAction');
+  }
+  onAction(params) {
+    const { action, shareableResources, resource } = params
+    if (action !== 'showShare')
+      return
+    if (resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+      return
+    this.showDocumentsToShare(shareableResources)
+  }
   shouldComponentUpdate(nextProps, nextState) {
     let { resource, to } = this.props
     if (this.props.sendStatus !== nextProps.sendStatus)
@@ -287,7 +298,6 @@ class FormRequestRow extends Component {
                           </View>
                       </View>
 
-    // onPressCall = prop  &&  !prop.allowPicturesFromLibrary ? this.showCamera({prop: prop}) : onPressCall
     let messageBody
     let isMyProduct = isFormRequest  &&  utils.isMyProduct(resource.form)
     if (prop  ||  isMyProduct  ||  application  ||  resource._documentCreated)
@@ -309,20 +319,10 @@ class FormRequestRow extends Component {
         {contextId}
       </View>
     )
-    // return (
-    //   <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
-    //     {date}
-    //     <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: this.props.bankStyle.VERIFIED_HEADER_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
-    //       {messageBody}
-    //       {sendStatus}
-    //       {shareables}
-    //     </View>
-    //   </View>
-    // )
   }
 
   showShareableResources(styles) {
-    let { resource, shareableResources, productToForms, bankStyle } = this.props
+    let { resource, shareableResources, productToForms, bankStyle, to } = this.props
     if (!shareableResources) // || !this.props.resource.message)
       return null
 
@@ -341,17 +341,11 @@ class FormRequestRow extends Component {
       for (let t in  multientryResources) {
         if (t !== formModel.id)
           continue
-        // let contexts = multientryResources[t]
-        // for (let c in contexts) {
-        //   if (c === resourceContextId)
-        //     continue
-        //   let meShare = this.formatMultiEntryShareable({context: c, verifications: contexts[c], model: formModel})
-          let meverifications = multientryResources[t]
-          if (meverifications.length > 1) {
-            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel, multiChooser: true, styles})
-            vtt.push(meShare)
-          }
-        // }
+        let meverifications = multientryResources[t]
+        if (meverifications.length > 1) {
+          let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel, multiChooser: true, styles})
+          vtt.push(meShare)
+        }
       }
     }
     if (!vtt.length) {
@@ -359,8 +353,9 @@ class FormRequestRow extends Component {
         if (t !== formModel.id)
           continue
         var ver = verifications[t];
-        // var totalShareables = ver.length
-        ver.forEach((r) => {
+        var totalShareables = ver.length
+        let r = ver[0]
+        // ver.forEach((r) => {
           let document = r.document
           if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
             return
@@ -380,9 +375,21 @@ class FormRequestRow extends Component {
                     {doc}
                   </View>
           }
-          vtt.push(doc);
+          if (totalShareables === 1)
+            vtt.push(doc);
+          else {
+            let total = `You have ${totalShareables} resource to share`
+            vtt.push(
+              <View>
+                {doc}
+                <TouchableOpacity onPress={() => Actions.showAllShareables(resource, to)} style={{alignItems: 'center', padding: 10, borderTopWidth: 1, marginTop: 5, borderTopColor: '#ddd'}}>
+                  <Text style={{font: 14, color: bankStyle.buttonBgColor || bankStyle.linkColor}}>{total}</Text>
+                </TouchableOpacity>
+              </View>
+             )
+          }
           cnt++;
-        })
+        // })
       }
     }
     if (!vtt.length)
@@ -408,24 +415,6 @@ class FormRequestRow extends Component {
             <View style={abStyle}/>
           </View>
     }
-
-
-    // if (number)
-    //   offerToShare = 'goodNews' //`Good news! You already have ${number}. To share tap icon below.`
-    // else
-    //   offerToShare = 'goodNewsFew'  //`Good news! You already have quite a few. To share tap icon below.`
-    // return (
-    //   <View style={styles.shareable} key={this.getNextKey()}>
-    //     <View style={{padding: 5, marginHorizontal: -1, borderTopWidth: 1, borderBottomWidth: 1, borderColor: bankStyle.verifiedHeaderTextColor}}>
-    //       <Text style={styles.assistentText}>{translate(offerToShare, number)}</Text>
-    //     </View>
-    //     <View style={styles.container}>
-    //       <View style={styles.shareablesList}>
-    //         {vtt}
-    //       </View>
-    //     </View>
-    //   </View>
-    //  );
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
         {or}
@@ -455,27 +444,27 @@ class FormRequestRow extends Component {
     let headerStyle = {paddingLeft: 10, width: msgWidth}
 
     let hs = /*isShared ? chatStyles.description :*/ {fontSize: 16, color: '#555555'}
-    // let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
     let displayName
+    let propLabel
     if (utils.isMyProduct(docModel))
       displayName = translate(docModel)
-    else
-      displayName = utils.getDisplayName(document)
+    else {
+      let propsUsed = []
+      displayName = utils.getDisplayName(document, docModel, propsUsed)
+      if (propsUsed.length)
+        propLabel = <Text style={styles.propertyTitle}>{translate(propsUsed[0], docModel)}</Text>
+    }
+
     let headerContent = <View style={headerStyle}>
+                          {propLabel}
                           <Text style={hs}>{displayName}</Text>
                         </View>
 
-    // headerContent = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
-    //                <View style={styles.header}>
-    //                  {headerContent}
-    //                  {arrow}
-    //                </View>
-    //              </TouchableOpacity>
     headerContent = <TouchableOpacity onPress={onSelect.bind(this, {resource: document, verification})}>
-                   <View style={styles.header}>
-                     {headerContent}
-                   </View>
+                     <View style={styles.header}>
+                       {headerContent}
+                     </View>
                  </TouchableOpacity>
     let orgRow = <View/>
     // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
@@ -496,8 +485,8 @@ class FormRequestRow extends Component {
         orgRow = <View style={chatStyles.shareView}>
                    <TouchableOpacity onPress={onPress ? onPress : () =>
                             Alert.alert(
-                              'Sharing ' + docTitle + ' ' + verifiedBy,
-                              'with ' + orgTitle,
+                              `Sharing "${docTitle}"`,
+                              null,
                               [
                                 {text: translate('cancel'), onPress: () => console.log('Canceled!')},
                                 {text: translate('Share'), onPress: share.bind(this, verification, to, resource)},
@@ -505,7 +494,7 @@ class FormRequestRow extends Component {
                           )}>
                     {shareView}
                    </TouchableOpacity>
-                   <View>
+                   <View style={{justifyContent:'center'}}>
                      {headerContent}
                      <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
                        {orgView}
@@ -591,19 +580,19 @@ class FormRequestRow extends Component {
       let meId = utils.getId(utils.getMe())
       if (utils.getId(document.from) === meId)
         verifiedBy = translate('sentTo', verification.organization.title)
-      else
-        verifiedBy = translate('issuedBy', verification.organization.title)
+      else if (document._sentTo)
+        verifiedBy = translate('sentTo', document._sentTo.title)
     }
+    let date = verification.dateVerified || document._time
+    let dateView = <View style={{flexDirection: 'row'}}>
+                     <Text style={styles.verifiedDate}>{utils.formatDate(date)}</Text>
+                   </View>
+
     let orgView = <View style={styles.orgView}>
-                    <Text style={chatStyles.description}>
-                      {verifiedBy}
-                    </Text>
-                      {verification.dateVerified
-                        ? <View style={{flexDirection: 'row'}}>
-                            <Text style={styles.verifiedDate}>{utils.formatDate(verification.dateVerified)}</Text>
-                          </View>
-                        : <View/>
-                      }
+                      <Text style={chatStyles.description}>
+                        {verifiedBy}
+                      </Text>
+                      {dateView}
                     </View>
     return {verifiedBy, orgPhoto, shareView, orgTitle, orgView}
   }
@@ -649,47 +638,37 @@ class FormRequestRow extends Component {
                     {shareView}
                    </TouchableOpacity>
                    <View>
-                   {headerContent}
-                   <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
-                     {orgView}
-                   </TouchableOpacity>
+                     {headerContent}
+                     <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
+                       {orgView}
+                     </TouchableOpacity>
                    </View>
                 </View>
       }
     }
-
-    // let header = <TouchableOpacity onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: true})}>
-    //                <View style={styles.header}>
-    //                  {headerContent}
-    //                  {arrow}
-    //                </View>
-    //              </TouchableOpacity>
     let content = <View style={{flex:1, paddingVertical: 3}}>
                      {orgRow && <View style={styles.hr}/>}
                      {orgRow}
                    </View>
 
-    // let verifiedBy = verification && verification.organization ? verification.organization.title : ''
     return <View style={styles.container} key={this.getNextKey()}>
              {content}
            </View>
   }
+  showDocumentsToShare(shareableResources) {
+    const { navigator, resource, to } = this.props
+    let { verifications } = shareableResources
+    verifications = verifications[resource.form]
+    let documents = verifications.map((v) => v.document)
+    this.showDocuments({documents, verifications, verifiedBy: to.name || to.title, multiChooser: false})
+  }
   showDocuments({documents, verifications, verifiedBy, multiChooser}) {
     let { navigator, bankStyle, resource, to } = this.props
-    // navigator.push({
-    //   title: utils.makeModelTitle(documents[0][TYPE]),
-    //   id: 37,
-    //   component: SimpleResourceList,
-    //   backButtonTitle: 'Back',
-    //   passProps: {
-    //     list: documents,
-    //     bankStyle: bankStyle
-    //   }
-    // })
     let modelName = documents[0][TYPE]
     let m = utils.getModel(modelName)
+    let title = translate(m) + (verifiedBy  &&  ('  →  '  + verifiedBy))
     navigator.push({
-      title: translate(m) + (verifiedBy  &&  ('  →  '  + verifiedBy)),
+      title,
       id: 37,
       component: ShareResourceList,
       backButtonTitle: 'Back',
@@ -901,40 +880,9 @@ class FormRequestRow extends Component {
               msg = <View key={this.getNextKey()}>
                      {this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: (item) => this.onSetMediaProperty(prop.name, item), useImageInput: true})}
                    </View>
-
-              // msg = <View key={this.getNextKey()}>
-              //        <View style={styles.row}>
-              //          <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-              //            <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
-              //          </ImageInput>
-              //          {resource.documentCreated ? null : icon}
-              //        </View>
-                   // </View>
-
-            // let useImageInput
-            // const isScan = prop.scanner //  &&  prop.scanner === 'id-document'
-            // if (utils.isWeb())
-            //   useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
-            // else
-            //   useImageInput = utils.isSimulator()  ||  prop.allowPicturesFromLibrary  ||  !isScan
-
-            // let actionItem
-            // if (useImageInput) {
-            //   actionItem = <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-            //                  <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
-            //                </ImageInput>
-            // }
-            // else
             //   actionItem = <TouchableOpacity underlayColor='transparent' onPress={() => this.showCamera({prop: prop})}>
             //                  <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
             //                </TouchableOpacity>
-
-
-            // msg = <View key={this.getNextKey()}>
-            //        <View style={styles.thumbView}>
-            //          {actionItem}
-            //          {resource._documentCreated ? null : icon}
-            //       </View>
             }
           }
           else if (form.id === IPROOV_SELFIE) {
@@ -1164,14 +1112,17 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       backgroundColor: '#eeeeee',
       height: 1,
       marginHorizontal: -10,
-
     },
-    assistentText: {
-      // color: '#757575',
-      color: bankStyle.verifiedHeaderTextColor,
-      fontStyle: 'italic',
-      fontSize: 17,
-      alignSelf: 'center'
+    assistentBox: {
+      backgroundColor: 'transparent',
+      // marginTop: -8,
+      justifyContent: 'center',
+      // width: 30,
+      height: 30,
+      marginTop: 0,
+      alignSelf: 'center',
+      borderRadius: 15,
+      paddingHorizontal: 10
     },
     white18: {
       color: '#ffffff',
@@ -1199,7 +1150,8 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       paddingLeft: 10,
       marginRight: 10,
       flex: 1,
-      justifyContent: 'center'
+      justifyContent: 'center',
+      alignItems: 'flex-end'
     },
     orText: {
       fontStyle: 'italic',
@@ -1279,23 +1231,12 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       borderColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       borderWidth: StyleSheet.hairlineWidth,
     },
-    // myProductSeparator: {
-    //   backgroundColor: bankStyle.verifiedBg,
-    //   height: 1,
-    //   flex: 1,
-    //   alignSelf: 'stretch'
-    // },
     addMore: {
       color: '#757575', // bankStyle.linkColor,
       fontSize: 18,
       paddingHorizontal: 10,
       width: msgWidth - 50
     },
-    // next: {
-    //   color: '#555555',
-    //   fontSize: 16,
-    //   // paddingLeft: 10
-    // },
     mstyle: {
       borderColor: 'transparent',
       backgroundColor: '#ffffff',
@@ -1318,10 +1259,17 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       paddingVertical: 3,
       backgroundColor: bankStyle.backgroundImage && 'transparent' || bankStyle.backgroundColor
     },
+    propertyTitle: {
+      color: '#aaaaaa',
+      fontSize: 14,
+      // marginTop: -5,
+      paddingBottom: 5
+    }
   })
 })
 reactMixin(FormRequestRow.prototype, RowMixin)
 reactMixin(FormRequestRow.prototype, OnePropFormMixin)
+reactMixin(FormRequestRow.prototype, Reflux.ListenerMixin);
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
