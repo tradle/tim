@@ -63,7 +63,7 @@ class ShowPropertiesView extends Component {
   render() {
     let viewCols = this.getViewCols()
     return (
-      <View style={{paddingBottom: 100}} key={this.getNextKey()}>
+      <View style={{paddingBottom: 50}} key={this.getNextKey()}>
         {viewCols}
       </View>
     );
