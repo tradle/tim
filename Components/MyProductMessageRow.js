@@ -84,6 +84,13 @@ class MyProductMessageRow extends Component {
     if (utils.isAgent()  &&   model.id === 'tradle.MyEmployeeOnboarding')
       model = utils.getModel('tradle.MyAgentOnboarding')
     // end Hack
+    // Product
+    else {
+      let mparts = model.id.split('.')
+      mparts[mparts.length - 1] = mparts[mparts.length - 1].substring(2)
+      model = utils.getModel(mparts.join('.'))
+    }
+
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
