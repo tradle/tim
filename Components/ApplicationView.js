@@ -82,6 +82,7 @@ class ApplicationView extends Component {
       resource: resource,
       isLoading: true,
       isConnected: props.navigator.isConnected,
+      bankStyle: props.bankStyle
     }
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -108,7 +109,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application} = params
+    let {resource, action, backlink, application, style} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -118,11 +119,12 @@ class ApplicationView extends Component {
     case 'getItem':
       this.setState({
         resource: resource,
-        isLoading: false
+        isLoading: false,
+        bankStyle: style || this.state.bankStyle
       })
       break
     case 'exploreBacklink':
-      if (backlink !== this.state.backlink || params.backlinkAdded) {
+      if (backlink !== this.props.backlink || params.backlinkAdded) {
         if (backlink.items.backlink) {
           let r = params.resource || this.state.resource
           this.setState({backlink: backlink, showDetails: false, showDocuments: false}) //, resource: r})
@@ -153,7 +155,7 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected } = this.state
-    let { navigator, bankStyle, currency } = this.props
+    let { navigator, currency, bankStyle } = this.props
 
     hasRM = hasRM  ||  resource.relationshipManagers
     let isRM = hasRM  &&  utils.isRM(resource)
@@ -372,7 +374,8 @@ class ApplicationView extends Component {
   }
 
   openChat() {
-    let { navigator, bankStyle } = this.props
+    let { navigator, application } = this.props
+    let { bankStyle } = this.state
     let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
     let title
