@@ -867,7 +867,7 @@ var utils = {
     return props
   },
 
-  getDisplayName(resource, model) {
+  getDisplayName(resource, model, propsUsed) {
     if (Array.isArray(resource))
       return
     if (!model) {
@@ -924,13 +924,19 @@ var utils = {
       let prop = props[p]
       if (resourceModel.subClassOf === ENUM)
         return resource[p]
-      else if (prop.ref  &&  utils.getModel(prop.ref).subClassOf === ENUM)
+      else if (prop.ref  &&  utils.getModel(prop.ref).subClassOf === ENUM) {
+        if (propsUsed)
+          propsUsed.push(prop)
         return resource[p].title
+      }
       if (utils.isContainerProp(prop, resourceModel))
         continue
       let dn = utils.getStringValueForProperty(resource, p, props)
-      if (dn)
+      if (dn) {
         displayName += displayName.length ? ' ' + dn : dn;
+        if (propsUsed)
+          propsUsed.push(prop)
+      }
     }
     if (displayName.length)
       return displayName
@@ -939,19 +945,35 @@ var utils = {
     if (!vCols || !vCols.length)
       return displayName
 
+    vCols = utils.ungroup(resourceModel, vCols)
     let excludeProps = []
     if (utils.isMessage(resourceModel))
       excludeProps = ['from', 'to']
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let p =  vCols[i]
       let prop = props[p]
-      if (prop.type === 'array' || prop.markdown  ||  prop.signature)
+      if (prop.markdown  ||  prop.signature)
         continue
+      if (prop.type === 'array') {
+        const pref = prop.items.ref
+        if (!pref  ||  utils.getModel(pref).subClassOf !== ENUM)
+          continue
+        else {
+          displayName = resource[p].map((v) => utils.translateEnum(v)).join(', ')
+          if (propsUsed)
+            propsUsed.push(prop)
+          continue
+        }
+      }
+
       if (utils.isContainerProp(p, resourceModel))
         continue
-      if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p])
+      if (!resource[p]  ||  excludeProps.indexOf(p) !== -1)
+      // if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p] !== -1)
         continue
       displayName = utils.getStringValueForProperty(resource, p, resourceModel.properties)
+      if (propsUsed)
+        propsUsed.push(prop)
     }
     return displayName;
   },
@@ -2298,8 +2320,11 @@ var utils = {
     // if (!isFormRequest  &&  !isFormError)
     //   return []
     let ftype
-    if (isFormRequest)
+    if (isFormRequest) {
       ftype = resource.form
+      if (!ftype)
+        ftype = type
+    }
     // else if (isFormError) {
     //   if (!resource.prefill)
     //     return []
