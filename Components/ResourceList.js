@@ -1399,7 +1399,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         modelName: BOOKMARK,
-        bankStyle: this.state.bankStyle
+        bankStyle: this.props.bankStyle || this.state.bankStyle
       },
     })
   }
