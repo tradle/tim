@@ -9,6 +9,9 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
+const { PROFILE } = constants.TYPES
+const { TYPE } = constants
+
 import utils, {
   translate
 } from '../utils/utils'
@@ -19,7 +22,6 @@ import { Text } from './Text'
 const REMEDIATION = 'tradle.Remediation'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
-const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {
   static propTypes = {
@@ -80,9 +82,9 @@ class ChatContext extends Component {
                 <Icon size={22} name='md-share' color={bankStyle.shareContextTextColor} style={{marginRight: 10, paddingLeft: 20}} />
               </TouchableOpacity>
     }
-    let stepIndicator = this.getStepIndicator({context, bankStyle})
+    let stepIndicator = this.getStepIndicator({context, bankStyle, application})
 
-    let bar = {backgroundColor: allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
+    let bar = {marginTop: -1, backgroundColor: allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
     return (
             <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
               {chooser}
@@ -91,7 +93,9 @@ class ChatContext extends Component {
             </View>
             )
   }
-  getStepIndicator({context, bankStyle}) {
+  getStepIndicator({context, bankStyle, application}) {
+    if (application)
+      return
     if (!context  ||  context._formsCount <= 1)
       return
     let name, color
