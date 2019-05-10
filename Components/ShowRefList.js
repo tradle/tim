@@ -33,7 +33,8 @@ const {
   VERIFICATION,
   ORGANIZATION,
   PROFILE,
-  FORM
+  FORM,
+  ENUM
 } = constants.TYPES
 
 class ShowRefList extends Component {
@@ -345,8 +346,13 @@ function hasPropertiesToShow(resource) {
   })
 
   for (let p in resource) {
-    if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
+    if (!props[p]  ||  p.charAt(0) === '_')//  ||  props[p].type === 'array')
       continue
+    if (props[p].type === 'array') {
+      const pref = props[p].items.ref
+      if (!pref  ||  utils.getModel(pref).subClassOf !== ENUM)
+        continue
+    }
     if (vCols  &&  vCols.indexOf(p) !== -1)
       return true
   }
