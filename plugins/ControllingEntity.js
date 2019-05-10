@@ -56,7 +56,7 @@ function getPropsForOwnership(form) {
   let typeOfLegalEntity = form.typeOfEntity
   if (!typeOfLegalEntity)
     return {
-      requestedProperties: ['typeOfEntity']
+      requestedProperties: [{name: 'typeOfEntity'}]
     }
   let id = typeOfLegalEntity.id.split('_')[1].toLowerCase()
   switch (id) {
