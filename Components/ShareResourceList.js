@@ -4,6 +4,7 @@ import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import Reflux from 'reflux'
 import PropTypes from 'prop-types'
+import _ from 'lodash'
 
 import constants from '@tradle/constants'
 var {
@@ -74,10 +75,10 @@ class ShareResourceList extends Component {
   }
   selectResource(resource) {
     let title = translate(utils.getModel(resource[TYPE]))
-    let { navigator, bankStyle } = this.props
+    let { navigator, bankStyle, multiChooser } = this.props
 
     if (utils.isMessage(resource)) {
-      navigator.push({
+      let route = {
         title: title,
         componentName: 'MessageView',
         backButtonTitle: 'Back',
@@ -85,13 +86,20 @@ class ShareResourceList extends Component {
           resource: resource,
           bankStyle: bankStyle
         }
-      })
+      }
+      if (!multiChooser)
+        _.extend(route, {
+          rightButtonTitle: translate('share'),
+          onRightButtonPress: () => {
+            this.shareChosen([resource])
+          }
+        })
+      navigator.push(route)
     }
     else {
       navigator.push({
         title: title,
         componentName: 'ResourceView',
-        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource
@@ -114,6 +122,7 @@ class ShareResourceList extends Component {
           rowId={rowId}
           gridCols={gridCols}
           multiChooser={multiChooser}
+          onlyOne={!multiChooser}
           resource={resource}
           bankStyle={bankStyle}
           chosen={this.state.chosen} />
@@ -124,6 +133,7 @@ class ShareResourceList extends Component {
                 key={resource[ROOT_HASH]}
                 modelName={modelName}
                 multiChooser={multiChooser}
+                onlyOne={!multiChooser}
                 navigator={navigator}
                 bankStyle={bankStyle}
                 chosen={this.state.chosen}
@@ -143,7 +153,8 @@ class ShareResourceList extends Component {
         );
   }
   render() {
-    let { bankStyle } = this.props
+    let { bankStyle, multiChooser } = this.props
+    let styles = createStyles({bankStyle})
     let content = <ListView ref='listview' style={styles.listview}
                     dataSource={this.state.dataSource}
                     removeClippedSubviews={false}
@@ -157,21 +168,30 @@ class ShareResourceList extends Component {
                     showsVerticalScrollIndicator={false} />
 
     let bgStyle =  {backgroundColor: bankStyle  &&  bankStyle.backgroundColor || '#ffffff'}
-    let bg = {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}
-    let submit = <TouchableOpacity onPress={this.shareChosen}>
-                   <View style={[styles.shareButton, bg]}>
-                     <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
-                     <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
-                   </View>
-                 </TouchableOpacity>
-    let searchBar = <SearchBar
-                    onChangeText={this.onSearchChange.bind(this)}
-                    placeholder={translate('search')}
-                    showsCancelButtonWhileEditing={false}
-                    showsCancelButton={false}
-                    hideBackground={true}
-                    bankStyle={this.props.bankStyle}
-                    />
+    let submit
+    if (multiChooser) {
+      submit = <TouchableOpacity onPress={this.shareChosen}>
+                 <View style={styles.shareButton}>
+                   <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
+                   <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
+                 </View>
+               </TouchableOpacity>
+    }
+    else {
+      submit = <View style={styles.shareBar}>
+                 <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
+                 <Text style={[styles.shareBarText, {fontSize: 18}]}>{translate('ChooseAndShare')}</Text>
+               </View>
+    }
+    // let searchBar = <SearchBar
+    //                 onChangeText={this.onSearchChange.bind(this)}
+    //                 placeholder={translate('search')}
+    //                 showsCancelButtonWhileEditing={false}
+    //                 showsCancelButton={false}
+    //                 hideBackground={true}
+    //                 bankStyle={this.props.bankStyle}
+    //                 />
+    let searchBar
 
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
@@ -185,7 +205,9 @@ class ShareResourceList extends Component {
     if (!this.isSmallScreen)
       return this.renderGridHeader()
   }
-  shareChosen() {
+  shareChosen(chosen) {
+    if (!chosen)
+      chosen = this.state.chosen
     let chosen = this.state.chosen
     if (utils.isEmpty(chosen)) {
       Alert.alert(translate('nothingToShare'))
@@ -201,18 +223,23 @@ class ShareResourceList extends Component {
       listStr,
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-        {text: translate('Ok'), onPress: this.share},
+        {text: translate('Ok'), onPress: () => this.share(chosen)},
       ]
     )
   }
-  share() {
+  share(chosen) {
     let { to, formRequest, navigator } = this.props
-    let chosen = Object.values(this.state.chosen)
+    if (!chosen)
+      chosen = Object.values(this.state.chosen)
     Actions.shareMany(chosen, to, formRequest)
+    navigator.pop()
+    let product = utils.getModel(formRequest.product)
+    if (!product.multiEntryForms  ||  product.multiEntryForms.indexOf(formRequest.form) === -1)
+      navigator.pop()
+
     // let chosen = this.state.chosen
     // for (let r in chosen)
     //   Actions.share(chosen[r], to, formRequest)
-    navigator.pop()
   }
   onSearchChange(filter) {
     let { search, isModel, formRequest } = this.props
@@ -236,31 +263,48 @@ reactMixin(ShareResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ShareResourceList.prototype, HomePageMixin)
 ShareResourceList = makeResponsive(ShareResourceList)
 
-var styles = StyleSheet.create({
-  listview: {
-    borderWidth: 0,
-    marginHorizontal: -1,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ffffff',
-  },
-  shareButton: {
-    backgroundColor: '#7AAAC3',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: 340,
-    marginTop: 20,
-    marginBottom: 30,
-    alignSelf: 'center',
-    height: 40,
-    borderRadius: 5,
-    marginHorizontal: 20
-  },
-  shareText: {
-    fontSize: 20,
-    paddingLeft: 5,
-    color: '#ffffff',
-    alignSelf: 'center'
-  },
-});
-
+var createStyles = utils.styleFactory(ShareResourceList, function ({ dimensions, bankStyle }) {
+  return StyleSheet.create({
+    listview: {
+      borderWidth: 0,
+      marginHorizontal: -1,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderColor: '#ffffff',
+    },
+    shareBar: {
+      flexDirection: 'row',
+      backgroundColor: '#e7e7e7',
+      borderTopWidth: 1,
+      justifyContent: 'center',
+      alignSelf: 'center',
+      height: 45,
+      width: utils.getContentWidth(ShareResourceList),
+      marginHorizontal: 20
+    },
+    shareButton: {
+      backgroundColor: bankStyle && bankStyle.linkColor,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 340,
+      marginTop: 20,
+      marginBottom: 30,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 5,
+      marginHorizontal: 20
+    },
+    shareText: {
+      fontSize: 20,
+      paddingLeft: 5,
+      color: '#ffffff',
+      alignSelf: 'center'
+    },
+    shareBarText: {
+      fontSize: 20,
+      paddingLeft: 5,
+      color: bankStyle  &&  bankStyle.linkColor || '#ffffff',
+      alignSelf: 'center'
+    },
+  })
+})
 module.exports = ShareResourceList;

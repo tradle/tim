@@ -11,7 +11,6 @@ import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import _ from 'lodash'
-import extend from 'extend'
 import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -83,7 +82,7 @@ class ResourceRow extends Component {
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
-    if (props.multiChooser) {
+    if (props.multiChooser  ||  props.onlyOne) {
       // multivalue ENUM property
       if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
         this.state.isChosen = true
@@ -182,8 +181,8 @@ class ResourceRow extends Component {
     let style
     if (isOfficialAccounts  &&  resource.style) {
       style = {}
-      extend(style, defaultBankStyle)
-      style = extend(style, resource.style)
+      _.extend(style, defaultBankStyle)
+      style = _.extend(style, resource.style)
     }
     if (!style)
       style = defaultBankStyle
