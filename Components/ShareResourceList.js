@@ -208,7 +208,6 @@ class ShareResourceList extends Component {
   shareChosen(chosen) {
     if (!chosen)
       chosen = this.state.chosen
-    let chosen = this.state.chosen
     if (utils.isEmpty(chosen)) {
       Alert.alert(translate('nothingToShare'))
       return
