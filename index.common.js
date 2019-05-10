@@ -31,7 +31,7 @@ const {
   PROFILE,
   MESSAGE
 } = constants.TYPES
-// console.disableYellowBox = true
+console.disableYellowBox = true
 import { Text } from './Components/Text'
 import HomePageMixin from './Components/HomePageMixin'
 
@@ -345,7 +345,7 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             if (!newRoute)
               return
-            let style = /*(newRoute.id === MESSAGE_LIST && newRoute.passProps.resource && newRoute.passProps.resource.style) ||*/ newRoute.passProps.bankStyle
+            let style = newRoute.passProps.bankStyle
             if (style)
               this.setState({navBarBgColor: newRoute.componentName === 'TourPage' ? 'transparent' : style.navBarBackgroundColor || 'transparent'})
             else
