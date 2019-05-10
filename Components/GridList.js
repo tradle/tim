@@ -995,7 +995,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         title: translate('searchSomething', translate(model)),
         id: 4,
         component: NewResource,
-        titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {

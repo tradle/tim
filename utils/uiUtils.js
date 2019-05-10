@@ -51,7 +51,6 @@ var uiUtils = {
         title: translate('searchSomething', translate(bm)),
         id: 4,
         component: NewResource,
-        titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
