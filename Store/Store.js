@@ -2363,7 +2363,7 @@ debug('sent:', r)
     try {
       env = await db.get(MY_REGULA)
       if (env.dbID) {
-        RegulaProxy.initialize(true)
+        await RegulaProxy.initialize(true)
         return
       }
     } catch (err) {
@@ -2372,8 +2372,13 @@ debug('sent:', r)
     }
 
     let dbID = 'Full'
-    await RegulaProxy.prepareDatabase(dbID)
-    await RegulaProxy.initialize()
+    try {
+      await RegulaProxy.prepareDatabase(dbID)
+      await RegulaProxy.initialize()
+    } catch (err) {
+      console.log(`initRegula: ${err}`)
+      return
+    }
     env.dbID = dbID
     await db.put(MY_REGULA, env)
   },
@@ -11607,7 +11612,7 @@ await fireRefresh(val.from.organization)
         path: `regula.licenseKey.${Platform.OS}`,
         get component() {
           return RegulaProxy
-          return require('../utils/regula')
+          // return require('../utils/regula')
         },
       },
       {
