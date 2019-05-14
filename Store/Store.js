@@ -1313,6 +1313,11 @@ debug('sent:', r)
       if (sharedIdx === -1)
         return {}
 
+      if (utils.isStub(context)) {
+        context = this._getItem(context)
+        if (context)
+          this.addVisualProps(context)
+      }
       let toId = utils.getId(context.to.organization)
       let timeShared = r._sharedWith[sharedIdx].timeShared
       debugger
@@ -10905,8 +10910,12 @@ await fireRefresh(val.from.organization)
     }
     else {
       let contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
-      if (contexts  &&  contexts.length)
-        contexts = contexts.filter((c) => c.contextId === contextId)
+      if (contexts  ||  !contexts.length)
+        return
+
+      contexts = contexts.filter((c) => c.contextId === contextId)
+      if (!contexts.length)
+        return
       context = contexts[0]
       context.from = utils.clone(val.from)
     }
