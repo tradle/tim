@@ -42,68 +42,6 @@ var search = {
       return this.initClientGraphQLRequest(meDriver, url)
   },
 
-  // initClientApollo(meDriver, url) {
-  //   // let graphqlEndpoint
-  //   // let orgId = me.organization.id
-  //   // let url = me.organization.url
-  //   // if (!url)
-  //   //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
-  //   // if (url)
-  //   let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
-  //   // else
-  //   //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-  //   if (!graphqlEndpoint)
-  //     return
-
-  //   // graphqlEndpoint = `http://localhost:21012/graphql`
-  //   const networkInterface = createNetworkInterface({
-  //     uri: graphqlEndpoint
-  //   })
-
-  //   networkInterface.use([{
-  //     applyMiddleware: async (req, next) => {
-  //       const body = tradleUtils.stringify({
-  //         ...req.request,
-  //         query: printQuery(req.request.query)
-  //       })
-
-  //       const result = await meDriver.sign({
-  //         object: {
-  //           [TYPE]: 'tradle.GraphQLQuery',
-  //           body,
-  //           _time: Date.now()
-  //         }
-  //       })
-
-  //       if (!req.options.headers) {
-  //         req.options.headers = {}
-  //       }
-
-  //       req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
-  //       next()
-  //     }
-  //   }])
-
-  //   // networkInterface.useAfter([
-  //   //   {
-  //   //     applyAfterware(result, next) {
-  //   //       const { response } = result
-  //   //       if (response.status > 300) {
-  //   //         const err = Error('request failed')
-  //   //         err.status = response.status
-  //   //         err.statusText = response.statusText
-  //   //         err.response = response
-  //   //         throw err
-  //   //       }
-
-  //   //       next()
-  //   //     }
-  //   //   }
-  //   // ])
-
-  //   return new ApolloClient({ networkInterface })
-  // },
-
   initClientGraphQLRequest(meDriver, url, headers) {
     // debugger
     let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
@@ -257,7 +195,7 @@ var search = {
               val.forEach((r, i) => {
                 if (i)
                   s += ', '
-                s += `"${r[ROOT_HASH]}"`
+                s += `"${utils.getRootHash(r)}"`
               })
               s += ']'
               inClause.push(s)
@@ -271,7 +209,7 @@ var search = {
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
-              op.EQ += `\n   ${p}___permalink: "${val[ROOT_HASH]}",`
+              op.EQ += `\n   ${p}___permalink: "${utils.getRootHash(val)}",`
             }
           }
         }
@@ -283,7 +221,7 @@ var search = {
             val.forEach((r, i) => {
               if (i)
                 s += ', '
-              s += `"${r[ROOT_HASH]}"`
+              s += `"${utils.getRootHash(r)}"`
             })
             s += ']'
             inClause.push(s)
@@ -557,6 +495,139 @@ var search = {
     }
 
   },
+
+  async getBookmarkChat(params) {
+    let { author, client, context, filterResource, limit, endCursor, application,
+          sortProperty, asc } = params
+    let table = `rl_${MESSAGE.replace(/\./g, '_')}`
+    let contextVar = filterResource || context ? '' : '($context: String)'
+    let limitP = `limit:  ${limit || 20}`
+    let checkpoint = limit  &&  endCursor ? `checkpoint: "${endCursor}"\n` : ''
+    // let desc = !direction || direction === 'down' ? true : false
+    let orderBy = sortProperty || '_time'
+    let desc
+    if (orderBy  &&  typeof asc !== 'undefined')
+      desc = params.hasOwnProperty('asc') ? asc : true
+    else
+      desc = true
+    let props = utils.getModel(MESSAGE).properties
+    // if (endCursor)
+    //   debugger
+
+    let queryHeader =
+       `query ${contextVar} {
+          ${table} (
+          ${limitP}
+          ${checkpoint}
+          filter: {
+       `
+    let queryFooter = `
+          }
+          orderBy:{
+            property: ${orderBy}
+            desc: ${desc}
+          }
+        )
+        {
+          pageInfo { endCursor }
+          edges {
+            node {
+              _author
+              _recipient
+              _link
+              _permalink
+              originalSender
+              _payloadType
+              _payloadLink
+              _time
+              context
+            }
+          }
+        }
+      }`
+
+    let op = {
+      CONTAINS: '',
+      EQ: '',
+      IN: '',
+      NEQ: '',
+      NULL: '',
+      STARTS_WITH: '',
+      GT: '',
+      GTE: '',
+      LT: '',
+      LTE: '',
+    }
+
+
+    // for app view prevent prevent from displaying double wrapped messages
+    if (author) //  &&  (!context ||  application))
+      op.EQ += `_counterparty: "${filterResource._counterparty || author}"\n`
+
+    if (filterResource) {
+      for (let p in filterResource) {
+        if (p === TYPE)
+          continue
+        let val = filterResource[p]
+        if (Array.isArray(val))
+          op.IN += `\n   ${p}: ["${val.join('\",\"')}"],`
+        else if (typeof val === 'string'  &&  props[p].type === 'string') {
+          let len = val.length
+          if (val.charAt(0) === '*') {
+            if (val.charAt(len - 1) === '*')
+              op.CONTAINS += `\n   ${p}: "${val.substring(1, len - 1)}",`
+            else
+              op.CONTAINS += `\n   ${p}: "${val.substring(1)}",`
+          }
+          else if (val.charAt(len - 1) === '*')
+            op.STARTS_WITH += `\n   ${p}: "${val.substring(0, len - 1)}",`
+          else
+            op.EQ += '             ' + p + ': ' + `"${val}"\n`
+        }
+        else if (props[p].type === 'date')
+          op.GTE = `\n   ${p}: "${new Date(val).getTime()}",`
+        else if (typeof val === 'boolean')
+          op.EQ += '             ' + p + ': ' + `${val}\n`
+        else
+          op.EQ += '             ' + p + ': ' + `"${val}"\n`
+      }
+    }
+
+    if (context)
+      op.EQ += `             context: "${context}"`
+    else  //if (filterResource  &&  filterResource.hasOwnProperty('context')  &&  typeof filterResource.context !== 'string') {
+      op.NULL += `             context: false            `
+    if (!context  &&  !filterResource) {
+      context = null
+      op.NEQ += `
+              context: $context
+              _payloadType: "${MESSAGE}"
+            `
+    }
+    if (!op.NEQ  &&  application) {
+      op.NEQ = `             _payloadType: "${MESSAGE}"`
+    }
+    let qq = ''
+    for (let o in op) {
+      let q = op[o]
+      if (q.length) {
+        qq +=
+         `\n  ${o}: {
+           ${op[o]}\n},`
+      }
+    }
+
+    let query = queryHeader + qq + queryFooter
+
+    try {
+      let result = await this.execute({client, query, table})
+      return result  &&  result.result
+    } catch (err) {
+      debugger
+    }
+
+  },
+
   getSearchProperties(params) {
     let {model, inlined, properties, backlink} = params
     let props = backlink ? {[backlink.name]: backlink} : model.properties
@@ -1198,3 +1269,65 @@ module.exports = search
     // function prettify (obj) {
     //   return JSON.stringify(obj, null, 2)
     // }
+
+  // initClientApollo(meDriver, url) {
+  //   // let graphqlEndpoint
+  //   // let orgId = me.organization.id
+  //   // let url = me.organization.url
+  //   // if (!url)
+  //   //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
+  //   // if (url)
+  //   let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
+  //   // else
+  //   //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+  //   if (!graphqlEndpoint)
+  //     return
+
+  //   // graphqlEndpoint = `http://localhost:21012/graphql`
+  //   const networkInterface = createNetworkInterface({
+  //     uri: graphqlEndpoint
+  //   })
+
+  //   networkInterface.use([{
+  //     applyMiddleware: async (req, next) => {
+  //       const body = tradleUtils.stringify({
+  //         ...req.request,
+  //         query: printQuery(req.request.query)
+  //       })
+
+  //       const result = await meDriver.sign({
+  //         object: {
+  //           [TYPE]: 'tradle.GraphQLQuery',
+  //           body,
+  //           _time: Date.now()
+  //         }
+  //       })
+
+  //       if (!req.options.headers) {
+  //         req.options.headers = {}
+  //       }
+
+  //       req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
+  //       next()
+  //     }
+  //   }])
+
+  //   // networkInterface.useAfter([
+  //   //   {
+  //   //     applyAfterware(result, next) {
+  //   //       const { response } = result
+  //   //       if (response.status > 300) {
+  //   //         const err = Error('request failed')
+  //   //         err.status = response.status
+  //   //         err.statusText = response.statusText
+  //   //         err.response = response
+  //   //         throw err
+  //   //       }
+
+  //   //       next()
+  //   //     }
+  //   //   }
+  //   // ])
+
+  //   return new ApolloClient({ networkInterface })
+  // },
