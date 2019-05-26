@@ -210,11 +210,20 @@ var HomePageMixin = {
     if (modelName === APPLICATION)
       return
     let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
-    if (gridCols)
-      return (
-        // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
-        <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)}/>
-      )
+    if (!gridCols)
+      return
+    let notSortable
+    if (modelName === MESSAGE) {
+      let idx = gridCols.indexOf('_time')
+      if (idx !== -1)
+        notSortable = gridCols.slice(0, idx)
+      if (idx !== gridCols.length - 1)
+        notSortable = notSortable.concat(gridCols.slice(idx + 1))
+    }
+
+    return (
+      <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)} notSortable={notSortable}/>
+    )
   },
   getGridCols() {
     let model = utils.getModel(this.props.modelName)
@@ -222,10 +231,15 @@ var HomePageMixin = {
     let gridCols = model.gridCols || model.viewCols
     if (!gridCols)
       return
+
     let vCols = []
     gridCols.forEach((v) => {
       if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json' && props[v].range !== 'url')
         vCols.push(v)
+      else if (v.indexOf('_group') !== -1) {
+        let group = utils.ungroup(model, [v])
+        group.forEach(p => vCols.push(p))
+      }
     })
     // if (vCols.length === 7)
     //   vCols.splice(6, 1)
@@ -244,12 +258,13 @@ var HomePageMixin = {
     let order = this.state.order || {}
     let curOrder = order[prop]
     let { resource } = this.state
+    const { modelName, bookmark, search } = this.props
 
     order[prop] = curOrder ? false : true
-    this.setState({order: order, sortProperty: prop, list: []})
+    this.setState({order, sortProperty: prop, list: []})
 
-    let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
-    if (this.props.search) {
+    let params = { modelName, sortProperty: prop, asc: order[prop], bookmark}
+    if (search) {
 console.log('HomePageMixin: filterResource', resource)
       _.extend(params, {search: true, filterResource: resource, limit: this.limit, first: true})
     }

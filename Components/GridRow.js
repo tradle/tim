@@ -34,7 +34,8 @@ var {
 var {
   PROFILE,
   FORM,
-  MONEY
+  MONEY,
+  MESSAGE
 } = constants.TYPES
 
 const PHOTO = 'tradle.Photo'
@@ -52,19 +53,20 @@ class GridRow extends Component {
   };
   constructor(props) {
     super(props)
+    const { resource, navigator, chosen, multiChooser } = props
     this.state = {
-      isConnected: this.props.navigator.isConnected,
-      resource: props.resource,
+      isConnected: navigator.isConnected,
+      resource: resource,
     }
-    if (props.multiChooser) {
+    if (multiChooser) {
       // multivalue ENUM property
-      if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
+      if (chosen  &&  chosen[utils.getId(resource)])
         this.state.isChosen = true
       else
         this.state.isChosen = false
     }
-    if (props.resource[TYPE] === PROFILE)
-      this.state.unread = props.resource._unread
+    if (resource[TYPE] === PROFILE)
+      this.state.unread = resource._unread
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
@@ -152,7 +154,10 @@ class GridRow extends Component {
   render()  {
     let { multiChooser, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
     let size
-    if (gridCols) {
+    let isMessage = modelName === MESSAGE
+    if (isMessage)
+      size = gridCols.length
+    else if (gridCols) {
       let model = utils.getModel(modelName)
       let props = model.properties
 
@@ -168,9 +173,10 @@ class GridRow extends Component {
 
     let key = this.getNextKey(resource)
     let cols
+    let justifyContent = isMessage ? 'flex-start' : 'center'
     if (gridCols  &&  gridCols.length) {
       cols = gridCols.map((v) => (
-        <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent: 'center'}]} key={key + v}>
+        <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + v}>
           {this.formatCol(v) || <View />}
         </Col>
       ))
@@ -184,13 +190,13 @@ class GridRow extends Component {
       let cellStyle = {paddingVertical: 5, paddingLeft: 7}
       cols = [<View style={cellStyle}>
                {typeTitle}
-               <Col sm={1} md={1} lg={1} style={styles.col} key={key + rowId}>
+               <Col sm={1} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + rowId}>
                  <Text style={styles.description}>{utils.getDisplayName(resource)}</Text>
                </Col>
              </View>]
     }
     if (multiChooser) {
-      cols.push(<Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent: 'center'}]} key={key + '_check'}>
+      cols.push(<Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + '_check'}>
                   <View style={styles.multiChooser}>
                    <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
                      <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
@@ -215,6 +221,11 @@ class GridRow extends Component {
     let properties = model.properties;
     let isContact = rtype === PROFILE;
     let colProp = properties[pName]
+
+    // Handle MESSAGE type RL accross providers
+    if (!colProp  &&  rtype === MESSAGE)
+      return this.formatMessageProperty(pName)
+
     let backlink
     if (colProp.type === 'array') {
       if (colProp.items.backlink)
@@ -323,7 +334,38 @@ class GridRow extends Component {
         if (m)
           val = translate(m)
       }
+      else if (colProp.range === 'model') {
+        let m = utils.getModel(resource[pName])
+        if (m)
+          val = translate(m)
+      }
+
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
+    }
+  }
+  formatMessageProperty(pName) {
+    let { resource } = this.props
+    let pval = resource[pName]
+
+    if (!pval)
+      return
+    if (typeof pval === 'object') {
+      let style = [styles.description, {paddingLeft: 5}]
+      // HACK to show provider icon
+      if (utils.isStub(pval)  &&  pName === '_provider') {
+        if (resource._icon) {
+          return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
+                   <Image style={styles.icon} source={{uri: resource._icon.url}} />
+                   <Text style={style}>{pval.title}</Text>
+                 </View>
+        }
+        return <View key={this.getNextKey(resource)}>
+                 <Text style={style}>{pval.title}</Text>
+               </View>
+      }
+      return <View key={this.getNextKey(resource)}>
+               <Text style={style}>{utils.getDisplayName(pval)}</Text>
+             </View>
     }
   }
 
@@ -397,6 +439,11 @@ var styles = StyleSheet.create({
     paddingVertical: 5,
     paddingRight: 7,
     borderBottomWidth: 1
+  },
+  icon: {
+    width: 25,
+    height: 25,
+    marginTop: -3
   },
   thumb: {
     width: 40,

@@ -21,7 +21,8 @@ const {
 } = constants
 const {
   VERIFICATION,
-  FORM
+  FORM,
+  MESSAGE
 } = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
@@ -80,11 +81,11 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application} = this.props
+    let {resource, isReview, search, application, message} = this.props
     if (isReview)
       return
-    if (resource.id) {
-      Actions.getItem({resource, search, application})
+    if (resource.id  ||  message) {
+      Actions.getItem({resource: message, search, application})
       return
     }
     let m = utils.getModel(resource[TYPE])
@@ -302,6 +303,8 @@ class MessageView extends Component {
       return this.showLoading({bankStyle, component: MessageView})
     let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
 
+    if (resource[TYPE] === MESSAGE)
+      resource = resource.object
     let rModel = utils.getModel(utils.getType(resource))
     let isWrapper = utils.getPrefillProperty(rModel)
     let model = isWrapper ? rModel : utils.getLensedModel(resource, lensId);

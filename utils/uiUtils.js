@@ -56,6 +56,7 @@ var uiUtils = {
         passProps: {
           model: Store.getAugmentedModel(bm),
           resource: {[TYPE]: bm.id},
+          bookmark: resource,
           searchWithFilter: searchFunction.bind(this),
           search: true,
           exploreData: true,

@@ -36,7 +36,8 @@ const {
   MONEY,
   SETTINGS,
   FORM,
-  IDENTITY
+  IDENTITY,
+  MESSAGE
 } = constants.TYPES
 
 const {
@@ -116,11 +117,13 @@ var NewResourceMixin = {
       }
     }
 
-
+    const isMessage = meta.id === MESSAGE
     let eCols = []
     if (editCols)
       eCols = editCols.slice();
       // editCols.forEach((r) => eCols[r] = props[r])
+    if (meta.id === MESSAGE)
+      eCols = meta.viewCols
     else {
       eCols = utils.getEditCols(meta).map(p => p.name)
       if (!eCols.length) {
@@ -207,9 +210,10 @@ var NewResourceMixin = {
 
     let options = {fields: {}}
     let resource = this.state.resource
+    let isMessage = meta.id === MESSAGE
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
-      if (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
+      if (!isMessage  &&  (p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
         continue;
 
       if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
@@ -390,7 +394,7 @@ var NewResourceMixin = {
             ref = MONEY
           else if (props[p].range === 'json')
             continue
-          ref = props[p].items.ref
+          ref = props[p].items  &&  props[p].items.ref
           if (!ref  ||  !utils.isEnum(ref))
             continue;
         }

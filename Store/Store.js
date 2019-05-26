@@ -387,7 +387,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
     const model = utils.getModel(id)
     return {
       [TYPE]: BOOKMARK,
-      message: utils.makeModelTitle(model, true),
+      message: translate(model), // utils.makeModelTitle(model, true),
       bookmark: {
         [TYPE]: id,
         _org: botPermalink
@@ -395,6 +395,16 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       from: utils.buildRef(me)
     }
   })
+  createdByBot.push({
+      [TYPE]: BOOKMARK,
+      message: translate('outgoingMessages'),
+      bookmark: {
+        [TYPE]: MESSAGE,
+        _inbound: false,
+        _counterparty: ALL_MESSAGES,
+      },
+      from: utils.buildRef(me)
+    })
 
   return createdByBot
 }
@@ -3861,11 +3871,18 @@ if (!res[SIG]  &&  res._message)
     return res
   },
   async onGetItemFromServer(params) {
-    var {resource, action, noTrigger, backlink, forwardlink, application} = params
-    let isApplication = utils.getType(resource) === APPLICATION
-    let rId = utils.getId(resource)
+    var {resource, action, noTrigger, backlink, forwardlink, application, } = params
+    const rtype = utils.getType(resource)
+    if (rtype === MESSAGE)
+      return await this.getMessage(params)
+
+    if (rtype === APPLICATION)
+      return await this.getApplication(params)
+
     let r
-    if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink)) {
+    const isApplication = rtype === APPLICATION
+    let rId = utils.getId(resource)
+    if (resource.id  ||  (!backlink  &&  !forwardlink)) {
       r = await this._getItemFromServer(rId, backlink)
       if (!r)
         return
@@ -3874,8 +3891,6 @@ if (!res[SIG]  &&  res._message)
           application                &&
           application.verifications  &&
           utils.isForm(r[TYPE])) {
-        // let hashes = application.verifications.map(r => this.getRootHash(r))
-        // let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r, _link: [hashes]}, noTrigger: true})
         let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
         if (l) {
           r.verifications = l.list
@@ -3883,60 +3898,10 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
-    else {
-      let prop
-      let blProp = backlink ||  forwardlink
-      if (blProp) {
-        let ref = blProp.items.ref
-        let submissions = utils.getModel(APPLICATION).properties.submissions
-        if (ref === APPLICATION_SUBMISSION)
-          prop = submissions
-        else
-          prop = blProp
-        let resourceWithBacklink = await this._getItemFromServer(rId, prop)
-        if (resourceWithBacklink  &&  resourceWithBacklink[prop.name]) {
-          r = _.cloneDeep(resource)
-          r[prop.name] = resourceWithBacklink[prop.name]
-        }
-        else
-          r = resource
-      }
-    }
 
     let list, style
     // let m = this.getModel(r[TYPE])
-    if (isApplication) {
-      let link = forwardlink  ||  backlink
-      if (link) {
-        let linkName = link.name
-        if (!r[linkName])
-          this.organizeSubmissions(r)
-        if (r[linkName]) {
-          list = await this.getObjects(r[linkName], link)
-          if (list.length)
-            list.sort((a, b) => b._time - a._time)
-          r[linkName] = list
-        }
-      }
-      if (r.relationshipManagers) {
-        r.relationshipManagers.forEach(relationshipManager => {
-          let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
-          let rm = this._getItem(rmId)
-          if (rm)
-            relationshipManager.title = utils.getDisplayName(rm)
-        })
-      }
-      if (!r._context) {
-        let context = await this.getContext(r.context, r)
-        if (context)
-          r._context = context
-      }
-      let applicant = this._getItem(r.applicant.id.replace(IDENTITY, PROFILE))
-      if (applicant  &&  applicant.organization) {
-        style = this._getItem(applicant.organization).style
-      }
-    }
-    else if (application) {
+    if (application) {
       if (!r._context) {
         let context = await this.getContext(application.context, r)
         if (context)
@@ -3947,17 +3912,89 @@ if (!res[SIG]  &&  res._message)
       r._context = resource._context
     }
 
-    if (isApplication  &&  !r._context) {
-      let context = await this.getContext(r.context, r)
-      if (context)
-        r._context = context
-    }
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
     this.trigger(retParams)
     return r
   },
+  async getApplication(params) {
+    var {resource, action, backlink, forwardlink, application} = params
+    let blProp = backlink ||  forwardlink
+    let prop
+    if (blProp) {
+      let ref = blProp.items.ref
+      let submissions = utils.getModel(APPLICATION).properties.submissions
+      if (ref === APPLICATION_SUBMISSION)
+        prop = submissions
+      else
+        prop = blProp
+    }
+
+    const rId = utils.getId(resource)
+    let r = await this._getItemFromServer(rId, prop)
+    if (!r)
+      return
+
+    let list, style
+    if (prop) {
+      let { name } = prop
+      let resourceWithBacklink = r
+      if (resourceWithBacklink  &&  resourceWithBacklink[name]) {
+        r = _.cloneDeep(resource)
+        r[name] = resourceWithBacklink[name]
+      }
+      if (!r[name])
+        this.organizeSubmissions(r)
+      if (r[name]) {
+        list = await this.getObjects(r[name], prop)
+        if (list.length)
+          list.sort((a, b) => b._time - a._time)
+        r[name] = list
+      }
+
+    }
+    // let m = this.getModel(r[TYPE])
+    if (r.relationshipManagers) {
+      r.relationshipManagers.forEach(relationshipManager => {
+        let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
+        let rm = this._getItem(rmId)
+        if (rm)
+          relationshipManager.title = utils.getDisplayName(rm)
+      })
+    }
+    if (!r._context) {
+      let context = await this.getContext(r.context, r)
+      if (context)
+        r._context = context
+    }
+    let applicant = this._getItem(r.applicant.id.replace(IDENTITY, PROFILE))
+    if (applicant  &&  applicant.organization) {
+      style = this._getItem(applicant.organization).style
+    }
+
+    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
+    if (list)
+      retParams.list = list
+    this.trigger(retParams)
+    return r
+  },
+
+  async getMessage(params) {
+    var { resource } = params
+    let result = await this.getObjects([resource._payloadLink])
+    if (!result)
+      return
+    let r = result[0]
+    r._context = resource._context
+    let recipient = this._getItem([PROFILE, resource._recipient, resource._recipient].join('_'))
+    if (recipient)
+      r.to = this.buildRef(recipient)
+    resource.object = r
+    let retParams = { resource, action: 'getItem'}
+    this.trigger(retParams)
+  },
+
   async getObjects(list, prop) {
     if (!list.length)
       return []
@@ -3969,7 +4006,7 @@ if (!res[SIG]  &&  res._message)
         links = list.map((fl) => this.getCurHash(fl.verifications)) // utils.getId(fl.verification).split('_')[2])
     }
     else
-      links = Object.keys(list)
+      links = Array.isArray(list) && list || Object.keys(list)
 
     let newLinks = []
     let cachedList = []
@@ -5588,15 +5625,21 @@ if (!res[SIG]  &&  res._message)
       let msgStream = meDriver.objects.messagesWithObject({ permalink: resource[ROOT_HASH] })
       let msgs = await collect(msgStream)
       if (!msgs.length)
-        return
+        return resource.to
       let msg = msgs.find(m => m.objectinfo.link === resource[CUR_HASH])
       let forward = msg.object.forward
-      let to = this._getItem([PROFILE, forward, forward].join('_'))
+
+      let to
+      if (forward)
+        to = this._getItem([PROFILE, forward, forward].join('_'))
+      else  // product prefilled by employee on employer's chat
+        to = resource.to
       resource._sentTo = to.organization
       return to
       // debugger
     } catch(err) {
       debugger
+      return resource.to
     }
   },
 
@@ -6404,8 +6447,6 @@ if (!res[SIG]  &&  res._message)
       return
     }
     let {direction, first, noTrigger, modelName, application, filterResource, endCursor, limit} = params
-    if (modelName === MESSAGE)
-      return await this.getChat(params)
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
     if (!filterResource)
       filterResource = {}
@@ -6448,14 +6489,138 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
     return {list, endCursor: newCursor}
   },
+  async getBookmarkChat(parameters) {
+    let params = _.cloneDeep(parameters)
+    let {direction, first, noTrigger, modelName, application,
+         filterResource, endCursor, limit, bookmark} = params
+    _.extend(filterResource, bookmark.bookmark)
+    let orgIds = SERVICE_PROVIDERS.map(sp => sp.org)
+
+    let myOrgId = utils.getId(me.organization)
+    let activeOrgIds = orgIds.filter(o => o !== myOrgId  &&  !this._getItem(o)._inactive)
+    let orgs = []
+
+    delete filterResource.context
+
+    let payloadTypes
+    let fPayloadType = filterResource._payloadType
+    if (fPayloadType) {
+      fPayloadType = fPayloadType.replace('*', '').toLowerCase()
+      if (utils.getModel(fPayloadType))
+        payloadTypes = [fPayloadType]
+      else {
+        let forms = utils.getAllSubclasses('tradle.Form')
+        let fforms = forms.filter(f => f.id.toLowerCase().indexOf(fPayloadType) !== -1 || translate(f).toLowerCase().indexOf(fPayloadType) !== -1)
+        if (fforms.length)
+          payloadTypes = fforms.map(f => f.id)
+      }
+      filterResource._payloadType = payloadTypes || [fPayloadType]
+    }
+    let results = await Promise.all(activeOrgIds.map((o, i) => {
+      const rep = this.getRepresentative(o)[CUR_HASH]
+      filterResource._counterparty = rep
+      if (filterResource._recipient) {
+        let name = filterResource._recipient.replace('*', '').toLowerCase()
+        let provider = SERVICE_PROVIDERS.find(sp => this._getItem(sp.org).name.toLowerCase().indexOf(name) !== -1)
+        if (provider)
+          filterResource._recipient = provider.permalink
+      }
+      // delete params.limit
+      if (parameters.endCursor)
+        params.endCursor = parameters.endCursor[o]
+      return graphQL.getBookmarkChat(params)
+    }))
+    let newEndCursors = {}
+    limit && results.forEach((result, i) => {
+      newEndCursors[activeOrgIds[i]] = result.pageInfo  &&  result.pageInfo.endCursor
+    })
+    let lists = results.map(result => result.edges.map(r => {
+      // let rr = this.convertMessageToResource(r.node)
+      let rr = {
+        [TYPE]: MESSAGE,
+        [ROOT_HASH]: r.node._permalink,
+        [CUR_HASH]: r.node._link,
+        ...r.node
+      }
+      let recipient = this._getItem([PROFILE, r.node._recipient, r.node._recipient].join('_'))
+      if (recipient) {
+        let recipientOrg = utils.getId(recipient.organization)
+        let provider = SERVICE_PROVIDERS.find(sp => sp.org === recipientOrg)
+        rr._provider = recipient.organization
+        rr._icon = provider && provider.style.logo
+      }
+
+      delete rr._permalink
+      delete rr._link
+      return rr
+    }))
+    let msglist = []
+    lists.forEach(l => msglist = msglist.concat(l))
+
+    let groupedList = _.groupBy(msglist, 'context')
+    let rmPR = []
+    let prLinks = []
+    let contextLinks = []
+    for (let c in groupedList) {
+      let l = groupedList[c]
+      if (l.length === 1  &&  l[0]._payloadType === PRODUCT_REQUEST) {
+        rmPR.push(c)
+        continue
+      }
+      let prLink
+      for (let i=0; i<l.length; i++) {
+        if (l[i]._payloadType === PRODUCT_REQUEST) {
+          prLink = l[i]._payloadLink
+          break
+        }
+      }
+      if (prLink)
+        prLinks.push(prLink)
+      else
+        contextLinks.push(l[0].context)
+    }
+    rmPR.forEach(c => delete groupedList[c])
+    let contexts = {}
+    if (prLinks.length) {
+      let prs = await this.getObjects(prLinks)
+      prs.forEach(r => contexts[r.contextId] = r)
+    }
+    else if (contextLinks.length) {
+      delete params.sortProperty
+      delete params.asc
+      let { result } = await graphQL.searchServer({...params, modelName: PRODUCT_REQUEST, filterResource: {[TYPE]: PRODUCT_REQUEST, contextId: contextLinks}})
+      if (result) {
+        let prs = result.edges.map((r) => this.convertToResource(r.node))
+        prs.forEach(r => contexts[r.contextId] = r)
+      }
+    }
+    let list = []
+    Object.values(groupedList).forEach(l => list = list.concat(l))
+    list = list.filter(r => r[TYPE] !== PRODUCT_REQUEST)
+
+    list.forEach(r => {
+      r._context = contexts[r.context]
+    })
+
+    // debugger
+    this.trigger({action: 'list', resource: parameters.filterResource, isSearch: true, first, list, endCursor: newEndCursors})
+  },
   async getChat(params) {
-    let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
-    let { application, endCursor, context, to, noTrigger, filterResource,
+    let { application, endCursor, context, to, noTrigger, filterResource, bookmark,
           switchToContext, direction, limit, modelName, loadEarlierMessages } = params
+    if (modelName === MESSAGE) {
+      if (bookmark) {
+        let counterparty = bookmark.bookmark._counterparty
+        if (counterparty === ALL_MESSAGES)
+          return await this.getBookmarkChat(params)
+      }
+    }
+
     let contextId
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
     let importedVerification
+    let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
     // Right now we request all imported verifications the first time.
     // May be we'll decide to page them too
     if (application) { //  &&  !endCursor) {
