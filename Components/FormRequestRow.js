@@ -257,12 +257,10 @@ class FormRequestRow extends Component {
 
     if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
-    var sealedStatus = (resource.txId)
-                     ? <View style={chatStyles.sealedStatus}>
+    var sealedStatus = resource.txId  &&
+                       <View style={chatStyles.sealedStatus}>
                          <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                        </View>
-                     : <View />
-
 
     let addStyle = [chatStyles.verificationBody, styles.mstyle]
     if (message.length < 30)
@@ -380,10 +378,10 @@ class FormRequestRow extends Component {
           else {
             let total = `You have ${totalShareables} resource to share`
             vtt.push(
-              <View>
+              <View key={this.getNextKey()}>
                 {doc}
                 <TouchableOpacity onPress={() => Actions.showAllShareables(resource, to)} style={{alignItems: 'center', padding: 10, borderTopWidth: 1, marginTop: 5, borderTopColor: '#ddd'}}>
-                  <Text style={{font: 14, color: bankStyle.buttonBgColor || bankStyle.linkColor}}>{total}</Text>
+                  <Text style={{fontSize: 14, color: bankStyle.buttonBgColor || bankStyle.linkColor}}>{total}</Text>
                 </TouchableOpacity>
               </View>
              )
@@ -440,10 +438,6 @@ class FormRequestRow extends Component {
     let msg;
     if (document.message  &&  !utils.isForm(docModel))
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
-    let msgWidth = utils.getMessageWidth(FormRequestRow) - 50
-    let headerStyle = {paddingLeft: 10, width: msgWidth}
-
-    let hs = /*isShared ? chatStyles.description :*/ {fontSize: 16, color: '#555555'}
 
     let displayName
     let propLabel
@@ -456,9 +450,9 @@ class FormRequestRow extends Component {
         propLabel = <Text style={styles.propertyTitle}>{translate(propsUsed[0], docModel)}</Text>
     }
 
-    let headerContent = <View style={headerStyle}>
+    let headerContent = <View style={styles.headerStyle}>
                           {propLabel}
-                          <Text style={hs}>{displayName}</Text>
+                          <Text style={styles.docText}>{displayName}</Text>
                         </View>
 
     headerContent = <TouchableOpacity onPress={onSelect.bind(this, {resource: document, verification})}>
@@ -583,15 +577,19 @@ class FormRequestRow extends Component {
       else if (document._sentTo)
         verifiedBy = translate('sentTo', document._sentTo.title)
     }
+    let verifiedByView
+    if (verifiedBy)
+      verifiedByView = <Text style={chatStyles.description}>
+                         {verifiedBy}
+                       </Text>
+
     let date = verification.dateVerified || document._time
     let dateView = <View style={{flexDirection: 'row'}}>
                      <Text style={styles.verifiedDate}>{utils.formatDate(date)}</Text>
                    </View>
 
     let orgView = <View style={styles.orgView}>
-                      <Text style={chatStyles.description}>
-                        {verifiedBy}
-                      </Text>
+                      {verifiedByView}
                       {dateView}
                     </View>
     return {verifiedBy, orgPhoto, shareView, orgTitle, orgView}
@@ -607,14 +605,10 @@ class FormRequestRow extends Component {
 
     let headerStyle = {paddingTop: 5, paddingLeft: 10}
 
-    let msgWidth = utils.getMessageWidth(FormRequestRow) - 100
-    let hs = [styles.header, {fontSize: 14, width: msgWidth - 100, color: bankStyle.linkColor}]
-    // let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
-
     let orgRow
     let isItem = utils.isSavedItem(document)
     let headerContent = <View style={headerStyle}>
-                          <Text style={hs}>{translate('multientryToShare', documents.length)}</Text>
+                          <Text style={styles.multiEntryDocText}>{translate('multientryToShare', documents.length)}</Text>
                         </View>
 
     if (verification  && (verification.organization || isItem)) {
@@ -1108,6 +1102,11 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       // paddingVertical: 5,
       // justifyContent: 'space-between'
     },
+    headerStyle: {
+      paddingLeft: 10,
+      paddingBottom: 3,
+      width: msgWidth - 50
+    },
     hr: {
       backgroundColor: '#eeeeee',
       height: 1,
@@ -1264,6 +1263,17 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       fontSize: 14,
       // marginTop: -5,
       paddingBottom: 5
+    },
+    docText: {
+      fontSize: 16,
+      color: '#555555'
+    },
+    multiEntryDocText: {
+      marginRight: -4,
+      marginLeft: -1,
+      fontSize: 14,
+      width: msgWidth - 200,
+      color: bankStyle.linkColor
     }
   })
 })
