@@ -2142,7 +2142,7 @@ var utils = {
     return trimTrailingSlashes(a) === trimTrailingSlashes(b)
   },
   isMessage(m) {
-    return m[IS_MESSAGE]
+    return m[IS_MESSAGE]  ||  m[TYPE] === MESSAGE
     // if (typeof m === 'string')
     //   m = utils.getModel(m)
     // else if (m[TYPE])  // resource was passed
