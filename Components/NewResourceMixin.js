@@ -122,7 +122,7 @@ var NewResourceMixin = {
     if (editCols)
       eCols = editCols.slice();
       // editCols.forEach((r) => eCols[r] = props[r])
-    if (meta.id === MESSAGE)
+    if (isMessage)
       eCols = meta.viewCols
     else {
       eCols = utils.getEditCols(meta).map(p => p.name)
@@ -210,7 +210,6 @@ var NewResourceMixin = {
 
     let options = {fields: {}}
     let resource = this.state.resource
-    let isMessage = meta.id === MESSAGE
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
       if (!isMessage  &&  (p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
