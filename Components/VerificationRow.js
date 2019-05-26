@@ -42,6 +42,7 @@ const { TYPE } = constants
 const {
   ORGANIZATION,
   MONEY,
+  MESSAGE
 } = constants.TYPES
 
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
@@ -306,6 +307,18 @@ class VerificationRow extends Component {
     }
     else if (isBookmark  &&  resource.message)
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
+    else if (rType === MESSAGE) {
+      let context = ''
+      if (resource._context)
+        context = translate(utils.getModel(resource._context.requestFor))
+      titleComponent = <View style={{flexDirection: 'row'}}>
+                         <Image style={styles.icon} source={{uri: resource._icon.url}} />
+                         <View style={{flexDirection: 'column'}}>
+                         <Text style={styles.rTitle}>{context}</Text>
+                         <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{translate(utils.getModel(resource._payloadType))}</Text>
+                         </View>
+                       </View>
+    }
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
     else if (title)
@@ -822,6 +835,10 @@ var styles = StyleSheet.create({
     marginTop: -3,
     flexDirection: 'row',
     justifyContent: 'flex-end'
+  },
+  icon: {
+    width: 25,
+    height: 25,
   },
 });
 

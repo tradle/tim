@@ -310,6 +310,8 @@ function hasPropertiesToShow(resource) {
       if (!pref  ||  utils.getModel(pref).subClassOf !== ENUM)
         continue
     }
+    if (vCols  &&  vCols.includes(p))
+      return true
   }
 }
 

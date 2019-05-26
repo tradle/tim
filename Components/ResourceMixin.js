@@ -626,6 +626,7 @@ var ResourceMixin = {
 }
 
 var createStyles = utils.styleFactory(component || PhotoList, function ({ dimensions, bankStyle, indent, isView }) {
+  indent = indent || 0
   return StyleSheet.create({
     learnMore: {
       color: bankStyle.linkColor,
