@@ -288,6 +288,7 @@ module.exports = {
     "enterValidValue": "Please enter the valid value",
     "rescan": "Please re-scan the same document",
     "invalidValue": "This value is invalid. Please re-enter.",
+    "outgoingMessages": "Outgoing Messages",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

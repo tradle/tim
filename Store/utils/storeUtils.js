@@ -132,12 +132,12 @@ var storeUtils = {
   addNameAndTitleProps(m, aprops) {
     var mprops = aprops  ||  m.properties
     for (let p in mprops) {
-      if (p.charAt(0) === '_')
+       if (p.charAt(0) === '_'  &&  (!m  || m.id !== MESSAGE))
         continue
       if (!mprops[p].name)
         mprops[p].name = p
       if (!mprops[p].title)
-        mprops[p].title = makeLabel(p)
+        mprops[p].title = makeLabel(p.replace('_', ''))
       if (mprops[p].type === 'array') {
         var aprops = mprops[p].items.properties
         if (aprops)

@@ -16,7 +16,7 @@ import utils, {
 } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 
-const MONEY = constants.TYPES
+const { MONEY, MESSAGE } = constants.TYPES
 
 class GridHeader extends Component {
   static propTypes = {
@@ -36,9 +36,10 @@ class GridHeader extends Component {
     };
   }
   render() {
-    let { modelName, isSmallScreen, multiChooser, gridCols } = this.props
+    let { modelName, isSmallScreen, multiChooser, gridCols, notSortable } = this.props
     if (!gridCols)
       return <View />
+
     let model = utils.getModel(modelName)
     let props = model.properties
 
@@ -57,6 +58,8 @@ class GridHeader extends Component {
     if (multiChooser)
       size++
     let {sortProperty, order} = this.state
+    // if (modelName === MESSAGE)
+    //   gridCols = ['_provider', '_payloadType', '_context', '_time']
     let cols = gridCols.map((p) => {
       let colStyle
       if (sortProperty  &&  sortProperty === p) {
@@ -67,17 +70,23 @@ class GridHeader extends Component {
         colStyle = styles.col
       let prop = props[p]
       let textStyle
-      if (prop.type === 'number' || prop.type === 'date' || prop.ref === MONEY)
+      if (prop  &&  (prop.type === 'number' || prop.type === 'date' || prop.ref === MONEY))
         textStyle = {alignSelf: 'flex-end', paddingRight: 10}
       else
         textStyle = {}
+      let title = <Text style={[styles.cell, textStyle]}>
+                     {translate(props[p], model).toUpperCase()}
+                   </Text>
+
+      let isSortable = !notSortable || !notSortable.includes(p)
+      if (isSortable)
+        title = <TouchableOpacity onPress={() => this.props.sort(p)}>
+                  {title}
+                 </TouchableOpacity>
+
       return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p}>
-                <TouchableOpacity onPress={() => this.props.sort(p)}>
-                  <Text style={[styles.cell, textStyle]}>
-                    {translate(props[p], model).toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              </Col>
+               {title}
+             </Col>
     })
     if (this.props.multiChooser) {
       // let checkIcon

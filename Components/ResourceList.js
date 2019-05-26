@@ -627,8 +627,11 @@ class ResourceList extends Component {
       let meOrgName = me.organization.title
       if (dn === meOrgName)
         title = meOrgName
-      else
-        title = meOrgName + '  →  ' + dn
+      else {
+        // let sep = utils.isWeb() ? '  →  ' : ' -- '
+        let sep = '  →  '
+        title = meOrgName + sep + dn
+      }
     }
     else
       title = resource.name //utils.getDisplayName(resource, model.properties);
@@ -922,10 +925,11 @@ class ResourceList extends Component {
     }
 
     let employee
-    if (me.isEmployee)
-      employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: this.state.bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
+    if (me.isEmployee) {
+      employee = <View style={{justifyContent: 'center', alignSelf: 'center', maxWidth: utils.dimensions(ResourceList).width - 90}}>
+                   <Text numberOfLines={1} style={{color: bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    }
     return (
         <View style={styles.footer}>
           {employee}

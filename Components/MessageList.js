@@ -1064,8 +1064,14 @@ class MessageList extends Component {
     }
 
     if (this.state.productList) {
+      let me = utils.getMe()
+      let title
+      if (me.isEmployee  &&  utils.getId(this.props.resource) === utils.getId(me.organization))
+        title = 'prefillTheProduct'
+      else
+        title = 'applyForProduct'
       push({
-        title: translate('applyForProduct'),
+        title: translate(title),
         callback: () => this.productChooser()
       })
     }

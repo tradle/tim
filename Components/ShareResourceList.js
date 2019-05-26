@@ -13,6 +13,8 @@ var {
 } = constants
 import HomePageMixin from './HomePageMixin'
 import utils, { translate } from '../utils/utils'
+import { getContentSeparator } from '../utils/uiUtils'
+
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
@@ -37,7 +39,7 @@ import {
 class ShareResourceList extends Component {
   static propTypes = {
     navigator: PropTypes.object.isRequired,
-    list: PropTypes.object.isRequired,
+    list: PropTypes.array.isRequired,
     formRequest: PropTypes.object,
     multiChooser: PropTypes.bool
   };
@@ -192,9 +194,9 @@ class ShareResourceList extends Component {
     //                 bankStyle={this.props.bankStyle}
     //                 />
     let searchBar
-
+    let separator = getContentSeparator(bankStyle)
     return (
-      <PageView style={[platformStyles.container, bgStyle]}>
+      <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
         {searchBar}
         {content}
         {submit}
@@ -277,7 +279,7 @@ var createStyles = utils.styleFactory(ShareResourceList, function ({ dimensions,
       justifyContent: 'center',
       alignSelf: 'center',
       height: 45,
-      width: utils.getContentWidth(ShareResourceList),
+      width: utils.dimensions(ShareResourceList).width,
       marginHorizontal: 20
     },
     shareButton: {
