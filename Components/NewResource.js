@@ -16,7 +16,7 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native'
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'
 
 import constants from '@tradle/constants'
 const {
@@ -710,7 +710,7 @@ class NewResource extends Component {
     }
     this.checkEnums(value, this.state.resource)
 
-    const { navigator, searchWithFilter, model } = this.props
+    const { navigator, searchWithFilter, model, bookmark } = this.props
     let currentRoutes = navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
 
@@ -720,7 +720,7 @@ class NewResource extends Component {
     let val = utils.sanitize(value)
     if (!val[TYPE])
       val[TYPE] = model.id
-    searchWithFilter(val)
+    searchWithFilter(val, bookmark)
     currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = val
     navigator.pop()
   }

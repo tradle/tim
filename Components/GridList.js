@@ -318,7 +318,7 @@ class GridList extends Component {
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, navigator, search, application, prop,
+    let { chat, resource, navigator, search, application, prop, bookmark,
           modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
@@ -342,8 +342,9 @@ class GridList extends Component {
       else if (!isForwardlink) {
 console.log('GridList.componentWillMount: filterResource', resource)
         Actions.list({
-          modelName: modelName,
+          modelName,
           filterResource: resource,
+          bookmark,
           search: true,
           first: true,
           limit: this.limit
@@ -626,6 +627,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (!_.isEqual(this.state.resource, nextState.resource)) {
       return true
     }
+    if (this.props.orientation !== nextProps.orientation)
+      return true
     if (this.state.chosen !== nextState.chosen)
       return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
@@ -786,12 +789,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return
     }
     let rType = utils.getType(resource)
-    let rModel = utils.getModel(rType)
-    let isStub = utils.isStub(resource)
-    let isFormError = rType === FORM_ERROR
-    let isForm = utils.isForm(rModel)
+    if (rType === MESSAGE)
+      rType = resource._payloadType
+    const rModel = utils.getModel(rType)
+    const isStub = utils.isStub(resource)
+    const isFormError = rType === FORM_ERROR
+    const isForm = utils.isForm(rModel)
 
-    let isVerification = utils.isVerification(rModel)
+    const isVerification = utils.isVerification(rModel)
     let title
     if (isVerification) {
       if (isStub)
@@ -1068,8 +1073,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
       model = utils.getModel(utils.getType(resource))
     let isContext = utils.isContext(model)
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
-    if (!isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+
+    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
+    let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
+
+    if (!isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
+      if (modelName === MESSAGE)
+        viewCols = ['_provider', '_payloadType', '_context', '_time']
       if (viewCols)
         return (
           <GridRow lazy={lazy}
@@ -1127,9 +1138,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
       chosen={this.state.chosen} />
     );
   }
-  searchWithFilter(filterResource) {
+  searchWithFilter(filterResource, bookmark) {
     this.setState({resource: filterResource})
-    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true, exploreData: true})
+    Actions.list({filterResource, bookmark, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true, exploreData: true})
   }
   getNextKey(resource) {
     return resource[ROOT_HASH] + '_' + cnt++
@@ -1167,22 +1178,23 @@ console.log('GridList.componentWillMount: filterResource', resource)
     //   return
     // debugger
     let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
-    let { modelName, search, resource } = this.props
+    let { modelName, search, resource, bookmark } = this.props
     if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
       return
     this.state.refreshing = true
 console.log('GridList._loadMoreContentAsync: filterResource', resource)
 
     Actions.list({
-      modelName: modelName,
-      sortProperty: sortProperty,
-      asc: this.state.order,
+      modelName,
+      sortProperty,
+      asc: this.state.order  &&  this.state.order[sortProperty],
       limit: this.limit,
       direction: this.direction,
-      search: search,
-      endCursor: endCursor,
+      search,
+      endCursor,
       to: modelName === BOOKMARK ? utils.getMe() : null,
       filterResource: (search  &&  this.state.resource) || resource,
+      bookmark,
       // from: list.length,
       lastId: utils.getId(list[list.length - 1])
     })
@@ -1226,10 +1238,11 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       noMenuButton = (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
     }
     let employee
-    if (me.isEmployee)
-      employee = <View style={styles.center}>
-                   <Text style={[styles.employee, {color: bankStyle.linkColor}]}>{me.firstName + '@' + me.organization.title}</Text>
+    if (me.isEmployee) {
+      employee = <View style={[styles.center, {paddingLeft: 10, maxWidth: utils.dimensions(GridList).width - 90}]}>
+                   <Text numberOfLines={1} style={[styles.employee, {color: bankStyle.linkColor}]}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    }
     else
       employee = <View/>
     let isAdd = this.state.allowToAdd  &&  !search
