@@ -3879,13 +3879,12 @@ if (!res[SIG]  &&  res._message)
     if (rtype === APPLICATION)
       return await this.getApplication(params)
 
-    let r
-    const isApplication = rtype === APPLICATION
     let rId = utils.getId(resource)
+    let r = await this._getItemFromServer(rId, backlink)
+    if (!r)
+      return
+
     if (resource.id  ||  (!backlink  &&  !forwardlink)) {
-      r = await this._getItemFromServer(rId, backlink)
-      if (!r)
-        return
       // Check if there are verifications
       if (!noTrigger                 &&
           application                &&
@@ -6447,6 +6446,9 @@ if (!res[SIG]  &&  res._message)
       return
     }
     let {direction, first, noTrigger, modelName, application, filterResource, endCursor, limit} = params
+    if (modelName === MESSAGE)
+      return await this.getChat(params)
+
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
     if (!filterResource)
       filterResource = {}
