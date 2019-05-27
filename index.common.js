@@ -92,7 +92,7 @@ class TiMApp extends Component {
       props: passProps
     };
 
-    ;['_handleOpenURL', '_handleAppStateChange', 'onNavigatorBeforeTransition', 'onNavigatorAfterTransition'].forEach((method) => {
+    ;['_handleAppStateChange', 'onNavigatorBeforeTransition', 'onNavigatorAfterTransition'].forEach((method) => {
       this[method] = this[method].bind(this)
     })
   }
@@ -107,14 +107,9 @@ class TiMApp extends Component {
     }
 
     AppState.addEventListener('change', this._handleAppStateChange);
-    // Linking.addEventListener('url', this._handleOpenURL);
-    // var url = Linking.popInitialURL();
-    // if (url)
-    //   this._handleOpenURL({url});
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this._handleAppStateChange);
-    // Linking.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
   }
 
@@ -189,90 +184,6 @@ class TiMApp extends Component {
 
     this.setState(newState)
   }
-  _handleOpenURL(event) {
-    let url = event.url.trim();
-    let idx = url.indexOf('://');
-    let q = (idx + 3 === url.length) ? null : url.substring(idx + 3);
-
-    let r;
-    if (!q) {
-      r = {
-        _t: 'tradle.Organization',
-        _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
-        name: 'HSBC',
-        me: 'me'
-      }
-    }
-    else {
-      let params = q.split('=');
-      if (params.length === 1) {
-        switch (parseInt(params[0])) {
-        case 1:
-          r = {
-            _t: 'tradle.Organization',
-            _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
-            name: 'Lloyds',
-            me: 'me'
-          }
-          break;
-        case 2:
-          r = {
-            _t: 'tradle.Organization',
-            _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
-            name: 'HSBC',
-            me: '31eb0b894cad3601adc76713d55a11c88e48b4a2'
-          }
-          break;
-        case 3:
-          r = {
-            _t: 'tradle.Organization',
-            _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
-            name: 'Lloyds',
-            me: 'b25da36eaf4b01b37fc2154cb1103eb5324a12345'
-          }
-          break;
-        }
-      }
-      else {
-        r = JSON.parse(decodeURIComponent(params[1]));
-        if (!r[TYPE])
-          r[TYPE] = 'tradle.Organization';
-      }
-    }
-    let props = {modelName: MESSAGE};
-
-    if (this.state.navigator) {
-      let currentRoutes = this.state.navigator.getCurrentRoutes();
-      let route = {
-        title: r.name ||  'Chat',
-        backButtonTitle: 'Back',
-        componentName: 'MessageList',
-        passProps: {
-          resource: r,
-          modelName: MESSAGE,
-        }
-      }
-      if (currentRoutes.length === 1)
-        this.state.navigator.push(route);
-      else
-        this.state.navigator.replace(route);
-    }
-    else {
-      this.setState({
-        initialRoute: {
-          title: r.name ||  'Chat',
-          // backButtonTitle: 'Back',
-          componentName: 'MessageList',
-          passProps: {
-            resource: r, //{'_t': type, '_r': rId},
-            modelName: MESSAGE,
-          }
-        },
-        props: props
-      });
-    }
-  }
-
   onNavigatorBeforeTransition(e) {
     if (ReactPerf) ReactPerf.start()
     Actions.startTransition()
@@ -367,8 +278,6 @@ class TiMApp extends Component {
       </View>
     );
   }
-          // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
-
   renderScene(route, nav) {
     if (!route.componentName || !components[route.componentName]) {
       Alert.alert(`Component not found ${route.componentName}`)
@@ -466,14 +375,8 @@ var NavigationBarRouteMapper = {
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)
       return <View/>
-    // let style = [platformStyles.navBarText, styles.navBarButtonText];
-    // if (route.tintColor)
-    //   style.push({color: route.tintColor});
-    // else if (route.passProps.bankStyle)
-    //   style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
     let rbTitle = route.rightButtonTitle
     let icon
-    let symbol
     let iconSize = 25
     let bankStyle = route.passProps.bankStyle
     let iconColor
@@ -499,8 +402,6 @@ var NavigationBarRouteMapper = {
       isSubmit = true
       if (route.passProps.isChooser)
         icon = 'md-checkmark'
-      // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
-      //   return
     case 'Accept':
       if (!icon) {
         icon = 'ios-send'
@@ -508,10 +409,7 @@ var NavigationBarRouteMapper = {
       }
       if (isAndroid)
         viewStyle = {paddingTop: 14}
-      style = {marginTop: -2} //isAndroid ? 0 : -2}
-      // style = {marginTop: 5, transform: [
-      //     {rotate: '45deg'}
-      //   ]}
+      style = {marginTop: -2}
       break
     case 'Confirm':
       icon = 'md-checkmark-circle-outline'
@@ -533,7 +431,6 @@ var NavigationBarRouteMapper = {
     case 'Edit':
       iconSize = 28
       style = {marginRight: -4, marginTop: isAndroid ? 12 : -2}
-      // style = {marginTop: 2, marginRight: -4}
       icon = 'ios-create-outline'
       break
     case 'Share':
@@ -555,9 +452,6 @@ var NavigationBarRouteMapper = {
                   {title}
                 </View>
     }
-    else if (symbol)
-      title = <Text style={{fontSize: 25}}>{symbol}</Text>
-
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
                   {rbTitle}
@@ -573,14 +467,6 @@ var NavigationBarRouteMapper = {
                {icons}
               </View>
     }
-      // {route.help
-      //   ? <TouchableOpacity
-      //       hitSlop={HIT_SLOP}
-      //       onPress={() =>  Alert.alert(translate(route.help))}>
-      //       <Icon name={'ios-information-circle'} key={'ios-help'} size={18} color='#29ABE2' style={[styles.iconSpace, {marginTop: 13}]}/>
-      //     </TouchableOpacity>
-      //   : <View />
-      // }
     return (
       <View style={viewStyle}>
       <TouchableOpacity
