@@ -3848,11 +3848,10 @@ if (!res[SIG]  &&  res._message)
       return await this.getApplication(params)
 
     const rId = utils.getId(resource)
-    let r
+    let r = await this._getItemFromServer(rId, backlink)
+    if (!r)
+      return
     if (resource.id  ||  (!backlink  &&  !forwardlink)) {
-      r = await this._getItemFromServer(rId, backlink)
-      if (!r)
-        return
       // Check if there are verifications
       if (!noTrigger                 &&
           application                &&
@@ -3866,8 +3865,6 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
-    else
-      r = resource
     let list, style
     if (application) {
       if (!r._context) {

@@ -904,8 +904,10 @@ var search = {
             if (props[p])
               prop = p
           }
-          excludeProps.push(prop)
-          return
+          if (prop) {
+            excludeProps.push(prop)
+            return
+          }
         }
 
         let msg = err.message
