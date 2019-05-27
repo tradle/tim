@@ -7022,8 +7022,8 @@
     },
     "react-native-fabric": {
       "version": "0.4.1",
-      "from": "react-native-fabric@>=0.4.1 <0.5.0",
-      "resolved": "https://registry.npmjs.org/react-native-fabric/-/react-native-fabric-0.4.1.tgz"
+      "from": "tradle/react-native-fabric#dev",
+      "resolved": "git://github.com/tradle/react-native-fabric.git#90af8e9669facbcb3e92ea538dcd12c1bea16dd3"
     },
     "react-native-fabric-crashlytics": {
       "version": "0.1.8",
@@ -7031,9 +7031,9 @@
       "resolved": "https://registry.npmjs.org/react-native-fabric-crashlytics/-/react-native-fabric-crashlytics-0.1.8.tgz"
     },
     "react-native-facetec-zoom": {
-      "version": "1.2.0",
+      "version": "1.2.1",
       "from": "react-native-facetec-zoom@latest",
-      "resolved": "http://registry.npmjs.org/react-native-facetec-zoom/-/react-native-facetec-zoom-1.2.0.tgz"
+      "resolved": "http://registry.npmjs.org/react-native-facetec-zoom/-/react-native-facetec-zoom-1.2.1.tgz"
     },
     "react-native-flexbox-grid": {
       "version": "0.3.2",
