@@ -153,7 +153,7 @@ const defaultStyles = StyleSheet.create({
   // },
   title: {
     alignSelf: 'center',
-    fontSize: 30
+    fontSize: 26
   },
   message: {
     alignSelf: 'flex-start',
