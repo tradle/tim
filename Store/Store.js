@@ -6691,7 +6691,7 @@ if (!res[SIG]  &&  res._message)
         continue
       let list = response.edges
       // HACK
-      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK  &&  r.node.object[TYPE] !== STYLES_PACK)
+      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK  &&  r.node.object[TYPE] !== STYLES_PACK  &&  r.node.object[TYPE] !== MESSAGE)
       list = filteredList
       if (list  &&  list.length) {
         list.forEach(li => {
