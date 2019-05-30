@@ -244,7 +244,7 @@ module.exports = {
     "youAreTheRM": "You are the Relationship Manager for this application",
     "fillRequiredFields": "Please fill out all required fields",
     "multientryToShare": "There are {1} documents to share",
-    "youAreAboutToShare": "You are about to share\n '{1}'\n documents",
+    "youAreAboutToShare": "You are about to share '{1}' documents",
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the data below",
