@@ -632,7 +632,9 @@ class FormRequestRow extends Component {
                     {shareView}
                    </TouchableOpacity>
                    <View>
-                     {headerContent}
+                     <TouchableOpacity underlayColor='transparent' onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: multiChooser})}>
+                       {headerContent}
+                     </TouchableOpacity>
                      <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
                        {orgView}
                      </TouchableOpacity>
@@ -641,7 +643,6 @@ class FormRequestRow extends Component {
       }
     }
     let content = <View style={{flex:1, paddingVertical: 3}}>
-                     {orgRow && <View style={styles.hr}/>}
                      {orgRow}
                    </View>
 
@@ -775,7 +776,7 @@ class FormRequestRow extends Component {
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isRefresh = resource.form === REFRESH
     if (isRequestForNext) {
-      let animStyle = {transform: [{scale: this.springValue}]}
+      let animStyle = {transform: [{scale: this.springValue}], paddingLeft: 5, marginLeft: -3}
       let buttons = (
         <View style={[styles.row, {paddingTop: 10}]}>
           <Animated.View style={animStyle}>
@@ -1145,12 +1146,13 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       // backgroundColor: '#ffffff'
     },
     orgView: {
-      // maxWidth: msgWidth - 150,
+      width: msgWidth - 70,
       paddingLeft: 10,
       marginRight: 10,
       flex: 1,
       justifyContent: 'center',
-      alignItems: 'flex-end'
+      alignItems: 'flex-end',
+      alignSelf: 'flex-end'
     },
     orText: {
       fontStyle: 'italic',
