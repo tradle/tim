@@ -3374,7 +3374,7 @@ debug('sent:', r)
 
     return orgRep
   },
-  async onGetRequestedProperties({resource, currentResource, noTrigger}) {
+  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource}) {
     let rtype = resource[TYPE]
     if (!plugins.length  &&  !appPlugins.length)
       return
@@ -3386,7 +3386,8 @@ debug('sent:', r)
     let _context = resource._context
     if (_context  &&   utils.isStub(_context))
       _context = this._getItem(_context.id)
-
+    if (!_context  &&  originatingResource)
+      _context = originatingResource._context
     // if (appPlugins)
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = this.getBizPluginsContext()

@@ -2,6 +2,7 @@ import { TYPE } from '@tradle/constants'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
+const LEGAL_ENTITY = 'tradle.legal.LegalEntity'
 
 module.exports = function LegalEntity ({ models }) {
   return {
@@ -19,9 +20,45 @@ module.exports = function LegalEntity ({ models }) {
         return getPropsForControllingEntity(form)
       case OWNERSHIP:
         return getPropsForOwnership(form)
+      case LEGAL_ENTITY:
+        return getPropsForLegalEntity(form)
       }
     }
   }
+}
+function getPropsForLegalEntity(form) {
+  const { photos, country, registrationNumber, region } = form
+  if (!country) {
+    return {
+      requestedProperties: [
+        { name: 'photos' },
+        { name: 'country' },
+      ]
+    }
+  }
+  if (!registrationNumber) {
+    if (country  &&  country.id.split('_')[1] === 'US'  &&  !region) {
+      return {
+        requestedProperties: [
+          { name: 'photos' },
+          { name: 'country' },
+          { name: 'region' }
+        ]
+      }
+    }
+  }
+  return {
+      requestedProperties: [
+        { name: 'info_group' },
+        { name: 'address_group'},
+        { name: 'taxIdNumber', required: false },
+        { name: 'companyEmail', required: false },
+        { name: 'streetAddress', required: false },
+        { name: 'postalCode', required: false },
+        { name: 'city', required: false },
+        // { name: 'address_group' }
+      ]
+    }
 }
 function getPropsForControllingEntity(form) {
   let typeOfControllingEntity = form.typeOfControllingEntity

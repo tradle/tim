@@ -176,7 +176,8 @@ var NewResourceMixin = {
         eCols.push(p)
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
-            eCols.push(pp)
+            if (!eCols.includes(pp))
+              eCols.push(pp)
             requestedProperties[pp] = ''
             // this.addError(p, params)
           })

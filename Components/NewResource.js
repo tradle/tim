@@ -185,7 +185,8 @@ class NewResource extends Component {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
       else
-        Actions.getRequestedProperties({resource})
+        Actions.getRequestedProperties({resource, originatingResource: this.props.originatingMessage})
+
     }
     else {
      if (resource.id) {
@@ -275,6 +276,8 @@ class NewResource extends Component {
       if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
         if (requestedProperties) {
           let r = resource ||  this.state.resource
+          if (originatingMessage  &&  originatingMessage.prefill)
+            _.extend(r, originatingMessage.prefill)
           if (deleteProperties  &&  this.floatingProps)
             deleteProperties.forEach(p => {
               delete this.floatingProps[p]
