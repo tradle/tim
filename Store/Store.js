@@ -10368,20 +10368,24 @@ if (!res[SIG]  &&  res._message)
         }
       }
       else {
-        if (val[TYPE] === FORM_ERROR  &&  val.prefill.id) {
-          let memPrefill = this._getItem(val.prefill)
-          let phash = memPrefill ? memPrefill[CUR_HASH] : this.getCurHash(val.prefill) //  val.prefill.id.split('_')[2]
-          let prefill
-          try {
-            prefill = await this._keeper.get(phash)
-          } catch (err) {
-            prefill = await this._getItemFromServer(val.prefill.id)
+        if (val[TYPE] === FORM_ERROR) {
+          if (!val.prefill.id)
+            val.prefill._latest = true
+          else {
+            let memPrefill = this._getItem(val.prefill)
+            let phash = memPrefill ? memPrefill[CUR_HASH] : this.getCurHash(val.prefill) //  val.prefill.id.split('_')[2]
+            let prefill
+            try {
+              prefill = await this._keeper.get(phash)
+            } catch (err) {
+              prefill = await this._getItemFromServer(val.prefill.id)
+            }
+            let p = {}
+            if (memPrefill)
+              _.extend(p, memPrefill)
+            _.extend(p, prefill)
+            val.prefill = p
           }
-          let p = {}
-          if (memPrefill)
-            _.extend(p, memPrefill)
-          _.extend(p, prefill)
-          val.prefill = p
         }
         else if (utils.isItem(model)) {
           let props = model.properties
