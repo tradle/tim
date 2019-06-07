@@ -173,8 +173,7 @@ class NewResource extends Component {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
       else
-        Actions.getRequestedProperties({resource})
-    }
+        Actions.getRequestedProperties({resource, originatingResource: this.props.originatingMessage})    }
     else {
      if (resource.id) {
         let type = utils.getType(resource.id)
@@ -250,6 +249,8 @@ class NewResource extends Component {
       if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
         if (requestedProperties) {
           let r = resource ||  this.state.resource
+          if (originatingMessage  &&  originatingMessage.prefill)
+            _.extend(r, originatingMessage.prefill)
           if (deleteProperties  &&  this.floatingProps)
             deleteProperties.forEach(p => {
               delete this.floatingProps[p]
@@ -1096,7 +1097,7 @@ class NewResource extends Component {
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
-    let width = utils.dimensions(NewResource).width - 40
+    let width = utils.dimensions(NewResource).width - 20
     if (count) {
       let cstyle = styles.activePropTitle
       actionableItem = <View style={{width}}>
