@@ -629,7 +629,9 @@ class FormRequestRow extends Component {
                      {shareView}
                    </TouchableOpacity>
                    <View>
-                     {headerContent}
+                     <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
+                       {headerContent}
+                     </TouchableOpacity>
                      <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
                        {orgView}
                      </TouchableOpacity>
@@ -638,7 +640,6 @@ class FormRequestRow extends Component {
       }
     }
     let content = <View style={{flex:1, paddingVertical: 3}}>
-                     {orgRow && <View style={styles.hr}/>}
                      {orgRow}
                    </View>
 
@@ -759,7 +760,7 @@ class FormRequestRow extends Component {
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isRefresh = resource.form === REFRESH
     if (isRequestForNext) {
-      let animStyle = {transform: [{scale: this.springValue}]}
+      let animStyle = {transform: [{scale: this.springValue}], paddingLeft: 5, marginLeft: -3}
       let buttons = (
         <View style={[styles.row, {paddingTop: 10}]}>
           <Animated.View style={animStyle}>
