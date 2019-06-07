@@ -1483,7 +1483,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : uiUtils.getContentSeparator(bankStyle)
     let contentSeparator = getContentSeparator(bankStyle)
     return (
-      <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && contentSeparator} bankStyle={bankStyle}>
+      <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={(this.state.allowToAdd  || (!isBacklink && !isForwardlink && !isEmptyItemsTab)) && contentSeparator} bankStyle={bankStyle}>
         {network}
         {searchBar}
         <View style={styles.separator} />
