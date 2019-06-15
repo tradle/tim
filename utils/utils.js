@@ -92,6 +92,7 @@ var {
   PROFILE,
   IDENTITY,
   ENUM,
+  MODEL,
   MESSAGE,
   CUSTOMER_WAITING
 } = constants.TYPES
@@ -701,8 +702,13 @@ var utils = {
       return utils.isSubclassOf(m, subType)
     }
     if (type.type)  {
-      if (type.type === 'tradle.Model')
-        return type.subClassOf === subType
+      if (type.type === MODEL) {
+        if (type.subClassOf === subType)
+          return true
+        if (!type.subClassOf)
+          return false
+        return utils.isSubclassOf(type.subClassOf, subType)
+      }
     }
     let m = utils.getModel(type[TYPE])
     if (m.subClassOf === subType)
