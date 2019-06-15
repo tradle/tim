@@ -1,8 +1,12 @@
 import { TYPE } from '@tradle/constants'
+import { getModel, getPropertiesWithAnnotation } from '../utils/utils'
 
-const LEGAL_ENTITY = 'tradle.legal.LegalEntity'
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
+const LEGAL_ENTITY = 'tradle.legal.LegalEntity'
+const LEGAL_DOCUMENT_INTERSECTION = 'tradle.legal.LegalEntityLegalDocument'
+const LEGAL_DOCUMENT = 'tradle.legal.LegalDocument'
+const COUNTRY = 'tradle.Country'
 
 module.exports = function LegalEntity ({ models }) {
   return {
@@ -22,28 +26,110 @@ module.exports = function LegalEntity ({ models }) {
         return getPropsForOwnership(form)
       case LEGAL_ENTITY:
         return getPropsForLegalEntity(form)
+      case LEGAL_DOCUMENT_INTERSECTION:
+        return getPropsForLegalDocumentI(form)
+      default:
+        if (getModel(type).subClassOf === LEGAL_DOCUMENT)
+          return getPropsForLegalDocument(form)
       }
     }
   }
 }
-function getPropsForLegalEntity(form) {
-  const { country } = form
-  if (country  &&  country.id.split('_')[1] === 'US') {
+function getPropsForLegalDocumentI(form) {
+  if (form.documentType) {
     return {
       requestedProperties: [
-        { name: 'region' },
-        // { name: 'info_group' },
-        // { name: 'taxIdNumber', required: false },
-        // { name: 'companyEmail', required: false },
-        // { name: 'street', required: false },
-        // { name: 'postalCode', required: false },
-        // { name: 'city', required: false },
-        // { name: 'address_group' }
+        { name: 'documentType' },
+        { name: 'document' },
       ]
     }
   }
-
+  else
+    return {
+      requestedProperties: [
+        { name: 'documentType' },
+      ]
+    }
 }
+function getPropsForLegalDocument(form) {
+  const props = getModel(form[TYPE]).properties
+  let countryProp
+  let docProp
+  for (let p in props) {
+    const prop = props[p]
+    if (prop.ref === COUNTRY)
+      countryProp = prop.name
+    else if (prop.range === 'document')
+      docProp = prop.name
+  }
+  if (!countryProp  ||  !docProp)
+    return
+  // let regionProp = subProps.find(p => p.subPropertyOf === 'region')
+  // const { document, country, registrationNumber, region } = form
+  const country = form[countryProp]
+  const region = form.region
+  if (!country) {
+    return {
+      requestedProperties: [
+        { name: countryProp },
+        { name: docProp },
+      ]
+    }
+  }
+  if (!form.registrationNumber) {
+    if (country  &&  country.id.split('_')[1] === 'US') {
+      return {
+        requestedProperties: [
+          { name: countryProp },
+          { name: 'region' },
+          { name: docProp },
+        ]
+      }
+    }
+    return {
+      requestedProperties: [
+        { name: countryProp },
+        { name: docProp },
+      ]
+    }
+  }
+  let ret = {
+    requestedProperties: [
+    ]
+  }
+  for (let p in props) {
+    ret.requestedProperties.push({name: p})
+  }
+  return ret
+}
+function getPropsForLegalEntity(form) {
+  const { document, country, registrationNumber, region } = form
+  // if (!country  ||  !document) {
+  // if (!document  ||  isNewResource(document)) {
+  //   return {
+  //     requestedProperties: [
+  //       // { name: 'country' },
+  //       { name: 'document' },
+  //     ]
+  //   }
+  // }
+  return {
+      requestedProperties: [
+        { name: 'info_group' },
+        { name: 'address_group'},
+        { name: 'taxIdNumber', required: false },
+        { name: 'companyEmail', required: false },
+        { name: 'streetAddress', required: false },
+        { name: 'postalCode', required: false },
+        { name: 'city', required: false },
+      ]
+    }
+}
+function isNewResource(stub) {
+  const parts = stub.id.split('_')
+  return parts[1] === parts[2]
+}
+
 function getPropsForControllingEntity(form) {
   let typeOfControllingEntity = form.typeOfControllingEntity
   if (!typeOfControllingEntity)
