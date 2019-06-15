@@ -1,8 +1,13 @@
 import { TYPE } from '@tradle/constants'
+import { getModel, getPropertiesWithAnnotation } from '../utils/utils'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
 const LEGAL_ENTITY = 'tradle.legal.LegalEntity'
+const LEGAL_DOCUMENT_INTERSECTION = 'tradle.legal.LegalEntityLegalDocument'
+const LEGAL_DOCUMENT = 'tradle.legal.LegalDocument'
+const COUNTRY = 'tradle.Country'
+const PHOTO = 'tradle.Photo'
 
 module.exports = function LegalEntity ({ models }) {
   return {
@@ -22,29 +27,91 @@ module.exports = function LegalEntity ({ models }) {
         return getPropsForOwnership(form)
       case LEGAL_ENTITY:
         return getPropsForLegalEntity(form)
+      case LEGAL_DOCUMENT_INTERSECTION:
+        return getPropsForLegalDocumentI(form)
+      default:
+        if (getModel(type).subClassOf === LEGAL_DOCUMENT)
+          return getPropsForLegalDocument(form)
       }
     }
   }
 }
-function getPropsForLegalEntity(form) {
-  const { photos, country, registrationNumber, region } = form
-  if (!country) {
+function getPropsForLegalDocumentI(form) {
+  if (form.documentType) {
     return {
       requestedProperties: [
-        { name: 'photos' },
-        { name: 'country' },
+        { name: 'documentType' },
+        { name: 'document' },
       ]
     }
   }
-  if (!registrationNumber) {
-    if (country  &&  country.id.split('_')[1] === 'US'  &&  !region) {
+  else
+    return {
+      requestedProperties: [
+        { name: 'documentType' },
+      ]
+    }
+}
+function getPropsForLegalDocument(form) {
+  const props = getModel(form[TYPE]).properties
+  let countryProp
+  let docProp
+  for (let p in props) {
+    const prop = props[p]
+    if (prop.ref === COUNTRY)
+      countryProp = prop.name
+    else if (prop.range === 'document')
+      docProp = prop.name
+  }
+  if (!countryProp  ||  !docProp)
+    return
+  // let regionProp = subProps.find(p => p.subPropertyOf === 'region')
+  // const { document, country, registrationNumber, region } = form
+  const country = form[countryProp]
+  const region = form.region
+  if (!country) {
+    return {
+      requestedProperties: [
+        { name: countryProp },
+        { name: docProp },
+      ]
+    }
+  }
+  if (!form.registrationNumber) {
+    if (country  &&  country.id.split('_')[1] === 'US') {
       return {
         requestedProperties: [
-          { name: 'photos' },
-          { name: 'country' },
-          { name: 'region' }
+          { name: countryProp },
+          { name: 'region' },
+          { name: docProp },
         ]
       }
+    }
+    return {
+      requestedProperties: [
+        { name: countryProp },
+        { name: docProp },
+      ]
+    }
+  }
+  let ret = {
+    requestedProperties: [
+    ]
+  }
+  for (let p in props) {
+    ret.requestedProperties.push({name: p})
+  }
+  return ret
+}
+function getPropsForLegalEntity(form) {
+  const { document, country, registrationNumber, region } = form
+  // if (!country  ||  !document) {
+  if (!document  ||  isNewResource(document)) {
+    return {
+      requestedProperties: [
+        // { name: 'country' },
+        { name: 'document' },
+      ]
     }
   }
   return {
@@ -56,10 +123,14 @@ function getPropsForLegalEntity(form) {
         { name: 'streetAddress', required: false },
         { name: 'postalCode', required: false },
         { name: 'city', required: false },
-        // { name: 'address_group' }
       ]
     }
 }
+function isNewResource(stub) {
+  const parts = stub.id.split('_')
+  return parts[1] === parts[2]
+}
+
 function getPropsForControllingEntity(form) {
   let typeOfControllingEntity = form.typeOfControllingEntity
   if (!typeOfControllingEntity)

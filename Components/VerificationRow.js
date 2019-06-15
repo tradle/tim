@@ -42,7 +42,8 @@ const { TYPE } = constants
 const {
   ORGANIZATION,
   MONEY,
-  MESSAGE
+  MESSAGE,
+  VERIFICATION
 } = constants.TYPES
 
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
@@ -94,8 +95,9 @@ class VerificationRow extends Component {
     let isMyProduct = utils.isMyProduct(model)
     let isForm = utils.isForm(model)
     let isBookmark = model.id === BOOKMARK
+    let isAbstract = isChooser  &&  utils.getModel(prop.ref).abstract
     let isApplicationSubmission = model.id === APPLICATION_SUBMISSION
-    let isVerification = resource.document != null
+    let isVerification = model.id === VERIFICATION  &&  resource.document != null
     let r = isVerification ? resource.document : resource
 
     let listModel = utils.getModel(this.props.modelName)
@@ -241,6 +243,12 @@ class VerificationRow extends Component {
       titleComponent = <Text style={styles.rTitle}>
                           <Text style={styles.rTitle}>{dn}</Text>
                         </Text>
+    }
+    else if (isAbstract) {
+      titleComponent = <View>
+                         <Text style={styles.rTitle}>{title}</Text>
+                         <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{translate(model)}</Text>
+                       </View>
     }
     else if (title != dn)  {
       if (isCheck) {

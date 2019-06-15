@@ -220,8 +220,6 @@ class RefPropertyEditor extends Component {
           label = translateEnum(val)
       }
     }
-    else
-      label = utils.getDisplayName(resource[pName], rModel)
     if (!label) { // see if stub
       label = resource[pName].title
       if (!label)
@@ -493,7 +491,8 @@ class RefPropertyEditor extends Component {
 
     if (originatingMessage) {
       let pmodel = utils.getLensedModel(originatingMessage)
-      prop = pmodel.properties[propName]
+      if (!pmodel.abstract)
+        prop = pmodel.properties[propName]
     }
 
     let route = {
