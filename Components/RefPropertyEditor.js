@@ -169,7 +169,7 @@ class RefPropertyEditor extends Component {
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        actionItem = <ImageInput nonImageAllowed={isVideo} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+        actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
       }
@@ -215,8 +215,6 @@ class RefPropertyEditor extends Component {
           label = translateEnum(val)
       }
     }
-    else
-      label = utils.getDisplayName(resource[pName], rModel)
     if (!label) { // see if stub
       label = resource[pName].title
       if (!label)
@@ -487,7 +485,8 @@ class RefPropertyEditor extends Component {
 
     if (originatingMessage) {
       let pmodel = utils.getLensedModel(originatingMessage)
-      prop = pmodel.properties[propName]
+      if (!pmodel.abstract)
+        prop = pmodel.properties[propName]
     }
 
     let route = {
