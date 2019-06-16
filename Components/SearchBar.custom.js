@@ -12,11 +12,11 @@ class SearchBar extends Component {
   render() {
     let {bankStyle, filter} = this.props
     return (
-      <View style={{padding: 7, borderBottomWidth: 2, borderBottomColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}}>
-        <TextInput
+      <View style={{paddingVertical: 7, paddingHorizontal: Platform.OS === 'web' && 25 || 7, borderBottomWidth: 2, borderBottomColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}}>        <TextInput
           style={styles.searchBarInput}
           autoCapitalize='none'
           onChange={this.props.onChangeText.bind(this)}
+          autoFocus={true}
           placeholder='Search'
           placeholderTextColor='#bbbbbb'
           underlineColorAndroid='transparent'
