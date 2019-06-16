@@ -165,23 +165,24 @@ class NewResource extends Component {
     return isUpdate
   }
   componentWillMount() {
-    let { resource } = this.state
-    // Profile gets changed every time there is a new photo added through for ex. Selfie
+    let { resource, isUploading } = this.state
+    let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource: resource})
     if (resource[ROOT_HASH]) {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
       else
-        Actions.getRequestedProperties({resource, originatingResource: this.props.originatingMessage})    }
+        Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
+    }
     else {
      if (resource.id) {
         let type = utils.getType(resource.id)
         if (!utils.getModel(type).inlined)
           Actions.getItem({resource: resource})
       }
-      else if (this.state.isUploading) {
-        if (this.props.containerResource)
+      else if (isUploading) {
+        if (containerResource)
           this.state.isUploading = false
         else {
           Actions.getTemporary(resource[TYPE])
@@ -250,7 +251,7 @@ class NewResource extends Component {
         if (requestedProperties) {
           let r = resource ||  this.state.resource
           if (originatingMessage  &&  originatingMessage.prefill)
-            _.extend(r, originatingMessage.prefill)
+            _.defaults(r, originatingMessage.prefill)
           if (deleteProperties  &&  this.floatingProps)
             deleteProperties.forEach(p => {
               delete this.floatingProps[p]
@@ -279,7 +280,9 @@ class NewResource extends Component {
     if (action === 'getTemporary') {
       let r = {}
       _.extend(r, this.state.resource)
-      _.extend(r, resource)
+
+      if (!originatingMessage.prefill)
+        _.extend(r, resource)
 
       this.setState({
         resource: r,
@@ -398,26 +401,26 @@ class NewResource extends Component {
   }
   // Show providers this resource was shared with and allow customer to choose
   // which providers to share the changes with
-  showSharedWithList(newResource) {
-    if (!this.props.resource  ||  !this.props.resource._sharedWith)
-      return
-    this.props.navigator.replace({
-      title: translate('shareChangesWith'),
-      backButtonTitle: 'Back',
-      componentName: 'ResourceList',
-      rightButtonTitle: 'Done',
-      passProps: {
-        message: translate('chooseCompaniesToShareChangesWith'),
-        modelName: ORGANIZATION,
-        to: this.state.resource.to,
-        resource: this.props.resource,
-        callback:  this.shareWith.bind(this, newResource),
-        chat: this.props.chat,
-        bankStyle: this.props.bankStyle,
-        currency: this.props.currency
-      }
-    });
-  }
+  // showSharedWithList(newResource) {
+  //   if (!this.props.resource  ||  !this.props.resource._sharedWith)
+  //     return
+  //   this.props.navigator.replace({
+  //     title: translate('shareChangesWith'),
+  //     backButtonTitle: 'Back',
+  //     componentName: 'ResourceList',
+  //     rightButtonTitle: 'Done',
+  //     passProps: {
+  //       message: translate('chooseCompaniesToShareChangesWith'),
+  //       modelName: ORGANIZATION,
+  //       to: this.state.resource.to,
+  //       resource: this.props.resource,
+  //       callback:  this.shareWith.bind(this, newResource),
+  //       chat: this.props.chat,
+  //       bankStyle: this.props.bankStyle,
+  //       currency: this.props.currency
+  //     }
+  //   });
+  // }
   // The form/verification was shared with other providers and now it is edited.
   // Offer to share the form with the same providers it was originally share
   shareWith(newResource, list) {
@@ -452,19 +455,21 @@ class NewResource extends Component {
       }
     }
     let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource, isRefresh } = this.props
-    let props = model.properties
     let required = utils.ungroup(model, model.required)
-    if (!required) {
+    if (!required)
       required = []
-      for (let p in props) {
-        if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
-          required.push(p)
-      }
-    }
+
     let requestedProperties = this.state.requestedProperties || this.props.requestedProperties
     if (requestedProperties) {
       for (let p in requestedProperties) {
         if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1)
+          required.push(p)
+      }
+    }
+    if (!required.length) {
+      const props = model.properties
+      for (let p in props) {
+        if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
           required.push(p)
       }
     }
