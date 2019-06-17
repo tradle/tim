@@ -23,9 +23,11 @@ import constants from '@tradle/constants'
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import { parseMessage } from '../utils/uiUtils'
+import NewResource from './NewResource'
 import RowMixin from './RowMixin'
 import ImageInput from './ImageInput'
 import OnePropFormMixin from './OnePropFormMixin'
+import StringChooser from './StringChooser'
 
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
@@ -629,7 +631,9 @@ class FormRequestRow extends Component {
                      {shareView}
                    </TouchableOpacity>
                    <View>
-                     {headerContent}
+                     <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
+                       {headerContent}
+                     </TouchableOpacity>
                      <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
                        {orgView}
                      </TouchableOpacity>
@@ -638,7 +642,6 @@ class FormRequestRow extends Component {
       }
     }
     let content = <View style={{flex:1, paddingVertical: 3}}>
-                     {orgRow && <View style={styles.hr}/>}
                      {orgRow}
                    </View>
 
@@ -674,44 +677,77 @@ class FormRequestRow extends Component {
     })
   }
 
-  createNewResource(model, isMyMessage) {
-    let { resource, currency, country, bankStyle, defaultPropertyValues, navigator } = this.props
-    let r = {
-      from: resource.to,
-      to: resource.from,
-      _context: resource._context,
-      [TYPE]: model.id
-    }
+  createNewResource({model, isMyMessage, resource}) {
+    let { currency, country, bankStyle, defaultPropertyValues, navigator } = this.props
+    if (!model)
+      model = utils.getModel(resource[TYPE])
+    if (model.abstract) {
+      let subList = utils.getAllSubclasses(model.id)
 
-    // Prefill for testing and demoing
+      navigator.push({
+        title: translate(model),
+        id: 33,
+        component: StringChooser,
+        backButtonTitle: 'Back',
+        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+        passProps: {
+          strings: subList, // model.additionalForms,
+          notModel: true,
+          bankStyle,
+          callback:  val => this.createNewResource({model: utils.getModel(val)})
+        }
+      });
+      return
+    }
+    let formRequest = this.props.resource
     let isPrefilled
-    if (ENV.prefillForms  &&  model.id in formDefaults) {
-      _.extend(r, formDefaults[model.id])
-      isPrefilled = true
+    let r
+    if (resource)
+      r = resource
+    else {
+      r = {
+        from: formRequest.to,
+        to: formRequest.from,
+        _context: formRequest._context,
+        [TYPE]: model.id
+      }
+
+      // Prefill for testing and demoing
+      if (ENV.prefillForms  &&  model.id in formDefaults) {
+        _.extend(r, formDefaults[model.id])
+        isPrefilled = true
+      }
+
+      if (formRequest.prefill) {
+        _.defaults(r, formRequest.prefill)
+        isPrefilled = true
+      }
+    }
+    if (!resource  &&  model.autoCreate) {
+      Actions.addChatItem({resource: r}) //, cb: this.createNewResource.bind(this)})
+      return
     }
 
-    if (resource.prefill) {
-      _.extend(r, resource.prefill)
-      isPrefilled = true
-    }
-    navigator.push({
+    let action = utils.getModel(formRequest.form).abstract && 'replace' || 'push'
+    navigator[action]({
+      id: 4,
       title: translate(model),
       rightButtonTitle: isMyMessage ? null : 'Done',
       backButtonTitle: 'Back',
-      componentName: 'NewResource',
+      component: NewResource,
+      // titleTextColor: '#7AAAC3',
       passProps:  {
-        model: model,
+        model,
         resource: r,
-        isPrefilled: isPrefilled,
-        currency: currency,
-        country: country,
-        bankStyle: bankStyle,
-        originatingMessage: resource,
-        defaultPropertyValues: defaultPropertyValues,
+        isPrefilled,
+        currency,
+        country,
+        bankStyle,
+        originatingMessage: formRequest,
+        defaultPropertyValues,
       }
     });
   }
-
   formRequest(resource, vCols, prop, styles) {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
@@ -728,16 +764,23 @@ class FormRequestRow extends Component {
     let isMyProduct = utils.isMyProduct(resource.form)
     if (!resource._documentCreated  &&  product) {
       let multiEntryForms = utils.getModel(product).multiEntryForms
+      let hasMultiEntry = multiEntryForms  &&  productToForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1  &&  productToForms) {
         let forms = productToForms[product]
         if (forms) {
           let formsArray = forms[resource.form]
+          if (!formsArray  &&  utils.getModel(resource.form).abstract) {
+            for (let f in forms) {
+              if (utils.getModel(f).subClassOf === resource.form)
+                sameFormRequestForm = true
+            }
+          }
           if (formsArray)
             sameFormRequestForm = true
         }
       }
       if (!sameFormRequestForm  &&  !isMyProduct)
-        onPressCall = this.createNewResource.bind(this, form, isMyMessage);
+        onPressCall = this.createNewResource.bind(this, {model: form, isMyMessage});
     }
 
     let icon
@@ -759,7 +802,7 @@ class FormRequestRow extends Component {
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isRefresh = resource.form === REFRESH
     if (isRequestForNext) {
-      let animStyle = {transform: [{scale: this.springValue}]}
+      let animStyle = {transform: [{scale: this.springValue}], paddingLeft: 5, marginLeft: -3}
       let buttons = (
         <View style={[styles.row, {paddingTop: 10}]}>
           <Animated.View style={animStyle}>
@@ -827,7 +870,7 @@ class FormRequestRow extends Component {
         else if (resource.verifiers)
           onPressCall = chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (!prop)
-          onPressCall = this.createNewResource.bind(this, form, isMyMessage)
+          onPressCall = this.createNewResource.bind(this, {model: form, isMyMessage})
         else {
           icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} style={styles.arrowForward}/>
 
@@ -1007,7 +1050,7 @@ class FormRequestRow extends Component {
                {content}
              </ImageInput>
 
-    return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, form, isMyMessage)}>
+    return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, {model: form, isMyMessage})}>
              {content}
            </TouchableOpacity>
 
@@ -1280,3 +1323,45 @@ reactMixin(FormRequestRow.prototype, Reflux.ListenerMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
+/*
+
+  createNewResource(model, isMyMessage) {
+    let { resource, currency, country, bankStyle, defaultPropertyValues, navigator } = this.props
+    let r = {
+      from: resource.to,
+      to: resource.from,
+      _context: resource._context,
+      [TYPE]: model.id
+    }
+
+    // Prefill for testing and demoing
+    let isPrefilled
+    if (ENV.prefillForms  &&  model.id in formDefaults) {
+      _.extend(r, formDefaults[model.id])
+      isPrefilled = true
+    }
+
+    if (resource.prefill) {
+      _.extend(r, resource.prefill)
+      isPrefilled = true
+    }
+    navigator.push({
+      title: translate(model),
+      rightButtonTitle: isMyMessage ? null : 'Done',
+      backButtonTitle: 'Back',
+      componentName: 'NewResource',
+      passProps:  {
+        model: model,
+        resource: r,
+        isPrefilled: isPrefilled,
+        currency: currency,
+        country: country,
+        bankStyle: bankStyle,
+        originatingMessage: resource,
+        defaultPropertyValues: defaultPropertyValues,
+      }
+    });
+  }
+
+
+ */

@@ -89,6 +89,7 @@ class GridItemsList extends Component {
           <ImageInput
             ref={input => this._imageInput = input}
             cameraType={prop.cameraType}
+            nonImageAllowed={prop.range === 'document'}
             allowPicturesFromLibrary={prop.allowPicturesFromLibrary}
             underlayColor='transparent'
             onPress={utils.isWeb() ? null : () => this._imageInput.showImagePicker()}

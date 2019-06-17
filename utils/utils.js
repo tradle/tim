@@ -94,10 +94,10 @@ var {
   IDENTITY,
   CUSTOMER_WAITING,
   MESSAGE,
-  ENUM
+  MODEL,
+  ENUM,
+  FORM
 } = constants.TYPES
-
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const ITEM = 'tradle.Item'
@@ -115,6 +115,9 @@ const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const STATUS = 'tradle.Status'
+const SELF_INTRODUCTION = 'tradle.SelfIntroduction'
+const SELFIE = 'tradle.Selfie'
+const PHOTO_ID = 'tradle.PhotoID'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
@@ -668,7 +671,7 @@ var utils = {
             found = true
           else {
             var em = utils.getModel(p)
-            if (em.subClassOf  &&  em.subClassOf === excludeModels[i])
+            if (utils.isSubclassOf(em, excludeModels[i]))
               found = true;
           }
         }
@@ -684,7 +687,7 @@ var utils = {
     var subclasses = [];
     for (var p in models) {
       var m = models[p];
-      if (m.subClassOf  &&  m.subClassOf === iModel)
+      if (utils.isSubclassOf(m, iModel))
         subclasses.push(m);
     }
     return subclasses;
@@ -692,13 +695,20 @@ var utils = {
   isSubclassOf(type, subType) {
     if (typeof type === 'string') {
       let m = utils.getModel(type)
+      if (!m)
+        throw new Error(`There is no model for ${type[TYPE]}`)
       return utils.isSubclassOf(m, subType)
     }
-    if (type.type)  {
-      if (type.type === 'tradle.Model')
-        return type.subClassOf === subType
+    if (type.type === MODEL) {
+      if (type.subClassOf === subType)
+        return true
+      if (!type.subClassOf)
+        return false
+      return utils.isSubclassOf(type.subClassOf, subType)
     }
     let m = utils.getModel(type[TYPE])
+    if (!m)
+      throw new Error(`There is no model for ${type[TYPE]}`)
     if (m.subClassOf === subType)
       return true
     if (m.subClassOf)
@@ -799,7 +809,7 @@ var utils = {
     else if (r[ROOT_HASH]) {
       let id = r[TYPE] + '_' + r[ROOT_HASH] // +  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       let m = utils.getModel(r[TYPE])
-      if (m  &&  m.subClassOf !== ENUM)
+      if (m  &&  !utils.isEnum(m))
         id +=  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       // return  m  &&  (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === MY_PRODUCT)
       //       ? id + '_' + (r[CUR_HASH] || r[ROOT_HASH])
@@ -825,11 +835,9 @@ var utils = {
     if (id)
       return id.split('_')[0]
   },
-  getProduct(r) {
-    return r[TYPE] === PRODUCT_APPLICATION
-           ? r.product
-           : r.requestFor
-  },
+  // getProduct(r) {
+  //   return r.requestFor
+  // },
   getItemsMeta(metadata) {
     var props = metadata.properties;
     // var required = utils.arrayToObject(metadata.required);
@@ -840,7 +848,7 @@ var utils = {
       if (props[p].type !== 'array')  //  &&  required[p]) {
         continue
       let ref = props[p].items.ref
-      if (!ref  ||  utils.getModel(ref).subClassOf !== ENUM)
+      if (!ref  ||  !utils.isEnum(ref))
         itemsMeta[p] = props[p];
     }
     return itemsMeta;
@@ -893,7 +901,7 @@ var utils = {
         if (!resource[p])
           continue
         let dn
-        if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
+        if (props[p].ref  &&  utils.isEnum(props[p].ref))
           dn = utils.translateEnum(resource[p])
         else if (props[p].range === 'model')
           dn = utils.translate(utils.getModel(resource[p]))
@@ -916,9 +924,9 @@ var utils = {
       if (!resource[p])
         continue
       let prop = props[p]
-      if (resourceModel.subClassOf === ENUM)
+      if (utils.isEnum(resourceModel))
         return resource[p]
-      if (prop.ref  &&  utils.getModel(prop.ref).subClassOf === ENUM) {
+      if (prop.ref  &&  utils.isEnum(prop.ref)) {
         if (propsUsed)
           propsUsed.push(prop)
         return resource[p].title
@@ -950,7 +958,7 @@ var utils = {
         continue
       if (prop.type === 'array') {
         const pref = prop.items.ref
-        if (!pref  ||  utils.getModel(pref).subClassOf !== ENUM)
+        if (!pref  ||  !utils.isEnum(pref))
           continue
         else {
           displayName = resource[p].map((v) => utils.translateEnum(v)).join(', ')
@@ -1309,7 +1317,7 @@ var utils = {
       return 'http://' + url;
   },
   sendSigned(driver, opts) {
-    if (opts.msg[TYPE] == 'tradle.SelfIntroduction') {
+    if (opts.msg[TYPE] == SELF_INTRODUCTION) {
       opts.public = true
     }
 
@@ -1493,7 +1501,7 @@ var utils = {
     for (let p in refs) {
       let r = refs[p]
       let refModel = utils.getModel(r.ref)
-      if (refModel.subClassOf === ENUM)
+      if (utils.isEnum(refModel))
         continue
 
       let itemsProps = utils.getPropertiesWithAnnotation(refModel, 'items')
@@ -1812,7 +1820,7 @@ var utils = {
     if (!wrapper.permalink) return wrapper
 
     if (wrapper.object) {
-      const payload = wrapper.object[TYPE] === 'tradle.Message' ? wrapper.object.object : wrapper.object
+      const payload = wrapper.object[TYPE] === MESSAGE ? wrapper.object.object : wrapper.object
       const link = protocol.linkString(payload)
       wrapper[CUR_HASH] = link
       wrapper[ROOT_HASH] = payload[ROOT_HASH] || link
@@ -2077,7 +2085,7 @@ var utils = {
     let rProps = []
     for (let p in props) {
       let pRef = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
-      if (pRef === ref  ||  model.subClassOf === pRef)
+      if (pRef === ref  ||  utils.isSubclassOf(model, pRef))
         rProps.push(props[p])
     }
     return rProps
@@ -2196,7 +2204,7 @@ var utils = {
     return val
   },
   getCaptureImageQualityForModel: ({ id }) => {
-    if (id === 'tradle.PhotoID' || id === 'tradle.Selfie') {
+    if (id === PHOTO_ID || id === SELFIE) {
       return 1
     }
 
@@ -2250,7 +2258,7 @@ var utils = {
         return [ep]
       if (ftype === PRODUCT_REQUEST)
         return [ep]
-      if (ep  &&  ep.type === 'object'  &&  (ep.ref === PHOTO ||  utils.getModel(ep.ref).subClassOf === ENUM))
+      if (ep  &&  ep.type === 'object'  &&  (ep.ref === PHOTO ||  utils.isEnum(ep.ref)))
         return [ep]
       if (ep.signature)
         return [ep]
@@ -2259,7 +2267,7 @@ var utils = {
   },
 
   isSealableModel: function (model) {
-    return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
+    return utils.isSubclassOf(model, FORM) || model.subClassOf === MY_PRODUCT || model.id === VERIFICATION
   },
   isSavedItem(r) {
     let type = utils.getType(r)

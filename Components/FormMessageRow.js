@@ -231,8 +231,12 @@ class FormMessageRow extends Component {
     let viewCols = model.gridCols || model.viewCols;
     if (!viewCols) {
       viewCols = model.required
-      if (!viewCols)
-        return
+      if (!viewCols) {
+        const dnProps = utils.getPropertiesWithAnnotation(model, 'displayName')
+        if (utils.isEmpty(dnProps))
+          return
+        viewCols = Object.keys(dnProps)
+      }
     }
     let properties = model.properties;
     // let onPressCall;

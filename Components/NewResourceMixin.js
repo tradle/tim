@@ -77,8 +77,9 @@ var NewResourceMixin = {
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     // let chooser = this.chooser  ||  this.props.chooser
 
-    meta = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
-
+    let m = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
+    if (m.abstract)
+      m = meta
     let props, bl;
     if (!meta.items)
       props = meta.properties;
@@ -166,6 +167,9 @@ var NewResourceMixin = {
         eCols.push(p)
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
+            let idx = eCols.indexOf(pp)
+            if (idx !== -1)
+              eCols.splice(idx, 1)
             eCols.push(pp)
             requestedProperties[pp] = ''
             // this.addError(p, params)

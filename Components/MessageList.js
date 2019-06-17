@@ -875,6 +875,7 @@ class MessageList extends Component {
         underlineColorAndroid='transparent'
         textInputHeight={textInputHeight}
         menu={this.generateMenu}
+        navigator={navigator}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardType={'default'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}

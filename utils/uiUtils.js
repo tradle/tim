@@ -123,7 +123,7 @@ var uiUtils = {
     newParams.message = message2.trim()
     return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{translate(message1) + ' '}
              <Text style={{color: linkColor}}>{formTitle}</Text>
-             <Text>{uiUtils.parseMessage(newParams)}</Text>
+             <Text>{` ${uiUtils.parseMessage(newParams)}`}</Text>
            </Text>
   },
   getMarkdownStyles(bankStyle, isItalic, isMyMessage, isChat) {
