@@ -147,17 +147,11 @@ class GridList extends Component {
       serverOffline: serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
-      // sharedContextCount: 0,
       refreshing: false,
-      // hasPartials: false,
-      // bookmarksCount: 0,
       notFoundMap: {},
       resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
     };
-    // if (props.isBacklink  &&  props.backlinkList) {
-    //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
-    // }
     if (props.multiChooser) {
       this.state.chosen = {}
       if (prop  &&  resource[prop.name])
@@ -186,65 +180,49 @@ class GridList extends Component {
       if (!this.state.sharedWith[orgId])
         continue
       orgs.push(orgId)
-//       for (let rep in this.state.sharedWithMapping) {
-//         let org = this.state.sharedWithMapping[rep]
-//         if (utils.getId(org) === orgId)
-//           reps.push(rep)
-//       }
     }
-    // if (reps.length)
     this.props.callback(orgs)
   }
   componentWillReceiveProps(props) {
-    let { resource, isBacklink, prop, search, forwardlink, application } = props
-    if (isBacklink) {
-      // if (!props.resource['_' + props.prop.name + 'Count'])
-      //   return
-       // if (application  ||  search  ||  (utils.getMe().isEmployee  &&  !utils.isMyMessage({resource}))) {
-        if (resource[prop.name]) {
-          this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
-          return
-        }
-      // }
-      else
-        this.state.dataSource = this.state.dataSource.cloneWithRows([])
-      if (!_.isEqual(this.props.prop, props.prop))
-        this.state.isLoading = true;
-
-      if (application) {
-        if (prop.name === this.props.prop.name) {
-          if (!application[prop.name]  &&  !this.props.application[prop.name])
-            return
-          let rows = (!application[prop.name]  &&  [])  ||  application[prop.name]
-          this.state.dataSource = this.state.dataSource.cloneWithRows(rows)
-          return
-        }
-
-        if (!application[prop.name]  ||  !application[prop.name].length)
-          this.state.dataSource = this.state.dataSource.cloneWithRows([])
-        else {
-          this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
-          // let params = this.getParamsForApplicationBacklinks(props)
-          // Actions.getItem(params)
-        }
-      }
-      else {
-        let params = this.getParamsForBacklinkList(props)
-        Actions.list(params)
-      }
-      // else if (props.backlinkList.length)
-      //   this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
-      // else
-      //   this.state.dataSource = this.state.dataSource.cloneWithRows([])
-    }
+    let { resource, isBacklink, search, forwardlink, provider } = props
+    if (isBacklink)
+      this._handleBacklink(props)
     else if (forwardlink) {
       this.state.dataSource = this.state.dataSource.cloneWithRows([])
       this.state.isLoading = true;
       Actions.getItem({resource, search, action: 'list', forwardlink})
     }
-    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
+    if (provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(provider))))
       Actions.list({modelName: ORGANIZATION})
-      // this.state.customStyles = props.customStyles
+  }
+  _handleBacklink(props) {
+    let { resource, prop, application } = props
+    if (resource[prop.name]) {
+      this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
+      return
+    }
+    else
+      this.state.dataSource = this.state.dataSource.cloneWithRows([])
+    if (!_.isEqual(this.props.prop, props.prop))
+      this.state.isLoading = true;
+
+    if (application) {
+      if (prop.name === this.props.prop.name) {
+        if (!application[prop.name]  &&  !this.props.application[prop.name])
+          return
+        let rows = (!application[prop.name]  &&  [])  ||  application[prop.name]
+        this.state.dataSource = this.state.dataSource.cloneWithRows(rows)
+        return
+      }
+
+      if (!application[prop.name])
+        this.state.dataSource = this.state.dataSource.cloneWithRows([])
+      else
+        this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
+    }
+    else {
+      let params = this.getParamsForBacklinkList(props)
+      Actions.list(params)
     }
   }
   getParamsForBacklinkList(props) {
@@ -470,7 +448,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !list || params.isAggregation !== this.props.isAggregation)
       return;
-    if (action === 'list'  &&  this.props.chat)
+    if (action === 'list'  &&  chat)
       return
     if (action === 'listSharedWith'  &&  !chat)
       return
@@ -1296,7 +1274,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     this.props.navigator.push(route)
   }
   addNew() {
-    let { modelName, prop, resource, bankStyle, navigator } = this.props
+    let { modelName, prop, resource, bankStyle, navigator, isChooser } = this.props
     let model = utils.getModel(modelName);
     let r;
     this.setState({hideMode: false})
@@ -1325,7 +1303,11 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     if (prop  &&  utils.isForm(model)) {
       if (!r)
         r = {}
-      r[TYPE] = prop.ref || prop.items.ref;
+      let pRef = prop.ref || prop.items.ref;
+      if (isChooser  &&  utils.getModel(pRef).abstract)
+        r[TYPE] = modelName
+      else
+        r[TYPE] = pRef
       r.from = resource.from
       r.to = resource.to
       r._context = resource._context
