@@ -172,7 +172,7 @@ class ShareResourceList extends Component {
     let bgStyle =  {backgroundColor: bankStyle  &&  bankStyle.backgroundColor || '#ffffff'}
     let submit
     if (multiChooser) {
-      submit = <TouchableOpacity onPress={this.shareChosen}>
+      submit = <TouchableOpacity onPress={this.shareChosen.bind(this)}>
                  <View style={styles.shareButton}>
                    <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
                    <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
@@ -208,21 +208,24 @@ class ShareResourceList extends Component {
       return this.renderGridHeader()
   }
   shareChosen(chosen) {
-    if (!chosen)
+    const { multiChooser, modelName } = this.props
+    if (multiChooser  ||  !chosen)
       chosen = this.state.chosen
     let chosen = this.state.chosen
     if (utils.isEmpty(chosen)) {
       Alert.alert(translate('nothingToShare'))
       return
     }
-    let list = []
-    for (let r in chosen)
-      list.push(utils.getDisplayName(chosen[r]))
-    let listStr = list.join(', ')
+    // let list = []
+    // for (let r in chosen)
+    //   list.push(utils.getDisplayName(chosen[r]))
+    // let listStr = list.join(', ')
 
     Alert.alert(
-      translate('youAreAboutToShare', translate(utils.getModel(this.props.modelName))),
-      listStr,
+      // translate('youAreAboutToShare', translate(utils.getModel(modelName))),
+      // listStr,
+      translate('youAreAboutToShare', Object.keys(chosen).length),
+      null,
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
         {text: translate('Ok'), onPress: () => this.share(chosen)},
@@ -233,7 +236,7 @@ class ShareResourceList extends Component {
     let { to, formRequest, navigator } = this.props
     if (!chosen)
       chosen = Object.values(this.state.chosen)
-    Actions.shareMany(chosen, to, formRequest)
+    Actions.shareMany(Object.values(chosen), to, formRequest)
     navigator.pop()
     let product = utils.getModel(formRequest.product)
     if (!product.multiEntryForms  ||  product.multiEntryForms.indexOf(formRequest.form) === -1)
