@@ -87,7 +87,9 @@ var NewResourceMixin = {
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     // let chooser = this.chooser  ||  this.props.chooser
 
-    meta = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
+    let m = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
+    if (m.abstract)
+      m = meta
 
     let props, bl;
     if (!meta.items)
