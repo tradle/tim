@@ -4208,7 +4208,7 @@ if (!res[SIG]  &&  res._message)
   async onGetTemporary(type) {
     var r = temporaryResources[type]
     let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
-    this.trigger({action: 'getTemporary', resource: r, requestedProperties})
+    this.trigger({action: 'getTemporary', resource: r || {}, requestedProperties})
   },
 
   async onAddAll(resource, to, message) {
@@ -4641,13 +4641,18 @@ if (!res[SIG]  &&  res._message)
     }
 
     if (cb) {
-      if (returnVal[TYPE] !== SETTINGS)
-        cb(returnVal)
+      if (returnVal[TYPE] !== SETTINGS) {
+        if (!returnVal[SIG]) {
+          let r = await self._keeper.get(returnVal[CUR_HASH])
+          returnVal[SIG] = r[SIG]
+        }
+        cb({resource: returnVal})
+      }
       else {
         // return newly created provider
         SERVICE_PROVIDERS.forEach((r) => {
           if (r.id === returnVal.id  &&  utils.urlsEqual(r.url, returnVal.url))
-            cb(self._getItem(utils.getId(r.org)))
+            cb({resource: self._getItem(utils.getId(r.org))})
         })
       }
     }
@@ -11803,8 +11808,11 @@ await fireRefresh(val.from.organization)
     let requestFor = context.requestFor
     allForms.forEach((r) => {
       let rtype = r[TYPE]
-      if (!multiEntryForms.includes(rtype))
-        return
+      if (!multiEntryForms.includes(rtype)) {
+        let sub = utils.getModel(rtype).subClassOf
+        if (!sub  ||  !multiEntryForms.includes(sub))
+          return
+      }
       hasMultiEntry = true
       var l = productToForms[requestFor]
       if (!l) {
