@@ -167,7 +167,7 @@ class VerifierChooser extends Component {
     form.to = resource
 
     utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addMessage({msg: msg, isWelcome: true, disableAutoResponse: true, requestForForm: true, cb: (r) => {
+      Actions.addMessage({msg: msg, isWelcome: true, disableAutoResponse: true, requestForForm: true, cb: ({r}) => {
         form._context = r
         this.setTimeout(() => Actions.addChatItem({
           resource: form,
