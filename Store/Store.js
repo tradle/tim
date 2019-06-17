@@ -3343,7 +3343,7 @@ debug('sent:', r)
 
     return orgRep
   },
-  async onGetRequestedProperties({resource, currentResource, noTrigger}) {
+  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource}) {
     let rtype = resource[TYPE]
     if (!plugins.length  &&  !appPlugins.length)
       return
@@ -3355,6 +3355,8 @@ debug('sent:', r)
     let _context = resource._context
     if (_context  &&   utils.isStub(_context))
       _context = this._getItem(_context.id)
+    if (!_context  &&  originatingResource)
+      _context = originatingResource._context
 
     // if (appPlugins)
     //   appPlugins.forEach(p => allPlugins.push(p))
@@ -4606,13 +4608,18 @@ if (!res[SIG]  &&  res._message)
     }
 
     if (cb) {
-      if (returnVal[TYPE] !== SETTINGS)
-        cb(returnVal)
+      if (returnVal[TYPE] !== SETTINGS) {
+        if (!returnVal[SIG]) {
+          let r = await self._keeper.get(returnVal[CUR_HASH])
+          returnVal[SIG] = r[SIG]
+        }
+        cb({resource: returnVal})
+      }
       else {
         // return newly created provider
         SERVICE_PROVIDERS.forEach((r) => {
           if (r.id === returnVal.id  &&  utils.urlsEqual(r.url, returnVal.url))
-            cb(self._getItem(utils.getId(r.org)))
+            cb({resource: self._getItem(utils.getId(r.org))})
         })
       }
     }
@@ -6632,7 +6639,7 @@ if (!res[SIG]  &&  res._message)
         continue
       let list = response.edges
       // HACK
-      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK  &&  r.node.object[TYPE] !== STYLES_PACK)
+      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK  &&  r.node.object[TYPE] !== STYLES_PACK  &&  r.node.object[TYPE] !== MESSAGE)
       list = filteredList
       if (list  &&  list.length) {
         list.forEach(li => {
@@ -10287,20 +10294,24 @@ if (!res[SIG]  &&  res._message)
         }
       }
       else {
-        if (val[TYPE] === FORM_ERROR  &&  val.prefill.id) {
-          let memPrefill = this._getItem(val.prefill)
-          let phash = memPrefill ? memPrefill[CUR_HASH] : this.getCurHash(val.prefill) //  val.prefill.id.split('_')[2]
-          let prefill
-          try {
-            prefill = await this._keeper.get(phash)
-          } catch (err) {
-            prefill = await this._getItemFromServer(val.prefill.id)
+        if (val[TYPE] === FORM_ERROR) {
+          if (!val.prefill.id)
+            val.prefill._latest = true
+          else {
+            let memPrefill = this._getItem(val.prefill)
+            let phash = memPrefill ? memPrefill[CUR_HASH] : this.getCurHash(val.prefill) //  val.prefill.id.split('_')[2]
+            let prefill
+            try {
+              prefill = await this._keeper.get(phash)
+            } catch (err) {
+              prefill = await this._getItemFromServer(val.prefill.id)
+            }
+            let p = {}
+            if (memPrefill)
+              _.extend(p, memPrefill)
+            _.extend(p, prefill)
+            val.prefill = p
           }
-          let p = {}
-          if (memPrefill)
-            _.extend(p, memPrefill)
-          _.extend(p, prefill)
-          val.prefill = p
         }
         else if (utils.isItem(model)) {
           let props = model.properties
@@ -11716,8 +11727,11 @@ await fireRefresh(val.from.organization)
     let requestFor = context.requestFor
     allForms.forEach((r) => {
       let rtype = r[TYPE]
-      if (!multiEntryForms.includes(rtype))
-        return
+      if (!multiEntryForms.includes(rtype)) {
+        let sub = utils.getModel(rtype).subClassOf
+        if (!sub  ||  !multiEntryForms.includes(sub))
+          return
+      }
       hasMultiEntry = true
       var l = productToForms[requestFor]
       if (!l) {
