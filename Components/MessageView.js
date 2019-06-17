@@ -82,10 +82,15 @@ class MessageView extends Component {
     let {resource, isReview, search, application, message} = this.props
     if (isReview)
       return
-    if (resource.id  ||  message) {
+    if (message) {
+      Actions.getItem({resource: message, search, application})
+      return
+    }
+    if (resource.id) {
       Actions.getItem({resource, search, application})
       return
     }
+
     let m = utils.getModel(resource[TYPE])
     let vCols = utils.getViewCols(m)
     if (!vCols)
