@@ -23,11 +23,9 @@ import constants from '@tradle/constants'
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import { parseMessage } from '../utils/uiUtils'
-import NewResource from './NewResource'
 import RowMixin from './RowMixin'
 import ImageInput from './ImageInput'
 import OnePropFormMixin from './OnePropFormMixin'
-import StringChooser from './StringChooser'
 
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
@@ -686,8 +684,7 @@ class FormRequestRow extends Component {
 
       navigator.push({
         title: translate(model),
-        id: 33,
-        component: StringChooser,
+        componentName: 'StringChooser',
         backButtonTitle: 'Back',
         sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
         passProps: {
@@ -730,11 +727,10 @@ class FormRequestRow extends Component {
 
     let action = utils.getModel(formRequest.form).abstract && 'replace' || 'push'
     navigator[action]({
-      id: 4,
       title: translate(model),
       rightButtonTitle: isMyMessage ? null : 'Done',
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       // titleTextColor: '#7AAAC3',
       passProps:  {
         model,

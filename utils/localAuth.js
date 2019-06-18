@@ -265,7 +265,7 @@ function lockUp (nav, err) {
   debug('lockUp')
   return new Promise(resolve => {
     nav.replace({
-      component: LockScreen,
+      componentName: 'LockScreen',
       noLeftButton: true,
       passProps: {
         bg: LOCK_SCREEN_BG,
@@ -282,7 +282,7 @@ function setPassword (navigator, isChangePassword) {
   debug('requesting to choose a gesture password')
   return new Promise((resolve, reject) => {
     navigator.push({
-      component: PasswordCheck,
+      componentName: 'PasswordCheck',
       noLeftButton: true,
       passProps: {
         ...PASSWORD_PROMPTS,
@@ -312,7 +312,7 @@ function checkPassword (navigator, isChangePassword) {
   let push = name !== PasswordCheck.displayName && name !== LockScreen.displayName
   let defer = Q.defer()
   let route = {
-    component: PasswordCheck,
+    componentName: 'PasswordCheck',
     noLeftButton: true,
     passProps: {
       ...PASSWORD_PROMPTS,
