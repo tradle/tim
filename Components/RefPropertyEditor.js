@@ -375,10 +375,10 @@ class RefPropertyEditor extends Component {
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'id')
       else if (rDocumentType === 'D')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
-      if (documentType.id !== resource.documentType.id) {
-        Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
-        return
-      }
+      // if (documentType.id !== resource.documentType.id) {
+      //   Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
+      //   return
+      // }
     }
 
     const r = _.cloneDeep(resource)
@@ -396,8 +396,7 @@ class RefPropertyEditor extends Component {
     const { otherSideScan, face, signature } = props
     if (result.imageBack) {
       // HACK
-      // if (utils.getModel(otherSideScan)) {
-      if (model.properties.otherSideScan) {
+      if (otherSideScan) {
         r.otherSideScan = {
           url: result.imageBack,
         }
