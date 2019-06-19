@@ -11,7 +11,7 @@ import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
-// import dateformat from 'dateformat'
+import dateformat from 'dateformat'
 import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
@@ -159,19 +159,31 @@ var NewResourceMixin = {
       }
       for (let p in requestedProperties) {
         // if (eCols.some((prop) => prop.name === p) {
-        if (eCols.indexOf(p) !== -1)
+        if (eCols.indexOf(p) !== -1) {
+          if (props[p].readOnly)
+            showReadOnly = true
           // this.addError(p, params)
           continue
-
+        }
         let idx = p.indexOf('_group')
         eCols.push(p)
-        if (idx !== -1  &&  props[p].list) {
+        if (idx === -1  &&  props[p].readOnly)
+          showReadOnly = true
+        else if (props[p].list) {
+          let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
           props[p].list.forEach((pp) => {
             let idx = eCols.indexOf(pp)
             if (idx !== -1)
               eCols.splice(idx, 1)
             eCols.push(pp)
-            requestedProperties[pp] = ''
+            if (!requestedProperties[pp]) {
+              if (isRequired  &&  props[pp].readOnly)
+                showReadOnly = true
+              requestedProperties[pp] = {
+                message: '',
+                required: true
+              }
+            }
             // this.addError(p, params)
           })
         }
@@ -213,9 +225,16 @@ var NewResourceMixin = {
         continue
 
       let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe  &&  requestedProperties && p.indexOf('_group') === -1 &&  requestedProperties[p] != null)
+      if (maybe                       &&
+          requestedProperties         &&
+          p.indexOf('_group') === -1  &&
+          requestedProperties[p])
         maybe = false
 
+      if (!maybe  &&  requestedProperties  &&  requestedProperties[p]) {
+        if (requestedProperties[p].hasOwnProperty('required') && !requestedProperties[p].required)
+          maybe = true
+      }
       let type = props[p].type;
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
@@ -277,6 +296,7 @@ var NewResourceMixin = {
                     model: meta,
                     errors: formErrors,
                     component,
+                    editable: !props[p].readOnly,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
 
@@ -368,7 +388,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
-                    editable: params.editable,
+                    editable: params.editable && !props[p].readOnly,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -702,7 +722,7 @@ var NewResourceMixin = {
           multiline={multiline}
           editable={editable}
           autoCapitalize={autoCapitalize}
-          onFocus={this.inputFocused.bind(this, prop.name)}
+          onFocus={this.inputFocused.bind(this, prop)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={value}
@@ -872,12 +892,14 @@ var NewResourceMixin = {
     }
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
-    let help = this.paintHelp(prop)
-    return (
-      <View key={this.getNextKey()} ref={prop.name}>
-        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
-          {propLabel}
-          <DatePicker
+    let datePicker
+    if (prop.readOnly) {
+      datePicker = <View style={[styles.formInput, {paddingVertical: 5}]}>
+                     <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
+                   </View>
+    }
+    else {
+      datePicker = <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 20}]}
             mode="date"
             placeholder={value}
@@ -902,7 +924,14 @@ var NewResourceMixin = {
             }}
             {...dateProps}
           />
-        {help}
+    }
+    let help = this.paintHelp(prop)
+    return (
+      <View key={this.getNextKey()} ref={prop.name}>
+        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+          {propLabel}
+          {datePicker}
+          {help}
         </View>
         {this.paintError(params)}
        </View>
@@ -988,17 +1017,19 @@ var NewResourceMixin = {
       delete this.state.missedRequiredOrErrorValue[prop.name]
    },
 
-  inputFocused(refName) {
+  inputFocused(prop) {
+    if (prop.readOnly)
+      return
     if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
          this.refs.scrollView        &&
          this.props.model            &&
          Object.keys(this.props.model.properties).length > 5) {
-      utils.scrollComponentIntoView(this, this.refs.form.getComponent(refName))
-      this.setState({inFocus: refName})
+      utils.scrollComponentIntoView(this, this.refs.form.getComponent(prop.name))
+      this.setState({inFocus: prop.name})
     }
-    else if (this.state.inFocus !== refName)
-      this.setState({inFocus: refName})
+    else if (this.state.inFocus !== prop.name)
+      this.setState({inFocus: prop.name})
   },
 
   myCustomTemplate(params) {

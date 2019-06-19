@@ -94,6 +94,8 @@ class RefPropertyEditor extends Component {
     let label, propLabel, isImmutable
     if (!val)
       label = pLabel
+    else if (utils.getModel(prop.ref).abstract)
+      label = translate(utils.getModel(val[TYPE]))
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto)
@@ -159,7 +161,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isImmutable)
+    if (isImmutable || prop.readOnly)
       actionItem = content
     else if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
