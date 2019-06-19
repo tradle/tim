@@ -18,6 +18,7 @@ import {
 const { Scenario } = Regula
 const LANDSCAPE_RIGHT_IOS = 8
 const LANDSCAPE_ANDROID = 2
+// const DELAY_INTERVAL = 30000
 
 export { Scenario }
 
@@ -96,6 +97,7 @@ class RegulaProxy {
       await Regula.prepareDatabase({dbID})
       this._prepareSucceeded()
     } catch (err) {
+      debugger
       console.log('Prepare Regula DB failed', err)
       this._prepareFailed(err)
     }
@@ -105,21 +107,26 @@ class RegulaProxy {
   initialize = once(async (prepared) => {
     if (!prepared)
       await this._prepared
-    debugger
+    // debugger
     try {
       await Regula.initialize(this.initializeOpts)
       this._initializeSucceeded()
+      // this.initTime = new Date().getTime()
     } catch (err) {
-      debugger
+      // debugger
       console.log('initialization Regula DB failed', err)
-      this._intializeFailed(err)
+      this._initializeFailed(err)
     }
     return this._initialized
   })
 
   scan = async (opts={}) => {
-    debugger
+    // debugger
     await this._initialized
+    // let delta = new Date().getTime() - this.initTime
+    // if (delta < DELAY_INTERVAL)
+    //   await Promise.delay(delta)
+
     opts = defaultsDeep(opts, DEFAULTS)
 
     validateType({
@@ -127,7 +134,6 @@ class RegulaProxy {
       spec: OptsTypeSpec,
       allowExtraProps: false,
     })
-    // await initialize()
     // opts will be supported soon
     const result = await Regula.scan(opts)
 

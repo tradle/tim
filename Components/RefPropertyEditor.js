@@ -396,7 +396,8 @@ class RefPropertyEditor extends Component {
     const { otherSideScan, face, signature } = props
     if (result.imageBack) {
       // HACK
-      if (utils.getModel(otherSideScan)) {
+      // if (utils.getModel(otherSideScan)) {
+      if (model.properties.otherSideScan) {
         r.otherSideScan = {
           url: result.imageBack,
         }
