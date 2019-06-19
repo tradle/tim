@@ -3389,7 +3389,10 @@ debug('sent:', r)
       let requestedProperties = moreInfo.requestedProperties
       if (requestedProperties) {
         requestedProperties.forEach((r) => {
-          rprops[r.name] = r.message || ''
+          rprops[r.name] = {
+            message: r.message || '',
+            required: r.required
+          }
         })
       }
     }
