@@ -106,14 +106,14 @@ function getPropsForLegalDocument(form) {
 function getPropsForLegalEntity(form) {
   const { document, country, registrationNumber, region } = form
   // if (!country  ||  !document) {
-  if (!document  ||  isNewResource(document)) {
-    return {
-      requestedProperties: [
-        // { name: 'country' },
-        { name: 'document' },
-      ]
-    }
-  }
+  // if (!document  ||  isNewResource(document)) {
+  //   return {
+  //     requestedProperties: [
+  //       // { name: 'country' },
+  //       { name: 'document' },
+  //     ]
+  //   }
+  // }
   return {
       requestedProperties: [
         { name: 'info_group' },
