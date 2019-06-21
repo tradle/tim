@@ -1077,7 +1077,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
 
-    if (!isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isModel  &&  !isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       // Overwrite viewCols for MESSAGE after renderHeader call
       if (model.id === MESSAGE)
@@ -1577,10 +1577,10 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     Actions.addChatItem({resource: resource})
   }
   renderHeader() {
-    let { search, modelName, isChooser } = this.props
+    let { search, modelName, isChooser, isModel } = this.props
     // if (!search)
     //   return
-    if (!isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isModel  &&  !isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (viewCols)
       // if (modelName !== PROFILE) {
