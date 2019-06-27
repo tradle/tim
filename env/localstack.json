@@ -1,0 +1,9 @@
+{
+  "appName": "Tradle-Dev",
+  "topLevelProviders": [
+    {
+      "name": "Superawesome",
+      "baseUrl": "http://localhost:21012"
+    }
+  ]
+}
