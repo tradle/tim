@@ -2255,6 +2255,8 @@ var utils = {
     else
       ftype = type
     const model = utils.getModel(ftype)
+    if (!model)
+      return []
     const props = model.properties
     let eCols = []
     for (let p in props) {
