@@ -716,10 +716,10 @@ class FormRequestRow extends Component {
       }
 
       // Prefill for testing and demoing
-      // if (ENV.prefillForms  &&  model.id in formDefaults) {
-      //   _.extend(r, formDefaults[model.id])
-      //   isPrefilled = true
-      // }
+      if (ENV.prefillForms  &&  model.id in formDefaults) {
+        _.extend(r, formDefaults[model.id])
+        isPrefilled = true
+      }
 
       if (formRequest.prefill) {
         _.defaults(r, formRequest.prefill)
