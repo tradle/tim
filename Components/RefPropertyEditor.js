@@ -262,6 +262,8 @@ class RefPropertyEditor extends Component {
     // debugger
     if (!item)
       return;
+    if (item.file && item.file.constructor.name === 'File')
+      delete item.file
     let { model, floatingProps, resource } = this.props
     const props = model.properties
     if (props[propName].ref)
