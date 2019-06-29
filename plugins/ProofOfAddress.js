@@ -17,11 +17,11 @@ module.exports = function ProofOfAddress ({ models }) {
       let model = getModel(form[TYPE])
       if (!isSubclassOf(model, PROOF_OF_ADDRESS))
         return
-      return getPropsForLegalDocumentI(form)
+      return getPropsForProofOfAddress(form)
     }
   }
 }
-function getPropsForLegalDocumentI(form) {
+function getPropsForProofOfAddress(form) {
   if (!form.document  ||  !form.country  ||  !form.accountName) {
     return {
       requestedProperties: [
