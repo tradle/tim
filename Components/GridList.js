@@ -1545,9 +1545,9 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     Actions.addChatItem({resource: resource})
   }
   renderHeader() {
-    let { search, modelName } = this.props
-    if (!search)
-      return
+    let { search, modelName, isModel } = this.props
+    if (!search || isModel)
+       return
     if (modelName !== PROFILE) {
       if (this.state.isGrid  &&  !utils.isContext(modelName))
         return this.renderGridHeader()
