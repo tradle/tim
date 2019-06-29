@@ -22,7 +22,7 @@ module.exports = function ProofOfAddress ({ models }) {
   }
 }
 function getPropsForProofOfAddress(form) {
-  if (!form.document  ||  !form.country  ||  !form.accountName)
+  if (!form.document  ||  !form.country  ||  !form.accountName) {
     return {
       requestedProperties: [
         { name: 'country' },
