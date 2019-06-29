@@ -266,7 +266,7 @@ class RemediationItemsList extends Component {
     let prop = props[0]
     if (prop.scanner === 'payment-card') {
       if (!utils.isWeb())
-        return this.scanPaymentCard.bind(this, prop)
+        return this.scanPaymentCard.bind(this, {prop})
       return
     }
     // if (prop.signature)
