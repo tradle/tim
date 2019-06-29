@@ -29,6 +29,7 @@ function getPropsForProofOfAddress(form) {
         { name: 'document' }
       ]
     }
+  }
   let propsArr = [
     'accountName',
     'billDate',
