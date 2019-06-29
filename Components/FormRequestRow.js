@@ -874,7 +874,7 @@ class FormRequestRow extends Component {
             if (!utils.isWeb()) {
               msg = <View key={this.getNextKey()}>
                       <View style={styles.messageLink}>
-                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanPaymentCard.bind(this, prop)})}
+                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanPaymentCard.bind(this, {prop, dontCreate: true})})}
                       </View>
                     </View>
             }

@@ -443,6 +443,20 @@ var NewResourceMixin = {
           options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
+        else if (props[p].signature) {
+          model[p] = maybe ? t.maybe(t.Str) : t.Str;
+          options.fields[p].template = this.mySignatureTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                    value: data  &&  data[p] ? data[p] + '' : null,
+                    required: !maybe,
+                    errors: formErrors,
+                    component,
+                    editable: params.editable,
+                  })
+          continue
+        }
         else if (search) {
           if (ref === PHOTO  ||  ref === IDENTITY)
             continue
@@ -667,7 +681,7 @@ var NewResourceMixin = {
             </View>
     }
     else {
-      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
+      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 15, borderBottomColor: '#cccccc', borderBottomWidth: 1}
       let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
       title = utils.translate('Please click here to sign')
       sig = <View style={vStyle}>
@@ -677,7 +691,7 @@ var NewResourceMixin = {
     }
 
     return <View style={st}>
-             <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind.this(prop))}>
+             <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind(this, prop))}>
                {sig}
              </TouchableOpacity>
           </View>

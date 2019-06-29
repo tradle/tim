@@ -1547,7 +1547,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
   renderHeader() {
     let { search, modelName, isModel } = this.props
     if (!search || isModel)
-      return
+       return
     if (modelName !== PROFILE) {
       if (this.state.isGrid  &&  !utils.isContext(modelName))
         return this.renderGridHeader()
