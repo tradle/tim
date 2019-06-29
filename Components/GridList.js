@@ -1578,6 +1578,8 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
   }
   renderHeader() {
     let { search, modelName, isChooser, isModel } = this.props
+    if (!search || isModel)
+      return
     // if (!search)
     //   return
     if (!isModel  &&  !isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
