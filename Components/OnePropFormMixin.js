@@ -261,7 +261,7 @@ var OnePropFormMixin = {
 
     // this.props.navigator.pop();
   },
-  async scanPaymentCard(prop) {
+  async scanPaymentCard({prop, dontCreate}) {
     let cardJson
     try {
       const card = await CardIOModule.scanCard({
@@ -284,9 +284,10 @@ var OnePropFormMixin = {
       return
     }
 
-    let { resource, isRefresh } = this.props
+    const { resource, isRefresh, currency, country, bankStyle, defaultPropertyValues } = this.props
     let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
-    let props = utils.getModel(r[TYPE]).properties
+    const model = utils.getModel(r[TYPE])
+    let props = model.properties
     for (let p in cardJson) {
       if (cardJson[p]  &&  props[p])
         r[p] = cardJson[p]
@@ -296,8 +297,27 @@ var OnePropFormMixin = {
         delete cardJson[p]
     r[prop.name + 'Json'] = cardJson
     this.setState({ r })
-
-    Actions.addChatItem({resource: r, disableFormRequest: resource, isRefresh})
+    if (!dontCreate) {
+      Actions.addChatItem({resource: r, disableFormRequest: resource, isRefresh})
+      return
+    }
+    this.props.navigator.push({
+      title: translate(model),
+      rightButtonTitle: 'Done',
+      backButtonTitle: 'Back',
+      componentName: 'NewResource',
+      // titleTextColor: '#7AAAC3',
+      passProps:  {
+        model,
+        resource: r,
+        isPrefilled: true,
+        currency,
+        country,
+        bankStyle,
+        originatingMessage: resource,
+        defaultPropertyValues,
+      }
+    })
   },
 }
 module.exports = OnePropFormMixin;
