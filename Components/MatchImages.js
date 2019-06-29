@@ -56,7 +56,7 @@ class MatchImages extends Component {
     let styles = createStyles()
     if (this.state.isLoading)
       return <PageView style={styles.pageView}>
-              {this.showLoading({component: MatchImages})}
+              {this.showLoading({component: MatchImages, bankStyle: this.props.bankStyle})}
              </PageView>
     const { selfie, photoId } = this.state
     return  <PageView style={styles.pageView}>
