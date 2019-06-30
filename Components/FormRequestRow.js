@@ -1,4 +1,3 @@
-
 import {
   // Text,
   TouchableOpacity,
@@ -162,7 +161,7 @@ class FormRequestRow extends Component {
     return false
   }
   render() {
-    let { resource, to, bankStyle, application } = this.props
+    const { resource, to, bankStyle, application } = this.props
 
     var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -175,13 +174,22 @@ class FormRequestRow extends Component {
 
     let props = utils.getEditableProperties(resource)
     let prop = props.length === 1  &&  props[0]
+    let hasMoreProps
     if (!prop  &&  isFormRequest) {
-      let formModel = utils.getModel(resource.form)
-      let editCols = formModel.editCols
-      if (editCols  &&  editCols.length === 1) {
-        let p = formModel.properties[editCols[0]]
-        if (p.scanner  &&  p.scanner === 'payment-card')
-          prop = p
+      const formModel = utils.getModel(resource.form)
+      const editCols = formModel.editCols
+      // if (editCols  &&  editCols.length === 1) {
+      //   let p = formModel.properties[editCols[0]]
+      //   if (p.scanner  &&  p.scanner === 'payment-card')
+      //     prop = p
+      // }
+      const props = formModel.properties
+      if (editCols) {
+        prop = editCols.find(p => props[p]  &&  props[p].scanner === 'payment-card')
+        if (prop  &&  editCols.length) {
+          prop = props[prop]
+          hasMoreProps = true
+        }
       }
     }
 
@@ -194,7 +202,7 @@ class FormRequestRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isFormRequest)
-      onPressCall = this.formRequest(resource, renderedRow, prop, styles)
+      onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
       onPressCall = resource._documentCreated ? null : this.reviewFormsInContext.bind(this)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: linkColor}} size={20} name={'ios-arrow-forward'} />
@@ -744,7 +752,8 @@ class FormRequestRow extends Component {
       }
     });
   }
-  formRequest(resource, vCols, prop, styles) {
+
+  formRequest({resource, renderedRow, prop, styles, hasMoreProps}) {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
     let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
@@ -874,7 +883,7 @@ class FormRequestRow extends Component {
             if (!utils.isWeb()) {
               msg = <View key={this.getNextKey()}>
                       <View style={styles.messageLink}>
-                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanPaymentCard.bind(this, {prop, dontCreate: true})})}
+                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanPaymentCard.bind(this, {prop, dontCreate: hasMoreProps})})}
                       </View>
                     </View>
             }
@@ -969,7 +978,7 @@ class FormRequestRow extends Component {
                {link}
              </View>
     }
-    vCols.push(msg);
+    renderedRow.push(msg);
     return isReadOnly || isRefresh ? null : onPressCall
   }
   moveToTheNextForm(form) {
