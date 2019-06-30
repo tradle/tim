@@ -70,6 +70,10 @@ if (!Error.captureStackTrace) {
   }
 }
 
+require('react-native').YellowBox.ignoreWarnings([
+  'ImageStore is deprecated'
+])
+
 // global.location = global.location || { port: 80 }
 
 // ;[
