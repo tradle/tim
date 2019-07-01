@@ -22,14 +22,14 @@ module.exports = function ProofOfAddress ({ models }) {
   }
 }
 function getPropsForProofOfAddress(form) {
-  if (!form.document  ||  !form.country  ||  !form.accountName) {
-    return {
-      requestedProperties: [
-        { name: 'country' },
-        { name: 'document' }
-      ]
-    }
-  }
+  // if (!form.document  ||  !form.country) {
+  //   return {
+  //     requestedProperties: [
+  //       { name: 'country' },
+  //       { name: 'document' }
+  //     ]
+  //   }
+  // }
   let propsArr = [
     'accountName',
     'billDate',
@@ -45,6 +45,15 @@ function getPropsForProofOfAddress(form) {
     'phoneNumber',
     'accountNumber'
   ]
+  let setProps = propsArr.filter(p => form[p])
+  if (setProps.length <= 2) {
+    return {
+      requestedProperties: [
+        { name: 'country' },
+        { name: 'document' }
+      ]
+    }
+  }
   let props = getModel(form[TYPE]).properties
   let requestedProperties = []
   propsArr.forEach(p => {
