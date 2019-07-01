@@ -6917,14 +6917,6 @@ if (!res[SIG]  &&  res._message)
       let type = m.subClassOf || m.id
       let stub = this.makeStub(sub)
       switch (type) {
-      case FORM:
-        if (m.id === PRODUCT_REQUEST)
-          return
-        if (!application.forms)
-          application.forms = []
-        application.forms.push(stub)
-        application._formsCount = application.forms.length
-        break
       case VERIFICATION:
         if (!application.verifications)
           application.verifications = []
@@ -6948,6 +6940,18 @@ if (!res[SIG]  &&  res._message)
           application.products = []
         application.products.push(stub)
         application._productsCount = application.products.length
+        break
+      default:
+      case FORM:
+        if (m.id === PRODUCT_REQUEST  ||  m.id === FORM_REQUEST)
+          break
+        if (!FORM  &&  !utils.isSubclassOf(FORM))
+          break
+        if (!application.forms)
+          application.forms = []
+        application.forms.push(stub)
+        application._formsCount = application.forms.length
+        break
       }
     })
     return application
