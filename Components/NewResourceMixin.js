@@ -363,7 +363,7 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     model: meta,
-                    value: data  &&  data[p] ? data[p] + '' : null,
+                    value: data  &&  data[p] || null,
                     required: !maybe,
                     errors: formErrors,
                     component: component,
@@ -434,6 +434,20 @@ var NewResourceMixin = {
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
           options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
+        }
+        else if (props[p].signature) {
+          model[p] = maybe ? t.maybe(t.Str) : t.Str;
+          options.fields[p].template = this.mySignatureTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                    value: data  &&  data[p] || null,
+                    required: !maybe,
+                    errors: formErrors,
+                    component,
+                    editable: params.editable,
+                  })
+          continue
         }
         else if (search) {
           if (ref === PHOTO  ||  ref === IDENTITY)
@@ -633,23 +647,23 @@ var NewResourceMixin = {
       label += ' *'
 
     let { bankStyle } = this.props
-    let hasValue = value  &&  value.length
-    if (hasValue) {
-      value = format(value, this.state.resource).trim()
-      hasValue = value  &&  value.length
-    }
-    let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
+    // let hasValue = value  &&  value.length
+    // if (hasValue) {
+    //   value = format(value, this.state.resource).trim()
+    //   hasValue = value  &&  value.length
+    // }
+    let lcolor = value ? '#555555' : this.getLabelAndBorderColor(prop.name)
 
     let help = this.paintHelp(prop)
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
     let title, sig
-    if (hasValue) {
+    if (value) {
       let vStyle = { height: 100, justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
       let lStyle = [styles.labelStyle, { paddingBottom: 10, color: lcolor, fontSize: 12}]
       title = utils.translate('Please click here to change signature')
-      let {width, height} = utils.dimensions(params.component)
+      let { width, height } = value
       let h = 70
       let w
       if (width > height)
@@ -658,7 +672,7 @@ var NewResourceMixin = {
         w = (height * 70)/(width - 100)
       sig = <View style={vStyle}>
               <Text style={lStyle}>{label}</Text>
-              <Image source={{uri: value}} style={{width: w, height: h}} />
+              <Image source={{uri: value.url}} style={{width: w, height: h}} />
             </View>
     }
     else {
@@ -671,11 +685,16 @@ var NewResourceMixin = {
             </View>
     }
 
-    return <View style={st}>
-             <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind.this(prop))}>
-               {sig}
-             </TouchableOpacity>
-          </View>
+    if (prop.immutable  &&  value) {
+      return <View style={st}>{sig}</View>
+    }
+    else {
+      return <View style={st}>
+               <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind(this, prop))}>
+                 {sig}
+               </TouchableOpacity>
+            </View>
+    }
   },
 
   myTextInputTemplate(params) {
