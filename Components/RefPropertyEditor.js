@@ -132,7 +132,7 @@ class RefPropertyEditor extends Component {
         let width = utils.dimensions(component).width - 60
         let scanned
         if (prop.scanner  &&  resource[prop.name + 'Json'])
-          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color: 'darkblue', width}]}>{translate('Scanned?')}</Text>
+          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color: 'darkblue', width}]}>{translate('Scanned')}</Text>
         else
           propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
       }

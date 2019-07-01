@@ -688,7 +688,7 @@ var NewResourceMixin = {
               <Icon name='md-create' size={25}  color={bankStyle.linkColor} />
             </View>
     }
-    if (prop.immutable) {
+    if (prop.immutable  &&  value) {
       return <View style={st}>{sig}</View>
     }
     else {
