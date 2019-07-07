@@ -26,6 +26,9 @@ module.exports = {
   get ArticleView() {
     return require('./ArticleView')
   },
+  get PdfView() {
+    return require('./PdfView')
+  },
   get GridList() {
     return require('./GridList')
   },

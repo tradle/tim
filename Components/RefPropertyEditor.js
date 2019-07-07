@@ -4,12 +4,15 @@ import {
   // Text,
   TouchableOpacity,
   Alert,
+  // Image as RawImage,
 } from 'react-native'
 import _ from 'lodash'
-const debug = require('debug')('tradle:app:blinkid')
+// const debug = require('debug')('tradle:app:blinkid')
+const debug = require('debug')('tradle:app:document')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 import debounce from 'p-debounce'
+import reactMixin from 'react-mixin'
 
 import constants from '@tradle/constants'
 const {
@@ -28,6 +31,7 @@ import utils, { translate, translateEnum, isWeb, isSimulator, buildStubByEnumTit
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
+import DocumentInput from './DocumentInput'
 import Actions from '../Actions/Actions'
 // import BlinkID from './BlinkID'
 import Regula from './Regula'
@@ -35,12 +39,14 @@ import Navigator from './Navigator'
 import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
 import Image from './Image'
+import PhotoCarouselMixin from './PhotoCarouselMixin'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const PHOTO_ID = 'tradle.PhotoID'
 const ID_CARD = 'tradle.IDCardType'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -115,10 +121,20 @@ class RefPropertyEditor extends Component {
     else
       color = '#AAAAAA'
     let propView
-    if (photoR)
-      propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0 }}>
-                   <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+    if (photoR) {
+      let isPdf = resource[pName]  &&  resource[pName].fileName  &&  resource[pName].fileName.toLowerCase().endsWith('.pdf')
+      let source = {uri: isPdf  &&  PDF_ICON ||  photoR.url}
+      let fileName
+      if (isPdf) {
+        let pieces = resource[pName].fileName.split('/')
+        fileName = <Text style={styles.textAfterImage}>{pieces[pieces.length - 1]}</Text>
+      }
+debug(source.uri.substring(0, 100))
+      propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0, flexDirection: 'row' }}>
+                   <Image source={source} style={[styles.thumb, {marginBottom: 5}]} />
+                   {fileName}
                  </View>
+    }
     else {
       let img = photo
       if (img) {
@@ -175,9 +191,17 @@ class RefPropertyEditor extends Component {
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
-                       {content}
-                     </ImageInput>
+        let isDocument = prop.range === 'document'
+        if (isDocument) {
+          actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
+                         {content}
+                       </DocumentInput>
+        }
+        else {
+          actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+                         {content}
+                       </ImageInput>
+        }
       }
       else
         actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>
@@ -202,6 +226,39 @@ class RefPropertyEditor extends Component {
         {help}
       </View>
     );
+  }
+  onDocument(propName, item) {
+    const { model, navigator } = this.props
+    if (item.type &&  item.type.indexOf('pdf') !== -1  || item.uri.endsWith('.pdf')) {
+      this.props.navigator.push({
+        title: translate(model, model.properties[propName]),
+        backButtonTitle: 'Back',
+        componentName: 'PdfView',
+        rightButtonTitle: 'Done',
+        passProps: {
+          prop: propName,
+          onSubmit: () => this.onSetMediaProperty(propName, item),
+          item: {isPdf: true, ...item}
+        }
+      });
+    }
+    else {
+      let photo = {url: `data:image/jpeg;base64,${item.contents}`}
+      this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
+      // let photo = {url: `data:image/jpeg;base64,${item.contents}`}
+      // this.props.navigator.push({
+      //   title: translate(model, model.properties[propName]),
+      //   backButtonTitle: 'Back',
+      //   componentName: 'PhotoList',
+      //   rightButtonTitle: 'Done',
+      //   passProps: {
+      //     callback: (photo) => this.onSetMediaProperty(propName, photo),
+      //     photos: [photo]
+      //   }
+      // });
+
+    }
+    // this.onSetMediaProperty(propName, {url: `data:image/jpeg;base64,${item.contents}`})
   }
   getRefLabel(prop, resource) {
     let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
@@ -567,6 +624,7 @@ function getDocumentTypeFromTitle (title='') {
     return 'other'
   }
 }
+reactMixin(RefPropertyEditor.prototype, PhotoCarouselMixin);
 module.exports = RefPropertyEditor;
   // async showBlinkIDScanner(prop) {
   //   let { resource } = this.props
