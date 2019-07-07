@@ -262,7 +262,7 @@ var utils = {
   sanitize(resource) {
     let r =  sanitize(resource).sanitized
     for (let p in r) {
-      if (!r[p])
+      if (!r[p]  &&   !r.hasOwnProperty(p))
         delete r[p]
     }
     return r

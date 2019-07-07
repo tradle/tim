@@ -52,21 +52,33 @@ export const wrapImageComponent = ImageComponent => {
       super(props)
       this.keeper = props.keeper || getGlobalKeeper()
       this.renderLoader = props.loading ? props.loading.bind(props) : getDefaultLoader(props)
+      this.state = this._getStateFromNewProps(props)
+    }
 
+    _getStateFromNewProps = (props) => {
       const uri = getUriProp(props)
       if (isKeeperUri(uri)) {
-        this.state = {
+        return {
           loading: true,
           source: null,
         }
-      } else {
-        this.state = {
-          source: props.source,
-        }
+      }
+
+      return {
+        source: props.source,
       }
     }
 
+    _setSource = (props) => {
+      this.setState(this._getStateFromNewProps(props))
+    }
+
+    componentWillMount() {
+      this._maybeRefetch(null, this.props)
+    }
+
     componentWillReceiveProps(props) {
+      this._setSource(props)
       this._maybeRefetch(this.props, props)
     }
 
@@ -92,10 +104,6 @@ export const wrapImageComponent = ImageComponent => {
       })
     }
 
-    componentWillMount() {
-      this._maybeRefetch(null, this.props)
-    }
-
     render() {
       if (this.state.loading) {
         return this.renderLoader()
@@ -107,7 +115,7 @@ export const wrapImageComponent = ImageComponent => {
     }
   }
 
-  // it would be tempting to return a regular unwrapped Image component
+  // it's tempting to return a regular unwrapped Image component
   // if initial props.source.uri is not a keeperUri, as in the snipper below
   //
   // this would be a mistake, as this component may initially get a regular uri

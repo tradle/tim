@@ -1585,6 +1585,7 @@ var styles= StyleSheet.create({
     height: 40,
     marginRight: 2,
     marginTop: 7,
+    // marginTop: utils.isIOS() && 0 || 7,
     borderRadius: 5
   },
   err: {
@@ -1627,6 +1628,13 @@ var styles= StyleSheet.create({
     backgroundColor: 'transparent',
     color: '#aaaaaa',
     fontSize: 20,
+  },
+  textAfterImage: {
+    backgroundColor: 'transparent',
+    color: '#aaaaaa',
+    fontSize: 20,
+    marginTop: 17,
+    marginLeft: 7
   },
   customIcon: {
     marginTop: 20,
