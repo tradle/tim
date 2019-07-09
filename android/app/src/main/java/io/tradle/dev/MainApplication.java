@@ -43,6 +43,7 @@ import io.tradle.reactlocalauth.LocalAuthPackage;
 import io.tradle.reactimagestore.ImageStorePackage;
 import io.tradle.reactkeeper.RNTradleKeeperPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
+import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
 
 // import com.instabug.reactlibrary.RNInstabugReactnativePackage;
 //import io.tradle.RNBlinkIDPackage;
@@ -97,7 +98,8 @@ public class MainApplication extends Application implements ReactApplication {
         new RNCameraPackage(),
         new OrientationPackage(),
         new ECCPackage(),
-        new LocalAuthPackage()
+        new LocalAuthPackage(),
+        new ReactNativeDocumentPicker()
 //        new RNBlinkIDPackage()
 //        new RNPassportReaderPackage()
       );
