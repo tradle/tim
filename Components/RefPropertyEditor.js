@@ -100,7 +100,7 @@ class RefPropertyEditor extends Component {
     let label, propLabel, isImmutable
     if (!val)
       label = pLabel
-    else if (utils.getModel(prop.ref).abstract)
+    else if (utils.getModel(prop.ref || prop.items.ref).abstract)
       label = translate(utils.getModel(val[TYPE]))
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
@@ -191,17 +191,15 @@ debug(source.uri.substring(0, 100))
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        let isDocument = prop.range === 'document'
-        if (isDocument) {
-          actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
-                         {content}
-                       </DocumentInput>
-        }
-        else {
+        // let isDocument = prop.range === 'document'
+        // if (isDocument)
+        //   actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
+        //                  {content}
+        //                </DocumentInput>
+        // else
           actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                          {content}
                        </ImageInput>
-        }
       }
       else
         actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>
@@ -229,7 +227,7 @@ debug(source.uri.substring(0, 100))
   }
   onDocument(propName, item) {
     const { model, navigator } = this.props
-    if (item.type &&  item.type.indexOf('pdf') !== -1  || item.uri.endsWith('.pdf')) {
+    if (item.type &&  item.type.indexOf('pdf') !== -1  || item.fileName.endsWith('.pdf')) {
       this.props.navigator.push({
         title: translate(model, model.properties[propName]),
         backButtonTitle: 'Back',
@@ -237,28 +235,15 @@ debug(source.uri.substring(0, 100))
         rightButtonTitle: 'Done',
         passProps: {
           prop: propName,
-          onSubmit: () => this.onSetMediaProperty(propName, item),
+          onSubmit: () => this.onSetMediaProperty(propName, {...item, url: `data:pdf/jpeg;base64${item.url}`}),
           item: {isPdf: true, ...item}
         }
       });
     }
     else {
-      let photo = {url: `data:image/jpeg;base64,${item.contents}`}
+      let photo = {url: `data:image/jpeg;base64,${item.url}`}
       this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
-      // let photo = {url: `data:image/jpeg;base64,${item.contents}`}
-      // this.props.navigator.push({
-      //   title: translate(model, model.properties[propName]),
-      //   backButtonTitle: 'Back',
-      //   componentName: 'PhotoList',
-      //   rightButtonTitle: 'Done',
-      //   passProps: {
-      //     callback: (photo) => this.onSetMediaProperty(propName, photo),
-      //     photos: [photo]
-      //   }
-      // });
-
     }
-    // this.onSetMediaProperty(propName, {url: `data:image/jpeg;base64,${item.contents}`})
   }
   getRefLabel(prop, resource) {
     let rModel = utils.getModel(prop.ref  ||  prop.items.ref)

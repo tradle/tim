@@ -57,6 +57,7 @@ class DocumentInput extends Component {
         }, async (error,res) => {
       let fileUri = res.uri
       let contents
+      debugger
       try {
         let fres = await RNFetchBlob.fetch('GET', fileUri)
         contents = fres.base64()
@@ -66,7 +67,7 @@ class DocumentInput extends Component {
         debugger
         return
       }
-      let item = {contents, ...res}
+      let item = {...res, url: contents}
       this.props.onDocument(item)
     });
   }

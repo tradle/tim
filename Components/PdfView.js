@@ -58,7 +58,7 @@ class PdfView extends Component {
       style={platformStyles.container}
       onError={(error) => this.renderError(error)}
       onLoad={this.renderLoading}
-      resource={item.contents}
+      resource={item.url}
       resourceType={'base64'}
     />
   }
