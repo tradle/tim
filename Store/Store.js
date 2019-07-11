@@ -212,6 +212,9 @@ const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
+
+const APPLICATION_NOT_FORMS = [PRODUCT_REQUEST, FORM_REQUEST, MODELS_PACK, STYLES_PACK, INTRODUCTION, APPLICATION_SUBMITTED, NEXT_FORM_REQUEST]
+
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
 const UNKNOWN_PAYLOAD_AUTHOR = 'UnknownPayloadAuthor'
@@ -6967,6 +6970,7 @@ if (!res[SIG]  &&  res._message)
       application.products = []
     if (application.requestErrors)
       application.requestErrors = []
+
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
       let type = m.subClassOf || m.id
@@ -6998,9 +7002,9 @@ if (!res[SIG]  &&  res._message)
         break
       default:
       case FORM:
-        if (m.id === PRODUCT_REQUEST  ||  m.id === FORM_REQUEST)
-          return
         if (!FORM  &&  !utils.isSubclassOf(FORM))
+          break
+        if (APPLICATION_NOT_FORMS.includes(m.id))
           break
         if (!application.forms)
           application.forms = []
