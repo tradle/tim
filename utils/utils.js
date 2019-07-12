@@ -42,7 +42,7 @@ import { calcLinks, omitVirtual } from '@tradle/build-resource'
 import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
-import AsyncStorage from '../Store/Storage'
+import AsyncStorage from './async-storage'
 // import Store from '../Store/Store'
 import ENV from './env'
 
@@ -954,7 +954,7 @@ var utils = {
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let p =  vCols[i]
       let prop = props[p]
-      if (prop.markdown  ||  prop.signature)
+      if (prop.markdown  ||  prop.signature  ||  prop.type === 'boolean')
         continue
       if (prop.type === 'array') {
         const pref = prop.items.ref
@@ -2255,6 +2255,8 @@ var utils = {
     else
       ftype = type
     const model = utils.getModel(ftype)
+    if (!model)
+      return []
     const props = model.properties
     let eCols = []
     for (let p in props) {
