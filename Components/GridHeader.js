@@ -57,7 +57,7 @@ class GridHeader extends Component {
     let smCol = isSmallScreen ? size/2 : 1
     if (multiChooser)
       size++
-    let {sortProperty, order} = this.state
+    let { sortProperty, order } = this.props
     // if (modelName === MESSAGE)
     //   gridCols = ['_provider', '_payloadType', '_context', '_time']
     let cols = gridCols.map((p) => {
@@ -70,7 +70,7 @@ class GridHeader extends Component {
         colStyle = styles.col
       let prop = props[p]
       let textStyle
-      if (prop  &&  (prop.type === 'number' || prop.type === 'date' || prop.ref === MONEY))
+      if (prop  &&  (prop.type === 'number'  ||  prop.ref === MONEY))
         textStyle = {alignSelf: 'flex-end', paddingRight: 10}
       else
         textStyle = {}
