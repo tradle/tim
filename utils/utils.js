@@ -958,7 +958,7 @@ var utils = {
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let p =  vCols[i]
       let prop = props[p]
-      if (prop.markdown  ||  prop.signature)
+      if (prop.markdown  ||  prop.signature || prop.type === 'boolean')
         continue
       if (prop.type === 'array') {
         const pref = prop.items.ref
