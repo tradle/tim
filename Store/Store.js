@@ -3,16 +3,18 @@ import path from 'path'
 import { parse as parseURL } from 'url'
 import {
   Alert,
-  NetInfo,
+  // NetInfo,
   Platform,
   InteractionManager
 } from 'react-native'
 import _ from 'lodash'
+import NetInfo from '@react-native-community/netinfo'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
 import Analytics from '../utils/analytics'
-import AsyncStorage from './Storage'
+import AsyncStorage from '../utils/async-storage'
+import asyncstorageDown from '../utils/asyncstorage-down'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createSemaphore from 'psem'
@@ -121,7 +123,6 @@ var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/
 import promisify from 'pify'
 var collect = promisify(require('stream-collector'))
 import debounce from 'debounce'
-import asyncstorageDown from 'asyncstorage-down'
 import levelup from 'levelup'
 // import mutexify from 'mutexify'
 // import updown from 'level-updown'
@@ -221,6 +222,9 @@ const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
+
+const APPLICATION_NOT_FORMS = [PRODUCT_REQUEST, FORM_REQUEST, MODELS_PACK, STYLES_PACK, INTRODUCTION, APPLICATION_SUBMITTED, NEXT_FORM_REQUEST, SIMPLE_MESSAGE]
+
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
 const UNKNOWN_PAYLOAD_AUTHOR = 'UnknownPayloadAuthor'
@@ -605,7 +609,6 @@ var Store = Reflux.createStore({
     if (!objId)
       return
     let r = this._getItem(objId)
-debug('sent:', r)
     if (r && r._sendStatus !== SENT) {
       r._msg = link
       r._sendStatus = SENT
@@ -6917,14 +6920,6 @@ if (!res[SIG]  &&  res._message)
       let type = m.subClassOf || m.id
       let stub = this.makeStub(sub)
       switch (type) {
-      case FORM:
-        if (m.id === PRODUCT_REQUEST)
-          return
-        if (!application.forms)
-          application.forms = []
-        application.forms.push(stub)
-        application._formsCount = application.forms.length
-        break
       case VERIFICATION:
         if (!application.verifications)
           application.verifications = []
@@ -6948,6 +6943,20 @@ if (!res[SIG]  &&  res._message)
           application.products = []
         application.products.push(stub)
         application._productsCount = application.products.length
+        break
+      default:
+      case FORM:
+        if (m.id === PRODUCT_REQUEST  ||  m.id === FORM_REQUEST)
+          break
+        if (!FORM  &&  !utils.isSubclassOf(FORM))
+          break
+        if (APPLICATION_NOT_FORMS.includes(m.id))
+          break
+        if (!application.forms)
+          application.forms = []
+        application.forms.push(stub)
+        application._formsCount = application.forms.length
+        break
       }
     })
     return application
