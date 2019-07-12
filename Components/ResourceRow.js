@@ -614,7 +614,10 @@ class ResourceRow extends Component {
     //             </View>
     // }
     // if (status !== 'Approved'  &&  status !== 'Denied') {
-    const aTitle = resource.applicantName || resource.applicant.title
+    let aTitle = resource.applicantName || resource.applicant.title
+    // HACK
+    if (aTitle === '[name unknown]')
+      aTitle = null
     const applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
     let icolor
     let iname
