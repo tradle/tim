@@ -43,7 +43,8 @@ const {
   ORGANIZATION,
   MONEY,
   MESSAGE,
-  VERIFICATION
+  VERIFICATION,
+  PROFILE
 } = constants.TYPES
 
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
@@ -309,8 +310,17 @@ class VerificationRow extends Component {
               description = <Text style={style}>{title}</Text>
           }
         }
-        if (dn)
-          titleComponent = <Text style={styles.rTitle}>{dn}</Text>
+        if (dn) {
+          let isProfile = parentResource  &&  parentResource[TYPE] === PROFILE
+          if (isForm  &&  isProfile) {
+            titleComponent = <View style={{justifyContent: 'center'}}>
+                               <Text style={styles.rTitle}>{dn}</Text>
+                               <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{translate(model)}</Text>
+                             </View>
+          }
+          else
+            titleComponent = <Text style={styles.rTitle}>{dn}</Text>
+        }
       }
     }
     else if (isBookmark  &&  resource.message)
