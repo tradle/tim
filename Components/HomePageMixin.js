@@ -220,9 +220,9 @@ var HomePageMixin = {
       if (idx !== gridCols.length - 1)
         notSortable = notSortable.concat(gridCols.slice(idx + 1))
     }
-
+    let { order, sortProperty } = this.state
     return (
-      <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)} notSortable={notSortable}/>
+      <GridHeader sortProperty={sortProperty} order={order} gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)} notSortable={notSortable}/>
     )
   },
   getGridCols() {
