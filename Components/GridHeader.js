@@ -17,6 +17,7 @@ import utils, {
 import StyleSheet from '../StyleSheet'
 
 const { MONEY } = constants.TYPES
+const PHOTO = 'tradle.Photo'
 
 class GridHeader extends Component {
   static propTypes = {
@@ -75,7 +76,7 @@ class GridHeader extends Component {
       let title = <Text style={[styles.cell, textStyle]}>
                     {translate(props[p], model).toUpperCase()}
                   </Text>
-      let isSortable = !notSortable || !notSortable.includes(p)
+      let isSortable = prop.ref !== PHOTO  &&  (!notSortable  ||  !notSortable.includes(p))
       if (isSortable)
         title = <TouchableOpacity onPress={() => this.props.sort(p)}>
                   {title}
