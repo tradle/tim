@@ -225,7 +225,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#4555faa0b992c0b2bc95d3eb216c31b889bdddc7"
+      "resolved": "git://github.com/tradle/models.git#4e5c3f5670e03384209c86bfa91f5fee7ed03999"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -6318,7 +6318,7 @@
     "react-native-deprecated-custom-components": {
       "version": "0.1.1",
       "from": "tradle/react-native-custom-components#web",
-      "resolved": "git://github.com/tradle/react-native-custom-components.git#c7c94e7353610571f861dc8d5fd4c3b52192bb94",
+      "resolved": "git://github.com/tradle/react-native-custom-components.git#5816e587fbc0e4d494963a32dd0bcf8dbdca564a",
       "dependencies": {
         "create-react-class": {
           "version": "15.6.0",
