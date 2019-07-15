@@ -1407,7 +1407,7 @@ class MessageList extends Component {
     if (oResource._context)
       resource._context = oResource._context
     this.props.navigator.push({
-      title: translate(prop, prModel),
+      title: translate('pleaseChoose'),
       id: 33,
       component: StringChooser,
       backButtonTitle: 'Back',
