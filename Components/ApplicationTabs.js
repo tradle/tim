@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Animated
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -40,6 +41,7 @@ const {
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
+
   static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
@@ -50,6 +52,13 @@ class ApplicationTabs extends Component {
   };
   constructor(props) {
     super(props);
+    this._animatedHeight = new Animated.Value(0)
+  }
+
+  animateTabsBar() {
+    Animated.timing(this._animatedHeight, {
+      toValue: 67
+    }).start();
   }
   render() {
     var { resource, bankStyle, children, navigator, lazy, showDetails, currency, backlink } = this.props
@@ -188,12 +197,22 @@ class ApplicationTabs extends Component {
       }
     }
 
-    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
-      return   <View>
+    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
+      if (refList  &&  refList.length) {
+        refList = <View style={buttonStyles.buttonsNoBorder} key={'ApplicationTabs'}>
+                    {refList}
+                  </View>
+        if (showDetails  &&  resource.status === 'started'  &&  resource.forms) {
+          this.animateTabsBar();
+          refList = <Animated.View style={{height: this._animatedHeight}}>
+                      {refList}
+                    </Animated.View>
+        }
+      }
+
+      return  <View>
                 {separator}
-                <View style={buttonStyles.buttonsNoBorder} key={'ApplicationTabs'}>
-                  {refList}
-                </View>
+                {refList}
                 {showDetails  &&  this.getAppStatus(styles)}
                 {children}
                 <View>
@@ -201,6 +220,7 @@ class ApplicationTabs extends Component {
                   {details}
                 </View>
               </View>
+    }
 
     return children || <View/>
   }
@@ -215,6 +235,8 @@ class ApplicationTabs extends Component {
   }
   getAppStatus(styles) {
     let { resource, bankStyle } = this.props
+    if (resource.status !== 'started'  ||  !resource.forms)
+      return
     let formTypes = []
     let progress = 0
     if (resource.forms) {
@@ -229,20 +251,21 @@ class ApplicationTabs extends Component {
       else
         progress = formTypes.length / m.forms.length
     }
-    let progressColor = bankStyle.linkColor
-    if (resource.status) {
-      switch (resource.status) {
-        case 'approved':
-          progressColor = '#A6D785'
-          break
-        case 'denied':
-          progressColor = '#EE3333'
-          break
-      }
-    }
+    let progressColor = '#a0d0a0' //bankStyle.linkColor
+    // if (resource.status) {
+    //   switch (resource.status) {
+    //     case 'approved':
+    //       progressColor = '#A6D785'
+    //       break
+    //     case 'denied':
+    //       progressColor = '#EE3333'
+    //       break
+    //   }
+    // }
 
     return <View style={styles.progress}>
-             <ProgressBar progress={progress} width={utils.getContentWidth(ApplicationTabs)} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
+             <Text style={styles.title}>Progress</Text>
+             <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} />
            </View>
   }
 }
@@ -268,6 +291,13 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       borderColor: appStyle.COUNTER_COLOR,
       paddingVertical: 1
     },
+    title: {
+      fontSize: 16,
+      // fontFamily: 'Avenir Next',
+      marginVertical: 3,
+      marginHorizontal: 7,
+      color: '#9b9b9b'
+    },
     countText: {
       fontSize: 12,
       fontWeight: '600',
@@ -290,8 +320,11 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     progress: {
       marginTop: 20,
       marginBottom: 10,
-      justifyContent: 'center',
-      alignSelf: 'center'
+      paddingHorizontal: 10,
+      justifyContent: 'flex-start',
+      // alignSelf: 'center',
+      // flexDirection: 'row',
+      // justifiedContent: 'space-between'
     },
     approve: {
       backgroundColor: buttonBg,
