@@ -575,7 +575,7 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
     photoBG: {
       backgroundColor: '#f7f7f7',
       alignItems: 'center',
-      borderColor: '#cccccc',
+      borderColor: '#eeeeee',
       borderTopWidth: 1,
       borderBottomWidth: 1
     },
