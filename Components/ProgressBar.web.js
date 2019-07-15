@@ -14,10 +14,10 @@ class ProgressBar extends Component {
   //   recipient: PropTypes.string.isRequired
   // };
   render() {
-    let { progress, width, color, height, borderWidth } = this.props
+    let { progress, width, color, height, borderWidth, borderRadius } = this.props
     progress *= 10
     return (
-      <View style={[styles.row, {borderColor: color, width, borderWidth}]}>
+      <View style={[styles.row, {borderColor: color, width, borderWidth, borderRadius}]}>
         <View style={{flex: progress, backgroundColor: color, height}} />
         <View style={{flex: 10 - progress, backgroundColor: '#ffffff', height}} />
       </View>
@@ -26,9 +26,10 @@ class ProgressBar extends Component {
 }
 var styles = StyleSheet.create({
   row: {
-    justifyContent: 'center',
-    alignSelf: 'center',
+    // justifyContent: 'center',
+    // alignSelf: 'center',
     flexDirection: 'row',
+    marginLeft: 7,
     borderWidth: 1
   }
 });
