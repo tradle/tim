@@ -8748,8 +8748,12 @@ if (!res[SIG]  &&  res._message)
           this.addAndCheckShareable(v, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
           return
         }
-        if (shareType === LEGAL_ENTITY  &&  r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
-          return
+        if (shareType === LEGAL_ENTITY) {
+          if (r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
+            return
+          if (!r.document || !r.companyName)
+            return
+        }
         if (this.checkIfWasShared(r, to, context))
           return
         if (filter  &&  utils.getDisplayName(r).indexOf(filter) === -1)
