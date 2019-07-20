@@ -1469,8 +1469,21 @@ var utils = {
         if (isVerification  &&  p === 'document')
           res[p] = utils.buildRef(res[p])
         else if (isFormError  &&  p === 'prefill') {
-          if (res[p][ROOT_HASH])
-            res[p] = utils.buildRef(res[p])
+          if (res[p][ROOT_HASH]) {
+            if (res._documentCreated)
+              res[p] = utils.buildRef(res[p])
+            else {
+              let props = utils.getModel(res[p][TYPE]).properties
+              res[p] = _.pickBy(res[p], (val, pname) => {
+                return props[pname] || pname === ROOT_HASH || pname === TYPE
+              })
+              // for (let pname in res[p]) {
+              //   if (!props[pname] && pname !== ROOT_HASH && pname !== TYPE)
+              //     delete res[p][pname]
+              // }
+
+            }
+          }
         }
         else if (isBookmark  &&  p === 'bookmark')
           return
