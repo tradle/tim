@@ -161,6 +161,7 @@
     "react-native-switch-selector": "^1.0.7",
     "react-native-vector-icons": "^4.1.1",
     "react-native-web": "^0.8.9",
+    "react-native-webview": "^5.12.1",
     "react-signature-pad": "github:tradle/react-signature-pad",
     "react-timer-mixin": "^0.13.3",
     "react-web": "github:mvayngrib/react-web#edgedist",
