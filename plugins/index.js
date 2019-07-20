@@ -1,7 +1,7 @@
 
 module.exports = [
   require('./PhotoID'),
-  require('./ControllingEntity'),
+  require('./BusinessAccount'),
   require('./PaymentCard'),
   require('./ProofOfAddress')
 ]
