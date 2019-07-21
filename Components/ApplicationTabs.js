@@ -28,6 +28,7 @@ import ShowPropertiesView from './ShowPropertiesView'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
+import { circled } from '../styles/utils'
 
 const {
   TYPE
@@ -101,7 +102,7 @@ class ApplicationTabs extends Component {
       propsToShow = vCols
     }
     let hasCounts
-
+    let hasSubmissions = resource.submissions
     propsToShow.forEach((p) => {
       // HACK
       if (p === 'submissions')
@@ -121,36 +122,48 @@ class ApplicationTabs extends Component {
         else
           icon = 'ios-checkmark-circle-outline';
       }
-      let cnt = resource['_' + p + 'Count'] || (resource[p] &&  resource[p].length)
+
       let count
-      if (cnt) {
-        hasCounts = true
-        if (!currentProp  &&  !showDetails)
-          currentProp = props[p]
-        count = <View style={styles.count}>
-                  <Text style={styles.countText}>{cnt}</Text>
-                </View>
+      if (hasSubmissions)  {
+        let cnt = resource['_' + p + 'Count'] || (resource[p] &&  resource[p].length)
+        if (cnt) {
+          hasCounts = true
+          if (!currentProp  &&  !showDetails)
+            currentProp = props[p]
+          count = <View style={styles.count}>
+                    <Text style={styles.countText}>{cnt}</Text>
+                  </View>
+        }
       }
       let showCurrent = backlink  &&  backlink.name === p ? currentMarker : null
+      let text, blIcon
+      if (hasSubmissions) {
+        text = <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
+        blIcon = <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
+      }
+      else {
+        text = <View style={styles.noSubmissionsText}/>
+        blIcon = <View style={styles.noSubmissionsIcon}/>
+      }
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableOpacity onPress={this.exploreBacklink.bind(this, resource, props[p])}>
              <View style={[styles.item, {justifyContent: 'flex-start'}]}>
                <View style={styles.row}>
-                 <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
+                 {blIcon}
                  {count}
                </View>
-               <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
+               {text}
              </View>
            </TouchableOpacity>
            {showCurrent}
          </View>
         );
     })
-    if (!hasCounts) {
-      if (showDetails)
-        refList = null
-    }
+    // if (!hasCounts) {
+    //   if (showDetails)
+    //     refList = null
+    // }
     // explore current backlink
     let flinkRL, details, separator
     if (!showDetails  &&  currentProp) {
@@ -378,6 +391,20 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     tabText: {
       marginTop: Platform.OS === 'android' ? 3 : 0
     },
+    noSubmissionsIcon: {
+      ...circled(30),
+      backgroundColor: '#ececec',
+      // shadowOpacity: 0.7,
+      opacity: 1,
+      // shadowRadius: 5,
+      // shadowColor: '#afafaf',
+    },
+    noSubmissionsText: {
+      backgroundColor: '#ececec',
+      height: 7,
+      width: 60,
+      marginTop: 10
+    }
   })
 })
 
