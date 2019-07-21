@@ -1,5 +1,5 @@
 import {
-  WebView,
+  // WebView,
   View,
   Text,
   ScrollView,
@@ -7,6 +7,7 @@ import {
   // StyleSheet,
 } from 'react-native'
 import PropTypes from 'prop-types'
+import { WebView } from 'react-native-webview'
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
