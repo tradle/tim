@@ -403,7 +403,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this._talkToEmployee(params)
       return
     }
-    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
+    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
