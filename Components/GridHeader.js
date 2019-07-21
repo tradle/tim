@@ -16,7 +16,8 @@ import utils, {
 } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 
-const { MONEY, MESSAGE } = constants.TYPES
+const { MONEY } = constants.TYPES
+const PHOTO = 'tradle.Photo'
 
 class GridHeader extends Component {
   static propTypes = {
@@ -58,8 +59,6 @@ class GridHeader extends Component {
     if (multiChooser)
       size++
     let { sortProperty, order } = this.props
-    // if (modelName === MESSAGE)
-    //   gridCols = ['_provider', '_payloadType', '_context', '_time']
     let cols = gridCols.map((p) => {
       let colStyle
       if (sortProperty  &&  sortProperty === p) {
@@ -78,7 +77,7 @@ class GridHeader extends Component {
                      {translate(props[p], model).toUpperCase()}
                    </Text>
 
-      let isSortable = !notSortable || !notSortable.includes(p)
+      let isSortable = prop.ref !== PHOTO  &&  (!notSortable  ||  !notSortable.includes(p))
       if (isSortable)
         title = <TouchableOpacity onPress={() => this.props.sort(p)}>
                   {title}
