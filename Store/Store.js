@@ -3896,9 +3896,11 @@ if (!res[SIG]  &&  res._message)
     var {resource, action, backlink, forwardlink, application} = params
     let blProp = backlink ||  forwardlink
     let prop
+    let submissions = utils.getModel(APPLICATION).properties.submissions
+    let sname = submissions.name
+    let slength = resource[sname]  &&  resource[submissions.name].length
     if (blProp) {
       let ref = blProp.items.ref
-      let submissions = utils.getModel(APPLICATION).properties.submissions
       if (ref === APPLICATION_SUBMISSION)
         prop = submissions
       else
@@ -3921,12 +3923,16 @@ if (!res[SIG]  &&  res._message)
       if (!r[name])
         this.organizeSubmissions(r)
       if (r[name]) {
-        list = await this.getObjects(r[name], prop)
-        if (list.length)
-          list.sort((a, b) => b._time - a._time)
-        r[name] = list
+        if (r[sname].length !== slength) {
+          list = await this.getObjects(r[name], prop)
+          if (list.length)
+            list.sort((a, b) => b._time - a._time)
+          r[name] = list
+          this.organizeSubmissions(r)
+        }
+        list = await this.getObjects(r[blProp.name], blProp)
+        r[blProp.name] = list
       }
-
     }
     // let m = this.getModel(r[TYPE])
     if (r.relationshipManagers) {
@@ -8689,8 +8695,12 @@ if (!res[SIG]  &&  res._message)
           this.addAndCheckShareable(v, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
           return
         }
-        if (shareType === LEGAL_ENTITY  &&  r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
-          return
+        if (shareType === LEGAL_ENTITY) {
+          if (r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
+            return
+          if (!r.document || !r.companyName)
+            return
+        }
         if (this.checkIfWasShared(r, to, context))
           return
         if (filter  &&  utils.getDisplayName(r).indexOf(filter) === -1)
