@@ -850,7 +850,7 @@ class FormRequestRow extends Component {
           let style = {transform: [{rotate: rotateX}], paddingLeft: 5, marginLeft: -3}
           msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: utils.isAndroid() ? 5 : 0}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
-                    <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 7}]}>
+                    <View style={styles.infoButton}>
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
@@ -1275,6 +1275,16 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       shadowColor: '#afafaf',
       borderColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       borderWidth: StyleSheet.hairlineWidth,
+    },
+    infoButton: {
+      ...circled(40),
+      shadowOpacity: 0.7,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+      backgroundColor: '#007EFF',
+      borderColor: 'blue',
+      borderWidth: StyleSheet.hairlineWidth,
+      marginRight: 7
     },
     addMore: {
       color: '#757575', // bankStyle.linkColor,
