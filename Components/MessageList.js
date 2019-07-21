@@ -1374,7 +1374,7 @@ class MessageList extends Component {
     if (productList._context)
       resource._context = productList._context
     this.props.navigator.push({
-      title: translate(prop, prModel),
+      title: translate('pleaseChoose'),
       componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
