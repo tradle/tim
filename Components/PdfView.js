@@ -1,5 +1,4 @@
 import {
-  WebView,
   View,
   Text,
   ScrollView,
