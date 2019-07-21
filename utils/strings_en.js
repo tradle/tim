@@ -289,6 +289,7 @@ module.exports = {
     "rescan": "Please re-scan the same document",
     "invalidValue": "This value is invalid. Please re-enter.",
     "outgoingMessages": "Outgoing Messages",
+    "pleaseChoose": "Please choose",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
