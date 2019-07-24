@@ -28,7 +28,7 @@ export default StyleSheet.create({
     marginTop: isIphone10 ? 10 : 1,
   },
   navBarText: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 17
   },
   navBarLeftButton: {
@@ -54,7 +54,7 @@ export default StyleSheet.create({
     alignSelf: 'flex-start'
   },
   logo: {
-    marginTop: 8
+    marginTop: 7
   },
   navBarMultiRowTitle: {
     flexDirection: 'column'

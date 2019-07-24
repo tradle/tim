@@ -262,6 +262,7 @@ module.exports = {
     "later": "Later",
     "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers.",
     "creationDate": "Date created",
+    "submissionDate": "Date submitted",
     "cancelItem": "You are about to cancel {1}. Please tap OK to confirm",
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",

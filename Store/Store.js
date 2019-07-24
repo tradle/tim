@@ -8,6 +8,10 @@ import {
   InteractionManager
 } from 'react-native'
 import _ from 'lodash'
+import Reflux from 'reflux'
+import createProcessor from 'level-change-processor'
+
+// import NetInfo from '@react-native-community/netinfo'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
@@ -25,12 +29,10 @@ import appPlugins from '../plugins'
 import refreshPrefill from './refreshPrefill.json'
 // import yukiConfig from '../yuki.json'
 
-import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
 import { uploadLinkedMedia } from '../utils/upload-linked-media'
 import Debug from 'debug'
-
-import createProcessor from 'level-change-processor'
+import RegulaProxy from '../utils/RegulaProxy'
 
 const SENT = 'Sent'
 const SENDING = 'Sending'
@@ -399,15 +401,15 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
     }
   })
   createdByBot.push({
-      [TYPE]: BOOKMARK,
-      message: translate('outgoingMessages'),
-      bookmark: {
-        [TYPE]: MESSAGE,
-        _inbound: false,
-        _counterparty: ALL_MESSAGES,
-      },
-      from: utils.buildRef(me)
-    })
+    [TYPE]: BOOKMARK,
+    message: translate('outgoingMessages'),
+    bookmark: {
+      [TYPE]: MESSAGE,
+      _inbound: false,
+      _counterparty: ALL_MESSAGES,
+    },
+    from: utils.buildRef(me)
+  })
 
   return createdByBot
 }
@@ -519,6 +521,8 @@ var Store = Reflux.createStore({
     if (false) {
       return await this.wipe()
     }
+    if (!utils.isWeb())
+      this.initRegula()
 
     await this.getReady()
     // if (ENV.yukiOn) {
@@ -622,7 +626,6 @@ var Store = Reflux.createStore({
     if (!objId)
       return
     let r = this._getItem(objId)
-debug('sent:', r)
     if (r && r._sendStatus !== SENT) {
       r._msg = link
       r._sendStatus = SENT
@@ -683,7 +686,7 @@ debug('sent:', r)
         //   }
         // }
         // else
-          if (err.type !== 'exists') throw err
+        if (err.type !== 'exists') throw err
         obj.from = {[ROOT_HASH]: msg.objectinfo.author}
       }
       obj.objectinfo = msg.objectinfo
@@ -1699,8 +1702,6 @@ debug('sent:', r)
       return providers
     }))
     debug('end fetching provider info from', serverUrls)
-    if (!utils.isWeb()  &&  result.some(r => r.state === 'fulfilled'))
-      await this.afterGetInfo()
     return result
   },
   // addYuki() {
@@ -2404,33 +2405,31 @@ debug('sent:', r)
     //   debugger
     // })
   },
-  async afterGetInfo() {
+  async initRegula() {
+    if (utils.isWeb())
+      return
     let env
     try {
       env = await db.get(MY_REGULA)
-      // some props like api keys may have been updated
+      if (env.dbID) {
+        await RegulaProxy.initialize(true)
+        return
+      }
     } catch (err) {
       env = {}
+      // debugger
     }
-    if (env.dbID)
-      return
-    let dbID = 'Full'
-    // if (SERVICE_PROVIDERS.length > 1)
-      // dbID = 'Full'
-    // else {
-    //   let newSp = SERVICE_PROVIDERS[0]
-    //   dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
-    // }
 
-    // // Check is DB was already prepared
-    const reg = require('../utils/regula')
+    let dbID = 'Full'
     try {
-      await reg.prepareDatabase(dbID)
-      _.set(env, 'dbID', dbID)
-      await db.put(MY_REGULA, env)
-    } catch(err) {
-      debug('Error preparing Regula DB')
+      await RegulaProxy.prepareDatabase(dbID)
+      await RegulaProxy.initialize()
+    } catch (err) {
+      console.log(`initRegula: ${err}`)
+      return
     }
+    env.dbID = dbID
+    await db.put(MY_REGULA, env)
   },
   parseProvider(sp, params, providerIds, newProviders) {
     if (!params)
@@ -3422,7 +3421,10 @@ debug('sent:', r)
       let requestedProperties = moreInfo.requestedProperties
       if (requestedProperties) {
         requestedProperties.forEach((r) => {
-          rprops[r.name] = r.message || ''
+          rprops[r.name] = {
+            message: r.message || '',
+            required: r.required
+          }
         })
       }
     }
@@ -3875,7 +3877,7 @@ if (!res[SIG]  &&  res._message)
     return res
   },
   async onGetItemFromServer(params) {
-    var {resource, action, noTrigger, backlink, forwardlink, application, } = params
+    var {resource, action, noTrigger, backlink, forwardlink, application} = params
     const rtype = utils.getType(resource)
     if (rtype === MESSAGE)
       return await this.getMessage(params)
@@ -3883,11 +3885,10 @@ if (!res[SIG]  &&  res._message)
     if (rtype === APPLICATION)
       return await this.getApplication(params)
 
-    let rId = utils.getId(resource)
+    const rId = utils.getId(resource)
     let r = await this._getItemFromServer(rId, backlink)
     if (!r)
       return
-
     if (resource.id  ||  (!backlink  &&  !forwardlink)) {
       // Check if there are verifications
       if (!noTrigger                 &&
@@ -3901,9 +3902,7 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
-
     let list, style
-    // let m = this.getModel(r[TYPE])
     if (application) {
       if (!r._context) {
         let context = await this.getContext(application.context, r)
@@ -3921,6 +3920,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
     return r
   },
+
   async getApplication(params) {
     var {resource, action, backlink, forwardlink, application} = params
     let blProp = backlink ||  forwardlink
@@ -4003,7 +4003,6 @@ if (!res[SIG]  &&  res._message)
     let retParams = { resource, action: 'getItem'}
     this.trigger(retParams)
   },
-
   async getObjects(list, prop) {
     if (!list.length)
       return []
@@ -5594,7 +5593,7 @@ if (!res[SIG]  &&  res._message)
       if (me.isEmployee) {
         await this.shareResources(documents, to, formRequest, shareBatchId)
         await Promise.all(documents.map(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId})))
-        // documents.forEach(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId}))
+      // documents.forEach(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId}))
       }
       else
         await Promise.all(documents.map(resource => this.shareForm({resource, to, formRequest, batch, shareBatchId})))
@@ -6627,12 +6626,12 @@ if (!res[SIG]  &&  res._message)
           switchToContext, direction, limit, modelName, loadEarlierMessages } = params
     if (modelName === MESSAGE) {
       if (bookmark) {
-        let counterparty = bookmark.bookmark._counterparty
-        if (counterparty === ALL_MESSAGES)
+        if (bookmark.bookmark._counterparty === ALL_MESSAGES)
           return await this.getBookmarkChat(params)
       }
-    }
 
+      // return await this.getChat(params)
+    }
     let contextId
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
@@ -6925,9 +6924,9 @@ if (!res[SIG]  &&  res._message)
             rr.applicantName = utils.getDisplayName(applicant)
         }
       }
-
       this.organizeSubmissions(rr)
     }
+
     this.addVisualProps(rr)
     return rr
   },
@@ -7008,6 +7007,8 @@ if (!res[SIG]  &&  res._message)
         break
       default:
       case FORM:
+        if (m.id === PRODUCT_REQUEST  ||  m.id === FORM_REQUEST)
+          break
         if (!FORM  &&  !utils.isSubclassOf(FORM))
           break
         if (APPLICATION_NOT_FORMS.includes(m.id))
@@ -8993,22 +8994,8 @@ if (!res[SIG]  &&  res._message)
       let document = verifications[0].document
       if (!verifiedShares[utils.getId(document)]  &&  utils.getId(document.from) === utils.getId(document.to)) {
         await this.getSentTo(document)
-        // try {
-        //   let msgStream = meDriver.objects.messagesWithObject({ permalink: document[ROOT_HASH] })
-        //   let msgs = await collect(msgStream)
-        //   if (msgs.length) {
-        //     let msg = msgs.find(m => m.objectinfo.link === document[CUR_HASH])
-        //     let forward = msg.object.forward
-        //     let to = this._getItem([PROFILE, forward, forward].join('_'))
-        //     document._sentTo = to.organization
-        //   }
-        //   // debugger
-        // } catch(err) {
-        //   debugger
-        // }
       }
     }
-
 
     let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
@@ -11105,7 +11092,7 @@ await fireRefresh(val.from.organization)
     }
     else {
       let contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
-      if (contexts  ||  !contexts.length)
+      if (!contexts  ||  !contexts.length)
         return
 
       contexts = contexts.filter((c) => c.contextId === contextId)
@@ -11900,7 +11887,8 @@ await fireRefresh(val.from.organization)
       {
         path: `regula.licenseKey.${Platform.OS}`,
         get component() {
-          return require('../utils/regula')
+          return RegulaProxy
+          // return require('../utils/regula')
         },
       },
       {
@@ -12025,327 +12013,3 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   return userId
 }
-/*
-  onAddMessage (params) {
-    let r = params.msg
-    let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
-
-    if (application) {
-      r.to = application._context.from
-      r._context = application._context
-    }
-    var self = this
-    let m = this.getModel(r[TYPE])
-    let isContext = utils.isContext(m) // r[TYPE] === PRODUCT_APPLICATION
-    var props = m.properties;
-    if (!r._time)
-      r._time = new Date().getTime();
-    var toOrg
-    // r.to could be a reference to a resource
-    var to = this._getItem(r.to)
-    let toType
-    if (to)
-      toType = to[TYPE]
-    let isReadOnlyContext, orgId, orgRep
-    if (toType === ORGANIZATION) {
-      orgId = utils.getId(r.to)
-      orgRep = this.getRepresentative(orgId)
-      // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
-      //   return
-      if (!orgRep) {
-        var params = {
-          action: 'addMessage',
-          error: 'No ' + r.to.name + ' representative was found'
-        }
-        this.trigger(params);
-        return
-      }
-      toOrg = r.to
-      r.to = orgRep
-    }
-    else {
-      let toM = this.getModel(toType)
-      isReadOnlyContext = utils.isContext(toM)  &&  utils.isReadOnlyChat(to)
-    }
-    let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
-
-    var rr = {};
-    var context
-    if (r._context) {
-      rr._context = r._context
-      context = this.findContext(r._context)
-    }
-    rr[IS_MESSAGE] = true
-
-    if (isContext)
-      rr.contextId = this.getNonce()
-    for (let p in r) {
-      if (!props[p])
-        continue
-      if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
-        rr[p] = this.buildRef(r[p])
-      else
-        rr[p] = r[p];
-    }
-
-    let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-    // rr[NONCE] = this.getNonce()
-    let toChain = {
-      [TYPE]: rr[TYPE],
-      // [NONCE]: rr[NONCE],
-      time: r._time
-    }
-    if (rr.message)
-      toChain.message = rr.message
-    if (rr.photos)
-      toChain.photos = rr.photos
-    if (isSelfIntroduction)
-      toChain.profile = { firstName: me.firstName }
-    if (r.list)
-      rr.list = r.list
-    let required = m.required
-    if (required) {
-      required.forEach((p) => {
-        if (props[p].type === 'object'  &&  !props[p].inlined  &&  !this.getModel(props[p].ref).inlined)
-          toChain[p] = this.buildSendRef(rr[p])
-        else
-          toChain[p] = rr[p]
-      })
-      // HACK
-      delete toChain.from
-      delete toChain.to
-    }
-    var batch = []
-    var error
-    var welcomeMessage
-    // var promise = Q(protocol.linkString(toChain))
-    let applicant
-    if (application  &&  utils.isRM(application))
-      applicant = this._getItem(utils.getId(application.applicant))
-    else
-      applicant = r.to
-    let hash = applicant[ROOT_HASH]
-    if (!hash)
-      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = utils.makeId(IDENTITY, hash)
-    rr._sendStatus = self.isConnected ? SENDING : QUEUED
-    var noCustomerWaiting
-    // let firstTime
-    return this._loadedResourcesDefer.promise
-    .then(() => {
-      let promise = isContext
-                  ? this.searchMessages({modelName: m.id, to: toOrg})
-                  : Q()
-      return promise
-    })
-    .then((result) => {
-      if (result) {
-        result = result.filter((r) => {
-          return (r.message === r.message  &&  !r._documentCreated) ? true : false
-        })
-        if (result.length) {
-          result.forEach((r) => {
-            const rid = utils.getId(r)
-            self._mergeItem(rid, { _documentCreated: true })
-          })
-        }
-      }
-      return this.maybeWaitForIdentity({ permalink: hash })
-    })
-    .then(() => this.meDriverExec('sign', { object: toChain }))
-    .then((result) => {
-      toChain = result.object
-      let hash = protocol.linkString(result.object)
-
-      rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
-      if (isContext) {
-        rr._context = r._context = {id: utils.getId(r), title: r.requestFor}
-        contextIdToResourceId[rr.contextId] = rr
-
-        self.addLastMessage(r, batch)
-      }
-      else if (!isWelcome  &&  !application)
-        self.addLastMessage(r, batch)
-
-      if (!isWelcome) //  ||  utils.isEmployee(r.to))
-        return
-      if (!orgRep)
-        return
-      if (orgRep.lastMessageTime) {
-        isWelcome = orgRep.lastMessage === r.message
-        if (!isWelcome)
-          return;
-      }
-      if (me.txId)
-        return
-
-      if (isContext)
-        isWelcome = false
-      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
-      // prevent the not needed duplicate expensive operations for obtaining ProductList
-      return checkForCustomerWaiting()
-    })
-    .then(() => {
-      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-        return;
-
-      // Temporary untill the real hash is known
-      var key = utils.getId(rr)
-
-      rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
-      rr.from = rr.from || r.from
-      if (isContext)
-        rr.to.organization = self.buildRef(to)
-      rr._outbound = true
-      rr._latest = true
-      if (!application) {
-        self._setItem(key, rr)
-
-        if (!toOrg)
-            toOrg = to.organization ? to.organization : to
-        let isDenial = rr[TYPE] === APPLICATION_DENIAL
-        let isApproval = rr[TYPE] === APPLICATION_APPROVAL
-        if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
-          self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
-        if (isApproval)
-          Actions.showModal({title: translate('inProcess'), showIndicator: true})
-
-        self.addMessagesToChat(utils.getId(toOrg), rr)
-      }
-      this.addVisualProps(rr)
-
-      var params = {
-        action: 'addMessage',
-        resource: isWelcome ? welcomeMessage : rr
-      }
-      if (error)
-        params.error = error
-      if (r[TYPE]  !== SELF_INTRODUCTION)
-        self.trigger(params)
-      if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
-        return self.getDriver(me)
-    })
-    .then(() => {
-      // SelfIntroduction or IdentityPublishRequest were just sent
-      if (noCustomerWaiting)
-        return
-      if (isReadOnlyContext)
-        return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-      let toRes = self._getItem(toId)
-      if (toRes)
-        return toRes.pubkeys
-      else if (me.isEmployee) {
-        let rep = this.getRepresentative(me.organization)
-        return this._getItem(utils.makeId(IDENTITY, rep[ROOT_HASH])).pubkeys
-      }
-    })
-    .then((pubkeys) => {
-      if (pubkeys)
-        return self.packMessage(toChain, r.from, r.to, context)
-    })
-    .then((sendParams) => {
-      if (!sendParams)
-        return
-        // let sendParams = self.packMessage(r, toChain)
-      if (disableAutoResponse) {
-        if (!sendParams.other)
-          sendParams.other = {}
-        sendParams.other.disableAutoResponse = true
-      }
-      const method = toChain[SIG] ? 'send' : 'signAndSend'
-      return self.meDriverExec(method, sendParams)
-      .catch(function (err) {
-        debugger
-      })
-    })
-    .then((result) => {
-      if (!requestForForm  &&  isWelcome)
-        return
-      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-        return
-      if (isReadOnlyContext)
-        return
-      // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
-      if (!toOrg)
-        toOrg = to.organization ? to.organization : to
-      // saving the new message
-      const data = storeUtils.toOldStyleWrapper(result.message)
-      if (data)  {
-        rr[ROOT_HASH] = data[ROOT_HASH]
-        rr[CUR_HASH] = data[CUR_HASH]
-      }
-      var key = utils.getId(rr)
-      self.dbBatchPut(key, rr, batch)
-      self._setItem(key, rr)
-      if (isContext)
-        return this.searchMessages({modelName: FORM_REQUEST, to: to})
-    })
-    .then((result) => {
-      if (result) {
-        result.forEach((r) => {
-          if (r._documentCreated  &&  !r._document) {
-            let rId = utils.getId(r)
-            batch.push({type: 'del', key: rId})
-            this.deleteMessageFromChat(orgId, r)
-            this._deleteItem(rId)
-          }
-        })
-      }
-      return db.batch(batch)
-    })
-    .then(() => {
-      if (me.isEmployee)
-        return this.getModelsPack(to)
-    })
-    .catch((err) => {
-      debug('Something went wrong', err.stack)
-      debugger
-    })
-    .finally(() => {
-      if (cb)
-        cb(rr)
-    })
-
-    async function checkForCustomerWaiting() {
-      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
-      // prevent the not needed duplicate expensive operations for obtaining ProductList
-      await self.getDriver(me)
-      if (!self.isConnected  ||  publishRequestSent[orgId])
-        return
-      // TODO:
-      // do we need identity publish status anymore
-      let status = await meDriver.identityPublishStatus()
-      if (!status) ///* || !self.isConnected*)
-        return
-      publishRequestSent[orgId] = true
-      if (!status.watches.link  &&  !status.link  &&  !me.isEmployee) {
-        if (isCustomerWaiting)
-          noCustomerWaiting = true
-        return self.publishMyIdentity(orgRep)
-      }
-      let id = to.organization ? utils.getId(to.organization) : utils.getId(to)
-      if (chatMessages[id]  &&  chatMessages[id].length)
-        return
-      var allMyIdentities = self._getItem(MY_IDENTITIES)
-      var all = allMyIdentities.allIdentities
-      var curId = allMyIdentities.currentIdentity
-
-      let identity = all.filter((id) => id.id === curId)
-      console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
-      var msg = {
-        message: me.firstName + ' is waiting for the response',
-        [TYPE]: SELF_INTRODUCTION,
-        identity: identity[0].publishedIdentity,
-        name: me.firstName,
-        profile: {
-          firstName: me.firstName
-        },
-        from: me,
-        to: r.to
-      }
-      if (isCustomerWaiting)
-        noCustomerWaiting = true
-      return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
-    }
-  },
-*/

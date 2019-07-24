@@ -5,8 +5,8 @@ import SplashScreen from 'react-native-splash-screen'
 if (SplashScreen && SplashScreen.hide) {
   SplashScreen.hide()
 }
-
-import { scan, Scenario, prepareDatabase } from '../../utils/regula'
+import RegulaProxy, { Scenario } from '../../utils/RegulaProxy'
+// import { scan, Scenario, prepareDatabase } from '../../utils/regula'
 import Image from '../../Components/Image'
 import dummyResult from '../../data/sample-regula-result.json'
 
@@ -31,8 +31,9 @@ class App extends Component {
     // if (bothSides)
     //   scanOpts.processParams.multipageProcessing = true
 
-    await prepareDatabase('Full')
-    const result = await scan(scanOpts)
+    await RegulaProxy.prepareDatabase('Full')
+    await RegulaProxy.initialize()
+    const result = await RegulaProxy.scan(scanOpts)
     this.setState(result)
   }
 
