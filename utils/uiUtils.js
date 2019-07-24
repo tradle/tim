@@ -14,13 +14,16 @@ import { translate, getModel, getContentSeparator, isMyProduct,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
-import GridList from '../Components/GridList'
-import NewResource from '../Components/NewResource'
+// import GridList from '../Components/GridList'
+// import NewResource from '../Components/NewResource'
 import PhotoList from '../Components/PhotoList'
 import NetworkInfoProvider from '../Components/NetworkInfoProvider'
 import PageView from '../Components/PageView'
 import chatStyles from '../styles/chatStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+
+const GRID_LIST = 'GridList'
+const NEW_RESOURCE = 'NewResource'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 
@@ -32,10 +35,9 @@ var uiUtils = {
     let btype = resource.bookmark[TYPE]
     let bm = getModel(btype)
     navigator.push({
-      id: 30,
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
-      component: GridList,
+      componentName: GRID_LIST,
       passProps: {
         modelName: btype,
         bookmark: resource,
@@ -49,8 +51,7 @@ var uiUtils = {
       rightButtonTitle: 'Search',
       onRightButtonPress: {
         title: translate('searchSomething', translate(bm)),
-        id: 4,
-        component: NewResource,
+        componentName: NEW_RESOURCE,
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {

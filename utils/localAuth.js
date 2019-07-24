@@ -6,6 +6,7 @@ const Errors = LocalAuth && require('react-native-local-auth/data/errors')
 import Q from 'q'
 import PasswordCheck from '../Components/PasswordCheck'
 import LockScreen from '../Components/LockScreen'
+import components from '../Components/components'
 import ENV from '../utils/env'
 
 // hack!
@@ -280,8 +281,7 @@ function lockUp (nav, err) {
   debug('lockUp')
   return new Promise(resolve => {
     nav.replace({
-      component: LockScreen,
-      id: 24,
+      componentName: 'LockScreen',
       noLeftButton: true,
       passProps: {
         bg: LOCK_SCREEN_BG,
@@ -304,8 +304,7 @@ function setPassword (navigator, isChangePassword) {
     const routes = navigator.getCurrentRoutes().length
     const method = isChangePassword || routes === 1 ? 'push' : 'replace'
     navigator[method]({
-      component: PasswordCheck,
-      id: 20,
+      componentName: 'PasswordCheck',
       noLeftButton: true,
       passProps: {
         ...PASSWORD_PROMPTS,
@@ -331,12 +330,11 @@ function checkPassword (navigator, isChangePassword) {
   // HACK
   let routes = navigator.getCurrentRoutes()
   let currentRoute = routes[routes.length - 1]
-  const name = currentRoute.component.displayName
+  const name = components[currentRoute.componentName].displayName
   let push = name !== PasswordCheck.displayName && name !== LockScreen.displayName
   let defer = Q.defer()
   let route = {
-    component: PasswordCheck,
-    id: 20,
+    componentName: 'PasswordCheck',
     noLeftButton: true,
     passProps: {
       ...PASSWORD_PROMPTS,
