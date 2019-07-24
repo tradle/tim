@@ -1,4 +1,3 @@
-
 import {
   // Text,
   TouchableOpacity,
@@ -23,12 +22,8 @@ import constants from '@tradle/constants'
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import { parseMessage } from '../utils/uiUtils'
-import NewResource from './NewResource'
-import RemediationItemsList from './RemediationItemsList'
 import RowMixin from './RowMixin'
 import ImageInput from './ImageInput'
-import ShareResourceList from './ShareResourceList'
-import ResourceList from './ResourceList'
 import OnePropFormMixin from './OnePropFormMixin'
 import StringChooser from './StringChooser'
 
@@ -360,8 +355,8 @@ class FormRequestRow extends Component {
       for (var t in  verifications) {
         if (t !== formModel.id)
           continue
-        var ver = verifications[t];
-        var totalShareables = ver.length
+        let ver = verifications[t]
+        let totalShareables = ver.length
         let r = ver[0]
         // ver.forEach((r) => {
           let document = r.document
@@ -469,7 +464,7 @@ class FormRequestRow extends Component {
                      <View style={styles.header}>
                        {headerContent}
                      </View>
-                 </TouchableOpacity>
+                   </TouchableOpacity>
     let orgRow = <View/>
     // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
@@ -599,9 +594,9 @@ class FormRequestRow extends Component {
                    </View>
 
     let orgView = <View style={styles.orgView}>
-                      {verifiedByView}
-                      {dateView}
-                    </View>
+                    {verifiedByView}
+                    {dateView}
+                  </View>
     return {verifiedBy, orgPhoto, shareView, orgTitle, orgView}
   }
   formatMultiEntryShareable(params) {
@@ -629,17 +624,17 @@ class FormRequestRow extends Component {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
                     <View>
-                     {headerContent}
-                    <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
-                      {orgView}
-                    </TouchableOpacity>
+                      {headerContent}
+                      <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
+                        {orgView}
+                      </TouchableOpacity>
                     </View>
                   </View>
       }
       else {
         orgRow = <View style={chatStyles.shareView}>
                    <TouchableOpacity underlayColor='transparent' onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: multiChooser})}>
-                    {shareView}
+                     {shareView}
                    </TouchableOpacity>
                    <View>
                      <TouchableOpacity underlayColor='transparent' onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: multiChooser})}>
@@ -674,8 +669,7 @@ class FormRequestRow extends Component {
     let title = translate(m) + (verifiedBy  &&  ('  →  '  + verifiedBy))
     navigator.push({
       title,
-      id: 37,
-      component: ShareResourceList,
+      componentName: 'ShareResourceList',
       backButtonTitle: 'Back',
       passProps: {
         multiChooser,
@@ -698,8 +692,7 @@ class FormRequestRow extends Component {
 
       navigator.push({
         title: translate(model),
-        id: 33,
-        component: StringChooser,
+        componentName: 'StringChooser',
         backButtonTitle: 'Back',
         sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
         passProps: {
@@ -742,11 +735,10 @@ class FormRequestRow extends Component {
 
     let action = utils.getModel(formRequest.form).abstract && 'replace' || 'push'
     navigator[action]({
-      id: 4,
       title: translate(model),
       rightButtonTitle: isMyMessage ? null : 'Done',
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       // titleTextColor: '#7AAAC3',
       passProps:  {
         model,
@@ -954,8 +946,6 @@ class FormRequestRow extends Component {
         }
       }
       if (addMessage) {
-        // if (isRequestForNext  ||  shareableResources)
-        //   addMessage = DEFAULT_MESSAGE
         if (!isRequestForNext)
           messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, this.hasSharables() && {paddingBottom: 15}]}>{addMessage}</Text>
       }
@@ -1062,10 +1052,9 @@ class FormRequestRow extends Component {
     // )
     const { navigator, bankStyle, resource, to, currency, list } = this.props
     this.props.navigator.push({
-      id: 29,
       title: translate("reviewData"),
       backButtonTitle: 'Back',
-      component: RemediationItemsList,
+      componentName: 'RemediationItemsList',
       rightButtonTitle: 'Done',
       passProps: {
         modelName: CONFIRM_PACKAGE_REQUEST,
@@ -1081,7 +1070,7 @@ class FormRequestRow extends Component {
   }
   submitAllForms() {
     // utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
+    Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
     // });
     // this.props.navigator.pop()
   }
@@ -1101,9 +1090,7 @@ class FormRequestRow extends Component {
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
@@ -1187,7 +1174,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     orgView: {
       width: msgWidth - 70,
       paddingLeft: 10,
-      marginRight: 10,
+      marginRight: 5,
       flex: 1,
       justifyContent: 'center',
       alignItems: 'flex-end',
@@ -1330,7 +1317,46 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
 })
 reactMixin(FormRequestRow.prototype, RowMixin)
 reactMixin(FormRequestRow.prototype, OnePropFormMixin)
-reactMixin(FormRequestRow.prototype, Reflux.ListenerMixin);
+reactMixin(FormRequestRow.prototype, Reflux.ListenerMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
+/*
+  createNewResource(model, isMyMessage) {
+    let { resource, currency, country, bankStyle, defaultPropertyValues, navigator } = this.props
+    let r = {
+      from: resource.to,
+      to: resource.from,
+      _context: resource._context,
+      [TYPE]: model.id
+    }
+
+    // Prefill for testing and demoing
+    let isPrefilled
+    if (ENV.prefillForms  &&  model.id in formDefaults) {
+      _.extend(r, formDefaults[model.id])
+      isPrefilled = true
+    }
+
+    if (resource.prefill) {
+      _.extend(r, resource.prefill)
+      isPrefilled = true
+    }
+    navigator.push({
+      title: translate(model),
+      rightButtonTitle: isMyMessage ? null : 'Done',
+      backButtonTitle: 'Back',
+      componentName: 'NewResource',
+      passProps:  {
+        model: model,
+        resource: r,
+        isPrefilled: isPrefilled,
+        currency: currency,
+        country: country,
+        bankStyle: bankStyle,
+        originatingMessage: resource,
+        defaultPropertyValues: defaultPropertyValues,
+      }
+    });
+  }
+*/

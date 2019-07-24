@@ -11,7 +11,7 @@ import {
   StyleSheet
 } from 'react-native'
 
-export default class Log extends Component {
+class Log extends Component {
   constructor(props) {
     super(props)
     this.onChange = this.onChange.bind(this)
@@ -70,3 +70,4 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start'
   }
 })
+module.exports = Log

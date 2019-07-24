@@ -94,9 +94,11 @@ class PhotoList extends Component {
     let item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-           {item}
-        </TouchableHighlight>
+        <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
+          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, {photo, isView})}>
+             {item}
+          </TouchableHighlight>
+        </Animated.View>
       </Col>
     )
   }

@@ -4,12 +4,15 @@ import {
   // Text,
   TouchableOpacity,
   Alert,
+  // Image as RawImage,
 } from 'react-native'
 import _ from 'lodash'
-const debug = require('debug')('tradle:app:blinkid')
+// const debug = require('debug')('tradle:app:blinkid')
+const debug = require('debug')('tradle:app:document')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 import debounce from 'p-debounce'
+import reactMixin from 'react-mixin'
 
 import constants from '@tradle/constants'
 const {
@@ -28,21 +31,22 @@ import utils, { translate, translateEnum, isWeb, isSimulator, buildStubByEnumTit
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
+import DocumentInput from './DocumentInput'
 import Actions from '../Actions/Actions'
 // import BlinkID from './BlinkID'
 import Regula from './Regula'
 import Navigator from './Navigator'
-import GridList from './GridList'
-import NewResource from './NewResource'
 import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
 import Image from './Image'
+import PhotoCarouselMixin from './PhotoCarouselMixin'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const PHOTO_ID = 'tradle.PhotoID'
 const ID_CARD = 'tradle.IDCardType'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -96,6 +100,8 @@ class RefPropertyEditor extends Component {
     let label, propLabel, isImmutable
     if (!val)
       label = pLabel
+    else if (utils.getModel(prop.ref || prop.items.ref).abstract)
+      label = translate(utils.getModel(val[TYPE]))
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto)
@@ -121,6 +127,20 @@ class RefPropertyEditor extends Component {
       } else {
         propView = <Icon name='ios-paper-outline' size={40} color={linkColor} />
       }
+// =======
+//       let isPdf = resource[pName]  &&  resource[pName].fileName  &&  resource[pName].fileName.toLowerCase().endsWith('.pdf')
+//       let source = {uri: isPdf  &&  PDF_ICON ||  photoR.url}
+//       let fileName
+//       if (isPdf) {
+//         let pieces = resource[pName].fileName.split('/')
+//         fileName = <Text style={styles.textAfterImage}>{pieces[pieces.length - 1]}</Text>
+//       }
+// debug(source.uri.substring(0, 100))
+//       propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0, flexDirection: 'row' }}>
+//                    <Image source={source} style={[styles.thumb, {marginBottom: 5}]} />
+//                    {fileName}
+//                  </View>
+// >>>>>>> origin/master
     }
     else {
       let img = photo
@@ -133,7 +153,11 @@ class RefPropertyEditor extends Component {
       else {
         let marginTop = 15
         let width = utils.dimensions(component).width - 60
-        propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
+        let scanned
+        if (prop.scanner  &&  resource[prop.name + 'Json'])
+          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color: 'darkblue', width}]}>{translate('Scanned')}</Text>
+        else
+          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
       }
     }
 
@@ -164,7 +188,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isImmutable)
+    if (isImmutable || prop.readOnly)
       actionItem = content
     else if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
@@ -202,6 +226,26 @@ class RefPropertyEditor extends Component {
       </View>
     );
   }
+  onDocument(propName, item) {
+    const { model, navigator } = this.props
+    if (item.type &&  item.type.indexOf('pdf') !== -1  || item.fileName.endsWith('.pdf')) {
+      this.props.navigator.push({
+        title: translate(model, model.properties[propName]),
+        backButtonTitle: 'Back',
+        componentName: 'PdfView',
+        rightButtonTitle: 'Done',
+        passProps: {
+          prop: propName,
+          onSubmit: () => this.onSetMediaProperty(propName, {...item, url: `data:pdf/jpeg;base64${item.url}`}),
+          item: {isPdf: true, ...item}
+        }
+      });
+    }
+    else {
+      let photo = {url: `data:image/jpeg;base64,${item.url}`}
+      this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
+    }
+  }
   getRefLabel(prop, resource) {
     let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
     // let m = utils.getId(resource[pName]).split('_')[0]
@@ -231,10 +275,9 @@ class RefPropertyEditor extends Component {
     let { navigator, bankStyle, model, resource, currency } = this.props
     let refModel = utils.getModel(prop.ref)
     navigator.push({
-      id: 4,
       title: translate('addNew', translate(refModel)), // Add new ' + bl.title,
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       rightButtonTitle: 'Done',
       passProps: {
         model: refModel,
@@ -381,10 +424,10 @@ class RefPropertyEditor extends Component {
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'id')
       else if (rDocumentType === 'D')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
-      if (documentType.id !== resource.documentType.id) {
-        Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
-        return
-      }
+      // if (documentType.id !== resource.documentType.id) {
+      //   Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
+      //   return
+      // }
     }
 
     const r = _.cloneDeep(resource)
@@ -402,7 +445,7 @@ class RefPropertyEditor extends Component {
     const { otherSideScan, face, signature } = props
     if (result.imageBack) {
       // HACK
-      if (utils.getModel(otherSideScan)) {
+      if (otherSideScan) {
         r.otherSideScan = {
           url: result.imageBack,
         }
@@ -499,8 +542,7 @@ class RefPropertyEditor extends Component {
 
     let route = {
       title: this.getPropertyLabel(prop), //m.title,
-      id:  30,
-      component: GridList,
+      componentName: 'GridList',
       backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
@@ -572,6 +614,7 @@ function getDocumentTypeFromTitle (title='') {
     return 'other'
   }
 }
+reactMixin(RefPropertyEditor.prototype, PhotoCarouselMixin);
 module.exports = RefPropertyEditor;
   // async showBlinkIDScanner(prop) {
   //   let { resource } = this.props

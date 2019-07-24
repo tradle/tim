@@ -1,7 +1,19 @@
+import React, { Component } from 'react'
+import {
+  // StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking
+} from 'react-native'
+import PropTypes from 'prop-types'
+
+import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
 import moment from 'moment'
+import Prompt from 'react-native-prompt'
 
 import constants from '@tradle/constants'
 import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
@@ -26,18 +38,7 @@ const {
   MONEY,
 } = constants.TYPES
 
-import Prompt from 'react-native-prompt'
 import StyleSheet from '../StyleSheet'
-import {
-  // StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Linking
-} from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
 import Image from './Image'
 
 class ShowPropertiesView extends Component {
@@ -164,6 +165,19 @@ class ShowPropertiesView extends Component {
       if (pMeta.range === 'json') {
         if (!val  ||  utils.isEmpty(val))
           return
+        if (pMeta.ref) {
+          let v = _.cloneDeep(val)
+          let rprops = utils.getModel(v[TYPE]  ||  pMeta.ref).properties
+          let exclude = [TYPE, '_time']
+          for (let p in v) {
+            if (!rprops[p]  ||  exclude.includes(p))
+              delete v[p]
+          }
+          if (utils.isEmpty(v))
+            return
+          val = v
+        }
+
         let jsonRows = []
 
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
@@ -307,6 +321,8 @@ class ShowPropertiesView extends Component {
               )
             return
           }
+          if (pMeta.items.backlink)
+            return
         }
         val = this.renderSimpleProp(val, pMeta, modelName, ShowPropertiesView)
       }

@@ -33,12 +33,6 @@ const {
 
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
-import NewItem from './NewItem'
-import ResourceList from './ResourceList'
-import GridList from './GridList'
-import GridItemsList from './GridItemsList'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import ShowPropertiesView from './ShowPropertiesView'
@@ -173,13 +167,10 @@ class NewResource extends Component {
     if (!isUpdate)
       isUpdate = !utils.compare(this.props.resource, nextProps.resource)
     return isUpdate
-           // nextState.isModalOpen !== this.state.isModalOpen  ||
-           // this.state.modalVisible != nextState.modalVisible ||
   }
   componentWillMount() {
-    let { resource } = this.state
-    let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props
-    // Profile gets changed every time there is a new photo added through for ex. Selfie
+    let { resource, isUploading } = this.state
+    let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource: resource})
     if (resource[ROOT_HASH]) {
@@ -194,7 +185,7 @@ class NewResource extends Component {
         if (!utils.getModel(type).inlined)
           Actions.getItem({resource: resource})
       }
-      else if (this.state.isUploading) {
+      else if (isUploading) {
         if (containerResource)
           this.state.isUploading = false
         else {
@@ -399,16 +390,14 @@ class NewResource extends Component {
       return
     }
     navigateTo({
-      id: isMessage ? 5 : 3,
       title: title,
-      component: isMessage ? MessageView : ResourceView,
+      componentName: isMessage ? 'MessageView' : 'ResourceView',
       titleTextColor: '#7AAAC3',
       rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         rightButtonTitle: 'Done',
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
@@ -427,34 +416,7 @@ class NewResource extends Component {
     });
     if (currentRoutesLength != 2)
       navigator.pop();
-//     console.log('onAction: submitted = false')
-//     this.state.submitted = false
   }
-  // Show providers this resource was shared with and allow customer to choose
-  // which providers to share the changes with
-  // showSharedWithList(newResource) {
-  //   if (!this.props.resource  ||  !this.props.resource._sharedWith)
-  //     return
-  //   this.props.navigator.replace({
-  //     id: 10,
-  //     title: translate('shareChangesWith'),
-  //     backButtonTitle: 'Back',
-  //     component: ResourceList,
-  //     rightButtonTitle: 'Done',
-  //     passProps: {
-  //       message: translate('chooseCompaniesToShareChangesWith'),
-  //       modelName: ORGANIZATION,
-  //       to: this.state.resource.to,
-  //       resource: this.props.resource,
-  //       callback:  this.shareWith.bind(this, newResource),
-  //       chat: this.props.chat,
-  //       bankStyle: this.props.bankStyle,
-  //       currency: this.props.currency
-  //     }
-  //   });
-  // }
-  // The form/verification was shared with other providers and now it is edited.
-  // Offer to share the form with the same providers it was originally share
   shareWith(newResource, list) {
     if (list.length)
       Actions.share(newResource, list)
@@ -494,7 +456,16 @@ class NewResource extends Component {
     let requestedProperties = this.state.requestedProperties || this.props.requestedProperties
     if (requestedProperties) {
       for (let p in requestedProperties) {
-        if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1)
+        if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1) {
+          if (!requestedProperties[p].hasOwnProperty('required')  ||  requestedProperties[p].required)
+            required.push(p)
+        }
+      }
+    }
+    if (!required.length) {
+      const props = model.properties
+      for (let p in props) {
+        if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
           required.push(p)
       }
     }
@@ -508,9 +479,6 @@ class NewResource extends Component {
     let missedRequiredOrErrorValue = {}
     let noRequiredValidation = containerResource && prop  && prop.partial
     if (noRequiredValidation) {
-      // let err = this.validateProperties(json)
-      // for (let p in err)
-      //   missedRequiredOrErrorValue[p] = err[p]
       containerResource[prop.name] = json
       if (!json[TYPE])
         json[TYPE] = resource[TYPE]
@@ -655,8 +623,6 @@ class NewResource extends Component {
         return
       if (resource[p].currency)
         v.currency = resource[p].currency
-      // else if (currency)
-      //   v.currency = currency
       else
         missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       return
@@ -719,18 +685,13 @@ class NewResource extends Component {
   onNewPressed(bl) {
     let resource = this.addFormValues();
     this.setState({resource: resource, err: '', inFocus: bl.name});
-    // if (bl.name === 'photos') {
-    //   this.showChoice(bl);
-    //   return;
-    // }
     let { bankStyle, currency, model, navigator } = this.props
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
     if (bl.items.ref  &&  bl.allowToAdd) {
       navigator.push({
-        id: 30,
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: 'Back',
-        component: GridList,
+        componentName: 'GridList',
         passProps: {
           modelName: bl.items.ref,
           to: this.state.resource.to,
@@ -745,10 +706,9 @@ class NewResource extends Component {
       return
     }
     navigator.push({
-      id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
       backButtonTitle: 'Back',
-      component: NewItem,
+      componentName: 'NewItem',
       rightButtonTitle: 'Done',
       passProps: {
         metadata: bl,
@@ -820,7 +780,7 @@ class NewResource extends Component {
         model: model,
         items: arrays,
         onEndEditing: this.onEndEditing,
-        component: NewResource,
+        componentName: 'NewResource',
         editable: this.state.disableEditing ? !this.state.disableEditing : true
       };
     if (editCols)
@@ -1134,9 +1094,8 @@ class NewResource extends Component {
   showResource(r) {
     this.props.navigator.push({
       title: r.title,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       passProps: {
         bankStyle: this.props.bankStyle,
         resource: r,
@@ -1148,8 +1107,7 @@ class NewResource extends Component {
   }
   showTermsAndConditions() {
     this.props.navigator.push({
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       title: translate('termsAndConditions'),
       backButtonTitle: 'Back',
       rightButtonTitle: 'Accept',
@@ -1206,8 +1164,7 @@ class NewResource extends Component {
     this.props.navigator.push({
       title: translate('tapToRemovePhotos'), //Tap to remove photos',
       titleTintColor: 'red',
-      id: 19,
-      component: GridItemsList,
+      componentName: 'GridItemsList',
       noLeftButton: true,
       rightButtonTitle: 'Done',
       passProps: {
@@ -1350,6 +1307,7 @@ class NewResource extends Component {
                 prop={bl}
                 underlayColor='transparent'
                 style={styles.actionIcon}
+                allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
             </ImageInput>
@@ -1593,4 +1551,3 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
   })
 })
 module.exports = NewResource;
-

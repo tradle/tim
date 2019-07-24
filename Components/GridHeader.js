@@ -40,6 +40,7 @@ class GridHeader extends Component {
     let { modelName, isSmallScreen, multiChooser, gridCols, notSortable } = this.props
     if (!gridCols)
       return <View />
+
     let model = utils.getModel(modelName)
     let props = model.properties
 
@@ -57,8 +58,7 @@ class GridHeader extends Component {
     let smCol = isSmallScreen ? size/2 : 1
     if (multiChooser)
       size++
-    let {sortProperty, order} = this.props
-
+    let { sortProperty, order } = this.props
     let cols = gridCols.map((p) => {
       let colStyle
       if (sortProperty  &&  sortProperty === p) {

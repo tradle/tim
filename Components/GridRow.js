@@ -10,16 +10,12 @@ import PropTypes from 'prop-types'
 
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
-// import extend from 'extend'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
-// import ResourceView from './ResourceView'
-// import MessageView from './MessageView'
 import RowMixin from './RowMixin'
-import ArticleView from './ArticleView'
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
 import Store from '../Store/Store'
@@ -56,7 +52,7 @@ class GridRow extends Component {
     const { resource, navigator, chosen, multiChooser } = props
     this.state = {
       isConnected: navigator.isConnected,
-      resource: resource,
+      resource,
     }
     if (multiChooser) {
       // multivalue ENUM property
@@ -92,7 +88,7 @@ class GridRow extends Component {
       break
     case 'assignRM_Confirmed':
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH])
-        this.setState({application: application, resource: application})
+        this.setState({application, resource: application})
       break
     case 'updateRow':
       let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
@@ -215,7 +211,7 @@ class GridRow extends Component {
     //   return row
   }
   formatCol(pName) {
-    let resource = this.props.resource
+    let { resource, isModel, search } = this.props.resource
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype || resource.id);
     let properties = model.properties;
@@ -249,7 +245,7 @@ class GridRow extends Component {
     let row
     let cellStyle = {paddingVertical: 5, paddingLeft: 7}
 
-    let criteria = this.props.search  &&  this.state.resource  &&  this.state.resource[pName]
+    let criteria = search  &&  this.state.resource  &&  this.state.resource[pName]
 
     if (ref) {
       if (!resource[pName])
@@ -273,7 +269,7 @@ class GridRow extends Component {
           if (eVal) {
             let { icon, color } = eVal
             if (icon) {
-              row = <View key={this.getNextKey(this.props.resource)} style={styles.row}>
+              row = <View key={this.getNextKey(resource)} style={styles.row}>
                       {this.paintIcon(model, eVal)}
                       <View style={{paddingLeft: 5, justifyContent: 'center'}}>
                         {row}
@@ -329,7 +325,7 @@ class GridRow extends Component {
       }
     }
     else {
-      if (this.props.isModel  &&  (pName === 'form'  ||  pName === 'product')) {
+      if (isModel  &&  (pName === 'form'  ||  pName === 'product')) {
         let m = utils.getModel(pName)
         if (m)
           val = translate(m)
@@ -339,7 +335,6 @@ class GridRow extends Component {
         if (m)
           val = translate(m)
       }
-
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }
   }
@@ -391,9 +386,8 @@ class GridRow extends Component {
   onPress(resource) {
     let title = utils.makeTitle(utils.getDisplayName(resource));
     this.props.navigator.push({
-      id: 7,
       title: title,
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: resource.url}
     });
   }

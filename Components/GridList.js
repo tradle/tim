@@ -23,12 +23,7 @@ import { Text } from './Text'
 import NoResources from './NoResources'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
-import ResourceView from './ResourceView'
-import ApplicationView from './ApplicationView'
 import VerificationRow from './VerificationRow'
-import NewResource from './NewResource'
-import MessageList from './MessageList'
-import MessageView from './MessageView'
 import PageView from './PageView'
 import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
 import ActionSheet from './ActionSheet'
@@ -157,9 +152,6 @@ class GridList extends Component {
       resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
     };
-    // if (props.isBacklink  &&  props.backlinkList) {
-    //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
-    // }
     if (props.multiChooser) {
       this.state.chosen = {}
       if (prop  &&  resource[prop.name])
@@ -192,18 +184,16 @@ class GridList extends Component {
     this.props.callback(orgs)
   }
   componentWillReceiveProps(props) {
-    let { resource, isBacklink, search, forwardlink } = props
-    if (isBacklink) {
+    let { resource, isBacklink, search, forwardlink, provider } = props
+    if (isBacklink)
       this._handleBacklink(props)
-    }
     else if (forwardlink) {
       this.state.dataSource = this.state.dataSource.cloneWithRows([])
       this.state.isLoading = true;
       Actions.getItem({resource, search, action: 'list', forwardlink})
     }
-    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
+    if (provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(provider))))
       Actions.list({modelName: ORGANIZATION})
-    }
   }
   _handleBacklink(props) {
     let { resource, prop, application } = props
@@ -330,7 +320,7 @@ class GridList extends Component {
       else if (!isForwardlink) {
 console.log('GridList.componentWillMount: filterResource', resource)
         Actions.list({
-          modelName: modelName,
+          modelName,
           filterResource: resource,
           bookmark,
           search: true,
@@ -413,7 +403,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this._talkToEmployee(params)
       return
     }
-    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
+    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
@@ -554,8 +544,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let style = this.mergeStyle(params.to.style)
     let route = {
       title: params.to.name,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: params.to,
@@ -711,8 +700,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (isApplication) {
       let route = {
         title: title,
-        id: 34,
-        component: ApplicationView,
+        componentName: 'ApplicationView',
         // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
@@ -726,8 +714,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return
     }
     let route = {
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       title: title,
       passProps: {
@@ -748,8 +735,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
           title: title,
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -816,8 +802,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
     let route = {
       title: title,
-      id: 5,
-      component: MessageView,
+      componentName: 'MessageView',
       backButtonTitle: 'Back',
       passProps: {
         resource,
@@ -863,8 +848,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -907,8 +891,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
     let route = {
       title: utils.makeTitle(newTitle),
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {
@@ -952,8 +935,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
         backButtonTitle: 'Back',
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps
@@ -965,10 +947,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
   selectModel(model) {
     let { navigator, bankStyle, currency, exploreData } = this.props
     navigator.push({
-      id: 30,
       title: translate('searchSomething', translate(model)),
       backButtonTitle: 'Back',
-      component: GridList,
+      componentName: 'GridList',
       passProps: {
         modelName: model.id,
         resource: {},
@@ -981,8 +962,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       rightButtonTitle: 'Search',
       onRightButtonPress: {
         title: translate('searchSomething', translate(model)),
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
@@ -1072,7 +1052,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
       model = utils.getModel(utils.getType(resource))
     let isContext = utils.isContext(model)
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
-
 
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
@@ -1204,8 +1183,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let route = {
       // title: translate(utils.getModel(resource.product)) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
@@ -1239,10 +1217,11 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       noMenuButton = (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
     }
     let employee
-    if (me.isEmployee)
+    if (me.isEmployee) {
       employee = <View style={styles.center}>
                    <Text numberOfLines={1} style={[styles.employee, {color: bankStyle.linkColor}]}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    }
     else
       employee = <View/>
     let isAdd = this.state.allowToAdd  &&  !search
@@ -1277,11 +1256,10 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let model = utils.getModel(SETTINGS)
     this.setState({hideMode: false})
     let route = {
-      component: NewResource,
+      componentName: 'NewResource',
       title: 'Settings',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
-      id: 4,
       titleTextColor: '#7AAAC3',
       passProps: {
         model: model,
@@ -1343,8 +1321,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let self = this
     navigator.push({
       title: model.title,
-      id: 4,
-      component: NewResource,
+      componentName: 'NewResource',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
@@ -1580,15 +1557,10 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let { search, modelName, isChooser, isModel } = this.props
     if (!search || isModel)
       return
-    // if (!search)
-    //   return
     if (!isModel  &&  !isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (viewCols)
-      // if (modelName !== PROFILE) {
-        // if (this.state.isGrid  &&  !utils.isContext(modelName))
-          return this.renderGridHeader()
-      // }
+        return this.renderGridHeader()
     }
   }
 }

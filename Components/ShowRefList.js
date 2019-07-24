@@ -10,12 +10,13 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+import Icon from 'react-native-vector-icons/Ionicons'
+
 import GridList from './GridList'
 import utils, {
   translate
 } from '../utils/utils'
 
-import Icon from 'react-native-vector-icons/Ionicons'
 import buttonStyles from '../styles/buttonStyles'
 import appStyle from '../styles/appStyle.json'
 import reactMixin from 'react-mixin'
@@ -197,7 +198,7 @@ class ShowRefList extends Component {
     const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
     if (showQR) {
       refList.push(
-        <View style={buttonStyles.container} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
              <View style={styles.item}>
                <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#757575' />
@@ -346,14 +347,14 @@ function hasPropertiesToShow(resource) {
   })
 
   for (let p in resource) {
-    if (!props[p]  ||  p.charAt(0) === '_')//  ||  props[p].type === 'array')
-      continue
+    if (!props[p]  ||   p.charAt(0) === '_')//  ||  props[p].type === 'array')
+       continue
     if (props[p].type === 'array') {
       const pref = props[p].items.ref
       if (!pref  ||  utils.getModel(pref).subClassOf !== ENUM)
         continue
     }
-    if (vCols  &&  vCols.indexOf(p) !== -1)
+    if (vCols  &&  vCols.includes(p))
       return true
   }
 }

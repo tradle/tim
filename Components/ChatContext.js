@@ -10,7 +10,6 @@ import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
 const { PROFILE } = constants.TYPES
-const { TYPE } = constants
 
 import utils, {
   translate

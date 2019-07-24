@@ -12,7 +12,7 @@ import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
-// import dateformat from 'dateformat'
+import dateformat from 'dateformat'
 import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
@@ -23,10 +23,8 @@ import constants from '@tradle/constants'
 import { Text, getFontMapping } from './Text'
 import utils, { translate } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
-import EnumList from './EnumList'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
-import MarkdownPropertyEdit from './MarkdownPropertyEdit'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
@@ -90,7 +88,6 @@ var NewResourceMixin = {
     let m = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
     if (m.abstract)
       m = meta
-
     let props, bl;
     if (!meta.items)
       props = meta.properties;
@@ -170,19 +167,31 @@ var NewResourceMixin = {
       }
       for (let p in requestedProperties) {
         // if (eCols.some((prop) => prop.name === p) {
-        if (eCols.indexOf(p) !== -1)
+        if (eCols.indexOf(p) !== -1) {
+          if (props[p].readOnly)
+            showReadOnly = true
           // this.addError(p, params)
           continue
-
+        }
         let idx = p.indexOf('_group')
         eCols.push(p)
-        if (idx !== -1  &&  props[p].list) {
+        if (idx === -1  &&  props[p].readOnly)
+          showReadOnly = true
+        else if (props[p].list) {
+          let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
           props[p].list.forEach((pp) => {
             let idx = eCols.indexOf(pp)
             if (idx !== -1)
               eCols.splice(idx, 1)
             eCols.push(pp)
-            requestedProperties[pp] = ''
+            if (!requestedProperties[pp]) {
+              if (isRequired  &&  props[pp].readOnly)
+                showReadOnly = true
+              requestedProperties[pp] = {
+                message: '',
+                required: true
+              }
+            }
             // this.addError(p, params)
           })
         }
@@ -217,16 +226,23 @@ var NewResourceMixin = {
     let resource = this.state.resource
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
-      if (!isMessage  &&  (p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
+      if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
         continue;
 
       if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
       let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe  &&  requestedProperties && p.indexOf('_group') === -1 &&  requestedProperties[p] != null)
+      if (maybe                       &&
+          requestedProperties         &&
+          p.indexOf('_group') === -1  &&
+          requestedProperties[p])
         maybe = false
 
+      if (!maybe  &&  requestedProperties  &&  requestedProperties[p]) {
+        if (requestedProperties[p].hasOwnProperty('required') && !requestedProperties[p].required)
+          maybe = true
+      }
       let type = props[p].type;
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
@@ -287,7 +303,8 @@ var NewResourceMixin = {
                     required: !maybe,
                     model: meta,
                     errors: formErrors,
-                    component: component,
+                    component,
+                    editable: !props[p].readOnly,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
 
@@ -312,7 +329,7 @@ var NewResourceMixin = {
                     model: meta,
                     value: v,
                     required: !maybe,
-                    component: component,
+                    component,
                     errors: formErrors,
                   })
 
@@ -366,7 +383,7 @@ var NewResourceMixin = {
                     value: data  &&  data[p] || null,
                     required: !maybe,
                     errors: formErrors,
-                    component: component,
+                    component,
                     editable: params.editable,
                   })
         }
@@ -379,8 +396,8 @@ var NewResourceMixin = {
                     required: !maybe,
                     onSubmitEditing: onSubmitEditing.bind(this),
                     errors: formErrors,
-                    component: component,
-                    editable: params.editable,
+                    component,
+                    editable: params.editable && !props[p].readOnly,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -426,7 +443,7 @@ var NewResourceMixin = {
                     value: value,
                     model: meta,
                     keyboard: 'numeric',
-                    component: component,
+                    component,
                     required: !maybe,
                     errors: formErrors,
                   })
@@ -471,7 +488,7 @@ var NewResourceMixin = {
             prop:  p,
             required: !maybe,
             errors: formErrors,
-            component: component,
+            component,
             chooser: options.fields[p].onFocus,
           })
 
@@ -489,7 +506,7 @@ var NewResourceMixin = {
           label: translate(props.video, meta),
           prop:  'video',
           errors: formErrors,
-          component: component,
+          component,
           required: !maybe
         })
     }
@@ -627,8 +644,7 @@ var NewResourceMixin = {
     this.props.navigator.push({
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
-      id: 31,
-      component: MarkdownPropertyEdit,
+      componentName: 'MarkdownPropertyEdit',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
@@ -647,11 +663,6 @@ var NewResourceMixin = {
       label += ' *'
 
     let { bankStyle } = this.props
-    // let hasValue = value  &&  value.length
-    // if (hasValue) {
-    //   value = format(value, this.state.resource).trim()
-    //   hasValue = value  &&  value.length
-    // }
     let lcolor = value ? '#555555' : this.getLabelAndBorderColor(prop.name)
 
     let help = this.paintHelp(prop)
@@ -676,7 +687,7 @@ var NewResourceMixin = {
             </View>
     }
     else {
-      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
+      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 15, borderBottomColor: '#cccccc', borderBottomWidth: 1}
       let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
       title = utils.translate('Please click here to sign')
       sig = <View style={vStyle}>
@@ -684,7 +695,6 @@ var NewResourceMixin = {
               <Icon name='md-create' size={25}  color={bankStyle.linkColor} />
             </View>
     }
-
     if (prop.immutable  &&  value) {
       return <View style={st}>{sig}</View>
     }
@@ -730,7 +740,7 @@ var NewResourceMixin = {
       st.flex = 5
     let { bankStyle } = this.props
     let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
-    let autoCapitalize = this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
+    let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
         <FloatLabel
@@ -739,7 +749,7 @@ var NewResourceMixin = {
           multiline={multiline}
           editable={editable}
           autoCapitalize={autoCapitalize}
-          onFocus={this.inputFocused.bind(this, prop.name)}
+          onFocus={this.inputFocused.bind(this, prop)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={value}
@@ -952,8 +962,8 @@ var NewResourceMixin = {
         {help}
         </View>
         {this.paintError(params)}
-       </View>
-      )
+      </View>
+     )
   },
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle
@@ -1035,17 +1045,19 @@ var NewResourceMixin = {
       delete this.state.missedRequiredOrErrorValue[prop.name]
    },
 
-  inputFocused(refName) {
+  inputFocused(prop) {
+    if (prop.readOnly)
+      return
     if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
          this.refs.scrollView        &&
          this.props.model            &&
          Object.keys(this.props.model.properties).length > 5) {
-      utils.scrollComponentIntoView(this, this.refs.form.getComponent(refName))
-      this.setState({inFocus: refName})
+      utils.scrollComponentIntoView(this, this.refs.form.getComponent(prop.name))
+      this.setState({inFocus: prop.name})
     }
-    else if (this.state.inFocus !== refName)
-      this.setState({inFocus: refName})
+    else if (this.state.inFocus !== prop.name)
+      this.setState({inFocus: prop.name})
   },
 
   myCustomTemplate(params) {
@@ -1284,7 +1296,7 @@ var NewResourceMixin = {
                     noError: true,
                     // errors: errors,
                     editable: editable,
-                    component: component,
+                    component,
                     keyboard: search ? null : 'numeric',
                   })
           }
@@ -1295,7 +1307,7 @@ var NewResourceMixin = {
                     required: required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
                     // errors:   errors,
-                    component: component,
+                    component,
                     // noError:  errors && errors[prop],
                     noError: true
                   })
@@ -1352,8 +1364,7 @@ var NewResourceMixin = {
     this.props.navigator.push({
       title: enumProp.title,
       // titleTextColor: '#7AAAC3',
-      id: 22,
-      component: EnumList,
+      componentName: 'EnumList',
       backButtonTitle: 'Back',
       passProps: {
         prop:        prop,
@@ -1589,6 +1600,7 @@ var styles= StyleSheet.create({
     height: 40,
     marginRight: 2,
     marginTop: 7,
+    // marginTop: utils.isIOS() && 0 || 7,
     borderRadius: 5
   },
   err: {
@@ -1631,6 +1643,13 @@ var styles= StyleSheet.create({
     backgroundColor: 'transparent',
     color: '#aaaaaa',
     fontSize: 20,
+  },
+  textAfterImage: {
+    backgroundColor: 'transparent',
+    color: '#aaaaaa',
+    fontSize: 20,
+    marginTop: 17,
+    marginLeft: 7
   },
   customIcon: {
     position: 'absolute',

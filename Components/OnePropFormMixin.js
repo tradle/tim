@@ -12,9 +12,6 @@ var {
 import utils, { translate, isWeb } from '../utils/utils'
 import { importFromImageStore } from '../utils/image-utils'
 import Actions from '../Actions/Actions'
-// import CameraView from './CameraView'
-// import VideoCamera from './VideoCamera'
-import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 import { capture } from '../utils/camera'
 import ENV from '../utils/env'
@@ -57,9 +54,7 @@ var OnePropFormMixin = {
     let sigView
     navigator.push({
       title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 32,
-      component: SignatureView,
+      componentName: 'SignatureView',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       onRightButtonPress: () => {
@@ -148,6 +143,8 @@ var OnePropFormMixin = {
           // optional customization options
           // see defaults.js for the full list
           // showZoomIntro: false,
+          topMargin: 1,
+          sizeRatio: 1,
           showPreEnrollmentScreen: false,
           showUserLockedScreen: false,
           showRetryScreen: false,
@@ -208,7 +205,7 @@ var OnePropFormMixin = {
     if (facemap) {
       selfie.facemap = {url: await importFromImageStore(facemap)}
     }
-    debugger
+    // debugger
     selfie.selfieJson = result
 
     Actions.addChatItem({
@@ -264,7 +261,7 @@ var OnePropFormMixin = {
 
     // this.props.navigator.pop();
   },
-  async scanPaymentCard(prop) {
+  async scanPaymentCard({prop, dontCreate}) {
     let cardJson
     try {
       const card = await CardIOModule.scanCard({
@@ -287,9 +284,10 @@ var OnePropFormMixin = {
       return
     }
 
-    let { resource, isRefresh } = this.props
+    const { resource, isRefresh, currency, country, bankStyle, defaultPropertyValues } = this.props
     let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
-    let props = utils.getModel(r[TYPE]).properties
+    const model = utils.getModel(r[TYPE])
+    let props = model.properties
     for (let p in cardJson) {
       if (cardJson[p]  &&  props[p])
         r[p] = cardJson[p]
@@ -299,8 +297,27 @@ var OnePropFormMixin = {
         delete cardJson[p]
     r[prop.name + 'Json'] = cardJson
     this.setState({ r })
-
-    Actions.addChatItem({resource: r, disableFormRequest: resource, isRefresh})
+    if (!dontCreate) {
+      Actions.addChatItem({resource: r, disableFormRequest: resource, isRefresh})
+      return
+    }
+    this.props.navigator.push({
+      title: translate(model),
+      rightButtonTitle: 'Done',
+      backButtonTitle: 'Back',
+      componentName: 'NewResource',
+      // titleTextColor: '#7AAAC3',
+      passProps:  {
+        model,
+        resource: r,
+        isPrefilled: true,
+        currency,
+        country,
+        bankStyle,
+        originatingMessage: resource,
+        defaultPropertyValues,
+      }
+    })
   },
 }
 module.exports = OnePropFormMixin;

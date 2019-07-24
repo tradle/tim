@@ -2,21 +2,11 @@ import utils from '../utils/utils'
 var translate = utils.translate
 import PageView from './PageView'
 import Icon from 'react-native-vector-icons/Ionicons';
-// import ResourceMixin from './ResourceMixin'
-// import MessageList from './MessageList'
-// import ResourceView from './ResourceView'
 import StyleSheet from '../StyleSheet'
-import ArticleView from './ArticleView'
 // import termsAndConditions from '../termsAndConditions.json'
 import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
-// import { makeResponsive } from 'react-native-orient'
-// const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
-// const MESSAGE = 'tradle.Message'
 const LEARN_MORE_URL = 'https://www.fca.org.uk/news/press-releases/financial-conduct-authority-unveils-successful-sandbox-firms-second-anniversary'// 'https://www.aviva.com/tradle/learnmore'
-
-// const LEARN_MORE_URL = 'https://www.aviva.com/tradle/learnmore'
-// const CONTACT_US_ADDRESS = 'tradlesupport@aviva.com'
 
 import {
   // StyleSheet,
@@ -152,7 +142,6 @@ class AvivaIntroView extends Component {
     // this.props.navigator.push({
     //   title: provider.name,
     //   component: MessageList,
-    //   id: 11,
     //   backButtonTitle: 'Back',
     //   passProps: {
     //     resource: provider,
@@ -164,8 +153,7 @@ class AvivaIntroView extends Component {
   }
   showTerms() {
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       backButtonTitle: 'Back',
       title: translate('termsAndConditions'),
       passProps: {
@@ -179,8 +167,7 @@ class AvivaIntroView extends Component {
   showHtml(url, title) {
     // this.goto('../html/Aviva_TC.html')
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       backButtonTitle: 'Back',
       title: translate(title),
       passProps: {
@@ -188,21 +175,12 @@ class AvivaIntroView extends Component {
         bankStyle: this.props.bankStyle
       }
     })
-    // this.props.navigator.push({
-    //   title: translate('Terms of use'),
-    //   id: 3,
-    //   component: ResourceView,
-    //   // titleTextColor: '#7AAAC3',
-    //   backButtonTitle: 'Back',
-    //   passProps: {resource: termsAndConditions}
-    // });
   }
   goto(url) {
     if (Linking) return Linking.openURL(url)
 
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: { url }
     })
   }

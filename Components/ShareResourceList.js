@@ -18,8 +18,6 @@ import { getContentSeparator } from '../utils/uiUtils'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
 import CustomIcon from '../styles/customicons'
 import StyleSheet from '../StyleSheet'
 import Actions from '../Actions/Actions'
@@ -84,8 +82,7 @@ class ShareResourceList extends Component {
     if (utils.isMessage(resource)) {
       let route = {
         title: title,
-        id: 5,
-        component: MessageView,
+        componentName: 'MessageView',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource,
@@ -104,8 +101,7 @@ class ShareResourceList extends Component {
     else {
       navigator.push({
         title: title,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource
@@ -177,7 +173,7 @@ class ShareResourceList extends Component {
     let bgStyle =  {backgroundColor: bankStyle  &&  bankStyle.backgroundColor || '#ffffff'}
     let submit
     if (multiChooser) {
-      submit = <TouchableOpacity onPress={this.shareChosen}>
+      submit = <TouchableOpacity onPress={this.shareChosen.bind(this)}>
                  <View style={styles.shareButton}>
                    <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
                    <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
@@ -199,7 +195,6 @@ class ShareResourceList extends Component {
     //                 bankStyle={this.props.bankStyle}
     //                 />
     let searchBar
-
     let separator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
@@ -224,13 +219,13 @@ class ShareResourceList extends Component {
     // let list = []
     // for (let r in chosen)
     //   list.push(utils.getDisplayName(chosen[r]))
-    // let listStr = list.join('\n ')
+    // let listStr = list.join(', ')
 
     Alert.alert(
       // translate('youAreAboutToShare', translate(utils.getModel(modelName))),
+      // listStr,
       translate('youAreAboutToShare', Object.keys(chosen).length),
       null,
-      // listStr,
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
         {text: translate('Ok'), onPress: () => this.share(chosen)},
@@ -317,5 +312,4 @@ var createStyles = utils.styleFactory(ShareResourceList, function ({ dimensions,
     },
   })
 })
-
 module.exports = ShareResourceList;

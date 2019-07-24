@@ -13,7 +13,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 
 import utils, { translate } from '../utils/utils'
-import ArticleView from './ArticleView'
 import RowMixin from './RowMixin'
 import chatStyles from '../styles/chatStyles'
 
@@ -90,7 +89,6 @@ class MyProductMessageRow extends Component {
       mparts[mparts.length - 1] = mparts[mparts.length - 1].substring(2)
       model = utils.getModel(mparts.join('.'))
     }
-
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
@@ -133,8 +131,7 @@ class MyProductMessageRow extends Component {
 
   onPress(event) {
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: this.props.resource.message}
     });
   }

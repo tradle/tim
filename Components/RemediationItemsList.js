@@ -20,8 +20,6 @@ import ENV from '../utils/env'
 import { TYPE, ROOT_HASH } from '@tradle/constants'
 
 import { circled } from '../styles/utils'
-import MessageView from './MessageView'
-import NewResource from './NewResource'
 import platformStyles from '../styles/platform'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
@@ -211,9 +209,8 @@ class RemediationItemsList extends Component {
     if (model.notEditable  &&  resource[ROOT_HASH]) {
       navigator.push({
         title: title,
-        id: 5,
         backButtonTitle: 'Back',
-        component: MessageView,
+        componentName: 'MessageView',
         rightButtonTitle: 'Confirm',
         // parentMeta: model,
         passProps: {
@@ -237,8 +234,7 @@ class RemediationItemsList extends Component {
     else {
       navigator.push({
         title: title,
-        id: 4,
-        component: NewResource,
+        componentName: 'NewResource',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Confirm',
         passProps: {
@@ -270,7 +266,7 @@ class RemediationItemsList extends Component {
     let prop = props[0]
     if (prop.scanner === 'payment-card') {
       if (!utils.isWeb())
-        return this.scanPaymentCard.bind(this, prop)
+        return this.scanPaymentCard.bind(this, {prop})
       return
     }
     // if (prop.signature)

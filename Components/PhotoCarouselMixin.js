@@ -1,33 +1,46 @@
 import { TYPE } from '@tradle/constants'
-import PhotoCarousel from './PhotoCarousel'
 import Navigator from './Navigator'
 import utils from '../utils/utils'
 
 var PhotoCarouselMixin = {
-  showCarousel(currentPhoto, isView) {
-    // let backButtonTitle = isView
-    //                     ? utils.translate('backTo', utils.getDisplayName(this.props.resource))
-    //                     : this.props.chat
-    //                        ? utils.translate('backTo', utils.getDisplayName(this.props.chat)) : utils.translate('backToResults')
-    this.props.navigator.push({
-      id: 14,
-      // title: utils.translate(utils.getModel(this.props.resource[TYPE])),
-      // noLeftButton: true,
+  showCarousel({photo, isView, done, title}) {
+    let { resource, mainPhoto } = this.props
+    let photos
+    // done - means there is something to be set
+    if (!done) {
+      if (mainPhoto)
+        photos = [mainPhoto]
+      else {
+        let rtype = utils.getType(resource)
+        let model = utils.getModel(rtype)
+        photos = utils.getResourcePhotos(model, resource)
+      }
+    }
+    let route = {
       backButtonTitle: 'Back',
-      component: PhotoCarousel,
+      componentName: 'PhotoCarousel',
       passProps: {
-        currentPhoto: currentPhoto,
-        photos: this.props.mainPhoto ? [this.props.mainPhoto] : (this.props.resource.photos ? this.props.resource.photos : this.props.photos),
-        resource: this.props.resource
+        photo,
+        photos: photos || [photo], //this.props.resource.photos,
+        resource
       },
-      // rightButtonTitle: 'Done',
       titleTextColor: '#f7f7f7',
       sceneConfig: Navigator.SceneConfigs.FadeAndroid,
       tintColor: '#dddddd',
-      onRightButtonPress: {
-        stateChange: this.closeCarousel.bind(this)
+      // onRightButtonPress: {
+      //   stateChange: this.closeCarousel.bind(this)
+      // }
+    }
+    if (done) {
+      if (title)
+        route.title = title
+      route.rightButtonTitle = 'Done'
+      route.onRightButtonPress = () => {
+        this.closeCarousel()
+        done()
       }
-    })
+    }
+    this.props.navigator.push(route)
   },
   closeCarousel() {
     this.props.navigator.pop();

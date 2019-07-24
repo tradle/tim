@@ -69,8 +69,7 @@ class IdentitiesList extends Component {
     var meName = utils.getDisplayName(me);
     var route = {
       title: model.title,
-      component: ResourceList,
-      id: 10,
+      componentName: 'ResourceList',
       passProps: {
         filter: '',
         modelName: modelName,
@@ -78,15 +77,13 @@ class IdentitiesList extends Component {
       rightButtonTitle: 'Profile', //'fontawesome|user',
       onRightButtonPress: {
         title: meName,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: meName,
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',

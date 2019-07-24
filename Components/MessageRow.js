@@ -10,7 +10,6 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 import { WebView } from 'react-native-webview'
-
 import React, { Component } from 'react'
 
 import utils, {
@@ -19,9 +18,6 @@ import utils, {
 
 import { circled } from '../styles/utils'
 
-import ArticleView from './ArticleView'
-import ResourceView from './ResourceView'
-import NewResource from './NewResource'
 import PhotoList from './PhotoList'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
@@ -327,8 +323,7 @@ class MessageRow extends Component {
     let title = utils.getDisplayName(resource);
     this.props.navigator.push({
       title: title,
-      id: 4,
-      component: NewResource,
+      componentName: 'NewResource',
       // titleTextColor: '#999999',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
@@ -342,10 +337,9 @@ class MessageRow extends Component {
   }
   onPress(link, text) {
     this.props.navigator.push({
-      id: 7,
       title: text || '',
       backButtonTitle: 'Back',
-      component: ArticleView,
+      componentName: 'ArticleView',
       passProps: {url: link}
     });
   }
@@ -365,11 +359,10 @@ class MessageRow extends Component {
     }
 
     this.props.navigator.push({
-      id: 4,
       title: translate(model),
       rightButtonTitle: isMyMessage ? null : 'Done',
       backButtonTitle: 'Back',
-      component: NewResource,
+      componentName: 'NewResource',
       // titleTextColor: '#7AAAC3',
       passProps:  {
         model: model,
@@ -803,8 +796,7 @@ class MessageRow extends Component {
     let title = translate('profile')
     this.props.navigator.push({
       title: title,
-      id: 3,
-      component: ResourceView,
+      componentName: 'ResourceView',
       backButtonTitle: 'Back',
       passProps: {
         resource: me,
@@ -812,37 +804,8 @@ class MessageRow extends Component {
         backlink: utils.getModel(me[TYPE]).properties.myForms,
       }
     })
-    // let n = this.props.navigator.getCurrentRoutes().length
-    // this.props.navigator.popN(n - 2)
-    // this.showResources(me, utils.getModel(me[TYPE]).properties.myForms)
   }
 
-  // onChooseProduct() {
-  //   if (this.props.isAggregation)
-  //     return
-  //   let modelName = MESSAGE
-  //   let model = utils.getModel(modelName);
-  //   let isInterface = model.isInterface;
-  //   if (!isInterface)
-  //     return;
-
-  //   let resource = this.props.to
-  //   let currentRoutes = this.props.navigator.getCurrentRoutes();
-  //   this.props.navigator.push({
-  //     title: translate('iNeed'), //I need...',
-  //     id: 15,
-  //     component: ProductChooser,
-  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       resource: resource,
-  //       returnRoute: currentRoutes[currentRoutes.length - 1],
-  //       products: this.props.resource.list,
-  //       callback: this.props.callback,
-  //       bankStyle: this.props.bankStyle
-  //     },
-  //   });
-  // }
   editForm(rUri, message) {
     let s = rUri.split('_')
     let resource = {
@@ -854,8 +817,7 @@ class MessageRow extends Component {
     let title = translate(rmodel);
     this.props.navigator.push({
       title: title,
-      id: 4,
-      component: NewResource,
+      componentName: 'NewResource',
       // titleTextColor: '#999999',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',

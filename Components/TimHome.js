@@ -4,41 +4,32 @@ import debounce from 'debounce'
 import React, { Component } from 'react'
 import {
   StyleSheet,
-  // Text,
   View,
   TouchableOpacity,
-  // NetInfo,
-  // Linking,
-  // StatusBar,
   Alert,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
+import extend from 'extend'
+import Reflux from 'reflux'
+import TimerMixin from 'react-timer-mixin'
+import { SyncStatus } from 'react-native-code-push'
+import { parse as parseURL } from 'url'
+
+const debug = require('debug')('tradle:app:Home')
 
 import { Text, setFontFamily } from './Text'
-import ResourceList from './ResourceList'
-// import VideoPlayer from './VideoPlayer'
-import NewResource from './NewResource'
-// import HomePage from './HomePage'
 import HomePageMixin from './HomePageMixin'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
-import MessageList from './MessageList'
-import extend from 'extend'
+import components from './components'
 import utils, { translate } from '../utils/utils'
-import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import reactMixin from 'react-mixin'
 import constants from '@tradle/constants'
 import PasswordCheck from './PasswordCheck'
-import ArticleView from './ArticleView'
 import FadeInView from './FadeInView'
-import TouchIDOptIn from './TouchIDOptIn'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import QRCodeScanner from './QRCodeScanner'
-import TimerMixin from 'react-timer-mixin'
 import {
   // authenticateUser,
   hasTouchID,
@@ -46,16 +37,12 @@ import {
   setPassword
 } from '../utils/localAuth'
 
-import { SyncStatus } from 'react-native-code-push'
 import Linking from '../utils/linking'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
 import ActivityIndicator from './ActivityIndicator'
-import { parse as parseURL } from 'url'
-
-const debug = require('debug')('tradle:app:Home')
 
 try {
   var commitHash = require('../version.json').commit.slice(0, 7)
@@ -239,7 +226,7 @@ class TimHome extends Component {
     const { navigator } = this.props
     while (true) {
       let currentRoute = Navs.getCurrentRoute(navigator)
-      let { displayName } = currentRoute.component
+      let { displayName } = components[currentRoute.componentName]
       if (displayName === TimHome.displayName || displayName === PasswordCheck.displayName) {
         debug('waiting to throw up deep linked alert until we are past the home screens')
         await Q.ninvoke(utils, 'onNextTransitionEnd', navigator)
@@ -334,25 +321,24 @@ class TimHome extends Component {
   async signInAndContinue() {
     const routes = this.props.navigator.getCurrentRoutes()
     // get the top TimHome in the stack
-    const homeRoute = routes.filter(r => r.component.displayName === TimHome.displayName).pop()
+    const homeRoute = routes.filter(r => components[r.componentName].displayName === TimHome.displayName).pop()
     const afterAuthRoute = utils.getTopNonAuthRoute(this.props.navigator)
     try {
       await signIn(this.props.navigator)
     } catch (err) {
-      if (afterAuthRoute.component.displayName === TimHome.displayName) return
+      if (components[afterAuthRoute.componentName].displayName === TimHome.displayName) return
 
       if (homeRoute) {
         return this.props.navigator.popToRoute(homeRoute)
       }
 
       return this.props.navigator.resetTo({
-        id: 1,
-        component: TimHome,
+        componentName: 'TimHome',
         passProps: {}
       })
     }
 
-    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
+    if (components[afterAuthRoute.componentName].displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
     return this.showFirstPage()
@@ -483,19 +469,15 @@ class TimHome extends Component {
       profileTitle = utils.getDisplayName(me)
     navigator[action]({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      id: 10,
       title: translate('officialAccounts'),
-      // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
-      component: ResourceList,
+      componentName: 'ResourceList',
       rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: () => navigator.push({
         title: profileTitle, //utils.getDisplayName(me) + (me.organization ? ' -- ' + me.organization.title : ''),
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         backButtonTitle: 'Back',
-        // titleTextColor: '#7AAAC3',
         passProps: {
           bankStyle,
           backlink: utils.getModel(me[TYPE]).properties.myForms,
@@ -504,9 +486,7 @@ class TimHome extends Component {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: me.firstName,
-          id: 4,
-          component: NewResource,
-          // titleTextColor: '#7AAAC3',
+          componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -600,8 +580,7 @@ class TimHome extends Component {
       : require('../html/ScanHelp.html')
 
     this.props.navigator[action]({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       backButtonTitle: 'Back',
       title: translate('importYourData'),
       passProps: {
@@ -633,7 +612,7 @@ class TimHome extends Component {
     // Check if the current page is the same we need
     let routes = navigator.getCurrentRoutes()
     let currentRoute = routes[routes.length - 1]
-    if (currentRoute.id === 11) {
+    if (currentRoute.componentName === 'MessageList') {
       if (utils.getId(currentRoute.passProps.resource) === utils.getId(resource))
         return
     }
@@ -648,14 +627,12 @@ class TimHome extends Component {
 
     let route = {
       title: resource.name,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: showProfile ? 'Profile' : 'Back',
       rightButtonTitle: 'View',
       onRightButtonPress: {
         title: resource.name,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
@@ -681,14 +658,12 @@ class TimHome extends Component {
       navigator.push(route)
   }
   showResource({resource, bankStyle}) {
-    let component, id
+    let componentName, id
     if (utils.isMessage(resource)) {
-      component = MessageView
-      id = 5
+      componentName = 'MessageView'
     }
     else {
-      component = ResourceView
-      id = 3
+      componentName = 'ResourceView'
     }
 
     let style = {}
@@ -698,8 +673,7 @@ class TimHome extends Component {
     let title = utils.getDisplayName(resource)
     let route = {
       title,
-      component,
-      id,
+      componentName,
       backButtonTitle: 'Back',
       passProps: {
         bankStyle: style,
@@ -718,8 +692,7 @@ class TimHome extends Component {
     let c = this.props.landingPageMapping[landingPage]
     this.props.navigator.push({
       title: provider  &&  provider.name || '',
-      component: c.component,
-      id: c.id,
+      componentName: c.component,
       // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
         bankStyle: style,
@@ -738,8 +711,7 @@ class TimHome extends Component {
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
@@ -751,14 +723,12 @@ class TimHome extends Component {
       rightButtonTitle: 'Profile',
       onRightButtonPress: {
         title: title,
-        id: 3,
-        component: ResourceView,
+        componentName: 'ResourceView',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -786,9 +756,8 @@ class TimHome extends Component {
 
     let model = utils.getModel(modelName);
     let route = {
-      component: NewResource,
+      componentName: 'NewResource',
       titleTextColor: '#BCD3E6',
-      id: 4,
       passProps: {
         model: model,
         bankStyle: defaultBankStyle,
@@ -829,8 +798,7 @@ class TimHome extends Component {
 
       return new Promise(resolve => {
         this.props.navigator.replace({
-          component: TouchIDOptIn,
-          id: 21,
+          componentName: 'TouchIDOptIn',
           rightButtonTitle: 'Skip',
           noLeftButton: true,
           passProps: {
@@ -854,9 +822,8 @@ class TimHome extends Component {
 
     let model = utils.getModel(modelName);
     let route = {
-      component: NewResource,
+      componentName: 'NewResource',
       titleTextColor: '#BCD3E6',
-      id: 4,
       passProps: {
         model: model,
         bankStyle: defaultBankStyle,
@@ -1121,8 +1088,7 @@ class TimHome extends Component {
   pairDevices() {
     this.props.navigator.push({
       title: translate('scanQRcode'),
-      id: 16,
-      component: QRCodeScanner,
+      componentName: 'QRCodeScanner',
       titleTintColor: '#eeeeee',
       backButtonTitle: 'Cancel',
       // rightButtonTitle: 'ion|ios-reverse-camera',
@@ -1281,64 +1247,3 @@ function getIconSize (dimensions) {
 }
 
 module.exports = TimHome;
-
-  // async onSettingsPressed() {
-  //   try {
-  //     await authenticateUser()
-  //   } catch (err) {
-  //     return
-  //   }
-
-  //   var model = utils.getModel(SETTINGS)
-  //   var route = {
-  //     component: NewResource,
-  //     title: translate('settings'),
-  //     backButtonTitle: translate('back'),
-  //     rightButtonTitle: translate('done'),
-  //     id: 4,
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       model: model,
-  //       isConnected: this.state.isConnected,
-  //       callback: this.props.navigator.pop,
-  //       bankStyle: defaultBankStyle
-
-  //       // callback: this.register.bind(this)
-  //     },
-  //   }
-
-  //   this.props.navigator.push(route)
-  // }
-//   showVideoTour(cb) {
-//     let onEnd = (err) => {
-//       if (err) debug('failed to load video', err)
-//       cb()
-//     }
-
-//     this.props.navigator.replace({
-//       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-//       id: 18,
-// //      title: 'Tradle',
-// //      titleTintColor: '#eeeeee',
-//       component: VideoPlayer,
-//       rightButtonTitle: __DEV__ ? 'Skip' : undefined,
-//       passProps: {
-//         uri: 'videotour',
-//         onEnd: onEnd,
-//         onError: onEnd,
-//         navigator: this.props.navigator
-//       },
-//       onRightButtonPress: onEnd
-//     })
-//   }
-  // async _checkConnectivity() {
-  //   try {
-  //     const isConnected = await NetInfo.isConnected.fetch()
-  //     const firstRoute = this.props.navigator.getCurrentRoutes()[0]
-  //     firstRoute.isConnected = isConnected
-  //   } catch (err) {
-  //     debug('failed to check connectivity', err)
-  //   }
-  // }
-
-

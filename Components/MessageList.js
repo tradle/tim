@@ -10,7 +10,6 @@ import {
   Alert,
 } from 'react-native'
 import PropTypes from 'prop-types'
-
 import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
@@ -26,7 +25,6 @@ import constants from '@tradle/constants'
 
 import { Text, setFontFamily } from './Text'
 import Navigator from './Navigator'
-import MessageView from './MessageView'
 import MessageRow from './MessageRow'
 import MyProductMessageRow from './MyProductMessageRow'
 import VerificationMessageRow from './VerificationMessageRow'
@@ -34,13 +32,10 @@ import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
 import FormErrorRow from './FormErrorRow'
 import TourRow from './TourRow'
-import NewResource from './NewResource'
+// import NewResource from './NewResource'
 // import ProductChooser from './ProductChooser'
-import StringChooser from './StringChooser'
-import VerifierChooser from './VerifierChooser'
-import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
-import ContextChooser from './ContextChooser'
+import NewResourceMixin from './NewResourceMixin'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
 import utils, { translate, isIphone10orMore, isAndroid, isWeb } from '../utils/utils'
 import Store from '../Store/Store'
@@ -86,12 +81,10 @@ class MessageList extends Component {
   constructor(props) {
     super(props);
     currentMessageTime = null;
-    let { resource, filter, application, navigator } = props
+    let { resource, filter, application, navigator, bankStyle } = props
     this.state = {
       isLoading: true,
-      // selectedAssets: {},
       isConnected: navigator.isConnected,
-      // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  resource  &&  utils.isEmployee(resource),
       filter: filter,
@@ -101,6 +94,7 @@ class MessageList extends Component {
       hasProducts: resource  &&  this.hasProducts(resource),
       allLoaded: false,
       step: -1,
+      bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: utils.getMe()._showStepIndicator
     }
     if (application  &&  utils.isRM(application)) {
@@ -226,7 +220,7 @@ class MessageList extends Component {
         this.setState({productToForms: productToForms})
       return
     }
-    let { application, modelName, bankStyle, navigator } = this.props
+    let { application, modelName, navigator } = this.props
     if (!modelName)
       modelName = MESSAGE
     if (action === 'productList') {
@@ -332,8 +326,8 @@ class MessageList extends Component {
     if (!list)
       return
 
-    if (bankStyle   &&  params.bankStyle)
-      _.extend(bankStyle, params.bankStyle)
+    if (this.state.bankStyle   &&  params.bankStyle)
+      _.extend(this.state.bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
     let state = {isLoading: false, isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
@@ -641,15 +635,17 @@ class MessageList extends Component {
     if (!model.notEditable) {
       isVerifier = application  ? utils.isRM(application) : !verification && utils.isVerifier(r)
     }
-    let { resource, bankStyle, currency } = this.props
+    let { resource, currency } = this.props
     let lensId = utils.getLensId(r, resource)
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
+
+    let bankStyle = this.state.bankStyle
+
     let route = {
       title: newTitle,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       parentMeta: model,
       passProps: {
         bankStyle,
@@ -708,8 +704,7 @@ class MessageList extends Component {
       if (!route.onRightButtonPress)
         route.onRightButtonPress = {
           title: newTitle, //utils.getDisplayName(resource),
-          id: 4,
-          component: NewResource,
+          componentName: 'NewResource',
           // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -739,7 +734,10 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, bankStyle, originatingMessage, currency, navigator } = this.props
+    let { application, isAggregation, originatingMessage, currency, navigator } = this.props
+
+    let bankStyle = this.state.bankStyle
+
     let model = utils.getModel(utils.getType(resource))
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
@@ -749,12 +747,12 @@ class MessageList extends Component {
       context = this.props.resource
     let props = {
       onSelect: this.selectResource,
-      resource: resource,
-      bankStyle: bankStyle,
-      context: context,
+      resource,
+      bankStyle,
+      context,
       application: this.state.application || application,
       to: isAggregation ? resource.to : this.props.resource,
-      navigator: navigator,
+      navigator,
       switchChat: isContext ? this.switchChat.bind(this, resource) : null
     }
     if (utils.isMyProduct(model))
@@ -911,7 +909,9 @@ class MessageList extends Component {
         underlineColorAndroid='transparent'
         textInputHeight={textInputHeight}
         menu={this.generateMenu}
+        navigator={navigator}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
+        keyboardType={'default'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         initialListSize={LIMIT}
         hideTextInput={hideTextInput}
@@ -949,7 +949,7 @@ class MessageList extends Component {
         {backgroundImage}
         {network}
         <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
-        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
+        <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
         {stepIndicator}
         <View style={ sepStyle } />
         {content}
@@ -963,6 +963,9 @@ class MessageList extends Component {
     return !!this.getActionSheetItems()
   }
   getStepIndicator(context) {
+    const { application } = this.props
+    if (application)
+    return
     if (!utils.getMe()._showStepIndicator ||  !context  ||  !context._formsTypes)
       return
 // const customStyles = {
@@ -988,8 +991,7 @@ class MessageList extends Component {
 //   labelSize: 13,
 //   currentStepLabelColor: '#fe7013'
 // }
-    const { bankStyle } = this.props
-    const { list, step } = this.state
+    const { list, step, bankStyle } = this.state
     let rgb = utils.hexToRgb(bankStyle.linkColor)
     rgb = Object.values(rgb).join(',')
     let unfinishedColor = `rgba(${rgb},0.5)`
@@ -1060,7 +1062,9 @@ class MessageList extends Component {
     if (appSubmitted  &&  startingPosition + MAX_STEPS < allSteps) // startingPosition + MAX_STEPS < allSteps)
       iconRight = <Icon name='md-arrow-dropright' size={25} color={bankStyle.linkColor} style={{position: 'absolute', right: 10, zIndex: 1000}}/>
 
-    return <View style={{marginTop: -15}}>
+    let addStyle = isWeb() ? {marginTop: -15, alignSelf: 'center', width: utils.getContentWidth(MessageList) + 50, paddingBottom: 3} : {marginTop: -15}
+
+    return <View style={addStyle}>
              {iconLeft}
              <StepIndicator
                customStyles={customStyles}
@@ -1133,13 +1137,12 @@ class MessageList extends Component {
     let model = utils.getModel(application.requestFor)
     this.props.navigator.push({
       title: translate(model),
-      id: 33,
-      component: StringChooser,
+      componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         strings:   this.state.additionalForms, // model.additionalForms,
-        bankStyle: this.props.bankStyle,
+        bankStyle: this.state.bankStyle,
         callback:  (val) => {
           let m = utils.getModel(val)
           let msg = {
@@ -1189,8 +1192,7 @@ class MessageList extends Component {
     let name = utils.getType(resource) === PROFILE ? resource.formatted : resource.name
     this.props.navigator.push({
       title: translate('contextsFor') + ' ' + name,
-      id: 23,
-      component: ContextChooser,
+      componentName: 'ContextChooser',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       backButtonTitle: 'Back',
       passProps: {
@@ -1225,8 +1227,7 @@ class MessageList extends Component {
       sharingChat = this.props.resource
     this.props.navigator.push({
       title: translate(utils.getModel(this.state.context.requestFor)),
-      id: 10,
-      component: ResourceList,
+      componentName: 'ResourceList',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Share',
       passProps: {
@@ -1254,20 +1255,21 @@ class MessageList extends Component {
   // Form request states taht the provider will be accepting verifications from one of the
   // listed providers
   chooseTrustedProvider(r, model, isMyMessage) {
-    this.props.navigator.push({
-      id: 25,
+    const { bankStyle } = this.state
+    const { to, currency, navigator } = this.props
+    navigator.push({
       title: translate('trustedProviders'),
-      titleTextColor: this.props.bankStyle.verifiedBorderColor,
+      titleTextColor: bankStyle.verifiedBorderColor,
       backButtonTitle: 'Back',
-      component: VerifierChooser,
+      componentName: 'VerifierChooser',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       // titleTextColor: '#7AAAC3',
       passProps:  {
         modelName: ORGANIZATION,
-        provider: this.props.to,
-        bankStyle: this.props.bankStyle,
+        provider: to,
+        bankStyle,
         originatingMessage: r,
-        currency: this.props.bankStyle
+        currency
       }
     });
   }
@@ -1354,6 +1356,7 @@ class MessageList extends Component {
   onSubmitEditing(msg) {
     if (!msg  ||  !msg.trim())
       return
+
     let me = utils.getMe();
     let { resource, application, modelName } = this.props
     if (!modelName)
@@ -1383,41 +1386,39 @@ class MessageList extends Component {
     let to = resource.from.organization  ||  resource.from
     this.props.navigator.push({
       title: to.title,
-      component: MessageList,
-      id: 11,
+      componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: to,
         modelName: MESSAGE,
         currency: this.props.currency,
-        bankStyle:  this.props.bankStyle
+        bankStyle:  this.state.bankStyle
       }
     })
   }
   productChooser() {
+    const { productList, bankStyle } = this.state
     let prModel = utils.getModel(PRODUCT_REQUEST)
     let prop = prModel.properties.requestFor
-    let oResource = this.state.productList
-    let model = utils.getModel(oResource.form)
+    let model = utils.getModel(productList.form)
     let resource = {
       [TYPE]: model.id,
       from: utils.getMe(),
-      to: oResource.from
+      to: productList.from
     }
-    if (oResource._context)
-      resource._context = oResource._context
+    if (productList._context)
+      resource._context = productList._context
     this.props.navigator.push({
       title: translate('pleaseChoose'),
-      id: 33,
-      component: StringChooser,
+      componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        strings:   oResource.chooser.oneOf,
-        bankStyle: this.props.bankStyle,
+        strings:   productList.chooser.oneOf,
+        bankStyle,
         callback:  (val) => {
           resource[prop.name] = val
-          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+          Actions.addChatItem({resource, disableFormRequest: productList})
         },
       }
     });
@@ -1479,179 +1480,3 @@ var styles = StyleSheet.create({
 });
 module.exports = MessageList;
 
-/* Adding new model from URL
-    this.props.navigator.push({
-      title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Chat',
-      passProps: {
-        resource: self.props.resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        modelName: modelName,
-        sendForm: sendForm,
-        callback: this.props.callback
-      },
-      rightButtonTitle: 'ion|plus',
-      onRightButtonPress: {
-        id: 4,
-        title: 'New model url',
-        component: NewResource,
-        backButtonTitle: 'Back',
-        titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: utils.getModel('tradle.NewMessageModel'),
-          callback: this.modelAdded.bind(this)
-        }
-      }
-    });
-
-  modelAdded(resource) {
-    if (resource.url)
-      Actions.addModelFromUrl(resource.url);
-  }
-  // showEmployeeMenu() {
-  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-  //   var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
-  //   var self = this;
-
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       self.chooseFormForCustomer()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
-  // showMenu() {
-  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-  //   var self = this;
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       self.forgetMe()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
-      // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[TYPE]).properties) + '\' to forget you',
-  onAddNewPressed(sendForm) {
-    let { modelName, resource, navigator, callback } = this.props
-    if (modelName === MESSAGE)
-      return
-    let model = utils.getModel(modelName);
-    if (!model.isInterface)
-      return;
-
-    let currentRoutes = navigator.getCurrentRoutes();
-    navigator.push({
-      title: translate(utils.getModel(FINANCIAL_PRODUCT)),
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: callback,
-        type: PRODUCT_REQUEST
-      },
-      rightButtonTitle: 'ion|plus',
-      onRightButtonPress: {
-        id: 4,
-        title: translate('newProduct'),
-        component: NewResource,
-        backButtonTitle: 'Back',
-        // titleTextColor: '#999999',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: utils.getModel('tradle.NewMessageModel'),
-          currency: resource.currency,
-          country: resource.country,
-          // callback: this.modelAdded.bind(this)
-        }
-      }
-    });
-  }
-  chooseFormForCustomer() {
-    if (!this.state.context) {
-      Alert.alert(translate('formListError'), translate('formListErrorDescription'))
-      return
-    }
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    let resource = this.props.resource
-    this.setState({show: false})
-    this.props.navigator.push({
-      title: translate(utils.getModel(FORM)),
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: this.props.callback,
-        type: FORM,
-        context: this.state.context
-      },
-      // rightButtonTitle: 'ion|plus',
-      // onRightButtonPress: {
-      //   id: 4,
-      //   title: translate('newProduct'),
-      //   component: NewResource,
-      //   backButtonTitle: translate('back'),
-      //   // titleTextColor: '#999999',
-      //   rightButtonTitle: translate('done'),
-      //   passProps: {
-      //     model: utils.getModel('tradle.NewMessageModel'),
-      //     currency: resource.currency,
-      //     // callback: this.modelAdded.bind(this)
-      //   }
-      // }
-    });
-  }
-  onChooseProduct() {
-    if (this.props.isAggregation)
-      return
-    // let modelName = MESSAGE
-    // let model = utils.getModel(modelName);
-    // let isInterface = model.isInterface;
-    // if (!isInterface)
-    //   return;
-
-    let resource = this.props.resource
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
-      title: translate('iNeed'), //I need...',
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        products: this.props.resource.list,
-        callback: this.props.callback,
-        bankStyle: this.props.bankStyle
-      },
-    });
-  }
-*/

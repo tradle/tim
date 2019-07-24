@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
 import { isSimulator, sanitize, isEmpty, getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
-import { scan, Scenario } from '../utils/regula'
+import RegulaProxy, { Scenario } from '../utils/RegulaProxy'  //'../utils/regula'
 // import DeviceInfo from 'react-native-device-info'
 const COUNTRY = 'tradle.Country'
 
@@ -38,7 +38,7 @@ const regulaScan = (function () {
     // }
     let result
     try {
-      result = await scan(scanOpts)
+      result = await RegulaProxy.scan(scanOpts)
     } catch (err) {
       // debugger
       console.log('regula scan failed: ' + JSON.stringify(scanOpts, 0, 2), err.stack)

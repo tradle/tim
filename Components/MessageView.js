@@ -30,10 +30,8 @@ import { getContentSeparator } from '../utils/uiUtils'
 import ArticleView from './ArticleView'
 import PhotoList from './PhotoList'
 import PhotoView from './PhotoView'
-// import StringChooser from './StringChooser'
 import ShowRefList from './ShowRefList'
 import VerificationView from './VerificationView'
-import NewResource from './NewResource'
 import PageView from './PageView'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
@@ -106,7 +104,7 @@ class MessageView extends Component {
   onAction(params) {
     let { action, currency, style, country, backlink, isConnected } = params
     if (action == 'connectivity') {
-      this.setState({isConnected: isConnected})
+      this.setState({isConnected})
       return
     }
     if (!params.resource)
@@ -141,7 +139,7 @@ class MessageView extends Component {
     else if (action === 'exploreBacklink') {
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         let r = params.resource || this.state.resource
-        this.setState({backlink: backlink, backlinkList: params.list || r[backlink], showDetails: false, showDocuments: false, resource: r})
+        this.setState({backlink, backlinkList: params.list || r[backlink], showDetails: false, showDocuments: false, resource: r})
         Actions.getItem({resource: r, application, search: search  ||  application != null})
       }
     }
@@ -180,19 +178,18 @@ class MessageView extends Component {
 
     navigator.push({
       title: model.title,
-      id: 4,
-      component: NewResource,
+      componentName: 'NewResource',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        model: model,
-        bankStyle: /*this.state.bankStyle ||*/ bankStyle,
+        model,
+        bankStyle,
         resource: r,
         prop: itemBl,
         search,
         // containerResource: resource,
         // doNotSend: true,
-        defaultPropertyValues: defaultPropertyValues,
+        defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
         callback: (resource) => {
           navigator.pop()
@@ -250,14 +247,14 @@ class MessageView extends Component {
     }
     let formError = {
       _t: 'tradle.FormError',
-      errors: errors,
+      errors,
       prefill: resource,
       from: utils.getMe(),// resource.to,
-      to: to,
+      to,
       _context: context,
       message: text || translate('pleaseCorrectTheErrors')
     }
-    Actions.addMessage({msg: formError, application: application})
+    Actions.addMessage({msg: formError, application})
     navigator.pop()
   }
   onCheck(prop, message) {
@@ -269,7 +266,7 @@ class MessageView extends Component {
       delete errorProps[prop.name]
     else
       errorProps[prop.name] = message
-    this.setState({errorProps: errorProps})
+    this.setState({errorProps})
   }
 
   getRefResource(resource, prop) {
@@ -288,9 +285,8 @@ class MessageView extends Component {
     let isVerifier = !resource && utils.isVerifier(document)
     let route = {
       title: newTitle,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      componentName: 'MessageView',
       parentMeta: model,
       passProps: {
         bankStyle: this.state.bankStyle || this.props.bankStyle,
@@ -432,7 +428,7 @@ class MessageView extends Component {
     let dateView
     if (isVerificationTree || isForm) {
       dateView = <View style={styles.band}>
-                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('creationDate')}</Text>
+                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('submissionDate')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
@@ -508,10 +504,9 @@ class MessageView extends Component {
 
   onPress(url) {
     this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+      componentName: 'ArticleView',
       backButtonTitle: 'Back',
-      passProps: {url: url}
+      passProps: {url}
     });
   }
   createVerification() {
@@ -529,7 +524,7 @@ class MessageView extends Component {
       to.push(utils.getId(resource.to))
     let r = {
       [TYPE]: VERIFICATION,
-      document: document,
+      document,
       from: me,
       to: resource.to,
     }
@@ -537,7 +532,7 @@ class MessageView extends Component {
       r._context = resource._context
     else if (application  &&  application._context)
       r._context = application._context
-    let params = {to: to, r: r}
+    let params = {to, r}
     if (r._context)
       params.context = r._context
     Actions.addVerification(params)
@@ -575,7 +570,7 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
     photoBG: {
       backgroundColor: '#f7f7f7',
       alignItems: 'center',
-      borderColor: '#cccccc',
+      borderColor: '#cccccc', //bankStyle.linkColor,
       borderTopWidth: 1,
       borderBottomWidth: 1
     },
