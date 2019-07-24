@@ -259,6 +259,7 @@ class ApplicationTabs extends Component {
           formTypes.push(itype)
       })
       let m = utils.getModel(resource.requestFor)
+
       if (resource.status === 'approved' || resource.status === 'completed')
         progress = 1
       else

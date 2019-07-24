@@ -198,9 +198,15 @@ class RefPropertyEditor extends Component {
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
-                       {content}
-                     </ImageInput>
+        // let isDocument = prop.range === 'document'
+        // if (isDocument)
+        //   actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
+        //                  {content}
+        //                </DocumentInput>
+        // else
+          actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+                         {content}
+                       </ImageInput>
       }
       else
         actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>

@@ -105,7 +105,6 @@ const DOCUMENT = 'tradle.Document'
 const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
-const PHOTO_ID = 'tradle.PhotoID'
 const PASSWORD_ENC = 'hex'
 const MAX_WIDTH = 800
 
@@ -119,6 +118,7 @@ const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const STATUS = 'tradle.Status'
 const SELF_INTRODUCTION = 'tradle.SelfIntroduction'
 const SELFIE = 'tradle.Selfie'
+const PHOTO_ID = 'tradle.PhotoID'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
@@ -2344,6 +2344,7 @@ var utils = {
     let ftype
     if (isFormRequest) {
       ftype = resource.form
+      // Case when search for FormRequest resources
       if (!ftype)
         ftype = type
     }

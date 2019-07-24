@@ -469,13 +469,6 @@ class NewResource extends Component {
           required.push(p)
       }
     }
-    if (!required.length) {
-      const props = model.properties
-      for (let p in props) {
-        if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
-          required.push(p)
-      }
-    }
     let missedRequiredOrErrorValue = {}
     let noRequiredValidation = containerResource && prop  && prop.partial
     if (noRequiredValidation) {
@@ -938,6 +931,7 @@ class NewResource extends Component {
                       {formList}
                     </View>
     }
+
     let submit
     if (!isRegistration  &&  !isRefresh) {
       let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed

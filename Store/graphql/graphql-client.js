@@ -1041,8 +1041,8 @@ var search = {
     try {
       let data = await client.rawRequest(query, variables)
       if (data.data) {
-        if (data.data[table].objects)
-          data.data[table].objects = data.data[table].objects.filter(r => r !== null)
+        // if (data.data[table].objects)
+        //   data.data[table].objects = data.data[table].objects.filter(r => r !== null)
         return {result: data.data[table]}
       }
       else

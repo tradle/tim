@@ -485,8 +485,6 @@ var NavigationBarRouteMapper = {
                {icons}
               </View>
     }
-    let helpStyle = route.help ? {paddingLeft: 5} : {paddingLeft: 25}
-    let submitStyle = isSubmit ? { paddingTop: 3 }  : {}
     return (
       <View style={{position: 'absolute', right: 0, flexDirection: 'row'}}>
       <TouchableOpacity

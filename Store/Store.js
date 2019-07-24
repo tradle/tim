@@ -32,6 +32,7 @@ import refreshPrefill from './refreshPrefill.json'
 import Actions from '../Actions/Actions'
 import { uploadLinkedMedia } from '../utils/upload-linked-media'
 import Debug from 'debug'
+// import { prepareDatabase } from '../utils/regula'
 import RegulaProxy from '../utils/RegulaProxy'
 
 const SENT = 'Sent'
@@ -3895,6 +3896,7 @@ if (!res[SIG]  &&  res._message)
           application                &&
           application.verifications  &&
           utils.isForm(r[TYPE])) {
+        debugger
         let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
         if (l) {
           r.verifications = l.list
@@ -5606,6 +5608,8 @@ if (!res[SIG]  &&  res._message)
   async handleSharedDoc({resource, to, batch, formRequest, shareBatchId}) {
     if (!resource._sharedWith) {
       resource._sharedWith = []
+      // if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource))
+      //   this.addSharedWith({ resource, shareWith: resource.to, time: resource._time, shareBatchId, formRequest })
       if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource)) {
         let shareWith = await this.getSentTo(resource)
         if (!shareWith)
@@ -6617,6 +6621,7 @@ if (!res[SIG]  &&  res._message)
     list.forEach(r => {
       r._context = contexts[r.context]
     })
+    list = list.filter(r => r[TYPE] !== PRODUCT_REQUEST)
 
     // debugger
     this.trigger({action: 'list', resource: parameters.filterResource, isSearch: true, first, list, endCursor: newEndCursors})
@@ -10610,6 +10615,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
+    //  check if utils.isReadOnly better
     if (isReadOnly  &&  me.isEmployee) {
       if (to.organization  &&  to.organization.id === me.organization.id)
         isReadOnly = false

@@ -418,6 +418,7 @@ class FormRequestRow extends Component {
             <View style={abStyle}/>
           </View>
     }
+
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
         {or}
@@ -1321,42 +1322,3 @@ reactMixin(FormRequestRow.prototype, Reflux.ListenerMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
-/*
-  createNewResource(model, isMyMessage) {
-    let { resource, currency, country, bankStyle, defaultPropertyValues, navigator } = this.props
-    let r = {
-      from: resource.to,
-      to: resource.from,
-      _context: resource._context,
-      [TYPE]: model.id
-    }
-
-    // Prefill for testing and demoing
-    let isPrefilled
-    if (ENV.prefillForms  &&  model.id in formDefaults) {
-      _.extend(r, formDefaults[model.id])
-      isPrefilled = true
-    }
-
-    if (resource.prefill) {
-      _.extend(r, resource.prefill)
-      isPrefilled = true
-    }
-    navigator.push({
-      title: translate(model),
-      rightButtonTitle: isMyMessage ? null : 'Done',
-      backButtonTitle: 'Back',
-      componentName: 'NewResource',
-      passProps:  {
-        model: model,
-        resource: r,
-        isPrefilled: isPrefilled,
-        currency: currency,
-        country: country,
-        bankStyle: bankStyle,
-        originatingMessage: resource,
-        defaultPropertyValues: defaultPropertyValues,
-      }
-    });
-  }
-*/

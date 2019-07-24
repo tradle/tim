@@ -248,6 +248,7 @@ var HomePageMixin = {
     let order = this.state.order || {}
     let curOrder = order[prop]
     let { resource } = this.state
+
     const { modelName, bookmark, search } = this.props
 
     order[prop] = curOrder ? false : true

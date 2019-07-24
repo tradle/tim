@@ -306,6 +306,7 @@ class MessageView extends Component {
 
     if (resource[TYPE] === MESSAGE)
       resource = resource.object
+
     let rModel = utils.getModel(utils.getType(resource))
     let isWrapper = utils.getPrefillProperty(rModel)
     let model = isWrapper ? rModel : utils.getLensedModel(resource, lensId);

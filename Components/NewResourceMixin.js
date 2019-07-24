@@ -925,12 +925,14 @@ var NewResourceMixin = {
     }
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
-    let help = this.paintHelp(prop)
-    return (
-      <View key={this.getNextKey()} ref={prop.name}>
-        <View style={[st, { paddingBottom: 10, justifyContent: 'flex-end'}]}>
-          {propLabel}
-          <DatePicker
+    let datePicker
+    if (prop.readOnly) {
+      datePicker = <View style={[styles.formInput, {paddingVertical: 5}]}>
+                     <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
+                   </View>
+    }
+    else {
+      datePicker = <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 20, paddingBottom: 10}]}
             mode="date"
             placeholder={value}
@@ -959,7 +961,14 @@ var NewResourceMixin = {
             }}
             {...dateProps}
           />
-        {help}
+    }
+    let help = this.paintHelp(prop)
+    return (
+      <View key={this.getNextKey()} ref={prop.name}>
+        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+          {propLabel}
+          {datePicker}
+          {help}
         </View>
         {this.paintError(params)}
       </View>

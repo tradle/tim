@@ -931,10 +931,11 @@ class ResourceList extends Component {
     }
 
     let employee
-    if (me.isEmployee)
+    if (me.isEmployee) {
       employee = <View style={{justifyContent: 'center'}}>
                    <Text style={{fontSize: 18, paddingLeft: 20, color: bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    }
     return (
         <View style={[styles.footer, {justifyContent: 'space-between'}]}>
           <View/>

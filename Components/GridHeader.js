@@ -76,6 +76,7 @@ class GridHeader extends Component {
       let title = <Text style={[styles.cell, textStyle]}>
                     {translate(props[p], model).toUpperCase()}
                   </Text>
+
       let isSortable = prop.ref !== PHOTO  &&  (!notSortable  ||  !notSortable.includes(p))
       if (isSortable)
         title = <TouchableOpacity onPress={() => this.props.sort(p)}>

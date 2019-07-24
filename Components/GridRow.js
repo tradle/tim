@@ -364,6 +364,32 @@ class GridRow extends Component {
     }
   }
 
+  formatMessageProperty(pName) {
+    let { resource } = this.props
+    let pval = resource[pName]
+
+    if (!pval)
+      return
+    if (typeof pval === 'object') {
+      let style = [styles.description, {paddingLeft: 5}]
+      // HACK to show provider icon
+      if (utils.isStub(pval)  &&  pName === '_provider') {
+        if (resource._icon) {
+          return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
+                   <Image style={styles.icon} source={{uri: resource._icon.url}} />
+                   <Text style={style}>{pval.title}</Text>
+                 </View>
+        }
+        return <View key={this.getNextKey(resource)}>
+                 <Text style={style}>{pval.title}</Text>
+               </View>
+      }
+      return <View key={this.getNextKey(resource)}>
+               <Text style={style}>{utils.getDisplayName(pval)}</Text>
+             </View>
+    }
+  }
+
   paintIcon(model, eVal) {
     let isCheck = utils.isSubclassOf(model, CHECK)
     let icolor = '#ffffff'
