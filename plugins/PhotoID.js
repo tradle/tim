@@ -163,8 +163,23 @@ function prefillValues(form, values, model) {
       // Need checking
       if (ref  &&  isEnum(ref)) {
         if (ref === 'tradle.Sex') {
-          let v = val.toLowerCase().charAt(0) === 'm'  &&  'Male'  ||  'Female'
-          let enumValue = getModel(ref).enum.find(r => r.id === v)
+          let ch = val.toLowerCase().charAt(0)
+          let docType = form.documentType.id.split('_')[1]
+          let enumL = getModel(ref).enum
+          let v
+          // HACK
+          if (docType === 'id') {
+            if (form.country.title === 'Mexico') {
+              if (ch === 'm')
+                v = 'Female'
+              else
+                v = 'Male'
+            }
+          }
+          if (!v)
+            v = ch === 'm'  &&  'Male'  ||  'Female'
+
+          let enumValue = enumL.find(r => r.id === v)
 
           form[p] = {
             id: ref + '_' + enumValue.id,

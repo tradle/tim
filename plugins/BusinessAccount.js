@@ -7,7 +7,6 @@ const LEGAL_ENTITY = 'tradle.legal.LegalEntity'
 const LEGAL_DOCUMENT_INTERSECTION = 'tradle.legal.LegalEntityLegalDocument'
 const LEGAL_DOCUMENT = 'tradle.legal.LegalDocument'
 const COUNTRY = 'tradle.Country'
-const PHOTO = 'tradle.Photo'
 
 module.exports = function LegalEntity ({ models }) {
   return {
@@ -105,8 +104,7 @@ function getPropsForLegalDocument(form) {
 }
 function getPropsForLegalEntity(form) {
   const { document, country, registrationNumber, region } = form
-  if (!country  ||  !document) {
-    return
+  // if (!country  ||  !document) {
   // if (!document  ||  isNewResource(document)) {
   //   return {
   //     requestedProperties: [
@@ -114,7 +112,7 @@ function getPropsForLegalEntity(form) {
   //       { name: 'document' },
   //     ]
   //   }
-  }
+  // }
   return {
       requestedProperties: [
         { name: 'info_group' },

@@ -62,3 +62,4 @@ function getPropsForProofOfAddress(form) {
   })
   return { requestedProperties }
 }
+
