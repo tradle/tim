@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Linking
 } from 'react-native'
+
+import _ from 'lodash'
 import PropTypes from 'prop-types'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
@@ -62,7 +64,7 @@ class ShowPropertiesView extends Component {
   render() {
     let viewCols = this.getViewCols()
     return (
-      <View style={{paddingBottom: 100}} key={this.getNextKey()}>
+      <View style={{paddingBottom: 50}} key={this.getNextKey()}>
         {viewCols}
       </View>
     );
@@ -161,6 +163,18 @@ class ShowPropertiesView extends Component {
       if (pMeta.range === 'json') {
         if (!val  ||  utils.isEmpty(val))
           return
+        if (pMeta.ref) {
+          let v = _.cloneDeep(val)
+          let rprops = utils.getModel(v[TYPE]  ||  pMeta.ref).properties
+          let exclude = [TYPE, '_time']
+          for (let p in v) {
+            if (!rprops[p]  ||  exclude.includes(p))
+              delete v[p]
+          }
+          if (utils.isEmpty(v))
+            return
+          val = v
+        }
         let jsonRows = []
 
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
@@ -264,7 +278,7 @@ class ShowPropertiesView extends Component {
         }
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
-          var value = val[TYPE] ? utils.getDisplayName(val) : val.title;
+          var value = utils.getDisplayName(val)
           if (!value)
             value = translate(utils.getModel(utils.getType(val)))
           val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>

@@ -256,7 +256,10 @@ class FormErrorRow extends Component {
     var vCols = [];
 
     viewCols.forEach((v) => {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date' ||  properties[v].range === 'json')
+      if (properties[v].type === 'array'  ||
+          properties[v].type === 'date'   ||
+          properties[v].range === 'json'  ||
+          properties[v].partial)
         return;
 
       if (properties[v].ref) {
