@@ -7,31 +7,42 @@ import {
   Platform,
   InteractionManager
 } from 'react-native'
+const noop = () => {}
+const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 import _ from 'lodash'
 import Reflux from 'reflux'
 import createProcessor from 'level-change-processor'
+import Debug from 'debug'
 
-// import NetInfo from '@react-native-community/netinfo'
-const noop = () => {}
-const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
+import createSemaphore from 'psem'
+import EventEmitter from 'events'
+import Promise, { coroutine as co } from 'bluebird'
+import TimerMixin from 'react-timer-mixin'
+import Q from 'q'
+Q.longStackSupport = true
+Q.onerror = function (err) {
+  debug(err.stack)
+  throw err
+}
+import sha from 'stable-sha1'
+var collect = promisify(require('stream-collector'))
+import debounce from 'debounce'
+import asyncstorageDown from 'asyncstorage-down'
+import levelup from 'levelup'
+
+import plugins from '@tradle/biz-plugins'
+import { allSettled } from '@tradle/promise-utils'
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-import createSemaphore from 'psem'
-import EventEmitter from 'events'
-import Promise, { coroutine as co } from 'bluebird'
-import TimerMixin from 'react-timer-mixin'
-import plugins from '@tradle/biz-plugins'
-import { allSettled } from '@tradle/promise-utils'
 import appPlugins from '../plugins'
 import refreshPrefill from './refreshPrefill.json'
 // import yukiConfig from '../yuki.json'
 
 import Actions from '../Actions/Actions'
 import { uploadLinkedMedia } from '../utils/upload-linked-media'
-import Debug from 'debug'
 // import { prepareDatabase } from '../utils/regula'
 import RegulaProxy from '../utils/RegulaProxy'
 
@@ -49,13 +60,6 @@ const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
 import { getCoverPhotoForRegion, getYukiForRegion, getLanguage } from './locale'
-
-import Q from 'q'
-Q.longStackSupport = true
-Q.onerror = function (err) {
-  debug(err.stack)
-  throw err
-}
 
 import ENV from '../utils/env'
 // const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
@@ -118,13 +122,8 @@ const NON_VIRTUAL_OBJECT_PROPS = Object.keys(ObjectModel.properties).filter(p =>
 
 import sampleProfile from '../data/sampleProfile.json'
 
-import sha from 'stable-sha1'
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 import promisify from 'pify'
-var collect = promisify(require('stream-collector'))
-import debounce from 'debounce'
-import asyncstorageDown from 'asyncstorage-down'
-import levelup from 'levelup'
 // import mutexify from 'mutexify'
 // import updown from 'level-updown'
 

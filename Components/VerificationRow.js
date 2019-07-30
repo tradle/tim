@@ -324,8 +324,6 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    // let isInactive = isCheck  &&  resource.isInactive
-    // let header =  <View style={[styles.header, isInactive && styles.greyedContentBg || styles.contentBg]} key={this.getNextKey()}>
     let header =  <View style={[styles.header, styles.contentBg]} key={this.getNextKey()}>
                     <View style={styles.row}>
                       {photo}
@@ -772,9 +770,6 @@ var styles = StyleSheet.create({
   },
   contentBg: {
     backgroundColor: '#fff'
-  },
-  greyedContentBg: {
-    opacity: 0.7
   },
   titleView: {
     flexDirection: 'row'

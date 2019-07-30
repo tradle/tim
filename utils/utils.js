@@ -730,7 +730,7 @@ var utils = {
   isVerification(type) {
     if (typeof type === 'object'  &&  type.id === VERIFICATION)
       return true
-    return type === VERIFICATION  ||  utils.isSubclassOf(type, VERIFICATION)
+    return utils.isSubclassOf(type, VERIFICATION)
   },
   isInlined(m) {
     if (!m)

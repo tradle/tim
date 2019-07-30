@@ -1021,7 +1021,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     });
   }
 
-  renderRow(resource, sectionId, rowId)  {
+  renderRow(resource, sectionId, rowId) {
     // Case when the model was not found but the stub existed,
     // and now when it is re-rendering with actual data graphQL didn't return resource for this stub
     if (!resource) {
@@ -1087,7 +1087,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
     if (isMessage  &&  resource !== model  &&  !isContext) { //isVerification  || isForm || isMyProduct)
       if (modelName === CHECK  ||  utils.isSubclassOf(modelName, CHECK))
-        return <CheckRow
+        return (<CheckRow
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 modelName={rtype}
@@ -1096,7 +1096,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 navigator={navigator}
                 searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 resource={resource} />
-
+               )
       return (<VerificationRow
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}

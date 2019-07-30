@@ -7,7 +7,6 @@ import {
   Linking
 } from 'react-native'
 import PropTypes from 'prop-types'
-
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
