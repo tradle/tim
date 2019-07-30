@@ -279,10 +279,11 @@ class NewResource extends Component {
     }
     if (action === 'getTemporary') {
       let r = {}
-      _.extend(r, this.state.resource)
 
       if (!originatingMessage  ||  !originatingMessage.prefill)
         _.extend(r, resource)
+
+      _.extend(r, this.state.resource)
 
       this.setState({
         resource: r,

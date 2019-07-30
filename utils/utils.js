@@ -2096,11 +2096,13 @@ var utils = {
     }
   },
   getPropertiesWithRef(ref, model) {
-    let props = utils.getPropertiesWithAnnotation(model, 'ref')
+    let refProps = utils.getPropertiesWithAnnotation(model, 'ref')
+    let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
+    let props = {...refProps, ...itemsProps}
     let rProps = []
     for (let p in props) {
       let pRef = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
-      if (pRef === ref  ||  utils.isSubclassOf(model, pRef))
+      if (pRef === ref  ||  utils.isSubclassOf(pRef, ref))
         rProps.push(props[p])
     }
     return rProps

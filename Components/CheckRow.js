@@ -93,9 +93,10 @@ class CheckRow extends Component {
       if (application  &&  application.checksOverride) {
         const checkId = utils.getId(resource)
         let checkType = utils.getType(resource)
-        let checkOverrideProp =  getCheckOverrideProp(utils.getModel(checkType))
-        if (checkOverrideProp) {
-          const checkOverride = application.checksOverride.filter(r => utils.getType(r) === checkOverrideProp.items.ref)
+        let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+        if (checkOverrideProp.length) {
+          const pref = checkOverrideProp[0].items.ref
+          const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref)
           if (checkOverride.length) {
             const statusModel = utils.getModel(OVERRIDE_STATUS)
             checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].title)
@@ -212,11 +213,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = CheckRow;
-function getCheckOverrideProp(type) {
-  const props = utils.getModel(type).properties
-  for (let p in props) {
-    let ref = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
-    if (ref  &&  (ref === CHECK_OVERRIDE ||  utils.isSubclassOf(ref, CHECK_OVERRIDE)))
-      return props[p]
-  }
-}
