@@ -158,9 +158,11 @@ var NewResourceMixin = {
     })
 
     if (this.state.requestedProperties)
-       requestedProperties = this.state.requestedProperties
+      requestedProperties = this.state.requestedProperties
 
     if (requestedProperties) {
+      // if (!utils.isEmpty(requestedProperties))
+      //   eCols = []
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
         formErrors = params.formErrors
@@ -481,7 +483,6 @@ var NewResourceMixin = {
             data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
           }
         }
-
         // options.fields[p].onFocus = chooser.bind(this, props[p], p)
         options.fields[p].template = this.myCustomTemplate.bind(this, {
             label: label,

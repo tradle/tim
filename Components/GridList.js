@@ -1086,7 +1086,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let isApplication = modelName === APPLICATION
     let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
     if (isMessage  &&  resource !== model  &&  !isContext) { //isVerification  || isForm || isMyProduct)
-      if (modelName === CHECK)
+      if (modelName === CHECK  ||  utils.isSubclassOf(modelName, CHECK))
         return <CheckRow
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}

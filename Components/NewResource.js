@@ -299,7 +299,7 @@ class NewResource extends Component {
       let r = {}
       _.extend(r, this.state.resource)
 
-      if (originatingMessage  &&  !originatingMessage.prefill)
+      if (!originatingMessage  ||  !originatingMessage.prefill)
         _.extend(r, resource)
 
       this.setState({

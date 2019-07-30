@@ -1,4 +1,3 @@
-
 import {
   // Text,
   TouchableOpacity,
@@ -50,7 +49,6 @@ const {
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const CONFIRMATION = 'tradle.Confirmation'
-const CHECK  = 'tradle.Check'
 const STATUS = 'tradle.Status'
 const INTERSECTION = 'tradle.Intersection'
 const IMAGE_PLACEHOLDER = utils.whitePixel
@@ -165,14 +163,11 @@ class VerificationRow extends Component {
     }
 
     let date
-    let isCheck = utils.isSubclassOf(model, CHECK)
     let isStub = utils.isStub(resource)
     if (!isStub  &&  !isBookmark  &&  r) {
       let dateP
       if (resource.dateVerified)
         dateP = 'dateVerified'
-      else if (isCheck)
-        dateP = 'dateChecked'
       if (!dateP)
         dateP = resource.date && 'date' || '_time'
       let dateVal = resource[dateP]
@@ -252,75 +247,27 @@ class VerificationRow extends Component {
                        </View>
     }
     else if (title != dn)  {
-      if (isCheck) {
-        if (resource.status) {
-          let statusId = this.getEnumID(resource.status.id)
-          let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
-          let checkIcon
-          if (statusM) {
-            const { icon, color } = statusM
-            let style, size, icolor
-            if (statusId === 'warning'  ||  statusId === 'error') {
-              // style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
-              size = 37
-              icolor = color
-            }
-            else {
-              style = [styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]
-              size = 30
-              icolor = '#ffffff'
-            }
-
-            if (icon) {
-              checkIcon = <View style={style}>
-                            <Icon color={icolor} size={size} name={icon} />
-                          </View>
-            }
-          }
-          titleComponent = <View style={styles.titleView}>
-                             {checkIcon}
-                             <View style={{justifyContent: 'center', paddingLeft: 10}}>
-                               <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
-                             </View>
-                           </View>
-        }
-        else {
-          if (title  &&  dn) {
-            titleComponent = <View style={{justifyContent: 'center'}}>
-                               <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
-                             </View>
-
-          }
-          else {
-            titleComponent = <Text style={styles.rTitle}>{dn || title}</Text>
-          }
+      if (utils.isImplementing(modelName, INTERSECTION)  ||  !dn) {
+        if (title) {
+          let style
+          if (dn)
+            style = styles.description
+          else
+            style = styles.rTitle
+          if (title !== dn)
+            description = <Text style={style}>{title}</Text>
         }
       }
-      else {
-        if (utils.isImplementing(modelName, INTERSECTION)  ||  !dn) {
-          if (title) {
-            let style
-            if (dn)
-              style = styles.description
-            else
-              style = styles.rTitle
-            if (title !== dn)
-              description = <Text style={style}>{title}</Text>
-          }
+      if (dn) {
+        let isProfile = parentResource  &&  parentResource[TYPE] === PROFILE
+        if (isForm  &&  isProfile) {
+          titleComponent = <View style={{justifyContent: 'center'}}>
+                             <Text style={styles.rTitle}>{dn}</Text>
+                             <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{translate(model)}</Text>
+                           </View>
         }
-        if (dn) {
-          let isProfile = parentResource  &&  parentResource[TYPE] === PROFILE
-          if (isForm  &&  isProfile) {
-            titleComponent = <View style={{justifyContent: 'center'}}>
-                               <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{translate(model)}</Text>
-                             </View>
-          }
-          else
-            titleComponent = <Text style={styles.rTitle}>{dn}</Text>
-        }
+        else
+          titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
     }
     else if (isBookmark  &&  resource.message)
@@ -340,7 +287,7 @@ class VerificationRow extends Component {
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
     else if (title)
-      description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
+      description = <Text style={styles.description}>{title}</Text>
 
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
@@ -733,11 +680,6 @@ var styles = StyleSheet.create({
     color: '#999999',
     fontSize: 16,
   },
-  checkType: {
-    color: '#999999',
-    fontSize: 16,
-    marginLeft: 25
-  },
   verifiedBy: {
     flex: 1,
     flexWrap: 'wrap',
@@ -754,11 +696,6 @@ var styles = StyleSheet.create({
   verySmallLetters: {
     fontSize: 12,
     color: '#b4c3cb'
-  },
-  checkDescription: {
-    fontSize: 14,
-    paddingTop: 3,
-    color: '#aaaaaa'
   },
   refPropertyRow: {
     flexDirection: 'row',
@@ -841,13 +778,6 @@ var styles = StyleSheet.create({
   },
   titleView: {
     flexDirection: 'row'
-  },
-  checkButton: {
-    ...circled(30),
-    shadowOpacity: 0.7,
-    opacity: 0.9,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
   },
   verifiedByAndDateStyle: {
     marginTop: -3,
