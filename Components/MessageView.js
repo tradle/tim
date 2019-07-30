@@ -429,7 +429,7 @@ class MessageView extends Component {
     let dateView
     if (isVerificationTree || isForm) {
       dateView = <View style={styles.band}>
-                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('creationDate')}</Text>
+                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('submissionDate')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
