@@ -7,33 +7,41 @@ import {
   Platform,
   InteractionManager
 } from 'react-native'
-import _ from 'lodash'
-import NetInfo from '@react-native-community/netinfo'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
+import _ from 'lodash'
+import NetInfo from '@react-native-community/netinfo'
+import Reflux from 'reflux'
+import createProcessor from 'level-change-processor'
+import Debug from 'debug'
+import createSemaphore from 'psem'
+import EventEmitter from 'events'
+import Promise, { coroutine as co } from 'bluebird'
+import TimerMixin from 'react-timer-mixin'
+import Q from 'q'
+Q.longStackSupport = true
+Q.onerror = function (err) {
+  debug(err.stack)
+  throw err
+}
+
+import plugins from '@tradle/biz-plugins'
+import { allSettled } from '@tradle/promise-utils'
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from '../utils/async-storage'
 import asyncstorageDown from '../utils/asyncstorage-down'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-import createSemaphore from 'psem'
-import EventEmitter from 'events'
-import Promise, { coroutine as co } from 'bluebird'
-import TimerMixin from 'react-timer-mixin'
-import plugins from '@tradle/biz-plugins'
-import { allSettled } from '@tradle/promise-utils'
 import appPlugins from '../plugins'
 import refreshPrefill from './refreshPrefill.json'
 // import yukiConfig from '../yuki.json'
 
-import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
 import { uploadLinkedMedia } from '../utils/upload-linked-media'
-import Debug from 'debug'
 // import { prepareDatabase } from '../utils/regula'
 import RegulaProxy from '../utils/RegulaProxy'
-import createProcessor from 'level-change-processor'
+
 
 const SENT = 'Sent'
 const SENDING = 'Sending'
@@ -49,13 +57,6 @@ const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
 import { getCoverPhotoForRegion, getYukiForRegion, getLanguage } from './locale'
-
-import Q from 'q'
-Q.longStackSupport = true
-Q.onerror = function (err) {
-  debug(err.stack)
-  throw err
-}
 
 import ENV from '../utils/env'
 // const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
@@ -223,7 +224,18 @@ const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 
-const APPLICATION_NOT_FORMS = [PRODUCT_REQUEST, FORM_REQUEST, MODELS_PACK, STYLES_PACK, INTRODUCTION, APPLICATION_SUBMITTED, NEXT_FORM_REQUEST, SIMPLE_MESSAGE]
+const CHECK_OVERRIDE      = 'tradle.CheckOverride'
+
+const APPLICATION_NOT_FORMS = [
+  PRODUCT_REQUEST,
+  FORM_REQUEST,
+  MODELS_PACK,
+  STYLES_PACK,
+  INTRODUCTION,
+  APPLICATION_SUBMITTED,
+  NEXT_FORM_REQUEST,
+  SIMPLE_MESSAGE
+]
 
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
@@ -3718,6 +3730,7 @@ var Store = Reflux.createStore({
 
     let contextId, lens
     if (formRequest) {
+      contextId = formRequest.context
       if (!contextId  &&  formRequest._context)
         contextId = formRequest._context.contextId  ||  this._getItem(formRequest._context).contextId
       lens = formRequest.lens
@@ -6949,6 +6962,12 @@ if (!res[SIG]  &&  res._message)
           application.products = []
         application.products.push(stub)
         application._productsCount = application.products.length
+        break
+      case CHECK_OVERRIDE:
+        if (!application.checkOverride)
+          application.checksOverride = []
+        application.checksOverride.push(stub)
+        application.checksOverrideCount = application.checksOverride.length
         break
       default:
       case FORM:

@@ -2,5 +2,7 @@
 module.exports = [
   require('./PhotoID'),
   require('./BusinessAccount'),
-  require('./PaymentCard')
+  require('./PaymentCard'),
+  require('./ProofOfAddress'),
+  require('./CheckOverride')
 ]
