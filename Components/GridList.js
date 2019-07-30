@@ -24,6 +24,7 @@ import NoResources from './NoResources'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
+import CheckRow from './CheckRow'
 import PageView from './PageView'
 import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
 import ActionSheet from './ActionSheet'
@@ -70,6 +71,7 @@ var {
 
 const APPLICATION = 'tradle.Application'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
+const CHECK = 'tradle.Check'
 
 const METHOD = 'tradle.Method'
 const BOOKMARK = 'tradle.Bookmark'
@@ -799,9 +801,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
       title = (dn ? dn + ' -- '  : '') + title;
     }
 
+    const isCheck = utils.isSubclassOf(rModel, CHECK)
     let route = {
       title: title,
-      componentName: 'MessageView',
+      componentName: isCheck  &&  'CheckView'  ||  'MessageView',
       backButtonTitle: 'Back',
       passProps: {
         resource,
@@ -1018,7 +1021,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     });
   }
 
-  renderRow(resource, sectionId, rowId)  {
+  renderRow(resource, sectionId, rowId) {
     // Case when the model was not found but the stub existed,
     // and now when it is re-rendering with actual data graphQL didn't return resource for this stub
     if (!resource) {
@@ -1028,7 +1031,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy,
+    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application,
           currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1055,7 +1058,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
 
-    if (!isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isModel  &&  !isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (modelName === MESSAGE)
         viewCols = ['_provider', '_payloadType', '_context', '_time']
@@ -1081,7 +1084,18 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
     let isApplication = modelName === APPLICATION
     let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
-    if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
+    if (isMessage  &&  resource !== model  &&  !isContext) { //isVerification  || isForm || isMyProduct)
+      if (modelName === CHECK  ||  utils.isSubclassOf(modelName, CHECK))
+        return (<CheckRow
+                lazy={lazy}
+                onSelect={() => this.selectResource({resource: selectedResource})}
+                modelName={rtype}
+                application={application}
+                bankStyle={bankStyle}
+                navigator={navigator}
+                searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
+                resource={resource} />
+               )
       return (<VerificationRow
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}
@@ -1099,6 +1113,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 resource={resource}
                 chosen={this.state.chosen} />
       )
+    }
     return (<ResourceRow
       lazy={lazy}
       onSelect={isSharedContext ? this.openSharedContextChat.bind(this) : this.selectResource.bind(this)}
@@ -1545,8 +1560,8 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     Actions.addChatItem({resource: resource})
   }
   renderHeader() {
-    let { search, modelName, isModel } = this.props
-    if (!search || isModel)
+    let { search, modelName, isChooser, isModel } = this.props
+    if (!search || isModel || isChooser)
        return
     if (modelName !== PROFILE) {
       if (this.state.isGrid  &&  !utils.isContext(modelName))
