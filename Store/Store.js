@@ -18,16 +18,15 @@ import createSemaphore from 'psem'
 import EventEmitter from 'events'
 import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
-
-import plugins from '@tradle/biz-plugins'
-import { allSettled } from '@tradle/promise-utils'
-
 import Q from 'q'
 Q.longStackSupport = true
 Q.onerror = function (err) {
   debug(err.stack)
   throw err
 }
+
+import plugins from '@tradle/biz-plugins'
+import { allSettled } from '@tradle/promise-utils'
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from '../utils/async-storage'

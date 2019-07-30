@@ -262,6 +262,7 @@ module.exports = {
     "later": "Later",
     "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers.",
     "creationDate": "Date created",
+    "submissionDate": "Date submitted",
     "cancelItem": "You are about to cancel {1}. Please tap OK to confirm",
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
@@ -290,6 +291,7 @@ module.exports = {
     "invalidValue": "This value is invalid. Please re-enter.",
     "outgoingMessages": "Outgoing Messages",
     "pleaseChoose": "Please choose",
+    "override": "Override",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

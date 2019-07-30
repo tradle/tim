@@ -281,7 +281,7 @@ class NewResource extends Component {
       let r = {}
       _.extend(r, this.state.resource)
 
-      if (originatingMessage  &&  !originatingMessage.prefill)
+      if (!originatingMessage  ||  !originatingMessage.prefill)
         _.extend(r, resource)
 
       this.setState({
@@ -399,30 +399,6 @@ class NewResource extends Component {
     if (currentRoutesLength != 2)
       navigator.pop();
   }
-  // Show providers this resource was shared with and allow customer to choose
-  // which providers to share the changes with
-  // showSharedWithList(newResource) {
-  //   if (!this.props.resource  ||  !this.props.resource._sharedWith)
-  //     return
-  //   this.props.navigator.replace({
-  //     title: translate('shareChangesWith'),
-  //     backButtonTitle: 'Back',
-  //     componentName: 'ResourceList',
-  //     rightButtonTitle: 'Done',
-  //     passProps: {
-  //       message: translate('chooseCompaniesToShareChangesWith'),
-  //       modelName: ORGANIZATION,
-  //       to: this.state.resource.to,
-  //       resource: this.props.resource,
-  //       callback:  this.shareWith.bind(this, newResource),
-  //       chat: this.props.chat,
-  //       bankStyle: this.props.bankStyle,
-  //       currency: this.props.currency
-  //     }
-  //   });
-  // }
-  // The form/verification was shared with other providers and now it is edited.
-  // Offer to share the form with the same providers it was originally share
   shareWith(newResource, list) {
     if (list.length)
       Actions.share(newResource, list)

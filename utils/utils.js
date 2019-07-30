@@ -723,6 +723,8 @@ var utils = {
     return utils.isSubclassOf(type, FORM)
   },
   isVerification(type) {
+    if (typeof type === 'object'  &&  type.id === VERIFICATION)
+      return true
     return utils.isSubclassOf(type, VERIFICATION)
   },
   isInlined(m) {
