@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Linking
 } from 'react-native'
+
+import _ from 'lodash'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -176,7 +178,6 @@ class ShowPropertiesView extends Component {
             return
           val = v
         }
-
         let jsonRows = []
 
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'

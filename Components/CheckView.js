@@ -134,7 +134,6 @@ class CheckView extends Component {
                           </View>
     }
     else if (!this.state.isLoading  &&  utils.isRM(application)) {
-      // let checkOverrideProp = getCheckOverrideProp(resource[TYPE])
       const rtype = utils.getType(resource)
       let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(rtype))
       if (checkOverrideProp.length) {
