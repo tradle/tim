@@ -246,7 +246,8 @@ class NewResource extends Component {
 
   onAction(params) {
     let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
-    let { navigator, prop, containerResource, callback, originatingMessage, bankStyle, model, currency, chat, isRefresh } = this.props
+    let { navigator, prop, containerResource, callback,
+          originatingMessage, bankStyle, model, currency, chat, isRefresh } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
       return
@@ -297,10 +298,11 @@ class NewResource extends Component {
     }
     if (action === 'getTemporary') {
       let r = {}
-      _.extend(r, this.state.resource)
 
       if (!originatingMessage  ||  !originatingMessage.prefill)
         _.extend(r, resource)
+
+      _.extend(r, this.state.resource)
 
       this.setState({
         resource: r,

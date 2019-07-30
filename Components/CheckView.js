@@ -38,7 +38,7 @@ class CheckView extends Component {
   static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
-    application: PropTypes.object.isRequired
+    application: PropTypes.object
   };
   constructor(props) {
     super(props);
@@ -133,12 +133,14 @@ class CheckView extends Component {
                             <Text style={styles.checkOverrideText}>{dn}</Text>
                           </View>
     }
-    else if (!this.state.isLoading) {
-      let checkOverrideProp = getCheckOverrideProp(resource[TYPE])
-      if (checkOverrideProp) {
+    else if (!this.state.isLoading  &&  utils.isRM(application)) {
+      // let checkOverrideProp = getCheckOverrideProp(resource[TYPE])
+      const rtype = utils.getType(resource)
+      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(rtype))
+      if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
                                 <TouchableOpacity
-                                      onPress={() => this.createCheckOverride(checkOverrideProp)}>
+                                      onPress={() => this.createCheckOverride(checkOverrideProp[0])}>
                                   <View style={styles.overrideButton}>
                                     <Text style={styles.overrideButtonText}>{translate('override')}</Text>
                                   </View>
@@ -165,6 +167,14 @@ class CheckView extends Component {
   createCheckOverride(prop) {
     const { resource, navigator, bankStyle, application } = this.props
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
+    const statusModel = utils.getModel(STATUS)
+    const values = statusModel.enum
+    const checkStatus = resource.status.id
+    let status
+    if (checkStatus.indexOf('_pass') !== -1)
+      status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
+    else if (checkStatus.indexOf('_fail') !== -1)
+      status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
     navigator.push({
       componentName: 'NewResource',
       title: translate(model),
@@ -175,7 +185,8 @@ class CheckView extends Component {
           _context: application._context,
           [TYPE]: model.id,
           check: utils.buildRef(resource),
-          application
+          application,
+          status
         },
         model,
         bankStyle
@@ -191,14 +202,6 @@ reactMixin(CheckView.prototype, ResourceMixin);
 reactMixin(CheckView.prototype, Reflux.ListenerMixin);
 CheckView = makeResponsive(CheckView)
 
-function getCheckOverrideProp(type) {
-  const props = utils.getModel(type).properties
-  for (let p in props) {
-    let ref = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
-    if (ref  &&  (ref === CHECK_OVERRIDE ||  isSubclassOf(ref, CHECK_OVERRIDE)))
-      return props[p]
-  }
-}
 var createStyles = utils.styleFactory(CheckView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
     overrideButton: {
