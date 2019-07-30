@@ -291,6 +291,7 @@ module.exports = {
     "invalidValue": "This value is invalid. Please re-enter.",
     "outgoingMessages": "Outgoing Messages",
     "pleaseChoose": "Please choose",
+    "override": "Override",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

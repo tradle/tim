@@ -215,8 +215,18 @@ const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
+const CHECK_OVERRIDE      = 'tradle.CheckOverride'
 
-const APPLICATION_NOT_FORMS = [PRODUCT_REQUEST, FORM_REQUEST, MODELS_PACK, STYLES_PACK, INTRODUCTION, APPLICATION_SUBMITTED, NEXT_FORM_REQUEST, SIMPLE_MESSAGE]
+const APPLICATION_NOT_FORMS = [
+  PRODUCT_REQUEST,
+  FORM_REQUEST,
+  MODELS_PACK,
+  STYLES_PACK,
+  INTRODUCTION,
+  APPLICATION_SUBMITTED,
+  NEXT_FORM_REQUEST,
+  SIMPLE_MESSAGE
+]
 
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
@@ -7009,6 +7019,12 @@ if (!res[SIG]  &&  res._message)
           application.products = []
         application.products.push(stub)
         application._productsCount = application.products.length
+        break
+      case CHECK_OVERRIDE:
+        if (!application.checkOverride)
+          application.checksOverride = []
+        application.checksOverride.push(stub)
+        application.checksOverrideCount = application.checksOverride.length
         break
       default:
       case FORM:

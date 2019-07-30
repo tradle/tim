@@ -211,7 +211,7 @@ class GridRow extends Component {
     //   return row
   }
   formatCol(pName) {
-    let { resource, isModel, search } = this.props.resource
+    let { resource, isModel, search } = this.props
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype || resource.id);
     let properties = model.properties;

@@ -215,7 +215,7 @@ var HomePageMixin = {
   getGridCols() {
     let model = utils.getModel(this.props.modelName)
     let props = model.properties
-    let hasGridCols = model.gridCols !== null
+    let hasGridCols = model.gridCols != null
     let gridCols = hasGridCols  &&  model.gridCols || model.viewCols
     if (!gridCols)
       return

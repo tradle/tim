@@ -8,6 +8,9 @@ module.exports = {
   get MessageView() {
     return require('./MessageView')
   },
+  get CheckView() {
+    return require('./CheckView')
+  },
   get MessageList() {
     return require('./MessageList')
   },
