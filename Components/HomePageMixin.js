@@ -22,6 +22,7 @@ const {
 } = constants.TYPES
 
 const APPLICATION = 'tradle.Application'
+const PHOTO = 'tradle.Photo'
 
 var HomePageMixin = {
   scanFormsQRCode(opts) {
@@ -214,12 +215,16 @@ var HomePageMixin = {
   getGridCols() {
     let model = utils.getModel(this.props.modelName)
     let props = model.properties
-    let gridCols = model.gridCols || model.viewCols
+    let hasGridCols = model.gridCols != null
+    let gridCols = hasGridCols  &&  model.gridCols || model.viewCols
     if (!gridCols)
       return
     let vCols = []
     gridCols.forEach((v) => {
-      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json' && props[v].range !== 'url')
+      if (!props[v].list             &&
+           props[v].range !== 'json' &&
+           props[v].range !== 'url'  &&
+           (props[v].ref !== PHOTO   &&  !hasGridCols))
         vCols.push(v)
       else if (v.indexOf('_group') !== -1) {
         let group = utils.ungroup(model, [v])
