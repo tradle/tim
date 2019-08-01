@@ -11,6 +11,7 @@ import {
 
 import InfiniteCalendar from 'react-infinite-calendar'
 import 'react-infinite-calendar/styles.css'
+import dateformat from 'dateformat'
 
 const DEFAULT_MIN_DATE = new Date('1900/01/01')
 
@@ -36,12 +37,14 @@ module.exports = function createCalendarModal (props) {
   const locale = calendarProps.locale || getDefaultLocaleForDisplay(display)
 
   // sensible defaults
+  const selDate = props.selectedDate ||  new Date()
   calendarProps = defaults(calendarProps, {
     display,
     locale,
     theme: defaultTheme,
     showTodayHelper: false,
-    selectedDate: new Date(),
+    selectedDate: selDate,
+    selected: dateformat(new Date(selDate), 'yyyy-mm-dd'),
     minDate: DEFAULT_MIN_DATE,
   })
 
