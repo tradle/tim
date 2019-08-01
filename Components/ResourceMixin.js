@@ -372,7 +372,7 @@ var ResourceMixin = {
       base0E: '#A36AC7',
       base0F: '#3971ED'
     };
-
+    json = utils.sanitize(json)
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
     let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
