@@ -3963,7 +3963,7 @@ if (!res[SIG]  &&  res._message)
       if (!r[name])
         this.organizeSubmissions(r)
       if (r[name]) {
-        if (r[sname].length !== slength) {
+        if (r[name].length !== slength) {
           list = await this.getObjects(r[name], prop)
           if (list.length)
             list.sort((a, b) => b._time - a._time)
@@ -3974,6 +3974,8 @@ if (!res[SIG]  &&  res._message)
         r[blProp.name] = list
       }
     }
+    if (r.checksOverride)
+      r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
     // let m = this.getModel(r[TYPE])
     if (r.relationshipManagers) {
       r.relationshipManagers.forEach(relationshipManager => {
@@ -7020,7 +7022,7 @@ if (!res[SIG]  &&  res._message)
         application._productsCount = application.products.length
         break
       case CHECK_OVERRIDE:
-        if (!application.checkOverride)
+        if (!application.checksOverride)
           application.checksOverride = []
         application.checksOverride.push(stub)
         application.checksOverrideCount = application.checksOverride.length

@@ -152,7 +152,7 @@ class CheckView extends Component {
     let width = utils.getContentWidth()
     let contentSeparator = getContentSeparator(bankStyle)
     return (
-      <PageView style={[platformStyles.container, {height, width, alignItems: 'center', borderTopColor: bankStyle.linkColor, borderTopWidth: 1}]} separator={contentSeparator} bankStyle={bankStyle} >
+      <PageView style={[platformStyles.container, {height, alignItems: 'center', borderTopColor: bankStyle.linkColor, borderTopWidth: 1}]} separator={contentSeparator} bankStyle={bankStyle} >
         <ScrollView
           ref='checkView'
           style={{width}}>
@@ -164,7 +164,8 @@ class CheckView extends Component {
     );
   }
   createCheckOverride(prop) {
-    const { resource, navigator, bankStyle, application } = this.props
+    const { navigator, bankStyle, application } = this.props
+    const { resource } = this.state
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
     const statusModel = utils.getModel(STATUS)
     const values = statusModel.enum
