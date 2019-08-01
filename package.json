@@ -150,6 +150,7 @@
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#dev",
     "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#dev",
     "react-native-infinite-scroll-view": "github:tradle/react-native-infinite-scroll-view",
+    "react-native-json-tree": "^1.2.0",
     "react-native-localization": "^0.1.12",
     "react-native-orient": "^1.3.3",
     "react-native-orientation": "^3.1.3",

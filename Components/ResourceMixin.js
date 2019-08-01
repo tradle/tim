@@ -6,9 +6,11 @@ import {
   View,
   ActivityIndicator,
   Linking,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView
 } from 'react-native'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
+import JSONTree from 'react-native-json-tree'
 
 import constants from '@tradle/constants'
 
@@ -348,6 +350,90 @@ var ResourceMixin = {
     return val
   },
   showJson(params) {
+    let { json, prop, isView } = params
+    let { resource, bankStyle } = this.props
+    const theme = {
+      scheme: 'google',
+      author: 'seth wright (http://sethawright.com)',
+      base00: '#1d1f21',
+      base01: '#282a2e',
+      base02: '#373b41',
+      base03: '#969896',
+      base04: '#b4b7b4',
+      base05: '#c5c8c6',
+      base06: '#e0e0e0',
+      base07: '#ffffff',
+      base08: '#CC342B',
+      base09: '#F96A38',
+      base0A: '#FBA922',
+      base0B: '#198844',
+      base0C: '#3971ED',
+      base0D: bankStyle.linkColor,
+      base0E: '#A36AC7',
+      base0F: '#3971ED'
+    };
+
+    let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
+    let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
+    let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
+
+    let icon
+    const rType = resource[TYPE]
+    const showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
+    if (showCollapsed  &&  showCollapsed === prop.name)
+      icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
+    let header = <TouchableOpacity onPress={() => {
+      this.state.hidden ? this.setState({hidden: false}) : this.setState({hidden: true})
+    }} style={style} key={this.getNextKey()}>
+                   <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
+                   {icon}
+                </TouchableOpacity>
+    let content = (
+      <View ref='json'>
+        <JSONTree data={json} hideRoot={true} theme={{
+            extend: theme,
+            nestedNodeItemString: ({ style }, nodeType, expanded) => ({
+              style: {
+                ...style,
+                fontSize: 18
+              }
+            })
+          }}
+          shouldExpandNode = {(keyName, data, level) => {
+            if (!keyName.length)
+              return this.state.hidden && false || true
+            else
+              return false
+          }}
+          getItemString={(type, data, itemType, itemString) => {
+            if (type === 'Array')
+              return <Text style={{fontSize: 16, color: '#757575'}}>{itemType} {itemString}</Text>
+            if (type === 'Object')
+              return
+            return <Text style={{fontSize: 16, color: '#757575'}}>{itemType} {itemString}</Text>
+          }}
+          labelRenderer={(raw, nodeType, expanded, hasItems) => {
+            const isArray = nodeType === 'Array'
+            // if (isArray  &&  !hasItems) {
+            //   return <View style={{height: 0}} />
+            const isObject = nodeType === 'Object'
+            let val = isObject && raw[0] || `${raw[0]}:`
+            return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16, color: '#757575' }}>{val}</Text>
+          }}
+          valueRenderer={raw => {
+            if (typeof raw === 'string')
+              raw = raw.replace(/['"]+/g, '')
+            return <Text style={{ padding: 15, fontSize: 16 }}>{raw}</Text>
+          }}
+        />
+      </View>
+    )
+    return <View>
+              {header}
+              {content}
+           </View>
+  },
+  showJson1(params) {
     let { json, indent, isView } = params
     _.extend(params, {rawStyles: createStyles({bankStyle: this.props.bankStyle, indent, isView})})
     if (!Array.isArray(json))
