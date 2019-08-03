@@ -265,6 +265,8 @@ var utils = {
     for (let p in r) {
       if (!r[p]  &&   !r.hasOwnProperty(p))
         delete r[p]
+      else if (r[p]  &&  Array.isArray(r[p])  &&  !r[p].length)
+        delete r[p]
     }
     return r
   },
