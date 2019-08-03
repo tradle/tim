@@ -31,6 +31,7 @@ import uiUtils from '../utils/uiUtils'
 
 const RESOURCE_VIEW = 'ResourceView'
 const MESSAGE_VIEW = 'MessageView'
+const CHECK_VIEW = 'CheckView'
 const APPLICATION_VIEW = 'ApplicationView'
 const RESOURCE_LIST = 'ResourceList'
 
@@ -38,6 +39,7 @@ const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
+const CHECK = 'tradle.Check'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -79,7 +81,7 @@ var ResourceMixin = {
     let {bankStyle, search, currency, country, navigator} = this.props
     if (isMessageView) {
       navigator.push({
-        componentName: MESSAGE_VIEW,
+        componentName: model.subClassOf === CHECK &&  CHECK_VIEW || MESSAGE_VIEW,
         backButtonTitle: 'Back',
         title,
         passProps: {
@@ -353,24 +355,23 @@ var ResourceMixin = {
     let { json, prop, isView } = params
     let { resource, bankStyle } = this.props
     const theme = {
-      scheme: 'google',
-      author: 'seth wright (http://sethawright.com)',
-      base00: '#1d1f21',
-      base01: '#282a2e',
-      base02: '#373b41',
-      base03: '#969896',
-      base04: '#b4b7b4',
-      base05: '#c5c8c6',
-      base06: '#e0e0e0',
-      base07: '#ffffff',
-      base08: '#CC342B',
-      base09: '#F96A38',
-      base0A: '#FBA922',
-      base0B: '#198844',
-      base0C: '#3971ED',
-      base0D: bankStyle.linkColor,
-      base0E: '#A36AC7',
-      base0F: '#3971ED'
+      scheme: 'custom',
+      base00: '#ffffff', // background
+      base01: '#272935',
+      base02: '#3a4055',
+      base03: '#5a647e',
+      base04: '#d4cfc9',
+      base05: '#e6e1dc',
+      base06: '#f4f1ed',
+      base07: '#f9f7f3',
+      base08: '#da4939',
+      base09: bankStyle.confirmationColor, // number
+      base0A: '#ffc66d',
+      base0B: bankStyle.linkColor, // string
+      base0C: '#519f50',
+      base0D: '#757575', // label
+      base0E: '#b6b3eb',
+      base0F: '#bc9458'
     };
     json = utils.sanitize(json)
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
@@ -380,8 +381,8 @@ var ResourceMixin = {
     let icon
     const rType = resource[TYPE]
     const showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
-    if (showCollapsed  &&  showCollapsed === prop.name)
-      icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
+    // if (showCollapsed  &&  showCollapsed === prop.name)
+    //   icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
     let header = <TouchableOpacity onPress={() => {
       this.state.hidden ? this.setState({hidden: false}) : this.setState({hidden: true})
     }} style={style} key={this.getNextKey()}>
@@ -390,7 +391,7 @@ var ResourceMixin = {
                 </TouchableOpacity>
     let content = (
       <View ref='json'>
-        <JSONTree data={json} hideRoot={true} theme={{
+        <JSONTree data={json} invertTheme={false} hideRoot={true} theme={{
             extend: theme,
             nestedNodeItemString: ({ style }, nodeType, expanded) => ({
               style: {
@@ -407,10 +408,10 @@ var ResourceMixin = {
           }}
           getItemString={(type, data, itemType, itemString) => {
             if (type === 'Array')
-              return <Text style={{fontSize: 16, color: '#757575'}}>{itemType} {itemString}</Text>
+              return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
             if (type === 'Object')
               return
-            return <Text style={{fontSize: 16, color: '#757575'}}>{itemType} {itemString}</Text>
+            return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
           }}
           labelRenderer={(raw, nodeType, expanded, hasItems) => {
             const isArray = nodeType === 'Array'
@@ -418,7 +419,7 @@ var ResourceMixin = {
             //   return <View style={{height: 0}} />
             const isObject = nodeType === 'Object'
             let val = isObject && raw[0] || `${raw[0]}:`
-            return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16, color: '#757575' }}>{val}</Text>
+            return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16 }}>{val}</Text>
           }}
           valueRenderer={raw => {
             if (typeof raw === 'string')
