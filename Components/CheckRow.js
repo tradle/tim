@@ -28,11 +28,10 @@ import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
 import RowMixin from './RowMixin'
 import StyleSheet from '../StyleSheet'
-import appStyle from '../styles/appStyle.json'
 import { Text } from './Text'
 
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
-const OVERRIDE_STATUS = 'tradle.OverrideStatus'
+const STATUS_OVERRIDE = 'tradle.OverrideStatus'
 
 const CHECK  = 'tradle.Check'
 const STATUS = 'tradle.Status'
@@ -52,98 +51,16 @@ class CheckRow extends Component {
   }
 
   render() {
-    let {resource, lazy, onSelect, modelName, bankStyle, application } = this.props
+    let { resource, lazy, onSelect } = this.props
     let rType = utils.getType(resource)
     let model = utils.getModel(rType);
-    let r = resource
 
-    let date
-    let isCheck = utils.isSubclassOf(model, CHECK)
-    let isStub = utils.isStub(resource)
-    if (!isStub  &&  r) {
-      let dateP
-      if (resource.dateVerified)
-        dateP = 'dateVerified'
-      else if (isCheck)
-        dateP = 'dateChecked'
-      if (!dateP)
-        dateP = resource.date && 'date' || '_time'
-      let dateVal = resource[dateP]
-      if (dateVal) {
-        let dateFormatted = dateformat(dateVal, 'mmm dS, yyyy h:MM TT')
-        date = <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
-      }
-    }
-    let dn = utils.getDisplayName(resource)
-    let title
-
-    if (utils.getModel(modelName).abstract)
-      title = translate(model)
-
-    let checkOverrideIcon
-    let titleComponent
-    if (!resource.status) {
-      titleComponent = <Text style={styles.rTitle}>{dn || title}</Text>
-    }
-    else {
-      let statusId = this.getEnumID(resource.status.id)
-      let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
-      let checkIcon
-      let checkOverrideStatus
-      if (application  &&  application.checksOverride) {
-        const checkId = utils.getId(resource)
-        let checkType = utils.getType(resource)
-        let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
-        if (checkOverrideProp.length) {
-          const pref = checkOverrideProp[0].items.ref
-          const rId = utils.getId(resource)
-          const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
-          if (checkOverride.length) {
-            const statusModel = utils.getModel(OVERRIDE_STATUS)
-            checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].status.title)
-          }
-        }
-      }
-      const { icon, color } = statusM
-      let style, size, icolor
-      if (statusId === 'warning'  ||  statusId === 'error') {
-        // style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
-        size = 37
-        icolor = color
-      }
-      else {
-        style = [styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]
-        size = 30
-        icolor = '#ffffff'
-      }
-
-      if (icon) {
-        checkIcon = <View style={style}>
-                      <Icon color={icolor} size={size} name={icon} />
-                    </View>
-      }
-      if (checkOverrideStatus) {
-        style = [styles.checkButton, {alignSelf: 'flex-end', alignItems: 'center', width: 20, height: 20, marginTop: -20, backgroundColor: checkOverrideStatus.color}]
-        checkOverrideIcon = <View style={style}>
-                              <Icon color={'#ffffff'} size={20} name={checkOverrideStatus.icon} />
-                            </View>
-      }
-      titleComponent = <View style={styles.titleView}>
-                         <View>
-                         {checkIcon}
-                         {checkOverrideIcon}
-                         </View>
-                         <View style={{justifyContent: 'center', paddingLeft: 10}}>
-                           <Text style={styles.rTitle}>{dn}</Text>
-                           <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
-                         </View>
-                       </View>
-    }
-
+    let date = this.getDateComponent(model)
+    let title = this.getTitleComponent(model)
     let header =  <View style={styles.header} key={this.getNextKey()}>
                     <View style={styles.noImageBlock}>
                       <View style={styles.title}>
-                        {titleComponent}
+                        {title}
                       </View>
                       <View style={styles.checkDate}>
                         {date}
@@ -156,6 +73,92 @@ class CheckRow extends Component {
                {header}
              </TouchableOpacity>
            </View>
+  }
+  getDateComponent(model) {
+    let { resource } = this.props
+
+    let isCheck = utils.isSubclassOf(model, CHECK)
+    let isStub = utils.isStub(resource)
+    if (isStub  ||  !resource)
+      return
+    let dateP
+    if (resource.dateVerified)
+      dateP = 'dateVerified'
+    else if (isCheck)
+      dateP = 'dateChecked'
+    if (!dateP)
+      dateP = resource.date && 'date' || '_time'
+    let dateVal = resource[dateP]
+    if (dateVal) {
+      let dateFormatted = dateformat(dateVal, 'mmm dS, yyyy h:MM TT')
+      return <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
+    }
+  }
+  getTitleComponent(model) {
+    let {resource, application, modelName } = this.props
+    let dn = utils.getDisplayName(resource)
+    let title
+    if (utils.getModel(modelName).abstract)
+      title = translate(model)
+
+    if (!resource.status)
+      return <Text style={styles.rTitle}>{dn || title}</Text>
+
+    let statusId = this.getEnumID(resource.status.id)
+    let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
+    let checkIcon
+    let checkOverrideStatus
+    let checkOverrideIcon
+
+    if (application  &&  application.checksOverride) {
+      const checkId = utils.getId(resource)
+      let checkType = utils.getType(resource)
+      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+      if (checkOverrideProp.length) {
+        const pref = checkOverrideProp[0].items.ref
+        const rId = utils.getId(resource)
+        const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
+        if (checkOverride.length) {
+          const statusModel = utils.getModel(STATUS_OVERRIDE)
+          checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].status.title)
+        }
+      }
+    }
+    const { icon, color } = statusM
+    let style, size, icolor
+    if (statusId === 'warning'  ||  statusId === 'error') {
+      // style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
+      size = 37
+      icolor = color
+    }
+    else {
+      style = [styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]
+      size = 30
+      icolor = '#ffffff'
+    }
+
+    if (icon) {
+      checkIcon = <View style={style}>
+                    <Icon color={icolor} size={size} name={icon} />
+                  </View>
+    }
+    if (checkOverrideStatus) {
+      style = [styles.checkButton, {alignSelf: 'flex-end', alignItems: 'center', width: 20, height: 20, marginTop: -20, backgroundColor: checkOverrideStatus.color}]
+      checkOverrideIcon = <View style={style}>
+                            <Icon color={'#ffffff'} size={20} name={checkOverrideStatus.icon} />
+                          </View>
+    }
+    return <View style={styles.titleView}>
+             <View>
+             {checkIcon}
+             {checkOverrideIcon}
+             </View>
+             <View style={{justifyContent: 'center', paddingLeft: 10}}>
+               <Text style={styles.rTitle}>{dn}</Text>
+               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
+             </View>
+           </View>
+
   }
 }
 
