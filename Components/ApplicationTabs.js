@@ -266,16 +266,6 @@ class ApplicationTabs extends Component {
         progress = formTypes.length / m.forms.length
     }
     let progressColor = '#a0d0a0' //bankStyle.linkColor
-    // if (resource.status) {
-    //   switch (resource.status) {
-    //     case 'approved':
-    //       progressColor = '#A6D785'
-    //       break
-    //     case 'denied':
-    //       progressColor = '#EE3333'
-    //       break
-    //   }
-    // }
 
     return <View style={styles.progress}>
              <Text style={styles.title}>Progress</Text>
