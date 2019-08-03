@@ -6991,6 +6991,8 @@ if (!res[SIG]  &&  res._message)
       application.products = []
     if (application.requestErrors)
       application.requestErrors = []
+    if (application.checksOverride)
+      application.checksOverride = []
 
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
