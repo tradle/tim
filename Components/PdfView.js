@@ -28,12 +28,13 @@ class PdfView extends Component {
 
     let currentRoutes = props.navigator.getCurrentRoutes()
     let currentRoutesIdx = currentRoutes.length - 1
-    currentRoutes[currentRoutesIdx].onRightButtonPress = this.onSubmit.bind(this)
+    currentRoutes[currentRoutesIdx].onRightButtonPress = this.submit.bind(this)
   }
-  onSubmit() {
+  submit() {
     this.props.navigator.pop()
     let { prop, item, onSubmit } = this.props
-    onSubmit(prop, item)
+    if (onSubmit)
+      onSubmit(prop, item)
   }
   renderError(description) {
     return <Text  style={styles.error}>error :( - {description && description || ''}</Text>
@@ -52,12 +53,17 @@ class PdfView extends Component {
   }
   render() {
     let { item } = this.props
+    let { url } = item
+    if (url.indexOf('data:') === 0) {
+      let idx = url.indexOf(';base64')
+      url = url.substring(idx + 7)
+    }
 
     return <PDFView
       style={platformStyles.container}
       onError={(error) => this.renderError(error)}
       onLoad={this.renderLoading}
-      resource={item.url}
+      resource={url}
       resourceType={'base64'}
     />
   }
