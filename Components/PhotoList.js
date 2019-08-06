@@ -20,6 +20,7 @@ import Image from './Image'
 
 const MIN_WIDTH = 140
 const PHOTO = 'tradle.Photo'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 // import Animated from 'Animated'
 class PhotoList extends Component {
@@ -86,16 +87,33 @@ class PhotoList extends Component {
     if (!uri)
       return
     let { isView, callback } = this.props
-    let source = {uri: uri};
-    let isDataUrl = utils.isImageDataURL(photo.url)
-    let isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
-    if (isDataUrl  ||  uri.charAt(0) == '/')
-      source.isStatic = true;
+    let source
+    let onPress, isPDF, isPng
+    if (callback)
+      onPress = callback.bind(this, photo)
+    else {
+      if (photo.url.indexOf(':application/pdf') !== -1) {
+        isPDF = true
+        onPress = this.showPDF.bind(this, {photo, isView})
+      }
+      else
+        onPress = this.showCarousel.bind(this, {photo, isView})
+    }
+
+    if (isPDF)
+      source = PDF_ICON
+    else {
+      source = {uri: uri};
+      let isDataUrl = utils.isImageDataURL(photo.url)
+      isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
+      if (isDataUrl  ||  uri.charAt(0) == '/')
+        source.isStatic = true;
+    }
     let item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
         <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
-          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, {photo, isView})}>
+          <TouchableHighlight underlayColor='transparent' onPress={onPress}>
              {item}
           </TouchableHighlight>
         </Animated.View>
@@ -119,6 +137,17 @@ class PhotoList extends Component {
     // case 5:
       return {width: d5, height: d5};
     // }
+  }
+  showPDF({photo}) {
+    let route = {
+      backButtonTitle: 'Back',
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url
+      },
+      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
+    }
+    this.props.navigator.push(route)
   }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
