@@ -75,7 +75,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country,
-          search, photo, component, paintError, paintHelp, required } = this.props
+          search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -188,7 +188,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isImmutable || prop.readOnly)
+    if (!exploreData  && (isImmutable || prop.readOnly))
       actionItem = content
     else if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
