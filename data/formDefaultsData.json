@@ -329,8 +329,10 @@
     "firstName": "SARAH MEREDYTH",
     "lastName": "MORGAN",
     "dateOfIssue": 1358553600000,
+    "dateOfBirth": 195368400000,
     "documentNumber": "MORGA753116SM9IJ 35",
     "issuer": "DVLA",
+    "full": "34 South Hill Road, Kent DA12 1JX, UK",
     "dateOfExpiry": 1674000000000
   },
   "tradle.WealthCV": {
