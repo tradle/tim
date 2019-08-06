@@ -398,34 +398,64 @@ const disableBlockchainSync = node => {
 }
 
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
+  const from = utils.buildRef(me)
   const createdByBot = [
-    APPLICATION,
-    // DRAFT_APPLICATION,
-    VERIFICATION,
-    SEAL,
-    'tradle.SanctionsCheck',
-    'tradle.CorporationExistsCheck',
-  ].map(id => {
-    const model = utils.getModel(id)
+    { type: APPLICATION },
+    // { type: APPLICATION,
+    //   bookmark: {
+    //     [TYPE]: APPLICATION,
+    //     _org: botPermalink,
+    //     relationshipManagers: [me]
+    //   },
+    //   message: translate('applicationsWhereI_RM')
+    // },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        status: 'started'
+      },
+      message: translate('applicationsStarted')
+    },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        status: 'In review'
+      },
+      message: translate('applicationsInReview')
+    },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        relationshipManagers: ['NULL']
+      },
+      message: translate('applicationsNotAssigned')
+    },
+    { type: VERIFICATION },
+    { type: SEAL },
+    { type: 'tradle.SanctionsCheck' },
+    { type: 'tradle.CorporationExistsCheck' },
+    { type: MESSAGE,
+      bookmark: {
+        [TYPE]: MESSAGE,
+        _inbound: false,
+        _counterparty: ALL_MESSAGES,
+      },
+    }
+  ].map(b => {
+    const { type, bookmark, message } = b
+    const model = utils.getModel(type)
     return {
       [TYPE]: BOOKMARK,
-      message: translate(model), // utils.makeModelTitle(model, true),
-      bookmark: {
-        [TYPE]: id,
+      message: message  ||  translate(model), // utils.makeModelTitle(model, true),
+      bookmark: bookmark  ||  {
+        [TYPE]: type,
         _org: botPermalink
       },
-      from: utils.buildRef(me)
+      from
     }
-  })
-  createdByBot.push({
-    [TYPE]: BOOKMARK,
-    message: translate('outgoingMessages'),
-    bookmark: {
-      [TYPE]: MESSAGE,
-      _inbound: false,
-      _counterparty: ALL_MESSAGES,
-    },
-    from: utils.buildRef(me)
   })
 
   return createdByBot
@@ -3933,7 +3963,7 @@ if (!res[SIG]  &&  res._message)
       if (!r[name])
         this.organizeSubmissions(r)
       if (r[name]) {
-        if (r[sname].length !== slength) {
+        if (r[name].length !== slength) {
           list = await this.getObjects(r[name], prop)
           if (list.length)
             list.sort((a, b) => b._time - a._time)
@@ -3944,6 +3974,8 @@ if (!res[SIG]  &&  res._message)
         r[blProp.name] = list
       }
     }
+    if (r.checksOverride)
+      r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
     // let m = this.getModel(r[TYPE])
     if (r.relationshipManagers) {
       r.relationshipManagers.forEach(relationshipManager => {
@@ -4924,37 +4956,40 @@ if (!res[SIG]  &&  res._message)
         delete returnVal.verifications
         await save(returnVal, true, lens)
 
-        if (rtype === ASSIGN_RM) {
-          let app = self._getItem(returnVal.application)
-          let appToUpdate
-          if (app)
-            appToUpdate = utils.clone(app)
-          else {
-            let appId = utils.getId(returnVal.application)
-            if (foundRefs) {
-              let l = foundRefs.filter((r) => utils.getId(r.value) === appId)
-              if (l.length)
-                app = l[0].value
-            }
-            if (!app)
-              app = await self._getItemFromServer(returnVal.application)
-            if (!app)
-              appToUpdate = utils.clone(returnVal.applications)
-            else {
-              appToUpdate = app
-              self._setItem(utils.getId(app), app)
-            }
-          }
-          if (!appToUpdate._context)
-            appToUpdate._context = returnVal._context
+        await handleAssignRM()
+        await handleCheckOverride()
+        // const isCheckOverride = utils.isSubclassOf(utils.getModel(rtype), CHECK_OVERRIDE)
+        // if (rtype === ASSIGN_RM) {
+        //   let app = self._getItem(returnVal.application)
+        //   let appToUpdate
+        //   if (app)
+        //     appToUpdate = utils.clone(app)
+        //   else {
+        //     let appId = utils.getId(returnVal.application)
+        //     if (foundRefs) {
+        //       let l = foundRefs.filter((r) => utils.getId(r.value) === appId)
+        //       if (l.length)
+        //         app = l[0].value
+        //     }
+        //     if (!app)
+        //       app = await self._getItemFromServer(returnVal.application)
+        //     if (!app)
+        //       appToUpdate = utils.clone(returnVal.applications)
+        //     else {
+        //       appToUpdate = app
+        //       self._setItem(utils.getId(app), app)
+        //     }
+        //   }
+        //   if (!appToUpdate._context)
+        //     appToUpdate._context = returnVal._context
 
-          if (!appToUpdate.relationshipManagers)
-            appToUpdate.relationshipManagers = []
-          appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
-          self.trigger({action: 'updateRow', resource: appToUpdate })
-          self.trigger({action: 'getItem', resource: appToUpdate})
-        //   self.dbPut(utils.getId(app), app)
-        }
+        //   if (!appToUpdate.relationshipManagers)
+        //     appToUpdate.relationshipManagers = []
+        //   appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
+        //   self.trigger({action: 'updateRow', resource: appToUpdate })
+        //   self.trigger({action: 'getItem', resource: appToUpdate})
+        // //   self.dbPut(utils.getId(app), app)
+        // }
         let toId = utils.getId(returnVal.to)
         let to = self._getItem(toId)
 
@@ -4986,6 +5021,50 @@ if (!res[SIG]  &&  res._message)
       } catch (err) {
         debug('Store._putResourceInDB:', err.stack)
       }
+    }
+    async function handleCheckOverride() {
+      if (!utils.isSubclassOf(utils.getModel(returnVal[TYPE]), CHECK_OVERRIDE))
+        return
+      let appToUpdate = await getApp()
+      appToUpdate.status = 'In review'  // HACK
+      self.trigger({action: 'updateRow', resource: appToUpdate, forceUpdate: true })
+      self.trigger({action: 'getItem', resource: appToUpdate})
+    }
+    async function handleAssignRM() {
+      if (returnVal[TYPE] !== ASSIGN_RM)
+        return
+      let appToUpdate = await getApp()
+      if (!appToUpdate.relationshipManagers)
+        appToUpdate.relationshipManagers = []
+      appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
+      self.trigger({action: 'updateRow', resource: appToUpdate })
+      self.trigger({action: 'getItem', resource: appToUpdate})
+    }
+    async function getApp() {
+      let app = self._getItem(returnVal.application)
+      let appToUpdate
+      if (app  &&  app.status)
+        appToUpdate = utils.clone(app)
+      else {
+        let appId = utils.getId(returnVal.application)
+        if (foundRefs) {
+          let l = foundRefs.filter((r) => utils.getId(r.value) === appId)
+          if (l.length)
+            app = l[0].value
+        }
+        if (!app)
+          app = await self._getItemFromServer(returnVal.application)
+        if (!app)
+          appToUpdate = utils.clone(returnVal.applications)
+        else {
+          appToUpdate = app
+          self._setItem(utils.getId(app), app)
+        }
+      }
+      if (!appToUpdate._context)
+        appToUpdate._context = returnVal._context
+
+      return appToUpdate
     }
     async function updateRequestFoRefresh(to) {
       let [ requestForRefresh ] = await self.searchMessages({to, modelName: FORM_REQUEST, isRefresh: true, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
@@ -6931,6 +7010,9 @@ if (!res[SIG]  &&  res._message)
       application.products = []
     if (application.requestErrors)
       application.requestErrors = []
+    if (application.checksOverride)
+      application.checksOverride = []
+
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
       let type = m.subClassOf || m.id
@@ -6961,7 +7043,7 @@ if (!res[SIG]  &&  res._message)
         application._productsCount = application.products.length
         break
       case CHECK_OVERRIDE:
-        if (!application.checkOverride)
+        if (!application.checksOverride)
           application.checksOverride = []
         application.checksOverride.push(stub)
         application.checksOverrideCount = application.checksOverride.length
@@ -6970,7 +7052,7 @@ if (!res[SIG]  &&  res._message)
       case FORM:
         if (m.id === PRODUCT_REQUEST  ||  m.id === FORM_REQUEST)
           break
-        if (!FORM  &&  !utils.isSubclassOf(FORM))
+        if (!FORM  &&  !utils.isSubclassOf(FORM, m))
           break
         if (APPLICATION_NOT_FORMS.includes(m.id))
           break
@@ -10314,8 +10396,16 @@ if (!res[SIG]  &&  res._message)
           let dataClaim = await this.searchMessages({modelName: DATA_CLAIM, to: val.from.organization})
           if (dataClaim  &&  dataClaim.length  ||  utils.isAgent())
             this.deleteMessageFromChat(utils.getId(val.from.organization), val)
-          else
+          else {
+            if (!me.isEmployee  &&
+                 val.form === PRODUCT_REQUEST  &&
+                 val.message === 'See our list of products') {
+              let pr = await this.searchMessages({modelName: PRODUCT_REQUEST, to: org})
+              if (pr  &&  pr.length)
+                return
+            }
             this.trigger({action: 'addItem', resource: val})
+          }
         }
         else {
           var fid = this._getItem(val.from)
@@ -10802,7 +10892,6 @@ await fireRefresh(val.from.organization)
         this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
-        let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
         let changeFr = await this.changeName(val, fr)
         if (changeFr)

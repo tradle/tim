@@ -80,6 +80,8 @@ const merged = extend({
     // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
     // lenka
     // 'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
+    // svb
+    'https://yfu6r9h8w0.execute-api.us-east-1.amazonaws.com/dev',
   ],
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {

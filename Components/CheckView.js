@@ -163,7 +163,8 @@ class CheckView extends Component {
     );
   }
   createCheckOverride(prop) {
-    const { resource, navigator, bankStyle, application } = this.props
+    const { navigator, bankStyle, application } = this.props
+    const { resource } = this.state
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
     const statusModel = utils.getModel(STATUS)
     const values = statusModel.enum

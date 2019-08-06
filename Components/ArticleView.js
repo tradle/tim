@@ -49,7 +49,8 @@ class ArticleView extends Component {
   render() {
     let { bankStyle, actionBarTitle, href, url, action } = this.props
     bankStyle = bankStyle || defaultBankStyle
-    let wView = <WebView style={styles.webView}
+    let isWeb = utils.isWeb()
+    let wView = <WebView style={isWeb && {flex: 1} || styles.webView}
                   source={href ? {uri: href} : url}
                   startInLoadingState={true}
                   renderError={this.renderError.bind(this)}

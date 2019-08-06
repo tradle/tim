@@ -217,7 +217,13 @@ var search = {
           if (props[p].items.ref) {
             if (!val.length)
               continue
-            let s = `${p}___permalink: [`
+            if (val.length === 1  &&  val[0].indexOf('NULL') !== -1) {
+              if (val[0].charAt(0) === '!')
+                op.NULL += `\n ${p}: false`
+              else
+                op.NULL += `\n ${p}: true`
+              continue
+            }            let s = `${p}___permalink: [`
             val.forEach((r, i) => {
               if (i)
                 s += ', '

@@ -13,13 +13,15 @@ import {
   StyleSheet,
   View,
   ListView,
+  Text,
   Animated,
-  TouchableHighlight,
+  TouchableOpacity,
 } from 'react-native'
 
 import Image from './Image'
 
 const PHOTO = 'tradle.Photo'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 // import Animated from 'Animated'
 class PhotoList extends Component {
@@ -48,8 +50,9 @@ class PhotoList extends Component {
     if (this.props.resource[ROOT_HASH] !== nextProps.resource[ROOT_HASH])
       return true
 
-    return nextProps.forceUpdate  ||  !_.isEqual(this.props.resource.photos, nextProps.resource.photos)  ||
-           !_.isEqual(this.props.photos, nextProps.photos)
+    return nextProps.forceUpdate                            ||
+           !_.isEqual(this.props.photos, nextProps.photos)  ||
+           !_.isEqual(this.props.resource.photos, nextProps.resource.photos)
   }
   render() {
     let { photos, isView, style } = this.props
@@ -62,10 +65,10 @@ class PhotoList extends Component {
     if (isView)
       addStyle.marginTop = -7
     return (
-       <View style={[styles.photoContainer, addStyle]} key={this.getNextKey() + '_photo'}>
-         {val}
-       </View>
-     );
+      <View style={[styles.photoContainer, addStyle]} key={this.getNextKey() + '_photo'}>
+        {val}
+      </View>
+    );
   }
   renderPhotoList(photos) {
     let imageStyle = this.props.style;
@@ -113,24 +116,79 @@ class PhotoList extends Component {
     if (!uri)
       return
     let { isView, callback } = this.props
-    let source = {uri: uri};
-    let isDataUrl = utils.isImageDataURL(photo.url)
-    let isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
-    if (isDataUrl  ||  uri.charAt(0) == '/')
-      source.isStatic = true;
-    let item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
+    let source
+    let onPress, isPDF, isPng
+    if (callback)
+      onPress = callback.bind(this, photo)
+    else {
+      let url = photo.url
+      if (url.indexOf(':application/pdf;') !== -1  ||  url.indexOf(':pdf/jpeg;') !== -1) {
+        isPDF = true
+        onPress = this.showPDF.bind(this, {photo, isView})
+      }
+      else
+        onPress = this.showCarousel.bind(this, {photo, isView})
+    }
+    let item
+    if (isPDF) {
+      source = { uri: PDF_ICON }
+      if (photo.fileName) {
+        let height = imageStyle.height || 200
+        item = <View style={{height}}>
+                 <Text style={{fontSize: 12, color: '#757575', alignSelf: 'flex-end'}}>{photo.fileName}</Text>
+                 <Image source={source} resizeMode='cover' style={[styles.thumbCommon, {width: 140, height: 140, alignSelf: 'flex-end', backgroundColor: 'transparent'}]} />
+               </View>
+      }
+      else
+        item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
+    }
+    else {
+      source = { uri: uri }
+      let isDataUrl = utils.isImageDataURL(photo.url)
+      isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
+      if (isDataUrl  ||  uri.charAt(0) == '/')
+        source.isStatic = true;
+      item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
+    }
+
 
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
         <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
-          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, {photo, isView})}>
+          <TouchableOpacity underlayColor='transparent' onPress={onPress}>
              {item}
-          </TouchableHighlight>
+          </TouchableOpacity>
         </Animated.View>
       </Col>
     )
   }
-
+  showPDF({photo}) {
+    if (utils.isWeb())
+      this.showWebPDF({photo})
+    else
+      this.showMobilePDF({photo})
+  }
+  showWebPDF({photo}) {
+    this.props.navigator.push({
+      backButtonTitle: 'Back',
+      title: photo.fileName || 'PDF',
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url
+      },
+    })
+  }
+  showMobilePDF({photo}) {
+    this.props.navigator.push({
+      // title: translate(model, model.properties[propName]),
+      backButtonTitle: 'Back',
+      title: photo.fileName || 'PDF',
+      componentName: 'PdfView',
+      passProps: {
+        item: {isPdf: true, url: photo.url}
+      }
+    });
+  }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
 reactMixin(PhotoList.prototype, RowMixin);
@@ -150,90 +208,3 @@ var styles = StyleSheet.create({
 })
 
 module.exports = PhotoList;
-  // renderPhotoList(val, styles) {
-  //   var dataSource = this.state.dataSource.cloneWithRows(
-  //     groupByEveryN(val, this.props.numberInRow || 3)
-  //   );
-  //   return (
-  //     <View style={styles.row}>
-  //        <ListView
-  //           scrollEnabled = {true}
-  //           removeClippedSubviews={false}
-  //           enableEmptySections={true}
-  //           style={{overflow: 'visible'}}
-  //           renderRow={this.renderRow.bind(this, styles)}
-  //           dataSource={dataSource} />
-  //     </View>
-  //   );
-  // }
-
-  // renderRow(styles, photos)  {
-  //   var len = photos.length;
-  //   var imageStyle = this.props.style;
-  //   if (!imageStyle) {
-  //     switch (len) {
-  //       case 1:
-  //       case 2:
-  //       case 3:
-  //         imageStyle = [styles.thumb3];
-  //         break;
-  //       case 4:
-  //         imageStyle = [styles.thumb4];
-  //         break;
-  //       default:
-  //       case 5:
-  //         imageStyle = [styles.thumb5];
-  //         break;
-  //      }
-  //    }
-  //    var photos = photos.map((photo) => {
-  //     if (photo === null)
-  //       return null;
-  //     // var title = !photo.title || photo.title === 'photo'
-  //     //           ? <View />
-  //     //           : <Text style={styles.photoTitle}>{photo.title}</Text>
-
-  //     // return (
-  //     // <Animated.Image                         // Base: Image, Text, View
-  //     //   source={{uri: utils.getImageUri(photo.url)}}
-  //     //   style={{
-  //     //     flex: 1,
-  //     //     transform: [                        // `transform` is an ordered array
-  //     //       {scale: this.state.bounceValue},  // Map `bounceValue` to `scale`
-  //     //     ]
-  //     //   }}
-  //     // />);
-  //     // var uri = utils.getImageUri(photo.url)
-  //     var uri = photo.url
-  //     if (!uri)
-  //       return <View />
-  //     var source = {uri: uri};
-  //     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
-  //       source.isStatic = true;
-
-  //     return (
-  //       <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-  //         <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-  //            <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
-  //         </TouchableHighlight>
-  //       </View>
-  //     );
-  //   });
-
-  //   return (
-  //     <View style={styles.row}>
-  //       {photos}
-  //     </View>
-  //   );
-  // }
-  // componentDidMount() {
-  //  // this.state.bounceValue.setValue(1.5);     // Start large
-  //   Animated.spring(                          // Base: spring, decay, timing
-  //     this.state.bounceValue,                 // Animate `bounceValue`
-  //     {
-  //       toValue: 0.8,                         // Animate to smaller size
-  //       friction: 1,                          // Bouncier spring
-  //     }
-  //   ).start();                                // Start the animation
-
-  // }

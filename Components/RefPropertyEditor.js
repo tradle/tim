@@ -75,7 +75,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country,
-          search, photo, component, paintError, paintHelp, required } = this.props
+          search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -181,7 +181,7 @@ debug(source.uri.substring(0, 100))
 
     let help = paintHelp(prop)
     let actionItem
-    if (isImmutable || prop.readOnly)
+    if (!exploreData  &&  (isImmutable || prop.readOnly))
       actionItem = content
     else if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
@@ -191,12 +191,12 @@ debug(source.uri.substring(0, 100))
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        // let isDocument = prop.range === 'document'
-        // if (isDocument)
-        //   actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
-        //                  {content}
-        //                </DocumentInput>
-        // else
+        let isDocument = prop.range === 'document'
+        if (isDocument)
+          actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
+                         {content}
+                       </DocumentInput>
+        else
           actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                          {content}
                        </ImageInput>
