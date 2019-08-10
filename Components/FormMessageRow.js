@@ -1,16 +1,24 @@
+import React, { Component } from 'react'
+import {
+  TouchableHighlight,
+  View,
+} from 'react-native'
+import PropTypes from 'prop-types'
 
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { makeResponsive } from 'react-native-orient'
+import dateformat from 'dateformat'
+
+import constants from '@tradle/constants'
+const { IDENTITY } = constants.TYPES
+var { TYPE, SIG } = constants
 
 import utils, { translate } from '../utils/utils'
-import dateformat from 'dateformat'
 import PhotoList from './PhotoList'
-import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
 import { makeStylish } from './makeStylish'
-
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
 import { Text } from './Text'
@@ -21,17 +29,8 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 const SELFIE = 'tradle.Selfie'
-// const SENT = 'Sent'
-
-const { IDENTITY } = constants.TYPES
-var { TYPE, SIG } = constants
-import {
-  TouchableHighlight,
-  View,
-} from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png'
+ // const SENT = 'Sent'
 
 class FormMessageRow extends Component {
   static displayName = 'FormMessageRow'
@@ -164,14 +163,15 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    let notSigned = !resource[SIG]
+    const notSigned = !resource[SIG]
 
     let headerStyle = [chatStyles.verifiedHeader, notSigned && styles.notSignedHeaderStyle || styles.headerStyle]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
-    let model = utils.getModel(utils.getType(resource))
+    const model = utils.getModel(utils.getType(resource))
+    const { properties } = model
     if (noContent) {
-      let prop = model.properties._time
+      let prop = properties._time
       if (prop  &&  resource[prop.name]) {
         let val = dateformat(new Date(resource[prop.name]), 'mmm d, yyyy')
         renderedRow = [this.getPropRow(prop, resource, val)]
@@ -183,8 +183,26 @@ class FormMessageRow extends Component {
       sentTo = <View style={styles.sentToView}>
                  <Text style={styles.sentTo}>{translate('asSentTo', resource.to.organization.title)}</Text>
                </View>
+
+    let docProps = utils.getPropertiesWithAnnotation(model, 'range')
+    let pdf, pdfUrl
+    for (let p in docProps) {
+      if (properties[p].range !== 'document')
+        continue
+      if (resource[p]  &&  resource[p].url.indexOf(':application/pdf') !== -1) {
+        pdf = <TouchableHighlight underlayColor='transparent' onPress={this.showPDF.bind(this, {photo: resource[p]})}>
+               <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
+              </TouchableHighlight>
+        break
+      }
+    }
     let row = <View style={{paddingVertical: noContent ? 0 : 5}}>
-                {renderedRow}
+                <View style={{flexDirection: 'row'}}>
+                  <View style={{flex: 10}}>
+                    {renderedRow}
+                  </View>
+                  {pdf}
+                </View>
                 {sentTo}
               </View>
     let contextId = this.getContextId(resource)
@@ -327,6 +345,33 @@ class FormMessageRow extends Component {
     // if (onPressCall)
     //   return {onPressCall: onPressCall}
     // return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+  }
+  showPDF({photo}) {
+    if (utils.isWeb())
+      this.showWebPDF({photo})
+    else
+      this.showMobilePDF({photo})
+  }
+  showWebPDF({photo}) {
+    this.props.navigator.push({
+      backButtonTitle: 'Back',
+      title: photo.fileName || 'PDF',
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url
+      },
+    })
+  }
+  showMobilePDF({photo}) {
+    this.props.navigator.push({
+      // title: translate(model, model.properties[propName]),
+      backButtonTitle: 'Back',
+      title: photo.fileName || 'PDF',
+      componentName: 'PdfView',
+      passProps: {
+        item: {isPdf: true, url: photo.url}
+      }
+    });
   }
 }
 
