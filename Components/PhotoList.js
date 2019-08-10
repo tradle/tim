@@ -20,7 +20,6 @@ import Image from './Image'
 
 const MIN_WIDTH = 140
 const PHOTO = 'tradle.Photo'
-const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 // import Animated from 'Animated'
 class PhotoList extends Component {
@@ -59,7 +58,7 @@ class PhotoList extends Component {
 
     let val = this.renderPhotoList(photos);
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5}]} key={this.getNextKey()}>
+       <View style={this.props.style ? {} : {marginHorizontal: 5}} key={this.getNextKey()}>
          {val}
        </View>
      );
@@ -87,28 +86,20 @@ class PhotoList extends Component {
     if (!uri)
       return
     let { isView, callback } = this.props
-    let source
-    let onPress, isPDF, isPng
+    let onPress
     if (callback)
       onPress = callback.bind(this, photo)
     else {
-      if (photo.url.indexOf(':application/pdf') !== -1) {
-        isPDF = true
-        onPress = this.showPDF.bind(this, {photo, isView})
-      }
-      else
-        onPress = this.showCarousel.bind(this, {photo, isView})
+      if (photo.url.indexOf(':application/pdf') !== -1)
+        return <View/>
+      onPress = this.showCarousel.bind(this, {photo, isView})
     }
 
-    if (isPDF)
-      source = PDF_ICON
-    else {
-      source = {uri: uri};
-      let isDataUrl = utils.isImageDataURL(photo.url)
-      isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
-      if (isDataUrl  ||  uri.charAt(0) == '/')
-        source.isStatic = true;
-    }
+    let isDataUrl = utils.isImageDataURL(photo.url)
+    let isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
+    let source = {uri: uri};
+    if (isDataUrl  ||  uri.charAt(0) == '/')
+      source.isStatic = true;
     let item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
@@ -138,26 +129,12 @@ class PhotoList extends Component {
       return {width: d5, height: d5};
     // }
   }
-  showPDF({photo}) {
-    let route = {
-      backButtonTitle: 'Back',
-      componentName: 'ArticleView',
-      passProps: {
-        href: photo.url
-      },
-      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
-    }
-    this.props.navigator.push(route)
-  }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
 reactMixin(PhotoList.prototype, RowMixin);
 PhotoList = makeResponsive(PhotoList)
 
 var styles = StyleSheet.create({
-  photoContainer: {
-    // paddingTop: 5,
-  },
   thumbCommon: {
     borderWidth: .5,
     borderRadius: 10,
@@ -173,30 +150,3 @@ var styles = StyleSheet.create({
 })
 
 module.exports = PhotoList;
-/*
-  renderRow(photo, imageStyle)  {
-    let uri = photo.url
-    if (!uri)
-      return
-    let source = {uri: uri};
-    if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
-      source.isStatic = true;
-    let item
-    if (photo[TYPE]  &&  photo[TYPE] !== PHOTO) {
-        item = <View style={[imageStyle, {alignItems: 'center'}]}>
-                 <Icon name='ios-paper-outline' size={50} color='#cccccc'/>
-                 <Text style={{fontSize: 10}}>{photo.name}</Text>
-               </View>
-    }
-    else
-      item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
-    return (
-      <View style={[{margin: 1}, imageStyle]} key={this.getNextKey()}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-           {item}
-        </TouchableHighlight>
-      </View>
-    )
-  }
-*/
-
