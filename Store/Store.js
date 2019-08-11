@@ -10895,6 +10895,7 @@ await fireRefresh(val.from.organization)
         this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
+        let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
         let changeFr = await this.changeName(val, fr)
         if (changeFr)
