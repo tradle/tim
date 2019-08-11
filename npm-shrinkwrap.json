@@ -6855,9 +6855,9 @@
       "resolved": "https://registry.npmjs.org/react-native-awesome-card-io/-/react-native-awesome-card-io-0.7.0.tgz"
     },
     "react-native-branch": {
-      "version": "2.3.5",
-      "from": "react-native-branch@>=2.2.4 <3.0.0",
-      "resolved": "http://registry.npmjs.org/react-native-branch/-/react-native-branch-2.3.5.tgz"
+      "version": "3.1.1",
+      "from": "react-native-branch@>=2.2.4 <4.0.0",
+      "resolved": "http://registry.npmjs.org/react-native-branch/-/react-native-branch-3.1.1.tgz"
     },
     "react-native-button": {
       "version": "2.3.0",
