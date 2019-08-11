@@ -122,35 +122,16 @@ class PhotoList extends Component {
       onPress = callback.bind(this, photo)
     else {
       let url = photo.url
-      if (url.indexOf(':application/pdf;') !== -1  ||  url.indexOf(':pdf/jpeg;') !== -1) {
-        isPDF = true
-        onPress = this.showPDF.bind(this, {photo, isView})
-      }
-      else
-        onPress = this.showCarousel.bind(this, {photo, isView})
+      if (url.indexOf(':application/pdf;') !== -1  ||  url.indexOf(':pdf/jpeg;') !== -1)
+        return <View/>
+      onPress = this.showCarousel.bind(this, {photo, isView})
     }
-    let item
-    if (isPDF) {
-      source = { uri: PDF_ICON }
-      if (photo.fileName) {
-        let height = imageStyle.height || 200
-        item = <View style={{height}}>
-                 <Text style={{fontSize: 12, color: '#757575', alignSelf: 'flex-end'}}>{photo.fileName}</Text>
-                 <Image source={source} resizeMode='cover' style={[styles.thumbCommon, {width: 140, height: 140, alignSelf: 'flex-end', backgroundColor: 'transparent'}]} />
-               </View>
-      }
-      else
-        item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
-    }
-    else {
-      source = { uri: uri }
-      let isDataUrl = utils.isImageDataURL(photo.url)
-      isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
-      if (isDataUrl  ||  uri.charAt(0) == '/')
-        source.isStatic = true;
-      item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
-    }
-
+    let isDataUrl = utils.isImageDataURL(photo.url)
+    isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
+    source = { uri: uri }
+    if (isDataUrl  ||  uri.charAt(0) == '/')
+      source.isStatic = true;
+    let item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
 
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
@@ -161,33 +142,6 @@ class PhotoList extends Component {
         </Animated.View>
       </Col>
     )
-  }
-  showPDF({photo}) {
-    if (utils.isWeb())
-      this.showWebPDF({photo})
-    else
-      this.showMobilePDF({photo})
-  }
-  showWebPDF({photo}) {
-    this.props.navigator.push({
-      backButtonTitle: 'Back',
-      title: photo.fileName || 'PDF',
-      componentName: 'ArticleView',
-      passProps: {
-        href: photo.url
-      },
-    })
-  }
-  showMobilePDF({photo}) {
-    this.props.navigator.push({
-      // title: translate(model, model.properties[propName]),
-      backButtonTitle: 'Back',
-      title: photo.fileName || 'PDF',
-      componentName: 'PdfView',
-      passProps: {
-        item: {isPdf: true, url: photo.url}
-      }
-    });
   }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
