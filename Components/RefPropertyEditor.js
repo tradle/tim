@@ -46,6 +46,8 @@ const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const PHOTO_ID = 'tradle.PhotoID'
 const ID_CARD = 'tradle.IDCardType'
+const TREE = 'tradle.Tree'
+
 const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 class RefPropertyEditor extends Component {
@@ -206,15 +208,19 @@ debug(source.uri.substring(0, 100))
                        {content}
                      </TouchableOpacity>
     }
-    else if (!utils.isEnum(prop.ref  ||  prop.items.ref)  && (prop.inlined  ||  utils.getModel(prop.ref).inlined)) {
-      actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
-                     {content}
-                   </TouchableOpacity>
-    }
     else {
-      actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
-                     {content}
-                   </TouchableOpacity>
+      let ref = prop.ref  ||  prop.items.ref
+      let refM = utils.getModel(ref)
+      if (!utils.isEnum(ref)  &&  !utils.isSubclassOf(refM, TREE)  &&  (prop.inlined  ||  refM.inlined)) {
+        actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
+                       {content}
+                     </TouchableOpacity>
+      }
+      else {
+        actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
+                       {content}
+                     </TouchableOpacity>
+      }
     }
     return (
       <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
