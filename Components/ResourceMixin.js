@@ -9,6 +9,7 @@ import {
   TouchableOpacity
 } from 'react-native'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
+// import JSONTree from 'react-native-json-tree'
 
 import constants from '@tradle/constants'
 
@@ -347,6 +348,89 @@ var ResourceMixin = {
     }
     return val
   },
+  // showJson(params) {
+  //   let { json, prop, isView } = params
+  //   let { resource, bankStyle } = this.props
+  //   const theme = {
+  //     scheme: 'custom',
+  //     base00: '#ffffff', // background
+  //     base01: '#272935',
+  //     base02: '#3a4055',
+  //     base03: '#5a647e',
+  //     base04: '#d4cfc9',
+  //     base05: '#e6e1dc',
+  //     base06: '#f4f1ed',
+  //     base07: '#f9f7f3',
+  //     base08: '#da4939',
+  //     base09: bankStyle.confirmationColor, // number
+  //     base0A: '#ffc66d',
+  //     base0B: bankStyle.linkColor, // string
+  //     base0C: '#519f50',
+  //     base0D: '#757575', // label
+  //     base0E: '#b6b3eb',
+  //     base0F: '#bc9458'
+  //   };
+  //   json = utils.sanitize(json)
+  //   let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
+  //   let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
+  //   let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
+
+  //   let icon
+  //   const rType = resource[TYPE]
+  //   const showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
+  //   // if (showCollapsed  &&  showCollapsed === prop.name)
+  //   //   icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
+  //   let header = <TouchableOpacity onPress={() => {
+  //     this.state.hidden ? this.setState({hidden: false}) : this.setState({hidden: true})
+  //   }} style={style} key={this.getNextKey()}>
+  //                  <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
+  //                  {icon}
+  //               </TouchableOpacity>
+  //   let content = (
+  //     <View ref='json'>
+  //       <JSONTree data={json} invertTheme={false} hideRoot={true} theme={{
+  //           extend: theme,
+  //           nestedNodeItemString: ({ style }, nodeType, expanded) => ({
+  //             style: {
+  //               ...style,
+  //               fontSize: 18
+  //             }
+  //           })
+  //         }}
+  //         shouldExpandNode = {(keyName, data, level) => {
+  //           if (!keyName.length)
+  //             return this.state.hidden && false || true
+  //           else
+  //             return false
+  //         }}
+  //         getItemString={(type, data, itemType, itemString) => {
+  //           if (type === 'Array')
+  //             return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+  //           if (type === 'Object')
+  //             return
+  //           return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+  //         }}
+  //         labelRenderer={(raw, nodeType, expanded, hasItems) => {
+  //           const isArray = nodeType === 'Array'
+  //           // if (isArray  &&  !hasItems) {
+  //           //   return <View style={{height: 0}} />
+  //           const isObject = nodeType === 'Object'
+  //           let val = isObject && raw[0] || `${raw[0]}:`
+  //           return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16 }}>{val}</Text>
+  //         }}
+  //         valueRenderer={raw => {
+  //           if (typeof raw === 'string')
+  //             raw = raw.replace(/['"]+/g, '')
+  //           return <Text style={{ padding: 15, fontSize: 16 }}>{raw}</Text>
+  //         }}
+  //       />
+  //     </View>
+  //   )
+  //   return <View>
+  //             {header}
+  //             {content}
+  //          </View>
+  // },
   showJson(params) {
     let { json, indent, isView } = params
     _.extend(params, {rawStyles: createStyles({bankStyle: this.props.bankStyle, indent, isView})})
