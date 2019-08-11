@@ -7,8 +7,9 @@ import PropTypes from 'prop-types'
 
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
+
 import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
@@ -30,7 +31,7 @@ const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 const SELFIE = 'tradle.Selfie'
 const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png'
- // const SENT = 'Sent'
+// const SENT = 'Sent'
 
 class FormMessageRow extends Component {
   static displayName = 'FormMessageRow'

@@ -148,7 +148,7 @@
     "react-native-async-storage-rocks": "^2.2.0",
     "react-native-async-storage-snappy": "^1.2.1",
     "react-native-awesome-card-io": "^0.7.0",
-    "react-native-branch": "^2.2.4",
+    "react-native-branch": "^3.1.1",
     "react-native-button": "^2.3.0",
     "react-native-camera": "github:react-native-community/react-native-camera#fd87a34",
     "react-native-carousel": "github:tradle/react-native-carousel",

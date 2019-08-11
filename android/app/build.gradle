@@ -287,8 +287,11 @@ dependencies {
     // implementation project(':blinkid-react-native')
     implementation project(':react-native-awesome-card-io')
     implementation 'com.android.support:multidex:1.0.1'
+
     implementation project(':react-native-branch')
-    implementation "io.branch.sdk.android:library:3.0.4"
+    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    implementation "com.facebook.react:react-native:+"  // From node_modules
+
     implementation project(':react-native-tcp')
     implementation project(':react-native-os')
     implementation project(':react-native-exception-handler')

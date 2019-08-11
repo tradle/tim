@@ -407,8 +407,7 @@ var NavigationBarRouteMapper = {
         icon = 'ios-send'
         iconSize = 28
       }
-      if (isAndroid)
-        viewStyle = {paddingTop: 14}
+      viewStyle = isAndroid  &&  {paddingTop: 14}
       style = {marginTop: -2}
       break
     case 'Confirm':
@@ -418,13 +417,14 @@ var NavigationBarRouteMapper = {
     case 'View':
       icon = 'md-eye'
       iconSize = 28
+      style = !isAndroid && {marginTop: 2}
       break
     case 'Search':
       icon = 'md-search'
       break
     case 'Profile':
       isProfile = true
-      style = {marginTop: isAndroid ? 10 : 0}
+      style = isAndroid &&  {marginTop: 10}
       iconSize = 28
       icon = 'md-person'
       break
