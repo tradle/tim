@@ -88,7 +88,8 @@ class VerificationRow extends Component {
   }
 
   render() {
-    let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName, multiChooser, bankStyle } = this.props
+    let {resource, isChooser, lazy, parentResource, onSelect, search, searchCriteria,
+         prop, modelName, multiChooser, bankStyle } = this.props
     let rType = utils.getType(resource)
     let model = utils.getModel(rType);
     let isMyProduct = utils.isMyProduct(model)
@@ -99,7 +100,7 @@ class VerificationRow extends Component {
     let isVerification = model.id === VERIFICATION  &&  resource.document != null
     let r = isVerification ? resource.document : resource
 
-    let listModel = utils.getModel(this.props.modelName)
+    let listModel = utils.getModel(modelName)
     let ph = utils.getMainPhotoProperty(listModel)
 
     let photo
@@ -141,7 +142,7 @@ class VerificationRow extends Component {
     let notAccordion = true //!isMyProduct  &&  !isVerification && !prop === null || resource.sources || resource.method || isForm
 
     let verifiedBy, org
-    if (!isChooser  && !this.props.search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
+    if (!isChooser  && !search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
       if (isMyProduct)
         org = resource.from.organization
       else if (isForm)
@@ -157,7 +158,7 @@ class VerificationRow extends Component {
                 : translate('verifiedByOn', title)
       verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
-    else if (this.props.search  &&  listModel.id === FORM_REQUEST) {
+    else if (search  &&  listModel.id === FORM_REQUEST) {
       let by =  'Sent from ' + resource.from.organization.title
       verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
@@ -206,7 +207,7 @@ class VerificationRow extends Component {
       // received the submission itself
       else if (rType !== modelName  &&  !utils.isSubclassOf(model, modelName))
         title = translate(model)
-      else if (this.props.search) {
+      else if (search) {
         if (isVerification)
           title = translate(verificationRequest)
         else if (model.id === APPLICATION_SUBMITTED)
@@ -311,7 +312,7 @@ class VerificationRow extends Component {
       }
     }
     let renderedRows = []
-    if (this.props.search  &&  this.props.searchCriteria)
+    if (search  &&  searchCriteria)
       this.formatFilteredResource(model, resource, renderedRows)
     else if (isBookmark  &&  !resource.message)
       this.formatBookmark(utils.getModel(resource.bookmark[TYPE]), resource.bookmark, renderedRows)
@@ -319,7 +320,7 @@ class VerificationRow extends Component {
     if (multiChooser) {
       multiChooserIcon = <View style={styles.multiChooser}>
                            <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
-                             <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
+                             <Icon name={this.state.isChosen ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
                            </TouchableOpacity>
                          </View>
 
@@ -355,7 +356,7 @@ class VerificationRow extends Component {
             </View>
     else if (notAccordion) {
       let renderedRows = []
-      if (this.props.search  &&  this.props.searchCriteria)
+      if (search  &&  searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
 
       // let content
