@@ -2,7 +2,6 @@
 import {
   Alert,
   Platform,
-  TouchableHighlight,
   TouchableOpacity,
   // Text,
   View
@@ -172,16 +171,19 @@ class ResourceRow extends Component {
 
   render() {
     let isModel = this.props.resource.type === MODEL
+    const { application, isChosen, sharedWith } = this.state
+    const { isOfficialAccounts, bankStyle, isChooser, multiChooser, hideMode } = this.props
     let resource = (isModel && this.props.resource) || this.state.resource
     let rType = utils.getType(resource)
-    if (rType !== APPLICATION  &&  this.state.application)
-      resource = this.state.application
+    if (rType !== APPLICATION  &&  application)
+      resource = application
     let photo;
     let isContact = rType === PROFILE;
     let noImage;
-    let isOfficialAccounts = this.props.isOfficialAccounts
     let style
-    if (isOfficialAccounts  &&  resource.style) {
+    if (bankStyle)
+      style = bankStyle
+    else if (isOfficialAccounts  &&  resource.style) {
       style = {}
       _.extend(style, defaultBankStyle)
       style = _.extend(style, resource.style)
@@ -241,7 +243,7 @@ class ResourceRow extends Component {
         }
       }
     }
-    if (!this.props.isChooser  &&  photo  &&  rType === ORGANIZATION) {
+    if (!isChooser  &&  photo  &&  rType === ORGANIZATION) {
       let onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
           <Geometry.Circle size={18} style={{ backgroundColor: !resource._online /*|| !this.props.navigator.isConnected*/ ? '#FAD70C' : '#62C457'}} />
@@ -258,35 +260,50 @@ class ResourceRow extends Component {
 
     // let rId = utils.getId(this.props.resource)
     // let cancelResource = (this.props.onCancel ||  this.state)
-    //                    ? <TouchableHighlight onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
+    //                    ? <TouchableOpacity onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
     //                        <View>
-    //                          <Icon name={this.state.sharedWith[rId] ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith[rId] ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
+    //                          <Icon name={sharedWith[rId] ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={sharedWith[rId] ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
     //                        </View>
     //                      </TouchableOpacity>
     //                    : <View />;
-    let bg = style ? {backgroundColor: style.listBg} : {}
+
+    let bg
+    if (isChosen) {
+      if (style) {
+        let rgb = utils.hexToRgb(style.linkColor || '#7AAAc3')
+        let bgColor = `rgba(${Object.values(rgb).join(',')}, 0.1)`
+
+        bg = {backgroundColor: bgColor}
+      }
+    }
+    else if (style)
+      bg = {backgroundColor: style.listBg}
+    if (!bg)
+      bg = {}
     let color = style ? {color: style.listColor} : {}
 
     let cancelResource
-    if (this.props.onCancel  ||  (this.state && this.state.sharedWith))
+    if (this.props.onCancel  ||  (this.state && sharedWith))
       cancelResource = <View style={styles.chooser}>
-                         <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
+                         <Icon name={sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
                        </View>
-    let hideMode
-    if (this.props.hideMode)
-      hideMode = <View style={styles.chooser}>
-                  <TouchableHighlight underlayColor='transparent' onPress={() => this.props.hideResource(resource)}>
-                    <Icon name='ios-remove-circle'  size={25}  color='#F63D37' />
-                  </TouchableHighlight>
-                 </View>
+    let hideModeComponent
+    if (hideMode) {
+      hideModeComponent = <View style={styles.chooser}>
+                            <TouchableOpacity underlayColor='transparent' onPress={() => this.props.hideResource(resource)}>
+                              <Icon name='ios-remove-circle'  size={25}  color='#F63D37' />
+                            </TouchableOpacity>
+                         </View>
+    }
 
-    let multiChooser
-    if (this.props.multiChooser)
-      multiChooser = <View style={styles.multiChooser}>
-                       <TouchableHighlight underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
-                         <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
-                       </TouchableHighlight>
+    let multiChooserComponent
+    if (multiChooser) {
+      multiChooserComponent = <View style={styles.multiChooser}>
+                       <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
+                         <Icon name={isChosen && 'ios-checkmark-circle' || 'ios-radio-button-off'}  size={30}  color={style  &&  style.linkColor || '#7AAAc3'} />
+                       </TouchableOpacity>
                      </View>
+    }
     let textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
     this.dateProp = utils.isContext(rType) ? '_time' : this.dateProp
@@ -314,7 +331,7 @@ class ResourceRow extends Component {
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
 
-    let isOpaque = rType === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
+    let isOpaque = rType === ORGANIZATION && !resource.contacts  &&  !isChooser
     if (isOpaque)
       return (
         <View key={this.getNextKey()} style={[{opacity: 0.5}, styles.rowWrapper]}>
@@ -324,9 +341,9 @@ class ResourceRow extends Component {
               {this.formatRow(resource, style)}
             </View>
             {dateRow}
-            {multiChooser}
+            {multiChooserComponent}
             {cancelResource}
-            {hideMode}
+            {hideModeComponent}
           </View>
           <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
@@ -334,9 +351,9 @@ class ResourceRow extends Component {
 
     let onPress = this.action.bind(this)
     let action
-    if (isOfficialAccounts  &&  !this.props.hideMode  &&  resource._formsCount) {
+    if (isOfficialAccounts  &&  !hideMode  &&  resource._formsCount) {
       action = <View style={styles.actionView}>
-                <TouchableHighlight underlayColor='transparent' onPress={this.showProviderView.bind(this)}>
+                <TouchableOpacity underlayColor='transparent' onPress={this.showProviderView.bind(this)}>
                 <View style={textStyle}>
                   <View style={{flexDirection: 'row'}}>
                     <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
@@ -345,23 +362,23 @@ class ResourceRow extends Component {
                     </View>
                   </View>
                 </View>
-               </TouchableHighlight>
+               </TouchableOpacity>
               </View>
     }
     let content =  <View style={[styles.content, bg, {paddingHorizontal: 10}]} key={this.getNextKey()}>
-                    <TouchableHighlight onPress={onPress} underlayColor='transparent'>
-                      <View style={[styles.row, bg, { minHeight: 71, justifyContent: 'center'}]}>
+                    <TouchableOpacity onPress={onPress}>
+                      <View style={[styles.row, { minHeight: 71, justifyContent: 'center'}]}>
                         {photo}
                         <View style={textStyle}>
                           {this.formatRow(resource, style)}
                         </View>
                       </View>
-                    </TouchableHighlight>
+                    </TouchableOpacity>
                     {counter}
                     {action}
                     {dateRow}
-                    {multiChooser}
-                    {hideMode}
+                    {multiChooserComponent}
+                    {hideModeComponent}
                     {cancelResource}
                     <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
                   </View>
@@ -791,7 +808,7 @@ var styles = StyleSheet.create({
     paddingTop: 3
   },
   row: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff',
     justifyContent: 'center',
     flexDirection: 'row',
     padding: 5,
