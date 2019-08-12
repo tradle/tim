@@ -1264,9 +1264,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       shadowOpacity: 0.7,
       shadowRadius: 5,
       shadowColor: '#afafaf',
-      backgroundColor: '#007EFF',
-      borderColor: 'blue',
-      borderWidth: StyleSheet.hairlineWidth,
+      backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
+      // borderWidth: StyleSheet.hairlineWidth,
+      opacity: 1,
       marginRight: 7
     },
     addMore: {
