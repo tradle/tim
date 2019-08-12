@@ -843,12 +843,6 @@ class MessageList extends Component {
           onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
     if (currentContext)
       context = currentContext
-    let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
-    let bgStyle
-    if (!bgImage  &&  bankStyle.backgroundColor)
-      bgStyle = {backgroundColor: bankStyle.backgroundColor}
-    else
-      bgStyle = {backgroundColor: 'transparent'}
     let alert = <View />
     let hideTextInput
     if (modelName === ORGANIZATION)
@@ -937,6 +931,14 @@ class MessageList extends Component {
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
     let hash = utils.getRootHash(progressInfoR)
+
+    let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
+    let bgStyle
+    if (!bgImage  &&  bankStyle.backgroundColor)
+      bgStyle = {backgroundColor: bankStyle.backgroundColor}
+    else
+      bgStyle = {backgroundColor: '#eeeeee'}
+
     let backgroundImage
     if (bgImage) {
       let {width, height} = utils.dimensions(MessageList)
