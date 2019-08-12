@@ -594,10 +594,11 @@ var NavigationBarRouteMapper = {
       if (route.titleTextColor)
         style.push({color: route.titleTextColor});
 
-      let width = navBarTitleWidth(route.component)
+      let width = navBarTitleWidth(components[route.componentName]) //utils.dimensions().width
       let st = {width, alignItems: 'center'}
       if (isWeb())
         st.paddingLeft = 5
+      // style.push({maxWidth: width - 160})
       for (let i=1; i<t.length; i++) {
         if (!tArr)
           tArr = []
@@ -606,7 +607,7 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
-      let tstyle = isWeb() ? {paddingLeft: 5} : {width}
+      let tstyle = isWeb() ? {paddingHorizontal: 5, maxWidth: width - 160} : {width}
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
