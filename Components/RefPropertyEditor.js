@@ -53,7 +53,7 @@ class RefPropertyEditor extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH])
+      isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]),
     }
     this.regulaScan = !isSimulator() && !isWeb()  &&  debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
@@ -61,6 +61,8 @@ class RefPropertyEditor extends Component {
     let prop = this.props.prop
     if (prop !== nextProps.prop)
       return false
+    if (this.props.inFocus !== nextProps.inFocus)
+      return true
     let pName = prop.name
     if (!_.isEqual(nextProps.resource[pName], this.props.resource[pName]))
       return true
@@ -75,14 +77,14 @@ class RefPropertyEditor extends Component {
     return false
   }
   render() {
-    let { prop, resource, error, styles, model, bankStyle, country,
+    let { prop, resource, error, styles, model, bankStyle, country, labelAndBorder,
           search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
     let pName = prop.name
 
-    let lcolor = {color: this.getLabelAndBorderColor(pName)}
+    let { lcolor, bcolor } = labelAndBorder(pName)
     let isVideo = pName === 'video'
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
     let isIdentity = prop.ref === IDENTITY
@@ -109,7 +111,7 @@ class RefPropertyEditor extends Component {
         label = pLabel
       else
         label = this.getRefLabel(prop, resource)
-      propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
+      propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
     let isRegistration = this.state.isRegistration
@@ -120,13 +122,13 @@ class RefPropertyEditor extends Component {
     else if (val)
       color = /*isImmutable  &&  linkColor ||*/ '#555555'
     else
-      color = '#AAAAAA'
+      color = '#888888'
     let propView
     if (photoR) {
       if (utils.isImageDataURL(photoR.url)) {
         propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
       } else {
-        propView = <Icon name='ios-paper-outline' size={40} color={linkColor} />
+        propView = <Icon name='ios-paper-outline' size={40} color={linkColor} style={{paddingTop: 10}} />
       }
 // =======
 //       let isPdf = resource[pName]  &&  resource[pName].fileName  &&  resource[pName].fileName.toLowerCase().endsWith('.pdf')
@@ -158,7 +160,7 @@ class RefPropertyEditor extends Component {
         if (prop.scanner  &&  resource[prop.name + 'Json'])
           propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color: 'darkblue', width}]}>{translate('Scanned')}</Text>
         else
-          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
+          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width, paddingTop: 10}]}>{label}</Text>
       }
     }
 
@@ -182,7 +184,7 @@ class RefPropertyEditor extends Component {
     }
     else
       icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.immutable} />
-    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+    let content = <View  style={styles.chooserContainer}>
                     {propView}
                     {icon}
                   </View>
@@ -192,22 +194,16 @@ class RefPropertyEditor extends Component {
     if (!exploreData  && (isImmutable || prop.readOnly))
       actionItem = content
     else if (isIdentity && !isWeb())
-       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
-                      {content}
-                    </TouchableOpacity>
+      actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
+                     {content}
+                   </TouchableOpacity>
     else if (isVideo ||  isPhoto) {
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        // let isDocument = prop.range === 'document'
-        // if (isDocument)
-        //   actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
-        //                  {content}
-        //                </DocumentInput>
-        // else
-          actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
-                         {content}
-                       </ImageInput>
+        actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+                       {content}
+                     </ImageInput>
       }
       else
         actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>
@@ -229,10 +225,12 @@ class RefPropertyEditor extends Component {
       }
     }
     return (
-      <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
-        {propLabel}
-        {actionItem}
-        {paintError({errors: error && {[pName]: error} || null , prop: prop, paddingBottom: 0})}
+      <View key={pName} style={{margin: 0, marginBottom: 10}} ref={pName}>
+        <View style={[styles.formInput, {borderColor: bcolor}]}>
+          {propLabel}
+          {actionItem}
+        </View>
+        {paintError({errors: error && {[pName]: error} || null, prop: prop, paddingBottom: 0})}
         {help}
       </View>
     );
@@ -392,15 +390,6 @@ class RefPropertyEditor extends Component {
       this.props.resource.video = data
       this.props.floatingProps.video = data
     }
-  }
-  getLabelAndBorderColor(prop) {
-    let bankStyle = this.props.bankStyle
-    if (this.state.isRegistration)
-      return '#eeeeee'
-    if (this.props.inFocus === prop)
-      return bankStyle  &&  bankStyle.linkColor || '#757575'
-    else
-      return '#b1b1b1'
   }
   async showRegulaScanner(params) {
     let { resource, model, prop, navigator } = this.props
@@ -577,7 +566,6 @@ class RefPropertyEditor extends Component {
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
     }
-
     navigator.push(route)
   }
   multiChooser(prop, values) {
@@ -627,154 +615,3 @@ function getDocumentTypeFromTitle (title='') {
 }
 reactMixin(RefPropertyEditor.prototype, PhotoCarouselMixin);
 module.exports = RefPropertyEditor;
-  // async showBlinkIDScanner(prop) {
-  //   let { resource } = this.props
-  //   const { documentType, country } = resource
-  //   const type = getDocumentTypeFromTitle(documentType.title)
-  //   let recognizers
-  //   let tooltip
-  //   let firstSideInstructions, secondSideInstructions
-  //   let scanBothSides
-  //   // let isPassport
-  //   // HACK
-  //   if (!recognizers  &&  prop === 'otherSideScan')
-  //     recognizers = BlinkID.recognizers.documentFace
-  //   else {
-  //     switch (type) {
-  //     case 'passport':
-  //       tooltip = translate('centerPassport')
-  //       // isPassport = true
-  //       // machine readable travel documents (passport)
-  //       recognizers = BlinkID.recognizers.mrtd
-  //       firstSideInstructions = translate('scanPassport')
-  //       break
-  //     case 'card':
-  //       firstSideInstructions = translate('centerIdCard')
-  //       // machine readable travel documents (passport)
-  //       // should be combined
-  //       // if (country.title === 'Bangladesh')
-  //       //   recognizers = BlinkID.recognizers.mrtd
-  //       //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
-  //       // else if (country.title === "Philippines")
-  //       //   recognizers = BlinkID.recognizers.pdf417
-  //       // else
-  //         // recognizers = BlinkID.recognizers.mrtd
-  //       recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
-  //       break
-  //     case 'license':
-  //     case 'licence':
-  //       firstSideInstructions = translate('centerLicence')
-  //       if (country.title === 'United States') {
-  //         secondSideInstructions = translate('documentBackSide')
-  //         recognizers = BlinkID.recognizers.usdlCombined
-  //         // recognizers = BlinkID.recognizers.usdl
-  //       }
-  //       else if (country.title === 'New Zealand')
-  //         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
-  //       else if (country.title === 'Australia') {
-  //         scanBothSides = true
-  //         recognizers = [BlinkID.recognizers.australiaFront, BlinkID.recognizers.australiaBack]
-  //       }
-  //       else {
-  //         recognizers = BlinkID.recognizers.eudl
-  //       }
-  //       break
-  //     default:
-  //       tooltip = translate('centerID')
-  //       break
-  //     }
-  //   }
-
-  //   const blinkIDOpts = {
-  //     // quality: 0.2,
-  //     // base64: true,
-  //     // timeout: ENV.blinkIDScanTimeoutInternal,
-  //     documentType,
-  //     country,
-  //     firstSideInstructions,
-  //     secondSideInstructions,
-  //     scanBothSides,
-  //     recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
-  //   }
-
-  //   Analytics.sendEvent({
-  //     category: 'widget',
-  //     action: 'scan_document',
-  //     label: `blinkid:${type}`
-  //   })
-
-  //   let result
-  //   try {
-  //     result = await BlinkID.scan(blinkIDOpts)
-  //   } catch (err) {
-  //     debug('scan failed:', err.message)
-  //     debugger
-  //   }
-  //   if (!result)
-  //     return
-
-  //   const r = _.cloneDeep(resource)
-  //   if (result.image) {
-  //     r[prop] = {
-  //       url: result.image.base64,
-  //     }
-  //   }
-  //   if (result.backImage) {
-  //     // HACK
-  //     if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
-  //       r.otherSideScan = {
-  //         url: result.backImage.base64,
-  //       }
-  //     }
-  //   }
-  //   if (result.images) {
-  //     let { faceImage, signatureImage } = result.images
-  //     if (faceImage)
-  //       r.faceImage = { url: faceImage }
-  //     if (signatureImage)
-  //       r.signatureImage = { url: signatureImage }
-  //   }
-
-  //   let dateOfExpiry //, dateOfBirth, documentNumber
-  //   ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
-  //     const scan = result[docType]
-  //     if (!scan) return
-
-  //     // const { personal, document } = scan
-  //     // documentNumber = document.documentNumber
-  //     // if (personal.dateOfBirth)
-  //     //   dateOfBirth = personal.dateOfBirth
-  //     // if (document.dateOfIssue) {
-  //     //   document.dateOfIssue = formatDate(document.dateOfIssue)
-  //     // }
-  //     const { document } = scan
-  //     if (document.dateOfExpiry)
-  //       dateOfExpiry = document.dateOfExpiry
-
-  //     r[prop + 'Json'] = scan
-  //     return
-  //   })
-
-  //   if (dateOfExpiry && dateOfExpiry < Date.now()) {
-  //     // give the BlinkID view time to disappear
-  //     // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-  //     await utils.promiseDelay(800)
-  //     Alert.alert(
-  //       translate('documentExpiredTitle'),
-  //       translate('documentExpiredMessage')
-  //     )
-
-  //     return
-  //   }
-  //   // let chipScan
-  //   // if (isPassport  &&  Platform.OS === 'android') {
-  //   //   Alert.alert('Please press the back of your android phone against the passport')
-  //   //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
-  //   // }
-
-  //   let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
-  //   if (docScannerProps  &&  docScannerProps.length)
-  //     r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
-  //   this.afterScan(r, prop)
-  // }
-
