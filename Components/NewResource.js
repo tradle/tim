@@ -775,7 +775,7 @@ class NewResource extends Component {
         model: model,
         items: arrays,
         onEndEditing: this.onEndEditing,
-        componentName: 'NewResource',
+        component: NewResource,
         editable: this.state.disableEditing ? !this.state.disableEditing : true
       };
     if (editCols)
@@ -1189,9 +1189,9 @@ class NewResource extends Component {
     let width = utils.getContentWidth(NewResource) - 40
     if (count) {
       let cstyle = styles.activePropTitle
-      actionableItem = <View style={{width}}>
+      actionableItem = <View style={{width, alignSelf: 'center'}}>
                          <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
-                           <View style={styles.items}>
+                           <View style={styles.iitems}>
                              <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
                              <View style={styles.addButton}>
                                <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
@@ -1205,7 +1205,7 @@ class NewResource extends Component {
     else {
       actionableItem = <View style={{width}}>
                        <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
-                         <View style={[styles.items, {paddingBottom: 5}]}>
+                         <View style={[styles.iitems, {paddingBottom: 10}]}>
                            <Text style={styles.noItemsText}>{label}</Text>
                            <View style={styles.addButton}>
                               <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
@@ -1218,14 +1218,14 @@ class NewResource extends Component {
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
 
-    let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
+    let istyle = [styles.itemButton]
     if (err)
       istyle.push({marginBottom: 10})
     else if (!count)
-      istyle.push({paddingBottom: 0, height: 70})
+      istyle.push({paddingBottom: 0, minHeight: 70})
     else {
       let height = 55 //resource[bl.name].photo ? 55 : 45
-      istyle.push({paddingBottom: 0, height: count * height + 35})
+      istyle.push({paddingBottom: 0, minHeight: count * height + 35})
     }
     istyle = StyleSheet.flatten(istyle)
     return (
@@ -1290,14 +1290,12 @@ class NewResource extends Component {
                          {itemsArray}
                        </ImageInput>
 
-    let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
-    if (!count)
-      istyle.push({height: 70})
+    let istyle = [count ? styles.photoButton : styles.itemButton]
 
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
-          <View style={[styles.items, {alignItems: 'flex-end'}]}>
+          <View style={styles.items}>
             {actionableItem}
             <ImageInput
                 prop={bl}
@@ -1335,15 +1333,21 @@ reactMixin(NewResource.prototype, OnePropFormMixin);
 NewResource = makeResponsive(NewResource)
 
 var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankStyle, isRegistration }) {
+  const formField =  {
+    borderColor: '#dddddd',
+    borderWidth: 1,
+    borderRadius: 6,
+    backgroundColor: '#ffffff',
+  }
   return StyleSheet.create({
     container: {
       flex: 1
     },
     noItemsText: {
       fontSize: 20,
-      color: '#AAAAAA',
+      color: '#777777',
       // alignSelf: 'center',
-      // paddingLeft: 10
+      paddingLeft: 10
     },
     forms: {
       fontSize: 18,
@@ -1365,38 +1369,26 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // paddingRight: 5
     },
     itemButton: {
-      height: 60,
-      marginLeft: 10,
-      // marginLeft: 10,
-      borderColor: '#ffffff',
-      // borderBottomColor: '#b1b1b1',
-      // borderBottomWidth: 1,
-      paddingBottom: 10,
+      ...formField,
+      minHeight: 60,
       justifyContent: 'flex-end',
     },
     photoButton: {
-      marginLeft: 10,
-      borderColor: '#ffffff',
-      // borderBottomColor: '#b1b1b1',
-      // borderBottomWidth: 1,
-      // paddingBottom: 5,
+      ...formField,
+      // marginTop: 10
     },
 
     photoBG: {
-      // marginTop: -15,
       alignItems: 'center',
       paddingBottom: 10,
-      // backgroundColor: '#245D8C'
     },
     err: {
-      // paddingVertical: 10,
       flexWrap: 'wrap',
       paddingHorizontal: 25,
       fontSize: 16,
       color: 'darkred',
     },
     getStartedText: {
-      // color: '#f0f0f0',
       color: '#eeeeee',
       fontSize: 20,
       fontWeight:'300',
@@ -1420,21 +1412,19 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       marginRight: 2,
       borderRadius: 5
     },
-    items: {
+    items: {},
+    iitems: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      // minHeight: 30
     },
     activePropTitle: {
       fontSize: 12,
-      // marginTop: 20,
       paddingBottom: 5,
-      // marginBottom: 5,
       color: '#bbbbbb'
     },
     photoStrip: {
       paddingBottom: 5,
-      marginHorizontal: 5,
+      marginHorizontal: 10,
       marginTop: 0
     },
     row: {
@@ -1466,11 +1456,13 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       justifyContent: 'center'
     },
     pics: {
-      paddingTop: 10,
-      width: '90%'
+      paddingTop: 5,
+      // width: '90%'
     },
     camera: {
-      // paddingTop: 30
+      position: 'absolute',
+      right: 10,
+      bottom: 10
     },
     submit: {
       width: 340,
@@ -1529,7 +1521,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       color: bankStyle.contextTextColor
     },
     arrayItems: {
-      marginTop: isRegistration ? 0 : -10,
       paddingBottom: 20
     },
     addButton: {
@@ -1542,7 +1533,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     message: {
       alignItems: 'center',
       // alignSelf: 'center',
-      backgroundColor: 'transparent'
+      backgroundColor: '#f3f3f3',
+      // backgroundColor: 'transparent'
     },
   })
 })
