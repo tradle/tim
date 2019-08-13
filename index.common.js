@@ -607,7 +607,7 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
-      let tstyle = isWeb() ? {paddingHorizontal: 5, maxWidth: width - 160} : {width}
+      let tstyle = isWeb() ? {paddingHorizontal: 5, maxWidth: Math.max(width - 160, 200)} : {width}
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
