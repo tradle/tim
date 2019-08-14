@@ -103,19 +103,32 @@ var RowMixin = {
       let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
 
       // let color =  isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
+
       let title
+      style = {flexDirection: 'column'}
+
       if (!prop.displayName  &&  !prop.displayAs)
-        title =  <View style={[styles.column, {flex: 1}]}>
-                  <Text style={[styles.descriptionG]}>{propTitle}</Text>
-                </View>
+        title =  <Text style={styles.descriptionG}>{propTitle}</Text>
       return (
         <View style={style} key={this.getNextKey()}>
-          {title}
-          <View style={[styles.column, {paddingLeft: 3, flex: flexVal}]}>
-            <Text style={styles.descriptionB}>{value}</Text>
-          </View>
+          <Text>
+           {title}
+           <Text style={[styles.descriptionB, {color: bankStyle.linkColor}]}>{(title &&  '  ' || '') + value}</Text>
+         </Text>
        </View>
       )
+      // if (!prop.displayName  &&  !prop.displayAs)
+      //   title =  <View style={[styles.column, {flex: 1}]}>
+      //             <Text style={[styles.descriptionG]}>{propTitle}</Text>
+      //           </View>
+      // return (
+      //   <View style={style} key={this.getNextKey()}>
+      //     {title}
+      //     <View style={[styles.column, {paddingLeft: 3, flex: flexVal}]}>
+      //       <Text style={styles.descriptionB}>{value}</Text>
+      //     </View>
+      //  </View>
+      // )
     }
 
   },
@@ -353,14 +366,15 @@ var styles = StyleSheet.create({
     color: '#757575'
   },
   descriptionG: {
-    fontSize: 17,
+    fontSize: 15,
     justifyContent: 'center',
     color: '#aaaaaa',
-    marginTop: 1
+    // marginTop: 1
   },
   descriptionB: {
-    fontSize: 17,
-    color: '#757575'
+    fontSize: 15,
+    color: '#757575',
+    fontWeight: '500'
   },
   msgImage: {
     // backgroundColor: '#dddddd',
@@ -404,30 +418,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = RowMixin;
-
-  // onSetSignatureProperty(prop, item) {
-  //   if (!item)
-  //     return;
-
-  //   let resource = this.props.resource
-
-  //   let formRequest
-  //   if (resource[TYPE] === FORM_REQUEST) {
-  //     formRequest = resource
-  //     resource = formRequest.prefill  ||  {}
-  //   }
-  //   // Form request for new resource
-  //   if (formRequest)
-  //     _.extend(resource, {
-  //         [TYPE]: formRequest.form,
-  //         _context: formRequest._context,
-  //         from: utils.getMe(),
-  //         to: formRequest.from
-  //       }
-  //     )
-  //   resource[prop.name] = item
-  //   let params = {resource}
-  //   if (formRequest)
-  //     params.disableFormRequest = formRequest
-  //   Actions.addChatItem(params)
-  // },
