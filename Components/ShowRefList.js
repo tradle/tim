@@ -292,7 +292,7 @@ function hasPropertiesToShow(resource) {
   let viewCols = m.viewCols
   if (!viewCols)
     viewCols = utils.getViewCols(m)
-  viewCols = utils.ungroup(m, viewCols)
+  viewCols = utils.ungroup({model: m, viewCols})
   let vCols = []
   let props = m.properties
   viewCols.forEach((pr) => {
