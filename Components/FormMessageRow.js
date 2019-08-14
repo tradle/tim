@@ -272,8 +272,9 @@ class FormMessageRow extends Component {
 
     let vCols = [];
     let isShared = this.isShared()
-    if (viewCols)
-      viewCols = utils.ungroup(model, viewCols)
+    if (viewCols) {
+      viewCols = utils.ungroup({model, viewCols})
+    }
     let isProductRequest = resource[TYPE] === PRODUCT_REQUEST
 
     viewCols.forEach((v) => {

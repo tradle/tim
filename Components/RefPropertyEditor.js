@@ -89,7 +89,6 @@ class RefPropertyEditor extends Component {
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
     let isIdentity = prop.ref === IDENTITY
 
-    // let required = model  &&  utils.ungroup(model.required)
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName])

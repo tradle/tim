@@ -272,40 +272,6 @@ class ShowRefList extends Component {
 
     return children || <View/>
   }
-  // getDocs(varr, rId, docs) {
-  //   if (!varr)
-  //     return
-  //   varr.forEach((v) => {
-  //     if (v.method) {
-  //       if (utils.getId(v.document) !== rId)
-  //         docs.push(v.document)
-  //     }
-  //     else if (v.sources)
-  //       this.getDocs(v.sources, rId, docs)
-  //   })
-  // }
-  // hasPropsToShow(resource) {
-  //   let m = utils.getModel(resource[TYPE])
-  //   let viewCols = m.viewCols
-  //   if (!viewCols)
-  //     viewCols = utils.getViewCols(m)
-  //   viewCols = utils.ungroup(m, viewCols)
-  //   let vCols = []
-  //   let props = m.properties
-  //   viewCols.forEach((pr) => {
-  //     if (props[pr].group)
-  //       props[pr].group.forEach((gp) => vCols.push(gp))
-  //     else
-  //       vCols.push(pr)
-  //   })
-
-  //   for (let p in resource) {
-  //     if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
-  //       continue
-  //     if (vCols  &&  vCols.indexOf(p) !== -1)
-  //       return true
-  //   }
-  // }
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
   }
@@ -336,7 +302,7 @@ function hasPropertiesToShow(resource) {
   let viewCols = m.viewCols
   if (!viewCols)
     viewCols = utils.getViewCols(m)
-  viewCols = utils.ungroup(m, viewCols)
+  viewCols = utils.ungroup({model: m, viewCols})
   let vCols = []
   let props = m.properties
   viewCols.forEach((pr) => {

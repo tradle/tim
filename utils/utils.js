@@ -956,7 +956,7 @@ var utils = {
     if (!vCols || !vCols.length)
       return displayName
 
-    vCols = utils.ungroup(resourceModel, vCols)
+    vCols = utils.ungroup({model: resourceModel, viewCols: vCols, edit: true})
     let excludeProps = []
     if (utils.isMessage(resourceModel))
       excludeProps = ['from', 'to']
@@ -2455,12 +2455,12 @@ var utils = {
     }
     return hasBacklinks
   },
-  ungroup(model, arr, includeGroupProp) {
-    if (!arr)
+  ungroup({model, viewCols, includeGroupProp, edit}) {
+    if (!viewCols)
       return
     let props = model.properties
     let newArr = []
-    arr.forEach((p) => {
+    viewCols.forEach((p) => {
       if (p.indexOf('_group') !== -1  && props[p].list) {
         if (includeGroupProp)
           newArr.push(p)
@@ -2469,11 +2469,12 @@ var utils = {
             newArr.push(pr)
         })
       }
-      else if (props[p].group)
+      else if (props[p].group  &&  edit) {
         props[p].group.forEach((pr) => {
           if (newArr.indexOf(pr) === -1)
             newArr.push(pr)
         })
+      }
       else
         newArr.push(p)
     })

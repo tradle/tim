@@ -451,7 +451,7 @@ class NewResource extends Component {
       }
     }
     let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource, isRefresh } = this.props
-    let required = utils.ungroup(model, model.required)
+    let required = utils.ungroup({model, viewCols: model.required, edit: true})
     if (!required)
       required = []
 

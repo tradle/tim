@@ -218,7 +218,7 @@ var NewResourceMixin = {
         if (eCols.indexOf(p) === -1)
           eCols.push(p)
     }
-    let required = utils.ungroup(meta, meta.required)
+    let required = utils.ungroup({model: meta, viewCols: meta.required, edit: true})
     required = utils.arrayToObject(required);
     if (validationErrors) {
       formErrors = validationErrors
