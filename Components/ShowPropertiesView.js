@@ -112,7 +112,7 @@ class ShowPropertiesView extends Component {
     // else {
       vCols = model.viewCols
       if (vCols)
-        vCols = utils.ungroup(model, vCols)
+        vCols = utils.ungroup({model, viewCols: vCols})
     // }
     // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
     if (!resource[ROOT_HASH]) {

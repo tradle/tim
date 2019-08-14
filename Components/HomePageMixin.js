@@ -227,7 +227,7 @@ var HomePageMixin = {
            (props[v].ref !== PHOTO   &&  !hasGridCols))
         vCols.push(v)
       else if (v.indexOf('_group') !== -1) {
-        let group = utils.ungroup(model, [v])
+        let group = utils.ungroup({model, viewCols: [v]})
         group.forEach(p => vCols.push(p))
       }
     })

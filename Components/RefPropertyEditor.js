@@ -54,7 +54,7 @@ class RefPropertyEditor extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH])
+      isRegistration: !utils.getMe()  && props.model.id === PROFILE  &&  (!props.resource || !props.resource[ROOT_HASH]),
     }
     this.regulaScan = !isSimulator() && !isWeb()  &&  debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
@@ -62,7 +62,9 @@ class RefPropertyEditor extends Component {
     let prop = this.props.prop
     if (prop !== nextProps.prop)
       return false
-    let pName = prop.name
+    if (this.props.inFocus !== nextProps.inFocus)
+      return true
+     let pName = prop.name
     if (!_.isEqual(nextProps.resource[pName], this.props.resource[pName]))
       return true
 
@@ -76,19 +78,18 @@ class RefPropertyEditor extends Component {
     return false
   }
   render() {
-    let { prop, resource, error, styles, model, bankStyle, country,
+    let { prop, resource, error, styles, model, bankStyle, country, labelAndBorder,
           search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
     let pName = prop.name
 
-    let lcolor = {color: this.getLabelAndBorderColor(pName)}
+    let { lcolor, bcolor } = labelAndBorder(pName)
     let isVideo = pName === 'video'
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
     let isIdentity = prop.ref === IDENTITY
 
-    // let required = model  &&  utils.ungroup(model.required)
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName])
@@ -110,7 +111,7 @@ class RefPropertyEditor extends Component {
         label = pLabel
       else
         label = this.getRefLabel(prop, resource)
-      propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
+      propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
     let isRegistration = this.state.isRegistration
@@ -119,9 +120,9 @@ class RefPropertyEditor extends Component {
     if (isRegistration)
       color = '#eeeeee'
     else if (val)
-      color = /*isImmutable  &&  linkColor ||*/ '#555555'
+      color = '#555555'
     else
-      color = '#AAAAAA'
+      color = '#888888'
     let propView
     if (photoR) {
       let isPdf = resource[pName]  &&  resource[pName].fileName  &&  resource[pName].fileName.toLowerCase().endsWith('.pdf')
@@ -131,9 +132,9 @@ class RefPropertyEditor extends Component {
         let pieces = resource[pName].fileName.split('/')
         fileName = <Text style={styles.textAfterImage}>{pieces[pieces.length - 1]}</Text>
       }
-debug(source.uri.substring(0, 100))
-      propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0, flexDirection: 'row' }}>
-                   <Image source={source} style={[styles.thumb, {marginBottom: 5}]} />
+// debug(source.uri.substring(0, 100))
+      propView = <View style={{ marginTop: 15, flexDirection: 'row' }}>
+                   <Image source={source} style={[styles.thumb]} />
                    {fileName}
                  </View>
     }
@@ -151,8 +152,9 @@ debug(source.uri.substring(0, 100))
         let scanned
         if (prop.scanner  &&  resource[prop.name + 'Json'])
           propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color: 'darkblue', width}]}>{translate('Scanned')}</Text>
-        else
-          propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
+        else {
+          propView = <Text numberOfLines={prop.multiEntry && 5 || 1} style={[styles.input, {maxWidth: width, marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
+        }
       }
     }
 
@@ -175,8 +177,8 @@ debug(source.uri.substring(0, 100))
         icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor} style={styles.customIcon} />
     }
     else
-      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.immutable} />
-    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.lockIcon} />
+    let content = <View style={styles.chooserContainer}>
                     {propView}
                     {icon}
                   </View>
@@ -186,9 +188,9 @@ debug(source.uri.substring(0, 100))
     if (!exploreData  &&  (isImmutable || prop.readOnly))
       actionItem = content
     else if (isIdentity && !isWeb())
-       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
-                      {content}
-                    </TouchableOpacity>
+      actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
+                     {content}
+                   </TouchableOpacity>
     else if (isVideo ||  isPhoto) {
       // HACK
       if (useImageInput({resource, prop})) {
@@ -199,7 +201,11 @@ debug(source.uri.substring(0, 100))
                          {content}
                        </DocumentInput>
         else
-          actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+          actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'}
+                                   cameraType={prop.cameraType}
+                                   allowPicturesFromLibrary={prop.allowPicturesFromLibrary}
+                                   style={aiStyle}
+                                   onImage={item => this.onSetMediaProperty(pName, item)}>
                          {content}
                        </ImageInput>
       }
@@ -222,12 +228,15 @@ debug(source.uri.substring(0, 100))
                      </TouchableOpacity>
       }
     }
+    actionItem = <View style={{marginTop: 10}}>{actionItem}</View>
     return (
-      <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
-        {propLabel}
-        {actionItem}
-        {paintError({errors: error && {[pName]: error} || null , prop: prop, paddingBottom: 0})}
-        {help}
+      <View key={pName} style={{margin: 0, marginBottom: 10}} ref={pName}>
+        <View style={[styles.formInput, {borderColor: bcolor, minHeight: 60}]}>
+          {propLabel}
+          {actionItem}
+        </View>
+          {paintError({errors: error && {[pName]: error} || null , prop: prop, paddingBottom: 0})}
+          {help}
       </View>
     );
   }
@@ -384,15 +393,6 @@ debug(source.uri.substring(0, 100))
       this.props.resource.video = data
       this.props.floatingProps.video = data
     }
-  }
-  getLabelAndBorderColor(prop) {
-    let bankStyle = this.props.bankStyle
-    if (this.state.isRegistration)
-      return '#eeeeee'
-    if (this.props.inFocus === prop)
-      return bankStyle  &&  bankStyle.linkColor || '#757575'
-    else
-      return '#b1b1b1'
   }
   async showRegulaScanner(params) {
     let { resource, model, prop, navigator } = this.props

@@ -195,7 +195,7 @@ class GridRow extends Component {
       cols.push(<Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + '_check'}>
                   <View style={styles.multiChooser}>
                    <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
-                     <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
+                     <Icon name={this.state.isChosen ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
                    </TouchableOpacity>
                  </View>
                </Col>)

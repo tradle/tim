@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   DatePickerAndroid,
+  Switch
 } from 'react-native'
 
 import SwitchSelector from 'react-native-switch-selector'
@@ -20,7 +21,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -207,7 +208,7 @@ var NewResourceMixin = {
         if (eCols.indexOf(p) === -1)
           eCols.push(p)
     }
-    let required = utils.ungroup(meta, meta.required)
+    let required = utils.ungroup({model: meta, viewCols: meta.required, edit: true})
     required = utils.arrayToObject(required);
     if (validationErrors) {
       formErrors = validationErrors
@@ -515,6 +516,7 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   onChangeText(prop, value) {
+    debugger
     if(prop.type === 'string'  &&  !value.trim().length)
       value = ''
     let {resource, missedRequiredOrErrorValue} = this.state
@@ -585,14 +587,16 @@ var NewResourceMixin = {
   },
 
   myMarkdownTextInputTemplate(params) {
-    let {prop, value} = params
-    let {bankStyle} = this.props
+    let { prop, value } = params
+    let { bankStyle } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
       value = format(value, this.state.resource).trim()
       hasValue = value  &&  value.length
     }
-    let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
+    if (hasValue)
+      lcolor =  '#555555'
 
     let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
@@ -618,7 +622,7 @@ var NewResourceMixin = {
     else
       header = <View style={vStyle}>
                  <Text style={lStyle}>{title}</Text>
-                 <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
+                 <Icon name='md-create' size={25}  color={bankStyle.linkColor} />
                </View>
 
     return <View style={st}>
@@ -656,7 +660,9 @@ var NewResourceMixin = {
     //   value = format(value, this.state.resource).trim()
     //   hasValue = value  &&  value.length
     // }
-    let lcolor = value ? '#555555' : this.getLabelAndBorderColor(prop.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
+    if (value)
+      lcolor = '#555555'
 
     let help = this.paintHelp(prop)
     let st = {paddingBottom: 10}
@@ -714,17 +720,15 @@ var NewResourceMixin = {
     let lStyle = styles.labelStyle
 
     let maxChars = (utils.dimensions(params.component).width - 40)/utils.getFontSize(9)
-      // let some space for wrapping
-      if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
-        lStyle = [lStyle, {marginTop: 0}]
-    // }
+    if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
+      lStyle = [lStyle, {marginTop: 0}]
 
-    let lcolor = this.getLabelAndBorderColor(prop.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.paintHelp(prop)
-    let st = {paddingBottom: 10}
+    let st = { paddingBottom: 10 }
     // Especially for money type props
     if (!help)
       st.flex = 5
@@ -741,7 +745,7 @@ var NewResourceMixin = {
           autoCapitalize={autoCapitalize}
           onFocus={this.inputFocused.bind(this, prop)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
-          style={[styles.formInput, {borderBottomColor: lcolor}]}
+          style={[styles.formInput, {borderColor: bcolor, minHeight: 60}]}
           value={value}
           keyboardShouldPersistTaps='always'
           keyboardType={keyboard || 'default'}
@@ -781,10 +785,12 @@ var NewResourceMixin = {
       else
         return
     }
-    if (isRegistration)
-      return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+    if (isRegistration) {
+      let estyle = [styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]
+      return <View style={estyle} key={this.getNextKey()}>
                <Text style={styles.font14, {color: '#eeeeee'}}>{err}</Text>
              </View>
+    }
 
     let { bankStyle } = this.props
 
@@ -794,7 +800,7 @@ var NewResourceMixin = {
       backgroundColor: bankStyle.errorBgColor  ||  '#990000',
       paddingHorizontal: 10,
     }
-    return <View style={[styles.err]} key={this.getNextKey()}>
+    return <View style={styles.err} key={this.getNextKey()}>
              <View style={addStyle}>
                <Text style={styles.font14, {paddingLeft: 5, color: bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
              </View>
@@ -803,18 +809,16 @@ var NewResourceMixin = {
 
   myBooleanTemplate(params) {
     let {prop, model, value, required, component} = params
-    let { search } = this.props
+    let { search, bankStyle } = this.props
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
-    let lcolor = this.getLabelAndBorderColor(prop.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
 
     let resource = this.state.resource
 
     let style = (resource && (typeof resource[prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
-    // if (Platform.OS === 'ios')
-    //   style = [style, {paddingLeft: 10}]
 
     let label = translate(prop, model)
     if (prop.units) {
@@ -825,43 +829,54 @@ var NewResourceMixin = {
     if (!search  &&  required)
       label += ' *'
 
-    let doWrap = label.length > 30
-    if (doWrap  &&  utils.isAndroid()) {
-      label = label.substring(0, 27) + '...'
-      doWrap = false
-    }
-
     let help = this.paintHelp(prop)
 
-    const options = [
-        { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
-        { value: 'null', customIcon: <Icon size={30} color='#000' name='ios-radio-button-off' /> },
-        { value: 'false', customIcon: <Icon size={30} color='#000' name='ios-close' /> },
-    ];
-    let initial
-    let v = value + ''
-    for (let i=0; i<options.length  &&  !initial; i++) {
-      if (options[i].value === v)
-        initial = i
+    let isTroolean = prop.range === 'troolean'
+    let switchView
+    let switchC, booleanContentStyle
+    if (isTroolean) {
+      const options = [
+          { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
+          { value: 'null', customIcon: <Icon size={30} color='#000' name='ios-radio-button-off' /> },
+          { value: 'false', customIcon: <Icon size={30} color='#000' name='ios-close' /> },
+      ];
+      let initial
+      let v = value + ''
+      for (let i=0; i<options.length  &&  !initial; i++) {
+        if (options[i].value === v)
+          initial = i
+      }
+      if (typeof initial === 'undefined')
+        initial = 1
+      let switchWidth = Math.floor(utils.getChatWidth() / 2)
+      switchView = { paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
+      booleanContentStyle = {}
+      switchC = <TouchableOpacity onPress={() => this.onChangeText(prop, isTroolean && value ||  !value)}>
+                  <View style={booleanContentStyle}>
+                    <Text style={[style, {color: lcolor}]}>{label}</Text>
+                    <View style={switchView}>
+                      <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
+                    </View>
+                 </View>
+                </TouchableOpacity>
+
     }
-    if (typeof initial === 'undefined')
-      initial = 1
-    let switchWidth = Math.floor((utils.dimensions(component).width - 40)/2) // 90 - 40 margins + 50 switch
-    let switchView = {paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
+    else {
+      booleanContentStyle = styles.booleanContentStyle
+      switchC = <View style={booleanContentStyle}>
+                <Text style={[style, {color: lcolor}]}>{label}</Text>
+                  <Switch onValueChange={(value) => {
+                    let r = _.cloneDeep(resource)
+                    r[prop.name] = value
+                    this.setState({resource: r})
+                  }} value={value} style={{alignSelf: 'center'}}/>
+               </View>
+    }
     return (
       <View style={styles.bottom10} key={this.getNextKey()} ref={prop.name}>
-        <TouchableOpacity onPress={
-          this.onChangeText.bind(this, prop, value)
-        }>
-          <View style={styles.booleanContainer}>
-            <View style={styles.booleanContentStyle}>
-                <Text style={[style, {color: lcolor}]}>{label}</Text>
-              <View style={switchView}>
-                <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
+        <View style={[styles.booleanContainer, {borderColor: bcolor}]}>
+          {switchC}
+        </View>
         {this.paintError(params)}
         {help}
       </View>
@@ -873,7 +888,7 @@ var NewResourceMixin = {
 
     let resource = this.state.resource
     let propLabel
-    let lcolor = this.getLabelAndBorderColor(prop.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
     if (resource && resource[prop.name])
       propLabel = <Text style={[styles.dateLabel, {color: lcolor}]}>{params.label}</Text>
     else
@@ -899,8 +914,7 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
-    let st = utils.isWeb() ? {marginHorizontal: 15, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {marginHorizontal: 5}
-
+    let st = isWeb() ? [styles.formInput, {minHeight: 60, borderColor: bcolor}] : [styles.formInput, {minHeight: 60, borderColor: bcolor, marginHorizontal: 15}]
     // convert from UTC date to local, so DatePicker displays it correctly
     // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
     let localizedDate
@@ -932,7 +946,7 @@ var NewResourceMixin = {
               dateInput: styles.dateInput,
               dateText: styles.dateText,
               placeholderText: [styles.font20, {
-                color: params.value ? '#555555' : '#aaaaaa',
+                color: params.value ? '#555555' : '#777777',
                 paddingLeft: params.value ? 10 : 0
               }],
               dateIconColor: {color: linkColor},
@@ -944,8 +958,8 @@ var NewResourceMixin = {
     }
     let help = this.paintHelp(prop)
     return (
-      <View key={this.getNextKey()} ref={prop.name}>
-        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+      <View key={this.getNextKey()} ref={prop.name} style={styles.bottom10}>
+        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}]}>
           {propLabel}
           {datePicker}
           {help}
@@ -956,12 +970,16 @@ var NewResourceMixin = {
   },
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle
+    let lcolor, bcolor
     if (this.state.isRegistration)
-      return '#eeeeee'
-    if (this.state.inFocus === prop)
-      return bankStyle  &&  bankStyle.linkColor || '#757575'
-    else
-      return '#b1b1b1'
+      lcolor = '#eeeeee'
+    else if (this.state.inFocus === prop)
+      lcolor = bankStyle  &&  bankStyle.linkColor || '#757575'
+    else {
+      lcolor = '#888888'
+      bcolor = '#dddddd'
+    }
+    return {lcolor, bcolor: bcolor ||  lcolor}
   },
   getDateRange(dateStr) {
     if (!dateStr)
@@ -1053,6 +1071,7 @@ var NewResourceMixin = {
     if (!this.floatingProps)
       this.floatingProps = {}
     let { model, metadata } = this.props
+    let { required, errors, component } = params
     let props
     if (model)
       props = model.properties
@@ -1068,8 +1087,8 @@ var NewResourceMixin = {
       onChange = this.setState.bind(this)
     else
       onChange = this.setChosenValue.bind(this)
-    let error = this.state.missedRequiredOrErrorValue  &&  this.state.missedRequiredOrErrorValue[prop.name]
-    if (!error  &&  params.errors  &&  params.errors[prop.name])
+    let error = this.state.missedRequiredOrErrorValue  &&  this.state.missedRequiredOrErrorValue[pName]
+    if (!error  &&  params.errors  &&  params.errors[pName])
       error = params.errors[pName]
 
     return <RefPropertyEditor {...this.props}
@@ -1077,10 +1096,11 @@ var NewResourceMixin = {
                              onChange={onChange}
                              prop={prop}
                              photo={this.state[pName + '_photo']}
-                             component={params.component}
+                             component={component}
+                             labelAndBorder={this.getLabelAndBorderColor.bind(this, pName)}
                              error={error}
                              inFocus={this.state.inFocus}
-                             required={params.required}
+                             required={required}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
@@ -1486,7 +1506,13 @@ function coerceNumber (obj, p) {
     obj[p] = Number(val.trim())
   }
 }
-
+const formField = {
+  minHeight: 60,
+  backgroundColor: '#ffffff',
+  borderWidth: 1,
+  borderColor: '#dddddd',
+  borderRadius: 6,
+}
 var styles= StyleSheet.create({
   enumProp: {
     marginTop: 15,
@@ -1498,55 +1524,48 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   labelStyle: {
-    paddingLeft: 0,
+    paddingLeft: 10,
   },
   arrowIcon: {
     width: 15,
     height: 15,
     // marginVertical: 2
   },
+  formInput: {
+    ...formField,
+    marginHorizontal: 15
+  },
   booleanContainer: {
-    minHeight: 45,
-    // marginTop: 20,
-    borderColor: '#ffffff',
-    // borderBottomColor: '#cccccc',
-    // borderBottomWidth: 1,
-    justifyContent: 'center',
+    ...formField,
+    // minHeight: 60,
+    paddingTop: 5,
+    paddingHorizontal: 10,
     marginHorizontal: 15,
-    // marginBottom: 10,
+    justifyContent: 'center',
     flex: 1
   },
   booleanContentStyle: {
-    // justifyContent: 'space-between',
-    // flexDirection: 'row',
-    // paddingVertical: 5,
-    // marginRight: 10,
-    borderRadius: 4
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   datePicker: {
-    // width: dimensions.width - 30,
-    paddingLeft: 10,
     justifyContent: 'flex-start',
-    borderColor: '#f7f7f7',
-    alignSelf: 'stretch'
+    alignSelf: 'stretch',
+    paddingHorizontal: 10,
+    paddingRight: 22
   },
   chooserContainer: {
-    minHeight: 55,
-    marginTop: 10,
-    borderColor: '#ffffff',
-    // borderBottomColor: '#cccccc',
-    // borderBottomWidth: 1,
-    marginHorizontal: 15,
-    // justifyContent: 'center',
+    // ...formField,
+    minHeight: 60,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 10,
     position: 'relative',
-    // marginBottom: 10,
-    // paddingBottom: 10,
     flex: 1
   },
   chooserContentStyle: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    // paddingVertical: 5,
     borderRadius: 4
   },
   enumElement: {
@@ -1559,37 +1578,25 @@ var styles= StyleSheet.create({
     height: 14,
     backgroundColor: 'transparent'
   },
-  formInput: {
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#eeeeee',
-    marginHorizontal: 15,
-    paddingLeft: 0,
-    // borderColor: '#cccccc',
-  },
   regInput: {
     borderWidth: 0,
-    paddingLeft: 0,
     height: 50,
     fontSize: 20,
     color: '#eeeeee'
   },
   textInput: {
     borderWidth: 0,
-    paddingLeft: 0,
     color: '#555555',
-    // minHeight: 45,
     fontSize: 20
   },
   thumb: {
     width: 40,
     height: 40,
     marginRight: 2,
-    marginTop: 7,
-    // marginTop: utils.isIOS() && 0 || 7,
-    borderRadius: 5
+    borderRadius: 5,
   },
   err: {
-    // paddingLeft: 10,
+    paddingHorizontal: 15,
     // backgroundColor: 'transparent'
   },
   element: {
@@ -1605,7 +1612,7 @@ var styles= StyleSheet.create({
   labelDirty: {
     marginTop: 21,
     // marginLeft: 10,
-    paddingLeft: 15,
+    paddingLeft: 10,
     color: '#AAA',
     position: 'absolute',
     fontSize: 12,
@@ -1616,13 +1623,19 @@ var styles= StyleSheet.create({
     right: 0,
     bottom: 3
   },
+  lockIcon: {
+    position: 'absolute',
+    right: 0,
+    bottom: 5
+  },
   photoIconEmpty: {
     position: 'absolute',
     right: 0,
     marginTop: 12
   },
   immutable: {
-    marginTop: 15
+    marginTop: 15,
+    paddingRight: 10
   },
   input: {
     backgroundColor: 'transparent',
@@ -1637,7 +1650,10 @@ var styles= StyleSheet.create({
     marginLeft: 7
   },
   customIcon: {
-    marginTop: 20,
+    // marginTop: 20,
+    position: 'absolute',
+    right: isWeb() && 10 || 0,
+    alignSelf: 'center'
   },
   dateInput: {
     flex: 1,
@@ -1671,67 +1687,48 @@ var styles= StyleSheet.create({
     borderWidth: 1.5,
     marginTop: 10,
     // marginHorizontal: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 13,
     marginBottom: 5
   },
   dividerText: {
-    // marginTop: 15,
     marginBottom: 5,
     fontSize: 26,
-    // alignSelf: 'center',
     color: '#ffffff'
   },
   font14: {
     fontSize: 14
   },
   booleanLabel: {
-    // marginTop: 2,
     color: '#aaaaaa',
     fontSize: 20
   },
   booleanText: {
-    // marginTop: 5,
     fontSize: 20
   },
   dateLabel: {
     marginLeft: 10,
     fontSize: 12,
     marginTop: 5,
-    // marginVertical: 5,
     paddingBottom: 5
   },
   noItemsText: {
     fontSize: 20,
     color: '#AAAAAA',
-    // alignSelf: 'center',
-    // paddingLeft: 10
   },
   markdown: {
     backgroundColor: '#f7f7f7',
     paddingVertical: 10,
-    // marginHorizontal: -10,
-    // paddingHorizontal: 20,
   },
   container: {
     flex: 1
   },
   help1: {
     backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
-    // marginHorizontal: 10,
     paddingHorizontal: 15,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc'
   },
   help: {
-    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
-    // marginHorizontal: 10,
-    paddingHorizontal: 15,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    backgroundColor: '#f3f3f3',
+    paddingHorizontal: 20,
     paddingBottom: 15
   },
   bottom10: {
