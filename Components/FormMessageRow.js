@@ -199,7 +199,7 @@ class FormMessageRow extends Component {
     }
     let row = <View style={{paddingVertical: noContent ? 0 : 5}}>
                 <View style={{flexDirection: 'row'}}>
-                  <View style={{flex: 7}}>
+                  <View style={{flex: 10, flexDirection: 'column'}}>
                     {renderedRow}
                   </View>
                   {pdf}
@@ -217,7 +217,7 @@ class FormMessageRow extends Component {
     let mTitle = prefillProp ? 'Draft' : translate(model)
     let headerTitle = mTitle + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
     let { bankStyle } = this.props
-    let color = isMyMessage && bankStyle.myMessageLinkColor
+    let color = notSigned  &&  bankStyle.myMessageBackgroundColor  ||  isMyMessage && bankStyle.myMessageLinkColor
     if (!color)
       color = '#ffffff'
     return (
@@ -263,7 +263,7 @@ class FormMessageRow extends Component {
     let vCols = [];
     let isShared = this.isShared()
     if (viewCols)
-      viewCols = utils.ungroup(model, viewCols)
+      viewCols = utils.ungroup({model, viewCols})
     let isProductRequest = resource[TYPE] === PRODUCT_REQUEST
 
     viewCols.forEach((v) => {
@@ -408,7 +408,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       alignSelf: 'flex-end'
     },
     sentToView: {
-      padding: 5
+      paddingHorizontal: 5
     },
     row: {
       flexDirection: 'row'
