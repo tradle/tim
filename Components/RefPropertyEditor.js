@@ -153,7 +153,7 @@ class RefPropertyEditor extends Component {
         if (prop.scanner  &&  resource[prop.name + 'Json'])
           propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color: 'darkblue', width}]}>{translate('Scanned')}</Text>
         else {
-          propView = <Text numberOfLines={prop.multiEntry && 5 || 1} style={[styles.input, {maxWidth: width, marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
+          propView = <Text numberOfLines={prop.type === 'array' && 5 || 1} style={[styles.input, {maxWidth: width, marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
         }
       }
     }
