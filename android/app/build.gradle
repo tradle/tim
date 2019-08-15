@@ -193,8 +193,8 @@ android {
             //
             // Before allowing 64-bit apks, see that react native supports it
             // https://github.com/facebook/react-native/issues/2814
-            // include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
-            include "armeabi-v7a", "x86"
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+            // include "armeabi-v7a", "x86"
         }
     }
     buildTypes {
@@ -320,6 +320,7 @@ dependencies {
     implementation(project(':react-native-device-info')) {
         exclude group: 'com.google.android.gms'
     }
+
     implementation "com.google.android.gms:play-services-base:${googlePlayServicesVersion}"
     implementation ("com.google.android.gms:play-services-gcm:${googlePlayServicesVersion}") {
         force = true;
