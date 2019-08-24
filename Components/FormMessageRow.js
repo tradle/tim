@@ -154,14 +154,6 @@ class FormMessageRow extends Component {
     let isMyMessage = this.isMyMessage()
 
     let isShared = this.isShared()
-    // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
-
-    // let { bankStyle, application } = this.props
-    // if (application)
-    //   width -= 50 // provider icon and padding
-
-    // let width = utils.getMessageWidth(FormMessageRow) // - (isSharedContext  ? 45 : 0))
-    // let styles = createStyles({bankStyle, isMyMessage, isShared, width})
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
@@ -186,15 +178,22 @@ class FormMessageRow extends Component {
                  <Text style={styles.sentTo}>{translate('asSentTo', resource.to.organization.title)}</Text>
                </View>
 
-    let docProps = utils.getPropertiesWithAnnotation(model, 'range')
-    let pdf, pdfUrl
+    let docProps = !noContent  &&  utils.getPropertiesWithAnnotation(model, 'range')
+    let { bankStyle } = this.props
+    let pdf
     for (let p in docProps) {
       if (properties[p].range !== 'document')
         continue
 
-      if  (resource[p]  &&  utils.isPDF(resource[p])) { //  &&  resource[p].url.indexOf(':application/pdf') !== -1) {
+      if  (resource[p]  &&  resource[p].url) {
+        let doc
+        if (utils.isPDF(resource[p]))  //  &&  resource[p].url.indexOf(':application/pdf') !== -1) {
+          doc = <Image style={{width: 43, height: 43, opacity: 0.8}} source={{uri: PDF_ICON}} />
+        else
+          doc = <Icon size={43} name='ios-paper-outline' color={bankStyle.linkColor} />
+
         pdf = <TouchableOpacity onPress={this.showPDF.bind(this, {photo: resource[p]})}>
-                <Image style={{width: 43, height: 43, opacity: 0.8}} source={{uri: PDF_ICON}} />
+                {doc}
               </TouchableOpacity>
         break
       }
@@ -218,7 +217,6 @@ class FormMessageRow extends Component {
     let prefillProp = utils.getPrefillProperty(model)
     let mTitle = prefillProp ? 'Draft' : translate(model)
     let headerTitle = mTitle + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
-    let { bankStyle } = this.props
     let color = notSigned  &&  bankStyle.myMessageBackgroundColor  ||  isMyMessage && bankStyle.myMessageLinkColor
     if (!color)
       color = '#ffffff'
