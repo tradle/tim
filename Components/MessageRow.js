@@ -844,7 +844,8 @@ var createStyles = utils.styleFactory(MessageRow, function ({ dimensions, bankSt
       backgroundColor: 'red',
     },
     myConfCell: {
-      paddingVertical: 5,
+      paddingTop: 7,
+      paddingBottom: 0,
       paddingHorizontal: 7,
       justifyContent: 'flex-end',
       borderTopLeftRadius: 0,
