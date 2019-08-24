@@ -205,6 +205,14 @@ class VerificationRow extends Component {
         title = translate(utils.getModel(utils.getType(resource.submission)))
       // Case for forms on Application. forms has a type og ApplicationSubmittion but the component
       // received the submission itself
+      else if (isVerification) {
+        if (resource.method  &&  resource.method)
+          title = translate(resource.method.aspect) //translate(resource.method.api.name) + ' (' + translate(resource.method.aspect) + ')')
+        else {
+          let dmodel = utils.getModel(utils.getType(r))
+          title = translate(model) + ' ' + translate(dmodel)
+        }
+      }
       else if (rType !== modelName  &&  !utils.isSubclassOf(model, modelName))
         title = translate(model)
       else if (search) {
@@ -237,9 +245,14 @@ class VerificationRow extends Component {
     if (title !== dn  &&  !title  &&  !dn)
       title = dn
     if (isVerification) {
-      titleComponent = <Text style={styles.rTitle}>
-                          <Text style={styles.rTitle}>{dn}</Text>
-                        </Text>
+      // titleComponent = <Text style={styles.rTitle}>
+      //                    <Text style={styles.rTitle}>{dn}</Text>
+      //                  </Text>
+      let vtitle = title  &&  <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{title}</Text>
+      titleComponent = <View>
+                         <Text style={styles.rTitle}>{dn}</Text>
+                         {vtitle}
+                       </View>
     }
     else if (isAbstract) {
       titleComponent = <View>
