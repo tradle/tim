@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import {
-  TouchableHighlight,
+  TouchableOpacity,
   View,
+  Image
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -121,10 +122,10 @@ class FormMessageRow extends Component {
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (rtype !== PRODUCT_REQUEST  &&  resource[SIG])
-      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, {resource})} underlayColor='transparent'>
-               {stub}
-             </TouchableHighlight>
+    if  (rtype !== PRODUCT_REQUEST  &&  resource[SIG])
+      stub = <TouchableOpacity onPress={this.props.onSelect.bind(this, {resource})}>
+                {stub}
+             </TouchableOpacity>
 
     return  <View style={styles.pageView}>
               {date}
@@ -190,10 +191,11 @@ class FormMessageRow extends Component {
     for (let p in docProps) {
       if (properties[p].range !== 'document')
         continue
-      if (resource[p]  &&  resource[p].url.indexOf(':application/pdf') !== -1) {
-        pdf = <TouchableHighlight underlayColor='transparent' onPress={this.showPDF.bind(this, {photo: resource[p]})}>
-               <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
-              </TouchableHighlight>
+
+      if  (resource[p]  &&  utils.isPDF(resource[p])) { //  &&  resource[p].url.indexOf(':application/pdf') !== -1) {
+        pdf = <TouchableOpacity onPress={this.showPDF.bind(this, {photo: resource[p]})}>
+                <Image style={{width: 43, height: 43, opacity: 0.8}} source={{uri: PDF_ICON}} />
+              </TouchableOpacity>
         break
       }
     }
