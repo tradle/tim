@@ -103,16 +103,27 @@ function getPropsForLegalDocument(form) {
   return ret
 }
 function getPropsForLegalEntity(form) {
-  const { document, country, registrationNumber, region } = form
-  // if (!country  ||  !document) {
-  // if (!document  ||  isNewResource(document)) {
-  //   return {
-  //     requestedProperties: [
-  //       // { name: 'country' },
-  //       { name: 'document' },
-  //     ]
-  //   }
-  // }
+  const { document, country, registrationNumber, region, jsonBundle, uploadForms} = form
+
+  if (!form.hasOwnProperty('uploadHierarchy')  &&  !form.country) {
+    return {
+      requestedProperties: [
+        // { name: 'country' },
+        { name: 'uploadHierarchy' },
+        { name: 'companyHierarchyFile'  }
+      ]
+    }
+  }
+  else if (form.uploadHierarchy  &&  !form.country) {
+    return {
+      requestedProperties: [
+        // { name: 'country' },
+        { name: 'uploadHierarchy' },
+        { name: 'companyHierarchyFile'  }
+      ]
+    }
+  }
+
   return {
       requestedProperties: [
         { name: 'info_group' },
@@ -147,17 +158,19 @@ function getPropsForControllingEntity(form) {
     return {
       requestedProperties: [
         {name: 'typeOfControllingPerson'},
-        // {name: 'controllingPerson'},
-        // {name: 'emailAddress'},
-        // {name: 'phone'},
-        // {name: 'legalEntity'}
+        {name: 'controllingPerson', required: false},
+        {name: 'emailAddress', required: false},
+        {name: 'phone', required: false},
+        {name: 'legalEntity', required: false}
       ]
     }
   case 'legalentity':
     return {
       requestedProperties: [
         {name: 'controllingLegalEntity'},
-        {name: 'legalEntity'}
+        {name: 'legalEntity'},
+        {name: 'emailAddress', required: false},
+        {name: 'phone', required: false},
       ]
     }
   }
