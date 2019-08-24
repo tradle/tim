@@ -405,10 +405,9 @@ var utils = {
   translate(...args) {
     if (typeof args[0] === 'string')
       return utils.translateString(...args)
-    if (args.length === 1)
+    if (args.length === 1 ||  typeof args[1] === 'boolean')
       return utils.translateModel(...args)
-    else
-      return utils.translateProperty(...args)
+    return utils.translateProperty(...args)
   },
   translateProperty(property, model, needDescription) {
     if (!dictionary)
@@ -1178,19 +1177,24 @@ var utils = {
     let group = []
     let hasSetProps
     let props = utils.getModel(rtype).properties
-    for (let i=0; i<pgroup.length; i++) {
-      let p = pgroup[i]
-      let v =  resource[p] ? resource[p] : ''
-      if (v)
+    pgroup.forEach(p =>  {
+      let v =  resource[p] || ''
+      if (resource[p])
         hasSetProps = true
-      if (typeof v === 'object')
-        v = v.title ? v.title : utils.getDisplayName(v, utils.getModel(props[p].ref))
-      else if (props  &&  props[p].range  &&  props[p].range  === 'check')
+      let prop = props[p]
+      if (typeof v === 'object') {
+        let ref = prop.ref  ||  prop.items.ref
+        if (Array.isArray(v))
+          v = v.map(r => r.title || utils.getDisplayName(r, utils.getModel(ref))).join(', ')
+        else
+          v = v.title || utils.getDisplayName(v, utils.getModel(ref))
+      }
+      else if (prop.range  &&  prop.range  === 'check')
         v = ''
-      if (props[p].units)
-        v += props[p].units
+      if (prop.units)
+        v += prop.units
       group.push(v)
-    }
+    })
 
     if (hasSetProps) {
       let s = utils.template(prop.displayAs, group).trim()
@@ -2141,6 +2145,8 @@ var utils = {
     for (let p in resource) {
       if (!props[p] ||  props[p].hidden || (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
         continue
+      if (props[p].range === 'document')
+        continue
       if (props[p].mainPhoto) {
         mainPhoto = resource[p]
         continue
@@ -2162,6 +2168,19 @@ var utils = {
       photos.splice(0, 0, mainPhoto)
       return photos
     }
+  },
+  getResourceDocuments(model, resource) {
+    let props = utils.getPropertiesWithAnnotation(model, 'range')
+    let { hiddenProperties } = model
+    let docProps = []
+    for (let p in props) {
+      if (props[p].range !== 'document'  ||
+          props[p].hidden                ||
+          (hiddenProperties  &&  hiddenProperties.indexOf(p) !== -1))
+        continue
+      docProps.push(resource[p])
+    }
+    return docProps
   },
   getPropertiesWithRef(ref, model) {
     let refProps = utils.getPropertiesWithAnnotation(model, 'ref')
