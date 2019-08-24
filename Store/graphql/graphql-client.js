@@ -208,7 +208,7 @@ var search = {
               if (val.value)
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
-            else if (val  &&  val.indexOf('NULL') !== -1) {
+            else if (val  &&  (typeof val === 'string')  &&  val.indexOf('NULL') !== -1) {
               if (val === 'NULL')
                 op.NULL += `\n ${p}: true`
               else
@@ -729,7 +729,7 @@ var search = {
       if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
         continue
       let prop = props[p]
-      if (prop === currentProp)
+      if (prop.virtual  ||  prop === currentProp)
         continue
       if (prop.displayAs)
         continue
