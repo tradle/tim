@@ -413,7 +413,9 @@ var NavigationBarRouteMapper = {
     case 'Done':
     case VERIFY_OR_CORRECT:
       color = bankStyle  &&  bankStyle.buttonBgColor || iconColor
-      iconColor = bankStyle  &&  bankStyle.buttonColor || '#fff'
+      iconColor = bankStyle  &&  bankStyle.buttonColor || '#ffffff'
+      if (iconColor === color)
+        iconColor = bankStyle.linkColor
       isSubmit = true
       if (route.passProps.isChooser)
         icon = 'md-checkmark'
@@ -566,7 +568,6 @@ var NavigationBarRouteMapper = {
     }
     let t = route.title.split(' -- ')
     let st = {} //t.length > 1 ? {marginTop: 2} : {}
-    let color
     if (uri) {
       let { width, height } = photoObj
       if (width  &&  height)
@@ -581,6 +582,7 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
     }
 
+    let color
     if (!isWeb()  &&  route.componentName === 'CameraView') // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
@@ -682,7 +684,8 @@ var styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     paddingRight: 10,
     paddingLeft: 15,
-    paddingBottom: isWeb() ? 3 : 0
+    paddingBottom: isWeb() && 3,
+    marginTop: isWeb() && 3
   }
 });
 TiMApp = makeResponsive(TiMApp)
