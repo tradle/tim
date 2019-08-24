@@ -120,7 +120,7 @@ class PhotoList extends Component {
       onPress = callback.bind(this, photo)
     else {
       let url = photo.url
-      if (url.indexOf(':application/pdf;') !== -1  ||  url.indexOf(':pdf/jpeg;') !== -1)
+      if (url.indexOf('data:application/pdf;') === 0)
         return <View/>
       onPress = this.showCarousel.bind(this, {photo, isView})
     }
