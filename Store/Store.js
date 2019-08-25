@@ -113,6 +113,7 @@ const NOT_CHAT_ITEM = '_notChatItem'
 import utils, {translate, translateEnum} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
+import JsonPlugin from './plugins/JsonPlugin'
 import { models as baseModels, data as sampleData } from '@tradle/models'
 
 const ObjectModel = baseModels['tradle.Object']
@@ -224,9 +225,10 @@ const APPLICATION_NOT_FORMS = [
   INTRODUCTION,
   APPLICATION_SUBMITTED,
   NEXT_FORM_REQUEST,
-  SIMPLE_MESSAGE
+  SIMPLE_MESSAGE,
+  APPLICATION_APPROVAL,
+  APPLICATION_DENIAL
 ]
-
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
 const UNKNOWN_PAYLOAD_AUTHOR = 'UnknownPayloadAuthor'
@@ -393,7 +395,9 @@ const disableBlockchainSync = node => {
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const from = utils.buildRef(me)
   const createdByBot = [
-    { type: APPLICATION },
+    { type: APPLICATION,
+      message: translate('applications')
+    },
     // { type: APPLICATION,
     //   bookmark: {
     //     [TYPE]: APPLICATION,
@@ -472,6 +476,7 @@ var Store = Reflux.createStore({
     // Setup components:
     db = level('TiM.db', { valueEncoding: 'json' });
     this._emitter = new EventEmitter()
+    this._jsonPlugin = new JsonPlugin(this)
 
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
@@ -1834,7 +1839,6 @@ var Store = Reflux.createStore({
 
     return node.createObject({ object })
   },
-
   async meDriverSend(sendParams) {
     await this._preSendCheck(sendParams)
     await this.maybeWaitForIdentity(sendParams.to)
@@ -4386,12 +4390,12 @@ if (!res[SIG]  &&  res._message)
   },
   async onAddChatItem(params) {
     _.extend(params, {isMessage: true})
-    await this.onAddItem(params)
+    return await this.onAddItem(params)
   },
   async onAddItem(params) {
     var self = this
     var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry,
-         value, chat, cb, meta, isRegistration, noTrigger, lens, doNotSend, isRefresh} = params
+         value, chat, cb, meta, isRegistration, noTrigger, lens, doNotSend, fileUpload, isRefresh} = params
     if (!value)
       value = resource
 
@@ -4418,6 +4422,7 @@ if (!res[SIG]  &&  res._message)
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
     let isRemediation, isRefreshRequest
+
     if (context) {
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
@@ -4657,8 +4662,12 @@ if (!res[SIG]  &&  res._message)
     }
     if (isRegistration)
       await handleRegistration()
-    else if (isMessage  &&  (!returnVal[NOT_CHAT_ITEM] || isRefresh))
-      await handleMessage({noTrigger, returnVal, lens, isRefreshRequest, isRefresh})
+    else if (isMessage  &&  (!returnVal[NOT_CHAT_ITEM] || isRefresh)) {
+      if (await wasHierarchyUploaded())
+        return
+
+      await handleMessage({noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, fileUpload})
+    }
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
@@ -4666,29 +4675,11 @@ if (!res[SIG]  &&  res._message)
       await updateRequestFoRefresh(this._getItem(toId))
     }
     if (disableFormRequest) {
-    //   // let fr =  disableFormRequest // this._getItem(disableFormRequest)
-    //   if (!disableFormRequest._documentCreated) {
-    //     let fr = utils.clone(disableFormRequest)
-    //     let addDocumentCreated
-    //     if (fr[TYPE] === FORM_REQUEST) {
-    //       let form = fr.form || disableFormRequest.form
-    //       addDocumentCreated = form === resource[TYPE]
-    //     }
-    //     else if (fr[TYPE] === FORM_ERROR) {
-    //       if (fr  &&  fr.prefill)
-    //         addDocumentCreated = fr.prefillForm.prefill[TYPE] === resource[TYPE]
-    //       else if (disableFormRequest)
-    //         addDocumentCreated = disableFormRequest.prefill[TYPE] === resource[TYPE]
-    //     }
-        if (addDocumentCreated) {
-    //       fr._documentCreated = true
-    //       fr._document = utils.getId(returnVal)//resource) /// NEW
-          let key = utils.getId(fr)
-          self._setItem(key, fr)
-          await self.dbPut(key, fr)
-    //       self.trigger({action: 'addItem', resource: fr})
-        }
-    //   }
+      if (addDocumentCreated) {
+        let key = utils.getId(fr)
+        self._setItem(key, fr)
+        await self.dbPut(key, fr)
+      }
     }
 
     if (cb) {
@@ -4707,6 +4698,27 @@ if (!res[SIG]  &&  res._message)
         })
       }
     }
+    async function wasHierarchyUploaded() {
+      let props = utils.getPropertiesWithAnnotation(meta, 'filePlugin')
+      if (props  &&  utils.isEmpty(props))
+        return
+      let vprops = Object.values(props).filter(prop => prop.ref === 'tradle.Json'  &&  returnVal[prop.name])
+      if (!vprops.length)
+        return
+      let prop = vprops[0]
+      try {
+        let jsonObj = JSON.parse(Buffer.from(returnVal[prop.name].url.split(',')[1], 'base64'))
+        if (jsonObj[TYPE] === meta.id) {
+          await self._jsonPlugin.createBundle(jsonObj, returnVal)
+          // if (disableFormRequest)
+          //   await handleDocumentCreated(disableFormRequest)
+          self.trigger({action: 'hierarchyUploaded', model: meta, resource})
+          return true
+        }
+      } catch (err) {
+        debugger
+      }
+    }
     function handleRegistration () {
       self.trigger({action: 'runVideo'})
       return Q.all([
@@ -4723,7 +4735,7 @@ if (!res[SIG]  &&  res._message)
       })
     }
 
-    async function handleMessage ({noTrigger, returnVal, lens, isRefresh, isRefreshRequest}) {
+    async function handleMessage ({noTrigger, returnVal, lens, isRefresh, isRefreshRequest, fileUpload}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -4760,6 +4772,8 @@ if (!res[SIG]  &&  res._message)
             }
           }
         }
+        else if (params.fileUpload)
+          forceUpdate = true
       }
       let isContext = utils.isContext(rModel)
       let isForm = utils.isForm(rModel)
@@ -4787,7 +4801,8 @@ if (!res[SIG]  &&  res._message)
         if (!forceUpdate) {
           self.rewriteStubs(prevResCached)
           if (utils.compare(returnVal, prevResCached)) {
-            self.trigger({action: 'noChanges'})
+            if (noTrigger ||  isRefresh  ||  returnVal[NOT_CHAT_ITEM])
+              self.trigger({action: 'noChanges'})
             return
           }
         }
@@ -4878,6 +4893,7 @@ if (!res[SIG]  &&  res._message)
           self.trigger({action: 'validationError', error: err.message})
         return
       }
+
       try {
         let data = await self.createObject(toChain)
         let hash = data.link
@@ -4947,6 +4963,23 @@ if (!res[SIG]  &&  res._message)
           if (!doNotSend) {
             let sendParams = await self.packMessage(returnVal)
             await self.meDriverSend(sendParams)
+
+            // let props = utils.getPropertiesWithAnnotation(rModel, 'virtual')
+            // if (props  &&  !utils.isEmpty(props)) {
+            //   let prop = Object.values(props)[0]
+            //   if (prop.ref === 'tradle.Json'  &&  returnVal[prop.name]) {
+            //     try {
+            //       let jsonStr = atob(returnVal[prop.name].url.split(',')[1])
+            //       let jsonObj = JSON.parse(jsonStr)
+            //       if (jsonObj[TYPE] === rtype) {
+            //         await new UploadBundle(self).createBundle(jsonObj, returnVal)
+            //         // self.createBundle(jsonObj, returnVal)
+            //       }
+            //     } catch (err) {
+            //       debugger
+            //     }
+            //   }
+            // }
           }
         }
         if (isBookmark) {
@@ -4988,43 +5021,6 @@ if (!res[SIG]  &&  res._message)
 
         await handleAssignRM()
         await handleCheckOverride()
-        // const isCheckOverride = utils.isSubclassOf(utils.getModel(rtype), CHECK_OVERRIDE)
-        // if (rtype === ASSIGN_RM  ||  isCheckOverride) {
-        //   let app = self._getItem(returnVal.application)
-        //   let appToUpdate
-        //   if (app  &&  app.status)
-        //     appToUpdate = utils.clone(app)
-        //   else {
-        //     let appId = utils.getId(returnVal.application)
-        //     if (foundRefs) {
-        //       let l = foundRefs.filter((r) => utils.getId(r.value) === appId)
-        //       if (l.length)
-        //         app = l[0].value
-        //     }
-        //     if (!app)
-        //       app = await self._getItemFromServer(returnVal.application)
-        //     if (!app)
-        //       appToUpdate = utils.clone(returnVal.applications)
-        //     else {
-        //       appToUpdate = app
-        //       self._setItem(utils.getId(app), app)
-        //     }
-        //   }
-        //   if (!appToUpdate._context)
-        //     appToUpdate._context = returnVal._context
-
-        //   if (isCheckOverride) {
-        //     appToUpdate.status = 'In review'  // HACK
-        //   }
-        //   else {
-        //     if (!appToUpdate.relationshipManagers)
-        //       appToUpdate.relationshipManagers = []
-        //     appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
-        //   }
-        //   self.trigger({action: 'updateRow', resource: appToUpdate, forceUpdate: isCheckOverride })
-        //   self.trigger({action: 'getItem', resource: appToUpdate})
-        // //   self.dbPut(utils.getId(app), app)
-        // }
         let toId = utils.getId(returnVal.to)
         let to = self._getItem(toId)
 
@@ -5036,7 +5032,8 @@ if (!res[SIG]  &&  res._message)
           let org = to.organization ? self._getItem(to.organization) : to
           // Draft project
           // self.trigger({action: 'getItem', resource: returnVal, to: org})
-          self.trigger({action: 'updateItem', resource: prevResCached, to: org})
+          if (!noTrigger)
+            self.trigger({action: 'updateItem', resource: prevResCached, to: org})
           await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
         }
@@ -5153,27 +5150,8 @@ if (!res[SIG]  &&  res._message)
       let rtype = utils.getType(returnVal)
       if (rtype === FORM_REQUEST) {
         let ptype = returnVal.product
-        if (ptype === REFRESH_PRODUCT) {
-          let r = {
-            [TYPE]: CONFIRMATION,
-            message: translate('afterRefresh')
-          }
-          let data = await self.createObject(r)
-          _.extend(r, data.object)
-          _.extend(r, {
-            [ROOT_HASH]: data.permalink,
-            [CUR_HASH]: data.link,
-            [IS_MESSAGE]: true,
-            from: returnVal.from,
-            to: returnVal.to
-          })
-          let rId = utils.getId(r)
-          await db.put(rId, r)
-          self._setItem(rId, r)
-          self.addMessagesToChat(utils.getId(r.from.organization), r)
-          self.addVisualProps(r)
-          self.trigger({action: 'addItem', resource: r})
-        }
+        if (ptype === REFRESH_PRODUCT)
+          await handleRefresh()
         else if (doneWithMultiEntry) {
           // when all the multientry forms are filled out and next form is requested
           // do not show the last form request for the multientry form it is confusing for the user
@@ -5205,6 +5183,51 @@ if (!res[SIG]  &&  res._message)
       } catch(err) {
         debugger
       }
+    }
+    async function handleRefresh() {
+      let fr = await self._keeper.get(returnVal[CUR_HASH])
+      let fileUpload = fr.prefill  &&  fr.prefill.fileUpload
+      if (fileUpload) {
+        let reviewedForms = params.reviewed
+        if (reviewedForms) {
+          let reviewed = Object.values(reviewedForms)
+          let promises = reviewed.map(r => {
+            delete r[NOT_CHAT_ITEM]
+            return self.onAddChatItem({resource: r, noTrigger: true, fileUpload: true})
+          })
+
+          try {
+            await Promise.all(promises)
+          } catch (err) {
+            debugger
+          }
+          reviewed.forEach(r => {
+            self.addMessagesToChat(utils.getId(r.to.organization), r)
+            self.addVisualProps(r)
+            self.trigger({action: 'addItem', resource: r})
+          })
+        }
+        return
+      }
+      let r = {
+        [TYPE]: CONFIRMATION,
+        message: translate('afterRefresh')
+      }
+      let data = await self.createObject(r)
+      _.extend(r, data.object)
+      _.extend(r, {
+        [ROOT_HASH]: data.permalink,
+        [CUR_HASH]: data.link,
+        [IS_MESSAGE]: true,
+        from: returnVal.from,
+        to: returnVal.to
+      })
+      let rId = utils.getId(r)
+      await db.put(rId, r)
+      self._setItem(rId, r)
+      self.addMessagesToChat(utils.getId(r.from.organization), r)
+      self.addVisualProps(r)
+      self.trigger({action: 'addItem', resource: r})
     }
   },
   _makeIdentityStub(r) {
@@ -8072,6 +8095,7 @@ if (!res[SIG]  &&  res._message)
         return
       //Object.keys(list).forEach(key => {
       let resourceId = resource ? utils.getId(resource) : null
+      let resourceContextId = resource  &&  resource._context  &&  utils.getId(resource._context)
       let alen = allMessages.length
       allMessages.forEach((res, i) => {
         let r = this._getItem(res.id)
@@ -8082,9 +8106,10 @@ if (!res[SIG]  &&  res._message)
         let type = r[TYPE]
         let m = this.getModel(type)
         if (!m) return
-        if (isBacklinkProp) {
+        if (isBacklinkProp  &&  m.properties[backlink]) {
           if (resourceId)  {
-            if (r[backlink]  &&  utils.getId(r[backlink]) !== resourceId)
+            if ((resourceContextId  &&  utils.getId(r._context) !== resourceContextId)  &&
+                r[backlink]  &&  utils.getId(r[backlink]) !== resourceId)
               return
           }
           else if (me.isEmployee) {
@@ -9511,6 +9536,7 @@ if (!res[SIG]  &&  res._message)
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
+
     } catch(err)  {
       debugger
       if (!noTrigger) {
@@ -9518,6 +9544,7 @@ if (!res[SIG]  &&  res._message)
       }
       err = err;
     }
+    return value
     function getContainerProp(model) {
       let props = model.properties
       let refProps = utils.getPropertiesWithAnnotation(model, 'ref')
@@ -10854,25 +10881,6 @@ if (!res[SIG]  &&  res._message)
         await this.onAddChatItem({resource: r, noTrigger: true})
       }
 await fireRefresh(val.from.organization)
-      // let bundleItems = result.map((item) => {
-      //   let r = item.object
-      //   r[ROOT_HASH] = item.permalink
-      //   r[CUR_HASH] = item.link
-      //   let m = this.getModel(r[TYPE])
-      //   let isMyMessage = r[TYPE] !== VERIFICATION  &&  m.subClassOf !== MY_PRODUCT
-      //   r.from = isMyMessage ? this.buildRef(me) : val.from
-      //   r.to = isMyMessage ? val.from : this.buildRef(me)
-      //   r[IS_MESSAGE] = true
-      //   r[NOT_CHAT_ITEM] = true
-      //   if (context)
-      //     r._context = context
-      //   return this.onAddChatItem({resource: r, noTrigger: true})
-      //   // let rId = utils.getId(r)
-      //   // this._setItem(rId, r)
-      //   // this.addMessagesToChat(orgId, r)
-      //   // this.dbBatchPut(rId, r, batch)
-      // })
-      // let items = await Promise.all(bundleItems)
       Actions.hideModal()
     }
 
