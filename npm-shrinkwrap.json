@@ -82,7 +82,7 @@
     "@tradle/biz-plugins": {
       "version": "1.0.0",
       "from": "tradle/biz-plugins",
-      "resolved": "git://github.com/tradle/biz-plugins.git#1bd2beeb524d2e4bdaec44aff589bdf6284c642e"
+      "resolved": "git://github.com/tradle/biz-plugins.git#2ee327c5a81dce141c36c960a2a11ced8cbd83ee"
     },
     "@tradle/build-resource": {
       "version": "4.0.2",
@@ -102,7 +102,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#fe4ada3fa67e17b9c3aa13f78eeab96410ddee7b"
+      "resolved": "git://github.com/tradle/custom-models.git#4f19844861d99f999921d1488a5e62138d76ef62"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -225,7 +225,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#27434a478666d3c162bfd7872a29f1b51e81f00d"
+      "resolved": "git://github.com/tradle/models.git#e64a3e3bb1c2946042e007615421dd351b668059"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -235,7 +235,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#289b157764f6ef9309f2d056c7e33bcce110b0ab"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#9575e320defe11d08e332c4688978f716d9acba2"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -300,9 +300,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.6",
+      "version": "7.1.11",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.6.tgz"
+      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.11.tgz"
     },
     "@tradle/validate-resource": {
       "version": "4.3.4",
