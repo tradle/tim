@@ -6,7 +6,8 @@ import {
   View,
   Text,
   Alert,
-  Platform
+  Platform,
+  Image
 } from 'react-native'
 import PropTypes from 'prop-types'
 import Reflux from 'reflux'
@@ -42,6 +43,7 @@ import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 class MessageView extends Component {
   static displayName = 'MessageView';
@@ -329,7 +331,7 @@ class MessageView extends Component {
         mainPhoto = resource[mainPhotoProp]
         if (photos) {
           if (mainPhotoProp !== 'photos')
-            photos = photos.filter(p => p.url !== mainPhoto)
+            photos = photos.filter(p => p.url !== mainPhoto.url)
         }
       }
       else if (!photos  ||  !photos.length) {
@@ -437,12 +439,20 @@ class MessageView extends Component {
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
     let contentSeparator = getContentSeparator(bankStyle)
     let bigPhoto
-    if (mainPhoto  &&  !checkProps)
+    if (mainPhoto  &&  !checkProps) {
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
                    <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
                  </View>
+    }
     let height = utils.dimensions(MessageView).height
     let width = utils.getContentWidth()
+
+    let documents = utils.getResourceDocuments(model, resource)
+    if (documents.length) {
+      documents = <TouchableOpacity style={{position: 'absolute', right: 0, top: 100}} onPress={this.showPDF.bind(this, {photo: documents[0]})}>
+                    <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
+                  </TouchableOpacity>
+    }
     return (
       <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
         <ScrollView
@@ -452,12 +462,24 @@ class MessageView extends Component {
           {dateView}
           {bigPhoto}
           {photoStrip}
+          {documents}
           {actionPanel}
         </ScrollView>
         {title}
         {footer}
       </PageView>
     );
+  }
+  showPDF({photo}) {
+    let route = {
+      backButtonTitle: 'Back',
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url
+      },
+      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
+    }
+    this.props.navigator.push(route)
   }
   onPageLayout(height, scrollDistance) {
     let scrollTo = height + scrollDistance - NAV_BAR_CONST
