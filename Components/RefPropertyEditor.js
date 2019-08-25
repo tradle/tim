@@ -87,6 +87,7 @@ class RefPropertyEditor extends Component {
     let { lcolor, bcolor } = labelAndBorder(pName)
     let isVideo = pName === 'video'
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
+    let isFile = prop.ref  &&  utils.isSubclassOf(prop.ref, 'tradle.File')
     let isIdentity = prop.ref === IDENTITY
 
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
@@ -196,7 +197,7 @@ class RefPropertyEditor extends Component {
       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                      {content}
                    </TouchableOpacity>
-    else if (isVideo ||  isPhoto) {
+    else if (isVideo ||  isPhoto  ||  isFile) {
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
@@ -313,8 +314,11 @@ class RefPropertyEditor extends Component {
     // debugger
     if (!item)
       return;
-    if (item.file && item.file.constructor.name === 'File')
+    let type
+    if (item.file && item.file.constructor.name === 'File') {
+      type = item.file.type
       delete item.file
+    }
     let { model, floatingProps, resource } = this.props
     const props = model.properties
     if (props[propName].ref)

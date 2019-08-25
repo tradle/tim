@@ -161,13 +161,14 @@ var NewResourceMixin = {
     if (this.state.requestedProperties)
       requestedProperties = this.state.requestedProperties
 
-    if (requestedProperties) {
+    if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       // if (!utils.isEmpty(requestedProperties))
       //   eCols = []
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
         formErrors = params.formErrors
       }
+      eCols = eCols.filter(p => requestedProperties[p])
       for (let p in requestedProperties) {
         // if (eCols.some((prop) => prop.name === p) {
         if (eCols.indexOf(p) !== -1) {
@@ -178,10 +179,10 @@ var NewResourceMixin = {
         }
         let idx = p.indexOf('_group')
         eCols.push(p)
+        let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
         if (idx === -1  &&  props[p].readOnly)
           showReadOnly = true
         else if (props[p].list) {
-          let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
           props[p].list.forEach((pp) => {
             let idx = eCols.indexOf(pp)
             if (idx !== -1)
@@ -197,6 +198,12 @@ var NewResourceMixin = {
             }
             // this.addError(p, params)
           })
+        }
+        else if (isRequired) {
+          requestedProperties[p] = {
+            message: '',
+            required: true
+          }
         }
         // else
         //   this.addError(p, params)
@@ -935,7 +942,7 @@ var NewResourceMixin = {
 
     let datePicker
     if (prop.readOnly) {
-      datePicker = <View style={[styles.formInput, {paddingVertical: 5}]}>
+      datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
     }
@@ -1095,7 +1102,8 @@ var NewResourceMixin = {
       props = utils.getModel(metadata.items.ref).properties
     let pName = params.prop
     let prop = props[pName]
-    let isMedia = pName === 'video' ||  pName === 'photos'  ||  prop.ref === PHOTO
+    let ref = prop.ref || prop.items.ref
+    let isMedia = pName === 'video' ||  pName === 'photos'  ||  ref === PHOTO  ||  utils.isSubclassOf(ref, 'tradle.File')
     let onChange
     if (isMedia)
       onChange = this.setState.bind(this)
