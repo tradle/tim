@@ -4,7 +4,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Linking
+  Linking,
 } from 'react-native'
 
 import PropTypes from 'prop-types'
@@ -106,17 +106,9 @@ class ShowPropertiesView extends Component {
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
-    // if (checkProperties) {
-    //   vCols = utils.getEditCols(model)
-    //   if (vCols)
-    //     vCols = Object.keys(vCols)
-    // }
-    // else {
-      vCols = model.viewCols
-      if (vCols)
-        vCols = utils.ungroup({model, viewCols: vCols})
-    // }
-    // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
+    vCols = model.viewCols
+    if (vCols)
+      vCols = utils.ungroup({model, viewCols: vCols})
     if (!resource[ROOT_HASH]) {
       if (!vCols)
         vCols = []
@@ -201,8 +193,10 @@ class ShowPropertiesView extends Component {
       // var isEmail
       let isUndefined = !val  &&  (typeof val === 'undefined')
       if (isUndefined) {
-        if (pMeta.displayAs)
+        if (pMeta.displayAs) {
           val = utils.templateIt(pMeta, resource);
+          val = <Text style={styles.title}>{val}</Text>
+        }
         else if (checkProperties) {
           if (p.indexOf('_group') === p.length - 6) {
             viewCols.push(
@@ -214,8 +208,7 @@ class ShowPropertiesView extends Component {
             )
             return
           }
-          else
-            val = NOT_SPECIFIED
+          val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
         }
         else
           return;
@@ -291,11 +284,6 @@ class ShowPropertiesView extends Component {
         }
       }
 
-      if (isUndefined) {
-        if (!checkProperties)
-          return
-        val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
-      }
       let checkForCorrection = !model.notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
