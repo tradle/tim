@@ -265,6 +265,10 @@ class NewResource extends Component {
       Actions.getRequestedProperties({resource})
       return
     }
+    if (action === 'hierarchyUploaded') {
+      if (model.id === params.model.id  &&  resource === params.resource)
+        navigator.pop()
+    }
     if (action === 'formEdit') {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
         if (requestedProperties) {
@@ -464,7 +468,7 @@ class NewResource extends Component {
         }
       }
     }
-    if (!required.length) {
+    if (!required.length  &&  !requestedProperties) {
       const props = model.properties
       for (let p in props) {
         if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
@@ -484,8 +488,8 @@ class NewResource extends Component {
         Actions.addChatItem(params)
       return
     }
-
-    this.checkRequired(json, required, missedRequiredOrErrorValue)
+    if (required)
+      this.checkRequired(json, required, missedRequiredOrErrorValue)
 
     let err = this.validateProperties(json)
     for (let p in err)
@@ -524,7 +528,7 @@ class NewResource extends Component {
       lens: lensId,
       isRegistration: this.state.isRegistration,
       isRefresh,
-      doNotSend,
+      doNotSend: isRefresh,
       chat
     };
 
@@ -1286,6 +1290,7 @@ class NewResource extends Component {
                          allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                          underlayColor='transparent'
                          style={{paddingBottom: 5}}
+                         nonImageAllowed={bl.range === 'document'}
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
                        </ImageInput>
@@ -1301,6 +1306,7 @@ class NewResource extends Component {
                 prop={bl}
                 underlayColor='transparent'
                 style={styles.actionIcon}
+                nonImageAllowed={bl.range === 'document'}
                 allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
