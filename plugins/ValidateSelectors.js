@@ -1,8 +1,6 @@
 import { TYPE } from '@tradle/constants'
 import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty } from '../utils/utils'
 
-const CHECK_OVERRIDE = 'tradle.CheckOverride'
-
 module.exports = function ValidateSelector ({ models }) {
   return {
     validateForm: function validateForm ({
@@ -34,12 +32,20 @@ module.exports = function ValidateSelector ({ models }) {
         let showF = new Function(...keys, `return ${prop.showIf}`);
         try {
           let doShow = showF(...values)
+          if (typeof doShow === 'string'  &&  !doShow.length)
+            doShow = false
           // let doShow = eval(prop.showIf)
           let inCols = ungrouped.indexOf(prop.name) !== -1
-          if (doShow  &&  !inCols)
-            editCols.push(prop.name)
+          if (doShow) {
+            if (!inCols)
+              editCols.push(prop.name)
+          }
+          else
+            exclude.push(prop.name)
         } catch (err) {
           // debugger
+          if (err.message.endsWith(' is not defined'))
+            exclude.push(prop.name)
           continue
         }
       }
@@ -50,14 +56,18 @@ module.exports = function ValidateSelector ({ models }) {
         let hideF = new Function(...keys, `return ${prop.hideIf}`);
         try {
           let doHide = hideF(...values)
+          if (typeof doHide === 'string'  &&  !doHide.length)
+            doHide = true
           let inCols = ungrouped.indexOf(prop.name) !== -1
-          if (doHide  &&  inCols) {
-            let idx = editCols.indexOf(prop.name)
-            if (idx !== -1)
-              editCols.splice(idx, 1)
-            else
-              exclude.push(prop.name)
-          }
+          if (!doHide)
+            continue
+          if (!inCols)
+            continue
+          let idx = editCols.indexOf(prop.name)
+          if (idx !== -1)
+            editCols.splice(idx, 1)
+          else
+            exclude.push(prop.name)
         } catch (err) {
           // debugger
           continue
@@ -71,7 +81,7 @@ module.exports = function ValidateSelector ({ models }) {
       })
       return {
         requestedProperties,
-        exclude
+        excludeProperties: exclude.length && exclude
       }
     }
   }

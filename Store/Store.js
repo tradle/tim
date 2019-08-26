@@ -3457,12 +3457,13 @@ var Store = Reflux.createStore({
       return
     }
     // let moreInfo = plugin().validateForm({application: resource._context, form: r})
-    let rprops = {}
+    let rProps
     let message, deleteProperties
     if (moreInfo) {
       deleteProperties = moreInfo.deleteProperties
       message = moreInfo.message
       let requestedProperties = moreInfo.requestedProperties
+      let rprops = {}
       if (requestedProperties) {
         requestedProperties.forEach((r) => {
           rprops[r.name] = {
@@ -3470,12 +3471,16 @@ var Store = Reflux.createStore({
             required: r.required
           }
         })
+        rProps = {
+          requestedProperties: rprops,
+          excludeProperties: moreInfo.excludeProperties
+        }
       }
     }
 
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rprops, resource, message, deleteProperties})
-    return rprops
+      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties})
+    return rProps
     // return rprops
   },
   getBizPluginsContext() {

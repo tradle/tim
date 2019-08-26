@@ -9,6 +9,7 @@ import {
   Switch
 } from 'react-native'
 
+import debounce from 'p-debounce'
 import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
 import t from 'tcomb-form-native'
@@ -77,7 +78,9 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, editCols, originatingMessage, search, exploreData, errs, requestedProperties } = this.props
+    this.onChangeText = debounce(this.onChangeText.bind(this), 200)
+
+    let { currency, editCols, originatingMessage, search, exploreData, errs } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
@@ -157,13 +160,15 @@ var NewResourceMixin = {
       if (!props[p].readOnly)
         showReadOnly = false
     })
-
+    let requestedProperties, excludeProperties
     if (this.state.requestedProperties)
-      requestedProperties = this.state.requestedProperties
+      ({requestedProperties, excludeProperties} = this.state.requestedProperties)
+
 
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       // if (!utils.isEmpty(requestedProperties))
       //   eCols = []
+
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
         formErrors = params.formErrors
@@ -171,13 +176,18 @@ var NewResourceMixin = {
       eCols = eCols.filter(p => requestedProperties[p])
       for (let p in requestedProperties) {
         // if (eCols.some((prop) => prop.name === p) {
-        if (eCols.indexOf(p) !== -1) {
-          if (props[p].readOnly)
-            showReadOnly = true
-          // this.addError(p, params)
-          continue
-        }
         let idx = p.indexOf('_group')
+        let eidx = eCols.indexOf(p)
+        if (eidx !== -1) {
+          // if (props[p].readOnly)
+          //   showReadOnly = true
+          // // this.addError(p, params)
+          // if (idx === -1)
+          //   continue
+          eCols.splice(eidx, 1)
+        }
+        if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
+          continue
         eCols.push(p)
         let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
         if (idx === -1  &&  props[p].readOnly)
@@ -187,6 +197,8 @@ var NewResourceMixin = {
             let idx = eCols.indexOf(pp)
             if (idx !== -1)
               eCols.splice(idx, 1)
+            if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
+              return
             eCols.push(pp)
             if (!requestedProperties[pp]) {
               if (isRequired  &&  props[pp].readOnly)
@@ -582,8 +594,10 @@ var NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[prop.name]
-    if (!search  &&  r[TYPE] !== SETTINGS)
-      Actions.saveTemporary(r)
+    if (!search  &&  r[TYPE] !== SETTINGS) {
+      // Actions.saveTemporary(r)
+      Actions.getRequestedProperties({resource: r})
+    }
 
     this.setState({
       resource: r,

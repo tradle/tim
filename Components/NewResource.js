@@ -280,7 +280,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties: requestedProperties, resource: r, message: message })
+          this.setState({requestedProperties, resource: r, message: message })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -459,8 +459,9 @@ class NewResource extends Component {
     if (!required)
       required = []
 
-    let requestedProperties = this.state.requestedProperties || this.props.requestedProperties
-    if (requestedProperties) {
+    let reqProperties = this.state.requestedProperties || this.props.requestedProperties
+    if (reqProperties) {
+      let requestedProperties = reqProperties.requestedProperties
       for (let p in requestedProperties) {
         if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1) {
           if (!requestedProperties[p].hasOwnProperty('required')  ||  requestedProperties[p].required)
@@ -468,7 +469,7 @@ class NewResource extends Component {
         }
       }
     }
-    if (!required.length  &&  !requestedProperties) {
+    if (!required.length  &&  !reqProperties) {
       const props = model.properties
       for (let p in props) {
         if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
