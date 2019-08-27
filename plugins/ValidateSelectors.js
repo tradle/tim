@@ -73,11 +73,11 @@ module.exports = function ValidateSelector ({ models }) {
           continue
         }
       }
-
+      let required = m.required || []
       let requestedProperties = []
       editCols.forEach(p => {
         if (exclude.indexOf(p) === -1)
-          requestedProperties.push({name: p})
+          requestedProperties.push({name: p, required: required.indexOf(p) !== -1})
       })
       return {
         requestedProperties,

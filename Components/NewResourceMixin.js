@@ -205,7 +205,7 @@ var NewResourceMixin = {
                 showReadOnly = true
               requestedProperties[pp] = {
                 message: '',
-                required: true
+                required: isRequired || (meta.required  &&  meta.required.indexOf(pp) !== -1)
               }
             }
             // this.addError(p, params)
