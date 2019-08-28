@@ -9,7 +9,6 @@ import {
   Switch
 } from 'react-native'
 
-import debounce from 'p-debounce'
 import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
 import t from 'tcomb-form-native'
@@ -78,8 +77,6 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    this.onChangeText = debounce(this.onChangeText.bind(this), 200)
-
     let { currency, editCols, originatingMessage, search, exploreData, errs } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
@@ -164,7 +161,6 @@ var NewResourceMixin = {
     if (this.state.requestedProperties)
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
-
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       // if (!utils.isEmpty(requestedProperties))
       //   eCols = []
@@ -189,7 +185,7 @@ var NewResourceMixin = {
         if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
           continue
         eCols.push(p)
-        let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
+        let isRequired = requestedProperties[p].required
         if (idx === -1  &&  props[p].readOnly)
           showReadOnly = true
         else if (props[p].list) {
@@ -201,16 +197,17 @@ var NewResourceMixin = {
               return
             eCols.push(pp)
             if (!requestedProperties[pp]) {
-              if (isRequired  &&  props[pp].readOnly)
+              let isPropRequired = isRequired
+              if (props[pp].readOnly  &&  (isRequired  ||  data[pp]))
                 showReadOnly = true
               if (!isRequired) {
-                isRequired = meta.required  &&  meta.required.indexOf(pp) !== -1
-                if (!isRequired  &&  meta.softRequired)
-                  isRequired = meta.softRequired  &&  meta.softRequired.indexOf(pp) !== -1
+                isPropRequired = meta.required  &&  meta.required.indexOf(pp) !== -1
+                if (!isPropRequired  &&  meta.softRequired)
+                  isPropRequired = meta.softRequired  &&  meta.softRequired.indexOf(pp) !== -1
               }
               requestedProperties[pp] = {
                 message: '',
-                required: isRequired
+                required: isPropRequired
               }
             }
             // this.addError(p, params)
@@ -256,20 +253,18 @@ var NewResourceMixin = {
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
         continue;
 
-      if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
+      if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
       let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe                       &&
-          requestedProperties         &&
-          p.indexOf('_group') === -1  &&
-          requestedProperties[p])
-        maybe = false
-
-      if (!maybe  &&  requestedProperties  &&  requestedProperties[p]) {
-        if (requestedProperties[p].hasOwnProperty('required') && !requestedProperties[p].required)
-          maybe = true
+      if (maybe) {
+        if (p.indexOf('_group') !== -1)
+          maybe = false
+        else if (requestedProperties &&  requestedProperties[p]  &&  requestedProperties[p].required)
+          maybe = false
       }
+      else if (requestedProperties  &&  requestedProperties[p]   &&  !requestedProperties[p].required)
+        maybe = true
       let type = props[p].type;
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
@@ -549,9 +544,6 @@ var NewResourceMixin = {
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
-  onChangeText(prop, value) {
-    this.changeValue(prop, value)
-  },
   changeValue(prop, value) {
     let { name: pname, ref: pref, type: ptype } = prop
 
@@ -793,7 +785,7 @@ var NewResourceMixin = {
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
           keyboardShouldPersistTaps='always'
           keyboardType={keyboard || 'default'}
-          onChangeText={this.onChangeText.bind(this, prop)}
+          onChangeText={this.changeValue.bind(this, prop)}
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
