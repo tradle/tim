@@ -35,7 +35,7 @@ module.exports = function ValidateSelector ({ models }) {
           if (typeof doShow === 'string'  &&  !doShow.length)
             doShow = false
           // let doShow = eval(prop.showIf)
-          let inCols = ungrouped.indexOf(prop.name) !== -1
+          let inCols = ungrouped.includes(prop.name)
           if (doShow) {
             if (!inCols)
               editCols.push(prop.name)
@@ -58,7 +58,7 @@ module.exports = function ValidateSelector ({ models }) {
           let doHide = hideF(...values)
           if (typeof doHide === 'string'  &&  !doHide.length)
             doHide = true
-          let inCols = ungrouped.indexOf(prop.name) !== -1
+          let inCols = ungrouped.includes(prop.name)
           if (!doHide)
             continue
           if (!inCols)
@@ -74,10 +74,13 @@ module.exports = function ValidateSelector ({ models }) {
         }
       }
       let required = m.required || []
+      if (m.softRequired)
+        required = required.concat(m.softRequired)
+
       let requestedProperties = []
       editCols.forEach(p => {
-        if (exclude.indexOf(p) === -1)
-          requestedProperties.push({name: p, required: required.indexOf(p) !== -1})
+        if (!exclude.includes(p))
+          requestedProperties.push({name: p, required: required.includes(p)})
       })
       return {
         requestedProperties,

@@ -203,9 +203,14 @@ var NewResourceMixin = {
             if (!requestedProperties[pp]) {
               if (isRequired  &&  props[pp].readOnly)
                 showReadOnly = true
+              if (!isRequired) {
+                isRequired = meta.required  &&  meta.required.indexOf(pp) !== -1
+                if (!isRequired  &&  meta.softRequired)
+                  isRequired = meta.softRequired  &&  meta.softRequired.indexOf(pp) !== -1
+              }
               requestedProperties[pp] = {
                 message: '',
-                required: isRequired || (meta.required  &&  meta.required.indexOf(pp) !== -1)
+                required: isRequired
               }
             }
             // this.addError(p, params)
@@ -545,12 +550,17 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   onChangeText(prop, value) {
-    if(prop.type === 'string'  &&  !value.trim().length)
+    this.changeValue(prop, value)
+  },
+  changeValue(prop, value) {
+    let { name: pname, ref: pref, type: ptype } = prop
+
+    if (ptype === 'string'  &&  !value.trim().length)
       value = ''
-    let {resource, missedRequiredOrErrorValue} = this.state
+    const { resource, missedRequiredOrErrorValue } = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
-    if(prop.type === 'number'  &&  !search) {
+    if(ptype === 'number'  &&  !search) {
       let val = Number(value)
       if (value.charAt(value.length - 1) === '.')
         value = val + '.00'
@@ -559,24 +569,25 @@ var NewResourceMixin = {
     }
     if (!this.floatingProps)
       this.floatingProps = {}
-    if (prop.ref == MONEY) {
-      if (!this.floatingProps[prop.name])
-        this.floatingProps[prop.name] = {}
-      this.floatingProps[prop.name].value = value
-      if (!r[prop.name])
-        r[prop.name] = {}
-      r[prop.name].value = value
+
+    if (pref == MONEY) {
+      if (!this.floatingProps[pname])
+        this.floatingProps[pname] = {}
+      this.floatingProps[pname].value = value
+      if (!r[pname])
+        r[pname] = {}
+      r[pname].value = value
     }
-    else if (prop.type === 'boolean')  {
+    else if (ptype === 'boolean')  {
       if (value === 'null') {
         let m = utils.getModel(resource[TYPE])
-        if (!search  ||  (m.required  &&  m.required.indexOf(prop.name) !== -1)) {
-          delete r[prop.name]
-          delete this.floatingProps[prop.name]
+        if (!search  ||  (m.required  &&  m.required.includes(pname))) {
+          delete r[pname]
+          delete this.floatingProps[pname]
         }
         else {
-          r[prop.name] = null
-          this.floatingProps[prop.name] = value
+          r[pname] = null
+          this.floatingProps[pname] = value
         }
       }
       else {
@@ -584,26 +595,27 @@ var NewResourceMixin = {
           value = true
         else if (value === 'false')
           value = false
-        r[prop.name] = value
-        this.floatingProps[prop.name] = value
+        r[pname] = value
+        this.floatingProps[pname] = value
       }
     }
     else {
-      r[prop.name] = value
-      this.floatingProps[prop.name] = value
+      r[pname] = value
+      this.floatingProps[pname] = value
     }
     if (missedRequiredOrErrorValue)
-      delete missedRequiredOrErrorValue[prop.name]
-    if (!search  &&  r[TYPE] !== SETTINGS) {
+      delete missedRequiredOrErrorValue[pname]
+    if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
       // Actions.saveTemporary(r)
       Actions.getRequestedProperties({resource: r})
     }
 
     this.setState({
       resource: r,
-      inFocus: prop.name
+      inFocus: pname
     })
   },
+
 
   myTextTemplate(params) {
     let label = translate(params.prop, params.model)
@@ -676,7 +688,7 @@ var NewResourceMixin = {
         prop:           prop,
         resource:       this.state.resource,
         bankStyle:      this.props.bankStyle,
-        callback:       this.onChangeText.bind(this)
+        callback:       this.changeValue.bind(this)
       }
     })
   },
@@ -727,7 +739,7 @@ var NewResourceMixin = {
     }
     else {
       return <View style={st}>
-               <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind(this, prop))}>
+               <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.changeValue.bind(this, prop))}>
                  {sig}
                </TouchableOpacity>
             </View>
@@ -889,7 +901,7 @@ var NewResourceMixin = {
       switchView = { paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
       booleanContentStyle = {}
       switchC = <View style={switchView}>
-                 <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
+                 <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.changeValue(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
                 </View>
     }
     else {
@@ -899,7 +911,7 @@ var NewResourceMixin = {
     return (
       <View style={styles.bottom10} key={this.getNextKey()} ref={prop.name}>
         <View style={[styles.booleanContainer, {borderColor: bcolor}]}>
-          <TouchableOpacity onPress={() => this.onChangeText(prop, isTroolean && value ||  !value)}>
+          <TouchableOpacity onPress={() => this.changeValue(prop, isTroolean && value ||  !value)}>
           <View style={booleanContentStyle}>
             <Text style={[style, {color: lcolor}]}>{label}</Text>
             {switchC}
