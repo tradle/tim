@@ -3828,12 +3828,15 @@ var Store = Reflux.createStore({
   },
   async onStepIndicatorPress({step, context, to}) {
     let forms = await this.searchMessages({context, modelName: FORM, to})
+    forms = forms.filter(f => f[TYPE] !== PRODUCT_REQUEST)
     let formType = context._formsTypes[step]
     let i = forms.length - 1
-    for (; i>0  &&  forms[i][TYPE] !== formType; i--);
-    if (i === 0)
+    let found
+    for (; i>=0  &&  !found; i--)
+      found = forms[i][TYPE] === formType
+    if (!found)
       return
-    let resource = await this.onGetItem({noTrigger: true, resource: forms[i]})
+    let resource = await this.onGetItem({noTrigger: true, resource: forms[i + 1]})
     this.trigger({action: 'stepIndicatorPress', resource, context, to, step})
   },
   async onShowStepIndicator() {
