@@ -73,14 +73,11 @@ module.exports = function ValidateSelector ({ models }) {
           continue
         }
       }
-      let required = m.required || []
-      if (m.softRequired)
-        required = required.concat(m.softRequired)
 
       let requestedProperties = []
       editCols.forEach(p => {
         if (!exclude.includes(p))
-          requestedProperties.push({name: p, required: required.includes(p)})
+          requestedProperties.push({name: p})
       })
       return {
         requestedProperties,
