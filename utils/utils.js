@@ -2668,6 +2668,10 @@ debugger
     }
     return r[ROOT_HASH] && r[ROOT_HASH] || (r.id  &&  r.id.split('_')[1])
   },
+  isNew(r) {
+    return !utils.getRootHash(r)
+  },
+
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
   //     const { width=0, height=0 } = shadowOffset
