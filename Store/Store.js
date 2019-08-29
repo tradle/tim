@@ -4809,7 +4809,7 @@ if (!res[SIG]  &&  res._message)
         if (!forceUpdate) {
           self.rewriteStubs(prevResCached)
           if (utils.compare(returnVal, prevResCached)) {
-            if (noTrigger ||  isRefresh  ||  returnVal[NOT_CHAT_ITEM])
+            if (!noTrigger ||  isRefresh  ||  returnVal[NOT_CHAT_ITEM])
               self.trigger({action: 'noChanges'})
             return
           }
