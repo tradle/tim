@@ -195,6 +195,8 @@ class ShowPropertiesView extends Component {
       if (isUndefined) {
         if (pMeta.displayAs) {
           val = utils.templateIt(pMeta, resource);
+          if (!val)
+            return
           val = <Text style={styles.title}>{val}</Text>
         }
         else if (checkProperties) {
