@@ -81,77 +81,33 @@ var NewResourceMixin = {
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
-    let meta = this.props.model  ||  this.props.metadata;
+    let meta = this.props.model  ||  this.props.metadata
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
-    // let chooser = this.chooser  ||  this.props.chooser
 
-    let m = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
-    if (m.abstract)
-      m = meta
-    let props, bl;
+    let props, bl
     if (!meta.items)
       props = meta.properties;
     else {
-      bl = meta.items.backlink;
-      if (!meta.items.ref)
-        props = meta.items.properties;
+      bl = meta.items.backlink
+      if (meta.items.ref)
+        props = utils.getModel(meta.items.ref).properties
       else
-        props = utils.getModel(meta.items.ref).properties;
+        props = meta.items.properties
     }
 
     let dModel = data  &&  utils.getModel(data[TYPE])
-    if (!utils.isEmpty(data)) {
-      if (!meta.items && data[TYPE] !== meta.id && !utils.isSubclassOf(dModel, meta.id)) {
-        let interfaces = meta.interfaces;
-        if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
-           return;
-
-        data[TYPE] = meta.id;
-        for (let p in data) {
-          if (p == TYPE)
-            continue;
-          if (props[p])
-            continue;
-        }
-      }
+    if (!utils.isEmpty(data)    &&
+        !meta.items             &&
+        data[TYPE] !== meta.id  &&
+        !utils.isSubclassOf(dModel, meta.id)) {
+      let interfaces = meta.interfaces;
+      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
+        return;
     }
 
-    const isMessage = meta.id === MESSAGE
-    let eCols = []
-    if (editCols)
-      eCols = editCols.slice();
-      // editCols.forEach((r) => eCols[r] = props[r])
-    if (isMessage)
-      eCols = meta.viewCols
-    else {
-      eCols = utils.getEditCols(meta).map(p => p.name)
-      if (!eCols.length) {
-        if (meta.required)
-          eCols = meta.required.slice
-        else
-          eCols = Object.keys(props)
-      }
-      else if (exploreData) {
-        let vColsList = utils.getViewCols(meta)
-        vColsList.forEach(p => {
-          if (eCols.indexOf(p) === -1)
-            eCols.push(p)
-        })
+    let eCols = this.getEditCols(props)
 
-        let exclude = ['time', 'context', 'lens']
-        let prefillProp = utils.getPrefillProperty(meta)
-        if (prefillProp)
-          exclude.push(prefillProp.name)
-        for (let p in props) {
-          if (eCols.indexOf(p) === -1  &&
-              !props[p].items              &&
-              p.charAt(0) !== '_'          &&
-              exclude.indexOf(p) === -1)
-            eCols.push(p)
-        }
-      }
-    }
     let showReadOnly = true
     eCols.forEach(p => {
       if (!props[p].readOnly)
@@ -162,9 +118,6 @@ var NewResourceMixin = {
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
-      // if (!utils.isEmpty(requestedProperties))
-      //   eCols = []
-
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
         formErrors = params.formErrors
@@ -175,17 +128,11 @@ var NewResourceMixin = {
         let idx = p.indexOf('_group')
         let eidx = eCols.indexOf(p)
         if (eidx !== -1) {
-          // if (props[p].readOnly)
-          //   showReadOnly = true
-          // // this.addError(p, params)
-          // if (idx === -1)
-          //   continue
           eCols.splice(eidx, 1)
         }
         if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
           continue
         eCols.push(p)
-        let isRequired = requestedProperties[p].required
         if (idx === -1  &&  props[p].readOnly)
           showReadOnly = true
         else if (props[p].list) {
@@ -196,42 +143,15 @@ var NewResourceMixin = {
             if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
               return
             eCols.push(pp)
-            if (!requestedProperties[pp]) {
-              let isPropRequired = isRequired
-              if (props[pp].readOnly  &&  (isRequired  ||  data[pp]))
-                showReadOnly = true
-              if (!isRequired) {
-                isPropRequired = meta.required  &&  meta.required.indexOf(pp) !== -1
-                if (!isPropRequired  &&  meta.softRequired)
-                  isPropRequired = meta.softRequired  &&  meta.softRequired.indexOf(pp) !== -1
-              }
-              requestedProperties[pp] = {
-                message: '',
-                required: isPropRequired
-              }
-            }
-            // this.addError(p, params)
           })
         }
-        else if (isRequired) {
-          requestedProperties[p] = {
-            message: '',
-            required: true
-          }
-        }
-        // else
-        //   this.addError(p, params)
       }
     }
     else if (data) {
       for (let p in data) {
-        if (eCols.indexOf(p) === -1  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+        if (!eCols.includes(p)  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
           eCols.push(p)
       }
-      // // filter out the backlink on which the adding resource was initiated
-      // let prop = this.props.prop
-      // if (prop  &&  prop.items  &&  prop.items.backlink  &&  eCols[prop.items.backlink])
-      //   delete eCols[prop.items.backlink]
     }
     // Add props for which request for corrections came, if they are not yet added
     if (formErrors) {
@@ -240,12 +160,14 @@ var NewResourceMixin = {
           eCols.push(p)
     }
     let required = utils.ungroup({model: meta, viewCols: meta.required, edit: true})
-    required = utils.arrayToObject(required);
+    let softRequired = meta.softRequired || []
+
     if (validationErrors) {
       formErrors = validationErrors
       this.state.validationErrors = null
     }
 
+    const isMessage = meta.id === MESSAGE
     let options = {fields: {}}
     let resource = this.state.resource
     for (let i=0; i<eCols.length; i++) {
@@ -256,15 +178,11 @@ var NewResourceMixin = {
       if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
-      let maybe = required  &&  !required.hasOwnProperty(p)
+      let maybe = !required  ||  !required.includes(p)
       if (maybe) {
-        if (p.indexOf('_group') !== -1)
-          maybe = false
-        else if (requestedProperties &&  requestedProperties[p]  &&  requestedProperties[p].required)
+        if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
           maybe = false
       }
-      else if (requestedProperties  &&  requestedProperties[p]   &&  !requestedProperties[p].required)
-        maybe = true
       let type = props[p].type;
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
@@ -532,6 +450,44 @@ var NewResourceMixin = {
         })
     }
     return options;
+  },
+  getEditCols(props) {
+    const { editCols, metadata, model, exploreData } = this.props
+    let meta = model  ||  metadata
+    const isMessage = meta.id === MESSAGE
+    if (editCols)
+      return editCols.slice();
+    if (isMessage)
+      return meta.viewCols
+
+    let eCols = utils.getEditCols(meta).map(p => p.name)
+    if (!eCols.length) {
+      if (meta.required)
+        return meta.required.slice
+      else
+        return Object.keys(props)
+    }
+    else if (!exploreData)
+      return eCols
+
+    let vColsList = utils.getViewCols(meta)
+    vColsList.forEach(p => {
+      if (eCols.indexOf(p) === -1)
+        eCols.push(p)
+    })
+
+    let exclude = ['time', 'context', 'lens']
+    let prefillProp = utils.getPrefillProperty(meta)
+    if (prefillProp)
+      exclude.push(prefillProp.name)
+    for (let p in props) {
+      if (!eCols.includes(p)      &&
+          !props[p].items         &&
+          p.charAt(0) !== '_'     &&
+          !exclude.includes(p))
+        eCols.push(p)
+    }
+    return eCols
   },
   addError(p, params) {
     let { errs } = this.props
@@ -1689,10 +1645,7 @@ var styles= StyleSheet.create({
     flex: 1,
     height: 35,
     paddingBottom: 5,
-    // marginTop: 5,
-    // borderWidth: 1,
     borderColor: 'transparent',
-    // borderBottomColor: '#eeeeee',
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
@@ -1700,11 +1653,7 @@ var styles= StyleSheet.create({
     fontSize: 20,
     color: '#555555',
     backgroundColor: 'transparent',
-    // marginLeft: 10
   },
-  // font18: {
-  //   fontSize: 18,
-  // },
   font20: {
     fontSize: 20,
   },
@@ -1714,7 +1663,6 @@ var styles= StyleSheet.create({
     // top: 5
   },
   divider: {
-    // justifyContent: 'center',
     borderColor: 'transparent',
     borderWidth: 1.5,
     marginTop: 10,
@@ -1725,62 +1673,43 @@ var styles= StyleSheet.create({
     // marginTop: 15,
     marginBottom: 5,
     fontSize: 26,
-    // alignSelf: 'center',
     color: '#ffffff'
   },
   font14: {
     fontSize: 14
   },
   booleanLabel: {
-    // marginTop: 2,
     color: '#aaaaaa',
     fontSize: 20
   },
   booleanText: {
-    // marginTop: 5,
     fontSize: 20
   },
   dateLabel: {
     marginLeft: 10,
     fontSize: 12,
     marginTop: 5,
-    // marginVertical: 5,
     paddingBottom: 5
-    // marginLeft: 10
   },
   noItemsText: {
     fontSize: 20,
     color: '#AAAAAA',
-    // alignSelf: 'center',
-    // paddingLeft: 10
   },
   markdown: {
     backgroundColor: '#f7f7f7',
     paddingVertical: 10,
-    // marginHorizontal: -10,
-    // paddingHorizontal: 20,
   },
   container: {
     flex: 1
   },
   help1: {
     backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
-    // marginHorizontal: 10,
     paddingHorizontal: 10,
-    // borderTopWidth: StyleSheet.hairlineWidth,
-    // borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
-    // borderBottomWidth: StyleSheet.hairlineWidth,
-    // borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc'
   },
   help: {
     backgroundColor: '#f3f3f3',
-    // marginHorizontal: 10,
     paddingHorizontal: 10,
     paddingTop: 7,
-    // borderTopWidth: 1,
-    // borderTopColor: '#cccccc',
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#cccccc',
     paddingBottom: 15
   },
   bottom10: {
