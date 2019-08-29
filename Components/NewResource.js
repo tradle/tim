@@ -459,6 +459,15 @@ class NewResource extends Component {
     if (!required)
       required = []
 
+    if (model.softRequired  &&  this.refs.form) {
+      // HACK a bit
+      let formProps = this.refs.form.props  &&  this.refs.form.props.options.fields
+      let props = model.properties
+      for (let p in formProps)
+        if (props[p]  &&  model.softRequired.includes(p))
+          required.push(p)
+    }
+
     let reqProperties = this.state.requestedProperties || this.props.requestedProperties
     if (reqProperties) {
       let requestedProperties = reqProperties.requestedProperties
