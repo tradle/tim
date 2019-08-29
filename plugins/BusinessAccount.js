@@ -1,5 +1,5 @@
 import { TYPE } from '@tradle/constants'
-import { getModel, getPropertiesWithAnnotation } from '../utils/utils'
+import { getModel, getPropertiesWithAnnotation, isNew } from '../utils/utils'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
@@ -103,9 +103,8 @@ function getPropsForLegalDocument(form) {
   return ret
 }
 function getPropsForLegalEntity(form) {
-  const { document, country, registrationNumber, region, jsonBundle, uploadForms} = form
-
-  if (!form.hasOwnProperty('uploadHierarchy')  &&  !form.country) {
+  const { country, uploadHierarchy} = form
+  if (isNew(form)  &&  !form.hasOwnProperty('uploadHierarchy')  &&  !country) {
     return {
       requestedProperties: [
         // { name: 'country' },
@@ -114,7 +113,7 @@ function getPropsForLegalEntity(form) {
       ]
     }
   }
-  else if (form.uploadHierarchy  &&  !form.country) {
+  else if (uploadHierarchy  &&  !country) {
     return {
       requestedProperties: [
         // { name: 'country' },
