@@ -2178,7 +2178,8 @@ var utils = {
           props[p].hidden                ||
           (hiddenProperties  &&  hiddenProperties.indexOf(p) !== -1))
         continue
-      docProps.push(resource[p])
+      if (resource[p])
+        docProps.push(resource[p])
     }
     return docProps
   },
