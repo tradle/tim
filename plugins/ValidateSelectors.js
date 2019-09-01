@@ -73,6 +73,19 @@ module.exports = function ValidateSelector ({ models }) {
           continue
         }
       }
+      if (exclude.length) {
+        let props = m.properties
+        editCols.forEach(p => {
+          if (!p.endsWith('_group'))
+            return
+          let list = props[p].list
+          if (!list)
+            return
+          let excludeGroupProps = !list.find(r => !exclude.includes(r))
+          if (excludeGroupProps)
+            exclude.push(props[p].name)
+        })
+      }
 
       let requestedProperties = []
       editCols.forEach(p => {
