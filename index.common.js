@@ -29,7 +29,8 @@ const {
 } = constants
 const {
   PROFILE,
-  MESSAGE
+  MESSAGE,
+  ORGANIZATION
 } = constants.TYPES
 console.disableYellowBox = true
 import { Text } from './Components/Text'
@@ -398,7 +399,9 @@ var NavigationBarRouteMapper = {
     case 'Done':
     case VERIFY_OR_CORRECT:
       color = bankStyle  &&  bankStyle.buttonBgColor || iconColor
-      iconColor = bankStyle  &&  bankStyle.buttonColor || '#fff'
+      iconColor = bankStyle  &&  bankStyle.buttonColor || '#ffffff'
+      if (iconColor === color)
+        iconColor = bankStyle.linkColor
       isSubmit = true
       if (route.passProps.isChooser)
         icon = 'md-checkmark'
@@ -509,14 +512,9 @@ var NavigationBarRouteMapper = {
         resource                        &&
         resource.organization           &&
         resource[TYPE] === PROFILE)
-          // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
-          //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
-          // if (route.passProps.resource.organization)
       org = <Text style={style}> - {resource.organization.title}</Text>
     let photo, uri
     let photoObj
-    // let noLogo = route.id === RESOURCE_VIEW  &&  route.passProps.resource[TYPE] === PROFILE
-    // if (!noLogo) {
     if (bankStyle)
       photoObj = bankStyle.barLogo  ||  bankStyle.logo
 
@@ -548,7 +546,6 @@ var NavigationBarRouteMapper = {
     }
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
-    let color
     if (uri) {
       let { width, height } = photoObj
       if (width  &&  height)
@@ -561,8 +558,12 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />
       else
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
+      let provider = resource  &&  resource[TYPE] === ORGANIZATION  ||  to  ||  (bankStyle && resource.to && resource.to.organization)
+      if (provider)
+        photo = <TouchableOpacity hitSlop={HIT_SLOP} onPress={() => this.showProvider(route, provider, navigator)}>{photo}</TouchableOpacity>
     }
 
+    let color
     if (route.componentName === 'CameraView')  // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
@@ -604,6 +605,18 @@ var NavigationBarRouteMapper = {
       </View>
     );
   },
+  showProvider: function(route, provider, navigator) {
+    let { bankStyle } = route.passProps
+    navigator.push({
+      title: provider.name,
+      componentName: 'ResourceView',
+      backButtonTitle: 'Back',
+      passProps: {
+        bankStyle,
+        resource: provider,
+      }
+    })
+  }
 };
 
 var styles = StyleSheet.create({
