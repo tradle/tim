@@ -734,7 +734,7 @@
     "@tradle/biz-plugins": {
       "version": "1.0.0",
       "from": "tradle/biz-plugins",
-      "resolved": "git://github.com/tradle/biz-plugins.git#1bd2beeb524d2e4bdaec44aff589bdf6284c642e"
+      "resolved": "git://github.com/tradle/biz-plugins.git#b663a75b9f81a3de9bfe8be436ca5c75a8bf3859"
     },
     "@tradle/build-resource": {
       "version": "4.0.2",
@@ -754,7 +754,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#17c40f408e671034dbae8d915fe78034cba1cf1b"
+      "resolved": "git://github.com/tradle/custom-models.git#a8d20398a51bdcf6dd6a163be3b8193a827da582"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -877,7 +877,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#27434a478666d3c162bfd7872a29f1b51e81f00d"
+      "resolved": "git://github.com/tradle/models.git#e64a3e3bb1c2946042e007615421dd351b668059"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -887,7 +887,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#289b157764f6ef9309f2d056c7e33bcce110b0ab"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#8eb5243d3dcde37a543437b5f337d976a8b12c51"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -952,9 +952,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.4",
+      "version": "7.1.12",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.4.tgz"
+      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.12.tgz"
     },
     "@tradle/validate-resource": {
       "version": "4.3.4",
