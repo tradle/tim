@@ -29,7 +29,8 @@ const {
 } = constants
 const {
   PROFILE,
-  MESSAGE
+  MESSAGE,
+  ORGANIZATION
 } = constants.TYPES
 console.disableYellowBox = true
 import { Text } from './Components/Text'
@@ -438,6 +439,7 @@ var NavigationBarRouteMapper = {
     case 'View':
       icon = 'md-eye'
       iconSize = 28
+      style = isWeb()  &&  {marginTop: 3}
       break
     case 'Search':
       icon = 'md-search'
@@ -580,6 +582,11 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />
       else
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
+
+
+      let provider = resource  &&  resource[TYPE] === ORGANIZATION  ||  to  ||  (bankStyle && resource.to && resource.to.organization)
+      if (provider)
+        photo = <TouchableOpacity hitSlop={HIT_SLOP} onPress={() => this.showProvider(route, provider, navigator)}>{photo}</TouchableOpacity>
     }
 
     let color
@@ -630,6 +637,20 @@ var NavigationBarRouteMapper = {
       </View>
     );
   },
+  showProvider: function(route, provider, navigator) {
+    let { bankStyle } = route.passProps
+    navigator.push({
+      title: provider.name ||  provider.title,
+      componentName: 'ResourceView',
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      passProps: {
+        bankStyle,
+        resource: provider,
+      }
+    })
+  }
+
 };
 
 var styles = StyleSheet.create({
@@ -705,3 +726,4 @@ function isLandscapeOnlyRoute (route) {
 
   return !utils.getMe() && route.componentName === 'NewResource'
 }
+

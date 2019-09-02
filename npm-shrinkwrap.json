@@ -102,7 +102,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#4f19844861d99f999921d1488a5e62138d76ef62"
+      "resolved": "git://github.com/tradle/custom-models.git#a8d20398a51bdcf6dd6a163be3b8193a827da582"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -235,7 +235,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#0b91b0d095d7a0595b5edc7f33c324531c15cbcd"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#8eb5243d3dcde37a543437b5f337d976a8b12c51"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -6318,7 +6318,7 @@
     "react-native-deprecated-custom-components": {
       "version": "0.1.1",
       "from": "tradle/react-native-custom-components#web",
-      "resolved": "git://github.com/tradle/react-native-custom-components.git#5816e587fbc0e4d494963a32dd0bcf8dbdca564a",
+      "resolved": "git://github.com/tradle/react-native-custom-components.git#faa87dd9e08a64042bb2662b79c7d13b918c255e",
       "dependencies": {
         "create-react-class": {
           "version": "15.6.0",
