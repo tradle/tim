@@ -601,8 +601,8 @@ class TimHome extends Component {
     let route = {
       title: resource.name,
       componentName: 'MessageList',
-      backButtonTitle: showProfile ? 'Profile' : 'Back',
-      rightButtonTitle: 'View',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Profile',
       onRightButtonPress: {
         title: resource.name,
         componentName: 'ResourceView',
@@ -622,7 +622,7 @@ class TimHome extends Component {
       }
     }
     if (showProfile)
-      route.passProps.onLeftButtonPress = () => this.showProfile(navigator, 'replace')
+      route.passProps.onLeftButtonPress = () => this.this.showOfficialAccounts(navigator, 'replace')
     if (action)
       navigator[action](route)
     else if (termsAccepted  &&  routes.length === 3)
