@@ -81,7 +81,7 @@ var NewResourceMixin = {
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
-    let meta = this.props.model  ||  this.props.metadata
+    let meta = utils.getModel((this.props.model  ||  this.props.metadata).id)
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
 
@@ -106,7 +106,7 @@ var NewResourceMixin = {
         return;
     }
 
-    let eCols = this.getEditCols(props)
+    let eCols = this.getEditCols(props, meta)
 
     let showReadOnly = true
     eCols.forEach(p => {
@@ -451,33 +451,32 @@ var NewResourceMixin = {
     }
     return options;
   },
-  getEditCols(props) {
-    const { editCols, metadata, model, exploreData } = this.props
-    let meta = model  ||  metadata
-    const isMessage = meta.id === MESSAGE
+  getEditCols(props, model) {
+    const { editCols, exploreData } = this.props
+    const isMessage = model.id === MESSAGE
     if (editCols)
       return editCols.slice();
     if (isMessage)
-      return meta.viewCols
+      return model.viewCols
 
-    let eCols = utils.getEditCols(meta).map(p => p.name)
+    let eCols = utils.getEditCols(model).map(p => p.name)
     if (!eCols.length) {
-      if (meta.required)
-        return meta.required.slice
+      if (model.required)
+        return model.required.slice
       else
         return Object.keys(props)
     }
     else if (!exploreData)
       return eCols
 
-    let vColsList = utils.getViewCols(meta)
+    let vColsList = utils.getViewCols(model)
     vColsList.forEach(p => {
       if (eCols.indexOf(p) === -1)
         eCols.push(p)
     })
 
     let exclude = ['time', 'context', 'lens']
-    let prefillProp = utils.getPrefillProperty(meta)
+    let prefillProp = utils.getPrefillProperty(model)
     if (prefillProp)
       exclude.push(prefillProp.name)
     for (let p in props) {

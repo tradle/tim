@@ -11144,9 +11144,14 @@ await fireRefresh(val.from.organization)
   async modelsPackHandler({val, batch, org}) {
     // org.products = []
     let pList = val.models || []
+    let oldVersionIds = []
     pList.forEach((m) => {
-      if (!this.getModel(m.id))
+      let oldModel = this.getModel(m.id, true)
+      if (!oldModel)
         this._emitter.emit('model:' + m.id)
+      else if (oldModel._versionId  &&  !oldVersionIds.includes(oldModel._versionId)) {
+        oldVersionIds.push(oldModel._versionId)
+      }
       m._versionId = val.versionId
 
       storeUtils.parseOneModel(m, models, enums)
@@ -11154,7 +11159,10 @@ await fireRefresh(val.from.organization)
     })
     utils.setModels(this.getModels())
     // utils.setModels(models)
-
+    let idx = oldVersionIds.indexOf(val._versionId)
+    if (idx !== -1)
+      oldVersionIds.splice(idx, 1)
+    this.clearModelsCache(oldVersionIds)
     if (val.lenses) {
       val.lenses.forEach((l) => {
         batch.push({type: 'put', key: l.id, value: l})
@@ -11756,7 +11764,7 @@ await fireRefresh(val.from.organization)
 
     return mm
   },
-  getModel(modelOrId) {
+  getModel(modelOrId, noCache) {
     const id = typeof modelOrId === 'string' ? modelOrId : modelOrId.id
     const cached = modelsWithAddOns[id]
     if (cached) return cached
@@ -11767,11 +11775,21 @@ await fireRefresh(val.from.organization)
       : modelOrId
 
     if (model) {
+      if (noCache)
+        return model
       modelsWithAddOns[id] = this.getAugmentedModel(model)
       return modelsWithAddOns[id]
     }
   },
-
+  clearModelsCache(oldVersionIds) {
+    if (!oldVersionIds.length)
+      return
+    for (let m in modelsWithAddOns) {
+      let model = modelsWithAddOns[m]
+      if (model._versionId && oldVersionIds.includes(model._versionId))
+        delete modelsWithAddOns[m]
+    }
+  },
   getAugmentedModel(model) {
     model = _.cloneDeep(model)
     storeUtils.addOns(model, models, enums)
