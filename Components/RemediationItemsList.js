@@ -34,22 +34,22 @@ class RemediationItemsList extends Component {
     super(props);
 
     var dataSource = new ListView.DataSource({
-        rowHasChanged: (row1, row2) => {
-          if (row1 !== row2)
-            return true
-          if (utils.isEmpty(this.props.reviewed))
-            return false
-          let row1reviewed = false
-          let row2reviewed = false
-          for (var rId in this.props.reviewed) {
-            if (this.props.reviewed[rId] === row1)
-              row1reviewed = true
-            else (this.props.reviewed[rId] === row2)
-              row2reviewed = true
-          }
-          return row2reviewed || row1reviewed
+      rowHasChanged: (row1, row2) => {
+        if (row1 !== row2)
+          return true
+        if (utils.isEmpty(this.props.reviewed))
+          return false
+        let row1reviewed = false
+        let row2reviewed = false
+        for (var rId in this.props.reviewed) {
+          if (this.props.reviewed[rId] === row1)
+            row1reviewed = true
+          else (this.props.reviewed[rId] === row2)
+            row2reviewed = true
         }
-      });
+        return row2reviewed || row1reviewed
+      }
+    });
 
     this.state = {
       list: props.list || [],
@@ -83,14 +83,7 @@ class RemediationItemsList extends Component {
       msg2,
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-        {text: translate('OK'), onPress: () => {
-          Actions.addChatItem({
-            value: {_documentCreated: true},
-            resource: resource,
-            meta: utils.getModel(resource[TYPE])
-          })
-          navigator.pop();
-        }}
+        {text: translate('OK'), onPress: this.processReviewed.bind(this)}
       ]
     )
   }
@@ -104,6 +97,17 @@ class RemediationItemsList extends Component {
       return
     Actions.list({modelName: FORM, to, isRefresh, originalResource: this.props.resource, resource})
   }
+  processReviewed() {
+    let { reviewed, resource, navigator } = this.props
+    Actions.addChatItem({
+      value: {_documentCreated: true},
+      resource,
+      meta: utils.getModel(resource[TYPE]),
+      reviewed
+    })
+    navigator.pop();
+  }
+
   onAction(params) {
     let { to, action, list, products, resource, isRefresh, requestForRefresh } = params
     if (!isRefresh)
