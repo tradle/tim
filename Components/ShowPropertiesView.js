@@ -68,15 +68,7 @@ class ShowPropertiesView extends Component {
         {viewCols}
       </View>
     );
-    // return (
-    //   <ScrollView ref={(scroll) => {this.scroll = scroll}} style={{paddingBottom: 100}} key={this.getNextKey}>
-    //     {viewCols}
-    //   </ScrollView>
-    // );
   }
-  // scrollToBottom() {
-  //   this.scroll.scrollToEnd()
-  // }
   shouldComponentUpdate(nextProps, nextState) {
     // Prompt for employee to write a correction message
     if (this.state.promptVisible !== nextState.promptVisible)
@@ -194,10 +186,12 @@ class ShowPropertiesView extends Component {
       if (isUndefined) {
         if (pMeta.displayAs) {
           val = utils.templateIt(pMeta, resource);
+          if (!val)
+            return
           val = <Text style={styles.title}>{val}</Text>
         }
         else if (checkProperties) {
-          if (p.indexOf('_group') === p.length - 6) {
+          if (p.endsWith('_group')) {
             viewCols.push(
               <View style={{padding: 15}} key={this.getNextKey()}>
                 <View style={styles.groupStyle}>

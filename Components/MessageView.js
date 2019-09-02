@@ -329,7 +329,7 @@ class MessageView extends Component {
         mainPhoto = resource[mainPhotoProp]
         if (photos) {
           if (mainPhotoProp !== 'photos')
-            photos = photos.filter(p => p.url !== mainPhoto)
+            photos = photos.filter(p => p.url !== mainPhoto.url)
         }
       }
       else if (!photos  ||  !photos.length) {

@@ -120,12 +120,14 @@ class PhotoList extends Component {
       onPress = callback.bind(this, photo)
     else {
       let url = photo.url
-      if (url.indexOf('data:application/pdf;') === 0)
+      if (url.startsWith('data:application/pdf;'))
+        return <View/>
+      else if (decodeURIComponent(url).indexOf('=application/pdf') !== -1)
         return <View/>
       onPress = this.showCarousel.bind(this, {photo, isView})
     }
     let isDataUrl = utils.isImageDataURL(photo.url)
-    let isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
+    let isPng = isDataUrl  &&  photo.url.startsWith('data:image/png;')
     let source = { uri: uri }
     if (isDataUrl  ||  uri.charAt(0) == '/')
       source.isStatic = true;

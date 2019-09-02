@@ -27,7 +27,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate, translateEnum, isWeb, isSimulator, buildStubByEnumTitleOrId } from '../utils/utils'
+import utils, { translate, translateEnum, isWeb, isSimulator, buildStubByEnumTitleOrId, isDataUrl, isPDF } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -48,7 +48,7 @@ const PHOTO_ID = 'tradle.PhotoID'
 const ID_CARD = 'tradle.IDCardType'
 const TREE = 'tradle.Tree'
 
-const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/Pdf.png'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -78,7 +78,7 @@ class RefPropertyEditor extends Component {
     return false
   }
   render() {
-    let { prop, resource, error, styles, model, bankStyle, country, labelAndBorder,
+    let { prop, resource, error, styles, model, bankStyle, country, labelAndBorder, isRefresh,
           search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
@@ -88,6 +88,7 @@ class RefPropertyEditor extends Component {
     let { lcolor, bcolor } = labelAndBorder(pName)
     let isVideo = pName === 'video'
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
+    let isFile = prop.ref  &&  utils.isSubclassOf(prop.ref, 'tradle.File')
     let isIdentity = prop.ref === IDENTITY
 
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
@@ -123,19 +124,23 @@ class RefPropertyEditor extends Component {
       color = '#555555'
     else
       color = '#888888'
+    let isDocument = prop.range === 'document'
     let propView
     if (photoR) {
-      let isPdf = resource[pName]  &&  resource[pName].fileName  &&  resource[pName].fileName.toLowerCase().endsWith('.pdf')
-      let source = {uri: isPdf  &&  PDF_ICON ||  photoR.url}
-      let fileName
-      if (isPdf) {
-        let pieces = resource[pName].fileName.split('/')
-        fileName = <Text style={styles.textAfterImage}>{pieces[pieces.length - 1]}</Text>
+      let pVal = resource[pName]
+      let source
+      if (isDocument  &&  pVal) {
+        let { fileName, url } = pVal
+        let isPdf = fileName  &&  fileName.toLowerCase().indexOf('.pdf') !== -1
+        if (!isPdf)
+          isPdf = url.indexOf('data:application/pdf') === 0
+        if (isPdf)
+          source = PDF_ICON
       }
-// debug(source.uri.substring(0, 100))
+      if (!source)
+        source = photoR.url
       propView = <View style={{ marginTop: 15, flexDirection: 'row' }}>
-                   <Image source={source} style={[styles.thumb]} />
-                   {fileName}
+                   <Image source={{uri: source}} style={[styles.thumb]} />
                  </View>
     }
     else {
@@ -170,7 +175,7 @@ class RefPropertyEditor extends Component {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={[val && styles.photoIcon || (styles.photoIconEmpty, {marginTop: 15})]}/>
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else if (isIdentity)
         icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else
@@ -191,15 +196,22 @@ class RefPropertyEditor extends Component {
       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                      {content}
                    </TouchableOpacity>
-    else if (isVideo ||  isPhoto) {
+    else if (isVideo  ||  isPhoto  ||  isFile) {
       // HACK
       if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        let isDocument = prop.range === 'document'
-        if (isDocument)
-          actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
-                         {content}
-                       </DocumentInput>
+        if (isDocument) {
+          if (isRefresh) {
+            actionItem = <TouchableOpacity onPress={() => this.onDocument(pName, resource[pName])}>
+                           {content}
+                         </TouchableOpacity>
+          }
+          else {
+            actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
+                           {content}
+                         </DocumentInput>
+          }
+        }
         else
           actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'}
                                    cameraType={prop.cameraType}
@@ -242,7 +254,11 @@ class RefPropertyEditor extends Component {
   }
   onDocument(propName, item) {
     const { model, navigator } = this.props
-    if (item.type &&  item.type.indexOf('pdf') !== -1  || item.fileName.endsWith('.pdf')) {
+    const { type, fileName, url, isText } = item
+    if (!url)
+      return
+    if (isPDF(url) || (fileName   &&  fileName.endsWith('.pdf'))) {
+      let dataUrl = isDataUrl(url) && url || `data:application/pdf;base64,${url}`
       this.props.navigator.push({
         title: translate(model, model.properties[propName]),
         backButtonTitle: 'Back',
@@ -250,13 +266,17 @@ class RefPropertyEditor extends Component {
         rightButtonTitle: 'Done',
         passProps: {
           prop: propName,
-          onSubmit: () => this.onSetMediaProperty(propName, {...item, url: `data:pdf/jpeg;base64${item.url}`}),
+          onSubmit: () => this.onSetMediaProperty(propName, {...item, url: dataUrl}),
           item: {isPdf: true, ...item}
         }
       });
     }
+    else if (isText) {
+      this.onSetMediaProperty(propName, {...item, url})
+    }
     else {
-      let photo = {url: `data:image/jpeg;base64,${item.url}`}
+      let iurl = `data:image/jpeg;base64,${url}`
+      let photo = {url: iurl}
       this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
     }
   }

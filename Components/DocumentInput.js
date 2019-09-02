@@ -56,18 +56,23 @@ class DocumentInput extends Component {
           filetype: [DocumentPickerUtil.allFiles()],
         }, async (error,res) => {
       let fileUri = res.uri
-      let contents
-      debugger
+      let contents, isText
+      // debugger
       try {
         let fres = await RNFetchBlob.fetch('GET', fileUri)
-        contents = fres.base64()
+        if (fres.info().rnfbEncode === 'base64')
+          contents = fres.base64()
+        else {
+          contents = fres.text()
+          isText = true
+        }
       }
       catch(err) {
         console.log(err.message, err.code);
         debugger
         return
       }
-      let item = {...res, url: contents}
+      let item = {...res, url: contents, isText }
       this.props.onDocument(item)
     });
   }

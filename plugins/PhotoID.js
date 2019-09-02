@@ -204,17 +204,43 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
   let isLicence = documentType.title.indexOf('Licence') !== -1
   let isOther = documentType.id.indexOf('_other') !== -1
   let isID = !isLicence  &&  documentType.title.indexOf('ID') !== -1
-  // if (!scan) {
+  let commonRP = [
+    {name: 'documentType'},
+    {name: 'scan'}
+  ]  // if (!scan) {
   if (isLicence) {
     switch (countryId) {
       case 'NZ':
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'country'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
+        requestedProperties = [
+          {name: 'otherSideScan'},
+          {name: 'country'},
+          {name: 'personal_group'},
+          {name: 'middleName'},
+          {name: 'address_group'},
+          {name: 'city'},
+          {name: 'document_group'},
+          {name: 'documentVersion'}
+        ]
         break
       case 'PH':
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'country'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'documentNumber'}, {name: 'dateOfExpiry'}]
+        requestedProperties = [
+          {name: 'otherSideScan'},
+          {name: 'country'},
+          {name: 'personal_group'},
+          {name: 'address_group'},
+          {name: 'documentNumber'},
+          {name: 'dateOfExpiry'}
+          ]
         break
       default:
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'country'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'issuer'}]
+        requestedProperties = [
+        {name: 'otherSideScan'},
+        {name: 'country'},
+        {name: 'personal_group'},
+        {name: 'address_group'},
+        {name: 'document_group'},
+        {name: 'issuer'}
+        ]
     }
     // if (countryId === 'NZ')
     //   requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
@@ -225,19 +251,37 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
     // requestedProperties.splice(1, 0, {name: 'country'})
   }
   else if (isID) {
-    requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+    requestedProperties = [
+      {name: 'otherSideScan'},
+      {name: 'personal_group'},
+      {name: 'nationality'},
+      {name: 'sex'},
+      {name: 'idCardDocument_group'}
+      ]
     if (form.middleName)
       requestedProperties.splice(2, 0, {name: 'middleName'})
     requestedProperties.splice(1, 0, {name: 'country'})
   }
   else {
-    if (isOther)
-      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
-    else
-      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+    if (isOther) {
+      requestedProperties = [
+       {name: 'personal_group'},
+       {name: 'nationality'},
+       {name: 'sex'},
+       {name: 'idCardDocument_group'}
+       ]
+    }
+    else {
+      requestedProperties = [
+        {name: 'personal_group'},
+        {name: 'nationality'},
+        {name: 'sex'},
+        {name: 'document_group'}
+        ]
+    }
     requestedProperties.splice(0, 0, {name: 'country'})
   }
-  return requestedProperties
+  return commonRP.concat(requestedProperties)
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
@@ -260,10 +304,26 @@ function cleanupValues(form, values, model) {
   let requestedProperties
   if (isWeb()  ||  isSimulator()  ||  form.documentType.id.indexOf('_other') !== -1) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
-    if (isLicence)
-      requestedProperties = [{name: 'personal_group'}, {name: 'document_group'}, {name: 'address_group'}]
-    else
-      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+    let commonRP = [
+      {name: 'documentType'},
+      {name: 'country'},
+      {name: 'scan'}
+    ]
+    if (isLicence) {
+      requestedProperties = [
+         {name: 'personal_group'},
+         {name: 'document_group'},
+         {name: 'address_group'}
+         ]
+    }
+    else {
+      requestedProperties = [
+        {name: 'personal_group'},
+        {name: 'nationality'},
+        {name: 'sex'},
+        {name: 'document_group'}]
+    }
+    requestedProperties = commonRP.concat(requestedProperties)
   }
   else
     requestedProperties = []
