@@ -584,7 +584,13 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
 
 
-      let provider = resource  &&  resource[TYPE] === ORGANIZATION  ||  to  ||  (resource && resource.to && resource.to.organization)
+      let provider
+      if (resource  &&  resource[TYPE] === ORGANIZATION)
+        provider = resource
+      else if (to)
+        provider =  to
+      else if (bankStyle  &&  resource && resource.to && resource.to.organization)
+        provider = resource.to.organization
       if (provider)
         photo = <TouchableOpacity hitSlop={HIT_SLOP} onPress={() => this.showProvider(route, provider, navigator)}>{photo}</TouchableOpacity>
     }
