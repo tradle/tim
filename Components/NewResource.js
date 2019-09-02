@@ -15,6 +15,7 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  KeyboardAvoidingView
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -153,7 +154,7 @@ class NewResource extends Component {
            this.state.isUploading !== nextState.isUploading  ||
            this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
-           this.state.keyboardSpace !== nextState.keyboardSpace    ||
+           // this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
            this.state.disableEditing !== nextState.disableEditing  ||
            this.state.validationErrors !== nextState.validationErrors ||
@@ -246,6 +247,10 @@ class NewResource extends Component {
       Actions.getRequestedProperties({resource})
       return
     }
+    if (action === 'hierarchyUploaded') {
+      if (model.id === params.model.id  &&  resource === params.resource)
+        navigator.pop()
+    }
     if (action === 'formEdit') {
       if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
         if (requestedProperties) {
@@ -257,7 +262,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties: requestedProperties, resource: r, message: message })
+          this.setState({requestedProperties, resource: r, message })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -436,8 +441,19 @@ class NewResource extends Component {
     if (!required)
       required = []
 
-    let requestedProperties = this.state.requestedProperties || this.props.requestedProperties
-    if (requestedProperties) {
+    if (model.softRequired  &&  this.refs.form) {
+      // HACK a bit
+      let formProps = this.refs.form.props  &&  this.refs.form.props.options.fields
+      let props = model.properties
+      for (let p in formProps)
+        if (props[p]  &&  model.softRequired.includes(p))
+          required.push(p)
+    }
+
+
+    let reqProperties = this.state.requestedProperties || this.props.requestedProperties
+    if (reqProperties) {
+      let requestedProperties = reqProperties.requestedProperties
       for (let p in requestedProperties) {
         if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1) {
           if (!requestedProperties[p].hasOwnProperty('required')  ||  requestedProperties[p].required)
@@ -445,7 +461,7 @@ class NewResource extends Component {
         }
       }
     }
-    if (!required.length) {
+    if (!required.length  &&  !reqProperties) {
       const props = model.properties
       for (let p in props) {
         if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
@@ -465,8 +481,8 @@ class NewResource extends Component {
         Actions.addChatItem(params)
       return
     }
-
-    this.checkRequired(json, required, missedRequiredOrErrorValue)
+    if (required)
+      this.checkRequired(json, required, missedRequiredOrErrorValue)
 
     let err = this.validateProperties(json)
     for (let p in err)
@@ -505,7 +521,7 @@ class NewResource extends Component {
       lens: lensId,
       isRegistration: this.state.isRegistration,
       isRefresh,
-      doNotSend,
+      doNotSend: isRefresh,
       chat
     };
 
@@ -513,6 +529,7 @@ class NewResource extends Component {
       params.lens = this.floatingProps._lens
 
     // HACK
+    Actions.saveTemporary(r)
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
     else {
@@ -820,8 +837,6 @@ class NewResource extends Component {
       Form.stylesheet = stylesheet
 
     let { height } = utils.dimensions(NewResource)
-    if (!options)
-      options = {}
     options.auto = 'placeholders';
     options.tintColor = 'red'
     let button
@@ -834,9 +849,11 @@ class NewResource extends Component {
                     </View>
                  </TouchableOpacity>
                </View>
-    let formStyle = isRegistration
-                  ? {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
-                  : styles.noRegistration
+    let formStyle
+    if (isRegistration)
+      formStyle = {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
+    else
+      formStyle = styles.noRegistration
     let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons
     if (jsonProps  &&  jsonProps.length) {
@@ -911,6 +928,13 @@ class NewResource extends Component {
                      {arrayItems}
                    </View>
     }
+    let form = <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
+    // if (!utils.isWeb()) {
+    //   form = <KeyboardAvoidingView behavior='position' style={{flex:1}} keyboardVerticalOffset={100} enabled>
+    //           <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
+    //         </KeyboardAvoidingView>
+    // }
+
     let content =
       <ScrollView style={styles.scroll}
                   ref='scrollView' {...this.scrollviewProps}
@@ -924,8 +948,9 @@ class NewResource extends Component {
                 dismissKeyboard();
             }
           }}>
+
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 0}}>
-            <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
+            {form}
             {formsToSign}
             {button}
             {arrayItems}
@@ -971,7 +996,7 @@ class NewResource extends Component {
 
 
     return (
-      <View style={{height: height}}>
+      <View style={{height}}>
         <BackgroundImage source={BG_IMAGE} />
         <View style={{justifyContent: 'center', height: height}}>
           {title}
@@ -1178,6 +1203,7 @@ class NewResource extends Component {
                          style={{paddingHorizontal: 5}}
                          allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                          underlayColor='transparent'
+                         nonImageAllowed={bl.range === 'document'}
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
                        </ImageInput>
@@ -1227,7 +1253,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
   const formField =  {
     // minHeight: 60,
     borderColor: '#dddddd',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 6,
     backgroundColor: '#ffffff',
   }

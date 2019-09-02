@@ -69,138 +69,82 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, editCols, originatingMessage, search, exploreData, errs, requestedProperties } = this.props
+    let { currency, editCols, originatingMessage, search, exploreData, errs, isRefresh } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
-    let meta = this.props.model  ||  this.props.metadata;
+    // Case when clicked in the FormRequest and modelsPack changed
+    let meta = utils.getModel((this.props.model  ||  this.props.metadata).id)
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
-    // let chooser = this.chooser  ||  this.props.chooser
-
-    let m = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
-    if (m.abstract)
-      m = meta
-    let props, bl;
+    let props, bl
     if (!meta.items)
       props = meta.properties;
     else {
-      bl = meta.items.backlink;
-      if (!meta.items.ref)
-        props = meta.items.properties;
+      bl = meta.items.backlink
+      if (meta.items.ref)
+        props = utils.getModel(meta.items.ref).properties
       else
-        props = utils.getModel(meta.items.ref).properties;
+        props = meta.items.properties
     }
 
     let dModel = data  &&  utils.getModel(data[TYPE])
-    if (!utils.isEmpty(data)) {
-      if (!meta.items && data[TYPE] !== meta.id && !utils.isSubclassOf(dModel, meta.id)) {
-        let interfaces = meta.interfaces;
-        if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
-           return;
-
-        data[TYPE] = meta.id;
-        for (let p in data) {
-          if (p == TYPE)
-            continue;
-          if (props[p])
-            continue;
-        }
-      }
+    if (!utils.isEmpty(data)    &&
+        !meta.items             &&
+        data[TYPE] !== meta.id  &&
+        !utils.isSubclassOf(dModel, meta.id)) {
+      let interfaces = meta.interfaces;
+      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
+        return;
     }
 
-    const isMessage = meta.id === MESSAGE
-    let eCols = []
-    if (editCols)
-      eCols = editCols.slice();
-      // editCols.forEach((r) => eCols[r] = props[r])
-    if (isMessage)
-      eCols = meta.viewCols
-    else {
-      eCols = utils.getEditCols(meta).map(p => p.name)
-      if (!eCols.length) {
-        if (meta.required)
-          eCols = meta.required.slice
-        else
-          eCols = Object.keys(props)
-      }
-      else if (exploreData) {
-        let vColsList = utils.getViewCols(meta)
-        vColsList.forEach(p => {
-          if (eCols.indexOf(p) === -1)
-            eCols.push(p)
-        })
+    let eCols = this.getEditCols(props, meta)
 
-        let exclude = ['time', 'context', 'lens']
-        let prefillProp = utils.getPrefillProperty(meta)
-        if (prefillProp)
-          exclude.push(prefillProp.name)
-        for (let p in props) {
-          if (eCols.indexOf(p) === -1  &&
-              !props[p].items              &&
-              p.charAt(0) !== '_'          &&
-              exclude.indexOf(p) === -1)
-            eCols.push(p)
-        }
-      }
-    }
     let showReadOnly = true
     eCols.forEach(p => {
       if (!props[p].readOnly)
         showReadOnly = false
     })
-
+    let requestedProperties, excludeProperties
     if (this.state.requestedProperties)
-       requestedProperties = this.state.requestedProperties
+       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
-    if (requestedProperties) {
+    if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
         formErrors = params.formErrors
       }
+      eCols = eCols.filter(p => requestedProperties[p])
       for (let p in requestedProperties) {
         // if (eCols.some((prop) => prop.name === p) {
-        if (eCols.indexOf(p) !== -1) {
-          if (props[p].readOnly)
-            showReadOnly = true
-          // this.addError(p, params)
-          continue
-        }
         let idx = p.indexOf('_group')
+        let eidx = eCols.indexOf(p)
+        if (eidx !== -1) {
+          eCols.splice(eidx, 1)
+        }
+        if (excludeProperties  &&  excludeProperties.includes(p))
+          continue
+
         eCols.push(p)
         if (idx === -1  &&  props[p].readOnly)
           showReadOnly = true
         else if (props[p].list) {
-          let isRequired = !requestedProperties[p].hasOwnProperty('required') || (typeof requestedProperties[p].required === 'undefined')
           props[p].list.forEach((pp) => {
             let idx = eCols.indexOf(pp)
             if (idx !== -1)
               eCols.splice(idx, 1)
+            if (excludeProperties  &&  excludeProperties.includes(pp))
+              return
             eCols.push(pp)
-            if (!requestedProperties[pp]) {
-              if (isRequired  &&  props[pp].readOnly)
-                showReadOnly = true
-              requestedProperties[pp] = {
-                message: '',
-                required: true
-              }
-            }
-            // this.addError(p, params)
           })
         }
-        // else
-        //   this.addError(p, params)
       }
     }
     else if (data) {
       for (let p in data) {
-        if (eCols.indexOf(p) === -1  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+        if (!eCols.includes(p)  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
           eCols.push(p)
       }
-      // // filter out the backlink on which the adding resource was initiated
-      // let prop = this.props.prop
-      // if (prop  &&  prop.items  &&  prop.items.backlink  &&  eCols[prop.items.backlink])
-      //   delete eCols[prop.items.backlink]
     }
     // Add props for which request for corrections came, if they are not yet added
     if (formErrors) {
@@ -209,12 +153,13 @@ var NewResourceMixin = {
           eCols.push(p)
     }
     let required = utils.ungroup({model: meta, viewCols: meta.required, edit: true})
-    required = utils.arrayToObject(required);
+    let softRequired = utils.ungroup({model: meta, viewCols: meta.softRequired, edit: true})
     if (validationErrors) {
       formErrors = validationErrors
       this.state.validationErrors = null
     }
 
+    const isMessage = meta.id === MESSAGE
     let options = {fields: {}}
     let resource = this.state.resource
     for (let i=0; i<eCols.length; i++) {
@@ -222,21 +167,15 @@ var NewResourceMixin = {
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
         continue;
 
-      if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
+      if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
-      let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe                       &&
-          requestedProperties         &&
-          p.indexOf('_group') === -1  &&
-          requestedProperties[p])
-        maybe = false
-
-      if (!maybe  &&  requestedProperties  &&  requestedProperties[p]) {
-        if (requestedProperties[p].hasOwnProperty('required') && !requestedProperties[p].required)
-          maybe = true
+      let maybe = !required  ||  !required.includes(p)
+      if (maybe) {
+        if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
+          maybe = false
       }
-      let type = props[p].type;
+      let type = props[p].type
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       let isReadOnly = props[p].readOnly
@@ -504,6 +443,43 @@ var NewResourceMixin = {
     }
     return options;
   },
+  getEditCols(props, model) {
+    const { editCols, exploreData } = this.props
+    const isMessage = model.id === MESSAGE
+    if (editCols)
+      return editCols.slice();
+    if (isMessage)
+      return model.viewCols
+
+    let eCols = utils.getEditCols(model).map(p => p.name)
+    if (!eCols.length) {
+      if (model.required)
+        return model.required.slice
+      else
+        return Object.keys(props)
+    }
+    else if (!exploreData)
+      return eCols
+
+    let vColsList = utils.getViewCols(model)
+    vColsList.forEach(p => {
+      if (eCols.indexOf(p) === -1)
+        eCols.push(p)
+    })
+
+    let exclude = ['time', 'context', 'lens']
+    let prefillProp = utils.getPrefillProperty(model)
+    if (prefillProp)
+      exclude.push(prefillProp.name)
+    for (let p in props) {
+      if (!eCols.includes(p)      &&
+          !props[p].items         &&
+          p.charAt(0) !== '_'     &&
+          !exclude.includes(p))
+        eCols.push(p)
+    }
+    return eCols
+  },
   addError(p, params) {
     let { errs } = this.props
     let { formErrors } = params
@@ -515,14 +491,17 @@ var NewResourceMixin = {
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
-  onChangeText(prop, value) {
-    debugger
-    if(prop.type === 'string'  &&  !value.trim().length)
+  changeValue(prop, value) {
+    let { name: pname, ref: pref, type: ptype } = prop
+
+    if (ptype === 'string'  &&  !value.trim().length)
+    // debugger
+    if(ptype === 'string'  &&  !value.trim().length)
       value = ''
-    let {resource, missedRequiredOrErrorValue} = this.state
+    const { resource, missedRequiredOrErrorValue } = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
-    if(prop.type === 'number'  &&  !search) {
+    if(ptype === 'number'  &&  !search) {
       let val = Number(value)
       if (value.charAt(value.length - 1) === '.')
         value = val + .00
@@ -531,24 +510,24 @@ var NewResourceMixin = {
     }
     if (!this.floatingProps)
       this.floatingProps = {}
-    if (prop.ref == MONEY) {
-      if (!this.floatingProps[prop.name])
-        this.floatingProps[prop.name] = {}
-      this.floatingProps[prop.name].value = value
-      if (!r[prop.name])
-        r[prop.name] = {}
-      r[prop.name].value = value
+    if (pref == MONEY) {
+      if (!this.floatingProps[pname])
+        this.floatingProps[pname] = {}
+      this.floatingProps[pname].value = value
+      if (!r[pname])
+        r[pname] = {}
+      r[pname].value = value
     }
-    else if (prop.type === 'boolean')  {
+    else if (ptype === 'boolean')  {
       if (value === 'null') {
         let m = utils.getModel(resource[TYPE])
-        if (!search  ||  (m.required  &&  m.required.indexOf(prop.name) !== -1)) {
-          delete r[prop.name]
-          delete this.floatingProps[prop.name]
+        if (!search  ||  (m.required  &&  m.required.includes(pname))) {
+          delete r[pname]
+          delete this.floatingProps[pname]
         }
         else {
-          r[prop.name] = null
-          this.floatingProps[prop.name] = value
+          r[pname] = null
+          this.floatingProps[pname] = value
         }
       }
       else {
@@ -556,22 +535,24 @@ var NewResourceMixin = {
           value = true
         else if (value === 'false')
           value = false
-        r[prop.name] = value
-        this.floatingProps[prop.name] = value
+        r[pname] = value
+        this.floatingProps[pname] = value
       }
     }
     else {
-      r[prop.name] = value
-      this.floatingProps[prop.name] = value
+      r[pname] = value
+      this.floatingProps[pname] = value
     }
     if (missedRequiredOrErrorValue)
-      delete missedRequiredOrErrorValue[prop.name]
-    if (!search  &&  r[TYPE] !== SETTINGS)
-      Actions.saveTemporary(r)
+      delete missedRequiredOrErrorValue[pname]
+    if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
+      // Actions.saveTemporary(r)
+      Actions.getRequestedProperties({resource: r})
+    }
 
     this.setState({
       resource: r,
-      inFocus: prop.name
+      inFocus: pname
     })
   },
 
@@ -644,7 +625,7 @@ var NewResourceMixin = {
         prop:           prop,
         resource:       this.state.resource,
         bankStyle:      this.props.bankStyle,
-        callback:       this.onChangeText.bind(this)
+        callback:       this.changeValue.bind(this)
       }
     })
   },
@@ -699,7 +680,7 @@ var NewResourceMixin = {
     }
     else {
       return <View style={st}>
-               <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind(this, prop))}>
+               <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.changeValue.bind(this, prop))}>
                  {sig}
                </TouchableOpacity>
             </View>
@@ -749,7 +730,7 @@ var NewResourceMixin = {
           value={value}
           keyboardShouldPersistTaps='always'
           keyboardType={keyboard || 'default'}
-          onChangeText={this.onChangeText.bind(this, prop)}
+          onChangeText={this.changeValue.bind(this, prop)}
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
@@ -851,11 +832,11 @@ var NewResourceMixin = {
       let switchWidth = Math.floor(utils.getChatWidth() / 2)
       switchView = { paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
       booleanContentStyle = {}
-      switchC = <TouchableOpacity onPress={() => this.onChangeText(prop, isTroolean && value ||  !value)}>
+      switchC = <TouchableOpacity onPress={() => this.changeValue(prop, isTroolean && value ||  !value)}>
                   <View style={booleanContentStyle}>
                     <Text style={[style, {color: lcolor}]}>{label}</Text>
                     <View style={switchView}>
-                      <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
+                      <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.changeValue(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
                     </View>
                  </View>
                 </TouchableOpacity>
@@ -869,6 +850,7 @@ var NewResourceMixin = {
                     let r = _.cloneDeep(resource)
                     r[prop.name] = value
                     this.setState({resource: r})
+                    Actions.getRequestedProperties({resource: r})
                   }} value={value} style={{alignSelf: 'center'}}/>
                </View>
     }
@@ -882,6 +864,7 @@ var NewResourceMixin = {
       </View>
     )
   },
+
   myDateTemplate(params) {
     let { prop, required, component } = params
     let { search, bankStyle } = this.props
@@ -925,7 +908,7 @@ var NewResourceMixin = {
 
     let datePicker
     if (prop.readOnly) {
-      datePicker = <View style={[styles.formInput, {paddingVertical: 5}]}>
+      datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
     }
@@ -1070,8 +1053,9 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata } = this.props
+    let { model, metadata, isRefresh } = this.props
     let { required, errors, component } = params
+    let { missedRequiredOrErrorValue, resource, inFocus } = this.state
     let props
     if (model)
       props = model.properties
@@ -1081,25 +1065,27 @@ var NewResourceMixin = {
       props = utils.getModel(metadata.items.ref).properties
     let pName = params.prop
     let prop = props[pName]
-    let isMedia = pName === 'video' ||  pName === 'photos'  ||  prop.ref === PHOTO
+    let ref = prop.ref || prop.items.ref
+    let isMedia = pName === 'video' ||  pName === 'photos'  ||  ref === PHOTO  ||  utils.isSubclassOf(ref, 'tradle.File')
     let onChange
     if (isMedia)
       onChange = this.setState.bind(this)
     else
       onChange = this.setChosenValue.bind(this)
-    let error = this.state.missedRequiredOrErrorValue  &&  this.state.missedRequiredOrErrorValue[pName]
+    let error = missedRequiredOrErrorValue  &&  missedRequiredOrErrorValue[pName]
     if (!error  &&  params.errors  &&  params.errors[pName])
       error = params.errors[pName]
 
     return <RefPropertyEditor {...this.props}
-                             resource={this.state.resource}
+                             resource={resource}
                              onChange={onChange}
                              prop={prop}
                              photo={this.state[pName + '_photo']}
                              component={component}
                              labelAndBorder={this.getLabelAndBorderColor.bind(this, pName)}
                              error={error}
-                             inFocus={this.state.inFocus}
+                             inFocus={inFocus}
+                             isRefresh={isRefresh}
                              required={required}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
@@ -1509,7 +1495,7 @@ function coerceNumber (obj, p) {
 const formField = {
   minHeight: 60,
   backgroundColor: '#ffffff',
-  borderWidth: 1,
+  borderWidth: StyleSheet.hairlineWidth,
   borderColor: '#dddddd',
   borderRadius: 6,
 }
@@ -1631,7 +1617,7 @@ var styles= StyleSheet.create({
   photoIconEmpty: {
     position: 'absolute',
     right: 0,
-    marginTop: 12
+    marginTop: 15
   },
   immutable: {
     marginTop: 15,
