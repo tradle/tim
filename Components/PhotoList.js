@@ -122,13 +122,15 @@ class PhotoList extends Component {
       onPress = callback.bind(this, photo)
     else {
       let url = photo.url
-      if (url.indexOf(':application/pdf;') !== -1  ||  url.indexOf(':pdf/jpeg;') !== -1)
+      if (url.startsWith('data:application/pdf;'))
+        return <View/>
+      else if (decodeURIComponent(url).indexOf('=application/pdf') !== -1)
         return <View/>
       onPress = this.showCarousel.bind(this, {photo, isView})
     }
     let isDataUrl = utils.isImageDataURL(photo.url)
-    isPng = isDataUrl  &&  photo.url.indexOf('data:image/png;') === 0
-    source = { uri: uri }
+    let isPng = isDataUrl  &&  photo.url.startsWith('data:image/png;') === 0
+    let source = { uri: uri }
     if (isDataUrl  ||  uri.charAt(0) == '/')
       source.isStatic = true;
     let item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
