@@ -110,8 +110,19 @@ class CheckView extends Component {
     let { navigator, application, currency } = this.props
     const styles = createStyles({bankStyle})
 
+    const rtype = utils.getType(resource)
+    const rmodel = utils.getModel(rtype)
+
+    let excludedProperties
+    if (resource.message === resource.aspects) {
+      if (rmodel.viewCols.includes('message')  &&
+          rmodel.viewCols.includes('aspects'))
+      excludedProperties = ['message']
+    }
+
     let propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource}
+                        excludedProperties={excludedProperties}
                         currency={currency}
                         bankStyle={bankStyle}
                         navigator={navigator} />
@@ -134,8 +145,7 @@ class CheckView extends Component {
                           </View>
     }
     else if (!this.state.isLoading  &&  utils.isRM(application)) {
-      const rtype = utils.getType(resource)
-      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(rtype))
+      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
       if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
                                 <TouchableOpacity
