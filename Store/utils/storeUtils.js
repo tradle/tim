@@ -10,7 +10,7 @@ import {
   Platform
 } from 'react-native'
 import { protocol } from '@tradle/engine'
-var constants = require('@tradle/constants');
+import constants from '@tradle/constants'
 
 import AsyncStorage from '../Storage'
 import voc from '../voc'
