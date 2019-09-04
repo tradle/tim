@@ -783,6 +783,11 @@ class NewResource extends Component {
     let model = {};
     let arrays = [];
     _.extend(data, resource);
+    let editable
+    if (this.state.disableEditing)
+      editable = false
+    else
+      editable = true
     let params = {
         meta: meta,
         data: data,
@@ -790,7 +795,7 @@ class NewResource extends Component {
         items: arrays,
         onEndEditing: this.onEndEditing,
         component: NewResource,
-        editable: this.state.disableEditing ? !this.state.disableEditing : true
+        editable
       };
     if (editCols)
       params.editCols = editCols;

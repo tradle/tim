@@ -244,7 +244,7 @@ var NewResourceMixin = {
                     model: meta,
                     errors: formErrors,
                     component,
-                    editable: !props[p].readOnly,
+                    editable: !props[p].readOnly || search,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
 
@@ -337,7 +337,7 @@ var NewResourceMixin = {
                     onSubmitEditing: onSubmitEditing.bind(this),
                     errors: formErrors,
                     component,
-                    editable: params.editable && !props[p].readOnly,
+                    editable: params.editable && (!props[p].readOnly || search),
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -914,7 +914,7 @@ var NewResourceMixin = {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
     let datePicker
-    if (prop.readOnly) {
+    if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
@@ -1298,7 +1298,7 @@ var NewResourceMixin = {
                     model: model,
                     noError: true,
                     // errors: errors,
-                    editable: editable,
+                    editable,
                     component,
                     keyboard: search ? null : 'numeric',
                   })
