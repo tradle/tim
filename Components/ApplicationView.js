@@ -91,7 +91,7 @@ class ApplicationView extends Component {
     this.approve = this.approve.bind(this)
     this.deny = this.deny.bind(this)
 
-    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
+    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle  &&  action)
       currentRoutes[len - 1].onRightButtonPress = action.bind(this)
   }
   componentWillMount() {
