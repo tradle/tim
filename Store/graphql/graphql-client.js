@@ -85,26 +85,7 @@ var search = {
       for (let p in filterResource) {
         if (exclude.indexOf(p) !== -1)
           continue
-        // if (!props[p]  ||  p.charAt(0) === '_')
-        //   continue
         let val = filterResource[p]
-        // if (p === TYPE) {
-        //   if (!Array.isArray(val))
-        //     continue
-        //   else {
-        //     let s = `${p}: [`
-        //     val.forEach((r, i) => {
-        //       if (i)
-        //         s += ', '
-        //       s += `"${r}"`
-        //     })
-        //     s += ']'
-        //     inClause.push(s)
-        //   }
-        // }
-
-        // if (p.charAt(0) === '_')
-        //   debugger
         if (!props[p]  &&  val) {
           if (p.charAt(0) === '_') {
             if (Array.isArray(val)) {
@@ -163,7 +144,9 @@ var search = {
             op.NEQ += `\n   ${p}: true,`
         }
         else if (props[p].type === 'number')
-          this.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+          addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+        else if (props[p].type === 'date')
+          op.GTE = `\n   ${p}: "${typeof val === 'date' &&  val ||  new Date(val).getTime()}",`
 
         else if (props[p].type === 'object') {
           // if (Array.isArray(val)) {
