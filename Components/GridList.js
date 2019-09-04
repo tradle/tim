@@ -712,6 +712,22 @@ console.log('GridList.componentWillMount: filterResource', resource)
           application: resource
         }
       }
+      // if (utils.isRM(resource)) {
+        route.rightButtonTitle = 'Edit'
+        route.onRightButtonPress = {
+          title: title,
+          componentName: 'NewResource',
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            bankStyle: style,
+            model: utils.getModel(resource[TYPE]),
+            resource: resource,
+            currency: currency,
+          }
+        }
+      // }
       navigator.push(route)
       return
     }
