@@ -248,8 +248,9 @@ class ShowPropertiesView extends Component {
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
           if (isStub(val)) {
             val[TYPE] = utils.getType(val.id)
-            val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
+            val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
                     <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
+                    <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
                   </TouchableOpacity>
             isRef = true
           }
@@ -261,8 +262,9 @@ class ShowPropertiesView extends Component {
               pViewCols.forEach((v) => viewCols.push(v))
               return
             }
-            val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
+            val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
                     <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
+                    <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
                   </TouchableOpacity>
             isRef = true
           }
@@ -279,8 +281,9 @@ class ShowPropertiesView extends Component {
           var value = utils.getDisplayName(val)
           if (!value)
             value = translate(utils.getModel(utils.getType(val)))
-          val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
-                 <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
+          val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
+                  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
+                  <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
                </TouchableOpacity>
 
           isRef = true;
@@ -448,6 +451,10 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       marginBottom: 0,
       marginHorizontal: 7,
       color: '#9b9b9b'
+    },
+    link: {
+      color: '#555555',
+      alignSelf: 'center'
     },
     linkTitle: {
       fontSize: 18,
