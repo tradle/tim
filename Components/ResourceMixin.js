@@ -25,7 +25,6 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
-// import ApplicationView from './ApplicationView'
 import Image from './Image'
 import uiUtils from '../utils/uiUtils'
 
@@ -97,7 +96,6 @@ var ResourceMixin = {
       navigator.push({
         title: title,
         componentName: APPLICATION_VIEW,
-        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
           resource,
@@ -111,7 +109,6 @@ var ResourceMixin = {
       navigator.push({
         title: title,
         componentName: RESOURCE_VIEW,
-        // rightButtonTitle: 'Edit',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource,
@@ -253,11 +250,6 @@ var ResourceMixin = {
                  </TouchableOpacity>
         }
         ret.push(item)
-        // ret.push(
-        //   <View style={{justifyContent: 'center', paddingVertical: 5}} key={this.getNextKey()}>
-        //    {item}
-        //  </View>
-        // );
       }
 
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
@@ -322,21 +314,13 @@ var ResourceMixin = {
         let { width } = utils.dimensions(component)
         let h = 200
         let w = width - 40
-        // if (width > height)
-        //   w = (width * 70)/(height - 100)
-        // else
-        //   w = (height * 70)/(width - 100)
-        // w = Math.round(w)
         val = <View style={styles.container}>
                 <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
               </View>
       }
       else if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-      // else if (modelName === TERMS_AND_CONDITIONS) {
-      //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
+        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
       else if (pMeta.markdown) {
-        // markdownStyles.color = bankStyle.linkColor
         val = <View style={styles.container}>
                 <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
                   {val}
@@ -533,8 +517,6 @@ var ResourceMixin = {
         if (p === 'properties')
           continue
       }
-      // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
-      //   continue
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
         continue
       let jVal = json[p]
