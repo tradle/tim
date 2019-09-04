@@ -4755,6 +4755,7 @@ if (!res[SIG]  &&  res._message)
       // and reset it after the real root hash will be known
       let isNew = returnVal[ROOT_HASH] == null
       let rModel = self.getModel(rtype)
+      let isApplication = rtype === APPLICATION
       let forceUpdate
       if (isNew) {
         returnVal._outbound = !isRefreshRequest
@@ -4795,7 +4796,7 @@ if (!res[SIG]  &&  res._message)
         if (isContext  &&  !returnVal.contextId)
           returnVal.contextId = self.getNonce()
       }
-      else {
+      else if (!isApplication) {
         // Check if model changed
         let prevRes
         prevResId = utils.getId(returnVal)
@@ -4909,6 +4910,15 @@ if (!res[SIG]  &&  res._message)
           returnVal[ROOT_HASH] = hash
         returnVal[CUR_HASH] = hash
 
+        if (isApplication) {
+          if (!doNotSend) {
+            let sendParams = await self.packMessage(returnVal)
+            await self.meDriverSend(sendParams)
+            self.trigger({ action: 'addItem', resource: returnVal })
+          }
+          return
+        }
+
         let returnValKey = utils.getId(returnVal)
         if (isContext)
           contextIdToResourceId[returnVal.contextId] = returnVal
@@ -4971,23 +4981,6 @@ if (!res[SIG]  &&  res._message)
           if (!doNotSend) {
             let sendParams = await self.packMessage(returnVal)
             await self.meDriverSend(sendParams)
-
-            // let props = utils.getPropertiesWithAnnotation(rModel, 'virtual')
-            // if (props  &&  !utils.isEmpty(props)) {
-            //   let prop = Object.values(props)[0]
-            //   if (prop.ref === 'tradle.Json'  &&  returnVal[prop.name]) {
-            //     try {
-            //       let jsonStr = atob(returnVal[prop.name].url.split(',')[1])
-            //       let jsonObj = JSON.parse(jsonStr)
-            //       if (jsonObj[TYPE] === rtype) {
-            //         await new UploadBundle(self).createBundle(jsonObj, returnVal)
-            //         // self.createBundle(jsonObj, returnVal)
-            //       }
-            //     } catch (err) {
-            //       debugger
-            //     }
-            //   }
-            // }
           }
         }
         if (isBookmark) {
@@ -5022,7 +5015,6 @@ if (!res[SIG]  &&  res._message)
             }
           })
         }
-
         delete returnVal._sharedWith
         delete returnVal.verifications
         await save(returnVal, true, lens)
