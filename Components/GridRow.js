@@ -344,24 +344,24 @@ class GridRow extends Component {
 
     if (!pval)
       return
-    if (typeof pval === 'object') {
-      let style = [styles.description, {paddingLeft: 5}]
-      // HACK to show provider icon
-      if (utils.isStub(pval)  &&  pName === '_provider') {
-        if (resource._icon) {
-          return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
-                   <Image style={styles.icon} source={{uri: resource._icon.url}} />
-                   <Text style={style}>{pval.title}</Text>
-                 </View>
-        }
-        return <View key={this.getNextKey(resource)}>
+    if (typeof pval !== 'object')
+      return
+    let style = [styles.description, {paddingLeft: 5}]
+    // HACK to show provider icon
+    if (utils.isStub(pval)  &&  pName === '_provider') {
+      if (resource._icon) {
+        return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
+                 <Image style={styles.icon} source={{uri: resource._icon.url}} />
                  <Text style={style}>{pval.title}</Text>
                </View>
       }
       return <View key={this.getNextKey(resource)}>
-               <Text style={style}>{utils.getDisplayName(pval)}</Text>
+               <Text style={style}>{pval.title}</Text>
              </View>
     }
+    return <View key={this.getNextKey(resource)}>
+             <Text style={style}>{utils.getDisplayName(pval)}</Text>
+           </View>
   }
 
   formatMessageProperty(pName) {
@@ -407,7 +407,7 @@ class GridRow extends Component {
       buttonStyles = styles.button
     return <View style={[buttonStyles, {alignItems: 'center', backgroundColor: color}]}>
              <Icon name={icon} color={icolor} size={size}/>
-            </View>
+           </View>
   }
   onPress(resource) {
     let title = utils.makeTitle(utils.getDisplayName(resource));
