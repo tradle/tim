@@ -390,6 +390,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return
     }
     if (action === 'models') {
+      if (!isModel)
+        return
       list = this.filterModels(list)
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
