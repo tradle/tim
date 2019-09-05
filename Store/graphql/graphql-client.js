@@ -55,7 +55,7 @@ var search = {
 
   async searchServer(params) {
     let {client, modelName, filterResource, sortProperty, asc, limit,
-         endCursor, properties, select, excludeProps} = params
+         endCursor, properties, select, excludeProps, bookmark} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -138,8 +138,10 @@ var search = {
         else if (props[p].type === 'boolean') {
           if (val)
             op.EQ += `\n   ${p}: ${val},`
-          else if (val === null)
-            op.NULL += `\n ${p}: true`
+          else if (val === null) {
+            if (!bookmark)
+              op.NULL += `\n ${p}: true`
+          }
           else
             op.NEQ += `\n   ${p}: true,`
         }
