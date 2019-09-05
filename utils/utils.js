@@ -190,7 +190,13 @@ var utils = {
   },
   isMe(resource) {
     let me = utils.getMe()
-    return me  &&  me[ROOT_HASH] === resource[ROOT_HASH]
+    let type = utils.getType(resource)
+    if (type !== PROFILE  &&  type !== IDENTITY) {
+      debugger
+      debug(`utils.isMe was called for the resource with the type ${type}`)
+      return false
+    }
+    return me  &&  me[ROOT_HASH] === utils.getRootHash(resource)
   },
   setModels(modelsRL) {
     models = modelsRL;

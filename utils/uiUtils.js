@@ -34,7 +34,7 @@ var uiUtils = {
     let { resource, navigator, bankStyle, currency, searchFunction } = params
     let btype = resource.bookmark[TYPE]
     let bm = getModel(btype)
-    navigator.push({
+    let route = {
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
       componentName: GRID_LIST,
@@ -48,23 +48,34 @@ var uiUtils = {
         search: true,
         exploreData: true
       },
-      rightButtonTitle: 'Search',
-      onRightButtonPress: {
-        title: translate('searchSomething', translate(bm)),
-        componentName: NEW_RESOURCE,
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: Store.getAugmentedModel(bm),
-          resource: {[TYPE]: bm.id},
-          bookmark: resource,
-          searchWithFilter: searchFunction.bind(this),
-          search: true,
-          exploreData: true,
-          bankStyle: bankStyle || defaultBankStyle,
+    }
+    if (!uiUtils.hasFilter(resource.bookmark, bm.properties)) {
+      extend(route, {
+        rightButtonTitle: 'Search',
+        onRightButtonPress: {
+          title: translate('searchSomething', translate(bm)),
+          componentName: NEW_RESOURCE,
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: Store.getAugmentedModel(bm),
+            resource: {[TYPE]: bm.id},
+            bookmark: resource,
+            searchWithFilter: searchFunction.bind(this),
+            search: true,
+            exploreData: true,
+            bankStyle: bankStyle || defaultBankStyle,
+          }
         }
-      }
-    })
+      })
+    }
+    navigator.push(route)
+  },
+  hasFilter(bookmark, props) {
+    for (let p in bookmark) {
+      if (p.charAt(0) !== '_'  &&  props[p])
+        return true
+    }
   },
   showLoading(params) {
     if (!params.component)

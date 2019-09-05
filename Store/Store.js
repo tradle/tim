@@ -394,10 +394,43 @@ const disableBlockchainSync = node => {
 
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const from = utils.buildRef(me)
-  const createdByBot = [
-    { type: APPLICATION,
+  const etype = 'tradle.ClientOnboardingTeam'
+  const amodel = utils.getModel(APPLICATION)
+  const aprops = amodel.properties
+  let teams = utils.getModel(etype).enum
+  let bookmarks = [
+    {
+      type: APPLICATION,
       message: translate('applications')
     },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        hasFailedChecks: true
+      },
+      message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
+    },
+  ]
+  teams.forEach(e => {
+    bookmarks.push({
+      type: APPLICATION,
+      message: `${translate('applications')} - ${translateEnum(e)}`,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        assignedToTeam: [{
+          id: `${etype}_${e.id}`,
+          title: e.title
+        }]
+      },
+    })
+  })
+
+  let moreBookmarks = [
+    // { type: APPLICATION,
+    //   message: translate('applications')
+    // },
     // { type: APPLICATION,
     //   bookmark: {
     //     [TYPE]: APPLICATION,
@@ -441,7 +474,10 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
         _counterparty: ALL_MESSAGES,
       },
     }
-  ].map(b => {
+  ]
+  moreBookmarks.forEach(b => bookmarks.push(b))
+
+  return bookmarks.map(b => {
     const { type, bookmark, message } = b
     const model = utils.getModel(type)
     return {
@@ -454,8 +490,6 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       from
     }
   })
-
-  return createdByBot
 }
 
 const getServiceProviderByUrl = url => (SERVICE_PROVIDERS || [])
@@ -4829,12 +4863,18 @@ if (!res[SIG]  &&  res._message)
       for (let p in toChain) {
         let prop = properties[p]
 
-        if (!isNew  &&  !prop  &&  !keepProps.includes(p)) // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+        if (!isNew  &&  !prop  &&  !keepProps.includes(p)) { // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
           delete toChain[p]
+          continue
+        }
         if (!prop  ||  prop.partial)
           continue
-        let isObject = prop.type === 'object'
         let isArray = prop.type === 'array'
+
+        if (isArray  &&  prop.items.filter) {
+          delete toChain[p]
+          continue
+        }
 
         let ref = prop.ref  ||  isArray  &&  prop.items.ref
 
@@ -4845,6 +4885,7 @@ if (!res[SIG]  &&  res._message)
         if (!refM  ||  refM.inlined)
           continue
 
+        let isObject = prop.type === 'object'
         if (isObject)
           toChain[p] = self.buildSendRef(returnVal[p])
         else
@@ -7377,7 +7418,7 @@ if (!res[SIG]  &&  res._message)
     if (query) {
       let q = query.toLowerCase()
       return enumList.filter((r) => {
-        let val = utils.translateEnum(r)
+        let val = translateEnum(r)
         if (!val)
           debugger
         val = val.toLowerCase()
