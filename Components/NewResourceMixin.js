@@ -646,7 +646,7 @@ var NewResourceMixin = {
     if (required)
       label += ' *'
 
-    let { bankStyle } = this.props
+    let { bankStyle, search } = this.props
     let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
     if (value)
       lcolor = '#555555'
@@ -827,7 +827,7 @@ var NewResourceMixin = {
 
     let help = this.paintHelp(prop)
 
-    let isTroolean = prop.range === 'troolean'
+    let isTroolean = prop.range === 'troolean' || search
     let switchView
     let switchC, booleanContentStyle
     if (isTroolean) {
