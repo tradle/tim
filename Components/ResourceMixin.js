@@ -77,10 +77,13 @@ var ResourceMixin = {
     else
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
 
-    let {bankStyle, search, currency, country, navigator} = this.props
+    const isCheck = model.subClassOf === CHECK
+    let {bankStyle, search, currency, country, navigator, application} = this.props
     if (isMessageView) {
-      navigator.push({
-        componentName: model.subClassOf === CHECK &&  CHECK_VIEW || MESSAGE_VIEW,
+      let r = this.props.resource
+      let isVerifier = utils.getModel(r[TYPE]).subClassOf === CHECK  &&  application &&  utils.isRM(application)
+      let route = {
+        componentName: isCheck &&  CHECK_VIEW || MESSAGE_VIEW,
         backButtonTitle: 'Back',
         title,
         passProps: {
@@ -90,7 +93,15 @@ var ResourceMixin = {
           currency: currency,
           country: country,
         }
-      })
+      }
+      if (isVerifier) {
+        route.rightButtonTitle = 'Done'
+        _.extend(route.passProps, {
+          isVerifier,
+          application
+        })
+      }
+      navigator.push(route)
     }
     else if (isApplicationView) {
       navigator.push({
