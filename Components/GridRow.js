@@ -91,8 +91,8 @@ class GridRow extends Component {
         this.setState({application, resource: application})
       break
     case 'updateRow':
-      let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
-      if (hash === this.props.resource[ROOT_HASH]) {
+      let hash = utils.getRootHash(params.resource)
+      if (hash === utils.getRootHash(this.props.resource)) {
         if (params.forceUpdate)
           this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
         else
