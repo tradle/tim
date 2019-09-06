@@ -10,19 +10,20 @@ import {
   LazyloadView as View,
   // LazyloadImage as Image
 } from 'react-native-lazyload'
-
-// import ImageComponent from './Image'
-import Image from './Image'
+import Reflux from 'reflux'
 
 import React, { Component } from 'react'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import dateformat from 'dateformat'
 import reactMixin from 'react-mixin'
-// import Accordion from 'react-native-accordion'
 
 import constants from '@tradle/constants'
 const { TYPE } = constants
+
+// import ImageComponent from './Image'
+import Image from './Image'
+import Store from '../Store/Store'
 
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
@@ -44,10 +45,44 @@ class CheckRow extends Component {
     application: PropTypes.object
   };
 
+  constructor(props) {
+    super(props)
+    let { resource, application } = props
+    let checkOverride
+    if (application  &&  application.checksOverride) {
+      const checkId = utils.getId(resource)
+      let checkType = utils.getType(resource)
+      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+      if (checkOverrideProp.length) {
+        const pref = checkOverrideProp[0].items.ref
+        const rId = utils.getId(resource)
+        const checkOverrides = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
+        if (checkOverrides.length)
+          checkOverride = checkOverrides[0]
+      }
+    }
+
+    this.state = {
+      resource,
+      checkOverride
+    }
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onAction');
+  }
   shouldComponentUpdate(nextProps, nextState) {
-    if (!_.isEqual(this.props.resource, nextProps.resource))
+    if (!_.isEqual(this.props.resource, nextProps.resource) ||
+        !_.isEqual(this.state.resource, nextState.resource))
       return true
     return false
+  }
+  onAction(params) {
+    let { action, resource, checkOverride } = params
+    if (action !=='updateRow')
+      return
+    if (utils.getRootHash(resource) !== utils.getRootHash(this.props.resource))
+      return
+    this.setState({ resource, checkOverride })
   }
 
   render() {
@@ -110,20 +145,25 @@ class CheckRow extends Component {
     let checkOverrideStatus
     let checkOverrideIcon
 
-    if (application  &&  application.checksOverride) {
-      const checkId = utils.getId(resource)
-      let checkType = utils.getType(resource)
-      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
-      if (checkOverrideProp.length) {
-        const pref = checkOverrideProp[0].items.ref
-        const rId = utils.getId(resource)
-        const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
-        if (checkOverride.length) {
-          const statusModel = utils.getModel(STATUS_OVERRIDE)
-          checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].status.title)
-        }
-      }
+    let { checkOverride } = this.state
+    if (checkOverride) {
+      const statusModel = utils.getModel(STATUS_OVERRIDE)
+      checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride.status.title)
     }
+    // else if (application  &&  application.checksOverride) {
+    //   const checkId = utils.getId(resource)
+    //   let checkType = utils.getType(resource)
+    //   let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+    //   if (checkOverrideProp.length) {
+    //     const pref = checkOverrideProp[0].items.ref
+    //     const rId = utils.getId(resource)
+    //     const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
+    //     if (checkOverride.length) {
+    //       const statusModel = utils.getModel(STATUS_OVERRIDE)
+    //       checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].status.title)
+    //     }
+    //   }
+    // }
     const { icon, color } = statusM
     let style, size, icolor
     if (statusId === 'warning'  ||  statusId === 'error') {
@@ -163,6 +203,7 @@ class CheckRow extends Component {
 }
 
 reactMixin(CheckRow.prototype, RowMixin);
+reactMixin(CheckRow.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   title: {
