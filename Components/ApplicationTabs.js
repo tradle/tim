@@ -76,7 +76,7 @@ class ApplicationTabs extends Component {
 
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
     if (itemProps)
-      propsToShow = Object.keys(itemProps)
+      propsToShow = Object.keys(itemProps).filter(p => !itemProps[p].hidden)
 
     let showCurrent = showDetails ? currentMarker : null
     let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
