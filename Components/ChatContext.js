@@ -65,12 +65,12 @@ class ChatContext extends Component {
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
     let style = me.hasOwnProperty('_stepIndicator') &&  me._showStepIndicator &&  context._formsCount  &&  styles.contextBarWithSteps ||  styles.contextBar
-    if (isAgent  ||  (context  &&  isShareContext || application))
+    // if (isAgent  ||  (context  &&  isShareContext || application))
       chooser = <View style={style}>{content}</View>
-    else
-      chooser = <TouchableOpacity onPress={contextChooser} style={style}>
-                  {content}
-                </TouchableOpacity>
+    // else
+    //   chooser = <TouchableOpacity onPress={contextChooser} style={style}>
+    //               {content}
+    //             </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
     if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson)) {
