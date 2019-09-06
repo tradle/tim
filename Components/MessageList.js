@@ -140,8 +140,8 @@ class MessageList extends Component {
     if (resource._formsTypes)
       return true
     let isReadOnlyChat = utils.isMessage(resource) && utils.isReadOnlyChat(context)
-    if (isReadOnlyChat  &&  resource._relationshipManager)
-      return true
+    // if (isReadOnlyChat  &&  resource._relationshipManager)
+    //   return true
     if (allContexts || isReadOnlyChat)
       return false
 
