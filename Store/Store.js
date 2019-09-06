@@ -411,6 +411,14 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       },
       message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
     },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        hasCheckOverrides: true
+      },
+      message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
+    },
   ]
   teams.forEach(e => {
     bookmarks.push({
@@ -428,17 +436,6 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
   })
 
   let moreBookmarks = [
-    // { type: APPLICATION,
-    //   message: translate('applications')
-    // },
-    // { type: APPLICATION,
-    //   bookmark: {
-    //     [TYPE]: APPLICATION,
-    //     _org: botPermalink,
-    //     relationshipManagers: [me]
-    //   },
-    //   message: translate('applicationsWhereI_RM')
-    // },
     { type: APPLICATION,
       bookmark: {
         [TYPE]: APPLICATION,
@@ -451,15 +448,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       bookmark: {
         [TYPE]: APPLICATION,
         _org: botPermalink,
-        status: 'In review'
-      },
-      message: translate('applicationsInReview')
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        relationshipManagers: ['NULL']
+        reviewer: 'NULL'
       },
       message: translate('applicationsNotAssigned')
     },
@@ -4053,14 +4042,20 @@ if (!res[SIG]  &&  res._message)
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
     // let m = this.getModel(r[TYPE])
-    if (r.relationshipManagers) {
-      r.relationshipManagers.forEach(relationshipManager => {
-        let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
-        let rm = this._getItem(rmId)
-        if (rm)
-          relationshipManager.title = utils.getDisplayName(rm)
-      })
+    if (r.reviewer) {
+        let revId = r.reviewer.id.replace(IDENTITY, PROFILE)
+        let reviewer = this._getItem(revId)
+        if (reviewer)
+          r.reviewer.title = utils.getDisplayName(reviewer)
     }
+    // if (r.relationshipManagers) {
+    //   r.relationshipManagers.forEach(relationshipManager => {
+    //     let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
+    //     let rm = this._getItem(rmId)
+    //     if (rm)
+    //       relationshipManager.title = utils.getDisplayName(rm)
+    //   })
+    // }
     if (!r._context) {
       let context = await this.getContext(r.context, r)
       if (context)
@@ -5100,16 +5095,19 @@ if (!res[SIG]  &&  res._message)
         return
       let appToUpdate = await getApp()
       appToUpdate.status = 'In review'  // HACK
-      self.trigger({action: 'updateRow', resource: appToUpdate, forceUpdate: true })
-      self.trigger({action: 'getItem', resource: appToUpdate})
+      let check = await self._getItemFromServer(returnVal.check)
+      self.trigger({action: 'updateRow', resource: check, checkOverride: returnVal })
+      // self.onGetItem({action: 'getItem', search: true, resource: appToUpdate, backlink: utils.getModel(APPLICATION).properties.checks})
+      // self.trigger({action: 'getItem', search: true, resource: appToUpdate, backlink: utils.getModel(APPLICATION).properties.checks})
     }
     async function handleAssignRM() {
       if (returnVal[TYPE] !== ASSIGN_RM)
         return
       let appToUpdate = await getApp()
-      if (!appToUpdate.relationshipManagers)
-        appToUpdate.relationshipManagers = []
-      appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
+      appToUpdate.reviewer = self._makeIdentityStub(me)
+      // if (!appToUpdate.relationshipManagers)
+      //   appToUpdate.relationshipManagers = []
+      // appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
       self.trigger({action: 'updateRow', resource: appToUpdate })
       self.trigger({action: 'getItem', resource: appToUpdate})
     }
