@@ -91,7 +91,7 @@ class ApplicationView extends Component {
     this.approve = this.approve.bind(this)
     this.deny = this.deny.bind(this)
 
-    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
+    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle  &&  action)
       currentRoutes[len - 1].onRightButtonPress = action.bind(this)
   }
   componentWillMount() {
@@ -157,7 +157,7 @@ class ApplicationView extends Component {
     let { resource, backlink, isLoading, hasRM, isConnected } = this.state
     let { navigator, bankStyle, currency } = this.props
 
-    hasRM = hasRM  ||  resource.relationshipManagers
+    hasRM = hasRM  ||  resource.reviewer
     let isRM = hasRM  &&  utils.isRM(resource)
     let styles = createStyles({ hasRM, isRM, bankStyle })
 
@@ -187,7 +187,7 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM)
+    if (!isRM  &&  !utils.isMe(resource.applicant))
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
