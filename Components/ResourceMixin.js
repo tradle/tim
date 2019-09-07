@@ -23,7 +23,6 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
-// import ApplicationView from './ApplicationView'
 import Image from './Image'
 import uiUtils from '../utils/uiUtils'
 
@@ -31,11 +30,13 @@ const RESOURCE_VIEW = 'ResourceView'
 const MESSAGE_VIEW = 'MessageView'
 const APPLICATION_VIEW = 'ApplicationView'
 const RESOURCE_LIST = 'ResourceList'
+const CHECK_VIEW = 'CheckView'
 
 const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
+const CHECK = 'tradle.Check'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -74,10 +75,13 @@ var ResourceMixin = {
     else
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
 
-    let {bankStyle, search, currency, country, navigator} = this.props
+    const isCheck = model.subClassOf === CHECK
+    let {bankStyle, search, currency, country, navigator, application} = this.props
     if (isMessageView) {
-      navigator.push({
-        componentName: MESSAGE_VIEW,
+      let r = this.props.resource
+      let isVerifier = utils.getModel(r[TYPE]).subClassOf === CHECK  &&  application &&  utils.isRM(application)
+      let route = {
+        componentName: isCheck &&  CHECK_VIEW || MESSAGE_VIEW,
         backButtonTitle: 'Back',
         title,
         passProps: {
@@ -87,13 +91,20 @@ var ResourceMixin = {
           currency: currency,
           country: country,
         }
-      })
+      }
+      if (isVerifier) {
+        route.rightButtonTitle = 'Done'
+        _.extend(route.passProps, {
+          isVerifier,
+          application
+        })
+      }
+      navigator.push(route)
     }
     else if (isApplicationView) {
       navigator.push({
         title: title,
         componentName: APPLICATION_VIEW,
-        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
           resource,
@@ -107,7 +118,6 @@ var ResourceMixin = {
       navigator.push({
         title: title,
         componentName: RESOURCE_VIEW,
-        // rightButtonTitle: 'Edit',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource,
@@ -249,11 +259,6 @@ var ResourceMixin = {
                  </TouchableOpacity>
         }
         ret.push(item)
-        // ret.push(
-        //   <View style={{justifyContent: 'center', paddingVertical: 5}} key={this.getNextKey()}>
-        //    {item}
-        //  </View>
-        // );
       }
 
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
@@ -318,21 +323,15 @@ var ResourceMixin = {
         let { width } = utils.dimensions(component)
         let h = 200
         let w = width - 40
-        // if (width > height)
-        //   w = (width * 70)/(height - 100)
-        // else
-        //   w = (height * 70)/(width - 100)
-        // w = Math.round(w)
         val = <View style={styles.container}>
                 <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
               </View>
       }
       else if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
+        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.textColor}]}>{val}</Text>;
       // else if (modelName === TERMS_AND_CONDITIONS) {
       //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
       else if (pMeta.markdown) {
-        // markdownStyles.color = bankStyle.linkColor
         val = <View style={styles.container}>
                 <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
                   {val}
@@ -362,8 +361,6 @@ var ResourceMixin = {
   showJsonPart(params) {
     let {prop, json, isView, jsonRows, skipLabels, indent,
          isOnfido, isBreakdown, rawStyles} = params
-    // let json = JSON.parse(jsonStr)
-    // let jsonRows = []
     let { resource, bankStyle } = this.props
     bankStyle = bankStyle || defaultBankStyle
 
@@ -373,7 +370,6 @@ var ResourceMixin = {
     let showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
 
-    // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
     let backlinksBg = {backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
@@ -446,8 +442,6 @@ var ResourceMixin = {
         if (p === 'properties')
           continue
       }
-      // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
-      //   continue
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
         continue
       let jVal = json[p]
