@@ -102,8 +102,6 @@ var RowMixin = {
       let ratio = value.length / propTitle.length
       let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
 
-      // let color =  isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
-
       let title
       style = {flexDirection: 'column'}
 
@@ -113,22 +111,10 @@ var RowMixin = {
         <View style={style} key={this.getNextKey()}>
           <Text>
            {title}
-           <Text style={[styles.descriptionB, {color: bankStyle.linkColor}]}>{(title &&  '  ' || '') + value}</Text>
+           <Text style={[styles.descriptionB, {color: bankStyle.textColor}]}>{(title &&  '  ' || '') + value}</Text>
          </Text>
        </View>
       )
-      // if (!prop.displayName  &&  !prop.displayAs)
-      //   title =  <View style={[styles.column, {flex: 1}]}>
-      //             <Text style={[styles.descriptionG]}>{propTitle}</Text>
-      //           </View>
-      // return (
-      //   <View style={style} key={this.getNextKey()}>
-      //     {title}
-      //     <View style={[styles.column, {paddingLeft: 3, flex: flexVal}]}>
-      //       <Text style={styles.descriptionB}>{value}</Text>
-      //     </View>
-      //  </View>
-      // )
     }
 
   },
@@ -155,11 +141,6 @@ var RowMixin = {
                 </View>
         return photo
       }
-      // return isContext
-      //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
-      //          {photo}
-      //        </TouchableHighlight>
-      //      : photo
     }
     if (to.photos) {
       let uri = utils.getImageUri(to.photos[0].url);
