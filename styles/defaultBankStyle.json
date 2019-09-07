@@ -1,6 +1,7 @@
 {
   "_t": "tradle.StylePack",
   "linkColor": "#2892C6",
+  "textColor": "#777777",
   "productRowBgColor": "#466399",
   "productRowTextColor": "#eeeeee",
   "guildanceMessageBg": "#eeeeee",
