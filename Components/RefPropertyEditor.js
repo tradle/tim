@@ -105,7 +105,7 @@ class RefPropertyEditor extends Component {
     if (!val)
       label = pLabel
     else if (utils.getModel(prop.ref || prop.items.ref).abstract)
-      label = translate(utils.getModel(val[TYPE]))
+      label = translate(utils.getModel(utils.getType(val)))
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto)
