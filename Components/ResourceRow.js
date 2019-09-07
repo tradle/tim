@@ -644,7 +644,7 @@ class ResourceRow extends Component {
     const applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
     let icolor
     let iname
-    const hasRM = resource.relationshipManagers
+    const hasRM = resource.reviewer // resource.relationshipManagers
     const { bankStyle } = this.props.bankStyle
     if (utils.isRM(resource)) {
       // iname = 'md-log-out'

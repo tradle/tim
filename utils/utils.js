@@ -189,7 +189,13 @@ var utils = {
   },
   isMe(resource) {
     let me = utils.getMe()
-    return me  &&  me[ROOT_HASH] === resource[ROOT_HASH]
+    let type = utils.getType(resource)
+    if (type !== PROFILE  &&  type !== IDENTITY) {
+      debugger
+      debug(`utils.isMe was called for the resource with the type ${type}`)
+      return false
+    }
+    return me  &&  me[ROOT_HASH] === utils.getRootHash(resource)
   },
   setModels(modelsRL) {
     models = modelsRL;
@@ -1440,10 +1446,10 @@ var utils = {
     if (me.organization._hasSupportLine) {
       if (resource[TYPE] === PROFILE)
         return true
-      if (utils.isContext(resource[TYPE])) {
-        if (resource._relationshipManager)
-          return true
-      }
+      // if (utils.isContext(resource[TYPE])) {
+      //   if (resource._relationshipManager)
+      //     return true
+      // }
     }
     else if (resource[TYPE] === ORGANIZATION  && utils.getId(me.organization) === utils.getId(resource))
       return true
@@ -1652,8 +1658,11 @@ var utils = {
       return
     let myIdentity = utils.getRootHash(utils.getMe()) //utils.getId(utils.getMe()).replace(PROFILE, IDENTITY)
     // let permalink = utils.getRootHash(myIdentity)
-    if (application.relationshipManagers)
-      return application.relationshipManagers.some((r) => utils.getRootHash(r) === myIdentity)
+    let { reviewer } = application
+    return reviewer  &&  utils.getRootHash(reviewer) === myIdentity
+
+    // if (application.relationshipManagers)
+    //   return application.relationshipManagers.some((r) => utils.getRootHash(r) === myIdentity)
   },
   scrollComponentIntoView (container, component) {
     const handle = platformUtils.getNode(component)

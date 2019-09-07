@@ -71,7 +71,7 @@ var NewResourceMixin = {
   getFormFields(params) {
     let { currency, editCols, originatingMessage, search, exploreData, errs, isRefresh } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
-    let { component, formErrors, model, data, validationErrors } = params
+    let { component, formErrors, model, data, validationErrors, editable } = params
 
     // Case when clicked in the FormRequest and modelsPack changed
     let meta = utils.getModel((this.props.model  ||  this.props.metadata).id)
@@ -220,7 +220,7 @@ var NewResourceMixin = {
       if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
-        options.fields[p] = {'editable':  false };
+        options.fields[p] = {editable:  false };
 
       if (formType) {
         if (props[p].keyboard)
@@ -236,7 +236,7 @@ var NewResourceMixin = {
                     model: meta,
                     errors: formErrors,
                     component,
-                    editable: !props[p].readOnly,
+                    editable: !props[p].readOnly || search,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
 
@@ -304,7 +304,7 @@ var NewResourceMixin = {
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
                     errors: formErrors,
-                    editable: params.editable,
+                    editable: !props[p].readOnly || search,
                   })
         }
         else if (type === 'string'  &&  props[p].signature) {
@@ -316,7 +316,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
-                    editable: params.editable,
+                    editable: !props[p].readOnly || search,
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
@@ -328,7 +328,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
-                    editable: params.editable && !props[p].readOnly,
+                    editable: !props[p].readOnly || search,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -393,7 +393,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
-                    editable: params.editable,
+                    editable: !props[p].readOnly
                   })
           continue
         }
@@ -812,7 +812,7 @@ var NewResourceMixin = {
 
     let help = this.paintHelp(prop)
 
-    let isTroolean = prop.range === 'troolean'
+    let isTroolean = prop.range === 'troolean' || search
     let switchView
     let switchC, booleanContentStyle
     if (isTroolean) {
@@ -907,7 +907,7 @@ var NewResourceMixin = {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
     let datePicker
-    if (prop.readOnly) {
+    if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>

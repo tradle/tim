@@ -119,6 +119,7 @@ class CheckView extends Component {
           rmodel.viewCols.includes('aspects'))
       excludedProperties = ['message']
     }
+    let isVerifier = !rmodel.notEditable && application  && utils.isRM(application)
 
     let propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource}

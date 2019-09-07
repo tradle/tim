@@ -390,6 +390,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return
     }
     if (action === 'models') {
+      if (!isModel)
+        return
       list = this.filterModels(list)
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
@@ -700,17 +702,19 @@ console.log('GridList.componentWillMount: filterResource', resource)
       style = bankStyle
     if (isApplication) {
       let route = {
-        title: title,
+        title,
         componentName: 'ApplicationView',
         // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
-          resource: resource,
-          search: search,
+          resource,
+          search,
           bankStyle: style,
           application: resource
         }
       }
+      // if (utils.isRM(resource)) {
+      this.addEdit({resource, title, route, style})
       navigator.push(route)
       return
     }
@@ -721,7 +725,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       passProps: {
         resource: search ? resource._context : resource,
         filter: '',
-        search: search,
+        search,
         modelName: MESSAGE,
         application: search  ? resource : null,
         currency: resource.currency,
@@ -733,23 +737,26 @@ console.log('GridList.componentWillMount: filterResource', resource)
       route.title = resource.firstName
       let isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
-        route.onRightButtonPress.rightButtonTitle = 'Edit'
-        route.onRightButtonPress.onRightButtonPress = {
-          title: title,
-          componentName: 'NewResource',
-          titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            bankStyle: style,
-            model: utils.getModel(resource[TYPE]),
-            resource: resource,
-            currency: currency,
-          }
-        }
+        this.addEdit({resource, route, style, title})
       }
     }
     navigator.push(route);
+  }
+  addEdit({resource, route, style, title}) {
+    route.rightButtonTitle = 'Edit'
+    route.onRightButtonPress = {
+      title,
+      componentName: 'NewResource',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        bankStyle: style,
+        model: utils.getModel(resource[TYPE]),
+        resource,
+        currency: this.props.currency,
+      }
+    }
+
   }
   selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props

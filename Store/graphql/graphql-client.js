@@ -3,12 +3,9 @@
 import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
-// import gql from 'graphql-tag'
 import { utils as tradleUtils } from '@tradle/engine'
-// import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import { GraphQLClient } from 'graphql-request'
 import constants from '@tradle/constants'
-// import { print as printQuery } from 'graphql/language/printer'
 import utils from '../../utils/utils'
 const {
   TYPE,
@@ -35,11 +32,7 @@ var messageMap = {
 const useApollo = false
 var search = {
   initClient(meDriver, url) {
-    // debugger
-    // if (useApollo)
-    //   return this.initClientApollo(meDriver, url)
-    // else
-      return this.initClientGraphQLRequest(meDriver, url)
+    return this.initClientGraphQLRequest(meDriver, url)
   },
 
   initClientGraphQLRequest(meDriver, url, headers) {
@@ -55,7 +48,7 @@ var search = {
 
   async searchServer(params) {
     let {client, modelName, filterResource, sortProperty, asc, limit,
-         endCursor, properties, select, excludeProps} = params
+         endCursor, properties, select, excludeProps, bookmark} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -85,26 +78,7 @@ var search = {
       for (let p in filterResource) {
         if (exclude.indexOf(p) !== -1)
           continue
-        // if (!props[p]  ||  p.charAt(0) === '_')
-        //   continue
         let val = filterResource[p]
-        // if (p === TYPE) {
-        //   if (!Array.isArray(val))
-        //     continue
-        //   else {
-        //     let s = `${p}: [`
-        //     val.forEach((r, i) => {
-        //       if (i)
-        //         s += ', '
-        //       s += `"${r}"`
-        //     })
-        //     s += ']'
-        //     inClause.push(s)
-        //   }
-        // }
-
-        // if (p.charAt(0) === '_')
-        //   debugger
         if (!props[p]  &&  val) {
           if (p.charAt(0) === '_') {
             if (Array.isArray(val)) {
@@ -126,7 +100,7 @@ var search = {
           }
           continue
         }
-        else if (props[p].type === 'string') {
+        if (props[p].type === 'string') {
           if (Array.isArray(val)) {
             let s = `${p}: [`
             val.forEach((r, i) => {
@@ -138,7 +112,7 @@ var search = {
             inClause.push(s)
             continue
           }
-          else if (!val  ||  !val.trim().length)
+          if (!val  ||  !val.trim().length)
             continue
           let len = val.length
           if (val.indexOf('*') === -1)
@@ -157,25 +131,20 @@ var search = {
         else if (props[p].type === 'boolean') {
           if (val)
             op.EQ += `\n   ${p}: ${val},`
-          else if (val === null)
-            op.NULL += `\n ${p}: true`
+          else if (val === null) {
+            if (bookmark)
+              op.NULL += `\n ${p}: true`
+          }
           else
             op.NEQ += `\n   ${p}: true,`
         }
         else if (props[p].type === 'number')
-          this.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+          addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+        else if (props[p].type === 'date')
+          op.GTE = `\n   ${p}: "${typeof val === 'date' &&  val ||  new Date(val).getTime()}",`
+
 
         else if (props[p].type === 'object') {
-          // if (Array.isArray(val)) {
-          //   let s = `${p}: [`
-          //   val.forEach((r, i) => {
-          //     if (i)
-          //       s += ', '
-          //     s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
-          //   })
-          //   s += ']'
-          //   inClause.push(s)
-          // }
           if (Array.isArray(val)) {
             if (!val.length)
               continue

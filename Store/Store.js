@@ -403,18 +403,48 @@ const disableBlockchainSync = node => {
 
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const from = utils.buildRef(me)
-  const createdByBot = [
-    { type: APPLICATION,
+  const etype = 'tradle.ClientOnboardingTeam'
+  const amodel = utils.getModel(APPLICATION)
+  const aprops = amodel.properties
+  let teams = utils.getModel(etype).enum
+  let bookmarks = [
+    {
+      type: APPLICATION,
       message: translate('applications')
     },
-    // { type: APPLICATION,
-    //   bookmark: {
-    //     [TYPE]: APPLICATION,
-    //     _org: botPermalink,
-    //     relationshipManagers: [me]
-    //   },
-    //   message: translate('applicationsWhereI_RM')
-    // },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        hasFailedChecks: true
+      },
+      message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
+    },
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        hasCheckOverrides: true
+      },
+      message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
+    },
+  ]
+  teams.forEach(e => {
+    bookmarks.push({
+      type: APPLICATION,
+      message: `${translate('applications')} - ${translateEnum(e)}`,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        assignedToTeam: [{
+          id: `${etype}_${e.id}`,
+          title: e.title
+        }]
+      },
+    })
+  })
+
+  let moreBookmarks = [
     { type: APPLICATION,
       bookmark: {
         [TYPE]: APPLICATION,
@@ -427,15 +457,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       bookmark: {
         [TYPE]: APPLICATION,
         _org: botPermalink,
-        status: 'In review'
-      },
-      message: translate('applicationsInReview')
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        relationshipManagers: ['NULL']
+        reviewer: 'NULL'
       },
       message: translate('applicationsNotAssigned')
     },
@@ -450,7 +472,10 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
         _counterparty: ALL_MESSAGES,
       },
     }
-  ].map(b => {
+  ]
+  moreBookmarks.forEach(b => bookmarks.push(b))
+
+  return bookmarks.map(b => {
     const { type, bookmark, message } = b
     const model = utils.getModel(type)
     return {
@@ -463,8 +488,6 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       from
     }
   })
-
-  return createdByBot
 }
 
 const getServiceProviderByUrl = url => (SERVICE_PROVIDERS || [])
@@ -3994,14 +4017,20 @@ if (!res[SIG]  &&  res._message)
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
     // let m = this.getModel(r[TYPE])
-    if (r.relationshipManagers) {
-      r.relationshipManagers.forEach(relationshipManager => {
-        let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
-        let rm = this._getItem(rmId)
-        if (rm)
-          relationshipManager.title = utils.getDisplayName(rm)
-      })
+    if (r.reviewer) {
+        let revId = r.reviewer.id.replace(IDENTITY, PROFILE)
+        let reviewer = this._getItem(revId)
+        if (reviewer)
+          r.reviewer.title = utils.getDisplayName(reviewer)
     }
+    // if (r.relationshipManagers) {
+    //   r.relationshipManagers.forEach(relationshipManager => {
+    //     let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
+    //     let rm = this._getItem(rmId)
+    //     if (rm)
+    //       relationshipManager.title = utils.getDisplayName(rm)
+    //   })
+    // }
     if (!r._context) {
       let context = await this.getContext(r.context, r)
       if (context)
@@ -4743,6 +4772,7 @@ if (!res[SIG]  &&  res._message)
       // and reset it after the real root hash will be known
       let isNew = returnVal[ROOT_HASH] == null
       let rModel = self.getModel(rtype)
+      let isApplication = rtype === APPLICATION
       let forceUpdate
       if (isNew) {
         returnVal._outbound = !isRefreshRequest
@@ -4783,7 +4813,7 @@ if (!res[SIG]  &&  res._message)
         if (isContext  &&  !returnVal.contextId)
           returnVal.contextId = self.getNonce()
       }
-      else {
+      else if (!isApplication) {
         // Check if model changed
         let prevRes
         prevResId = utils.getId(returnVal)
@@ -4816,12 +4846,18 @@ if (!res[SIG]  &&  res._message)
       for (let p in toChain) {
         let prop = properties[p]
 
-        if (!isNew  &&  !prop  &&  !keepProps.includes(p)) // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+        if (!isNew  &&  !prop  &&  !keepProps.includes(p)) {// !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
           delete toChain[p]
+          continue
+        }
         if (!prop  ||  prop.partial)
           continue
-        let isObject = prop.type === 'object'
         let isArray = prop.type === 'array'
+
+        if (isArray  &&  prop.items.filter) {
+          delete toChain[p]
+          continue
+        }
 
         let ref = prop.ref  ||  isArray  &&  prop.items.ref
 
@@ -4840,33 +4876,12 @@ if (!res[SIG]  &&  res._message)
         if (refM.inlined)
           continue
 
+        let isObject = prop.type === 'object'
         if (isObject)
           toChain[p] = self.buildSendRef(returnVal[p])
         else
           toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
       }
-      // else {
-      //   for (let p in toChain) {
-      //     let prop = properties[p]
-      //     if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
-      //       delete toChain[p]
-      //     else if (prop  &&  prop.type === 'object' &&
-      //              prop.ref /*&&  !returnVal.id*/   &&
-      //              !self.getModel(prop.ref).inlined &&
-      //              !prop.inlined                    &&
-      //              !prop.partial)
-      //       toChain[p] = self.buildSendRef(returnVal[p])
-      //   }
-
-      //   const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
-      //     _link: returnVal[CUR_HASH],
-      //     _permalink: returnVal[ROOT_HASH],
-      //     ...returnVal
-      //   })
-
-      //   _.extend(toChain, nextVersionScaffold)
-      //   _.extend(returnVal, nextVersionScaffold)
-      // }
       if (!isNew) {
         if (!returnVal[SIG]) debugger
 
@@ -4879,7 +4894,6 @@ if (!res[SIG]  &&  res._message)
         _.extend(toChain, nextVersionScaffold)
         _.extend(returnVal, nextVersionScaffold)
       }
-      // }
 
       toChain = utils.sanitize(toChain)
       try {
@@ -4897,13 +4911,6 @@ if (!res[SIG]  &&  res._message)
           self.trigger({action: 'validationError', error: err.message})
         return
       }
-      // try {
-      //   let r = await self._keeper.replaceDataUrls(toChain)
-      //   debugger
-      // } catch (err) {
-      //   console.log(err)
-      //   debugger
-      // }
 
       try {
         let data = await self.createObject(toChain)
@@ -4911,6 +4918,15 @@ if (!res[SIG]  &&  res._message)
         if (isNew)
           returnVal[ROOT_HASH] = hash
         returnVal[CUR_HASH] = hash
+
+        if (isApplication) {
+          if (!doNotSend) {
+            let sendParams = await self.packMessage(returnVal)
+            await self.meDriverSend(sendParams)
+            self.trigger({ action: 'addItem', resource: returnVal })
+          }
+          return
+        }
 
         let returnValKey = utils.getId(returnVal)
         if (isContext)
@@ -4939,7 +4955,6 @@ if (!res[SIG]  &&  res._message)
           org = toR.organization
           org = self._getItem(utils.getId(org))
         }
-        // org = self._getItem(utils.getId(org))
 
         let params;
 
@@ -5052,17 +5067,21 @@ if (!res[SIG]  &&  res._message)
       if (!utils.isSubclassOf(utils.getModel(returnVal[TYPE]), CHECK_OVERRIDE))
         return
       let appToUpdate = await getApp()
-      appToUpdate.status = 'In review'  // HACK
-      self.trigger({action: 'updateRow', resource: appToUpdate, forceUpdate: true })
-      self.trigger({action: 'getItem', resource: appToUpdate})
+      let check = await self._getItemFromServer(returnVal.check)
+      self.trigger({action: 'updateRow', resource: check, checkOverride: returnVal })
+
+      // appToUpdate.status = 'In review'  // HACK
+      // self.trigger({action: 'updateRow', resource: appToUpdate, forceUpdate: true })
+      // self.trigger({action: 'getItem', resource: appToUpdate})
     }
     async function handleAssignRM() {
       if (returnVal[TYPE] !== ASSIGN_RM)
         return
       let appToUpdate = await getApp()
-      if (!appToUpdate.relationshipManagers)
-        appToUpdate.relationshipManagers = []
-      appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
+      appToUpdate.reviewer = self._makeIdentityStub(me)
+      // if (!appToUpdate.relationshipManagers)
+      //   appToUpdate.relationshipManagers = []
+      // appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
       self.trigger({action: 'updateRow', resource: appToUpdate })
       self.trigger({action: 'getItem', resource: appToUpdate})
     }
@@ -5254,20 +5273,6 @@ if (!res[SIG]  &&  res._message)
     // debugger
 
     let org = this._getItem(newProvider.org)
-    // if (product === EMPLOYEE_ONBOARDING  &&  me.isEmployee) {
-    //   var msg = {
-    //     [TYPE]: CUSTOMER_WAITING,
-    //     from: me,
-    //     to: this.getRepresentative(utils.getId(org))
-    //   }
-    //   await this.onAddMessage({msg: msg, isWelcome: true})
-    //   return
-    // }
-
-    // let parts = product.split('.')
-    // parts[parts.length - 1] = 'My' + parts[parts.length - 1]
-    // let myProductID = parts.join('.')
-    // let myProduct = await this.searchNotMessages({modelName: myProductID, to: org})
     let resource = {
       [TYPE]: PRODUCT_REQUEST,
       requestFor: product,
@@ -5990,15 +5995,6 @@ if (!res[SIG]  &&  res._message)
     let coverPhoto = getCoverPhotoForRegion()
     if (coverPhoto) {
       r.coverPhoto = coverPhoto
-      // let res = await fetch(coverPhoto.url)
-      // let blob = await res.blob()
-      // var objectURL = URL.createObjectURL(blob);
-      // let src = objectURL;
-      // r.coverPhoto = {
-      //   url: src,
-      //   width: coverPhoto.width,
-      //   height: coverPhoto.height
-      // }
     }
     let languageCode = getLanguage()
     let m = this.getModel(LANGUAGE)
@@ -6030,8 +6026,6 @@ if (!res[SIG]  &&  res._message)
     }
   },
   getProviderById(providerId) {
-    // if (!SERVICE_PROVIDERS)
-    //   return
     let provider
     SERVICE_PROVIDERS.forEach((sp) => {
       if (sp.id === providerId)
@@ -6060,11 +6054,7 @@ if (!res[SIG]  &&  res._message)
     // HACK for now
     if (!isMessage)
       isMessage = isRefresh  || utils.isForm(meta)  ||  modelName === VERIFICATION
-    // if (params.prop)
-    //   debugger
     if (params.search &&  me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION  &&  !utils.isEnum(meta)) {
-      // if (exploreData)
-      //   Actions.showModal({title: translate('searching'), showIndicator: true})
       try {
         return await this.searchServer(params)
       } catch (error) {
@@ -6448,13 +6438,6 @@ if (!res[SIG]  &&  res._message)
     if (!result.length)
       return
 
-    // result = result.filter(r => {
-    //   if (r._time < time)
-    //     return true
-    //   if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
-    //     return true
-    //   return false
-    // })
     result.sort((a, b) => b._time - a._time)
 
     let myProducts = await this.searchMessages({modelName: MY_PRODUCT, to})
@@ -6584,8 +6567,6 @@ if (!res[SIG]  &&  res._message)
     }
 
     let newCursor = limit  &&  result.pageInfo  &&  result.pageInfo.endCursor
-        // if (result.edges.length < limit)
-        //   cursor.endCursor = null
     list = result.edges.map((r) => this.convertToResource(r.node))
     if (!noTrigger)
       this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
@@ -6716,8 +6697,6 @@ if (!res[SIG]  &&  res._message)
         if (bookmark.bookmark._counterparty === ALL_MESSAGES)
           return await this.getBookmarkChat(params)
       }
-
-      // return await this.getChat(params)
     }
     let contextId
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
@@ -6792,7 +6771,11 @@ if (!res[SIG]  &&  res._message)
         continue
       let list = response.edges
       // HACK
-      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK  &&  r.node.object[TYPE] !== STYLES_PACK  &&  r.node.object[TYPE] !== MESSAGE)
+      let filteredList = list.filter(r =>
+        r.node.object[TYPE] !== MODELS_PACK  &&
+        r.node.object[TYPE] !== STYLES_PACK  &&
+        r.node.object[TYPE] !== MESSAGE
+        )
       list = filteredList
       if (list  &&  list.length) {
         list.forEach(li => {
@@ -7229,11 +7212,6 @@ if (!res[SIG]  &&  res._message)
           break
         continue;
       }
-      // if (dataBundle  &&  r._dataBundle  &&  r._dataBundle !== dataBundle) {
-      //   foundRecs++
-      //   foundResources[key] = r
-      //   continue
-      // }
       var fr = this.checkCriteria({r, query, prop: searchProp})
       if (fr) {
         if (start  &&  foundRecs < start) {
@@ -7290,11 +7268,9 @@ if (!res[SIG]  &&  res._message)
       // Allow all providers in chooser
       if (!params.prop  &&  !all)
         result = retOrgs.filter((r) => r._isTest === isTest  ||  (!r._isTest  &&  !isTest))
-      // result = retOrgs
     }
     if (result.length === 1  ||  !sortProp)
       return result || []
-    // sortProp = sortProperty || sortProp
     asc = (typeof asc != 'undefined') ? asc : false;
     if (props[sortProp].type == 'date') {
       result.sort((a,b) => {
@@ -7330,9 +7306,6 @@ if (!res[SIG]  &&  res._message)
       if (asc)
         arr = arr.reverse();
       result = arr.map((s) => sortPropToR[s])
-      // result.sort(function(a, b) {
-      //   return asc ? a[sortProp].title - b[sortProp].title : b[sortProp].title - a[sortProp].title
-      // })
     }
 
     return result;
@@ -7343,7 +7316,7 @@ if (!res[SIG]  &&  res._message)
     if (query) {
       let q = query.toLowerCase()
       return enumList.filter((r) => {
-        let val = utils.translateEnum(r)
+        let val = translateEnum(r)
         if (!val)
           debugger
         val = val.toLowerCase()
@@ -7431,31 +7404,27 @@ if (!res[SIG]  &&  res._message)
   },
 
   async searchAllMessages(params) {
-    // await this._loadedResourcesDefer.promise
-    var self = this
+    let self = this
 
-    // var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
-    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, filterProps} = params
-// console._time('searchAllMessages')
-    var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
-    var foundResources = [];
+    let {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, filterProps} = params
+    let _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
+    let foundResources = [];
 
-    // var required = model.required;
-    var meId = utils.getId(me)
-    var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
+    let meId = utils.getId(me)
+    let meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
     let filterOutForms = !isForgetting  &&  to  &&  to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
 
-    var chatTo = to
+    let chatTo = to
     if (chatTo  &&  chatTo.id)
       chatTo = this._getItem(utils.getId(chatTo))
-    var chatId = chatTo ? utils.getId(chatTo) : null;
-    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
-    var toOrgId
+    let chatId = chatTo ? utils.getId(chatTo) : null;
+    let isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
+    let toOrgId
     let thisChatMessages
 
     if (isChatWithOrg) {
-      var rep = this.getRepresentative(chatId)
+      let rep = this.getRepresentative(chatId)
       if (!rep)
         return
       chatTo = rep
@@ -7478,10 +7447,7 @@ if (!res[SIG]  &&  res._message)
     }
     if (!thisChatMessages  ||  !thisChatMessages.length)
       return null
-    // if (isChatWithOrg  &&  !chatTo.name) {
-    //   chatTo = list[chatId].value;
-    // }
-    var testMe = chatTo ? chatTo.me : null;
+    let testMe = chatTo ? chatTo.me : null;
     if (testMe) {
       if (testMe === 'me') {
         if (!originalMe)
@@ -7489,15 +7455,13 @@ if (!res[SIG]  &&  res._message)
         testMe = originalMe[ROOT_HASH];
       }
 
-      var meId = utils.makeId(PROFILE, testMe)
+      let meId = utils.makeId(PROFILE, testMe)
       me = this._getItem(meId);
       await this.setMe(me);
-      var myIdentities = this._getItem(MY_IDENTITIES);
+      let myIdentities = this._getItem(MY_IDENTITIES);
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
-    // var lastPL
-    // var sharedWithTimePairs = []
     var limit = limit + 1
 
     let links = []
@@ -7539,22 +7503,6 @@ if (!res[SIG]  &&  res._message)
         this.addReferenceLink(thisChatMessages[i], links, all, refs)
         if (limit  &&  links.length === limit)
           break
-
-        // if (item[TYPE] === FORM_REQUEST  &&  item._document) {
-        //   let fr, k = i - 1
-        //   for (; k>=0  &&  !fr; k--) {
-        //     if (thisChatMessages[k].id === item._document)
-        //       break
-        //     if (utils.getType(thisChatMessages[k]) === FORM_REQUEST)
-        //       fr = true
-        //   }
-
-        //   if (fr) {
-        //     let d = this._getItem(item._document)
-        //     if (d)
-        //       this.addReferenceLink({id: item._document}, links, all, refs)
-        //   }
-        // }
       }
     }
     if (!links.length)
@@ -7608,10 +7556,8 @@ if (!res[SIG]  &&  res._message)
       if (duplicateItems.length) {
         removeDuplicates(duplicateItems, foundResources)
       }
-      // foundResources.sort((a, b) => a._time - b._time)
 
       utils.pinFormRequest(foundResources)
-// console.timeEnd('searchAllMessages')
       return foundResources
     })
     .catch((err) => {
@@ -7675,8 +7621,6 @@ if (!res[SIG]  &&  res._message)
       console.log(err)
       if (me.isEmployee)
         object = await this._getItemFromServer(rId)
-      // if (me.isEmployee)
-      //   return this._getItemFromServer(rId)
     }
     if (!object)
       return
@@ -7780,8 +7724,6 @@ if (!res[SIG]  &&  res._message)
       let m = utils.getModel(stub[TYPE])
       if (!m  ||  utils.isEnum(m))  {
         continue
-        // newStub.id = [m.id, r.id].join('_')
-        // newStub._displayName = m.enums.filter({id, title} => r.id === id)[0].title
       }
       if (!stub._link)
         continue
@@ -7789,7 +7731,6 @@ if (!res[SIG]  &&  res._message)
     }
     if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
       if (resource.prefill  &&  (!utils.isStub(resource.prefill) ||  !resource.prefill.id))
-      // if (resource.prefill  &&  !resource.prefill[ROOT_HASH] && !resource.prefill.id)//  !utils.isStub(resource.prefill))
         this.rewriteStubs(resource.prefill)
     }
   },
@@ -7802,8 +7743,6 @@ if (!res[SIG]  &&  res._message)
   },
   async checkResource(params) {
     let { r, foundResources, context, toOrgId, chatTo, chatId, query, isForgetting, isRefresh } = params
-    // var key = thisChatMessages[i].id
-    // var r = this._getItem(key)
     if (r.canceled)
       return
     if (r[TYPE] === BOOKMARK) {
@@ -7842,7 +7781,6 @@ if (!res[SIG]  &&  res._message)
         let org = this._getItem(r.bankRepresentative).organization
         return (org) ? utils.getId(org) === toOrgId : false
       })
-      // isSharedWith = sharedWith.length !== 0
     }
 
     if (chatTo) {
@@ -7853,9 +7791,6 @@ if (!res[SIG]  &&  res._message)
       let isContext = utils.isContext(m)
       let isDataClaim = m.id == DATA_CLAIM
       if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext && !isDataClaim  &&  !isItem)
-        // check if this is verification resource
-        return;
-      // var fromID = utils.getId(r.from);
       var toID = utils.getId(r.to);
 
       if (params.strict) {
@@ -7918,7 +7853,6 @@ if (!res[SIG]  &&  res._message)
     let fr = this.checkCriteria({r: isBookmark ? r.bookmark : r, query, isChooser})
 
     if (fr) {
-      // foundResources[key] = this.fillMessage(r);
       if (!filterOutForms  ||  !(await this.doFilterOut({r, prop}))) {
         foundResources.push(this.fillMessage(r))
         return true
@@ -8033,7 +7967,6 @@ if (!res[SIG]  &&  res._message)
         return
       chatTo = rep
       chatId = utils.getId(chatTo)
-      // isChatWithOrg = false
       toOrgId = utils.getId(to)
       thisChatMessages = chatMessages[toOrgId]
     }
@@ -8059,7 +7992,6 @@ if (!res[SIG]  &&  res._message)
       // let isMessage = model.id === MESSAGE
       if (!allMessages)
         return
-      //Object.keys(list).forEach(key => {
       let resourceId = resource ? utils.getId(resource) : null
       let resourceContextId = resource  &&  resource._context  &&  utils.getId(resource._context)
       let alen = allMessages.length
@@ -8093,10 +8025,6 @@ if (!res[SIG]  &&  res._message)
         }
         // This is the case when backlinks are requested on Profile page
         let addMessage = type === modelName  ||  (!isForm  &&  utils.isSubclassOf(m, model.id))
-        // if (addMessage)  {
-        //   if (dataBundle  &&  r._dataBundle !== dataBundle)
-        //     return
-        // }
         if (!addMessage)  {
           if (isForm) {
             if (utils.isForm(m)) {
@@ -8135,8 +8063,6 @@ if (!res[SIG]  &&  res._message)
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
-    // let lastPL
-    // let sharedWithTimePairs = []
     let isAllMessages = model.isInterface;
     let implementors = isAllMessages ? utils.getImplementors(modelName) : null;
 
@@ -8540,10 +8466,6 @@ if (!res[SIG]  &&  res._message)
         verifications.forEach((v) => {
           let doc = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
           let docType = doc.split('_')[0]
-          // if (!owners[pId][ownerId].forms)
-          //   return
-          // if (!allResources[doc]  ||  allResources[doc].from.id !== ownerId)
-          //   return
           if (forms.indexOf(docType) !== -1) {
             if (!uniqueVerifications[docType])
               uniqueVerifications[docType] = v
@@ -8635,7 +8557,6 @@ if (!res[SIG]  &&  res._message)
     })
   },
   inContext(r, context) {
-    // return r._context && utils.getId(r._context) === utils.getId(context)
     if (!r._context)
       return false
     if (utils.getId(r._context) === utils.getId(context))
@@ -8791,40 +8712,14 @@ if (!res[SIG]  &&  res._message)
     }
     if (!shareType)
       return {verifications: shareableResources}
-    // let toId = utils.getId(to)
     let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: shareType, limit}})
-    // if (!l)
-    //   return
     let verifiedShares = {}
     if (l) {
       l.forEach((val) => {
         checkOneVerification(val)
         verifiedShares[utils.getId(val.document)] = val
-        // if (utils.getType(val.document) === shareType) {
-        //   let d = this._getItem(val.document)
-        //   let rr = {
-        //     [TYPE]: VERIFICATION,
-        //     document: d,
-        //     organization: this._getItem(utils.getId(d.from)).organization
-        //   }
-        //   this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
-        // }
       })
     }
-    // for (let t in typeToDocs) {
-    //   let list = typeToDocs[t]
-
-    //   list.forEach((d) => {
-    //     if (verifiedShares[utils.getId(d)])
-    //       return
-    //     let rr = {
-    //       [TYPE]: VERIFICATION,
-    //       document: d,
-    //       organization: this._getItem(utils.getId(d.from)).organization
-    //     }
-    //     this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
-    //   })
-    // }
     // Allow sharing non-verified forms
     let curContext = context || await this.getCurrentContext(to)
     if (hasVerifiers  &&  hasVerifiers[shareType])
@@ -8945,8 +8840,6 @@ if (!res[SIG]  &&  res._message)
 
       if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated  ||  r.form === PRODUCT_REQUEST)
         continue;
-      // if (utils.getId(r.to)  !==  meId)
-      //   continue
       let rr = simpleLinkMessages[r.form]
       if (rr) {
         rr._documentCreated = true
@@ -9049,16 +8942,9 @@ if (!res[SIG]  &&  res._message)
     if (!docs.length)
       return
 
-    // let toId = utils.getId(to)
-    // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
     let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true, limit})
     let verifiedShares ={}
     if (result  &&  result.list) {
-      // let rep
-      // if (me.isEmployee) {
-      //   let representative = this.getRepresentative(me.organization)
-      //   rep = utils.getId(representative)
-      // }
       let contextId = context && utils.getId(context)
 
       let l = result.list
@@ -9293,8 +9179,6 @@ if (!res[SIG]  &&  res._message)
     _.extend(params, {noTrigger: true, search: me.isEmployee})
     let model = this.getModel(modelName)
     if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION) {
-      // LEGAL ENTITY
-      // if (modelName === 'tradle.LegalEntity')
       return await this.searchServer(params)
     }
   },
@@ -9346,8 +9230,6 @@ if (!res[SIG]  &&  res._message)
           lens: lens
         }})
       }
-      // if (isNew)
-      //   this.addVisualProps(value)
       if (!isNew  &&  !isForm) {
         let prevRes = list[utils.makeId(value[TYPE], value[ROOT_HASH], value[PREV_HASH])]
         if (prevRes) {
@@ -9745,7 +9627,6 @@ if (!res[SIG]  &&  res._message)
     const settings = this._getItem(key)
     let allProviders //, oneProvider
     if (value.id) {
-      // if (SERVICE_PROVIDERS) {
       if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url)) {
         if (settings  &&  settings.urls.indexOf(value.url) === -1) {
           self._mergeItem(key, { urls: [...settings.urls, value.url] })
@@ -9754,7 +9635,6 @@ if (!res[SIG]  &&  res._message)
         }
         return
       }
-      // }
       // We don't have this provider yet
       if (settings  &&  settings.urls.indexOf(value.url) !== -1) {
         // check if all providers were fetched from this server.

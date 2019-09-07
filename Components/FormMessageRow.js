@@ -403,7 +403,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       borderBottomLeftRadius: 10
     },
     sentTo: {
-      color: bankStyle.linkColor,
+      color: bankStyle.textColor,
       fontSize: 14,
       alignSelf: 'flex-end'
     },

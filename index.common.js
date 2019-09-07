@@ -491,6 +491,8 @@ var NavigationBarRouteMapper = {
                   }
     else if (isProfile)
       HomePageMixin.showProfile(navigator)
+    else if (!route.onRightButtonPress)
+      return
     else if (route.onRightButtonPress.stateChange) {
       if (route.onRightButtonPress.before)
         route.onRightButtonPress.before();

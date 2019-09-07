@@ -77,26 +77,25 @@ class GridRow extends Component {
     }
   }
   onRowUpdate(params) {
-    let { action, application, online, resource } = params
+    let { action, application, online, resource, forceUpdate, isConnected } = params
     switch (action) {
     case 'onlineStatus':
-      if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
-        this.setState({serverOffline: !online})
+      if (resource  &&  utils.getRootHash(resource) === utils.getRootHash(this.props.resource))
+        this.setState({ serverOffline: !online })
       break
     case 'connectivity':
-      this.setState({isConnected: params.isConnected})
+      this.setState({ isConnected })
       break
     case 'assignRM_Confirmed':
-      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH])
+      if (utils.getRootHash(application) === utils.getRootHash(this.props.resource))
         this.setState({application, resource: application})
       break
     case 'updateRow':
-      let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
-      if (hash === this.props.resource[ROOT_HASH]) {
-        if (params.forceUpdate)
-          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
+      if (utils.getRootHash(resource) === utils.getRootHash(this.props.resource)) {
+        if (forceUpdate)
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource})
         else
-          this.setState({unread: params.resource._unread})
+          this.setState({unread: resource._unread})
       }
 
       break
@@ -345,24 +344,24 @@ class GridRow extends Component {
 
     if (!pval)
       return
-    if (typeof pval === 'object') {
-      let style = [styles.description, {paddingLeft: 5}]
-      // HACK to show provider icon
-      if (utils.isStub(pval)  &&  pName === '_provider') {
-        if (resource._icon) {
-          return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
-                   <Image style={styles.icon} source={{uri: resource._icon.url}} />
-                   <Text style={style}>{pval.title}</Text>
-                 </View>
-        }
-        return <View key={this.getNextKey(resource)}>
+    if (typeof pval !== 'object')
+      return
+    let style = [styles.description, {paddingLeft: 5}]
+    // HACK to show provider icon
+    if (utils.isStub(pval)  &&  pName === '_provider') {
+      if (resource._icon) {
+        return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
+                 <Image style={styles.icon} source={{uri: resource._icon.url}} />
                  <Text style={style}>{pval.title}</Text>
                </View>
       }
       return <View key={this.getNextKey(resource)}>
-               <Text style={style}>{utils.getDisplayName(pval)}</Text>
+               <Text style={style}>{pval.title}</Text>
              </View>
     }
+    return <View key={this.getNextKey(resource)}>
+             <Text style={style}>{utils.getDisplayName(pval)}</Text>
+           </View>
   }
 
   paintIcon(model, eVal) {
@@ -382,7 +381,7 @@ class GridRow extends Component {
       buttonStyles = styles.button
     return <View style={[buttonStyles, {alignItems: 'center', backgroundColor: color}]}>
              <Icon name={icon} color={icolor} size={size}/>
-            </View>
+           </View>
   }
   onPress(resource) {
     let title = utils.makeTitle(utils.getDisplayName(resource));
