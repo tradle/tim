@@ -292,6 +292,7 @@ module.exports = {
     "outgoingMessages": "Outgoing Messages",
     "pleaseChoose": "Please choose",
     "override": "Override",
+    "olderResourceVersion": "This is the older version of this resource",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

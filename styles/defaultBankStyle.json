@@ -33,6 +33,9 @@
   "formErrorColor": "#FA0100",
   "formErrorBg": "#ffffff",
 
+  "errorBgColor": "#bb0000",
+  "errorColor": "#eeeeee",
+
   "shareContextTextColor": "#7D6EC4",
   "shareContextBackgroundColor": "#ECE8FF",
   "currentContextTextColor": "#555555",
