@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 
 import { Text } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, translateEnum } from '../utils/utils'
 import LinearGradient from 'react-native-linear-gradient';
 import RowMixin from './RowMixin'
 
@@ -713,7 +713,13 @@ class ResourceRow extends Component {
     // }
 
     let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
-
+    let team
+    let rightMarginTop = -30
+    if (resource[TYPE] === APPLICATION  &&  resource.assignedToTeam) {
+      if (!applicant ||  !dateCompleted)
+        rightMarginTop = -22
+      team = <Text style={{position: 'absolute', bottom: 0, left: 5, fontSize: 14, fontStyle: 'italic', color: '#7AAAC3'}}>{translateEnum(resource.assignedToTeam)}</Text>
+    }
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
@@ -722,7 +728,8 @@ class ResourceRow extends Component {
                 </View>
                 {applicant}
               </View>
-              <View style={{marginTop: -30, alignItems: 'flex-end'}}>
+              {team}
+              <View style={{marginTop: rightMarginTop, alignItems: 'flex-end'}}>
                 {rmIcon}
                 {dateStarted}
                 {dateEvaluated}
