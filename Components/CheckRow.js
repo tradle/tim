@@ -56,7 +56,7 @@ class CheckRow extends Component {
       if (checkOverrideProp.length) {
         const pref = checkOverrideProp[0].items.ref
         const rId = utils.getId(resource)
-        const checkOverrides = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
+        const checkOverrides = application.checksOverride.filter(r => r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
         if (checkOverrides.length)
           checkOverride = checkOverrides[0]
       }
