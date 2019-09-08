@@ -229,8 +229,8 @@ class FormMessageRow extends Component {
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
-        <View style={[chatStyles.verificationBody, {flex: 1, width, borderColor: bankStyle.contextBackgroundColor}]}>
-           <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
+        <View style={[chatStyles.verificationBody, {flex: 1, width, borderColor: bankStyle.contextBackgroundColor, borderTopRightRadius: isMyMessage ? 0 : 10, borderTopLeftRadius: isMyMessage ? 10 : 0 }]}>
+          <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
             <Text style={[chatStyles.verificationHeaderText, {color}]}>{headerTitle}
               {sealedStatus}
             </Text>
@@ -369,7 +369,12 @@ class FormMessageRow extends Component {
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   let { bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
-  let moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 10 }
+  let moreHeader
+  if (isMyMessage)
+    moreHeader = {borderTopRightRadius: 0, borderTopLeftRadius: 10,  }
+  else
+    moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 0,  }
+
   // let moreHeader = isMyMessage || isShared
   //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
   //                : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
@@ -391,7 +396,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
     noContentStyle: {
       marginBottom: -6,
       borderBottomRightRadius: 10,
-      borderBottomLeftRadius: 10
+      borderBottomLeftRadius: 10,
     },
     sentTo: {
       color: bankStyle.textColor,
@@ -425,7 +430,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       justifyContent: 'space-between',
       paddingLeft: 5,
       paddingRight: 7,
-      backgroundColor: notSignedBg
+      backgroundColor: notSignedBg,
     },
     title: {
       fontSize: 18,
