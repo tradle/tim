@@ -843,18 +843,14 @@ var search = {
     }
   },
   async getItem(id, client, backlink, excludeProps) {
-    let parts = id.split('_')
+    let [modelName, _permalink, _link] = id.split('_')
 
-    let modelName = parts[0]
     let model = utils.getModel(modelName)
     if (!model)
       return
 
     let table = `r_${modelName.replace(/\./g, '_')}`
-
-    // let _link = parts[parts.length - 1]
-    let _permalink = parts[1]
-    let query = `query {\n${table} (_permalink: "${_permalink}")\n`
+    let query = `query {\n${table} (_link: "${_link}")\n`
 
     let arr = this.getSearchProperties({model, backlink, excludeProps})
 
