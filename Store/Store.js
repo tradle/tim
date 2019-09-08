@@ -399,9 +399,13 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const aprops = amodel.properties
   let teams = utils.getModel(etype).enum
   let bookmarks = [
-    {
-      type: APPLICATION,
-      message: translate('applications')
+    { type: APPLICATION,
+      bookmark: {
+        [TYPE]: APPLICATION,
+        _org: botPermalink,
+        reviewer: from
+      },
+      message: `${translate('myCases')}`,
     },
     { type: APPLICATION,
       bookmark: {
@@ -452,17 +456,21 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       },
       message: translate('applicationsNotAssigned')
     },
-    { type: VERIFICATION },
-    { type: SEAL },
-    { type: 'tradle.SanctionsCheck' },
-    { type: 'tradle.CorporationExistsCheck' },
-    { type: MESSAGE,
-      bookmark: {
-        [TYPE]: MESSAGE,
-        _inbound: false,
-        _counterparty: ALL_MESSAGES,
-      },
-    }
+    {
+      type: APPLICATION,
+      message: translate('allApplications')
+    },
+    // { type: VERIFICATION },
+    // { type: SEAL },
+    // { type: 'tradle.SanctionsCheck' },
+    // { type: 'tradle.CorporationExistsCheck' },
+    // { type: MESSAGE,
+    //   bookmark: {
+    //     [TYPE]: MESSAGE,
+    //     _inbound: false,
+    //     _counterparty: ALL_MESSAGES,
+    //   },
+    // }
   ]
   moreBookmarks.forEach(b => bookmarks.push(b))
 
@@ -3894,15 +3902,15 @@ var Store = Reflux.createStore({
     if (utils.isMessage(r)) {
       let kres
       try {
-        if (r._latest  ||  me.isEmployee)
+        // if (r._latest  ||  me.isEmployee)
           kres = await this._keeper.get(r[CUR_HASH])
-        else {
-          let latest = this.findLatestResource(r)
-          if (latest)
-            kres = await this._keeper.get(latest[CUR_HASH])
-          else
-            kres = resource
-        }
+        // else {
+        //   let latest = this.findLatestResource(r)
+        //   if (latest)
+        //     kres = await this._keeper.get(latest[CUR_HASH])
+        //   else
+        //     kres = resource
+        // }
         this.rewriteStubs(kres)
       }
       catch (err) {
@@ -4951,6 +4959,7 @@ if (!res[SIG]  &&  res._message)
             let sendParams = await self.packMessage(returnVal)
             await self.meDriverSend(sendParams)
             self.trigger({ action: 'addItem', resource: returnVal })
+            self.trigger({ action: 'updateRow', resource: returnVal, forceUpdate: true})
           }
           return
         }
