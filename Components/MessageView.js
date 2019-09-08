@@ -453,6 +453,13 @@ class MessageView extends Component {
                     <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
                   </TouchableOpacity>
     }
+    let me = utils.getMe()
+    let warning
+    if (!me.isEmployee  &&  !resource._latest) {
+      warning = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.errorBgColor, alignItems: 'center'}}>
+                  <Text style={{fontSize: 18, color: bankStyle.errorColor}}>{translate('olderResourceVersion')}</Text>
+                </View>
+    }
     return (
       <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
         <ScrollView
@@ -460,6 +467,7 @@ class MessageView extends Component {
           keyboardShouldPersistTaps="always"
           style={{width: width}}>
           {dateView}
+          {warning}
           {bigPhoto}
           {photoStrip}
           {documents}
