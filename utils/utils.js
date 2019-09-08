@@ -419,8 +419,8 @@ var utils = {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
     // HACK for property that changes title in case it is upload or scan
-    if (this.isWeb()  &&  property.title  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
-      return property.title
+    // if (this.isWeb()  &&  property.title  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
+    //   return property.title
 
     let translations = dictionary.properties[property.name]
     let val
