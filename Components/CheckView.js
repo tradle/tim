@@ -17,7 +17,7 @@ const {
   TYPE,
 } = constants
 
-import utils, { translate, isSubclassOf, isStub } from '../utils/utils'
+import utils, { translate, translateEnum, isSubclassOf, isStub } from '../utils/utils'
 import { circled } from '../styles/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 import PageView from './PageView'
@@ -137,13 +137,21 @@ class CheckView extends Component {
       const statusM = e.find(r => r.id === statusId)
       const { icon, color } = statusM
 
-      const dn = utils.getDisplayName(checkOverride)
+      let reasonProp = statusId === 'pass' &&  'reasonsToPass' || 'reasonsToFail'
+      const dn = translateEnum(checkOverride[reasonProp])
       const checkIcon = <View style={[styles.checkButton, {backgroundColor: color}]}>
                           <Icon color='#ffffff' size={30} name={icon} />
                         </View>
+      const cmodel = utils.getModel(CHECK_OVERRIDE)
       checkOverrideView = <View style={styles.checkOverride}>
                             {checkIcon}
-                            <Text style={styles.checkOverrideText}>{dn}</Text>
+                            <View style={{flexDirection: 'column', flex: 1}}>
+                              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                <Text style={styles.checkOverrideTextBig}>{translate('manuallyOverriden')}</Text>
+                                <Text style={styles.dateText}>{utils.formatDate(checkOverride._time)}</Text>
+                              </View>
+                              <Text style={styles.checkOverrideText}>{ dn}</Text>
+                            </View>
                           </View>
     }
     else if (!this.state.isLoading  &&  utils.isRM(application)) {
@@ -239,12 +247,30 @@ var createStyles = utils.styleFactory(CheckView, function ({ dimensions, bankSty
       flexDirection: 'row',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: '#eeeeee',
+      backgroundColor: 'cornsilk'
     },
     checkOverrideText: {
-      color: '#757575',
+      color: bankStyle.textColor,
       fontSize: 18,
       marginTop: 3,
       paddingLeft: 10,
+    },
+    checkOverrideTextBig: {
+      color: bankStyle.textColor,
+      fontSize: 24,
+      paddingLeft: 10,
+      marginTop: 0
+    },
+    checkOverrideLabel: {
+      fontSize: 18,
+      marginTop: 3,
+      paddingLeft: 10,
+      color: '#aaaaaa'
+    },
+    dateText: {
+      fontSize: 12,
+      marginTop: 7,
+      color: bankStyle.textColor
     },
     checkButton: {
       ...circled(30),
