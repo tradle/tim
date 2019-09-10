@@ -4087,6 +4087,10 @@ if (!res[SIG]  &&  res._message)
     //   return r
     // }
     // debugger
+    if (prop) {
+      this.trigger(retParams)
+      return r
+    }
     let myBot = this.getRepresentative(me.organization)
 
     let itemsPR = await this.searchServer({
