@@ -137,8 +137,8 @@ class CheckView extends Component {
       const statusM = e.find(r => r.id === statusId)
       const { icon, color } = statusM
 
-      let reasonProp = statusId === 'pass' &&  'reasonsToPass' || 'reasonsToFail'
-      const dn = translateEnum(checkOverride[reasonProp])
+      let reasonProp = statusId  &&  checkOverride[reasonProp] === 'pass' &&  'reasonsToPass' || 'reasonsToFail' || ''
+      const dn = checkOverride[reasonProp]  &&  translateEnum(checkOverride[reasonProp]) || ''
       const checkIcon = <View style={[styles.checkButton, {backgroundColor: color}]}>
                           <Icon color='#ffffff' size={30} name={icon} />
                         </View>
