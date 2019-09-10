@@ -168,11 +168,13 @@ class ApplicationView extends Component {
     let contentSeparator = getContentSeparator(bankStyle)
     let loading
     if (isLoading) {
-      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
-        {this.showLoading({bankStyle, component: ApplicationView})}
-      </View>
+      // loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+      //   {this.showLoading({bankStyle, component: ApplicationView})}
+      // </View>
+      // if (!resource[TYPE])
+      //   return loading
       if (!resource[TYPE])
-        return loading
+        return <View/>
     }
     let isAndroid = utils.isAndroid()
     let color = isAndroid ? bankStyle.linkColor : '#ffffff'
