@@ -657,9 +657,9 @@ class ResourceRow extends Component {
     }
     let icon1, icon2
     if (resource.hasFailedChecks)
-      icon1 = <View style={{marginHorizontal: 2}}><Icon name='md-close-circle' size={25} color='red' style={{alignSelf: 'center'}}/></View>
+      icon1 = <View style={{marginHorizontal: 2}}><Icon name='md-close-circle' size={20} color='red' style={{alignSelf: 'center'}}/></View>
     if (resource.hasCheckOverrides)
-      icon2 = <View style={{marginHorizontal: 2}}><Icon name='ios-close-circle-outline' size={25} color='red' style={{alignSelf: 'center'}}/></View>
+      icon2 = <View style={{marginHorizontal: 2}}><Icon name='md-checkmark-circle' size={20} color='crimson' style={{alignSelf: 'center'}}/></View>
 
     let icon = <Icon name={iname} size={30} color={icolor}/>
     let icon0
@@ -677,7 +677,7 @@ class ResourceRow extends Component {
         icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
         break
       case 'In review':
-        icon0 = <Icon name='ios-eye-outline' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
+        icon0 = <Icon name='ios-eye-outline' size={25} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
         break
     }
 
