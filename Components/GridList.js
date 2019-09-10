@@ -662,7 +662,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return;
     }
     let { prop } = this.props
-    if (prop) {
+    if (prop  &&  !isApplication) {
       if (me) {
         if  (modelName != PROFILE) {
           this._selectResource(resource);
