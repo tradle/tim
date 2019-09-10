@@ -3581,6 +3581,10 @@ var Store = Reflux.createStore({
           context = await this._getItemFromServer(utils.getId(context))
         application._context = context //await this._getItemFromServer(utils.getId(context))
       }
+      // check if reviewer was updated or still in the process
+      if (!application.reviewer  ||  utils.getRootHash(application.reviewer) !== me[ROOT_HASH]) {
+        application.reviewer = this.buildRef(me)
+      }
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
     // if (__DEV__) {
@@ -4077,6 +4081,30 @@ if (!res[SIG]  &&  res._message)
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
+
+    // if (r.requestFor !== 'tradle.legal.LegalEntityProduct') {
+    //   this.trigger(retParams)
+    //   return r
+    // }
+    // debugger
+    let myBot = this.getRepresentative(me.organization)
+
+    let itemsPR = await this.searchServer({
+      modelName: PRODUCT_REQUEST,
+      noTrigger: true,
+      filterResource: {associatedResource: r[ROOT_HASH]}
+    })
+    if (itemsPR  &&  itemsPR.list)  {
+      let itemsAPP = await this.searchServer({
+        modelName: APPLICATION,
+        noTrigger: true,
+        filterResource: {context: itemsPR.list.map(pr => pr.contextId), _org: myBot[ROOT_HASH]}
+      })
+      if (itemsAPP  &&  itemsAPP.list) {
+        r.items = itemsAPP.list
+      }
+    }
+
     this.trigger(retParams)
     return r
   },
