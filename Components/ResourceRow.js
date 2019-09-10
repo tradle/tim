@@ -691,37 +691,6 @@ class ResourceRow extends Component {
                    {icons}
                  </View>
     let formsCount, progressBar
-    // let formTypes = []
-    // let progress = 0
-    // if (m  &&  resource.forms) {
-    //   resource.forms.forEach((item) => {
-    //     let itype = utils.getType(item.id)
-    //     if (formTypes.indexOf(itype) === -1)
-    //       formTypes.push(itype)
-    //   })
-    //   progress = formTypes.length / m.forms.length
-    // }
-
-    // let progressColor = '#7AAAC3'
-    // if (resource.status) {
-    //   switch (resource.status) {
-    //     case 'approved':
-    //       progressColor = '#A6D785'
-    //       break
-    //     case 'denied':
-    //       progressColor = '#EE3333'
-    //       break
-    //   }
-    // }
-    // progressBar = <View style={styles.progress}>
-    //                 <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
-    //               </View>
-    // let draft
-    // if (resource.draft) {
-    //   draft = <View style={{position: 'absolute', top: 0, width: '100%'}}>
-    //              <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
-    //           </View>
-    // }
 
     let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
     let team
