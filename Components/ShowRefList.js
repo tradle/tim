@@ -97,10 +97,10 @@ class ShowRefList extends Component {
       }
       else if (this.state.docs)
         docs = this.state.docs
-      else {
-        docs = []
-        getDocs(resource.verifications, rId, docs)
-      }
+      // else {
+      //   docs = []
+      //   getDocs(resource.verifications, rId, docs)
+      // }
       if (docs  &&  docs.length) {
         let count = <View style={styles.count}>
                       <Text style={styles.countText}>{docs.length}</Text>
