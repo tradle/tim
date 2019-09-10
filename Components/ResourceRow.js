@@ -655,7 +655,13 @@ class ResourceRow extends Component {
       iname = hasRM ? 'ios-person-add' : 'ios-person-add-outline'
       icolor = hasRM ? '#CA9DF2' : '#7AAAc3'
     }
-    let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
+    let icon1, icon2
+    if (resource.hasFailedChecks)
+      icon1 = <View style={{marginHorizontal: 2}}><Icon name='md-close-circle' size={25} color='red' style={{alignSelf: 'center'}}/></View>
+    if (resource.hasCheckOverrides)
+      icon2 = <View style={{marginHorizontal: 2}}><Icon name='ios-close-circle-outline' size={25} color='red' style={{alignSelf: 'center'}}/></View>
+
+    let icon = <Icon name={iname} size={30} color={icolor}/>
     let icon0
     switch (resource.status) {
       case 'approved':
@@ -670,9 +676,14 @@ class ResourceRow extends Component {
       case 'completed':
         icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
         break
+      case 'In review':
+        icon0 = <Icon name='ios-eye-outline' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
+        break
     }
 
-    let icons = <View style={{flexDirection: 'row'}}>
+    let icons = <View style={{flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
+            {icon1}
+            {icon2}
             {icon0}
             {icon}
           </View>
@@ -942,7 +953,7 @@ var styles = StyleSheet.create({
   providerLogo: {
     flexDirection: 'row',
     alignItems: 'center'
-  }
+  },
 });
 
 module.exports = ResourceRow;
