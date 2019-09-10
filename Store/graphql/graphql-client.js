@@ -107,7 +107,9 @@ var search = {
           }
           continue
         }
-        else if (props[p].type === 'string') {
+        if (!props[p]  ||  props[p].hidden)
+          continue
+        if (props[p].type === 'string') {
           if (Array.isArray(val)) {
             let s = `${p}: [`
             val.forEach((r, i) => {
