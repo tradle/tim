@@ -4097,27 +4097,30 @@ if (!res[SIG]  &&  res._message)
       this.trigger(retParams)
       // return r
     // }
-    if (prop)
-      return r
-    let myBot = this.getRepresentative(me.organization)
+    // if (prop)
+    //   return r
+    // let myBot = this.getRepresentative(me.organization)
 
-    let itemsPR = await this.searchServer({
-      modelName: PRODUCT_REQUEST,
-      noTrigger: true,
-      filterResource: {associatedResource: r[ROOT_HASH]}
-    })
-    if (itemsPR  &&  itemsPR.list)  {
-      let itemsAPP = await this.searchServer({
-        modelName: APPLICATION,
-        noTrigger: true,
-        filterResource: {context: itemsPR.list.map(pr => pr.contextId), _org: myBot[ROOT_HASH]}
-      })
-      if (itemsAPP  &&  itemsAPP.list) {
-        r.items = itemsAPP.list
-      }
-    }
-    if (r.items)
-      this.trigger(retParams)
+    // let itemsPR = await this.searchServer({
+    //   modelName: PRODUCT_REQUEST,
+    //   noTrigger: true,
+    //   filterResource: {associatedResource: r[ROOT_HASH]}
+    // })
+    // if (itemsPR  &&  itemsPR.list)  {
+    //   let itemsAPP = await this.searchServer({
+    //     modelName: APPLICATION,
+    //     noTrigger: true,
+    //     filterResource: {context: itemsPR.list.map(pr => pr.contextId), _org: myBot[ROOT_HASH]}
+    //   })
+    //   if (itemsAPP  &&  itemsAPP.list) {
+    //     r.items = itemsAPP.list
+    //   }
+    // }
+    // if (r.items) {
+    //   retParams.resource = {...r}
+
+    //   this.trigger(retParams)
+    // }
     return r
   },
 
