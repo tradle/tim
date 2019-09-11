@@ -772,7 +772,7 @@ var search = {
         arr.push(`${p} {
           edges {
             node {
-              ${this.getSearchProperties({model: utils.getModel(iref)})}
+              ${iref !== model.id && this.getSearchProperties({model: utils.getModel(iref)}) || arr}
             }
           }
         }`)
