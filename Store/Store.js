@@ -4025,7 +4025,13 @@ if (!res[SIG]  &&  res._message)
     }
 
     const rId = utils.getId(resource)
-    let r = await this._getItemFromServer(rId, prop)
+    let r
+    if (prop  &&  resource.submissions  &&  (utils.isRM(me) || utils.getRootHash(resource.applicant) === me[ROOT_HASH])) {
+      // if (prop.items.ref === APPLICATION_SUBMISSION)
+      r = resource
+    }
+    else
+      r = await this._getItemFromServer(rId, prop)
     if (!r)
       return
 
@@ -4087,10 +4093,12 @@ if (!res[SIG]  &&  res._message)
     //   return r
     // }
     // debugger
-    if (prop) {
+    // if (prop) {
       this.trigger(retParams)
+      // return r
+    // }
+    if (prop)
       return r
-    }
     let myBot = this.getRepresentative(me.organization)
 
     let itemsPR = await this.searchServer({
@@ -4108,8 +4116,8 @@ if (!res[SIG]  &&  res._message)
         r.items = itemsAPP.list
       }
     }
-
-    this.trigger(retParams)
+    if (r.items)
+      this.trigger(retParams)
     return r
   },
 
@@ -7281,7 +7289,7 @@ if (!res[SIG]  &&  res._message)
     let {modelName, limit, to, start, notVerified, query, all, isTest, sortProperty, asc} = params
     var meta = this.getModel(modelName)
     if (utils.isEnum(meta))
-      return this.getEnum(params)
+      return storeUtils.getEnum(params, enums)
     if (params.search)
       all = true
     // Product chooser for example
@@ -7455,82 +7463,6 @@ if (!res[SIG]  &&  res._message)
     }
 
     return result;
-  },
-  getEnum(params) {
-    const { modelName, limit, query, lastId, prop, pin } = params
-    let enumList = enums[modelName]
-    if (query) {
-      let q = query.toLowerCase()
-      return enumList.filter((r) => {
-        let val = translateEnum(r)
-        if (!val)
-          debugger
-        val = val.toLowerCase()
-        return val.indexOf(q) !== -1
-      })
-    }
-    if (prop) {
-      if (prop.limit  ||  prop.pin)
-        return utils.applyLens({prop, list: enumList})
-      else if (pin)
-        return utils.applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
-    }
-    let lim = limit || 20
-    let lastIdx
-    if (lastId)
-      lastIdx = _.findIndex(enumList, (item) => utils.getId(item) === lastId) + 1
-    else
-      lastIdx = 0
-    let ret = []
-    for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
-      ret.push(enumList[i])
-    return ret
-  },
-  checkCriteria({r, query, prop, isChooser}) {
-    debugger
-    if (!query)
-      return r
-    if (isChooser) {
-      let dn = utils.getDisplayName(r)
-      return (dn.toLowerCase().indexOf(query.toLowerCase()) !== -1) ? r : null
-    }
-    let rtype = r[TYPE]
-    let rModel = this.getModel(rtype)
-    let props = rModel.properties
-    if (prop  &&  rr[prop]) {
-      let val = utils.getStringPropertyValue(r, prop, props)
-      return (val.toLowerCase().indexOf(query.toLowerCase()) === -1) ? null : r
-    }
-    var combinedValue = '';
-    for (var rr in props) {
-      if (!r[rr]  ||  rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
-        continue;
-      if (props[rr].type === 'object') {
-        let title = utils.getDisplayName(r[rr], rModel)
-        combinedValue += combinedValue ? ' ' + title : title
-        continue
-      }
-      else if (props[rr].type === 'date') {
-        continue
-        if (!isNaN(r[rr])) {
-          let d = new Date(r[rr]).toString()
-          combinedValue += combinedValue ? ' ' + d : d
-          continue
-        }
-
-      }
-
-      combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-    }
-    if (rtype === BOOKMARK)
-      combinedValue += utils.makeModelTitle(rtype)
-    if (!combinedValue)
-      return
-      // return r
-
-    if (combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1)
-      return r
-    return
   },
   async _searchMessages(params) {
     await this._loadedResourcesDefer.promise
@@ -8034,7 +7966,7 @@ if (!res[SIG]  &&  res._message)
     }
     let isVerificationR = r[TYPE] === VERIFICATION
     let isBookmark = r[TYPE] === BOOKMARK
-    let fr = this.checkCriteria({r: isBookmark ? r.bookmark : r, query, isChooser})
+    let fr = storeUtils.checkCriteria({r: isBookmark ? r.bookmark : r, query, isChooser})
 
     if (fr) {
       // foundResources[key] = this.fillMessage(r);
