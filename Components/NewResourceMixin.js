@@ -82,7 +82,7 @@ var NewResourceMixin = {
     let { component, formErrors, model, data, validationErrors } = params
 
     let meta = utils.getModel((this.props.model  ||  this.props.metadata).id)
-    let onSubmitEditing = this.onSavePressed
+    let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
 
     let props, bl
