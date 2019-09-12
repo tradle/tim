@@ -3008,6 +3008,7 @@ var Store = Reflux.createStore({
       }
       await this.maybeWaitForIdentity({ permalink: hash })
 
+      toChain = utils.sanitize(toChain)
       result = await this.meDriverExec('sign', { object: toChain })
       toChain = result.object
       let hash = protocol.linkString(toChain)
@@ -10551,6 +10552,8 @@ if (!res[SIG]  &&  res._message)
             } catch (err) {
               prefill = await this._getItemFromServer(val.prefill.id)
             }
+            if (prefill)
+              this.rewriteStubs(prefill)
             let p = {}
             if (memPrefill)
               _.extend(p, memPrefill)
