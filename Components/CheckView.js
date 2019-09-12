@@ -143,16 +143,18 @@ class CheckView extends Component {
                           <Icon color='#ffffff' size={30} name={icon} />
                         </View>
       const cmodel = utils.getModel(CHECK_OVERRIDE)
-      checkOverrideView = <View style={styles.checkOverride}>
-                            {checkIcon}
-                            <View style={{flexDirection: 'column', flex: 1}}>
-                              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                                <Text style={styles.checkOverrideTextBig}>{translate('manuallyOverriden')}</Text>
-                                <Text style={styles.dateText}>{utils.formatDate(checkOverride._time)}</Text>
+      checkOverrideView = <TouchableOpacity onPress={() => this.showCheckOverride(checkOverride)}>
+                            <View style={styles.checkOverride}>
+                              {checkIcon}
+                              <View style={{flexDirection: 'column', flex: 1}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                  <Text style={styles.checkOverrideTextBig}>{translate('manuallyOverriden')}</Text>
+                                  <Text style={styles.dateText}>{utils.formatDate(checkOverride._time)}</Text>
+                                </View>
+                                <Text style={styles.checkOverrideText}>{ dn}</Text>
                               </View>
-                              <Text style={styles.checkOverrideText}>{ dn}</Text>
                             </View>
-                          </View>
+                           </TouchableOpacity>
     }
     else if (!this.state.isLoading  &&  utils.isRM(application)) {
       let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
@@ -182,6 +184,18 @@ class CheckView extends Component {
         </ScrollView>
       </PageView>
     );
+  }
+  showCheckOverride(resource) {
+    const { navigator, currency, bankStyle } = this.props
+    navigator.push({
+      componentName: 'MessageView',
+      title: translate(utils.getModel(utils.getType(resource))),
+      passProps: {
+        bankStyle,
+        resource,
+        currency,
+      }
+    })
   }
   createCheckOverride(prop) {
     const { navigator, bankStyle, application } = this.props
