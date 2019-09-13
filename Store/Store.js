@@ -431,10 +431,10 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       bookmark: {
         [TYPE]: APPLICATION,
         _org: botPermalink,
-        assignedToTeam: [{
+        assignedToTeam: {
           id: `${etype}_${e.id}`,
           title: e.title
-        }]
+        }
       },
     })
   })

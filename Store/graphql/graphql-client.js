@@ -163,10 +163,10 @@ var search = {
           //   s += ']'
           //   inClause.push(s)
           // }
+          let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
           if (Array.isArray(val)) {
             if (!val.length)
               continue
-            let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
             if (isEnum) {
               let s = `${p}__id: [`
               val.forEach((r, i) => {
@@ -189,7 +189,10 @@ var search = {
             }
           }
           else {
-            if (props[p].ref === MONEY) {
+            if (isEnum) {
+              op.EQ += `\n   ${p}__id: "${val.id}",`
+            }
+            else if (props[p].ref === MONEY) {
               let {value, currency} = val
               op.EQ += `\n  ${p}__currency: "${currency}",`
               if (val.value)
@@ -852,7 +855,11 @@ var search = {
       return
 
     let table = `r_${modelName.replace(/\./g, '_')}`
-    let query = `query {\n${table} (_link: "${_link}")\n`
+    let query
+    if (modelName === APPLICATION)
+      query = `query {\n${table} (_permalink: "${_permalink}")\n`
+    else
+      query = `query {\n${table} (_link: "${_link}")\n`
 
     let arr = this.getSearchProperties({model, backlink, excludeProps})
 
