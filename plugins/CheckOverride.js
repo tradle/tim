@@ -11,7 +11,8 @@ module.exports = function CheckOverride ({ models }) {
     }) {
       if (!application)
         return
-      if (getModel(form[TYPE]).subClassOf !== CHECK_OVERRIDE)
+      let m = getModel(form[TYPE])
+      if (m.subClassOf !== CHECK_OVERRIDE)
         return
 
       const { status, check } = form
@@ -22,13 +23,24 @@ module.exports = function CheckOverride ({ models }) {
           ]
         }
       }
-      const reasons = status.title === 'Pass'  &&  'reasonsToPass' || 'reasonsToFail'
-      return {
-        requestedProperties: [
+      const reasonSkip = status.title === 'Pass'  &&  'reasonsToFail' || 'reasonsToPass'
+      const reasonShow = status.title === 'Pass'  &&  'reasonsToPass' || 'reasonsToFail'
+      let requestedProperties = [
           { name: 'status' },
-          { name: reasons }
+          { name: reasonShow }
         ]
+
+      let props = m.properties
+      for (let p in props) {
+        if (p === reasonSkip  ||  p === 'status'  ||  p === reasonShow)
+          continue
+        if (p.charAt(0) === '_')
+          continue
+        if (props[p].readOnly  ||  props[p].hidden)
+          continue
+        requestedProperties.push({name: p})
       }
+      return {requestedProperties}
     }
   }
 }
