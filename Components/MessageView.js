@@ -81,15 +81,15 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message} = this.props
+    let {resource, isReview, search, application, message, isChat} = this.props
     if (isReview)
       return
     if (message) {
-      Actions.getItem({resource: message, search, application})
+      Actions.getItem({resource: message, search, application, isChat})
       return
     }
     if (resource.id) {
-      Actions.getItem({resource, search, application})
+      Actions.getItem({resource, search, application, isChat})
       return
     }
 
@@ -97,7 +97,7 @@ class MessageView extends Component {
     let vCols = utils.getViewCols(m)
     if (!vCols)
       return
-    Actions.getItem({resource, search, application})
+    Actions.getItem({resource, search, application, isChat})
   }
 
   componentDidMount() {

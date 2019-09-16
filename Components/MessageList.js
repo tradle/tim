@@ -649,6 +649,7 @@ class MessageList extends Component {
       parentMeta: model,
       passProps: {
         bankStyle,
+        isChat: true,
         resource: r,
         lensId: lensId,
         application,
