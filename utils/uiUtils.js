@@ -49,7 +49,7 @@ var uiUtils = {
         exploreData: true
       },
     }
-    if (!uiUtils.hasFilter(resource.bookmark, bm.properties)) {
+    // if (!uiUtils.hasFilter(resource.bookmark, bm.properties)) {
       extend(route, {
         rightButtonTitle: 'Search',
         onRightButtonPress: {
@@ -68,7 +68,7 @@ var uiUtils = {
           }
         }
       })
-    }
+    // }
     navigator.push(route)
   },
   hasFilter(bookmark, props) {
