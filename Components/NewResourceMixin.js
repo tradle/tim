@@ -77,7 +77,7 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, editCols, originatingMessage, search, exploreData, errs } = this.props
+    let { currency, editCols, originatingMessage, search, exploreData, errs, bookmark } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
@@ -118,6 +118,7 @@ var NewResourceMixin = {
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
+      showReadOnly = true
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
         formErrors = params.formErrors
@@ -328,6 +329,7 @@ var NewResourceMixin = {
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
+          let editable = (params.editable && !props[p].readOnly) || search || false
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
@@ -337,7 +339,7 @@ var NewResourceMixin = {
                     onSubmitEditing: onSubmitEditing.bind(this),
                     errors: formErrors,
                     component,
-                    editable: params.editable && (!props[p].readOnly || search),
+                    editable,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -418,7 +420,8 @@ var NewResourceMixin = {
           if (vType) {
             let subModel = utils.getModel(vType)
             options.fields[p].value = utils.getId(data[p])
-            data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
+            if (!search  &&  !bookmark)
+              data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
           }
         }
         // options.fields[p].onFocus = chooser.bind(this, props[p], p)
@@ -427,6 +430,7 @@ var NewResourceMixin = {
             prop:  p,
             required: !maybe,
             errors: formErrors,
+            resource: bookmark && search &&  data,
             component,
             chooser: options.fields[p].onFocus,
           })
@@ -719,10 +723,14 @@ var NewResourceMixin = {
     let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.paintHelp(prop)
     let st = { paddingBottom: 10 }
+    let icon
     // Especially for money type props
-    if (!help)
-      st.flex = 5
     let { bankStyle } = this.props
+    if (!help)
+      st = {...st, flex: 5}
+    if (!editable)
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+
     let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
@@ -744,6 +752,7 @@ var NewResourceMixin = {
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
+        {icon}
         {this.paintError(params)}
         {help}
       </View>
@@ -871,7 +880,7 @@ var NewResourceMixin = {
     )
   },
   myDateTemplate(params) {
-    let { prop, required, component } = params
+    let { prop, required, component, editable } = params
     let { search, bankStyle } = this.props
 
     let resource = this.state.resource
@@ -950,6 +959,10 @@ var NewResourceMixin = {
             {...dateProps}
           />
     }
+    let icon
+    if (!editable)
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+
     let help = this.paintHelp(prop)
     return (
       <View key={this.getNextKey()} ref={prop.name} style={{paddingBottom: 10}}>
@@ -957,6 +970,7 @@ var NewResourceMixin = {
           {propLabel}
           {datePicker}
           {help}
+          {icon}
         </View>
         {this.paintError(params)}
       </View>
@@ -1086,7 +1100,7 @@ var NewResourceMixin = {
     if (!error  &&  errors  &&  errors[pName])
       error = errors[pName]
     return <RefPropertyEditor {...this.props}
-                             resource={this.state.resource}
+                             resource={params.resource ||   this.state.resource}
                              onChange={onChange}
                              prop={prop}
                              photo={this.state[pName + '_photo']}
@@ -1619,6 +1633,11 @@ var styles= StyleSheet.create({
     position: 'absolute',
     right: 10,
     marginTop: utils.isWeb() ? 20 : 12
+  },
+  readOnly: {
+    position: 'absolute',
+    right: 10,
+    top: 20
   },
   immutable: {
     marginTop: 15

@@ -9,7 +9,7 @@ import React, { Component } from 'react'
 
 import {
   View,
-  Text,
+  // Text,
   ScrollView,
   Platform,
   Alert,
@@ -31,6 +31,7 @@ const {
   MONEY
 } = constants.TYPES
 
+import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 import ResourceMixin from './ResourceMixin'
@@ -774,7 +775,7 @@ class NewResource extends Component {
     }
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -783,6 +784,18 @@ class NewResource extends Component {
     let model = {};
     let arrays = [];
     _.extend(data, resource);
+    if (bookmark  &&  bookmark.bookmark) {
+      let props = meta.properties
+      for (let p in bookmark.bookmark) {
+        if (props[p]) {
+          if (props[p].ref  &&  utils.isEnum(props[p].ref))
+            data[p] = [bookmark.bookmark[p]]
+          else
+            data[p] = bookmark.bookmark[p]
+          this.state.resource[p] = bookmark.bookmark[p]
+        }
+      }
+    }
     let editable
     if (this.state.disableEditing)
       editable = false
