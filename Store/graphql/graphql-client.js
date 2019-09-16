@@ -847,7 +847,7 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink, excludeProps) {
+  async getItem({id, client, backlink, excludeProps, isChat}) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
@@ -856,10 +856,10 @@ var search = {
 
     let table = `r_${modelName.replace(/\./g, '_')}`
     let query
-    if (modelName === APPLICATION)
-      query = `query {\n${table} (_permalink: "${_permalink}")\n`
-    else
+    if (isChat)
       query = `query {\n${table} (_link: "${_link}")\n`
+    else
+      query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
     let arr = this.getSearchProperties({model, backlink, excludeProps})
 

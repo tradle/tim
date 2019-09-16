@@ -1536,7 +1536,7 @@ var Store = Reflux.createStore({
           //   this.client = await graphQL.initClient(meDriver)
           // }
           if (this.client) {
-            c = await this._getItemFromServer(cId)
+            c = await this._getItemFromServer({idOrResource: cId})
             if (r[TYPE] === ASSIGN_RM) {
               await this.dbPut(cId, c)
               this._setItem(cId, c)
@@ -3537,7 +3537,7 @@ var Store = Reflux.createStore({
     let document = this._getItem(docId)
     let docFromServer
     if (me.isEmployee) {
-      document = await this._getItemFromServer(docId)
+      document = await this._getItemFromServer({idOrResource: docId})
       if (!document)
         document = docStub
       else
@@ -3573,14 +3573,14 @@ var Store = Reflux.createStore({
     if (isAssignRM) {
       Actions.hideModal()
       if (!docFromServer)
-        document = await this._getItemFromServer(document)
-      let application = await this._getItemFromServer(document.application)
+        document = await this._getItemFromServer({idOrResource: document})
+      let application = await this._getItemFromServer({idOrResource: document.application})
       if (!application._context) {
         if (!context)
           context = await this.getContext(application.context, r)
         else
-          context = await this._getItemFromServer(utils.getId(context))
-        application._context = context //await this._getItemFromServer(utils.getId(context))
+          context = await this._getItemFromServer({idOrResource: utils.getId(context)})
+        application._context = context //await this._getItemFromServer(utiOrResourcels.getId(context))
       }
       // check if reviewer was updated or still in the process
       if (!application.reviewer  ||  utils.getRootHash(application.reviewer) !== me[ROOT_HASH]) {
@@ -3667,7 +3667,7 @@ var Store = Reflux.createStore({
         let cId = utils.getId(r._context)
         let c = this._getItem(cId);
         if (!c  &&  me.isEmployee)
-          c = await this._getItemFromServer(cId)
+          c = await this._getItemFromServer({idOrResource: cId})
         if (c)
           isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
       }
@@ -3883,7 +3883,7 @@ var Store = Reflux.createStore({
     this.trigger({action: 'showStepIndicator', showStepIndicator})
   },
   async onGetItem(params) {
-    var {resource, action, noTrigger, search, backlink, backlinks} = params
+    var {resource, action, noTrigger, search, backlink, backlinks, isChat} = params
     // await this._loadedResourcesDefer.promise
 
     const resModel = this.getModel(utils.getType(resource))
@@ -3900,28 +3900,30 @@ var Store = Reflux.createStore({
     if (!r) {
       if (me.isEmployee) {
         return await this.onGetItemFromServer(params)
-        // res = await this._getItemFromServer(rId)
+        // res = await this._getItemFromServer(rIdOrResource)
         // r = pick(res, TYPE)
       }
     }
     if (utils.isMessage(r)) {
       let kres
       try {
-        // if (r._latest  ||  me.isEmployee)
+        if (r._latest  ||  me.isEmployee)
           kres = await this._keeper.get(r[CUR_HASH])
-        // else {
-        //   let latest = this.findLatestResource(r)
-        //   if (latest)
-        //     kres = await this._keeper.get(latest[CUR_HASH])
-        //   else
-        //     kres = resource
-        // }
+        else if (isChat)
+          kres = resource
+        else {
+          let latest = this.findLatestResource(r)
+          if (latest)
+            kres = await this._keeper.get(latest[CUR_HASH])
+          else
+            kres = resource
+        }
         this.rewriteStubs(kres)
       }
       catch (err) {
         if (me.isEmployee) {
           return await this.onGetItemFromServer(params)
-          // kres = await this._getItemFromServer(rId)
+          // kres = await this._getItemFromServer(rIdOrResource)
         }
       }
       _.extend(res, kres)
@@ -3965,7 +3967,7 @@ if (!res[SIG]  &&  res._message)
     return res
   },
   async onGetItemFromServer(params) {
-    var {resource, action, noTrigger, backlink, forwardlink, application} = params
+    var {resource, action, noTrigger, backlink, forwardlink, application, isChat} = params
     const rtype = utils.getType(resource)
     if (rtype === MESSAGE)
       return await this.getMessage(params)
@@ -3974,7 +3976,7 @@ if (!res[SIG]  &&  res._message)
       return await this.getApplication(params)
 
     const rId = utils.getId(resource)
-    let r = await this._getItemFromServer(rId, backlink)
+    let r = await this._getItemFromServer({idOrResource: rId, backlink, isChat})
     if (!r)
       return
     if (resource.id  ||  (!backlink  &&  !forwardlink)) {
@@ -4032,7 +4034,7 @@ if (!res[SIG]  &&  res._message)
       r = resource
     }
     else
-      r = await this._getItemFromServer(rId, prop)
+      r = await this._getItemFromServer({idOrResource: rId, backlink: prop})
     if (!r)
       return
 
@@ -4178,7 +4180,7 @@ if (!res[SIG]  &&  res._message)
       let id = utils.makeId(type, link, permalink)
       resource = this._getItem(id)
       if (!resource)
-        resource = await this._getItemFromServer(id)
+        resource = await this._getItemFromServer({idOrResource: id})
     }
     else {
       let list = this.searchServer({modelName: type, filterResource: {permalink}, noTrigger: true})
@@ -4560,7 +4562,7 @@ if (!res[SIG]  &&  res._message)
       refProps[rValue].push(p)
       let elm = this._getItem(rValue)
       if (!elm  &&  me.isEmployee) {
-        elm = await this._getItemFromServer(rValue)
+        elm = await this._getItemFromServer({idOrResource: rValue})
         foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
       }
       else {
@@ -4577,7 +4579,7 @@ if (!res[SIG]  &&  res._message)
             kres = await this._keeper.get(elm[CUR_HASH])
           } catch (err) {
             if (me.isEmployee)
-              kres = await this._getItemFromServer(utils.getId(elm))
+              kres = await this._getItemFromServer({idOrResource: utils.getId(elm)})
             debugger
           }
           let r = _.cloneDeep(kres)
@@ -4884,7 +4886,7 @@ if (!res[SIG]  &&  res._message)
         try {
           prevRes = await self._keeper.get(returnVal[CUR_HASH])
         } catch(err) {
-          prevRes = await self._getItemFromServer(utils.getId(returnVal))
+          prevRes = await self._getItemFromServer({idOrResource: utils.getId(returnVal)})
         }
         prevResCached = self._getItem(prevResId)
         _.extend(prevResCached, prevRes)
@@ -5148,7 +5150,7 @@ if (!res[SIG]  &&  res._message)
         return
       let appToUpdate = await getApp()
       appToUpdate.status = 'In review'  // HACK
-      let check = await self._getItemFromServer(returnVal.check)
+      let check = await self._getItemFromServer({idOrResource: returnVal.check})
       self.trigger({action: 'updateRow', resource: check, checkOverride: returnVal })
       // self.onGetItem({action: 'getItem', search: true, resource: appToUpdate, backlink: utils.getModel(APPLICATION).properties.checks})
       // self.trigger({action: 'getItem', search: true, resource: appToUpdate, backlink: utils.getModel(APPLICATION).properties.checks})
@@ -5177,7 +5179,7 @@ if (!res[SIG]  &&  res._message)
             app = l[0].value
         }
         if (!app)
-          app = await self._getItemFromServer(returnVal.application)
+          app = await self._getItemFromServer({idOrResource: returnVal.application})
         if (!app)
           appToUpdate = utils.clone(returnVal.applications)
         else {
@@ -5379,7 +5381,7 @@ if (!res[SIG]  &&  res._message)
         me.isAgent = true
         me.entity = {
           id: utils.makeId(LEGAL_ENTITY, params.legalEntity)
-        }//await this._getItemFromServer(utils.makeId(LEGAL_ENTITY, params.legalEntity))
+        }//await this._getItemFromServer(utiOrResourcels.makeId(LEGAL_ENTITY, params.legalEntity))
         let meId = utils.getId(me)
         await utils.setMe(me)
         await db.put(meId, me)
@@ -6471,7 +6473,7 @@ if (!res[SIG]  &&  res._message)
               let cId = utils.getId(context)
               let c = contextIdToContext[cId]
               if (!c  &&  me.isEmployee)
-                c = await this._getItemFromServer(context)
+                c = await this._getItemFromServer({idOrResource: context})
               contextIdToContext[cId] = c
             }
             context = c
@@ -6855,7 +6857,7 @@ if (!res[SIG]  &&  res._message)
     if (application) { //  &&  !endCursor) {
       context = application._context
       if (!application.context)
-        application = await this._getItemFromServer(application)
+        application = await this._getItemFromServer({idOrResource: application})
       contextId = application.context
     }
     else if (context) {
@@ -7729,9 +7731,9 @@ if (!res[SIG]  &&  res._message)
       // debugger
       console.log(err)
       if (me.isEmployee)
-        object = await this._getItemFromServer(rId)
+        object = await this._getItemFromServer({idOrResource: rId})
       // if (me.isEmployee)
-      //   return this._getItemFromServer(rId)
+      //   return this._getItemFromServer(rIdOrResource)
     }
     if (!object)
       return
@@ -7746,7 +7748,7 @@ if (!res[SIG]  &&  res._message)
         let rcontextId = utils.getId(r._context)
         rcontext = refsObj[rcontextId]
         if (!rcontextId) {
-          rcontext = this._getItemFromServer(rcontextId)
+          rcontext = this._getItemFromServer({idOrResource: rcontextId})
           refsObj[rcontextId] = rcontext
         }
       }
@@ -8370,7 +8372,7 @@ if (!res[SIG]  &&  res._message)
           if (c)
             contexts.push(c)
           else
-            promisses.push(this._getItemFromServer(cId))
+            promisses.push(this._getItemFromServer({idOrResource: cId}))
         }
       })
       if (promisses.length) {
@@ -9548,7 +9550,7 @@ if (!res[SIG]  &&  res._message)
           let iId = utils.getId(value[container.name])
           let cRes = this._getItem(iId)
           if (!cRes)
-            cRes = await this._getItemFromServer(iId)
+            cRes = await this._getItemFromServer({idOrResource: iId})
           this.onExploreBacklink(cRes, item, true)
         }
       }
@@ -10550,7 +10552,7 @@ if (!res[SIG]  &&  res._message)
             try {
               prefill = await this._keeper.get(phash)
             } catch (err) {
-              prefill = await this._getItemFromServer(val.prefill.id)
+              prefill = await this._getItemFromServer({idOrResource: val.prefill.id})
             }
             if (prefill)
               this.rewriteStubs(prefill)
@@ -10565,7 +10567,7 @@ if (!res[SIG]  &&  res._message)
           let props = model.properties
           for (let p in props) {
             if (utils.isContainerProp(props[p], model)) {
-              let cRes = application  &&  await this._getItemFromServer(val[p]) || this._getItem(val[p])
+              let cRes = application  &&  await this._getItemFromServer({idOrResource: val[p]}) || this._getItem(val[p])
               if (cRes )
                 this.trigger({action: 'getItem', resource: cRes, application})
             }
@@ -10763,7 +10765,7 @@ if (!res[SIG]  &&  res._message)
       if (!document) {
         // debugger
         if (me.isEmployee)
-          document = await this._getItemFromServer(utils.getId(val.document))
+          document = await this._getItemFromServer({idOrResource: val.document})
       }
 
       if (!context  && document && document._context)
@@ -10988,7 +10990,7 @@ await fireRefresh(val.from.organization)
         if (doInit) {
           this.client = graphQL.initClient(meDriver, me.organization.url)
           if (utils.isAgent())
-             me.entity = await this._getItemFromServer(me.entity.id)
+             me.entity = await this._getItemFromServer({idOrResource: me.entity.id})
         }
       }
       else if (type === MY_AGENT_PASS) {
@@ -11918,15 +11920,14 @@ await fireRefresh(val.from.organization)
         return rr.value
     }
   },
-  async _getItemFromServer(id, backlink) {
-    if (typeof id !== 'string')
-      id = utils.getId(id)
+  async _getItemFromServer({idOrResource, backlink, isChat}) {
+    let id = (typeof idOrResource !== 'string') || utils.getId(idOrResource)
     if (!this.client) {
       // debugger
       return
     }
     try {
-      let result = await graphQL.getItem(id, this.client, backlink)
+      let result = await graphQL.getItem({id, client: this.client, backlink, isChat})
       if (result) {
         return this.convertToResource(result)
       }
