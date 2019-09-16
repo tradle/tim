@@ -788,11 +788,12 @@ class NewResource extends Component {
       let props = meta.properties
       for (let p in bookmark.bookmark) {
         if (props[p]) {
-          if (props[p].ref  &&  utils.isEnum(props[p].ref))
-            data[p] = [bookmark.bookmark[p]]
+          let bPropVal = bookmark.bookmark[p]
+          if (props[p].ref  &&  utils.isEnum(props[p].ref)  &&  !Array.isArray(bPropVal))
+            data[p] = [bPropVal]
           else
-            data[p] = bookmark.bookmark[p]
-          this.state.resource[p] = bookmark.bookmark[p]
+            data[p] = bPropVal
+          this.state.resource[p] = bPropVal
         }
       }
     }
