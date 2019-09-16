@@ -25,6 +25,7 @@ import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
 import CheckRow from './CheckRow'
+import ApplicationRow from './ApplicationRow'
 import PageView from './PageView'
 import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
 import ActionSheet from './ActionSheet'
@@ -1102,6 +1103,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let selectedResource = resource
 
     let isApplication = modelName === APPLICATION
+    if (isApplication) {
+      return <ApplicationRow
+               onSelect={this.selectResource.bind(this)}
+               resource={resource}
+               bankStyle={bankStyle}
+             />
+    }
+
     let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
     if (isMessage  &&  resource !== model  &&  !isContext) { //isVerification  || isForm || isMyProduct)
       if (modelName === CHECK  ||  utils.isSubclassOf(modelName, CHECK))
@@ -1133,6 +1142,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 chosen={this.state.chosen} />
       )
     }
+
     return (<ResourceRow
       lazy={lazy}
       onSelect={isSharedContext ? this.openSharedContextChat.bind(this) : this.selectResource.bind(this)}

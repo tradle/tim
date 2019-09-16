@@ -420,7 +420,7 @@ class ResourceRow extends Component {
     let model = utils.getModel(rtype);
     let viewCols = model.gridCols || model.viewCols;
 
-    if (!viewCols  &&  model.id !== APPLICATION) {
+    if (!viewCols) {
       if (model.id === PARTIAL) {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
         let productTitle = translate(utils.getModel(p))
@@ -440,9 +440,6 @@ class ResourceRow extends Component {
       else
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
-    // HACK
-    else if (model.id === APPLICATION)
-      return this.applicationRow(resource, style)
     else if (this.props.isChooser)
       return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
 
@@ -592,157 +589,6 @@ class ResourceRow extends Component {
         </View>
       </TouchableOpacity>
     ];
-  }
-  applicationRow(resource, style) {
-    const model = utils.getModel(resource[TYPE] || resource.id);
-    const m = utils.getModel(resource.requestFor)
-    // if (!m)
-    //   return <View/>
-
-    const props = model.properties
-    // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-    let dateCompleted, dateEvaluated, dateStarted
-    if (resource.dateStarted) {
-      dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
-                      <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
-                      <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
-                    </View>
-    }
-    // if (resource.certificate)
-    //   status = 'Approved'
-    // else
-    if (resource.dateEvaluated) {
-      // status = 'Denied'
-      dateEvaluated = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
-                        <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
-                        <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
-                      </View>
-    }
-    else if (resource.dateCompleted) {
-      // status = 'Submitted'
-      dateCompleted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
-                        <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
-                        <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
-                      </View>
-    }
-    // if (status) {
-    //   status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}>
-    //               <Text style={{fontSize: 12, color: '#7AAAc3'}}>{translate(status)}</Text>
-    //             </View>
-    // }
-    // if (status !== 'Approved'  &&  status !== 'Denied') {
-    let aTitle = resource.applicantName || resource.applicant.title
-    // HACK
-    if (aTitle === '[name unknown]')
-      aTitle = null
-    const applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
-    let icolor
-    let iname
-    const hasRM = resource.reviewer // resource.relationshipManagers
-    const { bankStyle } = this.props.bankStyle
-    if (utils.isRM(resource)) {
-      // iname = 'md-log-out'
-      iname = 'ios-person-add'
-      icolor = '#7AAAc3'
-    }
-    else if (this.state.hasRM) {
-      // iname = 'md-log-out'
-      iname = 'ios-person-add'
-      icolor = '#7AAAc3'
-    }
-    else {
-      // iname = 'md-log-in'
-      iname = hasRM ? 'ios-person-add' : 'ios-person-add-outline'
-      icolor = hasRM ? '#CA9DF2' : '#7AAAc3'
-    }
-    let icon1, icon2
-    if (resource.hasFailedChecks)
-      icon1 = <View style={{marginHorizontal: 2}}><Icon name='md-close-circle' size={20} color='red' style={{alignSelf: 'center'}}/></View>
-    if (resource.hasCheckOverrides)
-      icon2 = <View style={{marginHorizontal: 2}}><Icon name='md-checkmark-circle' size={20} color='crimson' style={{alignSelf: 'center'}}/></View>
-
-    let icon = <Icon name={iname} size={30} color={icolor}/>
-    let icon0
-    switch (resource.status) {
-      case 'approved':
-        icon0 = <Icon name='ios-done-all' size={30} color={bankStyle  &&  bankStyle.confirmationColor || '#02A5A5'}/>
-        break
-      case 'denied':
-        icon0 = <Icon name='ios-close' size={25} color='red'/>
-        break
-      case 'started':
-        icon0 = <Icon name='ios-code-working' size={25} color={bankStyle  &&  bankStyle.linkColor || '#7AAAC3'}/>
-        break
-      case 'completed':
-        icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
-        break
-      case 'In review':
-        icon0 = <Icon name='ios-eye-outline' size={25} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
-        break
-    }
-
-    let icons = <View style={{flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
-            {icon1}
-            {icon2}
-            {icon0}
-            {icon}
-          </View>
-    let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center', marginTop: aTitle && -15 || 0}}>
-                   {icons}
-                 </View>
-    let formsCount, progressBar
-
-    let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
-    let team
-    let rightMarginTop = -30
-    if (resource[TYPE] === APPLICATION  &&  resource.assignedToTeam) {
-      if (!applicant ||  !dateCompleted)
-        rightMarginTop = -22
-      team = <Text style={{position: 'absolute', bottom: 0, left: 5, fontSize: 14, fontStyle: 'italic', color: '#7AAAC3'}}>{translateEnum(resource.assignedToTeam)}</Text>
-    }
-    return  <View>
-              <View style={{padding: 5}}>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{mTitle}</Text>
-                  {formsCount}
-                </View>
-                {applicant}
-              </View>
-              {team}
-              <View style={{marginTop: rightMarginTop, alignItems: 'flex-end'}}>
-                {rmIcon}
-                {dateStarted}
-                {dateEvaluated}
-                {dateCompleted}
-              </View>
-              {progressBar}
-            </View>
-  }
-  assignRM() {
-    Alert.alert(
-      translate('areYouSureYouWantToServeThisCustomer', this.props.resource.from.title),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {}},
-        {text: translate('Yes'), onPress: () => {
-          let me = utils.getMe()
-          let msg = {
-            [TYPE]: ASSIGN_RM,
-            employee: {
-              id: utils.makeId('tradle.Identity', me[ROOT_HASH])
-            },
-            application: this.props.resource,
-            _context: this.props.resource._context,
-            from: me,
-            to: this.props.resource.to
-          }
-          Actions.addChatItem({resource: msg})
-          this.setState({hasRM: true})
-        }}
-      ]
-    )
-
-
   }
   onPress(event) {
     let { resource, navigator } = this.props
@@ -909,16 +755,10 @@ var styles = StyleSheet.create({
   },
   countText: {
     fontSize: 12,
-    // marginLeft: -7,
     fontWeight: '600',
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
   },
-  // progress: {
-  //   marginTop: 10,
-  //   justifyContent: 'center',
-  //   alignSelf: 'center'
-  // },
   providerLogo: {
     flexDirection: 'row',
     alignItems: 'center'
