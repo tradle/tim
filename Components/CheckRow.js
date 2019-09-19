@@ -39,10 +39,10 @@ const STATUS = 'tradle.Status'
 
 class CheckRow extends Component {
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
-    application: PropTypes.object
+    application: PropTypes.object,
+    modelName: PropTypes.string
   };
 
   constructor(props) {
