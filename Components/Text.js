@@ -5,25 +5,28 @@ import {
   Platform
 } from 'react-native'
 import _ from 'lodash'
-var fontFamily
-var fonts = {
-  "Benton Sans": "BentonSans Regular"
-}
+
+import { isWeb, isAndroid } from '../utils/utils'
 // import { translate } from '../utils/utils'
+var fontFamily
 
 export function setFontFamily(style) {
-  // if (!style.fontFamily)
-  //   fontFamily = 'BentonSans Regular'
+  if (!isWeb()  ||  !style)
+    return
+  if (style.textFont)
+    fontFamily = style.textFont
   // else
-  fontFamily = Platform.OS === 'android'  &&  style.fontFamilyAndroid  ||  style.fontFamily
-  if (fonts[fontFamily])
-    fontFamily = fonts[fontFamily]
+  //   fontFamily = Platform.OS === 'android'  &&  style.fontFamilyAndroid  ||  style.fontFamily
+
+  // if (fonts[fontFamily])
+  //   fontFamily = fonts[fontFamily]
 }
 export function resetFontFamily(ff) {
   fontFamily = null
 }
 export function getFontMapping(font) {
-  return fonts[font] || font
+  return font
+  // return fonts[font] || font
 }
 export const Text = props => {
   let { children, ...rest } = props
