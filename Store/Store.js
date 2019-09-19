@@ -403,7 +403,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       bookmark: {
         [TYPE]: APPLICATION,
         _org: botPermalink,
-        reviewer: from
+        analyst: me.employeePass
       },
       message: `${translate('myCases')}`,
     },
@@ -452,7 +452,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       bookmark: {
         [TYPE]: APPLICATION,
         _org: botPermalink,
-        reviewer: 'NULL'
+        analyst: 'NULL'
       },
       message: translate('applicationsNotAssigned')
     },
@@ -3500,7 +3500,7 @@ var Store = Reflux.createStore({
         requestedProperties.forEach((r) => {
           rprops[r.name] = {
             message: r.message || '',
-            required: r.required
+            required: r.required // r.hasOwnProperty('required') ? r.required : true
           }
         })
         rProps = {
@@ -3582,9 +3582,9 @@ var Store = Reflux.createStore({
           context = await this._getItemFromServer({idOrResource: utils.getId(context)})
         application._context = context //await this._getItemFromServer(utiOrResourcels.getId(context))
       }
-      // check if reviewer was updated or still in the process
-      if (!application.reviewer  ||  utils.getRootHash(application.reviewer) !== me[ROOT_HASH]) {
-        application.reviewer = this.buildRef(me)
+      // check if analyst was updated or still in the process
+      if (!application.analyst  ||  utils.getRootHash(application.analyst) !== me[ROOT_HASH]) {
+        application.analyst = {...me.employeePass}
       }
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
@@ -4063,12 +4063,12 @@ if (!res[SIG]  &&  res._message)
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
     // let m = this.getModel(r[TYPE])
-    if (r.reviewer) {
-        let revId = r.reviewer.id.replace(IDENTITY, PROFILE)
-        let reviewer = this._getItem(revId)
-        if (reviewer)
-          r.reviewer.title = utils.getDisplayName(reviewer)
-    }
+    // if (r.reviewer) {
+    //     let revId = r.reviewer.id.replace(IDENTITY, PROFILE)
+    //     let reviewer = this._getItem(revId)
+    //     if (reviewer)
+    //       r.reviewer.title = utils.getDisplayName(reviewer)
+    // }
     // if (r.relationshipManagers) {
     //   r.relationshipManagers.forEach(relationshipManager => {
     //     let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
@@ -5159,7 +5159,7 @@ if (!res[SIG]  &&  res._message)
       if (returnVal[TYPE] !== ASSIGN_RM)
         return
       let appToUpdate = await getApp()
-      appToUpdate.reviewer = self._makeIdentityStub(me)
+      appToUpdate.analyst = me.employeePass
       // if (!appToUpdate.relationshipManagers)
       //   appToUpdate.relationshipManagers = []
       // appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
@@ -11129,6 +11129,7 @@ await fireRefresh(val.from.organization)
       // }
       // await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
+      me.employeePass = self.buildRef(val)
       const bookmarks = getEmployeeBookmarks({
         me,
         botPermalink: self.getRepresentative(me.organization)[ROOT_HASH]
@@ -11921,7 +11922,7 @@ await fireRefresh(val.from.organization)
     }
   },
   async _getItemFromServer({idOrResource, backlink, isChat}) {
-    let id = (typeof idOrResource !== 'string') || utils.getId(idOrResource)
+    let id = (typeof idOrResource !== 'string') &&  utils.getId(idOrResource) || idOrResource
     if (!this.client) {
       // debugger
       return
