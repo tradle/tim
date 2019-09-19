@@ -1050,7 +1050,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application,
+    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application, bookmark,
           currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1077,7 +1077,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
 
-    if (!isModel  &&  !isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isModel  &&  !isChooser  &&  isGrid  &&  (modelName !== APPLICATION  ||  !bookmark)  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       // Overwrite viewCols for MESSAGE after renderHeader call
       if (model.id === MESSAGE)
@@ -1120,8 +1120,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 modelName={rtype}
                 application={application}
                 bankStyle={bankStyle}
-                navigator={navigator}
-                searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 resource={resource} />
                )
       return (<VerificationRow
