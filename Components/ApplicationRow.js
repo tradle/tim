@@ -6,7 +6,7 @@ import {
   View
 } from 'react-native'
 import PropTypes from 'prop-types';
-
+import Reflux from 'reflux'
 import React, { Component } from 'react'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import constants from '@tradle/constants'
 
+import Store from '../Store/Store'
 import { Text } from './Text'
 import utils, { translate, translateEnum } from '../utils/utils'
 import RowMixin from './RowMixin'
@@ -29,24 +30,44 @@ var {
 
 class ApplicationRow extends Component {
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
   };
-
+  constructor(props) {
+    super(props)
+    this.state = {
+      resource: props.resource,
+    }
+  }
   shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.resource !== nextProps.resource)
+      return true
+
     let opts = {strict: true}
-    for (let p in this.props) {
-      if (typeof this.props[p] === 'function') {
-        if ('' + this.props[p] !== '' + nextProps[p])
-          return true
-      }
-      else if (this.props[p] !== nextProps[p]) {
-        if (!_.isEqual(this.props[p], nextProps[p], opts))
+    for (let p in nextState.resource) {
+      if (!this.state.resource.hasOwnProperty(p))
+        return true
+      if (this.state.resource[p] !== nextState.resource[p]) {
+        if (!_.isEqual(this.state.resource[p], nextState.resource[p], opts))
           return true
       }
     }
+
     return false
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onRowUpdate');
+  }
+  onRowUpdate(params) {
+    let { action, application, resource } = params
+    let hash = resource  &&  utils.getRootHash(resource)
+    let thisHash = utils.getRootHash(this.props.resource)
+    switch (action) {
+    case 'assignRM_Confirmed':
+      if (utils.getRootHash(application) === thisHash)
+        this.setState({application: application, resource: application})
+      break
+    }
   }
 
   render() {
@@ -84,7 +105,7 @@ class ApplicationRow extends Component {
     return content
   }
   applicationRow(style) {
-    let resource = this.props.resource
+    let resource = this.state.resource
     const model = utils.getModel(resource[TYPE])
     const m = utils.getModel(resource.requestFor)
 
@@ -115,7 +136,7 @@ class ApplicationRow extends Component {
     const applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
     let icolor
     let iname
-    const hasRM = resource.reviewer // resource.relationshipManagers
+    const hasRM = resource.analyst // resource.relationshipManagers
     const { bankStyle } = this.props.bankStyle
     if (utils.isRM(resource)) {
       iname = 'ios-person-add'
@@ -189,6 +210,7 @@ class ApplicationRow extends Component {
             </View>
   }
 }
+reactMixin(ApplicationRow.prototype, Reflux.ListenerMixin);
 reactMixin(ApplicationRow.prototype, RowMixin);
 
 var styles = StyleSheet.create({
