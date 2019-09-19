@@ -460,10 +460,10 @@ class NewResource extends Component {
     if (!required)
       required = []
 
+    let props = model.properties
     if (model.softRequired  &&  this.refs.form) {
       // HACK a bit
       let formProps = this.refs.form.props  &&  this.refs.form.props.options.fields
-      let props = model.properties
       for (let p in formProps)
         if (props[p]  &&  model.softRequired.includes(p))
           required.push(p)
@@ -473,8 +473,14 @@ class NewResource extends Component {
     if (reqProperties) {
       let requestedProperties = reqProperties.requestedProperties
       for (let p in requestedProperties) {
-        if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1) {
-          if (!requestedProperties[p].hasOwnProperty('required')  ||  requestedProperties[p].required)
+        if (p.indexOf('_group') !== -1) {
+          // props[p].list.forEach(p => {
+          //   if (!requestedProperties[p])
+          //     required.push(p)
+          // })
+        }
+        else if (required.indexOf(p) === -1) {
+          if (requestedProperties[p].required)
             required.push(p)
         }
       }
@@ -921,15 +927,15 @@ class NewResource extends Component {
     if (meta.id === 'tradle.PhotoID') {
       guidanceMsg = <View style={{paddingBottom: 10}}>
                       <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
-                        <Text style={{fontSize: 18, paddingBottom: 10}}>Uploading a picture of your document to your computer:</Text>
+                        <Text style={styles.guidanceMsgTitle}>Uploading a picture of your document to your computer:</Text>
                         <Text style={{fontSize: 18}}>1.
-                          <Text style={{fontSize: 18, paddingLeft: 10}}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
+                          <Text style={styles.guidanceMsgText}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
                         </Text>
                         <Text style={{fontSize: 18}}>2.
-                          <Text style={{fontSize: 18, paddingLeft: 10}}>Transfer the image from your device to your computer: connect to the device with a USB cable, or email the image to yourself. Save the image to your computer (e.g. on the Desktop, Photos, Documents or Downloads folder).</Text>
+                          <Text style={styles.guidanceMsgText}>Transfer the image from your device to your computer: connect to the device with a USB cable, or email the image to yourself. Save the image to your computer (e.g. on the Desktop, Photos, Documents or Downloads folder).</Text>
                         </Text>
                         <Text style={{fontSize: 18}}>3.
-                        <Text style={{fontSize: 18, paddingLeft: 10}}>Use the Upload option below to choose the image from your computer.</Text>
+                        <Text style={styles.guidanceMsgText}>Use the Upload option below to choose the image from your computer.</Text>
                         </Text>
                       </View>
                     </View>
@@ -1571,6 +1577,16 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       backgroundColor: '#f3f3f3',
       // backgroundColor: 'transparent'
     },
+    guidanceMsgTitle: {
+      fontSize: 22,
+      paddingBottom: 10,
+      fontFamily: bankStyle.headerFont
+    },
+    guidanceMsgText: {
+      fontSize: 18,
+      paddingBottom: 10,
+      fontFamily: bankStyle.headerFont
+    }
   })
 })
 module.exports = NewResource;

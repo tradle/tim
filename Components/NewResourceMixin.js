@@ -117,36 +117,10 @@ var NewResourceMixin = {
     if (this.state.requestedProperties)
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
+    let softRequired
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       showReadOnly = true
-      if (!formErrors) {
-        _.extend(params, {formErrors: {}})
-        formErrors = params.formErrors
-      }
-      eCols = eCols.filter(p => requestedProperties[p])
-      for (let p in requestedProperties) {
-        // if (eCols.some((prop) => prop.name === p) {
-        let idx = p.indexOf('_group')
-        let eidx = eCols.indexOf(p)
-        if (eidx !== -1) {
-          eCols.splice(eidx, 1)
-        }
-        if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
-          continue
-        eCols.push(p)
-        if (idx === -1  &&  props[p].readOnly)
-          showReadOnly = true
-        else if (props[p].list) {
-          props[p].list.forEach((pp) => {
-            let idx = eCols.indexOf(pp)
-            if (idx !== -1)
-              eCols.splice(idx, 1)
-            if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
-              return
-            eCols.push(pp)
-          })
-        }
-      }
+      ;({ eCols, softRequired } = this.addRequestedProps({eCols, params, props}))
     }
     else if (data) {
       for (let p in data) {
@@ -161,7 +135,8 @@ var NewResourceMixin = {
           eCols.push(p)
     }
     let required = utils.ungroup({model: meta, viewCols: meta.required, edit: true})
-    let softRequired = meta.softRequired || []
+    if (!softRequired)
+      softRequired = meta.softRequired || []
 
     if (validationErrors) {
       formErrors = validationErrors
@@ -439,6 +414,7 @@ var NewResourceMixin = {
       }
     }
 
+
     // HACK for video
     if (eCols.indexOf('video') !== -1) {
       let maybe = required  &&  !required.hasOwnProperty('video');
@@ -455,14 +431,53 @@ var NewResourceMixin = {
     }
     return options;
   },
+  addRequestedProps({eCols, params, props}) {
+    let {requestedProperties, excludeProperties, formErrors, model} = this.state.requestedProperties
+    if (!formErrors) {
+      _.extend(params, {formErrors: {}})
+      formErrors = params.formErrors
+    }
+    eCols = eCols.filter(p => requestedProperties[p])
+    let softRequired = []
+    for (let p in requestedProperties) {
+      // if (eCols.some((prop) => prop.name === p) {
+      let idx = p.indexOf('_group')
+      let eidx = eCols.indexOf(p)
+      if (eidx !== -1) {
+        eCols.splice(eidx, 1)
+      }
+      if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
+        continue
+      eCols.push(p)
+      let isRequired = requestedProperties[p].required
+      if (idx === -1  &&  props[p].readOnly);
+        // showReadOnly = true
+      else if (props[p].list) {
+        props[p].list.forEach((pp) => {
+          let idx = eCols.indexOf(pp)
+          if (idx !== -1)
+            eCols.splice(idx, 1)
+          if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
+            return
+          eCols.push(pp)
+          // if (isRequired)
+          //   softRequired.push(pp)
+        })
+      }
+      else if (isRequired)
+        softRequired.push(p)
+    }
+    return { eCols, softRequired }
+  },
   getEditCols(props, model) {
-    const { editCols, exploreData } = this.props
+    const { editCols, exploreData, bookmark, search } = this.props
     const isMessage = model.id === MESSAGE
     if (editCols)
       return editCols.slice();
     if (isMessage)
       return model.viewCols
 
+    let isSearch = exploreData  ||  (bookmark && search)
     let eCols = utils.getEditCols(model).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
@@ -470,7 +485,7 @@ var NewResourceMixin = {
       else
         return Object.keys(props)
     }
-    else if (!exploreData)
+    else if (!isSearch)
       return eCols
 
     let vColsList = utils.getViewCols(model)
@@ -490,6 +505,7 @@ var NewResourceMixin = {
           !exclude.includes(p))
         eCols.push(p)
     }
+
     return eCols
   },
   addError(p, params) {
@@ -575,7 +591,7 @@ var NewResourceMixin = {
     return (
       <View style={{paddingVertical: 10}}>
       <View style={[styles.divider, {borderBottomColor: linkColor, paddingVertical: 5}]}>
-        <Text style={[styles.dividerText, {color: linkColor}]}>{label}</Text>
+        <Text style={[styles.dividerText, {color: linkColor, fontFamily: bankStyle.headerFont}]}>{label}</Text>
       </View>
       </View>
     );
@@ -731,7 +747,8 @@ var NewResourceMixin = {
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
 
-    let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
+    // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
+    let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
@@ -742,8 +759,8 @@ var NewResourceMixin = {
           editable={editable}
           autoCapitalize={autoCapitalize}
           onFocus={this.inputFocused.bind(this, prop)}
-          inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
-          style={[styles.formInput, {borderColor: bcolor}]}
+          inputStyle={this.state.isRegistration ? styles.regInput : [styles.textInput, fontF]}
+          style={[styles.formInput, fontF, {borderColor: bcolor}]}
           value={value}
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
           keyboardShouldPersistTaps='always'
@@ -923,14 +940,16 @@ var NewResourceMixin = {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
     let datePicker
+    let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
+
     if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
-                     <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
+                     <Text style={[styles.dateText, fontF]}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
     }
     else {
       datePicker = <DatePicker
-            style={[styles.datePicker, {width: utils.dimensions(component).width - 20, paddingBottom: 10}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 20, paddingBottom: 10}, fontF]}
             mode="date"
             placeholder={value}
             format={format}
@@ -946,9 +965,9 @@ var NewResourceMixin = {
               this.changeTime(params.prop, date)
             }}
             customStyles={{
-              dateInput: styles.dateInput,
-              dateText: styles.dateText,
-              placeholderText: [styles.font20, {
+              dateInput: [styles.dateInput, fontF],
+              dateText: [styles.dateText, fontF],
+              placeholderText: [styles.font20, fontF, {
                 color: params.value ? '#555555' : '#777777',
                 paddingLeft: 10
               }],
@@ -1078,7 +1097,7 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata } = this.props
+    let { model, metadata, bookmark } = this.props
     let { required, errors, component } = params
     let props
     if (model)
@@ -1103,6 +1122,7 @@ var NewResourceMixin = {
                              resource={params.resource ||   this.state.resource}
                              onChange={onChange}
                              prop={prop}
+                             bookmark={bookmark}
                              photo={this.state[pName + '_photo']}
                              labelAndBorder={this.getLabelAndBorderColor.bind(this, pName)}
                              component={component}
