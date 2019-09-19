@@ -23,3 +23,26 @@ textarea:focus, input:focus {
 * {
   font-family: Helvetica Neue, STHeiTi, sans-serif;
 }
+
+
+@font-face {
+  font-family: 'SVBSans';
+  src: url('./SVBSans.woff') format('woff'),
+       url('./SVBSans.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SVBSlab';
+  src: url('./SVBSlab.woff') format('woff'),
+       url('./SVBSlab.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+  font-family: 'SVBSlab-Bold';
+  src: url('./SVBSlab-Bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

@@ -18,7 +18,7 @@ const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const TYPE = constants.TYPE
 
 import {
-  Text,
+  // Text,
   TouchableHighlight,
   View,
   Platform,
@@ -27,6 +27,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import ENV from '../utils/env'
+import { Text } from './Text'
 
 class FormErrorRow extends Component {
   static propTypes = {

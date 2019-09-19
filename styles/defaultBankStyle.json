@@ -60,5 +60,7 @@
   "logoNeedsText": false,
   "navBarBorderWidth": 1,
   "menuBgColor": "red",
-  "menuColor": "#ffffff"
+  "menuColor": "#ffffff",
+  "headerFont": "Helvetica Neue",
+  "textFont": "Helvetica Neue"
 }

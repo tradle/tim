@@ -3,7 +3,7 @@ import equal from 'lodash/isEqual'
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import {
-  Text,
+  // Text,
   TouchableOpacity,
   View,
   // WebView,
@@ -16,6 +16,7 @@ import utils, {
   translate
 } from '../utils/utils'
 
+import { Text } from './Text'
 import { circled } from '../styles/utils'
 
 import PhotoList from './PhotoList'
