@@ -14,7 +14,18 @@ import constants from '@tradle/constants'
 
 import AsyncStorage from '../Storage'
 import voc from '../voc'
-import { makeLabel, isEnum, getModel, isForm } from '../../utils/utils'
+import {
+  makeLabel,
+  isEnum,
+  getModel,
+  isForm,
+  applyLens,
+  getId,
+  makeModelTitle,
+  getDisplayName,
+  getStringPropertyValue,
+  translateEnum
+} from '../../utils/utils'
 
 const {
   TYPE,
@@ -22,6 +33,7 @@ const {
   CUR_HASH
 } = constants
 const STYLES_PACK = 'tradle.StylesPack'
+const BOOKMARK = 'tradle.Bookmark'
 const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
@@ -130,7 +142,7 @@ var storeUtils = {
     }
   },
   addNameAndTitleProps(m, aprops) {
-    var mprops = aprops  ||  m.properties
+    let mprops = aprops  ||  m.properties
     for (let p in mprops) {
        if (p.charAt(0) === '_'  &&  (!m  || m.id !== MESSAGE))
         continue
@@ -139,7 +151,7 @@ var storeUtils = {
       if (!mprops[p].title)
         mprops[p].title = makeLabel(p.replace('_', ''))
       if (mprops[p].type === 'array') {
-        var aprops = mprops[p].items.properties
+        let aprops = mprops[p].items.properties
         if (aprops)
           storeUtils.addNameAndTitleProps(m, aprops)
       }
@@ -210,7 +222,7 @@ var storeUtils = {
     if (enumList.filter((e) => e[ROOT_HASH] === r[ROOT_HASH]).length)
       return
     enumList.push(r)
-    // // let id = utils.getId(r)
+    // // let id = getId(r)
     // let key = [r[TYPE], r[ROOT_HASH], r[CUR_HASH]].join('_')
     // if (saveInDB)
     //   batch.push({type: 'put', key, value: r})
@@ -395,6 +407,82 @@ var storeUtils = {
           value: pair[1]
         }
       })
+  },
+  getEnum(params, enums) {
+    const { modelName, limit, query, lastId, prop, pin } = params
+    let enumList = enums[modelName]
+    if (query) {
+      let q = query.toLowerCase()
+      return enumList.filter((r) => {
+        let val = translateEnum(r)
+        if (!val)
+          debugger
+        val = val.toLowerCase()
+        return val.indexOf(q) !== -1
+      })
+    }
+    if (prop) {
+      if (prop.limit  ||  prop.pin)
+        return applyLens({prop, list: enumList})
+      else if (pin)
+        return applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
+    }
+    let lim = limit || 20
+    let lastIdx
+    if (lastId)
+      lastIdx = _.findIndex(enumList, (item) => getId(item) === lastId) + 1
+    else
+      lastIdx = 0
+    let ret = []
+    for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
+      ret.push(enumList[i])
+    return ret
+  },
+  checkCriteria({r, query, prop, isChooser}) {
+    debugger
+    if (!query)
+      return r
+    if (isChooser) {
+      let dn = getDisplayName(r)
+      return (dn.toLowerCase().indexOf(query.toLowerCase()) !== -1) ? r : null
+    }
+    let rtype = r[TYPE]
+    let rModel = this.getModel(rtype)
+    let props = rModel.properties
+    if (prop  &&  r[prop]) {
+      let val = getStringPropertyValue(r, prop, props)
+      return (val.toLowerCase().indexOf(query.toLowerCase()) === -1) ? null : r
+    }
+    let combinedValue = '';
+    for (let rr in props) {
+      if (!r[rr]  ||  rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
+        continue;
+      if (props[rr].type === 'object') {
+        let title = getDisplayName(r[rr], rModel)
+        combinedValue += combinedValue ? ' ' + title : title
+        continue
+      }
+      else if (props[rr].type === 'date') {
+        continue
+        if (!isNaN(r[rr])) {
+          let d = new Date(r[rr]).toString()
+          combinedValue += combinedValue ? ' ' + d : d
+          continue
+        }
+
+      }
+
+      combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+    }
+    if (rtype === BOOKMARK)
+      combinedValue += makeModelTitle(rtype)
+    if (!combinedValue)
+      return
+      // return r
+
+    if (combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+      return r
+    return
   },
 }
 module.exports = storeUtils
