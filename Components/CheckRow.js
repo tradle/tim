@@ -38,10 +38,10 @@ const STATUS = 'tradle.Status'
 
 class CheckRow extends Component {
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
-    application: PropTypes.object
+    application: PropTypes.object,
+    modelName: PropTypes.string,
   };
 
   constructor(props) {
@@ -55,7 +55,7 @@ class CheckRow extends Component {
       if (checkOverrideProp.length) {
         const pref = checkOverrideProp[0].items.ref
         const rId = utils.getId(resource)
-        const checkOverrides = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
+        const checkOverrides = application.checksOverride.filter(r => r && r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
         if (checkOverrides.length)
           checkOverride = checkOverrides[0]
       }
