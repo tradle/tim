@@ -79,7 +79,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country, labelAndBorder, isRefresh,
-          search, photo, component, paintError, paintHelp, required, exploreData } = this.props
+          search, photo, component, paintError, paintHelp, required, exploreData, bookmark } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -171,7 +171,8 @@ class RefPropertyEditor extends Component {
     else
       iconColor = linkColor
     let icon
-    if (!isImmutable) {
+    let isBookmarkSealed = bookmark  &&  bookmark.bookmark[pName]
+    if (!isImmutable  &&  !isBookmarkSealed) {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
@@ -190,7 +191,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (!exploreData  &&  (isImmutable || prop.readOnly))
+    if (isBookmarkSealed || (!exploreData  &&  (isImmutable || prop.readOnly)))
       actionItem = content
     else if (isIdentity && !isWeb())
       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
