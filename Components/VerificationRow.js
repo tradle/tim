@@ -184,7 +184,7 @@ class VerificationRow extends Component {
       if (!dn)
         dn = translate(utils.getModel(utils.getType(resource.document)))
     }
-    else if (isMyProduct)
+    else if (isMyProduct  &&  modelName === MY_PRODUCT)
       dn = translate(model)
     else
       dn = utils.getDisplayName(resource)
