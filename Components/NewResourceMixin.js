@@ -69,13 +69,13 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, editCols, originatingMessage, search, exploreData, errs, isRefresh } = this.props
+    let { currency, editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors, editable } = params
 
     // Case when clicked in the FormRequest and modelsPack changed
     let meta = utils.getModel((this.props.model  ||  this.props.metadata).id)
-    let onSubmitEditing = this.onSavePressed
+    let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     let props, bl
     if (!meta.items)
@@ -109,36 +109,10 @@ var NewResourceMixin = {
     if (this.state.requestedProperties)
        ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
+    let softRequired
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
-      if (!formErrors) {
-        _.extend(params, {formErrors: {}})
-        formErrors = params.formErrors
-      }
-      eCols = eCols.filter(p => requestedProperties[p])
-      for (let p in requestedProperties) {
-        // if (eCols.some((prop) => prop.name === p) {
-        let idx = p.indexOf('_group')
-        let eidx = eCols.indexOf(p)
-        if (eidx !== -1) {
-          eCols.splice(eidx, 1)
-        }
-        if (excludeProperties  &&  excludeProperties.includes(p))
-          continue
-
-        eCols.push(p)
-        if (idx === -1  &&  props[p].readOnly)
-          showReadOnly = true
-        else if (props[p].list) {
-          props[p].list.forEach((pp) => {
-            let idx = eCols.indexOf(pp)
-            if (idx !== -1)
-              eCols.splice(idx, 1)
-            if (excludeProperties  &&  excludeProperties.includes(pp))
-              return
-            eCols.push(pp)
-          })
-        }
-      }
+      showReadOnly = true
+      ;({ eCols, softRequired } = this.addRequestedProps({eCols, params, props}))
     }
     else if (data) {
       for (let p in data) {
@@ -153,7 +127,9 @@ var NewResourceMixin = {
           eCols.push(p)
     }
     let required = utils.ungroup({model: meta, viewCols: meta.required, edit: true})
-    let softRequired = utils.ungroup({model: meta, viewCols: meta.softRequired, edit: true})
+    if (!softRequired)
+      softRequired = meta.softRequired || []
+
     if (validationErrors) {
       formErrors = validationErrors
       this.state.validationErrors = null
@@ -320,6 +296,7 @@ var NewResourceMixin = {
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
+          let editable = (params.editable && !props[p].readOnly) || search || false
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
@@ -328,7 +305,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
-                    editable: !props[p].readOnly || search,
+                    editable,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -409,7 +386,8 @@ var NewResourceMixin = {
           if (vType) {
             let subModel = utils.getModel(vType)
             options.fields[p].value = utils.getId(data[p])
-            data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
+            if (!search  &&  !bookmark)
+              data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
           }
         }
 
@@ -419,6 +397,7 @@ var NewResourceMixin = {
             prop:  p,
             required: !maybe,
             errors: formErrors,
+            resource: bookmark && search &&  data,
             component,
             chooser: options.fields[p].onFocus,
           })
@@ -443,14 +422,54 @@ var NewResourceMixin = {
     }
     return options;
   },
+  addRequestedProps({eCols, params, props}) {
+    let {requestedProperties, excludeProperties, formErrors, model} = this.state.requestedProperties
+    if (!formErrors) {
+      _.extend(params, {formErrors: {}})
+      formErrors = params.formErrors
+    }
+    eCols = eCols.filter(p => requestedProperties[p])
+    let softRequired = []
+    for (let p in requestedProperties) {
+      // if (eCols.some((prop) => prop.name === p) {
+      let idx = p.indexOf('_group')
+      let eidx = eCols.indexOf(p)
+      if (eidx !== -1) {
+        eCols.splice(eidx, 1)
+      }
+      if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
+        continue
+      eCols.push(p)
+      let isRequired = requestedProperties[p].required
+      if (idx === -1  &&  props[p].readOnly);
+        // showReadOnly = true
+      else if (props[p].list) {
+        props[p].list.forEach((pp) => {
+          let idx = eCols.indexOf(pp)
+          if (idx !== -1)
+            eCols.splice(idx, 1)
+          if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
+            return
+          eCols.push(pp)
+          // if (isRequired)
+          //   softRequired.push(pp)
+        })
+      }
+      else if (isRequired)
+        softRequired.push(p)
+    }
+    return { eCols, softRequired }
+  },
+
   getEditCols(props, model) {
-    const { editCols, exploreData } = this.props
+    const { editCols, exploreData, bookmark, search } = this.props
     const isMessage = model.id === MESSAGE
     if (editCols)
       return editCols.slice();
     if (isMessage)
       return model.viewCols
 
+    let isSearch = exploreData  ||  (bookmark && search)
     let eCols = utils.getEditCols(model).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
@@ -458,7 +477,7 @@ var NewResourceMixin = {
       else
         return Object.keys(props)
     }
-    else if (!exploreData)
+    else if (!isSearch)
       return eCols
 
     let vColsList = utils.getViewCols(model)
@@ -713,7 +732,13 @@ var NewResourceMixin = {
     // Especially for money type props
     if (!help)
       st.flex = 5
+    let icon
     let { bankStyle } = this.props
+    if (!help)
+      st = {...st, flex: 5}
+    if (!editable)
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+
     let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
@@ -734,6 +759,7 @@ var NewResourceMixin = {
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
+        {icon}
         {this.paintError(params)}
         {help}
       </View>
@@ -866,7 +892,7 @@ var NewResourceMixin = {
   },
 
   myDateTemplate(params) {
-    let { prop, required, component } = params
+    let { prop, required, component, editable } = params
     let { search, bankStyle } = this.props
 
     let resource = this.state.resource
@@ -939,6 +965,10 @@ var NewResourceMixin = {
             {...dateProps}
           />
     }
+    let icon
+    if (!editable)
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+
     let help = this.paintHelp(prop)
     return (
       <View key={this.getNextKey()} ref={prop.name} style={styles.bottom10}>
@@ -946,6 +976,7 @@ var NewResourceMixin = {
           {propLabel}
           {datePicker}
           {help}
+          {icon}
         </View>
         {this.paintError(params)}
        </View>
@@ -1053,7 +1084,7 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata, isRefresh } = this.props
+    let { model, metadata, isRefresh, bookmark } = this.props
     let { required, errors, component } = params
     let { missedRequiredOrErrorValue, resource, inFocus } = this.state
     let props
@@ -1077,9 +1108,10 @@ var NewResourceMixin = {
       error = params.errors[pName]
 
     return <RefPropertyEditor {...this.props}
-                             resource={resource}
+                             resource={params.resource ||   this.state.resource}
                              onChange={onChange}
                              prop={prop}
+                             bookmark={bookmark}
                              photo={this.state[pName + '_photo']}
                              component={component}
                              labelAndBorder={this.getLabelAndBorderColor.bind(this, pName)}
@@ -1618,6 +1650,11 @@ var styles= StyleSheet.create({
     position: 'absolute',
     right: 0,
     marginTop: 15
+  },
+  readOnly: {
+    position: 'absolute',
+    right: 10,
+    top: 20
   },
   immutable: {
     marginTop: 15,
