@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 
 import { Text } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, translateEnum } from '../utils/utils'
 import LinearGradient from 'react-native-linear-gradient';
 import RowMixin from './RowMixin'
 
@@ -315,7 +315,6 @@ class ResourceRow extends Component {
     let dateRow
     if (!this.isOfficialAccounts  &&  !this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
       let val = utils.formatDate(new Date(resource[this.dateProp]), true)
-      // let dateBlock = this.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
@@ -328,9 +327,6 @@ class ResourceRow extends Component {
                 <Text style={styles.countText}>{count}</Text>
               </View>
     }
-
-    // Grey out if not loaded provider info yet
-            // <ActivityIndicator hidden='true' color='#629BCA'/>
 
     let isOpaque = rType === ORGANIZATION && !resource.contacts  &&  !isChooser
     if (isOpaque)
@@ -437,7 +433,7 @@ class ResourceRow extends Component {
       }
       let dn
       if (utils.isEnum(model))
-        dn = utils.translateEnum(resource)
+        dn = translateEnum(resource)
       else
         dn = utils.getDisplayName(resource);
 
@@ -599,145 +595,6 @@ class ResourceRow extends Component {
       </TouchableOpacity>
     ];
   }
-  applicationRow(resource, style) {
-    const model = utils.getModel(resource[TYPE] || resource.id);
-    const m = utils.getModel(resource.requestFor)
-    // if (!m)
-    //   return <View/>
-
-    const props = model.properties
-    // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-    let dateCompleted, dateEvaluated, dateStarted
-    if (resource.dateStarted) {
-      dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
-                      <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
-                      <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
-                    </View>
-    }
-    // if (resource.certificate)
-    //   status = 'Approved'
-    // else
-    if (resource.dateEvaluated) {
-      // status = 'Denied'
-      dateEvaluated = <View style={{flexDirection: 'row'}}>
-                        <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
-                        <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
-                      </View>
-    }
-    else if (resource.dateCompleted) {
-      // status = 'Submitted'
-      dateCompleted = <View style={{flexDirection: 'row'}}>
-                        <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
-                        <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
-                      </View>
-    }
-    // if (status) {
-    //   status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}>
-    //               <Text style={{fontSize: 12, color: '#7AAAc3'}}>{translate(status)}</Text>
-    //             </View>
-    // }
-    // if (status !== 'Approved'  &&  status !== 'Denied') {
-    let aTitle = resource.applicantName || resource.applicant.title
-    // HACK
-    if (aTitle === '[name unknown]')
-      aTitle = null
-    const applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
-    let icolor
-    let iname
-    const hasRM = resource.reviewer // resource.relationshipManagers
-    const { bankStyle } = this.props.bankStyle
-    if (utils.isRM(resource)) {
-      // iname = 'md-log-out'
-      iname = 'ios-person-add'
-      icolor = '#7AAAc3'
-    }
-    else if (this.state.hasRM) {
-      // iname = 'md-log-out'
-      iname = 'ios-person-add'
-      icolor = '#7AAAc3'
-    }
-    else {
-      // iname = 'md-log-in'
-      iname = hasRM ? 'ios-person-add' : 'ios-person-add-outline'
-      icolor = hasRM ? '#CA9DF2' : '#7AAAc3'
-    }
-    let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
-    let icon0
-    switch (resource.status) {
-      case 'approved':
-        icon0 = <Icon name='ios-done-all' size={30} color={bankStyle  &&  bankStyle.confirmationColor || '#02A5A5'}/>
-        break
-      case 'denied':
-        icon0 = <Icon name='ios-close' size={25} color='red'/>
-        break
-      case 'started':
-        icon0 = <Icon name='ios-code-working' size={25} color={bankStyle  &&  bankStyle.linkColor || '#7AAAC3'}/>
-        break
-      case 'completed':
-        icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
-        break
-    }
-
-    let icons = <View style={{flexDirection: 'row'}}>
-            {icon0}
-            {icon}
-          </View>
-    let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center', marginTop: aTitle && -15 || 0}}>
-                   {icons}
-                 </View>
-    let formsCount, progressBar
-    // let formTypes = []
-    // let progress = 0
-    // if (m  &&  resource.forms) {
-    //   resource.forms.forEach((item) => {
-    //     let itype = utils.getType(item.id)
-    //     if (formTypes.indexOf(itype) === -1)
-    //       formTypes.push(itype)
-    //   })
-    //   progress = formTypes.length / m.forms.length
-    // }
-
-    // let progressColor = '#7AAAC3'
-    // if (resource.status) {
-    //   switch (resource.status) {
-    //     case 'approved':
-    //       progressColor = '#A6D785'
-    //       break
-    //     case 'denied':
-    //       progressColor = '#EE3333'
-    //       break
-    //   }
-    // }
-    // progressBar = <View style={styles.progress}>
-    //                 <ProgressBar progress={progress} width={utils.dimensions().width - 30} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
-    //               </View>
-    // let draft
-    // if (resource.draft) {
-    //   let width = utils.dimensions(ResourceRow).width
-    //   draft = <View style={{position: 'absolute', top: 0, width}}>
-    //              <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
-    //           </View>
-    // }
-
-    let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
-
-    return  <View>
-              <View style={{padding: 5}}>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{mTitle}</Text>
-                  {formsCount}
-                </View>
-                {applicant}
-              </View>
-              <View style={{marginTop: -30, alignItems: 'flex-end'}}>
-                {rmIcon}
-                {dateStarted}
-                {dateEvaluated}
-                {dateCompleted}
-              </View>
-              {progressBar}
-            </View>
-  }
   assignRM() {
     Alert.alert(
       translate('areYouSureYouWantToServeThisCustomer', this.props.resource.from.title),
@@ -801,11 +658,6 @@ var styles = StyleSheet.create({
     flexWrap: 'nowrap',
     color: '#999999',
     fontSize: 14,
-  },
-  applicant: {
-    color: '#999999',
-    fontSize: 16,
-    paddingTop: 3
   },
   row: {
     // backgroundColor: '#ffffff',
@@ -925,15 +777,10 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
   },
-  // progress: {
-  //   marginTop: 10,
-  //   justifyContent: 'center',
-  //   alignSelf: 'center'
-  // },
   providerLogo: {
     flexDirection: 'row',
     alignItems: 'center'
-  }
+  },
 });
 
 module.exports = ResourceRow;
