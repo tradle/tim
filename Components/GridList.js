@@ -25,6 +25,7 @@ import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
 import CheckRow from './CheckRow'
+import ApplicationRow from './ApplicationRow'
 import PageView from './PageView'
 import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
 import ActionSheet from './ActionSheet'
@@ -661,7 +662,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return;
     }
     let { prop } = this.props
-    if (prop) {
+    if (prop  &&  !isApplication) {
       if (me) {
         if  (modelName != PROFILE) {
           this._selectResource(resource);
@@ -1038,7 +1039,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application,
+    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application, bookmark,
           currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1065,7 +1066,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
 
-    if (!isModel  &&  !isChooser  &&  isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isModel  &&  !isChooser  &&  isGrid  &&  (modelName !== APPLICATION  ||  !bookmark)  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (modelName === MESSAGE)
         viewCols = ['_provider', '_payloadType', '_context', '_time']
@@ -1090,6 +1091,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let selectedResource = resource
 
     let isApplication = modelName === APPLICATION
+    if (isApplication) {
+      return <ApplicationRow
+               onSelect={this.selectResource.bind(this)}
+               resource={resource}
+               bankStyle={bankStyle}
+             />
+    }
+
     let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
     if (isMessage  &&  resource !== model  &&  !isContext) { //isVerification  || isForm || isMyProduct)
       if (modelName === CHECK  ||  utils.isSubclassOf(modelName, CHECK))
@@ -1099,8 +1108,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 modelName={rtype}
                 application={application}
                 bankStyle={bankStyle}
-                navigator={navigator}
-                searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 resource={resource} />
                )
       return (<VerificationRow
