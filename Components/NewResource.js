@@ -441,6 +441,7 @@ class NewResource extends Component {
     if (!required)
       required = []
 
+    let props = model.properties
     if (model.softRequired  &&  this.refs.form) {
       // HACK a bit
       let formProps = this.refs.form.props  &&  this.refs.form.props.options.fields
@@ -455,8 +456,14 @@ class NewResource extends Component {
     if (reqProperties) {
       let requestedProperties = reqProperties.requestedProperties
       for (let p in requestedProperties) {
-        if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1) {
-          if (!requestedProperties[p].hasOwnProperty('required')  ||  requestedProperties[p].required)
+        if (p.indexOf('_group') !== -1) {
+          // props[p].list.forEach(p => {
+          //   if (!requestedProperties[p])
+          //     required.push(p)
+          // })
+        }
+        else if (required.indexOf(p) === -1) {
+          if (requestedProperties[p].required)
             required.push(p)
         }
       }
@@ -523,7 +530,7 @@ class NewResource extends Component {
       isRefresh,
       doNotSend: isRefresh,
       chat
-    };
+    }
 
     if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
       params.lens = this.floatingProps._lens
@@ -538,6 +545,7 @@ class NewResource extends Component {
       Actions.addChatItem(params)
     }
   }
+
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
   checkEnums(json, resource) {
@@ -748,7 +756,7 @@ class NewResource extends Component {
     }
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -757,6 +765,18 @@ class NewResource extends Component {
     let model = {};
     let arrays = [];
     _.extend(data, resource);
+    if (bookmark  &&  bookmark.bookmark) {
+      let props = meta.properties
+      for (let p in bookmark.bookmark) {
+        if (props[p]) {
+          if (props[p].ref  &&  utils.isEnum(props[p].ref))
+            data[p] = [bookmark.bookmark[p]]
+          else
+            data[p] = bookmark.bookmark[p]
+          this.state.resource[p] = bookmark.bookmark[p]
+        }
+      }
+    }
     let editable
     if (this.state.disableEditing)
       editable = false

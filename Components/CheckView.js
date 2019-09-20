@@ -17,7 +17,7 @@ const {
   TYPE,
 } = constants
 
-import utils, { translate, isSubclassOf, isStub } from '../utils/utils'
+import utils, { translate, translateEnum, isSubclassOf, isStub } from '../utils/utils'
 import { circled } from '../styles/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 import PageView from './PageView'
@@ -136,14 +136,24 @@ class CheckView extends Component {
       const statusM = e.find(r => r.id === statusId)
       const { icon, color } = statusM
 
-      const dn = utils.getDisplayName(checkOverride)
+      let reasonProp = statusId  &&  checkOverride[reasonProp] === 'pass' &&  'reasonsToPass' || 'reasonsToFail' || ''
+      const dn = checkOverride[reasonProp]  &&  translateEnum(checkOverride[reasonProp]) || ''
       const checkIcon = <View style={[styles.checkButton, {backgroundColor: color}]}>
                           <Icon color='#ffffff' size={30} name={icon} />
                         </View>
-      checkOverrideView = <View style={styles.checkOverride}>
-                            {checkIcon}
-                            <Text style={styles.checkOverrideText}>{dn}</Text>
-                          </View>
+      const cmodel = utils.getModel(CHECK_OVERRIDE)
+      checkOverrideView = <TouchableOpacity onPress={() => this.showCheckOverride(checkOverride)}>
+                            <View style={styles.checkOverride}>
+                              {checkIcon}
+                              <View style={{flexDirection: 'column', flex: 1}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                  <Text style={styles.checkOverrideTextBig}>{translate('manuallyOverriden')}</Text>
+                                  <Text style={styles.dateText}>{utils.formatDate(checkOverride._time)}</Text>
+                                </View>
+                                <Text style={styles.checkOverrideText}>{ dn}</Text>
+                              </View>
+                            </View>
+                          </TouchableOpacity>
     }
     else if (!this.state.isLoading  &&  utils.isRM(application)) {
       let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
@@ -173,6 +183,19 @@ class CheckView extends Component {
       </PageView>
     );
   }
+  showCheckOverride(resource) {
+    const { navigator, currency, bankStyle } = this.props
+    navigator.push({
+      componentName: 'MessageView',
+      title: translate(utils.getModel(utils.getType(resource))),
+      passProps: {
+        bankStyle,
+        resource,
+        currency,
+      }
+    })
+  }
+
   createCheckOverride(prop) {
     const { navigator, bankStyle, application } = this.props
     const { resource } = this.state
@@ -237,12 +260,30 @@ var createStyles = utils.styleFactory(CheckView, function ({ dimensions, bankSty
       flexDirection: 'row',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: '#eeeeee',
+      backgroundColor: 'cornsilk'
     },
     checkOverrideText: {
-      color: '#757575',
+      color: bankStyle.textColor,
       fontSize: 18,
       marginTop: 3,
       paddingLeft: 10,
+    },
+    checkOverrideTextBig: {
+      color: bankStyle.textColor,
+      fontSize: 24,
+      paddingLeft: 10,
+      marginTop: 0
+    },
+    checkOverrideLabel: {
+      fontSize: 18,
+      marginTop: 3,
+      paddingLeft: 10,
+      color: '#aaaaaa'
+    },
+    dateText: {
+      fontSize: 12,
+      marginTop: 7,
+      color: bankStyle.textColor
     },
     checkButton: {
       ...circled(30),

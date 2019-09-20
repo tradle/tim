@@ -165,11 +165,13 @@ class ApplicationView extends Component {
     let contentSeparator = getContentSeparator(bankStyle)
     let loading
     if (isLoading) {
-      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
-        {this.showLoading({bankStyle, component: ApplicationView})}
-      </View>
+      // loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+      //   {this.showLoading({bankStyle, component: ApplicationView})}
+      // </View>
+      // if (!resource[TYPE])
+      //   return loading
       if (!resource[TYPE])
-        return loading
+        return <View/>
     }
     let isAndroid = utils.isAndroid()
     let color = isAndroid ? bankStyle.linkColor : '#ffffff'
@@ -216,16 +218,19 @@ class ApplicationView extends Component {
                       </TouchableOpacity>
     }
 
+    let chatButton
+    if (resource._context)
+      chatButton = <TouchableOpacity onPress={this.openChat} style={[styles.openChatPadding]}>
+                      <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
+                        <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
+                      </View>
+                    </TouchableOpacity>
 
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
                     {compareImages}
-                    <TouchableOpacity onPress={this.openChat} style={[styles.openChatPadding]}>
-                      <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
-                        <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
-                      </View>
-                    </TouchableOpacity>
+                    {chatButton}
                     {assignRM}
                   </View>
                 </View>

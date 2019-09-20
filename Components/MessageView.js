@@ -79,15 +79,15 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message} = this.props
+    let {resource, isReview, search, application, message, isChat} = this.props
     if (isReview)
       return
     if (message) {
-      Actions.getItem({resource: message, search, application})
+      Actions.getItem({resource: message, search, application, isChat})
       return
     }
     if (resource.id) {
-      Actions.getItem({resource, search, application})
+      Actions.getItem({resource, search, application, isChat})
       return
     }
 
@@ -95,7 +95,7 @@ class MessageView extends Component {
     let vCols = utils.getViewCols(m)
     if (!vCols)
       return
-    Actions.getItem({resource, search, application})
+    Actions.getItem({resource, search, application, isChat})
   }
 
   componentDidMount() {
@@ -442,12 +442,21 @@ class MessageView extends Component {
                    <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
                  </View>
     let height = utils.dimensions(MessageView).height - 80
+
+    let me = utils.getMe()
+    let warning
+    if (!me.isEmployee  &&  !resource._latest) {
+      warning = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.errorBgColor, alignItems: 'center'}}>
+                  <Text style={{fontSize: 18, color: bankStyle.errorColor}}>{translate('olderResourceVersion')}</Text>
+                </View>
+    }
     return (
       <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle} >
       <ScrollView
         ref='messageView'
         keyboardShouldPersistTaps="always">
         {dateView}
+        {warning}
         {bigPhoto}
         {photoStrip}
         {actionPanel}

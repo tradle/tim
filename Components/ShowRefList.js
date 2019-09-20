@@ -94,10 +94,10 @@ class ShowRefList extends Component {
       }
       else if (this.state.docs)
         docs = this.state.docs
-      else {
-        docs = []
-        getDocs(resource.verifications, rId, docs)
-      }
+      // else {
+      //   docs = []
+      //   getDocs(resource.verifications, rId, docs)
+      // }
       if (docs  &&  docs.length) {
         this.tabDetail.Documents = {icon: 'ios-paper-outline', action: this.showDocs.bind(this, docs)}
         refList.push(<View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel='Documents'/>)

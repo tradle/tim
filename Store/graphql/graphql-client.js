@@ -100,6 +100,8 @@ var search = {
           }
           continue
         }
+        if (!props[p]  ||  props[p].hidden)
+          continue
         if (props[p].type === 'string') {
           if (Array.isArray(val)) {
             let s = `${p}: [`
@@ -145,6 +147,7 @@ var search = {
 
 
         else if (props[p].type === 'object') {
+          let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
           if (Array.isArray(val)) {
             if (!val.length)
               continue
@@ -171,7 +174,10 @@ var search = {
             }
           }
           else {
-            if (props[p].ref === MONEY) {
+            if (isEnum) {
+              op.EQ += `\n   ${p}__id: "${val.id}",`
+            }
+            else if (props[p].ref === MONEY) {
               let {value, currency} = val
               op.EQ += `\n  ${p}__currency: "${currency}",`
               if (val.value)
@@ -282,74 +288,10 @@ var search = {
       }
       if (error  &&  error === NETWORK_FAILURE  ||  !retry)
         break
-
-    //   let message, graphQLErrors, networkError
-    //   if (useApollo) {
-    //     ({ message, graphQLErrors, networkError } = data.error)
-    //   }
-    //   else {
-    //     if (data.error.response) {
-    //       graphQLErrors = data.error.response.errors
-    //       message = INVALID_QUERY
-    //     }
-    //     else {
-    //       graphQLErrors = []
-    //       if (data.error.message === 'Failed to fetch') {
-    //         error = NETWORK_FAILURE
-    //         break
-    //       }
-    //       else
-    //         message = data.error.message
-    //     }
-    //   }
-    //   // let { message, graphQLErrors, networkError } = data.error
-    //   if (graphQLErrors  &&  graphQLErrors.length) {
-    //     let excludeProps = []
-    //     let str = 'Cannot query field \"'
-    //     let len = str.length
-    //     graphQLErrors.forEach(err => {
-    //       if (err.path) {
-    //         let prop
-    //         for (let i=err.path.length - 1  &&  !prop; i>=0; i--) {
-    //           let p = err.path[i]
-    //           if (props[p])
-    //             prop = p
-    //         }
-    //         excludeProps.push(prop)
-    //         return
-    //       }
-    //       let msg = err.message
-    //       let idx = msg.indexOf(str)
-    //       if (idx !== 0)
-    //         return
-    //       idx = msg.indexOf('\"', len)
-    //       excludeProps.push(msg.substring(len, idx))
-    //     })
-    //     if (excludeProps.length) {
-    //       params.excludeProps = excludeProps
-    //       return await this.searchServer(params)
-    //     }
-    //     else {
-    //       debugger
-    //       return
-    //     }
-    //   }
-    //   if (networkError  &&  networkError.message === NETWORK_FAILURE) {
-    //     error = NETWORK_FAILURE
-    //     break
-    //   }
-    //   retry = false
-    //   if (message.indexOf(INVALID_QUERY) === 0)
-    //     message = INVALID_QUERY
-    //   else
-    //     debugger
-    //   await utils.submitLog(true)
-    //   error = message
     }
 
     console.log(error)
     return { error: messageMap[error] || error, retry }
-      // throw error
 
     function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
       let isMoney = prop.ref === MONEY
@@ -376,9 +318,6 @@ var search = {
 
     }
   },
-                // # _author: "3c67687a96fe59d8f98b1c90cc46f943b938d54cda852b12fb1d43396e28978a"
-                // # _inbound: false
-                // # _recipient: ${hash}
   async getChat(params) {
     let { author, client, context, filterResource, limit, endCursor, application } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
@@ -465,12 +404,6 @@ var search = {
 
     try {
       let result = await this.execute({client, query, table})
-      // let result = await client.query({
-      //     fetchPolicy: 'network-only',
-      //     errorPolicy: 'all',
-      //     query: gql(`${query}`),
-      //     variables: filterResource || context ? null : {context: context}
-      //   })
       return result  &&  result.result
     } catch (err) {
       debugger
@@ -721,13 +654,8 @@ var search = {
 
       if (prop.inlined  ||  utils.getModel(ref).inlined)
         arr.push(this.addInlined(prop))
-      else {
+      else
         arr.push(this.addRef(prop))
-        // // HACK
-        // let add = model  &&  (model.id !== 'tradle.PhotoID'  ||  prop.name !== 'sex') &&  (model.id !== 'tradle.FormError'  ||  prop.name !== 'status')
-        // if (add)
-        //   arr.push(this.addRef(prop))
-      }
     }
     return arr
   },
@@ -753,7 +681,7 @@ var search = {
         arr.push(`${p} {
           edges {
             node {
-              ${this.getSearchProperties({model: utils.getModel(iref)})}
+              ${iref !== model.id && this.getSearchProperties({model: utils.getModel(iref)}) || arr}
             }
           }
         }`)
@@ -763,18 +691,6 @@ var search = {
           return
         arr.push(this.addInlined(prop))
       }
-      // else if (iref === model.id) {
-      //   arr.push(
-      //     `${p} {
-      //       ${TYPE}
-      //       _permalink
-      //       _link
-      //       _displayName
-      //     }`
-      //   )
-      // }
-      // else if (prop.inlined)
-      //   arr.push(this.addInlined(prop))
       else
         arr.push(
           `${p} {
@@ -825,19 +741,20 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink, excludeProps) {
-    let parts = id.split('_')
+  async getItem(id, client, backlink, excludeProps, isChat) {
+    let [modelName, _permalink, _link] = id.split('_')
 
-    let modelName = parts[0]
     let model = utils.getModel(modelName)
     if (!model)
       return
 
     let table = `r_${modelName.replace(/\./g, '_')}`
 
-    // let _link = parts[parts.length - 1]
-    let _permalink = parts[1]
-    let query = `query {\n${table} (_permalink: "${_permalink}")\n`
+    let query
+    if (isChat)
+      query = `query {\n${table} (_link: "${_link}")\n`
+    else
+      query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
     let arr = this.getSearchProperties({model, backlink, excludeProps})
 
@@ -874,37 +791,7 @@ var search = {
       }
     }
     if (graphQLErrors  &&  graphQLErrors.length) {
-      excludeProps = []
-      let str = 'Cannot query field \"'
-      let len = str.length
-      let props = model.properties
-      graphQLErrors.forEach(err => {
-        if (err.path) {
-          if (err.path === 1)
-            return
-          let prop
-          for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
-            let p = err.path[i]
-            if (props[p])
-              prop = p
-          }
-          if (prop) {
-            excludeProps.push(prop)
-            return
-          }
-        }
-
-        let msg = err.message
-        let idx = msg.indexOf(str)
-        if (idx !== 0)
-          return
-        idx = msg.indexOf('\"', len)
-        let field = msg.substring(len, idx)
-        // check if this is the table itself that is not recognized
-        if (!field.indexOf(`_${model.id.replace('.', '_')}`) === -1)
-          excludeProps.push(field)
-      })
-
+      let excludeProps = this.getExcludeProps(graphQLErrors, model)
       if (excludeProps.length)
         return { excludeProps }
       return { error: message, retry: message === NETWORK_FAILURE }
@@ -917,7 +804,39 @@ var search = {
     await utils.submitLog(true)
     return { error: message, retry: false }
   },
+  getExcludeProps(graphQLErrors, model) {
+    let excludeProps = []
+    let str = 'Cannot query field \"'
+    let len = str.length
+    let props = model.properties
+    graphQLErrors.forEach(err => {
+      if (err.path) {
+        if (err.path === 1)
+          return
+        let prop
+        for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
+          let p = err.path[i]
+          if (props[p])
+            prop = p
+        }
+        if (prop) {
+          excludeProps.push(prop)
+          return
+        }
+      }
 
+      let msg = err.message
+      let idx = msg.indexOf(str)
+      if (idx !== 0)
+        return
+      idx = msg.indexOf('\"', len)
+      let field = msg.substring(len, idx)
+      // check if this is the table itself that is not recognized
+      if (!field.indexOf(`_${model.id.replace('.', '_')}`) === -1)
+        excludeProps.push(field)
+    })
+    return excludeProps
+  },
   // TODO: rename _getItem to getItem
   // getItem: (...args) => search._getItem(...args),
   async getObjects(links, client) {
@@ -934,12 +853,6 @@ var search = {
     try {
       let result = await this.execute({client, query, table})
       return result.result  &&  result.result.objects  || []
-      // let result = await client.query({
-      //   fetchPolicy: 'network-only',
-      //   errorPolicy: 'all',
-      //   query: gql(`${query}`)
-      // })
-      // return result.data[table]  &&  result.data[table].objects
     }
     catch(err) {
       console.log('graphQL._getItem', err)
@@ -950,12 +863,6 @@ var search = {
   getIdentity: async ({ client, _permalink, _link, pub }) => {
     if (_link) return search.getIdentityByLink({ client, link: _link })
     if (!pub) throw new Error('querying identities by _permalink is not supported at this time')
-
-    // if (_permalink) {
-    //   const id = _link ? utils.makeId('tradle.Identity', _permalink, _link) : utils.makePermId('tradle.Identity', _permalink)
-    //   const result = await search._getItem(id, client)
-    //   return neuter(result)
-    // }
 
     const list = await search.searchServer({
       client,
@@ -981,23 +888,6 @@ var search = {
 
     return results[0]
   },
-//   async executeApollo({client, query, table, versionId}) {
-// let start = Date.now()
-//     try {
-//       let data = await client.query({
-//           fetchPolicy: 'network-only',
-//           errorPolicy: 'all',
-//           query: gql(`${query}`),
-//           variables: versionId  &&  {modelsVersionId: versionId}
-//         })
-// console.log('searchServer.apollo ' + (Date.now() - start))
-//       return { result: data.data[table] }
-//     } catch(error) {
-//       // debugger
-//       console.log(error)
-//       return { error }
-//     }
-//   },
 
   async execute(params) {
     if (useApollo)

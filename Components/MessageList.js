@@ -626,6 +626,7 @@ class MessageList extends Component {
       passProps: {
         bankStyle,
         resource: r,
+        isChat: true,
         lensId: lensId,
         application,
         currency: resource.currency || currency,
