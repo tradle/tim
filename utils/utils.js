@@ -905,7 +905,7 @@ var utils = {
     let dnProps = utils.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
-        if (!resource[p])
+        if (!resource[p]  &&  !props[p].displayAs)
           continue
         let dn
         if (props[p].ref  &&  utils.isEnum(props[p].ref))
@@ -1656,10 +1656,18 @@ var utils = {
   isRM(application) {
     if (!application)
       return
-    let myIdentity = utils.getRootHash(utils.getMe()) //utils.getId(utils.getMe()).replace(PROFILE, IDENTITY)
+    // let myIdentity = utils.getRootHash(utils.getMe()) //utils.getId(utils.getMe()).replace(PROFILE, IDENTITY)
     // let permalink = utils.getRootHash(myIdentity)
-    let { reviewer } = application
-    return reviewer  &&  utils.getRootHash(reviewer) === myIdentity
+    let { analyst } = application
+    if (analyst) {
+      let revHash = utils.getRootHash(analyst)
+      let me = utils.getMe()
+      let myEmployeePassHash = utils.getRootHash(me.employeePass)
+      return revHash === myEmployeePassHash
+    }
+    return false
+
+    // return reviewer  &&  utils.getRootHash(reviewer) === myIdentity
 
     // if (application.relationshipManagers)
     //   return application.relationshipManagers.some((r) => utils.getRootHash(r) === myIdentity)
