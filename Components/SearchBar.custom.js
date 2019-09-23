@@ -12,7 +12,7 @@ class SearchBar extends Component {
   render() {
     let {bankStyle, filter} = this.props
     return (
-      <View style={{paddingVertical: 7, paddingHorizontal: Platform.OS === 'web' && 25 || 7, borderBottomWidth: 2, borderBottomColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}}>
+      <View style={{paddingVertical: 7, paddingHorizontal: Platform.OS === 'web' && 15 || 7, borderBottomWidth: 1, borderBottomColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}}>
         <TextInput
           style={styles.searchBarInput}
           autoCapitalize='none'
@@ -33,7 +33,7 @@ var styles = StyleSheet.create({
     height: Platform.OS === 'android' ? 40 : 32,
     alignSelf: 'stretch',
     justifyContent: 'center',
-    paddingVertical: 7,
+    paddingVertical: 10,
     // marginHorizontal: -5,
     fontSize: 20,
     // paddingLeft: 5,
