@@ -103,25 +103,25 @@ function getPropsForLegalDocument(form) {
   return ret
 }
 function getPropsForLegalEntity(form) {
-  const { country, uploadHierarchy} = form
-  if (isNew(form)  &&  !form.hasOwnProperty('uploadHierarchy')  &&  !country) {
-    return {
-      requestedProperties: [
-        // { name: 'country' },
-        { name: 'uploadHierarchy' },
-        { name: 'companyHierarchyFile'  }
-      ]
-    }
-  }
-  else if (uploadHierarchy  &&  !country) {
-    return {
-      requestedProperties: [
-        // { name: 'country' },
-        { name: 'uploadHierarchy' },
-        { name: 'companyHierarchyFile'  }
-      ]
-    }
-  }
+  // const { country, uploadHierarchy} = form
+  // if (isNew(form)  &&  !form.hasOwnProperty('uploadHierarchy')  &&  !country) {
+  //   return {
+  //     requestedProperties: [
+  //       // { name: 'country' },
+  //       { name: 'uploadHierarchy' },
+  //       { name: 'companyHierarchyFile'  }
+  //     ]
+  //   }
+  // }
+  // else if (uploadHierarchy  &&  !country) {
+  //   return {
+  //     requestedProperties: [
+  //       // { name: 'country' },
+  //       { name: 'uploadHierarchy' },
+  //       { name: 'companyHierarchyFile'  }
+  //     ]
+  //   }
+  // }
 
   return {
       requestedProperties: [
@@ -154,15 +154,22 @@ function getPropsForControllingEntity(form) {
   let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'person':
-    return {
+    let retProps = {
       requestedProperties: [
         {name: 'typeOfControllingPerson'},
         {name: 'controllingPerson', required: false},
-        {name: 'emailAddress', required: false},
+        {name: 'emailAddress', required: true},
         {name: 'phone', required: false},
-        {name: 'legalEntity', required: false}
+        {name: 'legalEntity', required: true}
       ]
     }
+    if (form.name) {
+      retProps.requestedProperties.push({name: 'name', required: false})
+      retProps.requestedProperties.push({name: 'startDate', required: false})
+      retProps.requestedProperties.push({name: 'endDate', required: false})
+      retProps.requestedProperties.push({name: 'inactive', required: false})
+    }
+    return retProps
   case 'legalentity':
     return {
       requestedProperties: [
