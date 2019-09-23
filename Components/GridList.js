@@ -706,7 +706,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
       let route = {
         title: title,
         componentName: 'ApplicationView',
-        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
           resource: resource,
@@ -720,7 +719,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         route.onRightButtonPress = {
           title: title,
           componentName: 'NewResource',
-          titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -757,7 +755,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         route.onRightButtonPress.onRightButtonPress = {
           title: title,
           componentName: 'NewResource',
-          titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -870,7 +867,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         onRightButtonPress: {
           title: title,
           componentName: 'NewResource',
-          titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -958,7 +954,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         backButtonTitle: 'Back',
         componentName: 'NewResource',
         rightButtonTitle: 'Done',
-        titleTextColor: '#7AAAC3',
         passProps
       }
     }
@@ -1300,7 +1295,6 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       title: 'Settings',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
-      titleTextColor: '#7AAAC3',
       passProps: {
         model: model,
         bankStyle: this.props.style,
