@@ -26,6 +26,13 @@ module.exports = function ValidateSelector ({ models }) {
 
       let keys = Object.keys(form)
       let values = Object.values(form)
+      let props = m.properties
+      for (let p in props) {
+        if (!form[p]) {
+          keys.push(p)
+          values.push(null)
+        }
+      }
 
       for (let p in show) {
         let prop = show[p]
