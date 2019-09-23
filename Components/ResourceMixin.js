@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import React from 'react'
 import {
-  Text,
+  // Text,
   View,
   ActivityIndicator,
   Linking,
@@ -26,6 +26,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import Image from './Image'
+import { Text } from './Text'
 import uiUtils from '../utils/uiUtils'
 
 const RESOURCE_VIEW = 'ResourceView'
@@ -360,15 +361,16 @@ var ResourceMixin = {
       base06: '#f4f1ed',
       base07: '#f9f7f3',
       base08: '#da4939',
-      base09: bankStyle.confirmationColor, // number
+      base09: bankStyle.textColor, // number
       base0A: '#ffc66d',
-      base0B: bankStyle.linkColor, // string
+      base0B: bankStyle.textColor, // string
       base0C: '#519f50',
       base0D: '#757575', // label
       base0E: '#b6b3eb',
       base0F: '#bc9458'
     };
-    json = utils.sanitize(json)
+    json = this.minimizeJson(json)
+
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
     let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
@@ -428,6 +430,51 @@ var ResourceMixin = {
               {header}
               {content}
            </View>
+  },
+  minimizeJson(json) {
+    json = utils.sanitize(json)
+    for (let p in json) {
+      if (typeof json[p] !== 'object')
+        continue
+      if (!Array.isArray(json[p])) {
+        json[p] = this.minimizeJson(json[p])
+        continue
+      }
+      let jsonI = json[p]
+      let arr = jsonI
+      arr.forEach((elm, i) => {
+        if (_.size(elm) === 1)
+          jsonI[i] = elm[Object.keys(elm)[0]]
+        else
+          jsonI[i] = this.minimizeJson(elm)
+      })
+      json[p] = jsonI
+    }
+    return json
+  },
+  cleanupJson1(json) {
+    json = utils.sanitize(json)
+    if (!Array.isArray(json)  ||  json.length !== 1)
+      return json
+
+    json = json[0]
+    if (_.size(json) !== 1)
+      return json
+    json = Object.values(json)[0]
+    for (let p in json) {
+      if (!Array.isArray(json[p]))
+        continue
+      let arr = json[p]
+      if (!arr.length) {
+        delete json[p]
+        continue
+      }
+      arr.forEach((elm, i) => {
+        if (_.size(elm) === 1)
+          json[p][i] = elm[Object.keys(elm)[0]]
+      })
+    }
+    return json
   },
   showJson1(params) {
     let { json, indent, isView } = params
