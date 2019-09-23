@@ -855,8 +855,18 @@ var NewResourceMixin = {
 
     let isTroolean = prop.range === 'troolean' || search
     let switchView
-    let switchC, booleanContentStyle
-    if (isTroolean) {
+    let switchC, booleanContentStyle, icon
+
+    let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
+    if (prop.readOnly  &&  !search) {
+      switchC = <View style={{paddingVertical: 5}}>
+                  <Text style={[styles.dateText, fontF]}>{value + ''}</Text>
+                </View>
+      style = [style, {fontSize: 14}]
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+    }
+
+    else if (isTroolean) {
       const options = [
           { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
           { value: 'null', customIcon: <Icon size={30} color='#000' name='ios-radio-button-off' /> },
@@ -878,7 +888,7 @@ var NewResourceMixin = {
                 </View>
     }
     else {
-      switchC = <Switch value={value} style={{alignSelf: 'center'}}/>
+      switchC = <Switch value={value} style={{alignSelf: 'center'}} />
       booleanContentStyle = styles.booleanContentStyle
     }
     return (
@@ -891,6 +901,7 @@ var NewResourceMixin = {
           </View>
           </TouchableOpacity>
         </View>
+        {icon}
         {this.paintError(params)}
         {help}
       </View>
@@ -898,7 +909,7 @@ var NewResourceMixin = {
   },
   myDateTemplate(params) {
     let { prop, required, component, editable } = params
-    let { search, bankStyle } = this.props
+    let { search, bankStyle, bookmark } = this.props
 
     let resource = this.state.resource
     let propLabel
@@ -942,6 +953,24 @@ var NewResourceMixin = {
     let datePicker
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
 
+    let sign
+    // if (bookmark) {
+    //   let signValue = this.floatingProps[prop.name + '_sign']
+    //   sign = this.myTextInputTemplate({
+    //                 label: '',
+    //                 prop:  prop,
+    //                 sign: true,
+    //                 value: signValue || '',
+    //                 required: required,
+    //                 model: model,
+    //                 noError: true,
+    //                 // errors: errors,
+    //                 editable,
+    //                 component,
+    //                 keyboard: search ? null : 'numeric',
+    //               })
+    //   sign = <View style={{width: 30}}>{sign}</View>
+    // }
     if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={[styles.dateText, fontF]}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
@@ -987,6 +1016,7 @@ var NewResourceMixin = {
       <View key={this.getNextKey()} ref={prop.name} style={{paddingBottom: 10}}>
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
+          {sign}
           {datePicker}
           {help}
           {icon}
