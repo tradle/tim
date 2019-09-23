@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import {
   // StyleSheet,
   View,
-  Text,
+  // Text,
   TouchableOpacity,
   Linking,
 } from 'react-native'
@@ -19,6 +19,7 @@ import constants from '@tradle/constants'
 import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
+import { Text } from './Text'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
 var NOT_SPECIFIED = '[not specified]'

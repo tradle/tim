@@ -3,7 +3,7 @@ import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
 import {
   View,
-  Text,
+  // Text,
   StyleSheet,
   TouchableHighlight,
   Platform
@@ -23,6 +23,7 @@ import reactMixin from 'react-mixin'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
+import { Text } from './Text'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 
