@@ -156,8 +156,9 @@ function getPropsForControllingEntity(form) {
   case 'person':
     let retProps = {
       requestedProperties: [
-        {name: 'typeOfControllingPerson'},
-        {name: 'controllingPerson', required: false},
+        {name: 'typeOfControllingPerson', required: true},
+        // {name: 'controllingPerson', required: false},
+        {name: 'natureOfControl', required: false},
         {name: 'emailAddress', required: true},
         {name: 'phone', required: false},
         {name: 'legalEntity', required: true}
@@ -173,10 +174,13 @@ function getPropsForControllingEntity(form) {
   case 'legalentity':
     return {
       requestedProperties: [
-        {name: 'controllingLegalEntity'},
-        {name: 'legalEntity'},
-        {name: 'emailAddress', required: false},
+        // {name: 'controllingLegalEntity'},
+        {name: 'controllingEntityCompanyNumber'},
+        {name: 'name'},
+        {name: 'natureOfControl', required: false},
+        {name: 'emailAddress', required: true},
         {name: 'phone', required: false},
+        {name: 'legalEntity'},
       ]
     }
   }

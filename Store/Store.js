@@ -213,6 +213,7 @@ const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
+const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
@@ -4515,6 +4516,12 @@ if (!res[SIG]  &&  res._message)
     let isRemediation, isRefreshRequest
 
     if (context) {
+      if (context.associatedResource  &&  context.notes) {
+        for (let p in context.notes) {
+          if (props[p]  &&  props[p].type === 'string'  &&  !resource[p])
+            resource[p] = context.notes[p]
+        }
+      }
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
         context = savedContext
@@ -5387,8 +5394,12 @@ if (!res[SIG]  &&  res._message)
         await db.put(meId, me)
         this._setItem(meId, me)
       }
-      else if (product === CP_ONBOARDING) {
+      else if (product === CP_ONBOARDING ||
+               product === CE_ONBOARDING) {
         resource.associatedResource = params.application
+        let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
+        if (_.size(notes))
+          resource.notes = notes
       }
 
       await this.insurePublishingIdentity(org)
