@@ -266,15 +266,31 @@ var utils = {
   splitCamelCase(str) {
     return str.split(/(?=[A-Z])/g)
   },
-  sanitize(resource) {
-    let r =  sanitize(resource).sanitized
+  cleanJson(r) {
+    r = utils.sanitize(r)
     for (let p in r) {
-      if (!r[p]  &&   !r.hasOwnProperty(p))
+      if (!r[p]   &&   !r.hasOwnProperty(p))
         delete r[p]
-      else if (r[p]  &&  Array.isArray(r[p])  &&  !r[p].length)
+      else if (Array.isArray(r[p])  &&  !r[p].length)
         delete r[p]
+      else if (typeof r[p] === 'object') {
+        if (!_.size(r[p]))
+          delete r[p]
+        else
+          r[p] = utils.cleanJson(r[p])
+      }
     }
     return r
+  },
+  sanitize(resource) {
+    return sanitize(resource).sanitized
+    // for (let p in r) {
+    //   if (!r[p]  &&   !r.hasOwnProperty(p))
+    //     delete r[p]
+    //   else if (r[p]  &&  Array.isArray(r[p])  &&  !r[p].length)
+    //     delete r[p]
+    // }
+    // return r
   },
   hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
