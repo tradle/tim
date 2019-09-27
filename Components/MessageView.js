@@ -470,8 +470,8 @@ class MessageView extends Component {
           {warning}
           {bigPhoto}
           {photoStrip}
-          {documents}
           {actionPanel}
+          {documents}
         </ScrollView>
         {title}
         {footer}
