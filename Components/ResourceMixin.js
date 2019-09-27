@@ -23,7 +23,7 @@ import NetworkInfoProvider from './NetworkInfoProvider'
 import Accordion from './Accordion'
 import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, cleanJson } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import Image from './Image'
 import { Text } from './Text'
@@ -369,7 +369,12 @@ var ResourceMixin = {
       base0E: '#b6b3eb',
       base0F: '#bc9458'
     };
-    json = this.minimizeJson(json)
+    json = this.minimizeJson(_.cloneDeep(json))
+    // if (Array.isArray(json)  &&  json.length === 1) {
+    //   json = json[0]
+    //   if (_.size(json) === 1)
+    //     json = json[Object.keys(json)[0]]
+    // }
 
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
@@ -431,8 +436,14 @@ var ResourceMixin = {
               {content}
            </View>
   },
-  minimizeJson(json) {
-    json = utils.sanitize(json)
+  minimizeJson(jsonObj) {
+    let json = cleanJson(jsonObj)
+    if (Array.isArray(json)  &&  json.length === 1) {
+      json = json[0]
+      if (_.size(json) === 1)
+        json = json[Object.keys(json)[0]]
+    }
+
     for (let p in json) {
       if (typeof json[p] !== 'object')
         continue
@@ -441,13 +452,18 @@ var ResourceMixin = {
         continue
       }
       let jsonI = json[p]
-      let arr = jsonI
-      arr.forEach((elm, i) => {
-        if (_.size(elm) === 1)
-          jsonI[i] = elm[Object.keys(elm)[0]]
-        else
-          jsonI[i] = this.minimizeJson(elm)
-      })
+      if (jsonI.length === 1) {
+        jsonI = jsonI[Object.keys[0]]
+        jsonI = this.minimizeJson(jsonI)
+      }
+      else {
+        jsonI.forEach((elm, i) => {
+          if (_.size(elm) === 1)
+            jsonI[i] = elm[Object.keys(elm)[0]]
+          else
+            jsonI[i] = this.minimizeJson(elm)
+        })
+      }
       json[p] = jsonI
     }
     return json
