@@ -453,7 +453,7 @@ var ResourceMixin = {
       }
       let jsonI = json[p]
       if (jsonI.length === 1) {
-        jsonI = jsonI[Object.keys[0]]
+        jsonI = jsonI[0]
         jsonI = this.minimizeJson(jsonI)
       }
       else {
