@@ -123,6 +123,19 @@ function getPropsForLegalEntity(form) {
   //   }
   // }
 
+  if (isNew(form)) {
+    let rProps = {
+      requestedProperties: [
+        { name: 'companyName', required: true  },
+        { name: 'registrationNumber', required: true },
+        { name: 'country', required: true },
+      ]
+    }
+    let { country } = form
+    if (country  &&  country.id.split('_')[1] === 'US')
+      rProps.requestedProperties.push({name: 'region', required: true})
+    return rProps
+  }
   return {
       requestedProperties: [
         { name: 'info_group' },
@@ -135,6 +148,7 @@ function getPropsForLegalEntity(form) {
         { name: 'streetAddress', required: false },
         { name: 'postalCode', required: false },
         { name: 'city', required: false },
+        { name: 'companyType'}
       ]
     }
 }
