@@ -10836,6 +10836,16 @@ if (!res[SIG]  &&  res._message)
           }
       }
     }
+    if (isFormRequest  &&  !val.prefill &&  context  &&  context.notes) {
+      let fprops = utils.getModel(val.form).properties
+      for (let p in context.notes) {
+        if (fprops[p]) {
+          if (!val.prefill)
+            val.prefill = {}
+          val.prefill[p] = context.notes[p]
+        }
+      }
+    }
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
 // await fireRefresh(fOrg)
       ///=============== TEST VERIFIERS
