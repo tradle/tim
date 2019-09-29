@@ -705,7 +705,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
       let route = {
         title,
         componentName: 'ApplicationView',
-        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
           resource,
@@ -859,7 +858,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         onRightButtonPress: {
           title: title,
           componentName: 'NewResource',
-          titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -947,7 +945,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         backButtonTitle: 'Back',
         componentName: 'NewResource',
         rightButtonTitle: 'Done',
-        titleTextColor: '#7AAAC3',
         passProps
       }
     }
@@ -1066,7 +1063,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
 
-    if (!isModel  &&  !isChooser  &&  isGrid  &&  (modelName !== APPLICATION  ||  !bookmark)  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isBacklink  &&  !isModel  &&  !isChooser  &&  isGrid  &&  (modelName !== APPLICATION  ||  !bookmark)  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (modelName === MESSAGE)
         viewCols = ['_provider', '_payloadType', '_context', '_time']
@@ -1288,7 +1285,6 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       title: 'Settings',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
-      titleTextColor: '#7AAAC3',
       passProps: {
         model: model,
         bankStyle: this.props.style,

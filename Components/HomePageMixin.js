@@ -193,8 +193,8 @@ var HomePageMixin = {
   },
 
   renderGridHeader() {
-    let { modelName, navigator, multiChooser, bookmark } = this.props
-    if (modelName === APPLICATION  &&  bookmark)
+    let { modelName, navigator, multiChooser, bookmark, isBacklink } = this.props
+    if ((modelName === APPLICATION  &&  bookmark) || isBacklink)
       return
     let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (!gridCols)
