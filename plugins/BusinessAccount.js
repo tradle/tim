@@ -1,5 +1,5 @@
 import { TYPE } from '@tradle/constants'
-import { getModel, getPropertiesWithAnnotation } from '../utils/utils'
+import { getModel, getPropertiesWithAnnotation, isNew } from '../utils/utils'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
@@ -103,28 +103,52 @@ function getPropsForLegalDocument(form) {
   return ret
 }
 function getPropsForLegalEntity(form) {
-  const { document, country, registrationNumber, region } = form
-  // if (!country  ||  !document) {
-  // if (!document  ||  isNewResource(document)) {
+  // const { country, uploadHierarchy} = form
+  // if (isNew(form)  &&  !form.hasOwnProperty('uploadHierarchy')  &&  !country) {
   //   return {
   //     requestedProperties: [
   //       // { name: 'country' },
-  //       { name: 'document' },
+  //       { name: 'uploadHierarchy' },
+  //       { name: 'companyHierarchyFile'  }
   //     ]
   //   }
   // }
+  // else if (uploadHierarchy  &&  !country) {
+  //   return {
+  //     requestedProperties: [
+  //       // { name: 'country' },
+  //       { name: 'uploadHierarchy' },
+  //       { name: 'companyHierarchyFile'  }
+  //     ]
+  //   }
+  // }
+  if (isNew(form)) {
+    let rProps = {
+      requestedProperties: [
+        { name: 'companyName', required: true  },
+        { name: 'registrationNumber', required: true },
+        { name: 'country', required: true },
+      ]
+    }
+    let { country } = form
+    if (country  &&  country.id.split('_')[1] === 'US')
+      rProps.requestedProperties.push({name: 'region', required: true})
+    return rProps
+  }
+
   return {
       requestedProperties: [
         { name: 'info_group' },
         { name: 'address_group'},
-        { name: 'taxIdNumber', required: false },
-        { name: 'companyEmail', required: false },
-        { name: 'companyFax', required: false },
-        { name: 'companyPhone', required: false },
-        { name: 'DBAName', required: false },
-        { name: 'streetAddress', required: false },
-        { name: 'postalCode', required: false },
-        { name: 'city', required: false },
+        { name: 'taxIdNumber' },
+        { name: 'companyEmail' },
+        { name: 'companyFax' },
+        { name: 'companyPhone' },
+        { name: 'DBAName' },
+        { name: 'streetAddress' },
+        { name: 'postalCode' },
+        { name: 'city' },
+        { name: 'companyType'}
       ]
     }
 }
@@ -144,20 +168,31 @@ function getPropsForControllingEntity(form) {
   let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'person':
-    return {
+    let retProps = {
       requestedProperties: [
-        {name: 'typeOfControllingPerson'},
-        // {name: 'controllingPerson'},
-        // {name: 'emailAddress'},
-        // {name: 'phone'},
-        // {name: 'legalEntity'}
+        {name: 'typeOfControllingPerson', required: true},
+        {name: 'natureOfControl', required: false},
+        {name: 'emailAddress', required: true},
+        {name: 'phone', required: false},
+        {name: 'legalEntity', required: true}
       ]
     }
+    if (form.name) {
+      retProps.requestedProperties.push({name: 'name', required: false})
+      retProps.requestedProperties.push({name: 'startDate', required: false})
+      retProps.requestedProperties.push({name: 'endDate', required: false})
+      retProps.requestedProperties.push({name: 'inactive', required: false})
+    }
+    return retProps
   case 'legalentity':
     return {
       requestedProperties: [
-        {name: 'controllingLegalEntity'},
-        {name: 'legalEntity'}
+        {name: 'controllingEntityCompanyNumber'},
+        {name: 'name'},
+        {name: 'natureOfControl', required: false},
+        {name: 'emailAddress', required: true},
+        {name: 'phone', required: false},
+        {name: 'legalEntity'},
       ]
     }
   }
