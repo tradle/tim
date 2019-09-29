@@ -381,7 +381,7 @@ class VerificationRow extends Component {
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                     {content}
                   </Swipeout>
-      row = <View host={lazy}>
+      row = <View host={lazy} style={{marginTop: 8}}>
               {content}
             </View>
     }
@@ -749,7 +749,7 @@ var styles = StyleSheet.create({
     paddingRight: 5
   },
   photoIconPlacement: {
-    marginTop: 8
+    // marginTop: 8
   },
   photoPlaceholder: {
     width: 70
