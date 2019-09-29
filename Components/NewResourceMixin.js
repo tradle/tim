@@ -840,8 +840,17 @@ var NewResourceMixin = {
 
     let isTroolean = prop.range === 'troolean' || search
     let switchView
-    let switchC, booleanContentStyle
-    if (isTroolean) {
+    let switchC, booleanContentStyle, icon
+
+    let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
+    if (prop.readOnly  &&  !search) {
+      switchC = <View style={{paddingVertical: 5}}>
+                  <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
+                </View>
+      style = [style, {fontSize: 14}]
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+    }
+    else if (isTroolean) {
       const options = [
           { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
           { value: 'null', customIcon: <Icon size={30} color='#000' name='ios-radio-button-off' /> },
@@ -893,7 +902,7 @@ var NewResourceMixin = {
 
   myDateTemplate(params) {
     let { prop, required, component, editable } = params
-    let { search, bankStyle } = this.props
+    let { search, bankStyle, bookmark } = this.props
 
     let resource = this.state.resource
     let propLabel

@@ -247,16 +247,21 @@ class FormMessageRow extends Component {
       rtype = model.id
     }
 
-    let viewCols = model.gridCols || model.viewCols;
-    if (!viewCols) {
-      viewCols = model.required
-      if (!viewCols) {
-        const dnProps = utils.getPropertiesWithAnnotation(model, 'displayName')
-        if (utils.isEmpty(dnProps))
-          return
-        viewCols = Object.keys(dnProps)
-      }
+    let viewCols = utils.getPropertiesWithAnnotation(model, 'displayName')
+    if (viewCols)
+      viewCols = Object.keys(viewCols)
+
+    let moreCols = model.gridCols || model.viewCols;
+    if (!moreCols)
+      moreCols = model.required
+
+    if (moreCols) {
+      if (viewCols)
+        viewCols = viewCols.concat(moreCols)
+      else
+        viewCols = moreCols
     }
+
     let properties = model.properties;
     // let onPressCall;
 

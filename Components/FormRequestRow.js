@@ -36,6 +36,7 @@ import { circled } from '../styles/utils'
 
 import chatStyles from '../styles/chatStyles'
 import Image from './Image'
+import strings from '../utils/strings_en'
 
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
@@ -804,6 +805,12 @@ class FormRequestRow extends Component {
     let hasSharables = this.hasSharables()
 
     let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
+    // HACK
+    if (isRequestForNext) {
+      if (resource.message.startsWith(strings.reviewScannedProperties))
+        isRequestForNext = false
+    }
+
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isRefresh = resource.form === REFRESH
     if (isRequestForNext) {

@@ -220,6 +220,7 @@ const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
+const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
@@ -3293,34 +3294,36 @@ var Store = Reflux.createStore({
       }
     }
     let rid = utils.getId(r)
-    if (messages  &&  messages.length  &&  !isInit) {
-      if (r[TYPE] === FORM_REQUEST  &&  utils.isContext(r.form)) {
-        // This is request for productList
-        let msgId = messages[messages.length - 1].id
-        if (this._getItem(msgId).form === r.form) {
-          messages.splice(messages.length - 1, 1)
-          let allIdx = allMessages.findIndex(({ id }) => id === msgId)
-          if (allIdx !== -1)
-            allMessages.splice(allIdx, 1)
+    if (messages  &&  messages.length) {
+      if (!isInit) {
+        if (r[TYPE] === FORM_REQUEST  &&  utils.isContext(r.form)) {
+          // This is request for productList
+          let msgId = messages[messages.length - 1].id
+          if (this._getItem(msgId).form === r.form) {
+            messages.splice(messages.length - 1, 1)
+            let allIdx = allMessages.findIndex(({ id }) => id === msgId)
+            if (allIdx !== -1)
+              allMessages.splice(allIdx, 1)
+          }
         }
-      }
-      let idx = -1
-      for (let i=0; i<messages.length  &&  idx === -1; i++)
-        if (messages[i].id === rid)
-          idx = i
+        let idx = -1
+        for (let i=0; i<messages.length  &&  idx === -1; i++)
+          if (messages[i].id === rid)
+            idx = i
 
-      if (idx !== -1) {
-        let lr = list[rid]
-        let doAdd
-        if (lr  &&  r._time === lr.value._time) {
-          if (!timeShared)
-            return
-          if (timeShared === r._time)
-            return
-          doAdd = true
+        if (idx !== -1) {
+          let lr = list[rid]
+          let doAdd
+          if (lr  &&  r._time === lr.value._time) {
+            if (!timeShared)
+              return
+            if (timeShared === r._time)
+              return
+            doAdd = true
+          }
+          if (!doAdd)
+            messages.splice(idx, 1)
         }
-        if (!doAdd)
-          messages.splice(idx, 1)
       }
     }
     else {
@@ -4439,6 +4442,12 @@ if (!res[SIG]  &&  res._message)
     let context = resource._context || value._context
     let isRemediation, isRefreshRequest
     if (context) {
+      if (context.associatedResource  &&  context.notes) {
+        for (let p in context.notes) {
+          if (props[p]  &&  props[p].type === 'string'  &&  !resource[p])
+            resource[p] = context.notes[p]
+        }
+      }
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
         context = savedContext
@@ -5297,10 +5306,13 @@ if (!res[SIG]  &&  res._message)
         await db.put(meId, me)
         this._setItem(meId, me)
       }
-      else if (product === CP_ONBOARDING) {
+      else if (product === CP_ONBOARDING ||
+               product === CE_ONBOARDING) {
         resource.associatedResource = params.application
+        let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
+        if (_.size(notes))
+          resource.notes = notes
       }
-
       await this.insurePublishingIdentity(org)
     }
     await this.onAddChatItem({resource, noTrigger: true,  })
@@ -10562,6 +10574,16 @@ if (!res[SIG]  &&  res._message)
             val._context = this.buildRef(contexts[i])
             break
           }
+      }
+    }
+    if (isFormRequest  &&  !val.prefill &&  context  &&  context.notes) {
+      let fprops = utils.getModel(val.form).properties
+      for (let p in context.notes) {
+        if (fprops[p]) {
+          if (!val.prefill)
+            val.prefill = {}
+          val.prefill[p] = context.notes[p]
+        }
       }
     }
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
