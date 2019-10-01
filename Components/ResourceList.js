@@ -951,7 +951,7 @@ class ResourceList extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: this.props.style,
+        bankStyle: this.mergeStyle(this.props.style),
         callback: () => {
           this.props.navigator.pop()
           Actions.list({modelName: this.props.modelName})
