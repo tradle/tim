@@ -622,7 +622,7 @@ class TimHome extends Component {
       }
     }
     if (showProfile)
-      route.passProps.onLeftButtonPress = () => this.this.showOfficialAccounts(navigator, 'replace')
+      route.passProps.onLeftButtonPress = () => this.showOfficialAccounts('replace')
     if (action)
       navigator[action](route)
     else if (termsAccepted  &&  routes.length === 3)
