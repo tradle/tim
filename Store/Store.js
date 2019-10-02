@@ -10838,13 +10838,24 @@ if (!res[SIG]  &&  res._message)
     }
     if (isFormRequest  &&  !val.prefill &&  context  &&  context.notes) {
       let fprops = utils.getModel(val.form).properties
-      for (let p in context.notes) {
-        if (fprops[p]) {
-          if (!val.prefill)
-            val.prefill = {}
-          val.prefill[p] = context.notes[p]
+      let prefill
+      let { notes } = context
+      for (let p in notes) {
+        if (!fprops[p])
+          continue
+        if (!prefill)
+          prefill = {}
+        if (fprops[p].ref) {
+          try {
+            prefill[p] = JSON.parse(notes[p])
+          } catch (err) {
+            debugger
+          }
         }
+        if (!prefill[p])
+          prefill[p] = notes[p]
       }
+      if (prefill) val.prefill = prefill
     }
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
 // await fireRefresh(fOrg)
