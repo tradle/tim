@@ -1069,14 +1069,6 @@ class FormRequestRow extends Component {
   }
 
   reviewFormsInContext({isRefresh}) {
-    // Alert.alert(
-    //   translate('importDataPrompt'),
-    //   utils.getDisplayName(this.props.to),
-    //   [
-    //     {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-    //     {text: translate('Import'), onPress: this.submitAllForms.bind(this)},
-    //   ]
-    // )
     const { navigator, bankStyle, resource, to, currency, list } = this.props
     this.props.navigator.push({
       title: translate("reviewData"),
@@ -1094,12 +1086,6 @@ class FormRequestRow extends Component {
         currency
       }
     })
-  }
-  submitAllForms() {
-    // utils.onNextTransitionEnd(this.props.navigator, () => {
-    Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
-    // });
-    // this.props.navigator.pop()
   }
   chooser(prop) {
     let oResource = this.props.resource
