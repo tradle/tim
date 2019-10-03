@@ -1,3 +1,4 @@
+import omit from 'lodash/omit'
 import { TYPE } from '@tradle/constants'
 import { getModel, getPropertiesWithAnnotation, isNew } from '../utils/utils'
 
@@ -122,33 +123,46 @@ function getPropsForLegalEntity(form) {
   //     ]
   //   }
   // }
+
   if (isNew(form)) {
-    let rProps = {
-      requestedProperties: [
+    let requestedProperties = [
         { name: 'companyName', required: true  },
         { name: 'registrationNumber', required: true },
-        { name: 'country', required: true },
       ]
-    }
-    let { country } = form
-    if (country  &&  country.id.split('_')[1] === 'US')
-      rProps.requestedProperties.push({name: 'region', required: true})
-    return rProps
-  }
 
+    let { streetAddress, city, postalCode, country } = form
+    if (streetAddress)
+      requestedProperties.push({name: 'streetAddress'})
+    if (city)
+      requestedProperties.push({name: 'city'})
+    if (postalCode)
+      requestedProperties.push({name: 'postalCode'})
+    if (country  &&  country.id.split('_')[1] === 'US')
+      requestedProperties.push({name: 'region', required: true})
+    requestedProperties.push({ name: 'country', required: true })
+
+    let omitArr = ['companyName', 'registrationNumber', 'country', 'city', 'streetAddress', 'postalCode', 'region']
+    let props = getModel(form[TYPE]).properties
+    let moreProps = omit(form, omitArr)
+    for (let p in moreProps)  {
+      if (p.charAt(0) !== '_'  &&  props[p])
+        requestedProperties.push({name: p})
+    }
+    return { requestedProperties }
+  }
   return {
       requestedProperties: [
         { name: 'info_group' },
+        { name: 'companyType'},
         { name: 'address_group'},
-        { name: 'taxIdNumber' },
-        { name: 'companyEmail' },
-        { name: 'companyFax' },
-        { name: 'companyPhone' },
-        { name: 'DBAName' },
-        { name: 'streetAddress' },
-        { name: 'postalCode' },
-        { name: 'city' },
-        { name: 'companyType'}
+        { name: 'taxIdNumber', required: false },
+        { name: 'companyEmail', required: false },
+        { name: 'companyFax', required: false },
+        { name: 'companyPhone', required: false },
+        { name: 'DBAName', required: false },
+        // { name: 'streetAddress', required: false },
+        // { name: 'postalCode', required: false },
+        // { name: 'city', required: false },
       ]
     }
 }
@@ -171,27 +185,35 @@ function getPropsForControllingEntity(form) {
     let retProps = {
       requestedProperties: [
         {name: 'typeOfControllingPerson', required: true},
+        // {name: 'controllingPerson', required: false},
         {name: 'natureOfControl', required: false},
         {name: 'emailAddress', required: true},
         {name: 'phone', required: false},
-        {name: 'legalEntity', required: true}
       ]
     }
     if (form.name) {
       retProps.requestedProperties.push({name: 'name', required: false})
       retProps.requestedProperties.push({name: 'startDate', required: false})
       retProps.requestedProperties.push({name: 'endDate', required: false})
+      retProps.requestedProperties.push({name: 'occupation', required: false})
       retProps.requestedProperties.push({name: 'inactive', required: false})
     }
+    retProps.requestedProperties.push({name: 'legalEntity', required: true})
     return retProps
   case 'legalentity':
     return {
       requestedProperties: [
-        {name: 'controllingEntityCompanyNumber'},
+        // {name: 'controllingLegalEntity'},
         {name: 'name'},
-        {name: 'natureOfControl', required: false},
         {name: 'emailAddress', required: true},
-        {name: 'phone', required: false},
+        {name: 'controllingEntityCompanyNumber'},
+        {name: 'companyType'},
+        {name: 'controllingEntityStreetAddress'},
+        {name: 'controllingEntityRegion'},
+        {name: 'controllingEntityPostalCode'},
+        {name: 'controllingEntityCountry'},
+        {name: 'natureOfControl'},
+        {name: 'phone'},
         {name: 'legalEntity'},
       ]
     }
