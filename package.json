@@ -189,7 +189,7 @@
     "react-native-randombytes": "^3.5.1",
     "react-native-regula-document-reader": "github:tradle/react-native-regula-document-reader",
     "react-native-scrollable-tab-view": "github:tradle/react-native-scrollable-tab-view#fixes_android",
-    "react-native-search-bar": "^3.4.0",
+    "react-native-search-bar": "^3.4.3",
     "react-native-signature-pad": "github:tradle/react-native-signature-pad",
     "react-native-splash-screen": "^3.0.9",
     "react-native-step-indicator": "github:tradle/react-native-step-indicator",
