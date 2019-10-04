@@ -67,7 +67,7 @@ const merged = extend({
     // hats
     // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
     // friendly.io
-    'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io
@@ -81,7 +81,7 @@ const merged = extend({
     // lenka
     // 'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
     // svb
-    'https://yfu6r9h8w0.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://yfu6r9h8w0.execute-api.us-east-1.amazonaws.com/dev',
   ],
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {
