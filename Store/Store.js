@@ -34,7 +34,6 @@ import asyncstorageDown from '../utils/asyncstorage-down'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import appPlugins from '../plugins'
-import refreshPrefill from './refreshPrefill.json'
 // import yukiConfig from '../yuki.json'
 
 import Actions from '../Actions/Actions'
@@ -110,6 +109,8 @@ import utils, {translate, translateEnum} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
 import JsonPlugin from './plugins/JsonPlugin'
+import DataBundle from './plugins/DataBundle'
+
 import { models as baseModels, data as sampleData } from '@tradle/models'
 
 const ObjectModel = baseModels['tradle.Object']
@@ -2275,6 +2276,13 @@ var Store = Reflux.createStore({
     // await promisify(node.actions.readSeal)(action)
   },
 
+  saveObject(opts) {
+    return meDriver.saveObject(opts)
+  },
+  execOnce(command, opts) {
+    return meDriver.once(command, opts)
+  },
+
   setProviderOnlineStatus(permalink, online) {
     // if (!SERVICE_PROVIDERS) return
 
@@ -4293,96 +4301,12 @@ if (!res[SIG]  &&  res._message)
   async onAddAll(resource, to, message) {
     this._pushSemaphore.stop()
     try {
-      await this._onAddAll(...arguments)
+      await this.getDataBundle()._onAddAll(...arguments)
     } finally {
       this._pushSemaphore.go()
     }
   },
 
-  async _onAddAll({resource, to, reviewed, message, total}) {
-    let rId = utils.getId(resource)
-    let r = this._getItem(rId)
-    this.trigger({action: 'addItem', resource: r})
-    await this.dbPut(rId, r)
-    // prepare some whitespace
-    const numRows = 5
-    const white = ' '.repeat(40)
-    const messages = new Array(numRows).fill(white)
-    const title = `${translate('importing')}...          ` // extra whitespace on purpose
-
-    Actions.showModal({
-      title,
-      message: messages.join('\n')
-    })
-
-    let items = resource.items || reviewed
-    if (items.length === total)
-      r._documentCreated = true
-    let toRep = to[TYPE] === ORGANIZATION ? this.getRepresentative(to) : to
-    for (let i = 0; i < items.length; i++) {
-      // debugger
-      let item = { ...items[i], _context: resource._context, from : me, to: r.from }
-      delete item[NOT_CHAT_ITEM]
-
-      let itemType = utils.getType(item)
-      let itemModel = this.getModel(itemType)
-      let displayName = ''
-      if (itemModel) displayName += itemModel.title
-
-      let resourceDisplayName = item.title || utils.getDisplayName(item)
-      if (resourceDisplayName) {
-        displayName += ': ' + resourceDisplayName
-      }
-
-      if (i > 0) {
-        let last = messages.length - 1
-        messages[last] = messages[last].replace('importing', 'imported')
-      }
-
-      // let's not run out of room on the screen
-      let next = displayName // `importing "${displayName}"`
-      if (next.length > 30) {
-        next = next.slice(0, 27) + '...'
-      }
-
-      let idx = Math.min(numRows - 1, i)
-      if (messages[idx].trim()) {
-        messages.shift()
-        messages.push(next)
-      } else {
-        messages[idx] = next
-      }
-
-      Actions.showModal({
-        title,
-        message: messages.join('\n\n')
-      })
-      // debugger
-      // let promiseAddItem = await this.onAddChatItem({ resource: item, noTrigger: true, forceUpdate: true })
-      let promiseAddItem = this.onAddChatItem({ resource: item, noTrigger: true, forceUpdate: true })
-      // let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
-      // await Promise.all([
-      //   promiseAddItem,
-      //   Promise.race([
-      //     promiseSentEvent,
-      //     // force continue loop
-      //     utils.promiseDelay(4000)
-      //   ])
-      // ])
-      await utils.promiseDelay(5000)
-    }
-    await utils.promiseDelay(1500)
-    Actions.hideModal()
-
-    await this.onAddMessage({msg: {
-      [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
-      message,
-      time: new Date().getTime(),
-      _context: resource._context,
-      from: this.buildRef(me),
-      to: this.buildRef(r.from)
-    }})
-  },
   async onOpenURL(url) {
     let URL = parseURL(url.replace('/#', ''))
     let pathname = URL.pathname || URL.hostname
@@ -4703,7 +4627,7 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
       let toId = utils.getId(returnVal.to)
-      await updateRequestFoRefresh(this._getItem(toId))
+      await this.getDataBundle().updateRequestForRefresh(this._getItem(toId), returnVal)
     }
     if (disableFormRequest) {
       if (addDocumentCreated) {
@@ -4744,24 +4668,24 @@ if (!res[SIG]  &&  res._message)
         return
       let prop = vprops[0]
       let plugin = self._filePlugins[prop.ref]
-      if (prop.ref === JSON_MODEL) {
-        try {
-          let fUrl = returnVal[prop.name].url
-          let jsonObj
-          if (utils.isDataUrl(fUrl))
-            jsonObj = JSON.parse(Buffer.from(returnVal[prop.name].url.split(',')[1], 'base64'))
-          else
-            jsonObj = JSON.parse(fUrl)
-          if (jsonObj[TYPE] === meta.id) {
-            await plugin.createBundle(jsonObj, returnVal)
-            // if (disableFormRequest)
-            //   await handleDocumentCreated(disableFormRequest)
-            self.trigger({action: 'hierarchyUploaded', model: meta, resource})
-            return true
-          }
-        } catch (err) {
-          debugger
+      if (prop.ref !== JSON_MODEL)
+        return
+      try {
+        let fUrl = returnVal[prop.name].url
+        let jsonObj
+        if (utils.isDataUrl(fUrl))
+          jsonObj = JSON.parse(Buffer.from(returnVal[prop.name].url.split(',')[1], 'base64'))
+        else
+          jsonObj = JSON.parse(fUrl)
+        if (jsonObj[TYPE] === meta.id) {
+          await plugin.createBundle(jsonObj, returnVal)
+          // if (disableFormRequest)
+          //   await handleDocumentCreated(disableFormRequest)
+          self.trigger({action: 'hierarchyUploaded', model: meta, resource})
+          return true
         }
+      } catch (err) {
+        debugger
       }
     }
     function handleRegistration () {
@@ -5132,59 +5056,6 @@ if (!res[SIG]  &&  res._message)
         appToUpdate._context = returnVal._context
 
       return appToUpdate
-    }
-    async function updateRequestFoRefresh(to) {
-      // let requestsForRefresh = await self.searchMessages({to, modelName: FORM_REQUEST, isRefresh: true, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-      let requestsForRefresh = await self.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
-      let requestForRefresh
-      debugger
-      if (requestsForRefresh.length === 1)
-        requestForRefresh = requestsForRefresh[0]
-      else //{
-        requestForRefresh = requestsForRefresh.find(r => r._dataBundle === returnVal._dataBundle) //  &&  r.contextId  &&  r._context)
-
-      if (!requestForRefresh._context) {
-        debugger
-        let contexts = await self.searchMessages({to, modelName: PRODUCT_REQUEST, filterProps: {requestFor: REFRESH_PRODUCT, _documentCreated: false}})
-        let context = contexts && contexts.find(r => r._dataBundle === returnVal._dataBundle)
-        debug('updateRefresh: ' + JSON.stringify(context, null, 2))
-
-        if (context) {
-          requestForRefresh._context = context
-          self._setItem(utils.getId(requestForRefresh), requestForRefresh)
-        }
-      }
-      //   if (!requestForRefresh) {
-      //     let requestForRefreshDB = requestsForRefresh.find(r => r._dataBundle === returnVal._dataBundle)
-      //     let requestForRefreshC = requestsForRefresh.find(r => r.context  && r.context  === requestForRefreshDB._context.context)
-
-      //     if (requestForRefreshDB  &&  requestForRefreshC)  {
-      //       requestForRefresh = requestForRefreshC
-      //       requestForRefreshC._dataBundle = requestForRefreshDB._dataBundle
-      //       requestForRefreshC._context = requestForRefreshDB._context
-      //       requestForRefreshC._forms = requestForRefreshDB._forms
-      //       self._setItem(utils.getId(requestForRefreshC), requestForRefreshC)
-      //     }
-      //     else
-      //       requestForRefresh = requestForRefreshDB || requestForRefreshC
-      //   }
-      // }
-      // let [ requestForRefresh ] = await self.searchMessages({to, modelName: FORM_REQUEST, isRefresh: true, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-      if (!requestForRefresh._forms)
-        requestForRefresh._forms = []
-
-      // let idx = requestForRefresh._forms.findIndex(f => f.hash === returnVal[ROOT_HASH])
-      // if (idx === -1)
-      //   requestForRefresh._forms.push({type: resource[TYPE], isNew: false, hash: returnVal[ROOT_HASH]})
-      // else
-      //   requestForRefresh._forms.splice(idx, 1)
-
-      if (!requestForRefresh._forms.some(f => f.hash === returnVal[ROOT_HASH]))
-        requestForRefresh._forms.push({type: resource[TYPE], isNew: false, hash: returnVal[ROOT_HASH]})
-
-      let id = utils.getId(requestForRefresh)
-      await self.dbPut(id, requestForRefresh)
-      self._setItem(id, requestForRefresh)
     }
     async function deactivateFormRequests() {
       let org = returnVal.to.organization
@@ -6201,8 +6072,9 @@ if (!res[SIG]  &&  res._message)
     }
     else if (isRefresh) {
       try {
-        ({result, refreshProducts, requestForRefresh} = await this.searchForRefresh(params))
+        ({result, refreshProducts, requestForRefresh} = await this.getDataBundle().searchForRefresh(params))
       } catch (err) {
+        debug('searchForRefresh', err)
         debugger
       }
     }
@@ -6467,90 +6339,6 @@ if (!res[SIG]  &&  res._message)
     if (batch.length)
       await db.batch(batch)
   },
-  async searchForRefresh(params) {
-    let { to, resource } = params
-    // let [ requestForRefresh ] = await this.searchMessages({to, isRefresh: true, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-    let [ requestForRefresh ] = await this.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
-    if (!requestForRefresh)
-      return
-
-    let time = requestForRefresh._time
-    let forms = requestForRefresh  &&  requestForRefresh._forms
-
-    let refreshProducts
-    let result = await this.searchMessages(params)
-
-    result = result  &&  result.filter(r => {
-      if (r[TYPE] !== PRODUCT_REQUEST) {
-        // if (utils.getModel(r[TYPE]).notEditable)
-        //   return false
-        if (!r._latest)
-          return false
-        if (r._time < time)
-          return true
-        // Check if the resource that was created as new reviewed already
-        if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
-          return true
-        return false
-      }
-      if (r._time > time)
-        return false
-      // Gather all products for the customer before the request date
-      if (r._formsCount) {
-        if (!refreshProducts)
-          refreshProducts = []
-        refreshProducts.push(r)
-      }
-      return false
-    })
-    if (!result.length)
-      return
-
-    result.sort((a, b) => b._time - a._time)
-
-    let myProducts = await this.searchMessages({modelName: MY_PRODUCT, to})
-    if (myProducts) {
-      if (!refreshProducts)
-        refreshProducts = []
-      myProducts.forEach(p => {
-        if (p._time > time)
-          return
-        let requestFor = 'tradle.' + p[TYPE].split('.')[1].substring(2)
-        refreshProducts.push({
-          [TYPE]: PRODUCT_REQUEST,
-          requestFor
-        })
-      })
-    }
-
-    let moreForms = resource.prefill.additionalForms
-    if (!moreForms)
-      return {result, refreshProducts, requestForRefresh}
-    let toId = utils.getId(to)
-    moreForms.forEach(p => {
-      let product = refreshProducts  &&  refreshProducts.find(r => r.requestFor === p.product)
-      if (!product)
-        return
-      p.forms.forEach(f => {
-        if (forms) {
-          let form = forms.find(r => r.type === f  &&  !r.isNew)
-          if (form)
-            return
-        }
-        let context = this.buildRef(product)
-        let r = {
-          [TYPE]: f,
-          from: me,
-          to: this.getRepresentative(to)
-        }
-        if (context.id)
-          r._context = context
-        result.push(r)
-      })
-    })
-    return {result, refreshProducts, requestForRefresh}
-  },
-
   async getCurrentContext(to, orgId) {
     // let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
     let c
@@ -9952,6 +9740,11 @@ if (!res[SIG]  &&  res._message)
       throw err
     }
   },
+  getDataBundle() {
+    if (!this.dataBundle)
+      this.dataBundle = new DataBundle(this)
+    return this.dataBundle
+  },
   async setupPushNotifications() {
     const node = await this._enginePromise
     const onSent = ({ message, object }) => {
@@ -10653,7 +10446,6 @@ if (!res[SIG]  &&  res._message)
       if (prefill) val.prefill = prefill
     }
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
-// await fireRefresh(fOrg)
       ///=============== TEST VERIFIERS
       if (isNew) {
         // Prefill for testing and demoing
@@ -10700,40 +10492,6 @@ if (!res[SIG]  &&  res._message)
             this.trigger({action: 'updateItem', resource: r})
           }
         })
-    }
-    if (val[TYPE] === DATA_BUNDLE) {
-      let fromR = this._getItem(val.from)
-      let forg = fromR && fromR.organization
-      let title = forg  &&  forg.title  ||  val.from.title
-      Actions.showModal({title: translate('importingData', val.items.length, title), showIndicator: true})
-      setTimeout(() => Actions.hideModal(), 3000)
-      let result = await Promise.all(val.items.map(item => meDriver.saveObject({object: item})))
-      let orgR = this._getItem(val.from).organization
-      // Can't do it async since the order matters forms should be processed before verifications
-      for (let i=0; i<result.length; i++) {
-        let item = result[i]
-        let r = item.object
-        this.rewriteStubs(r)
-        r[ROOT_HASH] = item.permalink
-        r[CUR_HASH] = item.link
-        let m = this.getModel(r[TYPE])
-        let isMyMessage = r[TYPE] !== VERIFICATION  &&  !utils.isMyProduct(m)
-        r.from = isMyMessage ? this.buildRef(me) : val.from
-        r.to = isMyMessage ? val.from : this.buildRef(me)
-        if (!r._time)
-          r._time = new Date().getTime()
-        if (!utils.isItem(m))
-          r[IS_MESSAGE] = true
-        r[NOT_CHAT_ITEM] = true
-        if (context)
-          r._context = context
-        else
-          r._dataBundle = key
-        r._latest = true
-        await this.onAddChatItem({resource: r, noTrigger: true})
-      }
-await fireRefresh({to: val.from.organization, dataBundle: key, context})
-      Actions.hideModal()
     }
 
     var noTrigger, isRM, application
@@ -10903,40 +10661,6 @@ await fireRefresh({to: val.from.organization, dataBundle: key, context})
     this.addLastMessage(val, batch)
     return { noTrigger, application, isRM }
 
-    async function fireRefresh({to, dataBundle, context}) {
-      setTimeout(async () => {
-        let requestForRefresh = await self.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-        // debugger
-        if (requestForRefresh  &&  requestForRefresh.length)
-          return
-        let requestForPR = {
-          [TYPE]: PRODUCT_REQUEST,
-          requestFor: REFRESH_PRODUCT,
-          from: me,
-          to: val.from,
-          _dataBundle: dataBundle
-        }
-        await self.onAddChatItem({resource:  requestForPR, noTrigger: true})
-
-        requestForRefresh = {
-          [TYPE]: FORM_REQUEST,
-          from: val.from,
-          to: me,
-          product: REFRESH_PRODUCT,
-          form: 'tradle.Refresh',
-          message: 'Please review and confirm',
-          _dataBundle: dataBundle,
-          prefill: refreshPrefill
-        }
-        let res = await self.searchMessages({to: val.from, modelName: PRODUCT_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
-        let context = res && res.find(r => r.requestFor === REFRESH_PRODUCT  &&  dataBundle  &&  r._dataBundle === dataBundle)
-        if (context)
-          requestForRefresh._context = context
-        await utils.promiseDelay(5000)
-        debug('fireRefresh: ' + JSON.stringify(context, null, 2))
-        await self.onAddChatItem({resource:  requestForRefresh, doNotSend: true})
-      }, 5000)
-    }
     async function setupAgent() {
       me.isEmployee = true
       me.organization = self.buildRef(org)

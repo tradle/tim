@@ -1071,7 +1071,7 @@ class FormRequestRow extends Component {
   reviewFormsInContext({isRefresh}) {
     const { navigator, bankStyle, resource, to, currency, list } = this.props
     this.props.navigator.push({
-      title: translate("reviewData"),
+      title: translate('reviewData'),
       backButtonTitle: 'Back',
       componentName: 'RemediationItemsList',
       rightButtonTitle: 'Done',
