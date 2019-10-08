@@ -72,19 +72,20 @@ const merged = extend({
     // // `http://${LOCAL_IP}:21013`,
     // hats
     // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
-    'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
+    // friendly
+    // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io
     // 'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
-    'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
     // // perpetualguardian.co.nz
     // 'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
     // // r3.com
     // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
     // lenka
-    // 'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
+    'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
   ],
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {
