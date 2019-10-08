@@ -5396,7 +5396,8 @@ if (!res[SIG]  &&  res._message)
       }
       else if (product === CP_ONBOARDING ||
                product === CE_ONBOARDING) {
-        resource.associatedResource = params.application
+        resource.associatedResource = params.associatedResource
+        resource.parentApplication = params.parentApplication
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
         if (_.size(notes))
           resource.notes = notes
