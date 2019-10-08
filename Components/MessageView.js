@@ -319,7 +319,7 @@ class MessageView extends Component {
     let t = resource.dateVerified ? resource.dateVerified : resource._time
     let date
     if (isForm  &&  t)
-      date = utils.formatDate(new Date(t), true)
+      date = utils.formatDate(new Date(t))
     else
       date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     // let photos = resource.photos
