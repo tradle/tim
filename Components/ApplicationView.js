@@ -159,7 +159,7 @@ class ApplicationView extends Component {
 
     // hasRM = hasRM  ||  resource.relationshipManagers
 
-    hasRM = hasRM  ||  resource.reviewer
+    hasRM = hasRM  ||  resource.analyst
 
     let isRM = hasRM  &&  utils.isRM(resource)
     let styles = createStyles({ hasRM, isRM, bankStyle })
