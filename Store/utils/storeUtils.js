@@ -24,7 +24,9 @@ import {
   makeModelTitle,
   getDisplayName,
   getStringPropertyValue,
-  translateEnum
+  getEnumProperty,
+  translateEnum,
+  translate
 } from '../../utils/utils'
 
 const {
@@ -409,7 +411,7 @@ var storeUtils = {
       })
   },
   getEnum(params, enums) {
-    const { modelName, limit, query, lastId, prop, pin } = params
+    const { modelName, limit, query, lastId, prop, pin, isChooser, resource } = params
     let enumList = enums[modelName]
     if (query) {
       let q = query.toLowerCase()
@@ -434,6 +436,12 @@ var storeUtils = {
     else
       lastIdx = 0
     let ret = []
+    if (isChooser  &&  resource[prop.name]) {
+      let rmodel = getModel(resource[TYPE])
+      let property = getEnumProperty(getModel(modelName))
+      ret.push({_t: modelName, _r: `__reset`, [property]: `Reset "${translate(prop, rmodel)}"`})
+    }
+
     for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
       ret.push(enumList[i])
     return ret
