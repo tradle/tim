@@ -81,7 +81,9 @@ var NewResourceMixin = {
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
-    let meta = utils.getModel((this.props.model  ||  this.props.metadata).id)
+    let meta = this.props.model
+    if (!meta)
+      meta = utils.getModel(this.props.metadata.items.ref)
     let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
 
@@ -102,7 +104,7 @@ var NewResourceMixin = {
         data[TYPE] !== meta.id  &&
         !utils.isSubclassOf(dModel, meta.id)) {
       let interfaces = meta.interfaces;
-      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
+      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) === -1)
         return;
     }
 
@@ -1212,7 +1214,7 @@ var NewResourceMixin = {
     let isEnum = prop.ref  &&  utils.isEnum(prop.ref)
     let isMultichooser = search  &&  prop.ref  &&  utils.isEnum(prop.ref)
     let isArray = prop.type === 'array'
-
+    let doDelete
     let currentR = _.cloneDeep(resource)
     // clause for the items properies - need to redesign
     if (metadata  &&  metadata.type === 'array') {
@@ -1224,80 +1226,18 @@ var NewResourceMixin = {
       resource[propName] = value
     }
     else if (isArray || isMultichooser) {
-      let isEnum  = isArray ? utils.isEnum(prop.items.ref) : utils.isEnum(prop.ref)
-      if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !isEnum) {
-        if (!Array.isArray(value)) {
-          if (isArray) {
-            if (!resource[propName])
-              value = [value]
-            else {
-              let valueId = utils.getId(value)
-              let hasValue = resource[propName].some(r => utils.getId(r) === valueId)
-              if (hasValue)
-                value = resource[propName]
-              else {
-                let arr = _.cloneDeep(resource[propName]) || []
-                arr.push(value)
-                value = arr
-              }
-            }
-          }
-          else
-            value = [value]
-        }
-
-        let v = value.map((vv) => {
-          let val = utils.buildRef(vv)
-          if (vv.photos)
-            val.photo = vv.photos[0].url
-          return val
-        })
-        if (!resource[propName]) {
-          resource[propName] = []
-          resource[propName] = v
-        }
-        else {
-          let arr = resource[propName].filter((r) => {
-            return r.id === v.id
-          })
-          if (!arr.length)
-            resource[propName] = v
-        }
-
-        setItemCount = true
-      }
-      else  {
-        let val
-        if (prop.items) {
-          if (prop.items.ref  &&  isEnum)
-            val = value.map((v) => utils.buildRef(v))
-          else
-            val = value
-        }
-        else if (isEnum) {
-          if (value.length)
-            val = value.map((v) => utils.buildRef(v))
-        }
-        else
-          val = value
-        if (value.length) {
-          resource[propName] =  val
-          if (!this.floatingProps)
-            this.floatingProps = {}
-          this.floatingProps[propName] = resource[propName]
-        }
-        else if (prop.items.ref) {
-          resource[propName] = null
-        }
-        else {
-          delete resource[propName]
-          if (this.floatingProps)
-            delete this.floatingProps[propName]
-        }
-      }
+      ({setItemCount} = this.setArrayOrMultichooser(prop, value, resource))
+    }
+    else if (value[ROOT_HASH] === '__reset') {
+      if (this.floatingProps  &&  this.floatingProps[propName])
+        delete this.floatingProps[propName]
+      // resource[propName] = null
+      delete resource[propName]
+      doDelete = true
     }
     else {
       resource[propName] = value[ROOT_HASH] ?  utils.buildRef(value) : value
+
 
       if (!this.floatingProps)
         this.floatingProps = {}
@@ -1314,17 +1254,18 @@ var NewResourceMixin = {
       resource: resource,
       prop: propName
     }
-    if (this.state.missedRequiredOrErrorValue)
-      delete this.state.missedRequiredOrErrorValue[propName]
-    if (setItemCount)
-      state.itemsCount = resource[propName].length
+    if (!doDelete) {
+      if (this.state.missedRequiredOrErrorValue)
+        delete this.state.missedRequiredOrErrorValue[propName]
+      if (setItemCount)
+        state.itemsCount = resource[propName].length
 
-    if (value.photos)
-      state[propName + '_photo'] = value.photos[0]
-    else if (model  && model.properties[propName].ref === PHOTO)
-      state[propName + '_photo'] = value
+      if (value.photos)
+        state[propName + '_photo'] = value.photos[0]
+      else if (model  && model.properties[propName].ref === PHOTO)
+        state[propName + '_photo'] = value
+    }
     state.inFocus = propName
-
 
     let r = _.cloneDeep(this.state.resource)
     for (let p in this.floatingProps)
@@ -1333,12 +1274,87 @@ var NewResourceMixin = {
     this.setState(state);
     if (!search) {
       if (utils.isForm(model))
-        Actions.getRequestedProperties({resource: r, currentResource: currentR})
+        Actions.getRequestedProperties({resource, currentResource: resource})//currentR})
       if (!utils.isImplementing(r, INTERSECTION))
-        Actions.saveTemporary(r)
+        Actions.saveTemporary(resource)
     }
   },
 
+  setArrayOrMultichooser(prop, value, resource) {
+    let propName = prop.name
+    let isArray = prop.type === 'array'
+    let setItemCount
+    let isEnum  = isArray ? utils.isEnum(prop.items.ref) : utils.isEnum(prop.ref)
+    if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !isEnum) {
+      if (!Array.isArray(value)) {
+        if (isArray) {
+          if (!resource[propName])
+            value = [value]
+          else {
+            let valueId = utils.getId(value)
+            let hasValue = resource[propName].some(r => utils.getId(r) === valueId)
+            if (hasValue)
+              value = resource[propName]
+            else {
+              let arr = _.cloneDeep(resource[propName]) || []
+              arr.push(value)
+              value = arr
+            }
+          }
+        }
+        else
+          value = [value]
+      }
+
+      let v = value.map((vv) => {
+        let val = utils.buildRef(vv)
+        if (vv.photos)
+          val.photo = vv.photos[0].url
+        return val
+      })
+      if (!resource[propName]) {
+        resource[propName] = []
+        resource[propName] = v
+      }
+      else {
+        let arr = resource[propName].filter((r) => {
+          return r.id === v.id
+        })
+        if (!arr.length)
+          resource[propName] = v
+      }
+
+      return { setItemCount: true }
+    }
+    let val
+    if (prop.items) {
+      if (prop.items.ref  &&  isEnum)
+        val = value.map((v) => utils.buildRef(v))
+      else
+        val = value
+    }
+    else if (isEnum) {
+      if (value.length)
+        val = value.map((v) => utils.buildRef(v))
+    }
+    else
+      val = value
+    if (value.length) {
+      resource[propName] =  val
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      this.floatingProps[propName] = resource[propName]
+    }
+    else if (prop.items.ref) {
+      resource[propName] = null
+    }
+    else {
+      delete resource[propName]
+      if (this.floatingProps)
+        delete this.floatingProps[propName]
+    }
+    return {}
+  },
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     let { label, required, model, value, prop, editable, errors, component } = params
