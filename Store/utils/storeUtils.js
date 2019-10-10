@@ -439,7 +439,11 @@ var storeUtils = {
     if (isChooser  &&  resource[prop.name]) {
       let rmodel = getModel(resource[TYPE])
       let property = getEnumProperty(getModel(modelName))
-      ret.push({_t: modelName, _r: `__reset`, [property]: `Reset "${translate(prop, rmodel)}"`})
+      ret.push({
+        [TYPE]: modelName,
+        [ROOT_HASH]: '__reset',
+        [property]: translate('reset', translate(prop, rmodel))
+      })
     }
 
     for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
