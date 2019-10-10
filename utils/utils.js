@@ -541,7 +541,7 @@ var utils = {
           if (!utils.compare(r1[p], r2[p], true))
             return false
         }
-        else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
+        else if (!r1[p]  ||  !r2[p]  ||  utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
       else {
