@@ -205,6 +205,7 @@ class NewItem extends Component {
     let params = {
         meta: metadata,
         model: model,
+        editable: true,
         // onSubmitEditing: this.onSavePressed.bind(this),
         component: NewItem
     };
