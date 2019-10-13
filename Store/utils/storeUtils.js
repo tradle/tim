@@ -21,6 +21,7 @@ import {
   isForm,
   applyLens,
   getId,
+  buildRef,
   makeModelTitle,
   getDisplayName,
   getStringPropertyValue,
@@ -36,6 +37,7 @@ const {
 } = constants
 const STYLES_PACK = 'tradle.StylesPack'
 const BOOKMARK = 'tradle.Bookmark'
+const APPLICATION = 'tradle.Application'
 const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
@@ -496,6 +498,102 @@ var storeUtils = {
       return r
     return
   },
+  getEmployeeBookmarks({ me, botPermalink }) {
+    const from = buildRef(me)
+    const etype = 'tradle.ClientOnboardingTeam'
+    const amodel = getModel(APPLICATION)
+    const aprops = amodel.properties
+    let teams = getModel(etype).enum
+    let bookmarks = [
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+          analyst: me.employeePass
+        },
+        message: `${translate('myCases')}`
+      },
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+          hasFailedChecks: true
+        },
+        message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
+      },
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+          hasCheckOverrides: true
+        },
+        message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
+      },
+    ]
+    teams.forEach(e => {
+      bookmarks.push({
+        type: APPLICATION,
+        message: `${translate('applications')} - ${translateEnum(e)}`,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+          assignedToTeam: {
+            id: `${etype}_${e.id}`,
+            title: e.title
+          }
+        },
+      })
+    })
+
+    let moreBookmarks = [
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+          status: 'started'
+        },
+        message: translate('applicationsStarted')
+      },
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+           analyst: 'NULL'
+        },
+        message: translate('applicationsNotAssigned')
+      },
+      {
+        type: APPLICATION,
+        message: translate('applications')
+      },
+      // { type: VERIFICATION },
+      // { type: SEAL },
+      // { type: 'tradle.SanctionsCheck' },
+      // { type: 'tradle.CorporationExistsCheck' },
+      // { type: MESSAGE,
+      //   bookmark: {
+      //     [TYPE]: MESSAGE,
+      //     _inbound: false,
+      //     _counterparty: ALL_MESSAGES,
+      //   },
+      // }
+    ]
+    moreBookmarks.forEach(b => bookmarks.push(b))
+
+    return bookmarks.map(b => {
+      const { type, bookmark, message } = b
+      const model = getModel(type)
+      return {
+        [TYPE]: BOOKMARK,
+        message: message  ||  translate(model), // makeModelTitle(model, true),
+        bookmark: bookmark  ||  {
+          [TYPE]: type,
+          _org: botPermalink
+        },
+        from
+      }
+    })
+  }
 }
 module.exports = storeUtils
 /**
