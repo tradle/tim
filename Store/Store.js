@@ -406,102 +406,6 @@ const disableBlockchainSync = node => {
   }
 }
 
-const getEmployeeBookmarks = ({ me, botPermalink }) => {
-  const from = utils.buildRef(me)
-  const etype = 'tradle.ClientOnboardingTeam'
-  const amodel = utils.getModel(APPLICATION)
-  const aprops = amodel.properties
-  let teams = utils.getModel(etype).enum
-  let bookmarks = [
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        analyst: me.employeePass
-      },
-      message: `${translate('myCases')}`
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        hasFailedChecks: true
-      },
-      message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        hasCheckOverrides: true
-      },
-      message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
-    },
-  ]
-  teams.forEach(e => {
-    bookmarks.push({
-      type: APPLICATION,
-      message: `${translate('applications')} - ${translateEnum(e)}`,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        assignedToTeam: {
-          id: `${etype}_${e.id}`,
-          title: e.title
-        }
-      },
-    })
-  })
-
-  let moreBookmarks = [
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        status: 'started'
-      },
-      message: translate('applicationsStarted')
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-         analyst: 'NULL'
-      },
-      message: translate('applicationsNotAssigned')
-    },
-    {
-      type: APPLICATION,
-      message: translate('applications')
-    },
-    // { type: VERIFICATION },
-    // { type: SEAL },
-    // { type: 'tradle.SanctionsCheck' },
-    // { type: 'tradle.CorporationExistsCheck' },
-    // { type: MESSAGE,
-    //   bookmark: {
-    //     [TYPE]: MESSAGE,
-    //     _inbound: false,
-    //     _counterparty: ALL_MESSAGES,
-    //   },
-    // }
-  ]
-  moreBookmarks.forEach(b => bookmarks.push(b))
-
-  return bookmarks.map(b => {
-    const { type, bookmark, message } = b
-    const model = utils.getModel(type)
-    return {
-      [TYPE]: BOOKMARK,
-      message: message  ||  translate(model), // utils.makeModelTitle(model, true),
-      bookmark: bookmark  ||  {
-        [TYPE]: type,
-        _org: botPermalink
-      },
-      from
-    }
-  })
-}
 
 const getServiceProviderByUrl = url => (SERVICE_PROVIDERS || [])
   .find(sp => utils.urlsEqual(sp.url, url))
@@ -596,18 +500,6 @@ var Store = Reflux.createStore({
     //   await this._setupYuki()
     // }
   },
-
-  // async _setupYuki() {
-  //   const node = await this._enginePromise
-  //   this._yuki = await loadYuki({
-  //     node,
-  //     db: level('~yuki')
-  //   })
-
-  //   await this.addYuki()
-  //   await this._yuki.welcome()
-  //   // this.postHistory()
-  // },
 
   async onAcceptTermsAndChat(params) {
     me._termsAccepted = true;
@@ -4343,7 +4235,7 @@ if (!res[SIG]  &&  res._message)
   async onAddItem(params) {
     var self = this
     var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry,
-         value, chat, cb, meta, isRegistration, noTrigger, lens, doNotSend, fileUpload, isRefresh} = params
+         value, chat, cb, meta, isRegistration, noTrigger, forceUpdate, lens, doNotSend, isRefresh} = params
     if (!value)
       value = resource
 
@@ -4364,7 +4256,7 @@ if (!res[SIG]  &&  res._message)
       // debugger
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
-    else if (meta.id === BOOKMARK)
+    if (meta.id === BOOKMARK)
       resource.to = this.buildRef(resource.from)
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
@@ -4619,7 +4511,7 @@ if (!res[SIG]  &&  res._message)
       if (await wasHierarchyUploaded())
         return
 
-      await handleMessage({noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, fileUpload})
+      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend})
     }
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
@@ -4651,6 +4543,7 @@ if (!res[SIG]  &&  res._message)
         })
       }
     }
+    return returnVal
     async function wasHierarchyUploaded() {
       let props = utils.getPropertiesWithAnnotation(meta, 'filePlugin')
       if (props  &&  utils.isEmpty(props))
@@ -4702,7 +4595,7 @@ if (!res[SIG]  &&  res._message)
       })
     }
 
-    async function handleMessage ({noTrigger, returnVal, lens, isRefresh, isRefreshRequest, fileUpload}) {
+    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -4715,7 +4608,7 @@ if (!res[SIG]  &&  res._message)
       let isNew = returnVal[ROOT_HASH] == null
       let rModel = self.getModel(rtype)
       let isApplication = rtype === APPLICATION
-      let forceUpdate
+      // let forceUpdate
       if (isNew) {
         returnVal._outbound = !isRefreshRequest
         returnVal._latest = true
@@ -4740,8 +4633,6 @@ if (!res[SIG]  &&  res._message)
             }
           }
         }
-        else if (params.fileUpload)
-          forceUpdate = true
       }
       let isContext = utils.isContext(rModel)
       let isForm = utils.isForm(rModel)
@@ -4764,10 +4655,10 @@ if (!res[SIG]  &&  res._message)
         } catch(err) {
           prevRes = await self._getItemFromServer({idOrResource: returnVal})
         }
+        self.rewriteStubs(prevRes)
         prevResCached = self._getItem(prevResId)
         _.extend(prevResCached, prevRes)
         if (!forceUpdate) {
-          self.rewriteStubs(prevResCached)
           if (utils.compare(returnVal, prevResCached)) {
             if (!noTrigger ||  isRefresh  ||  returnVal[NOT_CHAT_ITEM])
               self.trigger({action: 'noChanges'})
@@ -5137,7 +5028,7 @@ if (!res[SIG]  &&  res._message)
           let reviewed = Object.values(reviewedForms)
           let promises = reviewed.map(r => {
             delete r[NOT_CHAT_ITEM]
-            return self.onAddChatItem({resource: r, noTrigger: true, fileUpload: true})
+            return self.onAddChatItem({resource: r, noTrigger: true, forceUpdate: true})
           })
 
           try {
@@ -5225,7 +5116,8 @@ if (!res[SIG]  &&  res._message)
       }
       else if (product === CP_ONBOARDING ||
                product === CE_ONBOARDING) {
-        resource.associatedResource = params.application
+        resource.associatedResource = params.associatedResource
+        resource.parentApplication = params.parentApplication
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
         if (_.size(notes))
           resource.notes = notes
@@ -7269,6 +7161,8 @@ if (!res[SIG]  &&  res._message)
           if (links.includes(hash)  &&  !duplicateItems.includes(hash))
             duplicateItems.push(hash)
         }
+        if (item._dataBundle  &&  !item._latest)
+          continue
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
           if (item._originalSender  ||  item._forward)
             continue
@@ -8432,7 +8326,9 @@ if (!res[SIG]  &&  res._message)
           msgModel                            &&
           !utils.isMyProduct(msgModel)        &&
           !msgModel.notShareable              &&
-          !utils.isContext(msgModel)) {
+          !utils.isContext(msgModel)          &&
+          !utils.isImplementing(msgModel, INTERSECTION)
+          ) {
         shareType = msgModel.id
         // formRequest = r
         formToProduct[msgModel.id] = r.product
@@ -8628,7 +8524,8 @@ if (!res[SIG]  &&  res._message)
       if (msgModel  &&
           !utils.isMyProduct(msgModel)        &&
           !msgModel.notShareable              &&
-          !utils.isContext(msgModel)) {
+          !utils.isContext(msgModel)          &&
+          !utils.isImplementing(msgModel, INTERSECTION)) {
         let productModel = this.getModel(r.product)
         if (!productModel)
           continue
@@ -10475,6 +10372,9 @@ if (!res[SIG]  &&  res._message)
           }
         })
     }
+    if (val[TYPE] === DATA_BUNDLE) {
+      await this.getDataBundle().processDataBundle({val, context})
+    }
 
     var noTrigger, isRM, application
     var isModelsPack = type === MODELS_PACK
@@ -10680,7 +10580,7 @@ if (!res[SIG]  &&  res._message)
       // await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
       me.employeePass = self.buildRef(val)
-      const bookmarks = getEmployeeBookmarks({
+      const bookmarks = storeUtils.getEmployeeBookmarks({
         me,
         botPermalink: self.getRepresentative(me.organization)[ROOT_HASH]
       })
@@ -11436,6 +11336,9 @@ if (!res[SIG]  &&  res._message)
   getCurHash(r) {
     return r[CUR_HASH] ? r[CUR_HASH] : r.id.split('_')[2]
   },
+  setItem(key, value) {
+    this._setItem(key, value)
+  },
   _setItem(key, value) {
     if (!value[TYPE]  ||  value[TYPE] === SELF_INTRODUCTION)
       return
@@ -11754,3 +11657,15 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   this.parseProvider(sp)
   //   return this.addInfo(sp)
   // },
+  // async _setupYuki() {
+  //   const node = await this._enginePromise
+  //   this._yuki = await loadYuki({
+  //     node,
+  //     db: level('~yuki')
+  //   })
+
+  //   await this.addYuki()
+  //   await this._yuki.welcome()
+  //   // this.postHistory()
+  // },
+
