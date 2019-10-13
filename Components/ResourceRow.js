@@ -265,6 +265,8 @@ class ResourceRow extends Component {
         bg = {backgroundColor: bgColor}
       }
     }
+    else if (isChooser  &&  resource[ROOT_HASH] === '__reset')
+      bg = {backgroundColor: 'aliceblue'}
     else if (style)
       bg = {backgroundColor: style.listBg}
     if (!bg)
