@@ -28,9 +28,12 @@ import Actions from '../../Actions/Actions'
 import refreshPrefill from '../refreshPrefill.json'
 
 const {
+  FORM,
   VERIFICATION,
   ORGANIZATION
 } = constants.TYPES
+const SOURCE_ID = '_sourceId'
+const REF_ID = '_refId'
 
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
@@ -44,18 +47,70 @@ class DataBundle {
   constructor(store) {
     this.Store = store
   }
-  async processDataBundle({val, context}) {
+
+  async processDataBundle({val}) {
+    let context = await this.createProductRequest(val)
+
+    let { items } = val
+
     let fromR = this.Store._getItem(val.from)
     let forg = fromR && fromR.organization
     let title = forg  &&  forg.title  ||  val.from.title
-    Actions.showModal({title: translate('sendingYourData', val.items.length, title), showIndicator: true})
-    setTimeout(() => Actions.hideModal(), 3000)
-    let result = await Promise.all(val.items.map(item => this.Store.saveObject({object: item})))
-    let orgR = this.Store._getItem(val.from).organization
-    let me = getMe()
-    let key = getId(val)
 
-    // Can't do it async since the order matters forms should be processed before verifications
+    Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
+
+    setTimeout(() => Actions.hideModal(), 3000)
+
+    let result = await Promise.all(items.map(item => this.Store.saveObject({object: item})))
+    let resources = []
+    await this.fillResources({result, context, val, resources, doAdd: true})
+
+    if (items[0][SOURCE_ID]) {
+      await this.processDataBundleWithSourceIDs({val, context, resources})
+      return
+    }
+
+    await this.fireRefresh({val, context})
+    Actions.hideModal()
+  }
+
+  async processDataBundleWithSourceIDs({val, context, resources}) {
+    let { items } = val
+
+    let refs = {}
+    items.forEach(item => {
+      let sourceId = item[SOURCE_ID]
+      refs[sourceId] = {}
+
+      for (let p in item) {
+        if (typeof item[p] === 'object'  &&  item[p][REF_ID])
+          refs[sourceId][p] = item[p][REF_ID]
+      }
+    })
+    resources.forEach(async r => {
+      // debugger
+      let irefs = refs[r._sourceId]
+      let props = Object.keys(irefs)
+      if (!props)
+        return
+      props.forEach(prop => {
+        let sourceId = irefs[prop]
+        let rr = resources.find(r => r._sourceId === sourceId)
+        if (!rr)
+          return
+        r[prop] = this.Store.buildRef(rr)
+      })
+      // Can't do it async since the order matters forms should be processed before verifications
+      await this.Store.onAddChatItem({resource: r, noTrigger: true})
+    })
+
+    await this.fireRefresh({val, context})
+    Actions.hideModal()
+  }
+
+  async fillResources({result, context, val, resources, doAdd}) {
+    let me = getMe()
+    let dataBundle = getId(val)
     for (let i=0; i<result.length; i++) {
       let item = result[i]
       let r = item.object
@@ -73,13 +128,15 @@ class DataBundle {
       r[NOT_CHAT_ITEM] = true
       if (context)
         r._context = context
-      else
-        r._dataBundle = key
+
+      r._dataBundle = dataBundle
       r._latest = true
-      await this.Store.onAddChatItem({resource: r, noTrigger: true})
+      resources.push(r)
+      // Can't do it async since the order matters forms should be processed before verifications
+      if (doAdd)
+        await this.Store.onAddChatItem({resource: r, noTrigger: true})
     }
-    await this.fireRefresh({val, dataBundle: key, context})
-    Actions.hideModal()
+    return resources
   }
   async searchForRefresh(params) {
     let { to, resource } = params
@@ -164,18 +221,29 @@ class DataBundle {
     return {result, refreshProducts, requestForRefresh}
   }
 
-  async fireRefresh({val, dataBundle, context}) {
+  async createProductRequest(val) {
+    let me = getMe()
+    let requestForPR = {
+      [TYPE]: PRODUCT_REQUEST,
+      requestFor: REFRESH_PRODUCT,
+      from: me,
+      to: val.from,
+      _dataBundle: getId(val)
+    }
+    return await this.Store.onAddChatItem({resource: requestForPR, noTrigger: true})
+  }
+  async fireRefresh({val, context}) {
     setTimeout(async () => {
       let me = getMe()
-      let requestForPR = {
-        [TYPE]: PRODUCT_REQUEST,
-        requestFor: REFRESH_PRODUCT,
-        from: me,
-        to: val.from,
-        _dataBundle: dataBundle
-      }
-      await this.Store.onAddChatItem({resource:  requestForPR, noTrigger: true})
-
+      // let requestForPR = {
+      //   [TYPE]: PRODUCT_REQUEST,
+      //   requestFor: REFRESH_PRODUCT,
+      //   from: me,
+      //   to: val.from,
+      //   _dataBundle: dataBundle
+      // }
+      // await this.Store.onAddChatItem({resource:  requestForPR, noTrigger: true})
+      let dataBundle = getId(val)
       let requestForRefresh = {
         [TYPE]: FORM_REQUEST,
         from: val.from,
@@ -186,8 +254,10 @@ class DataBundle {
         _dataBundle: dataBundle,
         prefill: refreshPrefill
       }
-      let res = await this.Store.searchMessages({to: val.from, modelName: PRODUCT_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
-      let context = res && res.find(r => r.requestFor === REFRESH_PRODUCT  &&  dataBundle  &&  r._dataBundle === dataBundle)
+      if (!context) {
+        let res = await this.Store.searchMessages({to: val.from, modelName: PRODUCT_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
+        context = res && res.find(r => r.requestFor === REFRESH_PRODUCT  &&  dataBundle  &&  r._dataBundle === dataBundle)
+      }
       if (context)
         requestForRefresh._context = context
       await promiseDelay(5000)
@@ -204,16 +274,22 @@ class DataBundle {
     else //{
       requestForRefresh = requestsForRefresh.find(r => r._dataBundle === returnVal._dataBundle) //  &&  r.contextId  &&  r._context)
 
-    if (!requestForRefresh._context) {
+    let context = requestForRefresh._context
+    if (!context) {
       let contexts = await this.Store.searchMessages({to, modelName: PRODUCT_REQUEST, filterProps: {requestFor: REFRESH_PRODUCT, _documentCreated: false}})
-      let context = contexts && contexts.find(r => r._dataBundle === returnVal._dataBundle)
+      context = contexts && contexts.find(r => r._dataBundle === returnVal._dataBundle)
       debug('updateRefresh: ' + JSON.stringify(context, null, 2))
 
       if (context) {
         requestForRefresh._context = context
-        this.Store._setItem(getId(requestForRefresh), requestForRefresh)
+        this.Store.setItem(getId(requestForRefresh), requestForRefresh)
       }
     }
+    if (!returnVal._context  &&  context) {
+      returnVal._context = context
+      this.Store.setItem(getId(returnVal), returnVal)
+    }
+
     if (!requestForRefresh._forms)
       requestForRefresh._forms = []
 
@@ -222,10 +298,10 @@ class DataBundle {
 
     let id = getId(requestForRefresh)
     await this.Store.dbPut(id, requestForRefresh)
-    this.Store._setItem(id, requestForRefresh)
+    this.Store.setItem(id, requestForRefresh)
   }
 
-  async _onAddAll({resource, to, reviewed, message, total}) {
+  async _onAddAll({resource, to, reviewed, message}) {
     let rId = getId(resource)
     let r = this.Store._getItem(rId)
     this.Store.trigger({action: 'addItem', resource: r})
@@ -241,9 +317,12 @@ class DataBundle {
       message: messages.join('\n')
     })
 
-    let items = resource.items || reviewed
-    if (items.length === total)
-      r._documentCreated = true
+    let { result } = await this.searchForRefresh({to, resource, modelName: FORM})
+    let total = result.length
+
+    // let items = resource.items || reviewed
+    let items = result.filter(r => reviewed.find(rr => rr[ROOT_HASH] === r[ROOT_HASH]))
+
     let context = resource._context || r._context
     let me = getMe()
     let toRep = to[TYPE] === ORGANIZATION ? this.Store.getRepresentative(to) : to
@@ -298,8 +377,19 @@ class DataBundle {
         ])
       ])
       await promiseDelay(200)
+      let itemId = getId(item)
+      // let savedItem = this.Store._getItem(itemId)
+      // if (savedItem._latest) {
+      item._latest = false
+      this.Store.setItem(itemId, item)
+      // }
     }
     Actions.hideModal()
+    if (items.length === total) {
+      r._documentCreated = true
+      this.Store.onAddChatItem({ resource: r })
+    }
+
 
     // await this.onAddMessage({msg: {
     //   [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
@@ -312,3 +402,4 @@ class DataBundle {
   }
 }
 module.exports = DataBundle
+
