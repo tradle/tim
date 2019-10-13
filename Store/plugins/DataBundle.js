@@ -52,56 +52,29 @@ class DataBundle {
     let context = await this.createProductRequest(val)
 
     let { items } = val
-    if (items[0][SOURCE_ID]) {
-      await this.processDataBundleWithSourceIDs({val, context})
-      return
-    }
 
     let fromR = this.Store._getItem(val.from)
     let forg = fromR && fromR.organization
     let title = forg  &&  forg.title  ||  val.from.title
+
     Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
+
     setTimeout(() => Actions.hideModal(), 3000)
+
     let result = await Promise.all(items.map(item => this.Store.saveObject({object: item})))
-    let me = getMe()
-    let key = getId(val)
-
-
-    // Can't do it async since the order matters forms should be processed before verifications
     let resources = []
     await this.fillResources({result, context, val, resources, doAdd: true})
 
-    // for (let i=0; i<result.length; i++) {
-    //   let item = result[i]
-    //   let r = item.object
-    //   this.Store.rewriteStubs(r)
-    //   r[ROOT_HASH] = item.permalink
-    //   r[CUR_HASH] = item.link
-    //   let m = this.Store.getModel(r[TYPE])
-    //   let isMyMessage = r[TYPE] !== VERIFICATION  &&  !isMyProduct(m)
-    //   r.from = isMyMessage ?  me : val.from
-    //   r.to = isMyMessage ? val.from : this.Store.buildRef(me)
-    //   if (!r._time)
-    //     r._time = new Date().getTime()
-    //   if (!isItem(m))
-    //     r[IS_MESSAGE] = true
-    //   r[NOT_CHAT_ITEM] = true
-    //   if (context)
-    //     r._context = context
-    //   else
-    //     r._dataBundle = key
-    //   r._latest = true
-    //   await this.Store.onAddChatItem({resource: r, noTrigger: true})
-    // }
+    if (items[0][SOURCE_ID]) {
+      await this.processDataBundleWithSourceIDs({val, context, resources})
+      return
+    }
+
     await this.fireRefresh({val, context})
     Actions.hideModal()
   }
 
-  async processDataBundleWithSourceIDs({val, context}) {
-    let fromR = this.Store._getItem(val.from)
-    let forg = fromR && fromR.organization
-    let title = forg  &&  forg.title  ||  val.from.title
-
+  async processDataBundleWithSourceIDs({val, context, resources}) {
     let { items } = val
 
     let refs = {}
@@ -114,13 +87,6 @@ class DataBundle {
           refs[sourceId][p] = item[p][REF_ID]
       }
     })
-
-    Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
-    setTimeout(() => Actions.hideModal(), 3000)
-    let result = await Promise.all(items.map(item => this.Store.saveObject({object: item})))
-
-    let resources = []
-    await this.fillResources({result, context, val, resources})
     resources.forEach(async r => {
       // debugger
       let irefs = refs[r._sourceId]
@@ -134,6 +100,7 @@ class DataBundle {
           return
         r[prop] = this.Store.buildRef(rr)
       })
+      // Can't do it async since the order matters forms should be processed before verifications
       await this.Store.onAddChatItem({resource: r, noTrigger: true})
     })
 
@@ -165,6 +132,7 @@ class DataBundle {
       r._dataBundle = dataBundle
       r._latest = true
       resources.push(r)
+      // Can't do it async since the order matters forms should be processed before verifications
       if (doAdd)
         await this.Store.onAddChatItem({resource: r, noTrigger: true})
     }
@@ -355,8 +323,6 @@ class DataBundle {
     // let items = resource.items || reviewed
     let items = result.filter(r => reviewed.find(rr => rr[ROOT_HASH] === r[ROOT_HASH]))
 
-    if (items.length === total)
-      r._documentCreated = true
     let context = resource._context || r._context
     let me = getMe()
     let toRep = to[TYPE] === ORGANIZATION ? this.Store.getRepresentative(to) : to
@@ -419,6 +385,11 @@ class DataBundle {
       // }
     }
     Actions.hideModal()
+    if (items.length === total) {
+      r._documentCreated = true
+      this.Store.onAddChatItem({ resource: r })
+    }
+
 
     // await this.onAddMessage({msg: {
     //   [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
@@ -432,63 +403,3 @@ class DataBundle {
 }
 module.exports = DataBundle
 
-/*
-  async processDataBundle1({val, context}) {
-    let fromR = this.Store._getItem(val.from)
-    let forg = fromR && fromR.organization
-    let title = forg  &&  forg.title  ||  val.from.title
-
-    let { items } = val
-
-    let refs = {}
-    items.forEach(item => {
-      let sourceId = item[SOURCE_ID]
-      refs[sourceId] = {}
-
-      for (let p in item) {
-        if (typeof item[p] === 'object'  &&  item[p][REF_ID])
-          refs[sourceId][p] = item[p][REF_ID]
-      }
-    })
-
-    Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
-    setTimeout(() => Actions.hideModal(), 3000)
-
-    let firstLevel = items.filter(item => !(Object.keys(refs[item[SOURCE_ID]]).length))
-    let rest = items.filter(item => Object.keys(refs[item[SOURCE_ID]]).length)
-    let resources = []
-    while (true) {
-      debugger
-
-      let result = await Promise.all(firstLevel.map(item => this.Store.saveObject({object: item})))
-      this.fillResources(result, context, val, resources)
-      rest.forEach(r => {
-        let irefs = refs[r._sourceId]
-        let props = Object.keys(irefs)
-        if (props) {
-          props.forEach(prop => {
-            let sourceId = irefs[prop]
-            let rr = resources.find(r => r._sourceId === sourceId)
-            if (!rr)
-              return
-            r[prop] = this.Store.buildRef(rr)
-            delete irefs[prop]
-          })
-        }
-      })
-      firstLevel = rest.filter(item => !(Object.keys(refs[item[SOURCE_ID]]).length))
-      if (!firstLevel.length)
-        break
-      rest = rest.filter(item => Object.keys(refs[item[SOURCE_ID]]).length)
-    }
-
-    let key = getId(val)
-    // Can't do it async since the order matters forms should be processed before verifications
-    for (let i=0; i<resources.length; i++)
-      await this.Store.onAddChatItem({resource: r, noTrigger: true})
-
-    await this.fireRefresh({val, dataBundle: key, context})
-    Actions.hideModal()
-  }
-
- */

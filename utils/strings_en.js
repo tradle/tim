@@ -294,6 +294,7 @@ module.exports = {
     "pleaseChoose": "Please choose",
     "override": "Override",
     "olderResourceVersion": "This is the older version of this resource",
+    "reset": "Reset {1}",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

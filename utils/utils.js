@@ -518,7 +518,7 @@ var utils = {
           if (!utils.compare(r1[p], r2[p], true))
             return false
         }
-        else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
+        else if (!r1[p]  ||  !r2[p]  ||  utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
       else {
@@ -1030,7 +1030,7 @@ var utils = {
         return p
     }
   },
-  getDateValue(value) {
+  getDateValue(value, noHours) {
     let lang = language || 'en'
     switch (lang) {
     case 'fil':
@@ -1065,7 +1065,7 @@ var utils = {
       return localLocale.calendar()
 
     let format
-    if (!valueMoment.hours()  &&  !valueMoment.minutes()  &&  !valueMoment.seconds())
+    if (noHours  ||  (!valueMoment.hours()  &&  !valueMoment.minutes()  &&  !valueMoment.seconds()))
       format = 'LL'
     else
       format = 'LLL'
@@ -1259,7 +1259,7 @@ var utils = {
     }
     return val;
   },
-  formatDate(date, showTime) {
+  formatDate(date, noTime) {
     // var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
     var date = new Date(date);
     var now = new Date()
@@ -1280,9 +1280,12 @@ var utils = {
     //   // val = moment(date).format('[yesterday], h:mA');
     //   break;
     default:
-      val = utils.getDateValue(date) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
+      val = utils.getDateValue(date, noTime) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));      // val = moment(date).format('LL');
       // val = moment(date).format('LL');
     }
+
+    if (val.endsWith(' 12:00 AM'))
+      val = val.slice(0, val.length - 9)
     return val;
   },
   keyByValue: function (map, value) {
