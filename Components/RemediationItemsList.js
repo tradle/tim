@@ -69,10 +69,10 @@ class RemediationItemsList extends Component {
     let msg1 = isAll
              ? translate('youReviewedAll', numReviewed)
              : translate('youReviewed', numReviewed, numItems)
-    if (!isAll) {
-      Alert.alert(msg1)
-      return
-    }
+    // if (!isAll) {
+    //   Alert.alert(msg1)
+    //   return
+    // }
     let msg2 = isAll
              ? translate('confirmAllItems', numItems)
              : translate('areYouSureYouWantToConfirmAllItems', numItems)
@@ -83,7 +83,8 @@ class RemediationItemsList extends Component {
       msg2,
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-        {text: translate('OK'), onPress: this.processReviewed.bind(this)}
+        {text: translate('OK'), onPress: this.submitAllForms.bind(this)}
+        // {text: translate('OK'), onPress: this.processReviewed.bind(this)}
       ]
     )
   }
@@ -184,9 +185,10 @@ class RemediationItemsList extends Component {
   }
 
   submitAllForms() {
-    let self = this
+    let { reviewed, resource, to } = this.props
+
     utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addAll(self.props.resource, self.props.to, translate('confirmedMyData'))
+      Actions.addAll({resource, to, reviewed: reviewed && Object.values(reviewed), message: translate('confirmedMyData')})
     });
     this.props.navigator.pop()
   }
