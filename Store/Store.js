@@ -103,6 +103,7 @@ const excludeWhenSignAndSend = [
   '_termsAccepted',
   '_latest',
   '_outbound',
+  '_dataBundle',
   '_lens'
 ]
 
@@ -114,6 +115,8 @@ import utils, {translate, translateEnum} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
 import JsonPlugin from './plugins/JsonPlugin'
+import DataBundle from './plugins/DataBundle'
+
 import { models as baseModels, data as sampleData } from '@tradle/models'
 
 const ObjectModel = baseModels['tradle.Object']
@@ -4361,94 +4364,12 @@ if (!res[SIG]  &&  res._message)
   async onAddAll(resource, to, message) {
     this._pushSemaphore.stop()
     try {
-      await this._onAddAll(...arguments)
+      await this.getDataBundle()._onAddAll(...arguments)
     } finally {
       this._pushSemaphore.go()
     }
   },
 
-  async _onAddAll(resource, to, message) {
-    let rId = utils.getId(resource)
-    let r = this._getItem(rId)
-    r._documentCreated = true
-    this.trigger({action: 'addItem', resource: r})
-    await this.dbPut(rId, r)
-    let context = resource._context
-    // prepare some whitespace
-    const numRows = 5
-    const white = ' '.repeat(40)
-    const messages = new Array(numRows).fill(white)
-    const title = `${translate('importing')}...          ` // extra whitespace on purpose
-
-    Actions.showModal({
-      title,
-      message: messages.join('\n')
-    })
-    let toRep = to[TYPE] === ORGANIZATION ? this.getRepresentative(to) : to
-    for (let i = 0; i < resource.items.length; i++) {
-      await utils.promiseDelay(200)
-      let item = resource.items[i]
-      item._context = context
-      item.to = toRep
-      item.from = me
-      let itemType = utils.getType(item)
-      let itemModel = this.getModel(itemType)
-      let displayName = ''
-      if (itemModel) displayName += itemModel.title
-
-      let resourceDisplayName = item.title || utils.getDisplayName(item)
-      if (resourceDisplayName) {
-        displayName += ': ' + resourceDisplayName
-      }
-
-      if (i > 0) {
-        let last = messages.length - 1
-        messages[last] = messages[last].replace('importing', 'imported')
-      }
-
-      // let's not run out of room on the screen
-      let next = displayName // `importing "${displayName}"`
-      if (next.length > 30) {
-        next = next.slice(0, 27) + '...'
-      }
-
-      let idx = Math.min(numRows - 1, i)
-      if (messages[idx].trim()) {
-        messages.shift()
-        messages.push(next)
-      } else {
-        messages[idx] = next
-      }
-
-      Actions.showModal({
-        title,
-        message: messages.join('\n\n')
-      })
-
-      let promiseAddItem = this.onAddChatItem({ resource: item, noTrigger: true })
-      let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
-      await Promise.all([
-        promiseAddItem,
-        Promise.race([
-          promiseSentEvent,
-          // force continue loop
-          utils.promiseDelay(2000)
-        ])
-      ])
-    }
-
-    await utils.promiseDelay(200)
-    Actions.hideModal()
-
-    await this.onAddMessage({msg: {
-      [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
-      message: message,
-      time: new Date().getTime(),
-      _context: resource._context,
-      from: this.buildRef(me),
-      to: this.buildRef(r.from)
-    }})
-  },
   async onOpenURL(url) {
     let URL = parseURL(url.replace('/#', ''))
     let pathname = URL.pathname || URL.hostname
@@ -4487,7 +4408,7 @@ if (!res[SIG]  &&  res._message)
   async onAddItem(params) {
     var self = this
     var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry,
-         value, chat, cb, meta, isRegistration, noTrigger, lens, doNotSend, fileUpload, isRefresh} = params
+         value, chat, cb, meta, isRegistration, noTrigger, forceUpdate, lens, doNotSend, isRefresh} = params
     if (!value)
       value = resource
 
@@ -4508,7 +4429,7 @@ if (!res[SIG]  &&  res._message)
       // debugger
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
-    else if (meta.id === BOOKMARK)
+    if (meta.id === BOOKMARK)
       resource.to = this.buildRef(resource.from)
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
@@ -4764,13 +4685,13 @@ if (!res[SIG]  &&  res._message)
       if (await wasHierarchyUploaded())
         return
 
-      await handleMessage({noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, fileUpload})
+      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend})
     }
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
       let toId = utils.getId(returnVal.to)
-      await updateRequestFoRefresh(this._getItem(toId))
+      await this.getDataBundle().updateRequestForRefresh(this._getItem(toId))
     }
     if (disableFormRequest) {
       if (addDocumentCreated) {
@@ -4796,6 +4717,7 @@ if (!res[SIG]  &&  res._message)
         })
       }
     }
+    return returnVal
     async function wasHierarchyUploaded() {
       let props = utils.getPropertiesWithAnnotation(meta, 'filePlugin')
       if (props  &&  utils.isEmpty(props))
@@ -4833,7 +4755,7 @@ if (!res[SIG]  &&  res._message)
       })
     }
 
-    async function handleMessage ({noTrigger, returnVal, lens, isRefresh, isRefreshRequest, fileUpload}) {
+    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -4846,7 +4768,7 @@ if (!res[SIG]  &&  res._message)
       let isNew = returnVal[ROOT_HASH] == null
       let rModel = self.getModel(rtype)
       let isApplication = rtype === APPLICATION
-      let forceUpdate
+      // let forceUpdate
       if (isNew) {
         returnVal._outbound = !isRefreshRequest
         returnVal._latest = true
@@ -4871,8 +4793,6 @@ if (!res[SIG]  &&  res._message)
             }
           }
         }
-        else if (params.fileUpload)
-          forceUpdate = true
       }
       let isContext = utils.isContext(rModel)
       let isForm = utils.isForm(rModel)
@@ -4895,10 +4815,10 @@ if (!res[SIG]  &&  res._message)
         } catch(err) {
           prevRes = await self._getItemFromServer({idOrResource: utils.getId(returnVal)})
         }
+        self.rewriteStubs(prevRes)
         prevResCached = self._getItem(prevResId)
         _.extend(prevResCached, prevRes)
         if (!forceUpdate) {
-          self.rewriteStubs(prevResCached)
           if (utils.compare(returnVal, prevResCached)) {
             if (!noTrigger ||  isRefresh  ||  returnVal[NOT_CHAT_ITEM])
               self.trigger({action: 'noChanges'})
@@ -5199,18 +5119,6 @@ if (!res[SIG]  &&  res._message)
 
       return appToUpdate
     }
-    async function updateRequestFoRefresh(to) {
-      let [ requestForRefresh ] = await self.searchMessages({to, modelName: FORM_REQUEST, isRefresh: true, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-      if (!requestForRefresh._forms)
-        requestForRefresh._forms = []
-
-      if (!requestForRefresh._forms.some(f => f.hash === returnVal[ROOT_HASH]))
-        requestForRefresh._forms.push({type: resource[TYPE], isNew: false, hash: returnVal[ROOT_HASH]})
-
-      let id = utils.getId(requestForRefresh)
-      await self.dbPut(id, requestForRefresh)
-      self._setItem(id, requestForRefresh)
-    }
     async function deactivateFormRequests() {
       let org = returnVal.to.organization
       let orgId = utils.getId(org ? org : returnVal.to)
@@ -5294,7 +5202,7 @@ if (!res[SIG]  &&  res._message)
           let reviewed = Object.values(reviewedForms)
           let promises = reviewed.map(r => {
             delete r[NOT_CHAT_ITEM]
-            return self.onAddChatItem({resource: r, noTrigger: true, fileUpload: true})
+            return self.onAddChatItem({resource: r, noTrigger: true, forceUpdate: true})
           })
 
           try {
@@ -6285,7 +6193,7 @@ if (!res[SIG]  &&  res._message)
     }
     else if (isRefresh) {
       try {
-        ({result, refreshProducts, requestForRefresh} = await this.searchForRefresh(params))
+        ({result, refreshProducts, requestForRefresh} = await this.getDataBundle().searchForRefresh(params))
       } catch (err) {
         debugger
       }
@@ -7597,6 +7505,8 @@ if (!res[SIG]  &&  res._message)
           if (links.includes(hash)  &&  !duplicateItems.includes(hash))
             duplicateItems.push(hash)
         }
+        if (item._dataBundle  &&  !item._latest)
+          continue
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
           if (item._originalSender  ||  item._forward)
             continue
@@ -8802,7 +8712,9 @@ if (!res[SIG]  &&  res._message)
           msgModel                            &&
           !utils.isMyProduct(msgModel)        &&
           !msgModel.notShareable              &&
-          !utils.isContext(msgModel)) {
+          !utils.isContext(msgModel)          &&
+          !utils.isImplementing(msgModel, INTERSECTION)
+          ) {
         shareType = msgModel.id
         // formRequest = r
         formToProduct[msgModel.id] = r.product
@@ -9031,7 +8943,8 @@ if (!res[SIG]  &&  res._message)
       if (msgModel  &&
           !utils.isMyProduct(msgModel)        &&
           !msgModel.notShareable              &&
-          !utils.isContext(msgModel)) {
+          !utils.isContext(msgModel)          &&
+          !utils.isImplementing(msgModel, INTERSECTION)) {
         let productModel = this.getModel(r.product)
         if (!productModel)
           continue
@@ -10154,6 +10067,11 @@ if (!res[SIG]  &&  res._message)
       throw err
     }
   },
+  getDataBundle() {
+    if (!this.dataBundle)
+      this.dataBundle = new DataBundle(this)
+    return this.dataBundle
+  },
   async setupPushNotifications() {
     const node = await this._enginePromise
     const onSent = ({ message, object }) => {
@@ -10908,38 +10826,7 @@ if (!res[SIG]  &&  res._message)
         })
     }
     if (val[TYPE] === DATA_BUNDLE) {
-      let fromR = this._getItem(val.from)
-      let forg = fromR && fromR.organization
-      let title = forg  &&  forg.title  ||  val.from.title
-      Actions.showModal({title: translate('importingData', val.items.length, title), showIndicator: true})
-      setTimeout(() => Actions.hideModal(), 3000)
-      let result = await Promise.all(val.items.map(item => meDriver.saveObject({object: item})))
-      let orgR = this._getItem(val.from).organization
-      // Can't do it async since the order matters forms should be processed before verifications
-      for (let i=0; i<result.length; i++) {
-        let item = result[i]
-        let r = item.object
-        this.rewriteStubs(r)
-        r[ROOT_HASH] = item.permalink
-        r[CUR_HASH] = item.link
-        let m = this.getModel(r[TYPE])
-        let isMyMessage = r[TYPE] !== VERIFICATION  &&  !utils.isMyProduct(m)
-        r.from = isMyMessage ? this.buildRef(me) : val.from
-        r.to = isMyMessage ? val.from : this.buildRef(me)
-        if (!r._time)
-          r._time = new Date().getTime()
-        if (!utils.isItem(m))
-          r[IS_MESSAGE] = true
-        r[NOT_CHAT_ITEM] = true
-        if (context)
-          r._context = context
-        else
-          r._dataBundle = key
-        r._latest = true
-        await this.onAddChatItem({resource: r, noTrigger: true})
-      }
-await fireRefresh(val.from.organization)
-      Actions.hideModal()
+      await this.getDataBundle().processDataBundle({val, context})
     }
 
     var noTrigger, isRM, application
@@ -11163,7 +11050,7 @@ await fireRefresh(val.from.organization)
       // await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
       me.employeePass = self.buildRef(val)
-      const bookmarks = getEmployeeBookmarks({
+      const bookmarks = storeUtils.getEmployeeBookmarks({
         me,
         botPermalink: self.getRepresentative(me.organization)[ROOT_HASH]
       })
@@ -11919,6 +11806,9 @@ await fireRefresh(val.from.organization)
   },
   getCurHash(r) {
     return r[CUR_HASH] ? r[CUR_HASH] : r.id.split('_')[2]
+  },
+  setItem(key, value) {
+    this._setItem(key, value)
   },
   _setItem(key, value) {
     if (!value[TYPE]  ||  value[TYPE] === SELF_INTRODUCTION)
