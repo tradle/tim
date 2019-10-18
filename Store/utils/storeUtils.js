@@ -21,6 +21,7 @@ import {
   isForm,
   applyLens,
   getId,
+  getMe,
   buildRef,
   makeModelTitle,
   getDisplayName,
@@ -38,6 +39,7 @@ const {
 const STYLES_PACK = 'tradle.StylesPack'
 const BOOKMARK = 'tradle.Bookmark'
 const APPLICATION = 'tradle.Application'
+const LANGUAGE = 'tradle.Language'
 const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
@@ -415,10 +417,11 @@ var storeUtils = {
   getEnum(params, enums) {
     const { modelName, limit, query, lastId, prop, pin, isChooser, resource } = params
     let enumList = enums[modelName]
+    let property = getEnumProperty(getModel(modelName))
     if (query) {
       let q = query.toLowerCase()
       return enumList.filter((r) => {
-        let val = translateEnum(r)
+        let val = modelName === LANGUAGE ? r.language : translateEnum(r)
         if (!val)
           debugger
         val = val.toLowerCase()
@@ -440,7 +443,6 @@ var storeUtils = {
     let ret = []
     if (isChooser  &&  resource[prop.name]) {
       let rmodel = getModel(resource[TYPE])
-      let property = getEnumProperty(getModel(modelName))
       ret.push({
         [TYPE]: modelName,
         [ROOT_HASH]: '__reset',
@@ -450,6 +452,19 @@ var storeUtils = {
 
     for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
       ret.push(enumList[i])
+
+    // if (!getModel(modelName).sortProperty)
+    //   return ret
+    // let me = getMe()
+    // if (!me.language  ||  me.languageCode === 'en')
+    //   return ret
+
+    // let propToRes = []
+    // ret.map(r => propToRes.push({[translateEnum(r)]:  r}))
+
+    // propToRes.sort((a, b) => Object.keys(a)[0] - Object.keys(b)[0])
+    // ret = propToRes.map(r => Object.values(r)[0])
+
     return ret
   },
   checkCriteria({r, query, prop, isChooser}) {
