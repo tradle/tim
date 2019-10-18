@@ -4700,7 +4700,7 @@ if (!res[SIG]  &&  res._message)
         let refM = self.getModel(ref)
         if (!refM)
           continue
-        if (prop.range === 'document') {
+        if (!utils.isWeb()  &&  prop.range === 'document') {
             debugger
           let { url } = toChain[p]
           if (url  &&  url.indexOf('data:application/pdf;') === 0)
