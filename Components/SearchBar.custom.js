@@ -10,7 +10,7 @@ import PropTypes from 'prop-types'
 
 class SearchBar extends Component {
   render() {
-    let {bankStyle, filter} = this.props
+    let {bankStyle, filter, placeholder} = this.props
     return (
       <View style={{paddingVertical: 7, paddingHorizontal: Platform.OS === 'web' && 25 || 7, borderBottomWidth: 2, borderBottomColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}}>
       <TextInput
@@ -18,7 +18,7 @@ class SearchBar extends Component {
           autoCapitalize='none'
           onChange={this.props.onChangeText.bind(this)}
           autoFocus={true}
-          placeholder='Search'
+          placeholder={placeholder || 'Search'}
           placeholderTextColor='#bbbbbb'
           underlineColorAndroid='transparent'
           value={filter}
