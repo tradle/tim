@@ -1,5 +1,7 @@
 import omit from 'lodash/omit'
+
 import { TYPE } from '@tradle/constants'
+
 import { getModel, getPropertiesWithAnnotation, isNew } from '../utils/utils'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
@@ -17,8 +19,6 @@ module.exports = function LegalEntity ({ models }) {
     }) {
       if (!application) return
 
-      // if (application.requestFor !== LEGAL_ENTITY_PRODUCT)
-      //   return
       const type = form[TYPE]
       switch (type) {
       case CONTROLLING_ENTITY:
@@ -153,16 +153,14 @@ function getPropsForLegalEntity(form) {
   return {
       requestedProperties: [
         { name: 'info_group' },
+        { name: 'registrationDate', required: true },
         { name: 'companyType'},
+        { name: 'companyEmail', required: true },
         { name: 'address_group'},
         { name: 'taxIdNumber', required: false },
-        { name: 'companyEmail', required: false },
         { name: 'companyFax', required: false },
         { name: 'companyPhone', required: false },
         { name: 'DBAName', required: false },
-        // { name: 'streetAddress', required: false },
-        // { name: 'postalCode', required: false },
-        // { name: 'city', required: false },
       ]
     }
 }
@@ -192,11 +190,15 @@ function getPropsForControllingEntity(form) {
       ]
     }
     if (form.name) {
-      retProps.requestedProperties.push({name: 'name', required: false})
-      retProps.requestedProperties.push({name: 'startDate', required: false})
-      retProps.requestedProperties.push({name: 'endDate', required: false})
-      retProps.requestedProperties.push({name: 'occupation', required: false})
-      retProps.requestedProperties.push({name: 'inactive', required: false})
+      retProps.requestedProperties = retProps.requestedProperties.concat([
+        {name: 'name', required: false},
+        // {name: 'dateOfBirth'},
+        {name: 'startDate', required: false},
+        {name: 'endDate', required: false},
+        {name: 'occupation', required: false},
+        {name: 'controllingEntityCountry'},
+        {name: 'inactive', required: false},
+      ])
     }
     retProps.requestedProperties.push({name: 'legalEntity', required: true})
     return retProps
