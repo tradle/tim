@@ -118,6 +118,7 @@ const STATUS = 'tradle.Status'
 const SELF_INTRODUCTION = 'tradle.SelfIntroduction'
 const SELFIE = 'tradle.Selfie'
 const PHOTO_ID = 'tradle.PhotoID'
+const LANGUAGE = 'tradle.Language'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
@@ -441,7 +442,10 @@ var utils = {
         return utils.buildRef(resource).title
       return resource.title
     }
+
     let rtype = utils.getType(resource)
+    if (rtype === LANGUAGE)
+      return resource.language
     let e = dictionary.enums[rtype]
     if (utils.isStub(resource))  {
       if (!e) {
