@@ -4193,7 +4193,7 @@ if (!res[SIG]  &&  res._message)
   async onAddAll(resource, to, message) {
     this._pushSemaphore.stop()
     try {
-      await this.getDataBundle()._onAddAll(...arguments)
+      await this.getDataBundle().onAddAll(...arguments)
     } finally {
       this._pushSemaphore.go()
     }
@@ -4613,10 +4613,7 @@ if (!res[SIG]  &&  res._message)
       // let forceUpdate
       if (isNew) {
         returnVal._outbound = !isRefreshRequest
-        // if (returnVal[TYPE] !== FORM_REQUEST)
         returnVal._latest = true
-        // if (rModel._versionId)
-        //   returnVal._versionId = rModel._versionId
       }
       else {
         if (!returnVal[SIG])

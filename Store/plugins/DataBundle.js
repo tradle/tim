@@ -301,7 +301,7 @@ class DataBundle {
     this.Store.setItem(id, requestForRefresh)
   }
 
-  async _onAddAll({resource, to, reviewed, message}) {
+  async onAddAll({resource, to, reviewed, message}) {
     let rId = getId(resource)
     let r = this.Store._getItem(rId)
     this.Store.trigger({action: 'addItem', resource: r})
