@@ -245,7 +245,7 @@ import AWSClient from '@tradle/aws-client'
 // import map from 'map-stream'
 // import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // import createKeeper from '@tradle/keeper'
-import { createKeeper, promisifyKeeper, setGlobalKeeper } from '../utils/keeper'
+import { createKeeper, promisifyKeeper, setGlobalKeeper, replaceDataUrls } from '../utils/keeper'
 // import Restore from '@tradle/restore'
 import crypto from 'crypto'
 // import { loadOrCreate as loadYuki } from './yuki'
@@ -275,6 +275,7 @@ var list = {};
 var msgToObj = {}
 var enums = {}
 var chatMessages = {}
+var providerDictionaries = {}
 
 var contextIdToResourceId = {}
 
@@ -743,6 +744,9 @@ var Store = Reflux.createStore({
     // this.maybeWatchSeal(msg)
 
     const payload = msg.object.object
+    if (payload[TYPE] === FORM_REQUEST  &&  payload.product === REFRESH_PRODUCT)
+      return
+
     const originalPayload = payload[TYPE] === MESSAGE ? payload.object : payload
     debug('newObject:', originalPayload[TYPE])
     if (!objectinfo.author) {
@@ -1034,17 +1038,26 @@ var Store = Reflux.createStore({
         me.organization.style = org.style
       if (SERVICE_PROVIDERS.length  &&  !me.organization.url) {
         let orgId = utils.getId(org)
-        let o = SERVICE_PROVIDERS.filter((r) => {
+        let o = SERVICE_PROVIDERS.find((r) => {
           return r.org == orgId ? true : false
         })
-        if (o && o.length) {
-          if (o[0].url)
-            me.organization.url = o[0].url
-        }
+        if (o  &&  o.url)
+          me.organization.url = o.url
       }
     }
-    await utils.setMe(me)
+    let dictionaryDomains = this.getDictionaryDomains()
+    await utils.setMe({meRes: me, dictionaryDomains, providerDictionaries})
     this._resolveWithMe(me)
+  },
+  getDictionaryDomains() {
+    let dictionaries = {}
+    SERVICE_PROVIDERS.forEach(sp => {
+      let org = this._getItem(sp.org)
+      if (!org || !org.domain)
+        return
+      dictionaries[org.domain] = org.url
+    })
+    return dictionaries
   },
   async onUpdateMe(params) {
     let r = _.clone(me)
@@ -2344,6 +2357,12 @@ var Store = Reflux.createStore({
     // await promisify(node.actions.readSeal)(action)
   },
 
+  saveObject(opts) {
+    return meDriver.saveObject(opts)
+  },
+  execOnce(command, opts) {
+    return meDriver.once(command, opts)
+  },
   setProviderOnlineStatus(permalink, online) {
     // if (!SERVICE_PROVIDERS) return
 
@@ -4364,7 +4383,7 @@ if (!res[SIG]  &&  res._message)
   async onAddAll(resource, to, message) {
     this._pushSemaphore.stop()
     try {
-      await this.getDataBundle()._onAddAll(...arguments)
+      await this.getDataBundle().onAddAll(...arguments)
     } finally {
       this._pushSemaphore.go()
     }
@@ -4435,7 +4454,6 @@ if (!res[SIG]  &&  res._message)
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
     let isRemediation, isRefreshRequest
-
     if (context) {
       if (context.associatedResource  &&  context.notes) {
         for (let p in context.notes) {
@@ -4691,7 +4709,7 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
       let toId = utils.getId(returnVal.to)
-      await this.getDataBundle().updateRequestForRefresh(this._getItem(toId))
+      await this.getDataBundle().updateRequestForRefresh(this._getItem(toId), returnVal)
     }
     if (disableFormRequest) {
       if (addDocumentCreated) {
@@ -4722,7 +4740,12 @@ if (!res[SIG]  &&  res._message)
       let props = utils.getPropertiesWithAnnotation(meta, 'filePlugin')
       if (props  &&  utils.isEmpty(props))
         return
-      let vprops = Object.values(props).filter(prop => prop.ref === 'tradle.Json'  &&  returnVal[prop.name])
+      let vprops = Object.values(props).filter(prop => {
+        if (!returnVal[prop.name])
+          return false
+        if (self._filePlugins[prop.ref])
+          return true
+      })
       if (!vprops.length)
         return
       let prop = vprops[0]
@@ -4772,8 +4795,6 @@ if (!res[SIG]  &&  res._message)
       if (isNew) {
         returnVal._outbound = !isRefreshRequest
         returnVal._latest = true
-        // if (rModel._versionId)
-        //   returnVal._versionId = rModel._versionId
       }
       else {
         if (!returnVal[SIG])
@@ -4858,7 +4879,15 @@ if (!res[SIG]  &&  res._message)
           continue
 
         let refM = self.getModel(ref)
-        if (!refM  ||  refM.inlined)
+        if (!refM)
+          continue
+        if (!utils.isWeb()  &&  prop.range === 'document') {
+            debugger
+          let { url } = toChain[p]
+          if (url  &&  url.indexOf('data:application/pdf;') === 0)
+            await self._keeper.replaceDataUrls(toChain[p])
+        }
+        if (refM.inlined)
           continue
 
         let isObject = prop.type === 'object'
@@ -4867,28 +4896,6 @@ if (!res[SIG]  &&  res._message)
         else
           toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
       }
-      // else {
-      //   for (let p in toChain) {
-      //     let prop = properties[p]
-      //     if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
-      //       delete toChain[p]
-      //     else if (prop  &&  prop.type === 'object' &&
-      //              prop.ref /*&&  !returnVal.id*/   &&
-      //              !self.getModel(prop.ref).inlined &&
-      //              !prop.inlined                    &&
-      //              !prop.partial)
-      //       toChain[p] = self.buildSendRef(returnVal[p])
-      //   }
-
-      //   const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
-      //     _link: returnVal[CUR_HASH],
-      //     _permalink: returnVal[ROOT_HASH],
-      //     ...returnVal
-      //   })
-
-      //   _.extend(toChain, nextVersionScaffold)
-      //   _.extend(returnVal, nextVersionScaffold)
-      // }
       if (!isNew) {
         if (!returnVal[SIG]) debugger
 
@@ -4901,7 +4908,6 @@ if (!res[SIG]  &&  res._message)
         _.extend(toChain, nextVersionScaffold)
         _.extend(returnVal, nextVersionScaffold)
       }
-      // }
 
       toChain = utils.sanitize(toChain)
       try {
@@ -4955,7 +4961,7 @@ if (!res[SIG]  &&  res._message)
         }
         else {
           let toR
-          if (isRefreshRequest)
+          if (isRefreshRequest  ||  returnVal[TYPE] === FORM_REQUEST)
             toR = self._getItem(utils.getId(returnVal.from))
           else
             toR = self._getItem(utils.getId(returnVal.to))
@@ -4964,7 +4970,6 @@ if (!res[SIG]  &&  res._message)
           org = toR.organization
           org = self._getItem(utils.getId(org))
         }
-        // org = self._getItem(utils.getId(org))
 
         let params;
 
@@ -5298,7 +5303,7 @@ if (!res[SIG]  &&  res._message)
           id: utils.makeId(LEGAL_ENTITY, params.legalEntity)
         }//await this._getItemFromServer(utiOrResourcels.makeId(LEGAL_ENTITY, params.legalEntity))
         let meId = utils.getId(me)
-        await utils.setMe(me)
+        await utils.setMe({meRes: me})
         await db.put(meId, me)
         this._setItem(meId, me)
       }
@@ -6458,94 +6463,6 @@ if (!res[SIG]  &&  res._message)
 
     if (batch.length)
       await db.batch(batch)
-  },
-  async searchForRefresh(params) {
-    let { to, resource } = params
-    let [ requestForRefresh ] = await this.searchMessages({to, isRefresh: true, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-    if (!requestForRefresh)
-      return
-    let time = requestForRefresh._time
-    let forms = requestForRefresh  &&  requestForRefresh._forms
-
-    let refreshProducts
-    let result = await this.searchMessages(params)
-
-    result = result  &&  result.filter(r => {
-      if (r[TYPE] !== PRODUCT_REQUEST) {
-        // if (utils.getModel(r[TYPE]).notEditable)
-        //   return false
-        if (!r._latest)
-          return false
-        if (r._time < time)
-          return true
-        // Check if the resource that was created as new reviewed already
-        if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
-          return true
-        return false
-      }
-      if (r._time > time)
-        return false
-      // Gather all products for the customer before the request date
-      if (r._formsCount) {
-        if (!refreshProducts)
-          refreshProducts = []
-        refreshProducts.push(r)
-      }
-      return false
-    })
-    if (!result.length)
-      return
-
-    // result = result.filter(r => {
-    //   if (r._time < time)
-    //     return true
-    //   if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
-    //     return true
-    //   return false
-    // })
-    result.sort((a, b) => b._time - a._time)
-
-    let myProducts = await this.searchMessages({modelName: MY_PRODUCT, to})
-    if (myProducts) {
-      if (!refreshProducts)
-        refreshProducts = []
-      myProducts.forEach(p => {
-        if (p._time > time)
-          return
-        let requestFor = 'tradle.' + p[TYPE].split('.')[1].substring(2)
-        refreshProducts.push({
-          [TYPE]: PRODUCT_REQUEST,
-          requestFor
-        })
-      })
-    }
-
-    let moreForms = resource.prefill.additionalForms
-    if (!moreForms)
-      return {result, refreshProducts, requestForRefresh}
-    let toId = utils.getId(to)
-    moreForms.forEach(p => {
-      let product = refreshProducts  &&  refreshProducts.find(r => r.requestFor === p.product)
-      if (!product)
-        return
-      p.forms.forEach(f => {
-        if (forms) {
-          let form = forms.find(r => r.type === f  &&  !r.isNew)
-          if (form)
-            return
-        }
-        let context = this.buildRef(product)
-        let r = {
-          [TYPE]: f,
-          from: me,
-          to: this.getRepresentative(to)
-        }
-        if (context.id)
-          r._context = context
-        result.push(r)
-      })
-    })
-    return {result, refreshProducts, requestForRefresh}
   },
 
   async getCurrentContext(to, orgId) {
@@ -11018,7 +10935,7 @@ if (!res[SIG]  &&  res._message)
       me.organization = self.buildRef(org)
 
       me.isAgent = true
-      await utils.setMe(me)
+      await utils.setMe({meRes: me})
       self._setItem(meId, me)
       await self.dbPut(meId, me)
       let bookmark = {
