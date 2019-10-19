@@ -35,6 +35,7 @@ const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
 const APPLICATION = 'tradle.Application'
 const PARTIAL = 'tradle.Partial'
+const LANGUAGE = 'tradle.Language'
 
 var {
   ROOT_HASH,
@@ -433,7 +434,7 @@ class ResourceRow extends Component {
               </View>
       }
       let dn
-      if (utils.isEnum(model))
+      if (utils.isEnum(model)  &&  model.id !== LANGUAGE)
         dn = utils.translateEnum(resource)
       else
         dn = utils.getDisplayName(resource);
