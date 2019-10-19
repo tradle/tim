@@ -294,6 +294,12 @@ module.exports = {
     "override": "Override",
     "olderResourceVersion": "This is the older version of this resource",
     "reset": "Reset {1}",
+    // Bookmarks
+    "myCases": "My cases",
+    "applicationsHasFailedChecks": "Applications with failed Checks",
+    "applicationsHasCheckOverrides": "Applications with Check Overrides",
+    "applicationsNotAssigned": "Applications - not assigned",
+    "applicationsStarted": "Applications - started",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
