@@ -119,6 +119,7 @@ const STATUS = 'tradle.Status'
 const SELF_INTRODUCTION = 'tradle.SelfIntroduction'
 const SELFIE = 'tradle.Selfie'
 const PHOTO_ID = 'tradle.PhotoID'
+const LANGUAGE = 'tradle.Language'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
@@ -162,23 +163,24 @@ var utils = {
     }
     return true;
   },
-  async setMe(meR) {
-    me = meR;
+  async setMe({meRes, dictionaryDomains, providerDictionaries}) {
+    me = meRes
     if (!me)
       return
     if (!me.language)
       return
-
     let lang = me.languageCode
     if (!lang)
       lang = me.language.id.split('_')[1]
     if (!lang)
       return
-    if (language === lang)
-      return
+    if (language === lang) {
+      if (!utils.isEmpty(providerDictionaries) || utils.isEmpty(dictionaryDomains))
+        return
+    }
     language = lang
     strings = await Strings.setLanguage(lang)
-    let d = await dictionaries(lang)
+    let d = await dictionaries({lang, dictionaryDomains, providerDictionaries})
     if (d) {
       const enD = getDictionary()
       dictionary = _.extend({}, enD, d)
@@ -464,7 +466,10 @@ var utils = {
         return utils.buildRef(resource).title
       return resource.title
     }
+
     let rtype = utils.getType(resource)
+    if (rtype === LANGUAGE)
+      return resource.language
     let e = dictionary.enums[rtype]
     if (utils.isStub(resource))  {
       if (!e) {
