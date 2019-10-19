@@ -21,6 +21,7 @@ import {
   isForm,
   applyLens,
   getId,
+  getMe,
   buildRef,
   makeModelTitle,
   getDisplayName,
@@ -40,7 +41,7 @@ const BOOKMARK = 'tradle.Bookmark'
 const APPLICATION = 'tradle.Application'
 const MSG_LINK = '_msg'
 
-const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
+const { FORM, IDENTITY, VERIFICATION, MESSAGE, LANGUAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
 var dictionary
 
@@ -415,10 +416,11 @@ var storeUtils = {
   getEnum(params, enums) {
     const { modelName, limit, query, lastId, prop, pin, isChooser, resource } = params
     let enumList = enums[modelName]
+    let property = getEnumProperty(getModel(modelName))
     if (query) {
       let q = query.toLowerCase()
       return enumList.filter((r) => {
-        let val = translateEnum(r)
+        let val = modelName === LANGUAGE ? r.language : translateEnum(r)
         if (!val)
           debugger
         val = val.toLowerCase()
@@ -440,7 +442,6 @@ var storeUtils = {
     let ret = []
     if (isChooser  &&  resource[prop.name]) {
       let rmodel = getModel(resource[TYPE])
-      let property = getEnumProperty(getModel(modelName))
       ret.push({
         [TYPE]: modelName,
         [ROOT_HASH]: '__reset',
@@ -511,7 +512,7 @@ var storeUtils = {
           _org: botPermalink,
           analyst: me.employeePass
         },
-        message: `${translate('myCases')}`
+        message: 'myCases'
       },
       { type: APPLICATION,
         bookmark: {
@@ -519,7 +520,7 @@ var storeUtils = {
           _org: botPermalink,
           hasFailedChecks: true
         },
-        message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
+        message: 'applicationsHasFailedChecks',
       },
       { type: APPLICATION,
         bookmark: {
@@ -527,13 +528,13 @@ var storeUtils = {
           _org: botPermalink,
           hasCheckOverrides: true
         },
-        message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
+        message: 'applicationsHasCheckOverrides',
       },
     ]
     teams.forEach(e => {
       bookmarks.push({
         type: APPLICATION,
-        message: `${translate('applications')} - ${translateEnum(e)}`,
+        message: `${translate('Applications')} - ${translateEnum(e)}`,
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -552,7 +553,7 @@ var storeUtils = {
           _org: botPermalink,
           status: 'started'
         },
-        message: translate('applicationsStarted')
+        message: 'applicationsStarted'
       },
       { type: APPLICATION,
         bookmark: {
@@ -560,11 +561,11 @@ var storeUtils = {
           _org: botPermalink,
            analyst: 'NULL'
         },
-        message: translate('applicationsNotAssigned')
+        message: 'applicationsNotAssigned'
       },
       {
         type: APPLICATION,
-        message: translate('applications')
+        message: 'applications'
       },
       // { type: VERIFICATION },
       // { type: SEAL },
