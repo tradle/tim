@@ -308,7 +308,7 @@ class ResourceRow extends Component {
                        </TouchableOpacity>
                      </View>
     }
-    let textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
+    let textStyle = noImage ? [styles.textContainer, {marginVertical: 7, alignItems: 'flex-start'}] : styles.textContainer;
 
     this.dateProp = utils.isContext(rType) ? '_time' : this.dateProp
 
