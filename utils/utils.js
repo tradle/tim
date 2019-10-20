@@ -927,6 +927,7 @@ var utils = {
     let props = model.properties
     let rType = utils.getType(resource)
     let resourceModel = rType && utils.getModel(rType)
+    let rProps = resourceModel.properties
 
     var displayName = '';
 
@@ -991,6 +992,8 @@ var utils = {
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let p =  vCols[i]
       let prop = props[p]
+      if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p] !== -1)
+        continue
       if (prop.markdown  ||  prop.signature  ||  prop.type === 'boolean')
         continue
       if (prop.type === 'array') {
@@ -1007,10 +1010,7 @@ var utils = {
 
       if (utils.isContainerProp(p, resourceModel))
         continue
-      if (!resource[p]  ||  excludeProps.indexOf(p) !== -1)
-      // if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p] !== -1)
-        continue
-      displayName = utils.getStringValueForProperty(resource, p, resourceModel.properties)
+      displayName = utils.getStringValueForProperty(resource, p, rProps)
       if (propsUsed)
         propsUsed.push(prop)
     }
