@@ -200,7 +200,9 @@ class TimHome extends Component {
 
     let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
 
-    let state = {firstPage: pathname, qs, isDeepLink: true}
+    let firstPage = qs.schema && qs.schema || pathname
+
+    let state = {firstPage, qs, isDeepLink: true}
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -386,7 +388,7 @@ class TimHome extends Component {
       this.signInAndContinue()
       return
     case 'getMe':
-      await utils.setMe(me)
+      await utils.setMe({meRes: me})
       this.setState({hasMe: me})
       if (me.isEmployee) {
         debugger
@@ -510,6 +512,10 @@ class TimHome extends Component {
         //   url: this.state.url
         // })
         Actions.getProvider(qs)
+        break
+      case 'ImportData':
+        this.showChatPage({resource: qs.provider, action: state.wasDeepLink ? 'push' : 'replace', showProfile: state.wasDeepLink})
+        Actions.importData(qs)
         break
       case 'r':
         Actions.getResourceFromLink(qs)
@@ -831,7 +837,7 @@ class TimHome extends Component {
   }
 
   onReloadDBPressed() {
-    utils.setMe(null);
+    utils.setMe({meRes: null});
     utils.setModels(null);
     Actions.reloadDB();
   }
