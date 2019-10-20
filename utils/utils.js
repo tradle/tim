@@ -162,8 +162,8 @@ var utils = {
     }
     return true;
   },
-  async setMe(meR) {
-    me = meR;
+  async setMe({meRes, dictionaryDomains, providerDictionaries}) {
+    me = meRes;
     if (!me)
       return
     if (!me.language)
@@ -174,11 +174,13 @@ var utils = {
       lang = me.language.id.split('_')[1]
     if (!lang)
       return
-    if (language === lang)
-      return
+    if (language === lang) {
+      if (!utils.isEmpty(providerDictionaries) || utils.isEmpty(dictionaryDomains))
+        return
+    }
     language = lang
     strings = await Strings.setLanguage(lang)
-    let d = await dictionaries(lang)
+    let d = await dictionaries({lang, dictionaryDomains, providerDictionaries})
     if (d) {
       const enD = getDictionary()
       dictionary = _.extend({}, enD, d)
