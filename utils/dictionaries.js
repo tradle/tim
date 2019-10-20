@@ -8,7 +8,7 @@ const MODEL = 'model'
 const PROPERTY_NAME = 'propertyName'
 const URL = 'https://s3.eu-west-2.amazonaws.com/tradle.io/dictionaries/'
 
-async function dictionaries(lang) {
+async function dictionaries({lang, dictionaryDomains, providerDictionaries}) {
   let headers = { cache: 'no-cache', 'content-type': 'application/json' }
   let fn = `dictionary_${lang}.json`
   const resM = await fetchWithBackoff(`${URL}models/${fn}`, { headers }, 5000)
@@ -33,6 +33,22 @@ async function dictionaries(lang) {
     let dict = genDictionary(dMCO, lang, d.enums)
     _.merge(d, dict)
   }
+  if (!dictionaryDomains)
+    return d
+  Object.keys(dictionaryDomains).forEach(async d => {
+    if (providerDictionaries[d])
+      return
+    debugger
+    const f = await fetchWithBackoff(`${URL}${d.split('.')[0]}/${fn}`, { headers }, 5000)
+    if (f.status > 300)
+      return
+    providerDictionaries[d] = true
+    const m = await f.json()
+    if (m) {
+      let dict = genDictionary(m, lang, d.enums)
+      _.merge(d, dict)
+    }
+  })
 
   return d
 }
