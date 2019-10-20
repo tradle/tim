@@ -526,7 +526,7 @@ var storeUtils = {
           _org: botPermalink,
           analyst: me.employeePass
         },
-        message: `${translate('myCases')}`
+        message: 'myCases'
       },
       { type: APPLICATION,
         bookmark: {
@@ -534,7 +534,7 @@ var storeUtils = {
           _org: botPermalink,
           hasFailedChecks: true
         },
-        message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
+        message: 'hasFailedChecks'
       },
       { type: APPLICATION,
         bookmark: {
@@ -542,7 +542,7 @@ var storeUtils = {
           _org: botPermalink,
           hasCheckOverrides: true
         },
-        message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
+        message: 'hasCheckOverrides'
       },
     ]
     teams.forEach(e => {
@@ -567,7 +567,7 @@ var storeUtils = {
           _org: botPermalink,
           status: 'started'
         },
-        message: translate('applicationsStarted')
+        message: 'applicationsStarted'
       },
       { type: APPLICATION,
         bookmark: {
@@ -579,7 +579,7 @@ var storeUtils = {
       },
       {
         type: APPLICATION,
-        message: translate('applications')
+        message: 'applications'
       },
       // { type: VERIFICATION },
       // { type: SEAL },
