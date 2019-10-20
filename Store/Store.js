@@ -283,6 +283,7 @@ var list = {};
 var msgToObj = {}
 var enums = {}
 var chatMessages = {}
+var providerDictionaries = {}
 
 var contextIdToResourceId = {}
 
@@ -915,17 +916,26 @@ var Store = Reflux.createStore({
         me.organization.style = org.style
       if (SERVICE_PROVIDERS.length  &&  !me.organization.url) {
         let orgId = utils.getId(org)
-        let o = SERVICE_PROVIDERS.filter((r) => {
+        let o = SERVICE_PROVIDERS.find((r) => {
           return r.org == orgId ? true : false
         })
-        if (o && o.length) {
-          if (o[0].url)
-            me.organization.url = o[0].url
-        }
+        if (o  &&  o.url)
+          me.organization.url = o.url
       }
     }
-    await utils.setMe(me)
+    let dictionaryDomains = this.getDictionaryDomains()
+    await utils.setMe({meRes: me, dictionaryDomains, providerDictionaries})
     this._resolveWithMe(me)
+  },
+  getDictionaryDomains() {
+    let dictionaries = {}
+    SERVICE_PROVIDERS.forEach(sp => {
+      let org = this._getItem(sp.org)
+      if (!org || !org.domain)
+        return
+      dictionaries[org.domain] = org.url
+    })
+    return dictionaries
   },
   async onUpdateMe(params) {
     let r = _.clone(me)
@@ -5110,7 +5120,7 @@ if (!res[SIG]  &&  res._message)
           id: utils.makeId(LEGAL_ENTITY, params.legalEntity)
         }//await this._getItemFromServer(utils.makeId(LEGAL_ENTITY, params.legalEntity))
         let meId = utils.getId(me)
-        await utils.setMe(me)
+        await utils.setMe({meRes: me})
         await db.put(meId, me)
         this._setItem(meId, me)
       }
@@ -5212,6 +5222,7 @@ if (!res[SIG]  &&  res._message)
     }
     return newProvider
   },
+
   async onImportData(data) {
     let { host, provider, dataHash } = data
     let providerId = utils.makeId(PROFILE, data.provider)
@@ -10563,7 +10574,7 @@ if (!res[SIG]  &&  res._message)
       me.organization = self.buildRef(org)
 
       me.isAgent = true
-      await utils.setMe(me)
+      await utils.setMe({meRes: me})
       self._setItem(meId, me)
       await self.dbPut(meId, me)
       let bookmark = {
