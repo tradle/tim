@@ -8747,8 +8747,8 @@ if (!res[SIG]  &&  res._message)
         if (shareType === LEGAL_ENTITY) {
           if (r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
             return
-          if (!r.document || !r.companyName)
-            return
+          // if (!r.document || !r.companyName)
+          //   return
         }
         if (this.checkIfWasShared(r, to, context))
           return
