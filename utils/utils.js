@@ -1192,8 +1192,12 @@ var utils = {
         let ref = prop.ref  ||  prop.items.ref
         if (Array.isArray(v))
           v = v.map(r => r.title || utils.getDisplayName(r, utils.getModel(ref))).join(', ')
-        else
-          v = v.title || utils.getDisplayName(v, utils.getModel(ref))
+        else {
+          if (utils.isEnum(ref))
+            v = utils.translateEnum(v)
+          else
+            v = v.title || utils.getDisplayName(v, utils.getModel(ref))
+        }
       }
       else if (prop.range  &&  prop.range  === 'check')
         v = ''
