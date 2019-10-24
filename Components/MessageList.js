@@ -633,7 +633,13 @@ class MessageList extends Component {
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier
     if (!model.notEditable) {
-      isVerifier = application  ? utils.isRM(application) : !verification && utils.isVerifier(r)
+      if (application) {
+        if (utils.isRM(application)  &&  r._latest)
+          isVerifier = true
+        else
+          isVerifier = !verification && utils.isVerifier(r)
+      }
+
     }
     let { resource, currency } = this.props
     let lensId = utils.getLensId(r, resource)
