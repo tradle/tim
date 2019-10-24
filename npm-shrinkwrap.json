@@ -102,7 +102,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#76edb91a2efa8c40a7ca180c4c147c34a3649986"
+      "resolved": "git://github.com/tradle/custom-models.git#818ab11b7b7570132867c05ec0754848be486649"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -225,7 +225,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#2ef385d44e69ed94a042d3bcdfcb4f93ff72a7ce"
+      "resolved": "git://github.com/tradle/models.git#492ed146041c97f33e19545fbbb9a9e048b65d21"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -235,7 +235,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#d712e6325ec11060d3944ae817d3f4be1af5307f"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#cd9f2705d735c63535e3ff36a7fdb9d8f71d40ed"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
