@@ -6585,6 +6585,16 @@ if (!res[SIG]  &&  res._message)
     chatItems.sort((a, b) => {
       return a._time - b._time
     })
+    let roots = {}
+    for (let i=chatItems.length - 1; i>=0; i--) {
+      let item = chatItems[i]
+      if (roots[item[ROOT_HASH]])
+        item._latest = false
+      else {
+        roots[item[ROOT_HASH]] = true
+        item._latest = true
+      }
+    }
     if (context) {
       let formTypes = []
       let lastFormRequest
