@@ -45,6 +45,7 @@ const {
 } = constants
 
 const INTERSECTION = 'tradle.Intersection'
+const FILE = 'tradle.File'
 
 const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
@@ -1141,7 +1142,7 @@ var NewResourceMixin = {
     let pName = params.prop
     let prop = props[pName]
     let ref = prop.ref || prop.items.ref
-    let isMedia = pName === 'video' ||  pName === 'photos'  ||  ref === PHOTO  ||  utils.isSubclassOf(ref, 'tradle.File')
+    let isMedia = pName === 'video' ||  pName === 'photos'  ||  ref === PHOTO   ||  ref === FILE ||  utils.isSubclassOf(ref, FILE)
     let onChange
     if (isMedia)
       onChange = this.setState.bind(this)
