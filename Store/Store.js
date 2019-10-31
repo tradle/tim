@@ -7084,7 +7084,7 @@ if (!res[SIG]  &&  res._message)
       case FORM:
         if (m.id === PRODUCT_REQUEST  ||  m.id === FORM_REQUEST)
           break
-        if (!FORM  &&  !utils.isSubclassOf(FORM, m))
+        if (m.id !== FORM  &&  !utils.isSubclassOf(m, FORM))
           break
         if (APPLICATION_NOT_FORMS.includes(m.id))
           break
