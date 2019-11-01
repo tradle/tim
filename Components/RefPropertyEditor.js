@@ -47,6 +47,7 @@ const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const PHOTO_ID = 'tradle.PhotoID'
 const ID_CARD = 'tradle.IDCardType'
 const TREE = 'tradle.Tree'
+const FILE = 'tradle.File'
 
 const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png'
 
@@ -88,7 +89,7 @@ class RefPropertyEditor extends Component {
     let { lcolor, bcolor } = labelAndBorder(pName)
     let isVideo = pName === 'video'
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
-    let isFile = prop.ref  &&  utils.isSubclassOf(prop.ref, 'tradle.File')
+    let isFile = prop.ref  &&  (prop.ref === FILE ||  utils.isSubclassOf(prop.ref, FILE))
     let isIdentity = prop.ref === IDENTITY
 
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
@@ -110,7 +111,9 @@ class RefPropertyEditor extends Component {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto)
         label = pLabel
-      else
+      else if (isFile  &&  resource[pName].name)
+        label = resource[pName].name
+      if (!label)
         label = this.getRefLabel(prop, resource)
       propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
     }
@@ -201,7 +204,7 @@ class RefPropertyEditor extends Component {
                    </TouchableOpacity>
     else if (isVideo  ||  isPhoto  ||  isFile) {
       // HACK
-      if (useImageInput({resource, prop})) {
+      if (useImageInput({resource, prop, isFile})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
         if (isDocument) {
           if (isRefresh) {
@@ -342,6 +345,11 @@ class RefPropertyEditor extends Component {
     // debugger
     if (!item)
       return;
+    if (item.file && item.file.constructor.name === 'File') {
+      item.type = item.file.type
+      item.name = item.file.name
+      delete item.file
+    }
     let { model, floatingProps, resource } = this.props
     const props = model.properties
     if (props[propName].ref)
@@ -609,14 +617,17 @@ class RefPropertyEditor extends Component {
     Actions.getIdentity({prop, ...result.data })
   }
 }
-function useImageInput({resource, prop}) {
+function useImageInput({resource, prop, isFile}) {
   let pName = prop.name
   const isScan = pName === 'scan'
   let rtype = utils.getType(resource)
   let { documentType } = resource
+  let isFile = utils.isSubclassOf(FILE, prop.ref)
   if (isWeb()  ||  isSimulator())
     return isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
   else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
+    return true
+  else if (isFile)
     return true
   else
     return prop.allowPicturesFromLibrary  &&  (!isScan  ||  !prop.scanner)

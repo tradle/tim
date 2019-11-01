@@ -111,7 +111,7 @@ class RemediationItemsList extends Component {
 
   onAction(params) {
     let { to, action, list, products, resource, isRefresh, requestForRefresh } = params
-    if (!isRefresh)
+    if (!isRefresh  &&  (!resource  ||  !resource._dataBundle))
       return
     if (!to)
       to = resource.to  &&  resource.to.organization
@@ -223,13 +223,14 @@ class RemediationItemsList extends Component {
           resource: resource,
           currency: currency,
           isReview: true,
-          action: () => {
-            // let newList = utils.clone(this.state.list)
-            Actions.addChatItem({resource: resource, isRefresh: true})
-            reviewed[rowId] = resource
+          action: (value) => {
+            reviewed[rowId] = {...resource, ...value}
+
+            let list = this.state.list
+            list.splice(rowId, 1, reviewed[rowId])
             this.setState({
               // list: newList,
-              dataSource: this.state.dataSource.cloneWithRows(this.state.list)
+              dataSource: this.state.dataSource.cloneWithRows(list)
             })
             navigator.pop()
           }
