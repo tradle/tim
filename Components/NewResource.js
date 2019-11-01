@@ -138,11 +138,11 @@ class NewResource extends Component {
     };
   }
   refresh() {
-    this.onSavePressed()
+    let value = this.onSavePressed()
     if (this.state.missedRequiredOrErrorValue  &&  !utils.isEmpty(this.state.missedRequiredOrErrorValue))
       this.state.submitted = false
     else
-      this.props.action()
+      this.props.action(value)
   }
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
@@ -505,7 +505,7 @@ class NewResource extends Component {
       this.setState(state)
       // HACK for REFRESH
       this.state.missedRequiredOrErrorValue = missedRequiredOrErrorValue
-      return;
+      return
     }
     if (!value)
       debugger
@@ -544,6 +544,7 @@ class NewResource extends Component {
         params.disableFormRequest = originatingMessage
       Actions.addChatItem(params)
     }
+    return json
   }
 
   // HACK: the value for property of the type that is subClassOf Enum is set on resource

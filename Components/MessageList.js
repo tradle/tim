@@ -236,6 +236,8 @@ class MessageList extends Component {
     }
     this.state.newItem = false
     if (action === 'updateItem') {
+      if (resource._dataBundle)
+        return
       let resourceId = utils.getId(resource)
       let replaced
       let list = this.state.list.map((r) => {
