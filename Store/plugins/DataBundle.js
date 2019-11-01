@@ -87,7 +87,7 @@ class DataBundle {
 
     Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
 
-    setTimeout(() => Actions.hideModal(), 3000)
+    setTimeout(() => Actions.hideModal(), 5000)
     let resources = []
     await this.fillResources({result, context, val, resources, doAdd: true})
 
