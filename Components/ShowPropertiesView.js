@@ -28,6 +28,7 @@ var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const PHOTO = 'tradle.Photo'
 const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
+const FILE = 'tradle.File'
 
 const {
   TYPE,
@@ -224,7 +225,12 @@ class ShowPropertiesView extends Component {
             return
           val = <Image source={{uri: val.url}} resizeMode='cover' style={styles.thumb} />
         }
-        else if (pMeta.ref == MONEY) {
+        else if (val && utils.isSubclassOf(pMeta.ref, FILE)) {
+          let idx = val.url.indexOf(',')
+          let dn = val.url.substring(0, idx)
+          val = <Text style={[styles.title, styles.linkTitle]}>{dn}</Text>
+        }
+        else if (pMeta.ref === MONEY) {
           let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
