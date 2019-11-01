@@ -38,7 +38,7 @@ async function dictionaries({lang, dictionaryDomains, providerDictionaries}) {
   Object.keys(dictionaryDomains).forEach(async d => {
     if (providerDictionaries[d])
       return
-    debugger
+    // debugger
     const f = await fetchWithBackoff(`${URL}${d.split('.')[0]}/${fn}`, { headers }, 5000)
     if (f.status > 300)
       return
