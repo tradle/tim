@@ -183,15 +183,23 @@ function getPropsForControllingEntity(form) {
     let retProps = {
       requestedProperties: [
         {name: 'typeOfControllingPerson', required: true},
-        // {name: 'controllingPerson', required: false},
         {name: 'natureOfControl', required: false},
-        {name: 'emailAddress', required: true},
-        {name: 'phone', required: false},
       ]
     }
+    if (form.name)
+      retProps.requestedProperties.push({name: 'name', required: false})
+
+    retProps.requestedProperties.push({name: 'isSeniorManager'})
+    if (form.isSeniorManager)
+      retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
+
+    retProps.requestedProperties.push({name: 'notificationMethod'})
+    retProps.requestedProperties.push({name: 'emailAddress', required: true})
+    if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
+      retProps.requestedProperties.push({name: 'phone', required: true})
+
     if (form.name) {
       retProps.requestedProperties = retProps.requestedProperties.concat([
-        {name: 'name', required: false},
         // {name: 'dateOfBirth'},
         {name: 'startDate', required: false},
         {name: 'endDate', required: false},
