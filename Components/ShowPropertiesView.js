@@ -218,10 +218,10 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.type === 'date') {
-        let valueMoment = moment.utc(val)
-        let date = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date(), valueMoment.hours(), valueMoment.minutes())
-        val = utils.formatDate(date)
-        // val = utils.formatDate(val)
+        // let valueMoment = moment.utc(val)
+        // let date = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date(), valueMoment.hours(), valueMoment.minutes())
+        // val = utils.formatDate(date)
+        val = utils.formatDate(val)
       }
       else if (pMeta.ref) {
         if (pMeta.ref === PHOTO) {
