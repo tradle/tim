@@ -135,11 +135,13 @@ class CheckRow extends Component {
     let title
     if (utils.getModel(modelName).abstract)
       title = translate(model)
-
-    if (!resource.status)
-      return <Text style={styles.rTitle}>{dn || title}</Text>
-
-    let statusId = this.getEnumID(resource.status.id)
+    let statusId
+    if (!resource.status)  {
+      statusId = 'pending'
+      // return <Text style={styles.rTitle}>{dn || title}</Text>
+    }
+    else
+      statusId = this.getEnumID(resource.status.id)
     let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
     let checkIcon
     let checkOverrideStatus
