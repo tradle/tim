@@ -342,6 +342,8 @@ var ResourceMixin = {
       else {
         if (pMeta.range === 'model')
           val = translate(utils.getModel(val))
+        else if (pMeta.range === 'password')
+          val = '*********'
         val = <Text style={[styles.description]}>{val}</Text>;
       }
     }
