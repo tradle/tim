@@ -193,7 +193,7 @@ function getPropsForControllingEntity(form) {
     if (form.isSeniorManager)
       retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
 
-    retProps.requestedProperties.push({name: 'notificationMethod'})
+    // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
     if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
       retProps.requestedProperties.push({name: 'phone', required: true})
