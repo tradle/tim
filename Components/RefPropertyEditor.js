@@ -350,6 +350,9 @@ class RefPropertyEditor extends Component {
       item.name = item.file.name
       delete item.file
     }
+    else {
+      item.name = item.fileName
+    }
     let { model, floatingProps, resource } = this.props
     const props = model.properties
     if (props[propName].ref)
@@ -622,7 +625,6 @@ function useImageInput({resource, prop, isFile}) {
   const isScan = pName === 'scan'
   let rtype = utils.getType(resource)
   let { documentType } = resource
-  let isFile = utils.isSubclassOf(FILE, prop.ref)
   if (isWeb()  ||  isSimulator())
     return isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
   else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
