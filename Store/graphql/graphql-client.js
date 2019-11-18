@@ -153,24 +153,34 @@ var search = {
               continue
             let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
             if (isEnum) {
-              let s = `${p}__id: [`
-              val.forEach((r, i) => {
-                if (i)
-                  s += ', '
-                s += `"${r.id}"`
-              })
-              s += ']'
-              inClause.push(s)
+              if (val.length === 1) {
+                op.EQ += `\n   ${p}__id: "${val[0].id}",`
+              }
+              else {
+                let s = `${p}__id: [`
+                val.forEach((r, i) => {
+                  if (i)
+                    s += ', '
+                  s += `"${r.id}"`
+                })
+                s += ']'
+                inClause.push(s)
+              }
             }
             else {
-              let s = `${p}___permalink: [`
-              val.forEach((r, i) => {
-                if (i)
-                  s += ', '
-                s += `"${utils.getRootHash(r)}"`
-              })
-              s += ']'
-              inClause.push(s)
+              if (val.length === 1) {
+                op.EQ += `\n   ${p}___permalink: "${utils.getRootHash(val[0])}",`
+              }
+              else {
+                let s = `${p}___permalink: [`
+                val.forEach((r, i) => {
+                  if (i)
+                    s += ', '
+                  s += `"${utils.getRootHash(r)}"`
+                })
+                s += ']'
+                inClause.push(s)
+              }
             }
           }
           else {
