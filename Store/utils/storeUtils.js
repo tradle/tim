@@ -577,6 +577,14 @@ var storeUtils = {
         },
         message: translate('applicationsNotAssigned')
       },
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+           parent: 'NULL'
+        },
+        message: 'topLevelApplications'
+      },
       {
         type: APPLICATION,
         message: 'applications'
