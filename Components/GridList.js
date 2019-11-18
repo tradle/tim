@@ -85,6 +85,7 @@ var excludeFromBrowsing = [
   SELF_INTRODUCTION,
   CUSTOMER_WAITING,
   FINANCIAL_PRODUCT,
+  APPLICATION_SUBMISSION,
   'tradle.ForgetMe',
   'tradle.ForgotYou',
   'tradle.GuestSessionProof',
@@ -992,7 +993,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
           !mm.inlined                       &&
           !mm.abstract                      &&
            mm.id !== MESSAGE                &&
-           mm.id !== APPLICATION_SUBMISSION &&
           !utils.isEnum(mm)                 &&
           !utils.isSubclassOf(mm, METHOD)   &&
           !utils.isSubclassOf(mm, FINANCIAL_PRODUCT)) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
