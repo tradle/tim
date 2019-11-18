@@ -748,6 +748,7 @@ var NewResourceMixin = {
         <FloatLabel
           labelStyle={[lStyle, fontF, {color: lcolor}]}
           autoCorrect={false}
+          password={prop.range === 'password' ? true : false}
           multiline={multiline}
           editable={editable}
           autoCapitalize={autoCapitalize}
