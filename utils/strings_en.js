@@ -294,6 +294,9 @@ module.exports = {
     "override": "Override",
     "olderResourceVersion": "This is the older version of this resource",
     "reset": "Reset {1}",
+    "completeOnboardingApplication": "Please complete the onboarding application",
+    "otherEnumResources": "Other {1} choices",
+    "suggestions": "Suggestions",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
