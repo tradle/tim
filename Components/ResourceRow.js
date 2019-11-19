@@ -176,8 +176,28 @@ class ResourceRow extends Component {
     let rType = utils.getType(resource)
     if (rType !== APPLICATION  &&  application)
       resource = application
+
+    let model = utils.getModel(rType)
+
     let photo;
     let isContact = rType === PROFILE;
+    let isSeparator = this.isSeparator(model, resource)
+
+    if (isSeparator) {
+      let actionItem = <View style={{ minHeight: 71, backgroundColor: '#efefef', justifyContent: 'flex-end' }}>
+                         <View style={{paddingHorizontal: 25, paddingVertical: 10}}>
+                           {this.formatRow(resource, style)}
+                         </View>
+                       </View>
+
+      return  <View style={{justifyContent: 'flex-end'}} key={this.getNextKey()}>
+                  <View style={styles.sepTopBorder}  key={this.getNextKey()} />
+                  {actionItem}
+                  <View style={styles.sepBorder}  key={this.getNextKey()} />
+              </View>
+
+    }
+
     let noImage;
     let style
     if (bankStyle)
@@ -230,7 +250,6 @@ class ResourceRow extends Component {
                 </LinearGradient>
       }
       else  {
-        let model = utils.getModel(rType)
         let icon = model.icon;
         if (icon)
           photo = <View style={styles.cell}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
@@ -370,25 +389,38 @@ class ResourceRow extends Component {
                  </View>
                </TouchableOpacity>
     }
+    let actionItem = <TouchableOpacity onPress={onPress}>
+                       <View style={[styles.row, { minHeight: 71, justifyContent: 'center'}]}>
+                         {photo}
+                         <View style={textStyle}>
+                           {this.formatRow(resource, style)}
+                         </View>
+                       </View>
+                     </TouchableOpacity>
+    let cellBorder
+    if (isNewContact)
+      cellBorder = styles.highlightedCellBorder
+    else
+      cellBorder = styles.cellBorder
+
+
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
-                    <TouchableOpacity onPress={onPress}>
-                      <View style={[styles.row, { width: utils.dimensions(ResourceRow).width - 10}]}>
-                        {photo}
-                        <View style={textStyle}>
-                          {this.formatRow(resource, style)}
-                        </View>
-                      </View>
-                    </TouchableOpacity>
+                    {actionItem}
                     {action}
                     {count}
                     {dateRow}
                     {multiChooserComponent}
                     {hideModeComponent}
                     {cancelResource}
-                    <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
+                    <View style={cellBorder}  key={this.getNextKey()} />
                   </View>
     return content
   }
+  isSeparator(model, resource) {
+    return utils.isEnum(model)  &&  resource[ROOT_HASH].startsWith('__separator')
+  }
+
+
   showProviderView() {
     let resource = this.props.resource
     let title = utils.getDisplayName(resource)
@@ -435,13 +467,18 @@ class ResourceRow extends Component {
               </View>
       }
       let dn
-      if (utils.isEnum(model)  &&  model.id !== LANGUAGE)
+      let isSeparator
+      if (utils.isEnum(model)  &&  model.id !== LANGUAGE) {
         dn = translateEnum(resource)
+        isSeparator = this.isSeparator(model, resource)
+        if (isSeparator)
+          dn = dn.toUpperCase()
+      }
       else
         dn = utils.getDisplayName(resource);
 
       if (dn && dn.length)
-        return <Text style={styles.resourceTitle}>{dn}</Text>;
+        return <Text style={isSeparator ? styles.sepTitle : styles.resourceTitle}>{dn}</Text>;
       else
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
@@ -652,6 +689,10 @@ var styles = StyleSheet.create({
   },
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
+  sepTitle: {
+    fontSize: 20,
+    color: '#999999'
+  },
   resourceTitle: {
     fontSize: 20,
     color: '#555555'
@@ -704,6 +745,17 @@ var styles = StyleSheet.create({
     backgroundColor: '#dddddd',
     height: 40,
     marginLeft: 10,
+  },
+  sepBorder: {
+    backgroundColor: '#eeeeee',
+    height: 1,
+    marginHorizontal: -4
+  },
+  sepTopBorder: {
+    backgroundColor: '#eeeeee',
+    height: 1,
+    marginHorizontal: -4,
+    marginTop: -1
   },
   cellBorder: {
     backgroundColor: '#eeeeee',
