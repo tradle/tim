@@ -472,8 +472,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
           return utils.getId(r) !== sharingChatId
         })
       }
-      if (isChooser)
-        list = utils.applyLens({prop, list})
+      // if (isChooser)
+      //   list = utils.applyLens({prop, list})
       if (search) {
         if (params.direction === 'up')
           --this.numberOfPages
