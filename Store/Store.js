@@ -4197,7 +4197,7 @@ if (!res[SIG]  &&  res._message)
     }
   },
   onSaveTemporary(resource) {
-    temporaryResources[resource[TYPE]] = resource
+    temporaryResources[resource[TYPE]] = utils.sanitize(resource)
   },
   async onGetTemporary(type) {
     var r = temporaryResources[type]
