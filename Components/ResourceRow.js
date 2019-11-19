@@ -185,7 +185,7 @@ class ResourceRow extends Component {
 
     if (isSeparator) {
       let actionItem = <View style={{ minHeight: 71, backgroundColor: '#efefef', justifyContent: 'flex-end' }}>
-                         <View style={{paddingHorizontal: 25, paddingVertical: 10}}>
+                         <View style={{paddingHorizontal: 15, paddingVertical: 10}}>
                            {this.formatRow(resource, style)}
                          </View>
                        </View>
