@@ -40,7 +40,7 @@ module.exports = function ValidateSelector ({ models }) {
 
       for (let p in show) {
         let prop = show[p]
-        let formula = normalizeFormula(prop.showIf)
+        let formula = normalizeFormula({ formula: prop.showIf })
         let showF = new Function(...keys, `return ${formula}`);
         try {
           let doShow = showF(...values)
@@ -65,7 +65,7 @@ module.exports = function ValidateSelector ({ models }) {
       for (let p in hide) {
         let prop = hide[p]
         // let doHide = !eval(prop.hideIf)
-        let formula = normalizeFormula(prop.hideIf)
+        let formula = normalizeFormula({ formula: prop.hideIf })
         let hideF = new Function(...keys, `return ${formula}`);
         try {
           let doHide = hideF(...values)
