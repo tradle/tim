@@ -1,5 +1,6 @@
+import { cloneDeep } from 'lodash'
 import { TYPE } from '@tradle/constants'
-import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty } from '../utils/utils'
+import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum } from '../utils/utils'
 
 module.exports = function ValidateSelector ({ models }) {
   return {
@@ -13,6 +14,7 @@ module.exports = function ValidateSelector ({ models }) {
       if (!m)
         return
       const show = getPropertiesWithAnnotation(m, 'showIf')
+
       const hide = getPropertiesWithAnnotation(m, 'hideIf')
       if (isEmpty(show)  &&  isEmpty(hide))
         return
@@ -24,8 +26,10 @@ module.exports = function ValidateSelector ({ models }) {
       let exclude = []
       let ungrouped = ungroup({model: m, viewCols: editCols, edit: true})
 
-      let keys = Object.keys(form)
-      let values = Object.values(form)
+      let resource = normalizeEnums({ form })
+
+      let keys = Object.keys(resource)
+      let values = Object.values(resource)
       let props = m.properties
       for (let p in props) {
         if (!form[p]) {
@@ -36,7 +40,8 @@ module.exports = function ValidateSelector ({ models }) {
 
       for (let p in show) {
         let prop = show[p]
-        let showF = new Function(...keys, `return ${prop.showIf}`);
+        let formula = normalizeFormula({ formula: prop.showIf })
+        let showF = new Function(...keys, `return ${formula}`);
         try {
           let doShow = showF(...values)
           if (typeof doShow === 'string'  &&  !doShow.length)
@@ -60,7 +65,8 @@ module.exports = function ValidateSelector ({ models }) {
       for (let p in hide) {
         let prop = hide[p]
         // let doHide = !eval(prop.hideIf)
-        let hideF = new Function(...keys, `return ${prop.hideIf}`);
+        let formula = normalizeFormula({ formula: prop.hideIf })
+        let hideF = new Function(...keys, `return ${formula}`);
         try {
           let doHide = hideF(...values)
           if (typeof doHide === 'string'  &&  !doHide.length)
@@ -105,4 +111,31 @@ module.exports = function ValidateSelector ({ models }) {
       }
     }
   }
+}
+function normalizeEnums({ form }) {
+  let resource = cloneDeep(form)
+  let model = getModel(resource[TYPE])
+  let props = model.properties
+  for (let p in resource) {
+    if (!props[p]) continue
+    let { ref } = props[p]
+    if (ref) {
+      if (!isEnum(ref)) continue
+      resource[p] = resource[p].id.split('_')[1]
+      continue
+    }
+    if (!props[p].items  ||  !props[p].items.ref)
+      continue
+
+    ref = props[p].items.ref
+    if (!isEnum(ref)) continue
+
+    resource[p] = resource[p].map(r => r.id.split('_')[1])
+  }
+
+  return resource
+}
+
+function normalizeFormula({ formula }) {
+  return formula.replace(/\s=\s/g, ' === ').replace(/\s!=\s/g, ' !== ')
 }
