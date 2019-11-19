@@ -343,7 +343,8 @@ var utils = {
     let limit = prop.limit
     if (!pin  &&  !limit)
       return list
-    let isEnum = utils.isEnum(prop.ref  ||  prop.items.ref)
+    let ref = prop.ref  ||  prop.items.ref
+    let isEnum = utils.isEnum(ref)
     if (isEnum) {
       if (limit  &&  limit.length) {
         let limitMap = {}
@@ -376,12 +377,25 @@ var utils = {
         })
         if (utils.isEmpty(pinMap))
           return list
-        let newpin = [] //= pin.filter((id) => pinMap[id])
+
+        let enumM = utils.getModel(ref)
+         let newpin = [] //= pin.filter((id) => pinMap[id])
+        let separator1 = {
+          [TYPE]: ref,
+          [ROOT_HASH]: '__separator1',
+          [utils.getEnumProperty(enumM)]: utils.translate('suggestions', utils.translateModel(enumM))
+        }
+        newpin.push(separator1)
         pin.forEach(p => {
           if (pinMap[p])
             newpin.push(pinMap[p])
         })
-
+        let separator = {
+          [TYPE]: ref,
+          [ROOT_HASH]: '__separator',
+          [utils.getEnumProperty(enumM)]: utils.translate('otherEnumResources', utils.translateModel(enumM))
+        }
+        newpin.push(separator)
         list = newpin.concat(newlist)
       }
     }
