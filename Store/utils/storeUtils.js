@@ -427,11 +427,24 @@ var storeUtils = {
         return val.indexOf(q) !== -1
       })
     }
+    let reset
+    if (isChooser  &&  resource[prop.name]) {
+      let rmodel = getModel(resource[TYPE])
+      reset = {
+        [TYPE]: modelName,
+        [ROOT_HASH]: '__reset',
+        [property]: translate('reset', translate(prop, rmodel))
+      }
+    }
     if (prop) {
+      let ret
       if (prop.limit  ||  prop.pin)
-        return applyLens({prop, list: enumList})
+        ret = applyLens({prop, list: enumList})
       else if (pin)
-        return applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
+        ret = applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
+      if (reset)
+        ret.splice(1, 0, reset)
+      return ret
     }
     let lim = limit || 20
     let lastIdx
@@ -440,14 +453,8 @@ var storeUtils = {
     else
       lastIdx = 0
     let ret = []
-    if (isChooser  &&  resource[prop.name]) {
-      let rmodel = getModel(resource[TYPE])
-      ret.push({
-        [TYPE]: modelName,
-        [ROOT_HASH]: '__reset',
-        [property]: translate('reset', translate(prop, rmodel))
-      })
-    }
+    if (reset)
+      ret.push(reset)
 
     for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
       ret.push(enumList[i])
