@@ -443,9 +443,11 @@ var storeUtils = {
         ret = applyLens({prop, list: enumList})
       else if (pin)
         ret = applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
-      if (reset)
-        ret.splice(1, 0, reset)
-      return ret
+      if (ret) {
+        if (reset)
+          ret.splice(1, 0, reset)
+        return ret
+      }
     }
     let lim = limit || 20
     let lastIdx
