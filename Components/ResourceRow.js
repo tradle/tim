@@ -277,6 +277,7 @@ class ResourceRow extends Component {
     }
 
     let bg
+    let isReset = resource[ROOT_HASH] === '__reset'
     if (isChosen) {
       if (style) {
         let rgb = utils.hexToRgb(style.linkColor || '#7AAAc3')
@@ -285,7 +286,7 @@ class ResourceRow extends Component {
         bg = {backgroundColor: bgColor}
       }
     }
-    else if (isChooser  &&  resource[ROOT_HASH] === '__reset')
+    else if (isChooser  &&  isReset)
       bg = {backgroundColor: 'aliceblue'}
     else if (style)
       bg = {backgroundColor: style.listBg}
@@ -318,7 +319,7 @@ class ResourceRow extends Component {
                  </View>
 
     let multiChooserComponent
-    if (multiChooser) {
+    if (multiChooser  &&  !isReset) {
       let icon = isChosen && 'ios-checkmark-circle' || 'ios-radio-button-off'
       multiChooserComponent = <View style={styles.multiChooser}>
                        <TouchableOpacity onPress={this.chooseToShare.bind(this)}>
