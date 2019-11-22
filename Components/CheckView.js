@@ -209,19 +209,22 @@ class CheckView extends Component {
       status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
     else if (checkStatus.indexOf('_fail') !== -1)
       status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
+    let r = {
+      from: utils.getMe(),
+      to: application.to,
+      _context: application._context,
+      [TYPE]: model.id,
+      check: utils.buildRef(resource),
+      application,
+      status
+    }
+    if (application.top)
+      r.top = application.top
     navigator.push({
       componentName: 'NewResource',
       title: translate(model),
       passProps: {
-        resource: {
-          from: utils.getMe(),
-          to: application.to,
-          _context: application._context,
-          [TYPE]: model.id,
-          check: utils.buildRef(resource),
-          application,
-          status
-        },
+        resource: r,
         model,
         bankStyle
       }
