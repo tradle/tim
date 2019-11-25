@@ -92,7 +92,7 @@ class RefPropertyEditor extends Component {
     let isFile = prop.ref  &&  (prop.ref === FILE ||  utils.isSubclassOf(prop.ref, FILE))
     let isIdentity = prop.ref === IDENTITY
 
-    if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
+    if (required  &&  prop.ref === COUNTRY  &&  country) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName])
         resource[pName] = country
