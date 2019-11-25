@@ -93,7 +93,7 @@ class RefPropertyEditor extends Component {
 
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
-      if (resource  &&  !resource[pName])
+      if (resource  &&  !resource[pName]  &&  country)
         resource[pName] = country
     }
     let val = resource && resource[pName]
