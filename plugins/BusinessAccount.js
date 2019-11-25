@@ -128,6 +128,8 @@ function getPropsForLegalEntity(form) {
     let requestedProperties = [
         { name: 'companyName', required: true  },
         { name: 'registrationNumber', required: true },
+        { name: 'DBAName' },
+        { name: 'formerlyKnownAs'}
       ]
 
     let { streetAddress, city, postalCode, country } = form
@@ -156,11 +158,13 @@ function getPropsForLegalEntity(form) {
         { name: 'registrationDate', required: true },
         { name: 'companyType'},
         { name: 'companyEmail', required: true },
+        { name: 'companyWebsite', required: true },
         { name: 'address_group'},
         { name: 'taxIdNumber', required: false },
         { name: 'companyFax', required: false },
         { name: 'companyPhone', required: false },
         { name: 'DBAName', required: false },
+        { name: 'formerlyKnownAs'}
       ]
     }
 }
