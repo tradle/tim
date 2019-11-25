@@ -576,7 +576,9 @@ var NewResourceMixin = {
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
     if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
+      // this.debugChanges(r, 'country')
       // Actions.saveTemporary(r)
+// global.a = r
       Actions.getRequestedProperties({resource: r})
     }
 
@@ -585,7 +587,14 @@ var NewResourceMixin = {
       inFocus: pname
     })
   },
-
+  // debugChanges(resource, prop) {
+  //   Object.defineProperty(resource, prop, {
+  //     set: (val) => {
+  //       debugger
+  //       // return val
+  //     }
+  //   })
+  // },
 
   myTextTemplate(params) {
     let label = translate(params.prop, params.model)
