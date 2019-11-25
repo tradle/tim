@@ -30,6 +30,7 @@ const PHOTO = 'tradle.Photo'
 const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
 const FILE = 'tradle.File'
+const CHECK = 'tradle.Check'
 
 const {
   TYPE,
@@ -301,6 +302,18 @@ class ShowPropertiesView extends Component {
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           viewCols.push(this.addForPartial(val, styles))
+          return
+        }
+        else if (pMeta.range === 'property') {
+          let m = utils.getModel(modelName)
+          if (m.subClassOf === CHECK)
+            val = translate(utils.getModel(utils.getType(resource.form)).properties[val], m)
+          else
+            val = translate(m.properties[val], m)
+          viewCols.push(<View style={{paddingLeft: 10}}>
+                          <Text style={styles.title}>{translate(pMeta, model)}</Text>
+                          <Text style={styles.description}>{val}</Text>
+                        </View>)
           return
         }
         isItems = Array.isArray(val)
