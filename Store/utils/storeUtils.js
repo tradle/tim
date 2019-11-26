@@ -445,7 +445,7 @@ var storeUtils = {
         ret = applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
       if (ret) {
         if (reset)
-          ret.splice(1, 0, reset)
+          ret.splice(0, 0, reset)
         return ret
       }
     }
