@@ -252,7 +252,10 @@ class ApplicationTabs extends Component {
       return
     let formTypes = []
     let progress = 0
-    if (resource.forms) {
+    let { submittedFormTypesCount, maxFormTypesCount } = resource
+    if (submittedFormTypesCount)
+      progress = submittedFormTypesCount / maxFormTypesCount
+    else if (resource.forms) {
       resource.forms.forEach((item) => {
         let itype = utils.getType(item)
         if (formTypes.indexOf(itype) === -1)

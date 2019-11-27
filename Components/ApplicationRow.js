@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import constants from '@tradle/constants'
 
+import ProgressBar from './ProgressBar'
 import Store from '../Store/Store'
 import { Text } from './Text'
 import utils, { translate, translateEnum } from '../utils/utils'
@@ -191,6 +192,12 @@ class ApplicationRow extends Component {
         rightMarginTop = -22
       team = <Text style={{position: 'absolute', bottom: 0, left: 5, fontSize: 14, fontStyle: 'italic', color: '#7AAAC3'}}>{translateEnum(resource.assignedToTeam)}</Text>
     }
+    let { submittedFormTypesCount, maxFormTypesCount } = resource
+    if (submittedFormTypesCount) {
+      let progress = submittedFormTypesCount / maxFormTypesCount
+      let progressColor = '#a0d0a0'
+      progressBar = <View style={{paddingBottom: 5}}><ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} /></View>
+    }
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
@@ -199,6 +206,7 @@ class ApplicationRow extends Component {
                 </View>
                 {applicant}
               </View>
+              {progressBar}
               {team}
               <View style={{marginTop: rightMarginTop, alignItems: 'flex-end'}}>
                 {rmIcon}
@@ -206,7 +214,6 @@ class ApplicationRow extends Component {
                 {dateEvaluated}
                 {dateCompleted}
               </View>
-              {progressBar}
             </View>
   }
 }
