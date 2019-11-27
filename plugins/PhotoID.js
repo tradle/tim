@@ -242,6 +242,8 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
         {name: 'document_group'},
         {name: 'issuer'}
         ]
+        if (form.full)
+          requestedProperties.splice(3, 0, {name: 'addressDetails_group', required: true})
     }
     // if (countryId === 'NZ')
     //   requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
