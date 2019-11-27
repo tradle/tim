@@ -102,7 +102,6 @@ class CheckRow extends Component {
                       </View>
                     </View>
                   </View>
-
     return <View host={lazy}>
              <TouchableOpacity onPress={onSelect.bind(this)}>
                {header}
@@ -136,10 +135,31 @@ class CheckRow extends Component {
     if (utils.getModel(modelName).abstract)
       title = translate(model)
 
-    if (!resource.status)
+    let { propertyName, secondaryName, name, status, form, provider } = resource
+    if (!status)
       return <View style={{paddingLeft: 40}}><Text style={styles.rTitle}>{dn || title}</Text></View>
 
-    let statusId = this.getEnumID(resource.status.id)
+    let searchTerm
+    if (propertyName) {
+      let propVal = translate(utils.getModel(utils.getType(form)).properties[propertyName], model)
+
+      searchTerm = <View style={styles.titleView}>
+                     <Text style={styles.label}>{propVal}</Text>
+                     <Text style={styles.search}>{`: ${secondaryName}`}</Text>
+                   </View>
+      if (name) {
+        let mainName = <View style={{flexDirection: 'row', paddingRight: 10}}>
+                         <Text style={styles.label}>{translate(model.properties.name, model)}</Text>
+                         <Text style={styles.search}>{`: ${name}`}</Text>
+                       </View>
+        searchTerm = <View style={{flexDirection: 'row', paddingVertical: 5}}>
+                      {mainName}
+                      {searchTerm}
+                    </View>
+      }
+    }
+
+    let statusId = this.getEnumID(status.id)
     let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
     let checkIcon
     let checkOverrideStatus
@@ -195,7 +215,8 @@ class CheckRow extends Component {
              </View>
              <View style={{justifyContent: 'center', paddingLeft: 10}}>
                <Text style={styles.rTitle}>{dn}</Text>
-               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
+               {searchTerm}
+               <Text style={styles.checkDescription}>{'Provider: ' + provider || translate(model)}</Text>
              </View>
            </View>
 
@@ -222,6 +243,16 @@ var styles = StyleSheet.create({
   rTitle: {
     fontSize: 18,
     color: '#555555',
+  },
+  search: {
+    fontSize: 16,
+    color: '#555555',
+    fontStyle: 'italic',
+  },
+  label: {
+    fontSize: 16,
+    color: '#aaaaaa',
+    fontStyle: 'italic',
   },
   noImageBlock: {
     flex: 1,
