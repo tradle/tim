@@ -8,6 +8,7 @@ import {
   Animated
 } from 'react-native'
 import PropTypes from 'prop-types';
+import PieChart from 'react-minimal-pie-chart';
 
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -29,7 +30,18 @@ import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
 import { circled } from '../styles/utils'
-
+const colors = [
+  '#5AFE3D',
+  'darkviolet',
+  'deeppink',
+  'dodgerblue',
+  'fuchsia',
+  'coral',
+  'gold',
+  'pink',
+  '#5087B4',
+  'red'
+]
 const {
   TYPE
 } = constants
@@ -185,12 +197,17 @@ class ApplicationTabs extends Component {
       separator = <View style={styles.separator} />
 
     if (showDetails) {
-      details = <ShowPropertiesView resource={resource}
-                                    showRefResource={this.getRefResource.bind(this)}
-                                    currency={currency}
-                                    bankStyle={bankStyle}
-                                    excludedProperties={['photos']}
-                                    navigator={navigator} />
+      let { scoreDetails } = resource
+      let pieChart = scoreDetails  &&  this.getPieChart(scoreDetails, styles)
+      details = <View style={{marginTop: pieChart && -40 || 0}}>
+                   {pieChart}
+                   <ShowPropertiesView resource={resource}
+                                      showRefResource={this.getRefResource.bind(this)}
+                                      currency={currency}
+                                      bankStyle={bankStyle}
+                                      excludedProperties={['photos']}
+                                      navigator={navigator} />
+                 </View>
       if (/*!resource.draft  &&*/ utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
@@ -237,6 +254,39 @@ class ApplicationTabs extends Component {
 
     return children || <View/>
   }
+  getPieChart(scoreDetails, styles) {
+    let data = []
+    let j = 0
+    for (let p in scoreDetails) {
+      let title = translate(p)
+      if (typeof scoreDetails[p] === 'number')
+        data.push({title: `${title} ${scoreDetails[p]}%`, value: scoreDetails[p], color: colors[j++]})
+      else if (scoreDetails[p].score) {
+        title += ':'
+        for (let pp in scoreDetails[p]) {
+          if (pp !== 'score')
+            title += ` ${pp}`
+        }
+        data.push({title: `${title} ${scoreDetails[p].score}%`, value: scoreDetails[p].score, color: colors[j++]})
+      }
+    }
+    return <View>
+             <Text style={styles.pieTitle}>{translate('riskScore')}</Text>
+             <PieChart
+               radius={40}
+               ration={1}
+               style={{height: '150px'}}
+               data={data}
+               animate
+               label={({ data, dataIndex }) =>
+                 data[dataIndex].title
+               }
+               labelPosition={112}
+               labelStyle={{fontSize: 9, fill: '#9b9b9b'}}
+             />
+             <View style={{height: 20, borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} />
+           </View>
+  }
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
   }
@@ -248,15 +298,18 @@ class ApplicationTabs extends Component {
   }
   getAppStatus(styles) {
     let { resource, bankStyle } = this.props
-    if (resource.status !== 'started'  ||  !resource.forms)
-      return
-    let formTypes = []
+
+    let { status, forms, submittedFormTypesCount, maxFormTypesCount } = resource
+    // if (resource.status !== 'started')
+    //   return
     let progress = 0
-    let { submittedFormTypesCount, maxFormTypesCount } = resource
     if (submittedFormTypesCount)
       progress = submittedFormTypesCount / maxFormTypesCount
-    else if (resource.forms) {
-      resource.forms.forEach((item) => {
+    else if (!forms)
+      return
+    else {
+      let formTypes = []
+      forms.forEach((item) => {
         let itype = utils.getType(item)
         if (formTypes.indexOf(itype) === -1)
           formTypes.push(itype)
@@ -398,6 +451,13 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       height: 7,
       width: 60,
       marginTop: 10
+    },
+    pieTitle: {
+      fontSize: 16,
+      marginBottom: 20,
+      alignSelf: 'center',
+      // paddingBottom: 20,
+      color: '#5b5b5b'
     }
   })
 })

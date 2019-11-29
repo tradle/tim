@@ -422,7 +422,7 @@ var ResourceMixin = {
             // if (isArray  &&  !hasItems) {
             //   return <View style={{height: 0}} />
             const isObject = nodeType === 'Object'
-            let val = isObject && raw[0] || `${raw[0]}:`
+            let val = isObject && translate(raw[0]) || `${translate(raw[0])}:`
             return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16 }}>{val}</Text>
           }}
           valueRenderer={raw => {
