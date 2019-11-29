@@ -136,6 +136,7 @@
     "react-dropzone": "^3.13.4",
     "react-file-input": "github:mvayngrib/react-file-input",
     "react-infinite-calendar": "github:tradle/react-infinite-calendar#dist",
+    "react-minimal-pie-chart": "^6.0.0",
     "react-mixin": "~1.2.2",
     "react-native-accordion": "github:tradle/react-native-accordion#dev",
     "react-native-actionsheet": "^2.4.2",

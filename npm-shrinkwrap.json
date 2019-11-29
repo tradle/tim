@@ -225,7 +225,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#4569ed57c7d29c4f3ac1b9c96f5283eb477287eb"
+      "resolved": "git://github.com/tradle/models.git#bec3b527e05c15c24f6478a558e07179e6efe9ec"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -6272,6 +6272,11 @@
       "version": "2.3.1",
       "from": "tradle/react-infinite-calendar#dist",
       "resolved": "git://github.com/tradle/react-infinite-calendar.git#98ef54f32142702460294a0afce17bd79008b6ee"
+    },
+    "react-minimal-pie-chart": {
+      "version": "6.0.0",
+      "from": "react-minimal-pie-chart@latest",
+      "resolved": "http://registry.npmjs.org/react-minimal-pie-chart/-/react-minimal-pie-chart-6.0.0.tgz"
     },
     "react-mixin": {
       "version": "1.2.4",
