@@ -198,7 +198,7 @@ class ApplicationTabs extends Component {
 
     if (showDetails) {
       let { scoreDetails } = resource
-      let pieChart = scoreDetails  &&  this.getPieChart(scoreDetails, styles)
+      let pieChart = scoreDetails  &&  this.getPieChart(styles)
       details = <View style={{marginTop: pieChart && -40 || 0}}>
                    {pieChart}
                    <ShowPropertiesView resource={resource}
@@ -254,24 +254,26 @@ class ApplicationTabs extends Component {
 
     return children || <View/>
   }
-  getPieChart(scoreDetails, styles) {
+  getPieChart(styles) {
+    let resource = this.props.resource
+    let scoreDetails = resource.scoreDetails
     let data = []
     let j = 0
     for (let p in scoreDetails) {
       let title = translate(p)
       if (typeof scoreDetails[p] === 'number')
-        data.push({title: `${title} ${scoreDetails[p]}%`, value: scoreDetails[p], color: colors[j++]})
+        data.push({title: `${title} ${scoreDetails[p]}`, value: scoreDetails[p], color: colors[j++]})
       else if (scoreDetails[p].score) {
         title += ':'
         for (let pp in scoreDetails[p]) {
           if (pp !== 'score')
             title += ` ${pp}`
         }
-        data.push({title: `${title} ${scoreDetails[p].score}%`, value: scoreDetails[p].score, color: colors[j++]})
+        data.push({title: `${title} ${scoreDetails[p].score}`, value: scoreDetails[p].score, color: colors[j++]})
       }
     }
     return <View>
-             <Text style={styles.pieTitle}>{translate('riskScore')}</Text>
+             <Text style={styles.pieTitle}>{`${translate('riskScore')}: ${resource.score}`}</Text>
              <PieChart
                radius={40}
                ration={1}
@@ -455,6 +457,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     pieTitle: {
       fontSize: 16,
       marginBottom: 20,
+      marginTop: 3,
       alignSelf: 'center',
       // paddingBottom: 20,
       color: '#5b5b5b'
