@@ -447,7 +447,9 @@ var utils = {
     return utils.translateProperty(...args)
   },
   translateProperty(property, model, needDescription) {
-    if (!dictionary)
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    if (!dictionary  ||  lang === 'en')
       return property.title || utils.makeLabel(property.name)
     // HACK for property that changes title in case it is upload or scan
     // if (this.isWeb()  &&  property.title  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
@@ -469,12 +471,17 @@ var utils = {
       return property.title || utils.makeLabel(property.name)
   },
   translateModel(model, isPlural) {
-    if (dictionary  &&  dictionary.models[model.id])
-      return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
-    return model.title ? model.title : utils.makeModelTitle(model, isPlural)
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    if (lang === 'en' ||  !dictionary  || !dictionary.models[model.id])
+      return model.title ? model.title : utils.makeModelTitle(model, isPlural)
+
+    return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
   },
   translateEnum(resource) {
-    if (!dictionary) {
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    if (!dictionary  ||  lang == 'en') {
       if (!resource.title)
         return utils.buildRef(resource).title
       return resource.title
