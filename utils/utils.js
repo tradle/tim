@@ -449,8 +449,11 @@ var utils = {
   translateProperty(property, model, needDescription) {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
-    if (!dictionary  ||  lang === 'en')
+    if (!dictionary  ||  lang === 'en') {
+      if (needDescription)
+        return property.description
       return property.title || utils.makeLabel(property.name)
+    }
     // HACK for property that changes title in case it is upload or scan
     // if (this.isWeb()  &&  property.title  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
     //   return property.title
