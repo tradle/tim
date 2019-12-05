@@ -2013,6 +2013,71 @@
       "from": "d@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/d/-/d-1.0.0.tgz"
     },
+    "d3-array": {
+      "version": "1.2.4",
+      "from": "d3-array@>=1.2.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-array/-/d3-array-1.2.4.tgz"
+    },
+    "d3-collection": {
+      "version": "1.0.7",
+      "from": "d3-collection@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-collection/-/d3-collection-1.0.7.tgz"
+    },
+    "d3-color": {
+      "version": "1.4.0",
+      "from": "d3-color@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-color/-/d3-color-1.4.0.tgz"
+    },
+    "d3-ease": {
+      "version": "1.0.6",
+      "from": "d3-ease@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-ease/-/d3-ease-1.0.6.tgz"
+    },
+    "d3-format": {
+      "version": "1.4.2",
+      "from": "d3-format@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-format/-/d3-format-1.4.2.tgz"
+    },
+    "d3-interpolate": {
+      "version": "1.4.0",
+      "from": "d3-interpolate@>=1.1.1 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-interpolate/-/d3-interpolate-1.4.0.tgz"
+    },
+    "d3-path": {
+      "version": "1.0.9",
+      "from": "d3-path@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-path/-/d3-path-1.0.9.tgz"
+    },
+    "d3-scale": {
+      "version": "1.0.7",
+      "from": "d3-scale@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-scale/-/d3-scale-1.0.7.tgz"
+    },
+    "d3-shape": {
+      "version": "1.3.7",
+      "from": "d3-shape@>=1.2.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-shape/-/d3-shape-1.3.7.tgz"
+    },
+    "d3-time": {
+      "version": "1.1.0",
+      "from": "d3-time@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-time/-/d3-time-1.1.0.tgz"
+    },
+    "d3-time-format": {
+      "version": "2.2.2",
+      "from": "d3-time-format@>=2.0.0 <3.0.0",
+      "resolved": "http://registry.npmjs.org/d3-time-format/-/d3-time-format-2.2.2.tgz"
+    },
+    "d3-timer": {
+      "version": "1.0.10",
+      "from": "d3-timer@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-timer/-/d3-timer-1.0.10.tgz"
+    },
+    "d3-voronoi": {
+      "version": "1.1.4",
+      "from": "d3-voronoi@>=1.1.2 <2.0.0",
+      "resolved": "http://registry.npmjs.org/d3-voronoi/-/d3-voronoi-1.1.4.tgz"
+    },
     "d64": {
       "version": "1.0.0",
       "from": "d64@>=1.0.0 <2.0.0",
@@ -2136,6 +2201,16 @@
       "from": "del@>=2.0.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/del/-/del-2.2.2.tgz",
       "dev": true
+    },
+    "delaunator": {
+      "version": "4.0.1",
+      "from": "delaunator@>=4.0.0 <5.0.0",
+      "resolved": "http://registry.npmjs.org/delaunator/-/delaunator-4.0.1.tgz"
+    },
+    "delaunay-find": {
+      "version": "0.0.5",
+      "from": "delaunay-find@0.0.5",
+      "resolved": "http://registry.npmjs.org/delaunay-find/-/delaunay-find-0.0.5.tgz"
     },
     "delayed-stream": {
       "version": "1.0.0",
@@ -6243,6 +6318,11 @@
       "from": "react-dropzone@>=3.13.4 <4.0.0",
       "resolved": "https://registry.npmjs.org/react-dropzone/-/react-dropzone-3.13.4.tgz"
     },
+    "react-fast-compare": {
+      "version": "2.0.4",
+      "from": "react-fast-compare@>=2.0.0 <3.0.0",
+      "resolved": "http://registry.npmjs.org/react-fast-compare/-/react-fast-compare-2.0.4.tgz"
+    },
     "react-file-input": {
       "version": "0.2.5",
       "from": "mvayngrib/react-file-input",
@@ -7983,6 +8063,311 @@
       "from": "verror@1.10.0",
       "resolved": "https://registry.npmjs.org/verror/-/verror-1.10.0.tgz",
       "dev": true
+    },
+    "victory": {
+      "version": "33.1.6",
+      "from": "victory@latest",
+      "resolved": "http://registry.npmjs.org/victory/-/victory-33.1.6.tgz"
+    },
+    "victory-area": {
+      "version": "33.1.6",
+      "from": "victory-area@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-area/-/victory-area-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@>=4.17.15 <5.0.0",
+          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-axis": {
+      "version": "33.1.6",
+      "from": "victory-axis@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-axis/-/victory-axis-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-bar": {
+      "version": "33.1.6",
+      "from": "victory-bar@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-bar/-/victory-bar-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-box-plot": {
+      "version": "33.1.6",
+      "from": "victory-box-plot@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-box-plot/-/victory-box-plot-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-brush-container": {
+      "version": "33.1.6",
+      "from": "victory-brush-container@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-brush-container/-/victory-brush-container-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-brush-line": {
+      "version": "33.1.6",
+      "from": "victory-brush-line@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-brush-line/-/victory-brush-line-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-candlestick": {
+      "version": "33.1.6",
+      "from": "victory-candlestick@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-candlestick/-/victory-candlestick-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-chart": {
+      "version": "33.1.6",
+      "from": "victory-chart@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-chart/-/victory-chart-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-core": {
+      "version": "33.1.6",
+      "from": "victory-core@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-core/-/victory-core-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-create-container": {
+      "version": "33.1.6",
+      "from": "victory-create-container@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-create-container/-/victory-create-container-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-cursor-container": {
+      "version": "33.1.6",
+      "from": "victory-cursor-container@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-cursor-container/-/victory-cursor-container-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-errorbar": {
+      "version": "33.1.6",
+      "from": "victory-errorbar@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-errorbar/-/victory-errorbar-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-group": {
+      "version": "33.1.6",
+      "from": "victory-group@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-group/-/victory-group-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-legend": {
+      "version": "33.1.6",
+      "from": "victory-legend@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-legend/-/victory-legend-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-line": {
+      "version": "33.1.6",
+      "from": "victory-line@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-line/-/victory-line-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-pie": {
+      "version": "33.1.6",
+      "from": "victory-pie@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-pie/-/victory-pie-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-polar-axis": {
+      "version": "33.1.6",
+      "from": "victory-polar-axis@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-polar-axis/-/victory-polar-axis-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-scatter": {
+      "version": "33.1.6",
+      "from": "victory-scatter@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-scatter/-/victory-scatter-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-selection-container": {
+      "version": "33.1.6",
+      "from": "victory-selection-container@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-selection-container/-/victory-selection-container-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-shared-events": {
+      "version": "33.1.6",
+      "from": "victory-shared-events@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-shared-events/-/victory-shared-events-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-stack": {
+      "version": "33.1.6",
+      "from": "victory-stack@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-stack/-/victory-stack-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-tooltip": {
+      "version": "33.1.6",
+      "from": "victory-tooltip@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-tooltip/-/victory-tooltip-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-voronoi": {
+      "version": "33.1.6",
+      "from": "victory-voronoi@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-voronoi/-/victory-voronoi-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-voronoi-container": {
+      "version": "33.1.6",
+      "from": "victory-voronoi-container@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-voronoi-container/-/victory-voronoi-container-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
+    },
+    "victory-zoom-container": {
+      "version": "33.1.6",
+      "from": "victory-zoom-container@>=33.1.6 <34.0.0",
+      "resolved": "http://registry.npmjs.org/victory-zoom-container/-/victory-zoom-container-33.1.6.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.15",
+          "from": "lodash@^4.17.15",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+        }
+      }
     },
     "vlq": {
       "version": "0.2.3",

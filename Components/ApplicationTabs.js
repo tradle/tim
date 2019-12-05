@@ -5,7 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-  Animated
+  Animated,
+  Alert
 } from 'react-native'
 import PropTypes from 'prop-types';
 import PieChart from 'react-minimal-pie-chart';
@@ -29,6 +30,7 @@ import ShowPropertiesView from './ShowPropertiesView'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
+
 import { circled } from '../styles/utils'
 const colors = [
   '#5AFE3D',
@@ -199,7 +201,7 @@ class ApplicationTabs extends Component {
     if (showDetails) {
       let { scoreDetails } = resource
       let pieChart = scoreDetails  &&  this.getPieChart(styles)
-      details = <View style={{marginTop: pieChart && -40 || 0}}>
+       details = <View style={{marginTop: pieChart && -40 || 0}}>
                    {pieChart}
                    <ShowPropertiesView resource={resource}
                                       showRefResource={this.getRefResource.bind(this)}
@@ -272,8 +274,9 @@ class ApplicationTabs extends Component {
         data.push({title: `${title} ${scoreDetails[p].score}`, value: scoreDetails[p].score, color: colors[j++]})
       }
     }
+    let pieChartTitle = `${translate('riskScore')}: ${resource.score}`
     return <View>
-             <Text style={styles.pieTitle}>{`${translate('riskScore')}: ${resource.score}`}</Text>
+             <Text style={styles.pieTitle}>{pieChartTitle}</Text>
              <PieChart
                radius={40}
                ration={1}

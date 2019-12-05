@@ -176,10 +176,13 @@ class ShowPropertiesView extends Component {
 
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
 
-        let params = {prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
+        let params = {prop: pMeta, json: val, showTree: true, isView: true, jsonRows, isOnfido}
         // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
         let jVal = this.showJson(params)
-        if (jVal   &&  typeof !Array.isArray(jVal))
+        if (!jVal)
+          return
+
+        if (!Array.isArray(jVal))
           viewCols.push(jVal)
         else if (jVal.length)
           viewCols.push(

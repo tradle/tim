@@ -28,6 +28,8 @@ import platformStyles from '../styles/platform'
 import Image from './Image'
 import { Text } from './Text'
 import uiUtils from '../utils/uiUtils'
+import { VictorySunburst } from './victory-sunburst'
+// import { VictoryContainer } from 'victory'
 
 const RESOURCE_VIEW = 'ResourceView'
 const MESSAGE_VIEW = 'MessageView'
@@ -349,8 +351,73 @@ var ResourceMixin = {
     }
     return val
   },
+  changeResourceTree(tree, newTree) {
+    let isNodes = !tree._displayName
+    if (!isNodes) {
+      if (!tree.top)
+        return
+      // if (tree[TYPE] === APPLICATION) {
+      let appDn
+      let requestFor = tree.requestFor
+      if (requestFor)
+        appDn = `${utils.makeModelTitle(requestFor)} ${translate('application')}`
+      else
+        appDn = translate(utils.getModel(APPLICATION))
+      // }
+      // else
+      //   dn = `${tree._displayName} - ${utils.makeModelTitle(tree[TYPE])}`
+      // newTree[`${dn};link:${tree[TYPE]}_${tree._permalink}`] = '$$'
+      let dnR = `${tree.top._displayName};link:${tree.top[TYPE]}_${tree.top._permalink}`
+      let dnA = `${appDn};link:${tree[TYPE]}_${tree._permalink}`
+
+      let dn = `${dnR} - ${dnA}`
+      newTree[dn] = '$$'
+    }
+    let i = 1
+    for (let p in tree) {
+      if (typeof tree[p] !== 'object')
+        continue
+      let prop = p
+      if (isNodes)
+        prop = '' + i++ //tree[p]._displayName
+      else if (p === 'top')
+        prop = translate('beneficialOwners')
+      newTree[prop] = {}
+      this.changeResourceTree(tree[p], newTree[prop], false)
+      if (p === 'top') {
+        let nodes = tree[p].nodes
+        if (nodes)
+          this.changeResourceTree(nodes, newTree[prop], false)
+      }
+    }
+  },
   showJson(params) {
     let { json, prop, isView } = params
+    let isTree = json[TYPE]
+    let origJson = json
+    if (isTree) {
+      if (!json.top  ||  !json.top.nodes)
+        return
+      let title = translate('beneficialOwners')
+      let newTree = {[title]: {}}
+      let starBurst = {[title]: {}}
+      this.changeResourceTree(json.top.nodes, newTree[title], true)
+      json = newTree
+    }
+// ARROW_COLOR: theme.base0D,
+//   BACKGROUND_COLOR: theme.base00,
+//   BOOLEAN_COLOR: theme.base09,
+//   DATE_COLOR: theme.base0B,
+//   FUNCTION_COLOR: theme.base08,
+//   ITEM_STRING_COLOR: theme.base0B,
+//   ITEM_STRING_EXPANDED_COLOR: theme.base03,
+//   LABEL_COLOR: theme.base0D,
+//   NUMBER_COLOR: theme.base09,
+//   NULL_COLOR: theme.base08,
+//   STRING_COLOR: theme.base0B,
+//   SYMBOL_COLOR: theme.base08,
+//   TEXT_COLOR: theme.base07,
+//   UNDEFINED_COLOR: theme.base08,
     let { resource, bankStyle } = this.props
     const theme = {
       scheme: 'custom',
@@ -394,7 +461,7 @@ var ResourceMixin = {
                    {icon}
                 </TouchableOpacity>
     let content = (
-      <View ref='json'>
+      <View ref='json' style={{flex: 1}}>
         <JSONTree data={json} invertTheme={false} hideRoot={true} theme={{
             extend: theme,
             nestedNodeItemString: ({ style }, nodeType, expanded) => ({
@@ -415,28 +482,214 @@ var ResourceMixin = {
               return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
             if (type === 'Object')
               return
-            return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+            return <Text style={{fontSize: 16, paddingTop: 10}}>{itemType} {itemString}</Text>
           }}
           labelRenderer={(raw, nodeType, expanded, hasItems) => {
             const isArray = nodeType === 'Array'
             // if (isArray  &&  !hasItems) {
             //   return <View style={{height: 0}} />
             const isObject = nodeType === 'Object'
-            let val = isObject && translate(raw[0]) || `${translate(raw[0])}:`
-            return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16 }}>{val}</Text>
+            // let val = isObject && translate(raw[0]) || `${translate(raw[0])}:`
+            let val = raw[0]
+            if (isObject)
+              val = translate(val)
+            else {
+              let idx = val.indexOf(';link:')
+              if (idx !== -1) {
+                let parts = val.split(' - ')
+                let links = parts.map((part, i) => {
+                  let idx = part.indexOf(';link:')
+                  let id = part.slice(idx + 6)
+                  let title = part.slice(0, idx)
+                  return <TouchableOpacity onPress={this.showTreeNode.bind(this, {id, title})}>
+                           <Text style={{ paddingLeft: 5, fontSize: i ? 12 : 16, color: bankStyle.linkColor, opacity: i && 0.5 || 1 }}>{part.substring(0, idx)}</Text>
+                         </TouchableOpacity>
+                })
+                return <View>{links}</View>
+              }
+              val = `${translate(val)}:`
+            }
+
+            return <Text style={{ paddingLeft: (isObject || isArray) && 7 || 5, fontSize: 16 }}>{val}</Text>
           }}
           valueRenderer={raw => {
-            if (typeof raw === 'string')
+            if (typeof raw === 'string') {
               raw = raw.replace(/['"]+/g, '')
+              if (raw == '$$')
+                return
+            }
             return <Text style={{ padding: 15, fontSize: 16 }}>{raw}</Text>
           }}
         />
       </View>
     )
+
+    if (isTree  &&  params.showTree  &&  resource.submissions) {
+      let tree = this.paintTree(json, resource)
+      content = <View style={{flexDirection: 'row'}}>
+                 {content}
+                 <View style={{flex: 1, alignItems: 'flex-end'}}>
+                   {tree}
+                 </View>
+                </View>
+
+    }
+
     return <View>
               {header}
               {content}
            </View>
+  },
+
+/*
+{
+  "Beneficial Owners": {
+    "1": {
+      "Christopher Hullatt\nValid Driver Licence, United Kingdom;link:tradle.PhotoID_097a094463e1b5b8bff45f712b75999d7ca9a5ab3cef4f171ffc171f34f1c30c - Application For: Controlling Person Onboarding;link:tradle.Application_5a4cc48852ab688f98015e496b5c68399755a90c4ecea63799a02ed52655ac03": "$$"
+    },
+    "2": {
+      "Octopus Ventures Limited;link:tradle.legal.LegalEntity_5f7a25c84e38d3618da1ea4f04d481d1859fbf8192158b8d27811109e6393166 - Application For: Controlling Entity Onboarding;link:tradle.Application_e266eae6eb36fae6d873c339a89a2a843690e5239c9f08ea5ed90f75fb8042b6": "$$",
+      "Beneficial Owners": {
+        "1": {
+          "Octopus Investments Limited;link:tradle.legal.LegalEntity_a5c43986a452d845fdc0702291562c13fcfc8b1cd2ecd0c0dc254cafce38a394 - Application For: Controlling Entity Onboarding;link:tradle.Application_fb2ccf8f691dbf0febd4350f6abbd11083acd03869482eecb5ac8052e99a5414": "$$"
+        }
+      }
+    }
+  }
+}"
+ */
+  makeSunbirstTree(jsonO, data, resource) {
+    let size = _.size(data)
+    if (!size) {
+      data.name = utils.getDisplayName(resource).split(' ').slice(0, 2).join('\n')
+      data.children = []
+    }
+    let bo = translate('beneficialOwners')
+    let json = jsonO[bo] || jsonO
+
+    for (let p in json) {
+      if (!isNaN(p)) {
+        let keys = Object.keys(json[p])
+        let name = keys[0]
+        let idx = name.indexOf(';link:')
+        if (idx) {
+          name = name.slice(0, idx)
+          let parts = name.replace(/\n/g, ' ').split(' ')
+          let n = ''
+          for (let i=0; i<parts.length  &&  n.length < 10; i++) {
+            n += (i && '\n' || '') + parts[i]
+          }
+          name = n
+        }
+        if (_.size(json[p]) === 1)
+          data.children.push({ name, size: 4 })
+        else {
+          let obj = {
+            name,
+            children: []
+          }
+          data.children.push(obj)
+          this.makeSunbirstTree(json[p][bo], obj, resource)
+        }
+      }
+    }
+    return data
+  },
+  getDepth(obj) {
+    var depth = 0;
+    if (obj.children) {
+      obj.children.forEach(d => {
+        var tmpDepth = this.getDepth(d)
+        if (tmpDepth > depth) {
+            depth = tmpDepth
+        }
+      })
+    }
+    return 1 + depth
+  },
+  paintTree(tree, resource) {
+    let size = 500
+
+    // let data = {
+    //   name: "CE",
+    //   children: [
+    //     { name: "CE-Oct", size: 5 },
+    //     {
+    //       name: "CP-Chris\nHulatt",
+    //       children: [
+    //         { name: "PhotoID" },
+    //         {
+    //           name: "Info",
+    //           children: [
+    //             { name: "Selfie", size: 4 },
+    //             { name: "Sig", size: 4 }
+    //           ]
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       name: "CE",
+    //       children: [
+    //         { name: "CP1", size: 3 },
+    //         { name: "CP2", size: 5 }
+    //       ]
+    //     }
+    //   ]
+    // }
+    let data = {}
+    let treeData = this.makeSunbirstTree(tree, data, resource)
+    let depth = this.getDepth(treeData)
+    if (depth < 3)
+      return
+    return (
+      <VictorySunburst
+          colorScale={'qualitative'}
+          height={size}
+          width={size}
+          data={treeData}
+          events={[{
+            target: "labels",
+            eventHandlers: {
+              onClick: () => {
+               return [
+                  {
+                    target: "labels",
+                    mutation: () => {
+                      return { active: true };
+                    },
+                    callback: () => {
+                      console.log("I happen after setState");
+                    }
+                  }
+                ];
+              }
+            }
+          }]}
+       />
+    )
+  },
+
+  showTreeNode({id, title}) {
+    debugger
+    const { bankStyle, navigator, resource } = this.props
+    let type = utils.getType(id)
+    let isApplication = type === APPLICATION
+    if (isApplication) {
+      title = `${title} -- ${resource.from.title} -> ${title}`
+    }
+    else
+      title = `${title} -- ${utils.makeModelTitle(type)}`
+    navigator.push({
+      componentName: isApplication ? APPLICATION_VIEW : MESSAGE_VIEW,
+      backButtonTitle: 'Back',
+      title,
+      passProps: {
+        bankStyle,
+        resource: {
+          id
+        }
+      }
+    })
   },
   minimizeJson(jsonObj) {
     let json = cleanJson(jsonObj)

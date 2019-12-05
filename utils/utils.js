@@ -2736,6 +2736,19 @@ debugger
     }
     return r[ROOT_HASH] && r[ROOT_HASH] || (r.id  &&  r.id.split('_')[1])
   },
+  getCurrentHash(r) {
+    if (typeof r === 'string') {
+      let keys = r.split('_')
+      return keys.length === 3 &&  keys[2] || null
+    }
+    if (r[CUR_HASH])
+      return r[CUR_HASH]
+    else if (r.id) {
+      let parts = r.id.split('_')
+      if (parts.length === 3)
+        return parts[2]
+    }
+  },
   isNew(r) {
     return !utils.getRootHash(r)
   },

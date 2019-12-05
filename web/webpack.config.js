@@ -51,6 +51,7 @@ var common = {
     alias: {
       'q': 'bluebird-q',
       'react-native': 'react-web',
+      'victory-native': 'victory',
       // 'react-native': 'react-web/lib/react-web.js',
       'ReactART': 'react-art',
       'RCTNativeAppEventEmitter': emptyObjPath,

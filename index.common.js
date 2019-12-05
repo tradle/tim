@@ -628,7 +628,7 @@ var NavigationBarRouteMapper = {
         style.push({fontFamily:  bankStyle.headerFont})
       let tstyle = isWeb() ? {paddingHorizontal: 5, maxWidth: Math.max(width - 160, 200)} : {width}
       text = <View style={tstyle} key={'index.common.js_0'}>
-               <Text numberOfLines={1} style={style}>{t[0]}</Text>
+               <Text numberOfLines={1} style={style}>{t[0].replace(/\n/, ' ')}</Text>
              </View>
     }
     let titleStyle = tArr ? platformStyles.navBarMultiRowTitle : styles.navBarMultiRowTitle

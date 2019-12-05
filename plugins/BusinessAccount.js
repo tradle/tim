@@ -208,7 +208,8 @@ function getPropsForControllingEntity(form) {
         {name: 'startDate', required: false},
         {name: 'endDate', required: false},
         {name: 'occupation', required: false},
-        {name: 'controllingEntityCountry'},
+        {name: 'controllingEntityCountry', required: true},
+        {name: 'controllingEntityDateOfBirth'},
         {name: 'inactive', required: false},
       ])
     }
