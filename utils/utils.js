@@ -484,13 +484,14 @@ var utils = {
   translateEnum(resource) {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
+    let rtype = utils.getType(resource)
     if (!dictionary  ||  lang == 'en') {
-      if (!resource.title)
-        return utils.buildRef(resource).title
+      // resource[utils.getEnumProperty(utils.getModel(rtype))]
+      if (resource[TYPE])
+        return resource[utils.getEnumProperty(rtype)]
       return resource.title
     }
 
-    let rtype = utils.getType(resource)
     if (rtype === LANGUAGE)
       return resource.language
     let e = dictionary.enums[rtype]
@@ -946,6 +947,10 @@ var utils = {
         return resource.title
       }
       model = utils.getModel(resource[TYPE])
+    }
+    if (utils.isEnum(model)  &&  resource[TYPE]) {
+      let prop = utils.getEnumProperty(model)
+      return resource[prop]
     }
     let props = model.properties
     let rType = utils.getType(resource)
@@ -2361,6 +2366,8 @@ var utils = {
     return model.interfaces  &&  model.interfaces.indexOf(DOCUMENT) !== -1
   },
   getEnumProperty(model) {
+    if (typeof model === 'string')
+      model = utils.getModel(model)
     let props = model.properties
     for (let p in props)
       if (p !== TYPE)

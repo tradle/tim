@@ -276,7 +276,7 @@ var NewResourceMixin = {
           }
         }
 
-        if (type === 'string'  &&  p.length > 7  &&  p.indexOf('_group') === p.length - 6) {
+        if (type === 'string'  &&  p.length > 6  &&  p.indexOf('_group') === p.length - 6) {
           options.fields[p].template = this.myTextTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
