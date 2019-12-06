@@ -609,39 +609,12 @@ var ResourceMixin = {
     return 1 + depth
   },
   paintTree(tree, resource) {
-    let size = 500
-
-    // let data = {
-    //   name: "CE",
-    //   children: [
-    //     { name: "CE-Oct", size: 5 },
-    //     {
-    //       name: "CP-Chris\nHulatt",
-    //       children: [
-    //         { name: "PhotoID" },
-    //         {
-    //           name: "Info",
-    //           children: [
-    //             { name: "Selfie", size: 4 },
-    //             { name: "Sig", size: 4 }
-    //           ]
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       name: "CE",
-    //       children: [
-    //         { name: "CP1", size: 3 },
-    //         { name: "CP2", size: 5 }
-    //       ]
-    //     }
-    //   ]
-    // }
     let data = {}
     let treeData = this.makeSunbirstTree(tree, data, resource)
     let depth = this.getDepth(treeData)
     if (depth < 3)
       return
+    let size = 500
     return (
       <VictorySunburst
           colorScale={'qualitative'}
@@ -1157,3 +1130,29 @@ var styles = StyleSheet.create({
 })
 
 module.exports = ResourceMixin;
+    // let data = {
+    //   name: "CE",
+    //   children: [
+    //     { name: "CE-Oct", size: 5 },
+    //     {
+    //       name: "CP-Chris\nHulatt",
+    //       children: [
+    //         { name: "PhotoID" },
+    //         {
+    //           name: "Info",
+    //           children: [
+    //             { name: "Selfie", size: 4 },
+    //             { name: "Sig", size: 4 }
+    //           ]
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       name: "CE",
+    //       children: [
+    //         { name: "CP1", size: 3 },
+    //         { name: "CP2", size: 5 }
+    //       ]
+    //     }
+    //   ]
+    // }
