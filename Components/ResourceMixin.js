@@ -493,7 +493,7 @@ var ResourceMixin = {
             let val = raw[0]
             if (isObject)
               val = translate(val)
-            else {
+            if (typeof val === 'string') {
               let idx = val.indexOf(';link:')
               if (idx !== -1) {
                 let parts = val.split(' - ')
@@ -576,7 +576,8 @@ var ResourceMixin = {
           name = name.slice(0, idx)
           let parts = name.replace(/\n/g, ' ').split(' ')
           let n = ''
-          for (let i=0; i<parts.length  &&  n.length < 10; i++) {
+          let len = Math.min(parts.length, 3)
+          for (let i=0; i<len; i++) {
             n += (i && '\n' || '') + parts[i]
           }
           name = n
