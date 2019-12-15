@@ -138,27 +138,19 @@ class ApplicationTabs extends Component {
       }
 
       let count
-      if (hasSubmissions)  {
-        let cnt = resource['_' + p + 'Count'] || (resource[p] &&  resource[p].length)
-        if (cnt) {
-          hasCounts = true
-          if (!currentProp  &&  !showDetails)
-            currentProp = props[p]
-          count = <View style={styles.count}>
-                    <Text style={styles.countText}>{cnt}</Text>
-                  </View>
-        }
+      let pName = hasSubmissions && '_' || '' + p + 'Count'
+      let cnt = resource[pName] || (resource[p] &&  resource[p].length)
+      if (cnt) {
+        hasCounts = true
+        if (!currentProp  &&  !showDetails)
+          currentProp = props[p]
+        count = <View style={styles.count}>
+                  <Text style={styles.countText}>{cnt}</Text>
+                </View>
       }
       let showCurrent = backlink  &&  backlink.name === p ? currentMarker : null
-      let text, blIcon
-      if (hasSubmissions) {
-        text = <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
-        blIcon = <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
-      }
-      else {
-        text = <View style={styles.noSubmissionsText}/>
-        blIcon = <View style={styles.noSubmissionsIcon}/>
-      }
+      let text = <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
+      let blIcon = <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableOpacity onPress={this.exploreBacklink.bind(this, resource, props[p])}>
@@ -201,15 +193,13 @@ class ApplicationTabs extends Component {
     if (showDetails) {
       let { scoreDetails } = resource
       let pieChart = scoreDetails  &&  this.getPieChart(styles)
-       details = <View style={{marginTop: pieChart && -40 || 0}}>
-                   {pieChart}
-                   <ShowPropertiesView resource={resource}
+      details = <ShowPropertiesView resource={resource}
+                                      pieChart={pieChart}
                                       showRefResource={this.getRefResource.bind(this)}
                                       currency={currency}
                                       bankStyle={bankStyle}
                                       excludedProperties={['photos']}
                                       navigator={navigator} />
-                 </View>
       if (/*!resource.draft  &&*/ utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
@@ -274,9 +264,7 @@ class ApplicationTabs extends Component {
         data.push({title: `${title} ${scoreDetails[p].score}`, value: scoreDetails[p].score, color: colors[j++]})
       }
     }
-    let pieChartTitle = `${translate('riskScore')}: ${resource.score}`
     return <View>
-             <Text style={styles.pieTitle}>{pieChartTitle}</Text>
              <PieChart
                radius={40}
                ration={1}
@@ -289,7 +277,6 @@ class ApplicationTabs extends Component {
                labelPosition={112}
                labelStyle={{fontSize: 9, fill: '#9b9b9b'}}
              />
-             <View style={{height: 20, borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} />
            </View>
   }
   exploreBacklink(resource, prop) {
