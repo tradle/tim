@@ -430,8 +430,13 @@ var utils = {
     return utils.translateProperty(...args)
   },
   translateProperty(property, model, needDescription) {
-    if (!dictionary)
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    if (!dictionary  ||  lang === 'en') {
+      if (needDescription)
+        return property.description
       return property.title || utils.makeLabel(property.name)
+    }
     let translations = dictionary.properties[property.name]
     let val
     if (translations) {
@@ -448,18 +453,23 @@ var utils = {
       return property.title || utils.makeLabel(property.name)
   },
   translateModel(model, isPlural) {
-    if (dictionary  &&  dictionary.models[model.id])
-      return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
-    return model.title ? model.title : utils.makeModelTitle(model, isPlural)
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    if (lang === 'en' ||  !dictionary  || !dictionary.models[model.id])
+      return model.title ? model.title : utils.makeModelTitle(model, isPlural)
+
+    return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
   },
   translateEnum(resource) {
-    if (!dictionary) {
-      if (!resource.title)
-        return utils.buildRef(resource).title
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    let rtype = utils.getType(resource)
+    if (!dictionary  ||  lang === 'en') {
+      if (resource[TYPE])
+        return resource[utils.getEnumProperty(rtype)]
       return resource.title
     }
 
-    let rtype = utils.getType(resource)
     if (rtype === LANGUAGE)
       return resource.language
     let e = dictionary.enums[rtype]
@@ -2285,6 +2295,8 @@ var utils = {
     return model.interfaces  &&  model.interfaces.indexOf(DOCUMENT) !== -1
   },
   getEnumProperty(model) {
+    if (typeof model === 'string')
+      model = utils.getModel(model)
     let props = model.properties
     for (let p in props)
       if (p !== TYPE)

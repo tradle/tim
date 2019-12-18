@@ -339,6 +339,7 @@ module.exports = {
     "orShare": "Or share",
     "goodNews": "Good news! You already have {1}. To share tap the icon below",
     "goodNewsFew": "Good news! You already have quite a few. To share tap icon below.",
+    "prefilledForCustomer": "For your convenience we prefilled some fields. Please review and submit",
     // Tours buttons
     "Skip": "Skip",
     "Done": "Done",
