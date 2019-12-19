@@ -16,15 +16,18 @@ import moment from 'moment'
 import Prompt from 'react-native-prompt'
 
 import constants from '@tradle/constants'
+import validateModel from '@tradle/validate-model'
+
 import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import { Text } from './Text'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
-var NOT_SPECIFIED = '[not specified]'
-var DEFAULT_CURRENCY_SYMBOL = '£'
-var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const NOT_SPECIFIED = '[not specified]'
+const DEFAULT_CURRENCY_SYMBOL = '£'
+const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const OBJECT = 'tradle.Object'
 
 const PHOTO = 'tradle.Photo'
 const METHOD = 'tradle.Method'
@@ -34,11 +37,13 @@ const CHECK = 'tradle.Check'
 
 const {
   TYPE,
-  ROOT_HASH
+  ROOT_HASH,
+  PREV_HASH
 } = constants
 const {
   IDENTITY,
   MONEY,
+  FORM
 } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
@@ -54,7 +59,8 @@ class ShowPropertiesView extends Component {
     currency: PropTypes.string,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
-    excludedProperties: PropTypes.array
+    excludedProperties: PropTypes.array,
+    pieChart: PropTypes.object
   };
   constructor(props) {
     super(props);
@@ -99,7 +105,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency, showRefResource } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, pieChart } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
@@ -146,14 +152,23 @@ class ShowPropertiesView extends Component {
     let isPartial = model.id === PARTIAL
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
+    if (me.isEmployee  &&  resource._sourceOfData) {
+      vCols.push('_sourceOfData')
+      // vCols.push('_dataLineage')
+    }
+
+    const ObjectModel = utils.getModel(OBJECT)
 
     var viewCols = []
     vCols.forEach((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-      if (utils.isHidden(p, resource))
-        return
       var pMeta = props[p];
+      if (pMeta  &&  utils.isHidden(p, resource))
+        return
+      if (!pMeta)
+        pMeta = ObjectModel.properties[p]
+
       // if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
       //   return
       var val = resource[p];
@@ -176,7 +191,7 @@ class ShowPropertiesView extends Component {
 
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
 
-        let params = {prop: pMeta, json: val, showTree: true, isView: true, jsonRows, isOnfido}
+        let params = {prop: pMeta, json: val, pieChart, showTree: true, isView: true, jsonRows, isOnfido}
         // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
         let jVal = this.showJson(params)
         if (!jVal)
@@ -375,6 +390,17 @@ class ShowPropertiesView extends Component {
          </View>
       )
     })
+    if (isMessage  &&  utils.isSubclassOf(model, FORM)  &&  me.isEmployee) {
+      if (resource[PREV_HASH]  &&  resource[PREV_HASH] !== resource[ROOT_HASH]) {
+        let title = utils.getDisplayName(resource)
+        viewCols.push(
+          <TouchableOpacity onPress={showRefResource.bind(this, {id: `${resource[TYPE]}_${resource[ROOT_HASH]}_${resource[PREV_HASH]}`, title }, ObjectModel.properties[PREV_HASH])} key={this.getNextKey()}>
+            <Text style={styles.title}>{translate('previousVersion')}</Text>
+            <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
+          </TouchableOpacity>
+        )
+      }
+    }
     if (resource.txId) { // || utils.isSealableModel(model)) {
       viewCols.push(
           <View key={this.getNextKey()} ref='propertySheet'>
