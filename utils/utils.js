@@ -70,9 +70,11 @@ const getStore = () => require('../Store/Store')
 
 const IS_MESSAGE = '_message'
 var strMap = {
+  'Please review and correct the data below': 'reviewScannedProperties',
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
-  'Please take a **selfie** picture of your face': 'takeAPicture'
+  'Please take a **selfie** picture of your face': 'takeAPicture',
+  'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
 }
 
 var {
@@ -485,7 +487,7 @@ var utils = {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
     let rtype = utils.getType(resource)
-    if (!dictionary  ||  lang == 'en') {
+    if (!dictionary  ||  lang === 'en') {
       // resource[utils.getEnumProperty(utils.getModel(rtype))]
       if (resource[TYPE])
         return resource[utils.getEnumProperty(rtype)]
@@ -1533,6 +1535,10 @@ var utils = {
           res._context = utils.buildRef(res._context)
           return
         }
+        if (p === '_sourceOfData'  &&  res._sourceOfData) {
+          res._sourceOfData = utils.buildRef(res._sourceOfData)
+          return
+        }
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
           return
         if (isContext  &&  (p === 'requestFor' || p === 'contextId'))
@@ -2521,7 +2527,7 @@ var utils = {
         return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
       }
     }
-    return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
+    return props[p]  &&  (props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1))
   },
 
   parseMessageFromDB(message) {
@@ -2761,6 +2767,15 @@ debugger
   },
   isNew(r) {
     return !utils.getRootHash(r)
+  },
+  hasModificationHistory(r) {
+    if (!utils.getMe().isEmployee)
+      return false
+    let m = utils.getModel(r[TYPE])
+    if (!m.properties.modificationHistory ||  utils.getRootHash(r) === utils.getCurrentHash(r))
+      return false
+    else
+      return true
   },
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
