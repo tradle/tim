@@ -208,9 +208,10 @@ function getPropsForControllingEntity(form) {
         {name: 'startDate', required: false},
         {name: 'endDate', required: false},
         {name: 'occupation', required: false},
-        {name: 'controllingEntityCountry', required: true},
+        {name: 'controllingEntityCountryOfResidence', required: true},
         {name: 'controllingEntityDateOfBirth'},
         {name: 'inactive', required: false},
+        {name: 'doNotReachOut'},
       ])
     }
     retProps.requestedProperties.push({name: 'legalEntity', required: true})
@@ -230,6 +231,7 @@ function getPropsForControllingEntity(form) {
         {name: 'natureOfControl'},
         {name: 'phone'},
         {name: 'legalEntity'},
+        {name: 'doNotReachOutToMembers'},
       ]
     }
   }
