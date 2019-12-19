@@ -220,6 +220,7 @@ const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
+const MODIFICATION        = 'tradle.Modification'
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -2910,9 +2911,9 @@ var Store = Reflux.createStore({
   onSetPreferences(preferences) {
     this.preferences = preferences
   },
-
   async onAddMessage (params) {
     let r = params.msg
+    let { editFormRequestPrefill, originatingMessage } = params
     let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
 
     if (application) {
@@ -2967,7 +2968,7 @@ var Store = Reflux.createStore({
     for (let p in r) {
       if (!props[p])
         continue
-      if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
+      if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id  &&  (!props[p].inlined || r[p][ROOT_HASH]))
         rr[p] = this.buildRef(r[p])
       else
         rr[p] = r[p];
@@ -2978,20 +2979,39 @@ var Store = Reflux.createStore({
       [TYPE]: rr[TYPE],
       time: r._time
     }
-    if (rr.message)
-      toChain.message = rr.message
-    if (rr.photos)
-      toChain.photos = rr.photos
-    if (isSelfIntroduction)
-      toChain.profile = { firstName: me.firstName }
-    if (r.list)
-      rr.list = r.list
+
+    if (editFormRequestPrefill) {
+      let prefill = await this.prepareToSend({resource: r.prefill, model: this.getModel(rr.form), isPrefill: true})
+      _.extend(toChain, {
+        prefill,
+        form: r.form,
+        product: r.product
+      })
+      let ending = ''
+      let origMessage = originatingMessage.message
+      if (origMessage.endsWith('**')) {
+        let idx =  origMessage.indexOf(' **')
+        ending = idx !== origMessage.length - 3 && origMessage.slice(idx) || ''
+      }
+      toChain.message = rr.message = translate('prefilledForCustomer') + ending
+    }
+    else {
+      let { message, photos } = rr
+      if (message)
+        toChain.message = message
+      if (photos)
+        toChain.photos = photos
+      if (isSelfIntroduction)
+        toChain.profile = { firstName: me.firstName }
+      if (r.list)
+        rr.list = r.list
+    }
     let required = m.required
     if (required) {
       required.forEach((p) => {
         if (props[p].type === 'object'  &&  !props[p].inlined  &&  !this.getModel(props[p].ref).inlined)
           toChain[p] = this.buildSendRef(rr[p])
-        else
+        else if (!editFormRequestPrefill)
           toChain[p] = rr[p]
       })
       // HACK
@@ -3048,12 +3068,24 @@ var Store = Reflux.createStore({
         this.addLastMessage(r, batch)
 
       let noCustomerWaiting = await checkIfNeedToPublishIdentityOrSendSelfIntro()
-      if (!isWelcome  ||  !utils.isEmpty(welcomeMessage))
+      if (!isWelcome  ||  !utils.isEmpty(welcomeMessage)) {
         await handleSimpleMessage(rr)
+        if (editFormRequestPrefill) {
+          originatingMessage._documentCreated = true
+          await this.disableFormRequests({form: toChain.form, batch, org: me.organization})
+
+          let frId = utils.getId(originatingMessage)
+          this._setItem(frId, originatingMessage)
+          await this.dbPut(frId, originatingMessage)
+          this.trigger({action: 'updateItem', resource: originatingMessage})
+
+          this.trigger({action: 'addMessage', resource: toChain})
+        }
+      }
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (!noCustomerWaiting)
         await sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse})
-      if (me.isEmployee)
+      if (!editFormRequestPrefill  &&  me.isEmployee)
         await this.getModelsPack(to)
     } catch(err) {
       debug('Something went wrong', err.stack)
@@ -3062,6 +3094,7 @@ var Store = Reflux.createStore({
       if (cb)
         cb(rr)
     }
+
     // async function sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse}) {
     async function sendCustomerWaiting() {
       if (isReadOnlyContext) {
@@ -3219,6 +3252,90 @@ var Store = Reflux.createStore({
     }
   },
 
+  async prepareToSend({resource, model, isPrefill}) {
+    let toChain = _.omit(resource, excludeWhenSignAndSend)
+    let properties = model.properties
+
+    this.rewriteStubs(toChain)
+    let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
+    let isNew = isPrefill  ||  !resource[ROOT_HASH]
+    for (let p in toChain) {
+      let prop = properties[p]
+
+      if (!isNew  &&  !prop  &&  !keepProps.includes(p)) { // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+        delete toChain[p]
+        continue
+      }
+      if (!prop) {
+        prop = ObjectModel.properties[p]
+        if (!prop  ||  prop.virtual  ||  toChain[p]._link)
+          continue
+      }
+      if (prop  &&  prop.partial)
+        continue
+      let isArray = prop.type === 'array'
+
+      if (isArray  &&  prop.items.filter) {
+        delete toChain[p]
+        continue
+      }
+
+      let ref = prop.ref  ||  isArray  &&  prop.items.ref
+
+      if (!ref)
+        continue
+
+      let refM = this.getModel(ref)
+      if (!refM)
+        continue
+      if (!utils.isWeb()  &&  prop.range === 'document') {
+          debugger
+        let { url } = toChain[p]
+        if (!isPrefill  &&  url  &&  url.indexOf('data:application/pdf;') === 0)
+          await this._keeper.replaceDataUrls(toChain[p])
+      }
+      if (refM.inlined)
+        continue
+
+      let isObject = prop.type === 'object'
+      if (isObject)
+        toChain[p] = this.buildSendRef(resource[p])
+      else
+        toChain[p] = resource[p].map(v => this.buildSendRef(v))
+    }
+    if (!isNew  &&  !isPrefill) {
+      if (!resource[SIG]) debugger
+
+      const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
+        _link: resource[CUR_HASH],
+        _permalink: resource[ROOT_HASH],
+        ...resource
+      })
+
+      _.extend(toChain, nextVersionScaffold)
+      _.extend(resource, nextVersionScaffold)
+    }
+
+    toChain = utils.sanitize(toChain)
+    let rtype = utils.getType(toChain)
+    try {
+      if (rtype !== DATA_BUNDLE)
+        validateResource({ resource: toChain, models: this.getModels() })
+    } catch (err) {
+      if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
+      // if (err.name === 'InvalidPropertyValue')
+        this.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
+      else if (Errors.matches(err, ValidateResourceErrors.Required)) {
+        let validationErrors = {}
+        err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
+        this.trigger({action: 'validationError', validationErrors})
+      }
+       else
+        this.trigger({action: 'validationError', error: err.message})
+      return
+    }
+    return toChain
+  },
   async getModelsPack(to) {
     let type = utils.getType(to)
 
@@ -3995,7 +4112,8 @@ if (!res[SIG]  &&  res._message)
     return res
   },
   async onGetItemFromServer(params) {
-    var {resource, action, noTrigger, backlink, forwardlink, application, isChat} = params
+    var {resource, action, noTrigger, backlink, forwardlink,
+         application, isChat, isPreviousVersion} = params
     const rtype = utils.getType(resource)
     if (rtype === MESSAGE)
       return await this.getMessage(params)
@@ -4004,7 +4122,7 @@ if (!res[SIG]  &&  res._message)
       return await this.getApplication(params)
 
     const rId = utils.getId(resource)
-    let r = await this._getItemFromServer({idOrResource: rId, backlink, isChat})
+    let r = await this._getItemFromServer({idOrResource: rId, backlink, isChat, isPreviousVersion})
     if (!r)
       return
     if (resource.id  ||  (!backlink  &&  !forwardlink)) {
@@ -4013,7 +4131,7 @@ if (!res[SIG]  &&  res._message)
           application                &&
           application.verifications  &&
           utils.isForm(r[TYPE])) {
-        debugger
+        // debugger
         let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
         if (l) {
           r.verifications = l.list
@@ -4032,7 +4150,8 @@ if (!res[SIG]  &&  res._message)
     if (!r._context) {
       r._context = resource._context
     }
-
+    if (resource._sourceOfData)
+      r._sourceOfData = resource._sourceOfData
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
@@ -4243,19 +4362,20 @@ if (!res[SIG]  &&  res._message)
   onExploreBacklink(resource, prop, backlinkAdded) {
     this.trigger({
       action: 'exploreBacklink',
-      resource: resource,
+      resource,
       backlink: prop,
       // list: list,
-      backlinkAdded: backlinkAdded
+      backlinkAdded
     })
   },
+
   onExploreForwardlink(resource, prop, forwardlinkAdded) {
     this.trigger({
       action: 'exploreForwardlink',
-      resource: resource,
+      resource,
       forwardlink: prop,
       // list: list,
-      forwardlinkAdded: forwardlinkAdded
+      forwardlinkAdded
     })
   },
   onGetDetails(resource) {
@@ -4632,12 +4752,16 @@ if (!res[SIG]  &&  res._message)
     else {
       returnVal = {};
       _.extend(returnVal, resource);
+      let keepProps = ['_sourceOfData'] //, '_dataLineage']
       for (let p in json) {
         // Could be metadata property that is why it preceeds the next 'else'
         if (!returnVal[p])
-          returnVal[p] = json[p];
-        else if (!props[p])
+          returnVal[p] = json[p]
+        else if (!props[p]) {
+          if (keepProps.includes(p))
+            returnVal[p] = json[p]
           continue
+        }
         else if (!props[p].readOnly  &&  !props[p].immutable)
           returnVal[p] = json[p];
       }
@@ -4840,7 +4964,7 @@ if (!res[SIG]  &&  res._message)
       let properties = rModel.properties
 
       self.rewriteStubs(toChain)
-      let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time']
+      let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
       // if (isNew) {
 
       for (let p in toChain) {
@@ -4850,7 +4974,12 @@ if (!res[SIG]  &&  res._message)
           delete toChain[p]
           continue
         }
-        if (!prop  ||  prop.partial)
+        if (!prop) {
+          prop = ObjectModel.properties[p]
+          if (!prop  ||  prop.virtual  ||  toChain[p]._link)
+            continue
+        }
+        if (prop  &&  prop.partial)
           continue
         let isArray = prop.type === 'array'
 
@@ -7669,12 +7798,21 @@ if (!res[SIG]  &&  res._message)
   rewriteStubs(resource) {
     let type = resource[TYPE]
     let props = this.getModel(type).properties
+    let refProps = ['_sourceOfData']
     for (let p in resource) {
-      if (!props[p])
+      let prop = props[p]
+      if (!prop)  {
+        if (refProps.includes(p)) {
+          prop = ObjectModel.properties[p]
+          if (!prop)
+           continue
+        }
+        else
+          continue
+      }
+      if (prop.type !== 'object'  &&  prop.type !== 'array')
         continue
-      if (props[p].type !== 'object'  &&  props[p].type !== 'array')
-        continue
-      if (props[p].range === 'json')
+      if (prop.range === 'json')
         continue
       if (typeof resource[p] !== 'object')
         continue
@@ -10609,7 +10747,7 @@ if (!res[SIG]  &&  res._message)
         if (me.isEmployee  &&  isFormRequest  &&  val.product) {
           // Someone is applying to my provider
           let meApplying = context.from.organization  &&  context.from.organization.id === me.organization.id
-          let meServing = context.to.organization.id === me.organization.id
+          let meServing = context.to.organization  &&  context.to.organization.id === me.organization.id
           if (meApplying  ||  meServing) {
             context._startForm = val.form
             contextId = utils.getId(context)
@@ -10706,53 +10844,45 @@ if (!res[SIG]  &&  res._message)
       }
       if (prefill) val.prefill = prefill
     }
-    if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
-      ///=============== TEST VERIFIERS
-      if (isNew) {
-        // Prefill for testing and demoing
+    if (isFormRequest  &&  val.form !== PRODUCT_REQUEST) {
+      if (utils.isSimulator()) {
+        ///=============== TEST VERIFIERS
+        if (isNew) {
+          // Prefill for testing and demoing
 
-        let orgs = {}
-        this.searchNotMessages({modelName: ORGANIZATION}).forEach((r) => orgs[utils.getId(r)] = r)
+          let orgs = {}
+          this.searchNotMessages({modelName: ORGANIZATION}).forEach((r) => orgs[utils.getId(r)] = r)
 
-        newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
-        //============
-        if (SERVICE_PROVIDERS.length && val.verifiers) {
-          if (!val.message) {
-            val.message = 'Please have this form verified by one of our trusted associates'
-          }
-
-          val.verifiers.forEach((v) => {
-            let serviceProvider = SERVICE_PROVIDERS.find((sp) => {
-              if (!sp.url)
-                return
-              if (!utils.urlsEqual(sp.url, v.url)) return
-              if (v.id) return v.id === sp.id
-
-              return v.permalink === sp.permalink
-            })
-
-            if (serviceProvider) {
-              v.provider = serviceProvider.org
-              let org = self._getItem(v.provider)
-              v.name = org.name
-              v.id = serviceProvider.id
-              v.photo = org.photos && org.photos[0].url
+          newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
+          //============
+          if (SERVICE_PROVIDERS.length && val.verifiers) {
+            if (!val.message) {
+              val.message = 'Please have this form verified by one of our trusted associates'
             }
-          })
+
+            val.verifiers.forEach((v) => {
+              let serviceProvider = SERVICE_PROVIDERS.find((sp) => {
+                if (!sp.url)
+                  return
+                if (!utils.urlsEqual(sp.url, v.url)) return
+                if (v.id) return v.id === sp.id
+
+                return v.permalink === sp.permalink
+              })
+
+              if (serviceProvider) {
+                v.provider = serviceProvider.org
+                let org = self._getItem(v.provider)
+                v.name = org.name
+                v.id = serviceProvider.id
+                v.photo = org.photos && org.photos[0].url
+              }
+            })
+          }
         }
       }
 
-      let formRequests = await this.searchMessages({modelName: FORM_REQUEST, to: org})
-      if (formRequests)
-        formRequests.forEach((r) => {
-          if (!r._documentCreated  &&  r.form === val.form) {
-            r._documentCreated = true
-            let rId = utils.getId(r)
-            this._getItem(rId)._documentCreated = true
-            this.dbBatchPut(rId, r, batch)
-            this.trigger({action: 'updateItem', resource: r})
-          }
-        })
+      await this.disableFormRequests({form:val.form, batch, org})
     }
     if (val[TYPE] === DATA_BUNDLE) {
       await this.getDataBundle().processDataBundle({val, context})
@@ -10989,6 +11119,21 @@ if (!res[SIG]  &&  res._message)
       await self.dbPut(meId, me)
       disableBlockchainSync(meDriver)
     }
+  },
+  async disableFormRequests({form, noTrigger, batch, org}) {
+    let formRequests = await this.searchMessages({modelName: FORM_REQUEST, to: org})
+    if (formRequests)
+      formRequests.forEach((r) => {
+        if (!r._documentCreated  &&  r.form === form) {
+          r._documentCreated = true
+          let rId = utils.getId(r)
+          this._getItem(rId)._documentCreated = true
+          this.dbBatchPut(rId, r, batch)
+          if (!noTrigger)
+            this.trigger({action: 'updateItem', resource: r})
+        }
+      })
+
   },
   async modelsPackHandler({val, batch, org}) {
     // org.products = []
@@ -11755,14 +11900,14 @@ if (!res[SIG]  &&  res._message)
         return rr.value
     }
   },
-  async _getItemFromServer({idOrResource, backlink, isChat}) {
+  async _getItemFromServer({idOrResource, backlink, isChat, isPreviousVersion}) {
     let id = (typeof idOrResource !== 'string') &&  utils.getId(idOrResource) || idOrResource
     if (!this.client) {
       // debugger
       return
     }
     try {
-      let result = await graphQL.getItem({id, client: this.client, backlink, isChat})
+      let result = await graphQL.getItem({id, client: this.client, backlink, isChat, isPreviousVersion})
       if (result) {
         return this.convertToResource(result)
       }
