@@ -14,7 +14,10 @@ import JSONTree from 'react-native-json-tree'
 
 import constants from '@tradle/constants'
 
-var { TYPE } = constants
+var {
+  TYPE,
+  // PREV_HASH
+} = constants
 var { PROFILE, ORGANIZATION } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
@@ -42,6 +45,7 @@ const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
+const MODIFICATION = 'tradle.Modification'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -95,6 +99,7 @@ var ResourceMixin = {
           search: search,
           currency: currency,
           country: country,
+          // isPreviousVersion: prop.name === PREV_HASH
         }
       }
       if (isVerifier) {
@@ -184,7 +189,8 @@ var ResourceMixin = {
           return
         }
         let value;
-        if (itemMeta.displayAs)
+        let isDisplayName = itemMeta.displayAs
+        if (isDisplayName)
           value = utils.templateIt(itemMeta, v, pModel)
         else if (itemMeta.type === 'date')
           value = utils.formatDate(v[p]);
@@ -199,6 +205,11 @@ var ResourceMixin = {
           }
           else
             value = v[p];
+        }
+        else if (itemMeta.range === 'json') {
+          // let json = {[displayName]: v[p]}
+          ret.push(this.showJson({ json: v[p], prop: itemMeta, isView: true }))
+          return
         }
         else if (itemMeta.ref)
           value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref));
@@ -392,7 +403,7 @@ var ResourceMixin = {
     }
   },
   showJson(params) {
-    let { json, prop, isView } = params
+    let { json, prop, title, isView, pieChart } = params
     let isTree = json[TYPE]
     let origJson = json
     if (isTree) {
@@ -447,7 +458,7 @@ var ResourceMixin = {
 
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-    let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
+    let style = {opacity: this.props.resource[TYPE] === MODIFICATION && 0.4 || 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
 
     let icon
     const rType = resource[TYPE]
@@ -457,7 +468,7 @@ var ResourceMixin = {
     let header = <TouchableOpacity onPress={() => {
       this.state.hidden ? this.setState({hidden: false}) : this.setState({hidden: true})
     }} style={style} key={this.getNextKey()}>
-                   <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
+                   <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{title && title || translate(prop)}</Text>
                    {icon}
                 </TouchableOpacity>
     let content = (
@@ -471,12 +482,14 @@ var ResourceMixin = {
               }
             })
           }}
-          shouldExpandNode = {(keyName, data, level) => {
-            if (!keyName.length)
-              return this.state.hidden && false || true
-            else
-              return false
-          }}
+          shouldExpandNode = {this.shouldExpandNode.bind(this)}
+          // shouldExpandNode = {(keyName, data, level) => {
+          //   return true
+          //   if (!keyName.length)
+          //     return this.state.hidden && false || true
+          //   else
+          //     return false
+          // }}
           getItemString={(type, data, itemType, itemString) => {
             if (type === 'Array')
               return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
@@ -491,7 +504,8 @@ var ResourceMixin = {
             const isObject = nodeType === 'Object'
             // let val = isObject && translate(raw[0]) || `${translate(raw[0])}:`
             let val = raw[0]
-            if (isObject)
+            // if (isObject)
+            if (typeof val === 'string')
               val = translate(val)
             if (typeof val === 'string') {
               let idx = val.indexOf(';link:')
@@ -507,7 +521,7 @@ var ResourceMixin = {
                 })
                 return <View>{links}</View>
               }
-              val = `${translate(val)}:`
+              val = `${translate(val)}`
             }
 
             return <Text style={{ paddingLeft: (isObject || isArray) && 7 || 5, fontSize: 16 }}>{val}</Text>
@@ -523,22 +537,39 @@ var ResourceMixin = {
         />
       </View>
     )
+    if (resource.submissions) {
+      if (isTree  &&  params.showTree) {
+        let tree = this.paintTree(json, resource)
+        content = <View style={{flexDirection: 'row'}}>
+                   {content}
+                   <View style={{flex: 1, alignItems: 'flex-end'}}>
+                     {tree}
+                   </View>
+                  </View>
 
-    if (isTree  &&  params.showTree  &&  resource.submissions) {
-      let tree = this.paintTree(json, resource)
-      content = <View style={{flexDirection: 'row'}}>
-                 {content}
-                 <View style={{flex: 1, alignItems: 'flex-end'}}>
-                   {tree}
-                 </View>
-                </View>
-
+      }
+      else if (pieChart  && prop.name === 'scoreDetails') {
+        content = <View style={{flexDirection: 'row'}}>
+                   <View style={{flex: 1}}>{content}</View>
+                   <View style={{flex: 2, marginLeft: -250}}>
+                     {pieChart}
+                   </View>
+                  </View>
+      }
     }
-
     return <View>
               {header}
               {content}
            </View>
+  },
+  shouldExpandNode(keyName, data, level) {
+    if (this.props.resource[TYPE] === MODIFICATION)
+      return true
+
+    if (!keyName.length)
+      return this.state.hidden && false || true
+    else
+      return false
   },
 
 /*
