@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 
 import dateformat from 'dateformat'
 import reactMixin from 'react-mixin'
-// import {Column as Col, Row} from 'react-native-flexbox-grid'
 import Icon from 'react-native-vector-icons/Ionicons'
 
 import constants from '@tradle/constants'
@@ -18,7 +17,6 @@ const { TYPE } = constants
 
 import { translate, getModel, styleFactory, isEnum } from '../utils/utils'
 import RowMixin from './RowMixin'
-// import ResourceMixin from './ResourceMixin'
 import StyleSheet from '../StyleSheet'
 
 import { Text } from './Text'
@@ -71,45 +69,43 @@ class ModificationRow extends Component {
       let isChanged
       let isRemoved
       let v = json[p]
-      if (typeof v !== 'object')
-        continue
-      if (p === 'added') {
-        icon = 'ios-add-circle-outline'
-        color = 'green'
+      let iconName
+      if (typeof v == 'object') {
+        // continue
+        if (p === 'added') {
+          iconName = 'ios-add-circle-outline'
+          color = 'green'
+        }
+        else if (p === 'changed') {
+          iconName = 'ios-create-outline'
+          color = 'darkblue'
+          isChanged = true
+          // isChanged = true
+        }
+        else if (p === 'removed') {
+          iconName = 'ios-remove-circle-outline'
+          isRemoved = true
+          color = 'red'
+        }
+        else if (p !== 'properties') {
+          rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
+                      <Text  style={styles.pTitle}>{translate(p)}</Text>
+                    </View>)
+          this.paintHistory({json:v, rows, model, styles})
+          continue
+        }
       }
-      else if (p === 'changed') {
-        icon = 'ios-create-outline'
-        color = 'darkblue'
-        isChanged = true
-        // isChanged = true
-      }
-      else if (p === 'removed') {
-        icon = 'ios-remove-circle-outline'
-        isRemoved = true
-        color = 'red'
-      }
-      else if (p !== 'properties') {
-        // rows.push(<Row size={size} style={styles.headerRow} key={this.getNextKey()} nowrap>
-        //             <Text  style={[styles.pTitle, {color: '#999', paddingVertical: 10}]}>{p}</Text>
-        //           </Row>)
-        rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
-                    <Text  style={styles.pTitle}>{translate(p)}</Text>
-                  </View>)
-        this.paintHistory({icon, color, json:v, rows, model, styles})
-        continue
-      }
-      else
-        isProperties = true
+
       if (!color) color = '#aaa'
       if (icon)
-        icon = <Icon name={icon} size={20} color={color} style={styles.icon} key={this.getNextKey()} />
+        icon = <Icon name={iconName} size={20} color={color} style={styles.icon} key={this.getNextKey()} />
       else
         icon = <View style={styles.icon} />
       let cols = []
       if (isChanged) {
         this.paintChange({json:v, cols, model, styles, icon})
       }
-      else {
+      else if (typeof v === 'object') {
         for (let part in v) {
           let prop = props[part]
           let val = v[part]
@@ -127,19 +123,28 @@ class ModificationRow extends Component {
                        <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
                      </View>
                    </View>)
-          // cols.push(<Col sm={size} md={size} lg={size} style={styles.col} key={this.getNextKey()}>
-          //            {icon}
-          //            <Text  style={[styles.pTitle, {color: '#999'}]}>{label}</Text>
-          //            <Text  style={[styles.pTitle, {color: '#555'}]}>{v[part]}</Text>
-          //          </Col>)
         }
+      }
+      else {
+        let prop = props[p]
+        let label = prop && translate(prop, model) || p
+        let val = v
+        if (prop  &&  prop.type === 'date')
+          val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+        cols.push(<View style={styles.col} key={this.getNextKey()}>
+                   <View style={{flexDirection: 'row', flex: 1}}>
+                     {icon}
+                     <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
+                   </View>
+                   <View style={{flex: 1}}>
+                     <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
+                   </View>
+                 </View>)
+        // continue
       }
       rows.push(<View key={p}>
                   {cols}
                 </View>)
-      // rows.push(<Row size={size} style={styles.headerRow} key={p} nowrap>
-      //             {cols}
-      //           </Row>)
     }
   }
   paintChange({json, cols, styles, model, icon}) {
@@ -185,7 +190,6 @@ class ModificationRow extends Component {
 }
 
 reactMixin(ModificationRow.prototype, RowMixin);
-// reactMixin(ModificationRow.prototype, ResourceMixin);
 
 var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, isRM, bankStyle }) {
   return StyleSheet.create({
@@ -193,8 +197,6 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
       fontSize: 24,
       backgroundColor: 'aliceblue',
       padding: 10,
-      // borderBottomColor: bankStyle.linkColor,
-      // borderBottomSize: 1
     },
     gridRow: {
       backgroundColor: '#f7f7f7',
@@ -215,10 +217,8 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
     modifications: {
       paddingVertical: 5,
       backgroundColor: 'transparent',
-      // borderBottomWidth: 1
     },
     col: {
-      // justifyContent: 'space-between',
       flexDirection: 'row',
       paddingRight: 10
     }
