@@ -25,6 +25,7 @@ import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
 import CheckRow from './CheckRow'
+import ModificationRow from './ModificationRow'
 import ApplicationRow from './ApplicationRow'
 import PageView from './PageView'
 import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
@@ -49,6 +50,7 @@ import formDefaults from '../data/formDefaults'
 
 const FORM_ERROR = 'tradle.FormError'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
+const MODIFICATION = 'tradle.Modification'
 
 const SEARCH_LIMIT = 10
 
@@ -302,6 +304,7 @@ class GridList extends Component {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
     let { chat, resource, navigator, search, application, prop, bookmark,
           modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
+
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
@@ -1117,6 +1120,17 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 bankStyle={bankStyle}
                 resource={resource} />
                )
+      else if (modelName === MODIFICATION)
+        return (<ModificationRow
+                lazy={lazy}
+                onSelect={() => this.selectResource({resource: selectedResource})}
+                modelName={rtype}
+                application={application}
+                bankStyle={bankStyle}
+                parentResource={this.props.resource}
+                resource={resource} />
+               )
+
       return (<VerificationRow
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}
@@ -1192,7 +1206,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     //   return
     // debugger
     let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
-    let { modelName, search, resource, bookmark } = this.props
+    let { modelName, search, resource, bookmark, isBacklink, prop } = this.props
+    if (isBacklink  &&  prop  &&  resource[prop.name].length < this.limit)
+      this.state.allLoaded = true
     if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
       return
     this.state.refreshing = true
