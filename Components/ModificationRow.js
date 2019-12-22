@@ -17,11 +17,15 @@ const { TYPE } = constants
 
 import { translate, getModel, styleFactory, isEnum } from '../utils/utils'
 import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import { circled } from '../styles/utils'
+
 import StyleSheet from '../StyleSheet'
 
 import { Text } from './Text'
 
 const MODIFICATION = 'tradle.Modification'
+const STATUS = 'tradle.Status'
 
 class ModificationRow extends Component {
   static propTypes = {
@@ -65,9 +69,11 @@ class ModificationRow extends Component {
     let icon, color
     let size = 3
     let isProperties
+    let bankStyle = this.props.bankStyle
     for (let p in json) {
       let isChanged
       let isRemoved
+      let prop = props[p]
       let v = json[p]
       let iconName
       if (typeof v == 'object') {
@@ -86,6 +92,89 @@ class ModificationRow extends Component {
           iconName = 'ios-remove-circle-outline'
           isRemoved = true
           color = 'red'
+        }
+        else if (prop) {
+          let label = translate(prop, model)
+
+          if (prop.ref  &&  isEnum(prop.ref)) {
+            let val = v.title
+            if (!v.title) {
+              if (v.id) {
+                let id = v.id.split('_')[1]
+                val = getModel(prop.ref).enum.find(e => e.id === id)
+                if (val)
+                  val = val.title
+                else
+                  continue
+              }
+            }
+            rows.push(<View style={styles.col} key={this.getNextKey()}>
+                       <View style={{flexDirection: 'row', flex: 1}}>
+                         {icon}
+                         <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
+                       </View>
+                       <View style={{flex: 1}}>
+                         <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
+                       </View>
+                     </View>)
+          }
+          continue
+        }
+        else if (p === 'check') {
+          let label = translate(p)
+          let val = translate(v.displayName || v._displayName)
+          let { status } = v
+          if (!status)
+            status = {id: `${STATUS}_fail`}
+          let id = status.id.split('_')[1]
+
+          let m = getModel(STATUS)
+          let elm = m.enum.find(e => e.id === id)
+          if (elm) {
+            ({ icon, color} = elm)
+
+            icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 10, backgroundColor: color}]}>
+                     <Icon name={icon} size={17} color='#fff' />
+                   </View>
+          }
+          let hash = v.hash || v._permalink
+          rows.push(<View style={styles.checkRow} key={this.getNextKey()}>
+                      <View style={{flexDirection: 'row', flex: 1}}>
+                        <View style={{flex: 1}}>
+                          <Text  style={[styles.pTitle, {color: '#999999', paddingHorizontal: 10}]}>{label}</Text>
+                        </View>
+                        <View style={{flex: 1, flexDirection: 'row'}}>
+                          <TouchableOpacity onPress={() => this.showRefResource({
+                            id: `${v.type}_${hash}_${hash}`,
+                            title: label
+                          })}>
+                           <Text  style={[styles.pTitle, {color: bankStyle.linkColor, paddingRight: 5}]}>{val}</Text>
+                          </TouchableOpacity>
+                          {icon}
+                        </View>
+                      </View>
+                    </View>)
+          continue
+        }
+        else if (v._permalink) {
+          let label = translate(p)
+          let val = translate(v._displayName)
+          rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
+                      <View style={{flexDirection: 'row', flex: 1}}>
+                        <View style={{flex: 1}}>
+                          <Text  style={[styles.pTitle, {color: '#999999', paddingLeft: 10}]}>{label}</Text>
+                        </View>
+                        <View style={{flex: 1}}>
+                          <TouchableOpacity onPress={() => this.showRefResource({
+                            id: `${v[TYPE]}_${v._permalink}_${v._link}`,
+                            title: label
+                          })}>
+                           <Text  style={[styles.pTitle, {color: bankStyle.linkColor}]}>{val}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>)
+          continue
         }
         else if (p !== 'properties') {
           rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
@@ -107,13 +196,13 @@ class ModificationRow extends Component {
       }
       else if (typeof v === 'object') {
         for (let part in v) {
-          let prop = props[part]
+          let pprop = props[part]
           let val = v[part]
           if (isRemoved)
             val = ''
-          else if (prop  &&  prop.type === 'date')
+          else if (pprop  &&  pprop.type === 'date')
             val = dateformat(val, 'mmm dS, yyyy h:MM TT')
-          let label = prop && translate(prop, model) || part
+          let label = pprop && translate(pprop, model) || part
           cols.push(<View style={styles.col} key={this.getNextKey()}>
                      <View style={{flexDirection: 'row', flex: 1}}>
                        {icon}
@@ -126,7 +215,6 @@ class ModificationRow extends Component {
         }
       }
       else {
-        let prop = props[p]
         let label = prop && translate(prop, model) || p
         let val = v
         if (prop  &&  prop.type === 'date')
@@ -189,7 +277,8 @@ class ModificationRow extends Component {
   }
 }
 
-reactMixin(ModificationRow.prototype, RowMixin);
+reactMixin(ModificationRow.prototype, RowMixin)
+reactMixin(ModificationRow.prototype, ResourceMixin)
 
 var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, isRM, bankStyle }) {
   return StyleSheet.create({
@@ -202,9 +291,8 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
       backgroundColor: '#f7f7f7',
       paddingHorizontal: 10
     },
-    bigTitle: {
-      fontSize: 20,
-      color: '#777',
+    checkRow: {
+      paddingHorizontal: 10
     },
     pTitle: {
       fontSize: 16,
@@ -221,7 +309,14 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
     col: {
       flexDirection: 'row',
       paddingRight: 10
-    }
+    },
+    checkButton: {
+      ...circled(17),
+      shadowOpacity: 0.7,
+      opacity: 0.9,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+    },
   })
 })
 module.exports = ModificationRow;
