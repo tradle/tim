@@ -8121,7 +8121,12 @@ if (!res[SIG]  &&  res._message)
         if (!m) return
         if (isBacklinkProp  &&  m.properties[backlink]) {
           if (resourceId)  {
-            if ((resourceContextId  &&  utils.getId(r._context) !== resourceContextId)  &&
+            let rcontext
+            if (r._context)
+              rcontext = r._context
+            else if (type === FORM_REQUEST  &&  r.form === PRODUCT_REQUEST)
+              rcontext = r
+            if ((resourceContextId  &&  utils.getId(rcontext) !== resourceContextId)  &&
                 r[backlink]  &&  utils.getId(r[backlink]) !== resourceId)
               return
           }
