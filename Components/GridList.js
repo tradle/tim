@@ -1126,6 +1126,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 modelName={rtype}
                 application={application}
+                navigator={navigator}
                 bankStyle={bankStyle}
                 parentResource={this.props.resource}
                 resource={resource} />
@@ -1207,8 +1208,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     // debugger
     let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
     let { modelName, search, resource, bookmark, isBacklink, prop } = this.props
-    if (isBacklink  &&  prop  &&  resource[prop.name].length < this.limit)
+    if (isBacklink  &&  prop  &&  resource[prop.name].length < this.limit) {
       this.state.allLoaded = true
+      return
+    }
     if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
       return
     this.state.refreshing = true
