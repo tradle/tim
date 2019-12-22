@@ -187,30 +187,34 @@ function getPropsForControllingEntity(form) {
     let retProps = {
       requestedProperties: [
         {name: 'typeOfControllingPerson', required: true},
-        {name: 'natureOfControl', required: false},
+        {name: 'natureOfControl'},
+        {name: 'percentageOfOwnership'},
       ]
     }
-    if (form.name)
-      retProps.requestedProperties.push({name: 'name', required: false})
-
-    retProps.requestedProperties.push({name: 'isSeniorManager'})
-    if (form.isSeniorManager)
-      retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
+    if (form.name) {
+      retProps.requestedProperties.push({name: 'name'})
+      retProps.requestedProperties.push({name: 'firstName'})
+      retProps.requestedProperties.push({name: 'lastName'})
+      retProps.requestedProperties.push({name: 'controllingEntityDateOfBirth'})
+      retProps.requestedProperties.push({name: 'controllingEntityCountryOfResidence', required: true})
+    }
 
     // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
     if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
       retProps.requestedProperties.push({name: 'phone', required: true})
 
+    retProps.requestedProperties.push({name: 'isSeniorManager'})
+    if (form.isSeniorManager)
+      retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
+
     if (form.name) {
       retProps.requestedProperties = retProps.requestedProperties.concat([
         // {name: 'dateOfBirth'},
-        {name: 'startDate', required: false},
-        {name: 'endDate', required: false},
-        {name: 'occupation', required: false},
-        {name: 'controllingEntityCountryOfResidence', required: true},
-        {name: 'controllingEntityDateOfBirth'},
-        {name: 'inactive', required: false},
+        {name: 'startDate'},
+        {name: 'endDate'},
+        {name: 'occupation'},
+        {name: 'inactive'},
         {name: 'doNotReachOut'},
       ])
     }
@@ -223,12 +227,14 @@ function getPropsForControllingEntity(form) {
         {name: 'name'},
         {name: 'emailAddress', required: true},
         {name: 'controllingEntityCompanyNumber'},
+        {name: 'controllingEntityRegistrationDate'},
         {name: 'companyType'},
         {name: 'controllingEntityStreetAddress'},
         {name: 'controllingEntityRegion'},
         {name: 'controllingEntityPostalCode'},
         {name: 'controllingEntityCountry'},
         {name: 'natureOfControl'},
+        {name: 'percentageOfOwnership'},
         {name: 'phone'},
         {name: 'legalEntity'},
         {name: 'doNotReachOutToMembers'},
