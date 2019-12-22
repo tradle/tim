@@ -325,7 +325,7 @@ class ApplicationView extends Component {
     let status = statusModel.enum.find(r => r.id === 'pass')
     let r = {
       [TYPE]: MANUAL_VISUAL_COMPARISON_CHECK,
-      selfie,
+      form: selfie,
       photoID,
       provider: VERIFICATION_PROVIDER,
       from: me,
