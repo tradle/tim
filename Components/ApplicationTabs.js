@@ -138,7 +138,8 @@ class ApplicationTabs extends Component {
       }
 
       let count
-      let pName = hasSubmissions && '_' || '' + p + 'Count'
+      let prefix = hasSubmissions && '_' || ''
+      let pName = `${prefix}${p}Count`
       let cnt = resource[pName] || (resource[p] &&  resource[p].length)
       if (cnt) {
         hasCounts = true
