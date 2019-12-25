@@ -4147,6 +4147,9 @@ if (!res[SIG]  &&  res._message)
           r._context = context
       }
     }
+    if (backlink  &&  this.getModel(backlink.items.ref).abstract) {
+      r[backlink.name] = await this.getObjects(r[backlink.name], backlink)
+    }
     if (!r._context) {
       r._context = resource._context
     }
