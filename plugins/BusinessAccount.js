@@ -186,18 +186,15 @@ function getPropsForControllingEntity(form) {
   case 'person':
     let retProps = {
       requestedProperties: [
+        {name: 'name', required: true},
         {name: 'typeOfControllingPerson', required: true},
         {name: 'natureOfControl'},
         {name: 'percentageOfOwnership'},
+        {name: 'inactive'},
       ]
     }
-    if (form.name) {
-      retProps.requestedProperties.push({name: 'name'})
-      retProps.requestedProperties.push({name: 'firstName'})
-      retProps.requestedProperties.push({name: 'lastName'})
-      retProps.requestedProperties.push({name: 'controllingEntityDateOfBirth'})
-      retProps.requestedProperties.push({name: 'controllingEntityCountryOfResidence', required: true})
-    }
+    if (!form.inactive)
+      retProps.requestedProperties.push({name: 'personal_group', required: true})
 
     // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
@@ -214,7 +211,6 @@ function getPropsForControllingEntity(form) {
         {name: 'startDate'},
         {name: 'endDate'},
         {name: 'occupation'},
-        {name: 'inactive'},
         {name: 'doNotReachOut'},
       ])
     }
