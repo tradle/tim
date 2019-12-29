@@ -59,7 +59,6 @@ var {
   MESSAGE
 } = constants.TYPES
 // import Progress from 'react-native-progress'
-const DATA_CLAIM = 'tradle.DataClaim'
 const BG_IMAGE = ENV.splashBackground
 const SUBMIT_LOG_TEXT = {
   submit: translate('submitLog'),
