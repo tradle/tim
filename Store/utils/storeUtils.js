@@ -520,7 +520,8 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-          analyst: me.employeePass
+          analyst: me.employeePass,
+          draft: false
         },
         message: 'myCases'
       },
@@ -528,7 +529,8 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-          hasFailedChecks: true
+          hasFailedChecks: true,
+          draft: false
         },
         message: 'applicationsHasFailedChecks',
       },
@@ -548,6 +550,7 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
+          draft: false,
           assignedToTeam: {
             id: `${etype}_${e.id}`,
             title: e.title
@@ -561,7 +564,8 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-          status: 'started'
+          status: 'started',
+          draft: false
         },
         message: 'applicationsStarted'
       },
@@ -569,7 +573,8 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-           analyst: 'NULL'
+           analyst: 'NULL',
+           draft: false
         },
         message: 'applicationsNotAssigned'
       },
@@ -577,13 +582,28 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-           parent: 'NULL'
+           parent: 'NULL',
+           draft: false
         },
         message: 'topLevelApplications'
       },
       {
         type: APPLICATION,
-        message: 'applications'
+        message: 'applications',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+           draft: false
+        },
+      },
+      {
+        type: APPLICATION,
+        message: 'applicationDrafts',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+           draft: true
+        },
       },
       // { type: VERIFICATION },
       // { type: SEAL },
