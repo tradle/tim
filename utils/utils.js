@@ -75,6 +75,7 @@ var strMap = {
   'Please fill out this form': 'fillTheForm',
   'Please take a **selfie** picture of your face': 'takeAPicture',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
+  'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning'
 }
 
 var {
@@ -487,11 +488,17 @@ var utils = {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
     let rtype = utils.getType(resource)
+    let { id, title } = resource
+    if (!title  &&  !resource[ROOT_HASH]) {
+      let [type, eid] = resource.id.split('_')
+      let enumVal = utils.getModel(rtype).enum.find(e => e.id === eid)
+      title = enumVal && enumVal.title
+    }
     if (!dictionary  ||  lang === 'en') {
       // resource[utils.getEnumProperty(utils.getModel(rtype))]
       if (resource[TYPE])
         return resource[utils.getEnumProperty(rtype)]
-      return resource.title
+      return title
     }
 
     if (rtype === LANGUAGE)
@@ -499,16 +506,16 @@ var utils = {
     let e = dictionary.enums[rtype]
     if (utils.isStub(resource))  {
       if (!e) {
-        if (resource.title)
-          return resource.title
+        if (title)
+          return title
         let [type, id] = resource.id.split('_')
         let val = utils.getModel(rtype).enum.find(r => r.id === id)
 
-        resource.title = val  &&  val.title
-        return resource.title
+        title = val  &&  val.title
+        return title
       }
       let [type, id] = resource.id.split('_')
-      return e[id]  ||  resource.title
+      return e[id]  ||  title
     }
     else if (e)
       return e[resource[ROOT_HASH]] || resource[utils.getEnumProperty(utils.getModel(rtype))]
