@@ -88,7 +88,7 @@ var ResourceMixin = {
     let {bankStyle, search, currency, country, navigator, application} = this.props
     if (isMessageView) {
       let r = this.props.resource
-      let isVerifier = utils.getModel(r[TYPE]).subClassOf === CHECK  &&  application &&  utils.isRM(application)
+      let isVerifier = utils.getModel(utils.getType(r)).subClassOf === CHECK  &&  application &&  utils.isRM(application)
       let route = {
         componentName: isCheck &&  CHECK_VIEW || MESSAGE_VIEW,
         backButtonTitle: 'Back',
