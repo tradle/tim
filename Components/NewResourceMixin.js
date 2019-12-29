@@ -442,11 +442,14 @@ var NewResourceMixin = {
     }
     eCols = eCols.filter(p => requestedProperties[p])
     let softRequired = []
+    let groupped = []
     for (let p in requestedProperties) {
       // if (eCols.some((prop) => prop.name === p) {
       let idx = p.indexOf('_group')
       let eidx = eCols.indexOf(p)
       if (eidx !== -1) {
+        if (groupped.indexOf(p) !== -1)
+          continue
         eCols.splice(eidx, 1)
       }
       if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
@@ -463,8 +466,13 @@ var NewResourceMixin = {
           if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
             return
           eCols.push(pp)
-          // if (isRequired)
-          //   softRequired.push(pp)
+          if (isRequired) {
+            if (!requestedProperties[pp])
+              softRequired.push(pp)
+          }
+          else if (requestedProperties[pp]  &&  requestedProperties[pp].required)
+            softRequired.push(pp)
+          groupped.push(pp)
         })
       }
       else if (isRequired)
