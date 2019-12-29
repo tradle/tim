@@ -38,7 +38,7 @@ const CHECK = 'tradle.Check'
 const {
   TYPE,
   ROOT_HASH,
-  PREV_HASH
+  // PREV_HASH
 } = constants
 const {
   IDENTITY,
@@ -390,17 +390,17 @@ class ShowPropertiesView extends Component {
          </View>
       )
     })
-    if (isMessage  &&  utils.isSubclassOf(model, FORM)  &&  me.isEmployee) {
-      if (resource[PREV_HASH]  &&  resource[PREV_HASH] !== resource[ROOT_HASH]) {
-        let title = utils.getDisplayName(resource)
-        viewCols.push(
-          <TouchableOpacity onPress={showRefResource.bind(this, {id: `${resource[TYPE]}_${resource[ROOT_HASH]}_${resource[PREV_HASH]}`, title }, ObjectModel.properties[PREV_HASH])} key={this.getNextKey()}>
-            <Text style={styles.title}>{translate('previousVersion')}</Text>
-            <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
-          </TouchableOpacity>
-        )
-      }
-    }
+    // if (isMessage  &&  utils.isSubclassOf(model, FORM)  &&  me.isEmployee) {
+    //   if (resource[PREV_HASH]  &&  resource[PREV_HASH] !== resource[ROOT_HASH]) {
+    //     let title = utils.getDisplayName(resource)
+    //     viewCols.push(
+    //       <TouchableOpacity onPress={showRefResource.bind(this, {id: `${resource[TYPE]}_${resource[ROOT_HASH]}_${resource[PREV_HASH]}`, title }, ObjectModel.properties[PREV_HASH])} key={this.getNextKey()}>
+    //         <Text style={styles.title}>{translate('previousVersion')}</Text>
+    //         <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
+    //       </TouchableOpacity>
+    //     )
+    //   }
+    // }
     if (resource.txId) { // || utils.isSealableModel(model)) {
       viewCols.push(
           <View key={this.getNextKey()} ref='propertySheet'>
