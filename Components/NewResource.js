@@ -476,10 +476,12 @@ class NewResource extends Component {
       let requestedProperties = reqProperties.requestedProperties
       for (let p in requestedProperties) {
         if (p.indexOf('_group') !== -1) {
-          // props[p].list.forEach(p => {
-          //   if (!requestedProperties[p])
-          //     required.push(p)
-          // })
+          if (requestedProperties[p].required) {
+            props[p].list.forEach(p => {
+              if (!requestedProperties[p])
+                required.push(p)
+            })
+          }
         }
         else if (required.indexOf(p) === -1) {
           if (requestedProperties[p].required)
