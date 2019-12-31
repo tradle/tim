@@ -249,6 +249,7 @@ module.exports = {
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the data below",
     "reviewScannedPropertiesAndSecondSideSnapshot": "Please review the data below, and take a snapshot of the {1} side of the document",
+    "reviewScannedPropertiesWarning": "Is it your company? Please review and correct the data below",
     "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
     "validationErrors": "Please correct failed validation fields",
     "createNew": "Fill out form \"{1}\"",
@@ -297,6 +298,7 @@ module.exports = {
     "completeOnboardingApplication": "Please complete the onboarding application",
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
+    "submitDraft": "Submit draft for {1}",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
