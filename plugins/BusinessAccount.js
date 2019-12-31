@@ -193,14 +193,14 @@ function getPropsForControllingEntity(form) {
         {name: 'inactive'},
       ]
     }
-    if (!form.inactive)
-      retProps.requestedProperties.push({name: 'personal_group', required: true})
-
-    // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
     if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
       retProps.requestedProperties.push({name: 'phone', required: true})
 
+    if (!form.inactive)
+      retProps.requestedProperties.push({name: 'personal_group', required: true})
+
+    // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'isSeniorManager'})
     if (form.isSeniorManager)
       retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
