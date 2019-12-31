@@ -521,7 +521,6 @@ var storeUtils = {
           [TYPE]: APPLICATION,
           _org: botPermalink,
           analyst: me.employeePass,
-          draft: false
         },
         message: 'myCases'
       },
@@ -530,7 +529,6 @@ var storeUtils = {
           [TYPE]: APPLICATION,
           _org: botPermalink,
           hasFailedChecks: true,
-          draft: false
         },
         message: 'applicationsHasFailedChecks',
       },
@@ -550,7 +548,6 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-          draft: false,
           assignedToTeam: {
             id: `${etype}_${e.id}`,
             title: e.title
@@ -565,7 +562,6 @@ var storeUtils = {
           [TYPE]: APPLICATION,
           _org: botPermalink,
           status: 'started',
-          draft: false
         },
         message: 'applicationsStarted'
       },
@@ -574,7 +570,6 @@ var storeUtils = {
           [TYPE]: APPLICATION,
           _org: botPermalink,
            analyst: 'NULL',
-           draft: false
         },
         message: 'applicationsNotAssigned'
       },
@@ -583,7 +578,6 @@ var storeUtils = {
           [TYPE]: APPLICATION,
           _org: botPermalink,
            parent: 'NULL',
-           draft: false
         },
         message: 'topLevelApplications'
       },
@@ -593,7 +587,6 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-           draft: false
         },
       },
       {
