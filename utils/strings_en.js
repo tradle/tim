@@ -248,6 +248,7 @@ module.exports = {
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the data below",
+    "reviewAndConfirm": "Please review and confirm",
     "reviewScannedPropertiesAndSecondSideSnapshot": "Please review the data below, and take a snapshot of the {1} side of the document",
     "reviewScannedPropertiesWarning": "Is it your company? Please review and correct the data below",
     "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
@@ -298,7 +299,7 @@ module.exports = {
     "completeOnboardingApplication": "Please complete the onboarding application",
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
-    "submitDraft": "Submit draft for {1}",
+    "submitDraft": "Send to the prospect prefilled application for: {1}",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
@@ -341,6 +342,7 @@ module.exports = {
     "goodNews": "Good news! You already have {1}. To share tap the icon below",
     "goodNewsFew": "Good news! You already have quite a few. To share tap icon below.",
     "prefilledForCustomer": "For your convenience we prefilled some fields. Please review and submit",
+    "prefillTheProduct": "Choose the application to prefill for the prospect",
     // Tours buttons
     "Skip": "Skip",
     "Done": "Done",
