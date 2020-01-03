@@ -192,8 +192,8 @@
       "integrity": "sha1-Q8Jj7hDsPJxviCjZr2dSyJzZsFI="
     },
     "@tradle/custom-models": {
-      "version": "git://github.com/tradle/custom-models.git#69930a25466d0ec8896d636dfe2640aecb45c5f2",
-      "from": "tradle/custom-models",
+      "version": "github:tradle/custom-models#24219aad3365e1bfc64b9f1a9b845d3b8fc66b2b",
+      "from": "github:tradle/custom-models",
       "requires": {
         "@tradle/validate-model": "^7.1.18"
       }
@@ -431,7 +431,7 @@
       }
     },
     "@tradle/models": {
-      "version": "github:tradle/models#04326f9a6aec2ff63f42eec3e54b51b7b5936e87",
+      "version": "github:tradle/models#f617646c318096281d22b5900d4c99e6f17b10bb",
       "from": "github:tradle/models"
     },
     "@tradle/models-cloud": {

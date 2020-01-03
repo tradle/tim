@@ -221,6 +221,7 @@ const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
 const MODIFICATION        = 'tradle.Modification'
+const PRODUCT_BUNDLE      = 'tradle.ProductBundle'
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -2981,7 +2982,10 @@ var Store = Reflux.createStore({
     }
 
     if (editFormRequestPrefill) {
-      let prefill = await this.prepareToSend({resource: r.prefill, model: this.getModel(rr.form), isPrefill: true})
+      let errAndValue = await this.prepareToSend({resource: r.prefill, model: this.getModel(rr.form), isPrefill: true})
+      if (errAndValue.error)
+        return
+      let prefill = errAndValue.toChain
       _.extend(toChain, {
         prefill,
         form: r.form,
@@ -3254,6 +3258,8 @@ var Store = Reflux.createStore({
 
   async prepareToSend({resource, model, isPrefill}) {
     let toChain = _.omit(resource, excludeWhenSignAndSend)
+    if (!model)
+      model = this.getModel(resource[TYPE])
     let properties = model.properties
 
     this.rewriteStubs(toChain)
@@ -3318,6 +3324,7 @@ var Store = Reflux.createStore({
 
     toChain = utils.sanitize(toChain)
     let rtype = utils.getType(toChain)
+    let error
     try {
       if (rtype !== DATA_BUNDLE)
         validateResource({ resource: toChain, models: this.getModels() })
@@ -3332,9 +3339,9 @@ var Store = Reflux.createStore({
       }
        else
         this.trigger({action: 'validationError', error: err.message})
-      return
+      error = err.message
     }
-    return toChain
+    return { toChain, error }
   },
   async getModelsPack(to) {
     let type = utils.getType(to)
@@ -4786,7 +4793,7 @@ if (!res[SIG]  &&  res._message)
         // if (isRefMessage) {
           let result = await this.searchMessages({modelName: prop.ref, context: context})
           if (result  &&  result.length)
-            returnVal[prop.name] = this.buildRef(result[0])
+            returnVal[prop.name] = this.buildRef(result[result.length - 1])
         // }
       }
 
@@ -4837,7 +4844,7 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
       let toId = utils.getId(returnVal.to)
-      await this.getDataBundle().updateRequestForRefresh(this._getItem(toId), returnVal)
+      await this.getDataBundle(context).updateRequestForRefresh(this._getItem(toId), returnVal)
     }
     if (disableFormRequest) {
       if (addDocumentCreated) {
@@ -4867,7 +4874,8 @@ if (!res[SIG]  &&  res._message)
     if (dataBundle  &&  _.size(dataBundle)) {
       for (let p in dataBundle) {
         if (returnVal[p]) {
-          this.getDataBundle().createDataBundle(resource, p)
+          this.dataBundle = new DataBundle(this, resource)
+          this.getDataBundle(context).createDataBundle(resource, p)
           break
         }
       }
@@ -4962,88 +4970,90 @@ if (!res[SIG]  &&  res._message)
         if (isForm  &&  !isRefresh)
           await deactivateFormRequests()
       }
-
-      let toChain = _.omit(returnVal, excludeWhenSignAndSend)
-      let properties = rModel.properties
-
-      self.rewriteStubs(toChain)
-      let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
-      // if (isNew) {
-
-      for (let p in toChain) {
-        let prop = properties[p]
-
-        if (!isNew  &&  !prop  &&  !keepProps.includes(p)) { // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
-          delete toChain[p]
-          continue
-        }
-        if (!prop) {
-          prop = ObjectModel.properties[p]
-          if (!prop  ||  prop.virtual  ||  toChain[p]._link)
-            continue
-        }
-        if (prop  &&  prop.partial)
-          continue
-        let isArray = prop.type === 'array'
-
-        if (isArray  &&  prop.items.filter) {
-          delete toChain[p]
-          continue
-        }
-
-        let ref = prop.ref  ||  isArray  &&  prop.items.ref
-
-        if (!ref)
-          continue
-
-        let refM = self.getModel(ref)
-        if (!refM)
-          continue
-        if (!utils.isWeb()  &&  prop.range === 'document') {
-            debugger
-          let { url } = toChain[p]
-          if (url  &&  url.indexOf('data:application/pdf;') === 0)
-            await self._keeper.replaceDataUrls(toChain[p])
-        }
-        if (refM.inlined)
-          continue
-
-        let isObject = prop.type === 'object'
-        if (isObject)
-          toChain[p] = self.buildSendRef(returnVal[p])
-        else
-          toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
-      }
-      if (!isNew) {
-        if (!returnVal[SIG]) debugger
-
-        const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
-          _link: returnVal[CUR_HASH],
-          _permalink: returnVal[ROOT_HASH],
-          ...returnVal
-        })
-
-        _.extend(toChain, nextVersionScaffold)
-        _.extend(returnVal, nextVersionScaffold)
-      }
-
-      toChain = utils.sanitize(toChain)
-      try {
-        if (rtype !== DATA_BUNDLE)
-          validateResource({ resource: toChain, models: self.getModels() })
-      } catch (err) {
-        if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
-        // if (err.name === 'InvalidPropertyValue')
-          self.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
-        else if (Errors.matches(err, ValidateResourceErrors.Required)) {
-          let validationErrors = {}
-          err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
-          self.trigger({action: 'validationError', validationErrors})
-        }
-         else
-          self.trigger({action: 'validationError', error: err.message})
+      let { toChain, error } = await self.prepareToSend({resource: returnVal})
+      if (error)
         return
-      }
+      // let toChain = _.omit(returnVal, excludeWhenSignAndSend)
+      // let properties = rModel.properties
+
+      // self.rewriteStubs(toChain)
+      // let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
+      // // if (isNew) {
+
+      // for (let p in toChain) {
+      //   let prop = properties[p]
+
+      //   if (!isNew  &&  !prop  &&  !keepProps.includes(p)) { // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+      //     delete toChain[p]
+      //     continue
+      //   }
+      //   if (!prop) {
+      //     prop = ObjectModel.properties[p]
+      //     if (!prop  ||  prop.virtual  ||  toChain[p]._link)
+      //       continue
+      //   }
+      //   if (prop  &&  prop.partial)
+      //     continue
+      //   let isArray = prop.type === 'array'
+
+      //   if (isArray  &&  prop.items.filter) {
+      //     delete toChain[p]
+      //     continue
+      //   }
+
+      //   let ref = prop.ref  ||  isArray  &&  prop.items.ref
+
+      //   if (!ref)
+      //     continue
+
+      //   let refM = self.getModel(ref)
+      //   if (!refM)
+      //     continue
+      //   if (!utils.isWeb()  &&  prop.range === 'document') {
+      //       debugger
+      //     let { url } = toChain[p]
+      //     if (url  &&  url.indexOf('data:application/pdf;') === 0)
+      //       await self._keeper.replaceDataUrls(toChain[p])
+      //   }
+      //   if (refM.inlined)
+      //     continue
+
+      //   let isObject = prop.type === 'object'
+      //   if (isObject)
+      //     toChain[p] = self.buildSendRef(returnVal[p])
+      //   else
+      //     toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
+      // }
+      // if (!isNew) {
+      //   if (!returnVal[SIG]) debugger
+
+      //   const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
+      //     _link: returnVal[CUR_HASH],
+      //     _permalink: returnVal[ROOT_HASH],
+      //     ...returnVal
+      //   })
+
+      //   _.extend(toChain, nextVersionScaffold)
+      //   _.extend(returnVal, nextVersionScaffold)
+      // }
+
+      // toChain = utils.sanitize(toChain)
+      // try {
+      //   if (rtype !== DATA_BUNDLE)
+      //     validateResource({ resource: toChain, models: self.getModels() })
+      // } catch (err) {
+      //   if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
+      //   // if (err.name === 'InvalidPropertyValue')
+      //     self.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
+      //   else if (Errors.matches(err, ValidateResourceErrors.Required)) {
+      //     let validationErrors = {}
+      //     err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
+      //     self.trigger({action: 'validationError', validationErrors})
+      //   }
+      //    else
+      //     self.trigger({action: 'validationError', error: err.message})
+      //   return
+      // }
 
       try {
         let data = await self.createObject(toChain)
@@ -5332,29 +5342,6 @@ if (!res[SIG]  &&  res._message)
         }
       }
       let fr = await self._keeper.get(returnVal[CUR_HASH])
-      // let fileUpload = fr.prefill  &&  fr.prefill.fileUpload
-      // if (fileUpload) {
-      //   let reviewedForms = params.reviewed
-      //   if (reviewedForms) {
-      //     let reviewed = Object.values(reviewedForms)
-      //     let promises = reviewed.map(r => {
-      //       delete r[NOT_CHAT_ITEM]
-      //       return self.onAddChatItem({resource: r, noTrigger: true, forceUpdate: true})
-      //     })
-
-      //     try {
-      //       await Promise.all(promises)
-      //     } catch (err) {
-      //       debugger
-      //     }
-      //     reviewed.forEach(r => {
-      //       self.addMessagesToChat(utils.getId(r.to.organization), r)
-      //       self.addVisualProps(r)
-      //       self.trigger({action: 'addItem', resource: r})
-      //     })
-      //   }
-      //   return
-      // }
       let r = {
         [TYPE]: CONFIRMATION,
         message: translate('afterRefresh')
@@ -5399,7 +5386,7 @@ if (!res[SIG]  &&  res._message)
     }
   },
   async onApplyForProduct(params) {
-    const { host, provider, product, contextId } = params
+    const { host, provider, product, contextId, bundleId } = params
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
@@ -5427,6 +5414,8 @@ if (!res[SIG]  &&  res._message)
       to: this.getRepresentative(org),
       contextId
     }
+    // if (bundleId)
+    //   _.extend(resource, { bundleId })
     if (me) {
       // HACK!!!
       if (product === EMPLOYEE_ONBOARDING  &&  params.isAgent) {
@@ -5439,6 +5428,8 @@ if (!res[SIG]  &&  res._message)
         await db.put(meId, me)
         this._setItem(meId, me)
       }
+      else if (bundleId)
+        _.extend(resource, { bundleId })
       else if (product === CP_ONBOARDING ||
                product === CE_ONBOARDING) {
         resource.associatedResource = params.associatedResource
@@ -5463,6 +5454,39 @@ if (!res[SIG]  &&  res._message)
     }
     await db.put(utils.getId(profile), profile)
     this.trigger({action: 'formEdit', prop, value: {id: identityId, title: firstName}})
+  },
+  async onSubmitDraftApplication({context}) {
+    let contextId = context.contextId
+    var params = {
+      modelName: APPLICATION,
+      to: me.organization,
+      noTrigger: true,
+      search: true,
+      filterResource: {
+        context: contextId,
+        draft: true
+      }
+    }
+
+    let { list } = await this.searchServer(params)
+    if (!list  ||  !list.length) {
+      debugger
+      return
+    }
+    let application = list[0]
+    application.draftCompleted = true
+
+    await this.onAddChatItem({resource: application})
+    // let { toChain, error } = await this.prepareResource(application)
+    // if (error) {
+    //   debugger
+    //   return
+    // }
+    // let data = await this.createObject(toChain)
+    // let sendParams = await this.packMessage(application)
+    // await this.meDriverSend(sendParams)
+
+    // debugger
   },
   async onGetProductList({resource}) {
     if (resource[TYPE] !== ORGANIZATION) {
@@ -5541,7 +5565,7 @@ if (!res[SIG]  &&  res._message)
     let { host, provider, dataHash } = data
     let providerId = utils.makeId(PROFILE, data.provider)
     let r = {
-      _t: 'tradle.DataClaim',
+      _t: DATA_CLAIM,
       claimId: dataHash,
       from: {
         id: utils.getId(me),
@@ -6330,7 +6354,7 @@ if (!res[SIG]  &&  res._message)
     }
     else if (isRefresh) {
       try {
-        ({result, refreshProducts, requestForRefresh} = await this.getDataBundle().searchForRefresh(params))
+        ({result, refreshProducts, requestForRefresh} = await this.getDataBundle(context).searchForRefresh(params))
       } catch (err) {
         debugger
       }
@@ -6668,10 +6692,12 @@ if (!res[SIG]  &&  res._message)
         filterResource.archived = false
         if (!filterResource._org  &&  !filterResource.context)
           filterResource._org = myBot[ROOT_HASH]
+        if (typeof filterResource.draft === 'undefined')
+          filterResource.draft = false
       }
     }
 
-    _.extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
+    _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
     let list
     let { result, error, retry } = await graphQL.searchServer(params)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
@@ -8323,6 +8349,8 @@ if (!res[SIG]  &&  res._message)
     }
   },
   filterFound({foundResources, filterProps, refsObj}) {
+    let hasPR
+    let hasFR
     return foundResources.filter((r) => {
       if (filterProps) {
         // debugger
@@ -8336,12 +8364,24 @@ if (!res[SIG]  &&  res._message)
           }
         }
       }
-      if (r[TYPE] === VERIFICATION)
+      let rtype = r[TYPE]
+      switch(rtype) {
+      case VERIFICATION:
         r.document = refsObj[utils.getId(r.document)] || r.document
-      else if (r[TYPE] === FORM_ERROR) {
+        break
+      case FORM_ERROR:
         let prefill = refsObj[utils.getId(r.prefill)]
         if (prefill)
           r.prefill = prefill
+        break
+      case PRODUCT_REQUEST:
+        hasPR = true
+        break
+      case FORM_REQUEST:
+        if (r.chooser &&  (hasPR || hasFR))
+          return false
+        hasFR = true
+        break
       }
       this.addVisualProps(r)
       return true
@@ -10143,9 +10183,9 @@ if (!res[SIG]  &&  res._message)
       throw err
     }
   },
-  getDataBundle() {
+  getDataBundle(context) {
     if (!this.dataBundle)
-      this.dataBundle = new DataBundle(this)
+      this.dataBundle = new DataBundle(this, context)
     return this.dataBundle
   },
   async setupPushNotifications() {
@@ -10416,12 +10456,7 @@ if (!res[SIG]  &&  res._message)
     if (model.id === IDENTITY)
       representativeAddedTo = this.putIdentityInDB(val, batch)
     else {
-      let ret = await this.putMessageInDB(val, obj, batch, onMessage)
-      if (ret) {
-        noTrigger = ret.noTrigger
-        application = ret.application
-        // isRM = ret.isRM
-      }
+      ({ noTrigger, application} = await this.putMessageInDB(val, obj, batch, onMessage))
       if (type === VERIFICATION)
         return
     }
@@ -10525,8 +10560,10 @@ if (!res[SIG]  &&  res._message)
           else {
             if (!me.isEmployee  &&
                  val.form === PRODUCT_REQUEST  &&
-                 val.message === 'See our list of products') {
-              let pr = await this.searchMessages({modelName: PRODUCT_REQUEST, to: org})
+                 val.chooser) {
+              // debugger
+              let rep = this._getItem(val.from)
+              let pr = await this.searchMessages({modelName: PRODUCT_REQUEST, to: this._getItem(rep.organization)})
               if (pr  &&  pr.length)
                 return
             }
@@ -10686,7 +10723,7 @@ if (!res[SIG]  &&  res._message)
     let isContext = utils.isContext(model)
     if (!from) {
       if (type !== SELF_INTRODUCTION)
-        return
+        return {}
       let name = val.name || (val.identity.name && val.identity.name.formatted)
       from = {
         [TYPE]: PROFILE,
@@ -10852,6 +10889,7 @@ if (!res[SIG]  &&  res._message)
       }
       if (prefill) val.prefill = prefill
     }
+    var noTrigger, isRM, application
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST) {
       if (utils.isSimulator()) {
         ///=============== TEST VERIFIERS
@@ -10889,21 +10927,30 @@ if (!res[SIG]  &&  res._message)
           }
         }
       }
-
+      if (val.prefill  &&  val.form === PRODUCT_BUNDLE) {
+        // debugger
+        val.prefill.items.forEach(item => {
+          this.rewriteStubs(item)
+          item.from = val.to
+          item.to = val.from
+        })
+        this.dataBundle = new DataBundle(this, val)
+        this.getDataBundle().createProductBundle(val)
+        await utils.promiseDelay(3000)
+      }
       await this.disableFormRequests({form:val.form, batch, org})
     }
     if (val[TYPE] === DATA_BUNDLE) {
       await this.getDataBundle().processDataBundle({val, context})
     }
 
-    var noTrigger, isRM, application
     var isModelsPack = type === MODELS_PACK
     if (isModelsPack) {
       noTrigger = true
       val[NOT_CHAT_ITEM] = true
       let stopHere = await this.modelsPackHandler({val, batch, org})
       if (stopHere)
-        return
+        return {}
       this.addMessagesToChat(utils.getId(fOrg), val)
     }
     else {
@@ -10960,7 +11007,7 @@ if (!res[SIG]  &&  res._message)
     if (isVerification) {
       // debugger
       await this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
-      return
+      return {}
     }
     if (!isReadOnly) {
       if (type === MY_EMPLOYEE_PASS) {
@@ -12166,3 +12213,94 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   return userId
 }
+/*
+  async prepareResource(resource) {
+    let toChain = _.omit(resource, excludeWhenSignAndSend)
+    let rModel = this.getModel(resource[TYPE])
+    let properties = rModel.properties
+// debugger
+    this.rewriteStubs(toChain)
+    let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
+    let isNew = resource[ROOT_HASH] == null
+
+
+    for (let p in toChain) {
+      let prop = properties[p]
+
+      if (!isNew  &&  !prop  &&  !keepProps.includes(p)) { // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+        delete toChain[p]
+        continue
+      }
+      if (!prop) {
+        prop = ObjectModel.properties[p]
+        if (!prop  ||  prop.virtual  ||  toChain[p]._link)
+          continue
+      }
+      if (prop  &&  prop.partial)
+        continue
+      let isArray = prop.type === 'array'
+
+      if (isArray  &&  prop.items.filter) {
+        delete toChain[p]
+        continue
+      }
+
+      let ref = prop.ref  ||  isArray  &&  prop.items.ref
+
+      if (!ref)
+        continue
+
+      let refM = this.getModel(ref)
+      if (!refM)
+        continue
+      if (!utils.isWeb()  &&  prop.range === 'document') {
+          debugger
+        let { url } = toChain[p]
+        if (url  &&  url.indexOf('data:application/pdf;') === 0)
+          await this._keeper.replaceDataUrls(toChain[p])
+      }
+      if (refM.inlined)
+        continue
+
+      let isObject = prop.type === 'object'
+      if (isObject)
+        toChain[p] = this.buildSendRef(resource[p])
+      else
+        toChain[p] = resource[p].map(v => this.buildSendRef(v))
+    }
+    if (!isNew) {
+      if (!resource[SIG]) debugger
+
+      const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
+        _link: resource[CUR_HASH],
+        _permalink: resource[ROOT_HASH],
+        ...resource
+      })
+
+      _.extend(toChain, nextVersionScaffold)
+      _.extend(resource, nextVersionScaffold)
+    }
+
+    toChain = utils.sanitize(toChain)
+    let error
+    try {
+      if (toChain[TYPE] !== DATA_BUNDLE)
+        validateResource({ resource: toChain, models: this.getModels() })
+    } catch (err) {
+      if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
+      // if (err.name === 'InvalidPropertyValue')
+        this.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
+      else if (Errors.matches(err, ValidateResourceErrors.Required)) {
+        let validationErrors = {}
+        err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
+        this.trigger({action: 'validationError', validationErrors})
+      }
+       else
+        this.trigger({action: 'validationError', error: err.message})
+      error = err.message
+    }
+
+    return { toChain, error }
+  },
+
+ */

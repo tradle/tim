@@ -343,6 +343,7 @@ module.exports = {
     "goodNewsFew": "Good news! You already have quite a few. To share tap icon below.",
     "prefilledForCustomer": "For your convenience we prefilled some fields. Please review and submit",
     "prefillTheProduct": "Choose the application to prefill for the prospect",
+    "importedData": "Click here to see {1} resources imported from {2} on your profile page.",
     // Tours buttons
     "Skip": "Skip",
     "Done": "Done",
