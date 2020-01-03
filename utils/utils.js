@@ -1059,7 +1059,33 @@ var utils = {
     if (resource[p]) {
       if (meta[p].type === 'date')
         return utils.getDateValue(resource[p])
-      if (meta[p].type !== 'object') {
+      if (meta[p].type === 'array') {
+        let { items } = meta[p]
+        if (items.ref  &&  utils.isEnum(items.ref))
+          return resource[p].map((v) => utils.translateEnum(v)).join(', ')
+        else if (meta[p].inlined) {
+          let mProps = items.properties
+          if (_.size(mProps) === 1)
+            return resource[p][Object.keys(mProps)][0]
+
+          let dnProps = []
+          for (let ip in mProps) {
+            if (mProps[ip].displayName)
+              dnProps.push(ip)
+          }
+          if (!dnProps.length)
+            return
+          let dn = ''
+          let val = resource[p]
+          val.forEach((v, i) => {
+            if (i)
+              dn += ', '
+            dnProps.forEach(pr => dn += `${utils.translate(v[pr])}`)
+          })
+          return dn
+        }
+      }
+      else if (meta[p].type !== 'object') {
         if (meta[p].range  ===  'model') {
           let m = utils.getModel(resource[p])
           if (m)
