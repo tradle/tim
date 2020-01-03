@@ -47,6 +47,7 @@ const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const SELFIE = 'tradle.Selfie'
 const REFRESH = 'tradle.Refresh'
+const PRODUCT_BUNDLE = 'tradle.ProductBundle'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {
   TYPE,
@@ -197,7 +198,8 @@ class FormRequestRow extends Component {
 
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
-    if (isFormRequest)
+    let isProductBundle = resource.form === PRODUCT_BUNDLE
+    if (isFormRequest  &&  !isProductBundle)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
       let linkColor
@@ -205,7 +207,13 @@ class FormRequestRow extends Component {
         linkColor = '#757575'
       else
         linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
-      onPressCall = resource._documentCreated ? null : this.reviewFormsInContext.bind(this)
+      onPressCall
+      if (!resource._documentCreated) {
+        if (isProductBundle)
+          onPressCall = this.reviewFormsInDraft.bind(this)
+        else
+          onPressCall = this.reviewFormsInContext.bind(this)
+      }
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: linkColor}} size={20} name={'ios-arrow-forward'} />
 
       let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
@@ -1067,16 +1075,26 @@ class FormRequestRow extends Component {
            </TouchableOpacity>
 
   }
+  reviewFormsInDraft() {
+    const { navigator, bankStyle, resource, to, currency, list } = this.props
+    this.props.navigator.push({
+      title: translate("reviewData"),
+      backButtonTitle: 'Back',
+      componentName: 'ReviewPrefilledItemsList',
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: PRODUCT_BUNDLE,
+        resource: resource,
+        bankStyle,
+        reviewed: {},
+        to,
+        list: resource.prefill.items,
+        currency
+      }
+    })
+  }
 
   reviewFormsInContext({isRefresh}) {
-    // Alert.alert(
-    //   translate('importDataPrompt'),
-    //   utils.getDisplayName(this.props.to),
-    //   [
-    //     {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-    //     {text: translate('Import'), onPress: this.submitAllForms.bind(this)},
-    //   ]
-    // )
     const { navigator, bankStyle, resource, to, currency, list } = this.props
     this.props.navigator.push({
       title: translate("reviewData"),
@@ -1094,12 +1112,6 @@ class FormRequestRow extends Component {
         currency
       }
     })
-  }
-  submitAllForms() {
-    // utils.onNextTransitionEnd(this.props.navigator, () => {
-    Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
-    // });
-    // this.props.navigator.pop()
   }
 
   chooser(prop) {
