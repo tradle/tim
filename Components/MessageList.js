@@ -1090,7 +1090,7 @@ class MessageList extends Component {
            </View>
   }
   getActionSheetItems() {
-    const { application } = this.props
+    const { application, resource } = this.props
     const buttons = []
     const push = btn => buttons.push({ ...btn, index: buttons.length })
 
@@ -1111,10 +1111,11 @@ class MessageList extends Component {
       return buttons
     }
 
+    let me = utils.getMe()
+    let isDraft = me.isEmployee  &&  utils.getId(this.props.resource) === utils.getId(me.organization)
     if (this.state.productList) {
-      let me = utils.getMe()
       let title
-      if (me.isEmployee  &&  utils.getId(this.props.resource) === utils.getId(me.organization))
+      if (isDraft)
         title = 'prefillTheProduct'
       else
         title = 'applyForProduct'
@@ -1130,7 +1131,27 @@ class MessageList extends Component {
         callback: () => this.forgetMe()
       })
     }
-
+    if (isDraft) {
+      let { list, context, currentContext } = this.state
+      if (context  &&  list  &&  list[list.length - 1][TYPE] !== PRODUCT_REQUEST) {
+        push({
+          title: translate('submitDraft', translate(utils.getModel(context.requestFor))),
+          callback: () => {
+            Alert.alert(
+              translate('pleaseConfirm'),
+              null,
+              [
+                {text: translate('cancel'), onPress: () => console.log('Cancel')},
+                {text: 'OK', onPress: () => {
+                  Actions.submitDraftApplication({context: currentContext || context})
+                  // this.props.navigator.pop()
+                }}
+              ]
+            )
+          }
+        })
+      }
+    }
     push({
       title: translate('cancel'),
       callback: () => {}
@@ -1145,7 +1166,7 @@ class MessageList extends Component {
     Actions.stepIndicatorPress({context: currentContext || context, step, to: this.props.resource})
   }
   chooseFormForApplication() {
-    let application = this.props.application
+    let { application } = this.props
     let model = utils.getModel(application.requestFor)
     this.props.navigator.push({
       title: translate(model),
