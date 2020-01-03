@@ -459,7 +459,10 @@ class MessageRow extends Component {
     // }
 
     if (resource[TYPE] === DATA_BUNDLE) {
-      let message = 'Click here to see ' + resource.items.length + ' resources imported from ' + resource.from.organization.title + ' on your profile page.'
+      let org = resource.from.organization
+      let message = ''
+      if (org)
+        message = translate('importedData', resource.items.length, org.title)
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowSpace}>
                     <View style={styles.container}>
