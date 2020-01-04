@@ -51,6 +51,7 @@ class ShowRefList extends Component {
     var isOrg = model.id === ORGANIZATION;
     var me = utils.getMe()
     var isMe = isProfile ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
+    let isEmployee = isMe  &&  me.isEmployee
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
@@ -65,6 +66,8 @@ class ShowRefList extends Component {
     if (itemProps) {
       for (var p in itemProps) {
         if (itemProps[p].hidden)
+          continue
+        if (!isEmployee  &&  itemProps[p].internalUse)
           continue
         if (isProfile) {
           if (!isMe  &&  itemProps[p].allowRoles  &&  itemProps[p].allowRoles === 'me')
@@ -146,15 +149,17 @@ class ShowRefList extends Component {
       if (!currentBacklink  &&  !showDetails)
         currentBacklink = props[p]
     })
-    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
+    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !isEmployee
     if (showQR  &&  this.props.showQR) {
       let tabName = translate('showQR')
       this.tabDetail[tabName] = { icon: 'ios-qr-scanner', action: this.props.showQR.bind(this) }
       refList.push(<View style={buttonStyles.container} key={this.getNextKey()} tabLabel={tabName}/>)
     }
     if (!hasBacklinks  &&  !showDocuments) {
-      if (showDetails)
-        refList = null
+      if (showDetails) {
+        if (utils.isNew(resource)  ||  !utils.hasModificationHistory(resource))
+          refList = null
+      }
     }
     // explore current backlink
     let backlinkRL, details, separator
