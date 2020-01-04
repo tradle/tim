@@ -81,7 +81,8 @@ var asyncActions = [
   'importData',
   'stepIndicatorPress',
   'showStepIndicator',
-  'showAllShareables'
+  'showAllShareables',
+  'submitDraftApplication'
 ]
 
 var syncActions = [
