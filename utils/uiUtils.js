@@ -61,7 +61,7 @@ var uiUtils = {
             model: Store.getAugmentedModel(bm),
             resource: {[TYPE]: bm.id},
             bookmark: resource,
-            searchWithFilter: searchFunction.bind(this),
+            searchWithFilter: searchFunction && searchFunction.bind(this),
             search: true,
             exploreData: true,
             bankStyle: bankStyle || defaultBankStyle,
