@@ -180,6 +180,7 @@ var NewResourceMixin = {
         label = utils.makeLabel(p);
       let errMessage
       if (errs  &&  errs[p]) {
+        maybe = false
         if (resource[p] === this.props.resource[p])
           errMessage = errs[p]
       }

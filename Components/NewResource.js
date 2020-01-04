@@ -457,7 +457,7 @@ class NewResource extends Component {
       }
     }
     let { model, originatingMessage, lensId, chat, editFormRequestPrefill,
-          doNotSend, prop, containerResource, isRefresh, application } = this.props
+          doNotSend, prop, containerResource, isRefresh, application, errs } = this.props
     let required = utils.ungroup({model, viewCols: model.required, edit: true})
     if (!required)
       required = []
@@ -488,6 +488,12 @@ class NewResource extends Component {
             required.push(p)
         }
       }
+    }
+    if (originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
+      Object.keys(errs).forEach(prop => {
+        if (!required.includes(prop))
+          required.push(prop)
+      })
     }
     if (!required.length  &&  !reqProperties) {
       const props = model.properties
