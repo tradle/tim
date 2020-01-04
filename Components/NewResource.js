@@ -489,7 +489,7 @@ class NewResource extends Component {
         }
       }
     }
-    if (originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
+    if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
       Object.keys(errs).forEach(prop => {
         if (!required.includes(prop))
           required.push(prop)
