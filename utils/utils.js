@@ -70,9 +70,12 @@ const getStore = () => require('../Store/Store')
 
 const IS_MESSAGE = '_message'
 var strMap = {
+  'Please review and correct the data below': 'reviewScannedProperties',
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
-  'Please take a **selfie** picture of your face': 'takeAPicture'
+  'Please take a **selfie** picture of your face': 'takeAPicture',
+  'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
+  'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning'
 }
 
 var {
@@ -464,10 +467,11 @@ var utils = {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
     let rtype = utils.getType(resource)
-    if (!dictionary  ||  lang === 'en') {
-      if (resource[TYPE])
-        return resource[utils.getEnumProperty(rtype)]
-      return resource.title
+    let { id, title } = resource
+    if (!title  &&  !resource[ROOT_HASH]) {
+      let [type, eid] = resource.id.split('_')
+      let enumVal = utils.getModel(rtype).enum.find(e => e.id === eid)
+      title = enumVal && enumVal.title
     }
 
     if (rtype === LANGUAGE)
@@ -475,16 +479,16 @@ var utils = {
     let e = dictionary.enums[rtype]
     if (utils.isStub(resource))  {
       if (!e) {
-        if (resource.title)
-          return resource.title
+        if (title)
+          return title
         let [type, id] = resource.id.split('_')
         let val = utils.getModel(rtype).enum.find(r => r.id === id)
 
-        resource.title = val  &&  val.title
-        return resource.title
+        title = val  &&  val.title
+        return title
       }
       let [type, id] = resource.id.split('_')
-      return e[id]  ||  resource.title
+      return e[id]  ||  title
     }
     else if (e)
       return e[resource[ROOT_HASH]] || resource[utils.getEnumProperty(utils.getModel(rtype))]
@@ -1022,7 +1026,32 @@ var utils = {
     if (resource[p]) {
       if (meta[p].type === 'date')
         return utils.getDateValue(resource[p])
-      if (meta[p].type !== 'object') {
+      if (meta[p].type === 'array') {
+        let { items } = meta[p]
+        if (items.ref  &&  utils.isEnum(items.ref))
+          return resource[p].map((v) => utils.translateEnum(v)).join(', ')
+        else if (!meta[p].inlined)
+          return displayName
+        let mProps = items.properties
+        if (_.size(mProps) === 1)
+          return resource[p][Object.keys(mProps)][0]
+
+        let dnProps = []
+        for (let ip in mProps) {
+          if (mProps[ip].displayName)
+            dnProps.push(ip)
+        }
+        if (!dnProps.length)
+          return
+        let dn = ''
+        let val = resource[p]
+        val.forEach((v, i) => {
+          if (i)
+            dn += ', '
+          dnProps.forEach(pr => dn += `${utils.translate(v[pr])}`)
+        })
+      }
+      else if (meta[p].type !== 'object') {
         if (meta[p].range  ===  'model') {
           let m = utils.getModel(resource[p])
           if (m)
@@ -1507,6 +1536,10 @@ var utils = {
       Object.keys(res).forEach(p => {
         if (p === '_context'  &&  res._context) {
           res._context = utils.buildRef(res._context)
+          return
+        }
+        if (p === '_sourceOfData'  &&  res._sourceOfData) {
+          res._sourceOfData = utils.buildRef(res._sourceOfData)
           return
         }
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
@@ -2417,7 +2450,7 @@ var utils = {
         return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
       }
     }
-    return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
+    return props[p]  &&  (props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1))
   },
 
   parseMessageFromDB(message) {
@@ -2644,6 +2677,15 @@ debugger
   },
   isNew(r) {
     return !utils.getRootHash(r)
+  },
+  hasModificationHistory(r) {
+    if (!utils.getMe().isEmployee)
+      return false
+    let m = utils.getModel(r[TYPE])
+    if (!m.properties.modificationHistory ||  utils.getRootHash(r) === utils.getCurrentHash(r))
+      return false
+    else
+      return true
   },
   getMessageWidth(component) {
     let width = component ? utils.dimensions(component).width : utils.dimensions().width
