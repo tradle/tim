@@ -100,6 +100,8 @@ class ApplicationTabs extends Component {
     }
     let hasCounts
 
+    let hasSubmissions = resource.submissions
+
     propsToShow.forEach((p) => {
       // HACK
       if (p === 'submissions')
@@ -119,8 +121,10 @@ class ApplicationTabs extends Component {
         else
           icon = 'ios-checkmark-circle-outline';
       }
-      let cnt = resource['_' + p + 'Count'] || (resource[p] &&  resource[p].length)
-      // let count
+
+      let prefix = hasSubmissions && '_' || ''
+      let pName = `${prefix}${p}Count`
+      let cnt = resource[pName] || (resource[p] &&  resource[p].length)
       if (cnt) {
         hasCounts = true
       //   if (!currentProp  &&  !showDetails)
@@ -247,22 +251,26 @@ class ApplicationTabs extends Component {
     let { resource, bankStyle } = this.props
     let formTypes = []
     let progress = 0
-    if (resource.forms) {
-      resource.forms.forEach((item) => {
+
+    let { submittedFormTypesCount, maxFormTypesCount, forms, requestFor, status } = resource
+    if (submittedFormTypesCount)
+      progress = submittedFormTypesCount / maxFormTypesCount
+    else if (forms) {
+      forms.forEach((item) => {
         let itype = utils.getType(item)
         if (formTypes.indexOf(itype) === -1)
           formTypes.push(itype)
       })
-      let m = utils.getModel(resource.requestFor)
+      let m = utils.getModel(requestFor)
 
-      if (resource.status === 'approved' || resource.status === 'completed')
+      if (status === 'approved' || status === 'completed')
         progress = 1
       else
         progress = formTypes.length / m.forms.length
     }
     let progressColor = bankStyle.linkColor
-    if (resource.status) {
-      switch (resource.status) {
+    if (status) {
+      switch (status) {
         case 'approved':
           progressColor = '#A6D785'
           break
