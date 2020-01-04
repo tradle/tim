@@ -16,14 +16,17 @@ import moment from 'moment'
 import Prompt from 'react-native-prompt'
 
 import constants from '@tradle/constants'
+import validateModel from '@tradle/validate-model'
+
 import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
-var NOT_SPECIFIED = '[not specified]'
-var DEFAULT_CURRENCY_SYMBOL = '£'
-var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const NOT_SPECIFIED = '[not specified]'
+const DEFAULT_CURRENCY_SYMBOL = '£'
+const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const OBJECT = 'tradle.Object'
 
 const PHOTO = 'tradle.Photo'
 const METHOD = 'tradle.Method'
@@ -33,7 +36,7 @@ const CHECK = 'tradle.Check'
 
 const {
   TYPE,
-  ROOT_HASH
+  ROOT_HASH,
 } = constants
 const {
   IDENTITY,
@@ -136,14 +139,22 @@ class ShowPropertiesView extends Component {
     let isPartial = model.id === PARTIAL
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
+    if (me.isEmployee  &&  resource._sourceOfData) {
+      vCols.push('_sourceOfData')
+      // vCols.push('_dataLineage')
+    }
+
+    const ObjectModel = utils.getModel(OBJECT)
 
     var viewCols = []
     vCols.forEach((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-      if (utils.isHidden(p, resource))
-        return
       var pMeta = props[p];
+      if (pMeta  &&  utils.isHidden(p, resource))
+        return
+      if (!pMeta)
+        pMeta = ObjectModel.properties[p]
       // if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
       //   return
       var val = resource[p];
@@ -169,7 +180,11 @@ class ShowPropertiesView extends Component {
         let params = {prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
         // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
         let jVal = this.showJson(params)
-        if (jVal   &&  typeof !Array.isArray(jVal))
+
+        if (!jVal)
+          return
+
+        if (!Array.isArray(jVal))
           viewCols.push(jVal)
         else if (jVal.length)
           viewCols.push(
@@ -240,7 +255,7 @@ class ShowPropertiesView extends Component {
         else if (pMeta.ref === IDENTITY) {
           let title = val.title
           if (!title)
-            title = val.id.split('_')[0] === me[ROOT_HASH] ? 'Me' : 'Not me'
+            title = val.id === utils.getId(me) ? 'Me' : 'Not me'
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
@@ -407,7 +422,7 @@ class ShowPropertiesView extends Component {
   }
   getCheckForCorrection(pMeta) {
     let { checkProperties, errorProps, bankStyle, navigator, resource } = this.props
-    if (!checkProperties)
+    if (!checkProperties  ||  pMeta.immutable)
       return
     let p = pMeta.name
     let icon = errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'
