@@ -3071,6 +3071,15 @@ var Store = Reflux.createStore({
       else if (!isWelcome  &&  !application)
         this.addLastMessage(r, batch)
 
+      // if (r[TYPE] === FORM_ERROR  &&  r.prefill[ROOT_HASH]) {
+      //   let item = this._getItem(r.prefill)
+      //   if (item) {
+      //     _.extend(item, r.prefill)
+      //     item._latest = false
+      //     this._setItem(utils.getId(item), item)
+      //     this.trigger({action: 'updateItem', resource: item})
+      //   }
+      // }
       let noCustomerWaiting = await checkIfNeedToPublishIdentityOrSendSelfIntro()
       if (!isWelcome  ||  !utils.isEmpty(welcomeMessage)) {
         await handleSimpleMessage(rr)
@@ -11040,6 +11049,20 @@ if (!res[SIG]  &&  res._message)
       }
       this.addLastMessage(val, batch)
     }
+    if (me.isEmployee) {
+      if (val[ROOT_HASH] !== val[CUR_HASH]) {
+        let pid = `${val[TYPE]}_${val[ROOT_HASH]}_${val[PREV_HASH]}`
+        let pitem = this._getItem(pid)
+        if (pitem) {
+          pitem._latest = false
+          this._setItem(pid, pitem)
+          await this.dbPut(pid, pitem)
+          this.trigger({action: 'updateItem', resource: pitem})
+        }
+      }
+      val._latest = true
+    }
+
     if (list[key]) {
       let v = {}
       _.extend(v, val)
