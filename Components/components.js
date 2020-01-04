@@ -80,6 +80,9 @@ module.exports = {
   get RemediationItemsList() {
     return require('./RemediationItemsList')
   },
+  get ReviewPrefilledItemsList() {
+    return require('./ReviewPrefilledItemsList')
+  },
   get CameraView() {
     return require('./CameraView')
   },
