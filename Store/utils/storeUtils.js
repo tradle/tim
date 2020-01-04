@@ -55,6 +55,7 @@ var storeUtils = {
       storeUtils.parseOneModel(m, models, enums)
     }
     dictionary = storeUtils.makeDictionary(models)
+    this.addNameAndTitleProps(ObjectModel.id)
   },
   getDictionary() {
     return dictionary
@@ -150,7 +151,7 @@ var storeUtils = {
   addNameAndTitleProps(m, aprops) {
     let mprops = aprops  ||  m.properties
     for (let p in mprops) {
-       if (p.charAt(0) === '_'  &&  (!m  || m.id !== MESSAGE))
+       if (p.charAt(0) === '_'  &&  (!m  || (m.id !== MESSAGE && m.id !== ObjectModel.id)))
         continue
       if (!mprops[p].name)
         mprops[p].name = p
@@ -596,7 +597,20 @@ var storeUtils = {
       },
       {
         type: APPLICATION,
-        message: 'applications'
+        message: 'applications',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink
+        }
+      },
+      {
+        type: APPLICATION,
+        message: 'applicationDrafts',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+           draft: true
+        },
       },
       // { type: VERIFICATION },
       // { type: SEAL },
