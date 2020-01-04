@@ -29,6 +29,7 @@ const {
   SETTINGS,
   ENUM,
   PROFILE,
+  IDENTITY,
   ORGANIZATION,
   MONEY
 } = constants.TYPES
@@ -436,7 +437,8 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource, isRefresh } = this.props
+    let { model, originatingMessage, lensId, chat, editFormRequestPrefill,
+          doNotSend, prop, containerResource, isRefresh, application, errs } = this.props
     let required = utils.ungroup({model, viewCols: model.required, edit: true})
     if (!required)
       required = []
@@ -449,6 +451,12 @@ class NewResource extends Component {
       for (let p in formProps)
         if (props[p]  &&  model.softRequired.includes(p))
           required.push(p)
+    }
+    if (originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
+      Object.keys(errs).forEach(prop => {
+        if (!required.includes(prop))
+          required.push(prop)
+      })
     }
 
 
@@ -517,8 +525,12 @@ class NewResource extends Component {
     let r = {}
     _.extend(r, resource)
     json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
-    if (originatingMessage  &&  originatingMessage.lens)
-      json._lens = originatingMessage.lens
+    if (originatingMessage) {
+      if (originatingMessage.lens)
+        json._lens = originatingMessage.lens
+      if (originatingMessage.prefill)
+        json._sourceOfData = originatingMessage
+    }
 
     delete r.url
     let params = {
@@ -536,9 +548,26 @@ class NewResource extends Component {
       params.lens = this.floatingProps._lens
 
     // HACK
-    Actions.saveTemporary(r)
+    //???? Actions.saveTemporary(r)
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
+    else if (editFormRequestPrefill) {
+      let toId = application.applicant.id.replace(IDENTITY, PROFILE)
+      if (!json[TYPE])
+      json[TYPE] = originatingMessage.form
+      let msg = {
+        [TYPE]: 'tradle.FormRequest',
+        prefill: json,
+        product: application.requestFor,
+        form: originatingMessage.form,
+        from: utils.getMe(),
+        to: {id: toId},
+        _context: application._context,
+        context: application.context
+      }
+      Actions.addMessage({msg, editFormRequestPrefill, originatingMessage})
+      this.props.navigator.pop()
+    }
     else {
       if (originatingMessage)
         params.disableFormRequest = originatingMessage
