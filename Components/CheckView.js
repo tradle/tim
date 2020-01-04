@@ -218,8 +218,9 @@ class CheckView extends Component {
       application,
       status
     }
-    if (application.top)
-      r.top = application.top
+    const { top } = application
+    r.top = top || application
+
     navigator.push({
       componentName: 'NewResource',
       title: translate(model),
