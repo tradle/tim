@@ -110,15 +110,22 @@ class MessageView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource))
-      return
+    if (utils.getId(params.resource) !== utils.getId(resource)) {
+      if (utils.getCurrentHash(resource) ||  utils.getRootHash(resource) !== utils.getRootHash(params.resource))
+        return
+    }
     if (action === 'verifyOrCorrect') {
       this.verifyOrCreateError()
       return
     }
      if (action === 'getItem') {
+      let newResource
+      if (utils.isStub(this.state.resource))
+        newResource = params.resource
+      else
+        newResource = {...this.state.resource, ...params.resource}
       let state = {
-        resource: params.resource,
+        resource: newResource,
         isLoading: false
       }
       if (currency)
@@ -140,7 +147,7 @@ class MessageView extends Component {
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         let r = params.resource || this.state.resource
         this.setState({backlink, backlinkList: params.list || r[backlink], showDetails: false, showDocuments: false, resource: r})
-        Actions.getItem({resource: r, application, search: search  ||  application != null})
+        Actions.getItem({resource: r, application, backlink, search: search  ||  application != null})
       }
     }
     else if (action === 'showDetails')
