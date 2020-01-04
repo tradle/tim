@@ -448,7 +448,7 @@ class ShowPropertiesView extends Component {
   }
   getCheckForCorrection(pMeta) {
     let { checkProperties, errorProps, bankStyle, navigator, resource } = this.props
-    if (!checkProperties)
+    if (!checkProperties  ||  pMeta.immutable)
       return
     let p = pMeta.name
     let icon = errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'
