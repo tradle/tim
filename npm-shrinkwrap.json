@@ -192,7 +192,7 @@
       "integrity": "sha1-Q8Jj7hDsPJxviCjZr2dSyJzZsFI="
     },
     "@tradle/custom-models": {
-      "version": "github:tradle/custom-models#24219aad3365e1bfc64b9f1a9b845d3b8fc66b2b",
+      "version": "github:tradle/custom-models#c8ace8aaaa190a0b3fb03740acdfe825d6b0bd25",
       "from": "github:tradle/custom-models",
       "requires": {
         "@tradle/validate-model": "^7.1.18"
@@ -431,7 +431,7 @@
       }
     },
     "@tradle/models": {
-      "version": "github:tradle/models#f617646c318096281d22b5900d4c99e6f17b10bb",
+      "version": "github:tradle/models#e98d71dd1b955cacfe65fd83adbddad08c613f32",
       "from": "github:tradle/models"
     },
     "@tradle/models-cloud": {
