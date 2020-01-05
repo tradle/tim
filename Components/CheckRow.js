@@ -161,8 +161,6 @@ class CheckRow extends Component {
     }
 
     let statusId = this.getEnumID(status.id)
-    let statusId = this.getEnumID(resource.status.id)
-
     let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
     let checkIcon
     let checkOverrideStatus
