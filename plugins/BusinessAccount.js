@@ -186,21 +186,24 @@ function getPropsForControllingEntity(form) {
   case 'person':
     let retProps = {
       requestedProperties: [
+        {name: 'name', required: true},
         {name: 'typeOfControllingPerson', required: true},
-        {name: 'natureOfControl', required: false},
+        {name: 'natureOfControl'},
+        {name: 'percentageOfOwnership'},
+        {name: 'inactive'},
       ]
     }
-    if (form.name)
-      retProps.requestedProperties.push({name: 'name', required: false})
+    // retProps.requestedProperties.push({name: 'notificationMethod'})
+    retProps.requestedProperties.push({name: 'emailAddress', required: true})
+    if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
+      retProps.requestedProperties.push({name: 'phone', required: true})
+
+    if (!form.inactive)
+      retProps.requestedProperties.push({name: 'personal_group', required: true})
 
     retProps.requestedProperties.push({name: 'isSeniorManager'})
     if (form.isSeniorManager)
       retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
-
-    retProps.requestedProperties.push({name: 'notificationMethod'})
-    retProps.requestedProperties.push({name: 'emailAddress', required: true})
-    if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
-      retProps.requestedProperties.push({name: 'phone', required: true})
 
     if (form.name) {
       retProps.requestedProperties = retProps.requestedProperties.concat([
@@ -208,8 +211,8 @@ function getPropsForControllingEntity(form) {
         {name: 'startDate', required: false},
         {name: 'endDate', required: false},
         {name: 'occupation', required: false},
-        {name: 'controllingEntityCountry'},
-        {name: 'inactive', required: false},
+        // {name: 'inactive', required: false},
+        {name: 'doNotReachOut'},
       ])
     }
     retProps.requestedProperties.push({name: 'legalEntity', required: true})
@@ -221,14 +224,17 @@ function getPropsForControllingEntity(form) {
         {name: 'name'},
         {name: 'emailAddress', required: true},
         {name: 'controllingEntityCompanyNumber'},
+        {name: 'controllingEntityRegistrationDate'},
         {name: 'companyType'},
         {name: 'controllingEntityStreetAddress'},
         {name: 'controllingEntityRegion'},
         {name: 'controllingEntityPostalCode'},
         {name: 'controllingEntityCountry'},
         {name: 'natureOfControl'},
+        {name: 'percentageOfOwnership'},
         {name: 'phone'},
         {name: 'legalEntity'},
+        {name: 'doNotReachOut'},
       ]
     }
   }
