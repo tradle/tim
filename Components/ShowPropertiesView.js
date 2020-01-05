@@ -139,7 +139,8 @@ class ShowPropertiesView extends Component {
     let isPartial = model.id === PARTIAL
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
-    if (me.isEmployee  &&  resource._sourceOfData) {
+    // HACK
+    if (me.isEmployee  &&  !checkProperties  &&  resource._sourceOfData) {
       vCols.push('_sourceOfData')
       // vCols.push('_dataLineage')
     }
@@ -217,6 +218,10 @@ class ShowPropertiesView extends Component {
               </View>
             )
             return
+          }
+          else if (pMeta.items) {
+            if (pMeta.items.ref  &&  !utils.isEnum(pMeta.items.ref))
+              return
           }
           val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
         }
