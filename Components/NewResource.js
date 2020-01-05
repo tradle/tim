@@ -87,11 +87,13 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     let r = {};
-    if (props.resource)
-      r = utils.clone(props.resource) //extend(true, r, props.resource)
+    let { resource, originatingMessage, model } = props
+    if (resource)
+      r = utils.clone(resource) //extend(true, r, props.resource)
     else
-      r[TYPE] = props.model.id
-    let isRegistration = !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
+      r[TYPE] = model.id
+
+    let isRegistration = !utils.getMe()  &&  model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
     let isUploading = !isRegistration  &&  (!r[ROOT_HASH] || Object.keys(r).length === 2)
     this.state = {
       resource: r,
@@ -102,6 +104,11 @@ class NewResource extends Component {
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
+    if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
+      if (originatingMessage.message)
+        this.state.message = originatingMessage.message
+    }
+
     this.onSavePressed = this.onSavePressed.bind(this)
     this.showTermsAndConditions = this.showTermsAndConditions.bind(this)
     this.acceptTsAndCs = this.acceptTsAndCs.bind(this)
@@ -263,7 +270,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties, resource: r, message })
+           this.setState({requestedProperties, resource: r, message: message || this.state.message })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -452,7 +459,7 @@ class NewResource extends Component {
         if (props[p]  &&  model.softRequired.includes(p))
           required.push(p)
     }
-    if (originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
+    if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
       Object.keys(errs).forEach(prop => {
         if (!required.includes(prop))
           required.push(prop)
