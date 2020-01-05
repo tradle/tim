@@ -25,6 +25,7 @@ import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
 import VerificationRow from './VerificationRow'
 import CheckRow from './CheckRow'
+import ModificationRow from './ModificationRow'
 import ApplicationRow from './ApplicationRow'
 import PageView from './PageView'
 import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
@@ -49,6 +50,7 @@ import formDefaults from '../data/formDefaults'
 
 const FORM_ERROR = 'tradle.FormError'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
+const MODIFICATION = 'tradle.Modification'
 
 const SEARCH_LIMIT = 10
 
@@ -136,7 +138,7 @@ class GridList extends Component {
         return true
       }
     })
-    let {resource, modelName, prop, filter, serverOffline, search} = this.props
+    let {resource, modelName, prop, filter, serverOffline, search, bookmark} = this.props
     let model = utils.getModel(modelName)
 
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
@@ -154,7 +156,8 @@ class GridList extends Component {
       refreshing: false,
       notFoundMap: {},
       resource: search  &&  resource,
-      isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
+      isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
+      isDraft: bookmark  &&  bookmark.bookmark.draft
     };
     if (props.multiChooser) {
       this.state.chosen = {}
@@ -1107,6 +1110,16 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 bankStyle={bankStyle}
                 resource={resource} />
                )
+      else if (modelName === MODIFICATION)
+        return (<ModificationRow
+                lazy={lazy}
+                onSelect={() => this.selectResource({resource: selectedResource})}
+                modelName={rtype}
+                application={application}
+                bankStyle={bankStyle}
+                parentResource={this.props.resource}
+                resource={resource} />
+               )
       return (<VerificationRow
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}
@@ -1182,7 +1195,11 @@ console.log('GridList.componentWillMount: filterResource', resource)
     //   return
     // debugger
     let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
-    let { modelName, search, resource, bookmark } = this.props
+    let { modelName, search, resource, bookmark, isBacklink, prop } = this.props
+    if (isBacklink  &&  prop  &&  resource[prop.name].length < this.limit) {
+      this.state.allLoaded = true
+      return
+    }
     if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
       return
     this.state.refreshing = true
@@ -1235,11 +1252,12 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
       return
     if (prop  &&  !prop.allowToAdd)
       return
+    let { resource, isDraft, allowToAdd } = this.state
     let me = utils.getMe()
     let model = utils.getModel(modelName);
     let noMenuButton
     if (!prop  &&  model.id !== ORGANIZATION) {
-      noMenuButton = (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
+       noMenuButton = (!search &&  !isModel  &&  (!resource || !Object.keys(resource).length))
     }
     let employee
     if (me.isEmployee) {
@@ -1249,7 +1267,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     }
     else
       employee = <View/>
-    let isAdd = this.state.allowToAdd  &&  !search
+    let isAdd = allowToAdd  &&  !search
     let icon
     if (isAdd)
       icon = 'md-add'
@@ -1260,7 +1278,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
 
     let color = Platform.OS !== 'android' ? '#ffffff' : 'red'
     let menuBtn
-    if (!bookmark  &&  !noMenuButton)
+    if ((!bookmark || isDraft)  &&  !noMenuButton)
       menuBtn = <TouchableOpacity onPress={() => isAdd ? this.addNew() : this.ActionSheet.show()}>
                   <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
                     <Icon name={icon}  size={33}  color={color}/>
@@ -1505,10 +1523,19 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let { search, modelName, prop, isBacklink, isForwardlink, bookmark } = this.props
     if (isForwardlink)
       return
-    if (bookmark)
-      return
+    let { allowToAdd, isDraft } = this.state
     let buttons
-    if (search) {
+    if (bookmark) {
+      if (!isDraft)
+        return
+      buttons = [
+        {
+          text: translate('addNew', translate(utils.getModel(APPLICATION))),
+          onPress: () => {}
+        }
+      ]
+    }
+    else if (search) {
       buttons = [
         {
           text: translate('Bookmark'),
@@ -1516,7 +1543,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
         }
       ]
     }
-    else if (this.state.allowToAdd) {
+    else if (allowToAdd) {
       if (isBacklink)
         return
       buttons = [
