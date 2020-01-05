@@ -46,6 +46,7 @@ const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const SELFIE = 'tradle.Selfie'
 const REFRESH = 'tradle.Refresh'
+const PRODUCT_BUNDLE = 'tradle.ProductBundle'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {
   TYPE,
@@ -194,20 +195,29 @@ class FormRequestRow extends Component {
       }
     }
 
-    let linkColor
-    if (application)
-      linkColor = '#757575'
-    else
-      linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
-
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
-    if (isFormRequest)
+    let isProductBundle = resource.form === PRODUCT_BUNDLE
+    if (isFormRequest  &&  !isProductBundle)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
-      onPressCall = resource._documentCreated ? null : this.reviewFormsInContext.bind(this)
+      let linkColor
+      if (application)
+        linkColor = '#757575'
+      else
+        linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
+      onPressCall
+      if (!resource._documentCreated) {
+        if (isProductBundle)
+          onPressCall = this.reviewFormsInDraft.bind(this)
+        else
+          onPressCall = this.reviewFormsInContext.bind(this)
+      }
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: linkColor}} size={20} name={'ios-arrow-forward'} />
-      let params = { resource, message, bankStyle, noLink: application != null || resource._documentCreated }
+
+      let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
+      let params = { resource, message, bankStyle, noLink }
+
       let msg = parseMessage(params)
       if (typeof msg === 'string') {
         let idx = message.indexOf('...')
@@ -303,7 +313,7 @@ class FormRequestRow extends Component {
 
     let messageBody
     let isMyProduct = isFormRequest  &&  utils.isMyProduct(resource.form)
-    if (prop  ||  isMyProduct  ||  application  ||  resource._documentCreated)
+    if (prop  ||  isMyProduct  ||  (application  &&  !this.canEmployeePrefill(resource))  ||  resource._documentCreated)
       messageBody = msgContent
     else
       messageBody = <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}}>
@@ -359,39 +369,39 @@ class FormRequestRow extends Component {
         let totalShareables = ver.length
         let r = ver[0]
         // ver.forEach((r) => {
-          let document = r.document
-          if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
-            return
-          // Dont' share forms for the same product
-          if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
-            return
-          var doc = this.formatShareables({
-            model: formModel,
-            verification: r,
-            styles,
-            // isAccordion: totalShareables > 1,
-            providers: providers  &&  providers[document[ROOT_HASH]]
-          })
-          if (cnt) {
-            doc = <View key={this.getNextKey()}>
-                    <View style={styles.separator} />
-                    {doc}
-                  </View>
-          }
-          if (totalShareables === 1)
-            vtt.push(doc);
-          else {
-            let total = `You have ${totalShareables} resource to share`
-            vtt.push(
-              <View key={this.getNextKey()}>
-                {doc}
-                <TouchableOpacity onPress={() => Actions.showAllShareables(resource, to)} style={{alignItems: 'center', padding: 10, borderTopWidth: 1, marginTop: 5, borderTopColor: '#ddd'}}>
-                  <Text style={{fontSize: 14, color: bankStyle.buttonBgColor || bankStyle.linkColor}}>{total}</Text>
-                </TouchableOpacity>
-              </View>
-             )
-          }
-          cnt++;
+        let document = r.document
+        if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
+          return
+        // Dont' share forms for the same product
+        if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
+          return
+        var doc = this.formatShareables({
+          model: formModel,
+          verification: r,
+          styles,
+          // isAccordion: totalShareables > 1,
+          providers: providers  &&  providers[document[ROOT_HASH]]
+        })
+        if (cnt) {
+          doc = <View key={this.getNextKey()}>
+                  <View style={styles.separator} />
+                  {doc}
+                </View>
+        }
+        if (totalShareables === 1)
+          vtt.push(doc);
+        else {
+          let total = `You have ${totalShareables} resource to share`
+          vtt.push(
+            <View key={this.getNextKey()}>
+              {doc}
+              <TouchableOpacity onPress={() => Actions.showAllShareables(resource, to)} style={{alignItems: 'center', padding: 10, borderTopWidth: 1, marginTop: 5, borderTopColor: '#ddd'}}>
+                <Text style={{fontSize: 14, color: bankStyle.buttonBgColor || bankStyle.linkColor}}>{total}</Text>
+              </TouchableOpacity>
+            </View>
+           )
+        }
+        cnt++;
         // })
       }
     }
@@ -684,8 +694,8 @@ class FormRequestRow extends Component {
     })
   }
 
-  createNewResource({model, isMyMessage, resource}) {
-    let { currency, country, bankStyle, defaultPropertyValues, navigator } = this.props
+  createNewResource({model, isMyMessage, resource, editFormRequestPrefill}) {
+    let { currency, country, bankStyle, defaultPropertyValues, navigator, application } = this.props
     if (!model)
       model = utils.getModel(resource[TYPE])
     if (model.abstract) {
@@ -750,6 +760,8 @@ class FormRequestRow extends Component {
         bankStyle,
         originatingMessage: formRequest,
         defaultPropertyValues,
+        editFormRequestPrefill,
+        application
       }
     });
   }
@@ -757,7 +769,25 @@ class FormRequestRow extends Component {
   formRequest({resource, renderedRow, prop, styles, hasMoreProps}) {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
-    let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
+
+    let me = utils.getMe()
+    let { product } = resource
+
+    let switchToContext = me.isEmployee  &&  context  &&  product  && context.to.organization  &&  context.to.organization.id === me.organization.id
+
+    let isReadOnly = application != null
+
+    let canPrefill = this.canEmployeePrefill(resource)
+    if (canPrefill)
+      isReadOnly = false
+    else if (!isReadOnly)
+      isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
+
+    let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct  || resource.form === PRODUCT_REQUEST
+
+    let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
+    let params = { resource, message, bankStyle, noLink }
+
     let messagePart = parseMessage(params)
     if (typeof messagePart === 'string')
       messagePart = null
@@ -766,7 +796,6 @@ class FormRequestRow extends Component {
     let onPressCall
     let sameFormRequestForm
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
-    let { product } = resource
     let isMyProduct = utils.isMyProduct(resource.form)
     if (!resource._documentCreated  &&  product) {
       let multiEntryForms = utils.getModel(product).multiEntryForms
@@ -790,13 +819,6 @@ class FormRequestRow extends Component {
     }
 
     let icon
-    let me = utils.getMe()
-    let switchToContext = me.isEmployee  &&  context  &&  resource.product  && context.to.organization  &&  context.to.organization.id === me.organization.id
-
-    let isReadOnly = application != null
-
-    if (!isReadOnly)
-      isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
 
     let addMessage = messagePart || translate(message)
     messagePart = null
@@ -804,8 +826,7 @@ class FormRequestRow extends Component {
 
     let hasSharables = this.hasSharables()
 
-    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
-    // HACK
+    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated // &&  !resource.prefill    // HACK
     if (isRequestForNext) {
       if (resource.message.startsWith(strings.reviewScannedProperties))
         isRequestForNext = false
@@ -882,7 +903,7 @@ class FormRequestRow extends Component {
         else if (resource.verifiers)
           onPressCall = chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (!prop)
-          onPressCall = this.createNewResource.bind(this, {model: form, isMyMessage})
+          onPressCall = this.createNewResource.bind(this, {model: form, isMyMessage, editFormRequestPrefill: canPrefill})
         else {
           icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} style={styles.arrowForward}/>
 
@@ -988,6 +1009,10 @@ class FormRequestRow extends Component {
     renderedRow.push(msg);
     return isReadOnly || isRefresh ? null : onPressCall
   }
+  canEmployeePrefill(resource) {
+    let { application } = this.props
+    return !resource._documentCreated  &&  application  &&  utils.isRM(application)
+  }
   moveToTheNextForm(form) {
    Alert.alert(
      translate('areYouSureAboutNextForm', translate(form)),
@@ -1066,6 +1091,25 @@ class FormRequestRow extends Component {
              {content}
            </TouchableOpacity>
 
+  }
+
+  reviewFormsInDraft() {
+    const { navigator, bankStyle, resource, to, currency, list } = this.props
+    this.props.navigator.push({
+      title: translate("reviewData"),
+      backButtonTitle: 'Back',
+      componentName: 'ReviewPrefilledItemsList',
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: PRODUCT_BUNDLE,
+        resource: resource,
+        bankStyle,
+        reviewed: {},
+        to,
+        list: resource.prefill.items,
+        currency
+      }
+    })
   }
 
   reviewFormsInContext({isRefresh}) {
