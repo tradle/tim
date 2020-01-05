@@ -14,7 +14,7 @@ const {
   CUR_HASH,
 } = constants
 
-const { MONEY, ORGANIZATION, MESSAGE, MODEL } = constants.TYPES
+const { MONEY, ORGANIZATION, MESSAGE, MODEL, FORM } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -561,7 +561,7 @@ var search = {
     if (utils.isInlined(model))
       arr = [] //[TYPE] //, '_link', '_permalink']
     else {
-      arr = ['_permalink', '_link', '_time', '_author', '_org', '_authorTitle', '_time']
+      arr = ['_permalink', '_link', '_p', '_time', '_author', '_org', '_authorTitle', '_time']
       if (model.id !== PUB_KEY  &&  !inlined) {
         let newarr = arr.concat(TYPE, SIG)
         arr = newarr
@@ -632,12 +632,18 @@ var search = {
     if (!arr)
       arr = []
     let isApplication = model  &&  model.id === APPLICATION
+    let me = utils.getMe()
     for (let p in props) {
       if (excludeProps  &&  excludeProps.indexOf(p) !== -1)
         continue
-      if (p.charAt(0) === '_')
+      if (p.charAt(0) === '_') {
+        if (me.isEmployee) {
+          if (p === '_sourceOfData'  ||  p === '_dataLineage')
+            arr.push(p)
+        }
         continue
-      if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
+      }
+      if (p === 'from' || p === 'to' ||  p.indexOf('_group') !== -1)
         continue
       let prop = props[p]
       if (prop === currentProp)
@@ -751,7 +757,7 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink, excludeProps, isChat) {
+  async getItem(id, client, backlink, excludeProps, isChat, isPreviousVersion) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
@@ -761,7 +767,7 @@ var search = {
     let table = `r_${modelName.replace(/\./g, '_')}`
 
     let query
-    if (isChat)
+    if (isChat || isPreviousVersion)
       query = `query {\n${table} (_link: "${_link}")\n`
     else
       query = `query {\n${table} (_permalink: "${_permalink}")\n`
