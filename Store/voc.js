@@ -9,7 +9,7 @@ let models = _.cloneDeep(_.extend(
   require('@tradle/models-corporate-onboarding').models,
   require('@tradle/models-products-bot'),
   require('@tradle/models-onfido'),
-  require('@tradle/models-cloud')
+  require('@tradle/models-cloud').models
 ))
 
 const exclude = ['tradle.AssignRelationshipManager', 'tradle.ProductRequest']
