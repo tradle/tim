@@ -91,11 +91,12 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     let r = {};
-    if (props.resource)
-      r = utils.clone(props.resource) //extend(true, r, props.resource)
+    let { resource, originatingMessage, model } = props
+    if (resource)
+      r = utils.clone(resource) //extend(true, r, props.resource)
     else
-      r[TYPE] = props.model.id
-    let isRegistration = !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
+      r[TYPE] = model.id
+    let isRegistration = !utils.getMe()  &&  model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
     let isUploading = !isRegistration  &&  (!r[ROOT_HASH] || Object.keys(r).length === 2)
     this.state = {
       resource: r,
@@ -106,6 +107,11 @@ class NewResource extends Component {
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
+    if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
+      if (originatingMessage.message)
+        this.state.message = originatingMessage.message
+    }
+
     this.onSavePressed = this.onSavePressed.bind(this)
     this.showTermsAndConditions = this.showTermsAndConditions.bind(this)
     this.acceptTsAndCs = this.acceptTsAndCs.bind(this)
@@ -282,7 +288,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties, resource: r, message: message })
+          this.setState({requestedProperties, resource: r, message: message || this.state.message })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -955,11 +961,15 @@ class NewResource extends Component {
     // HACK
     let guidanceMsg
     if (meta.id === 'tradle.PhotoID') {
+      let src = 'https://tradle-public-images.s3.amazonaws.com/landscape.png'
       guidanceMsg = <View style={{paddingBottom: 10}}>
                       <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
                         <Text style={styles.guidanceMsgTitle}>Uploading a picture of your document to your computer:</Text>
                         <Text style={{fontSize: 18}}>1.
-                          <Text style={styles.guidanceMsgText}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
+                          <Text style={styles.guidanceMsgText}>Take a photo of your document using your smartphone, tablet, camera or scanner</Text>
+                        </Text>
+                        <Text style={{fontSize: 18, paddingLeft: 20}}>
+                          Please use the landscape mode <Image source={{uri: src}} style={{width: 50, height: 25}} />
                         </Text>
                         <Text style={{fontSize: 18}}>2.
                           <Text style={styles.guidanceMsgText}>Transfer the image from your device to your computer: connect to the device with a USB cable, or email the image to yourself. Save the image to your computer (e.g. on the Desktop, Photos, Documents or Downloads folder).</Text>
