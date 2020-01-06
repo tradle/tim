@@ -51,6 +51,7 @@ module.exports = {
     "tapToRemovePhotos": "Tap to remove photos",
     "addNew": "Add new {1}",
     "fillTheForm": "Please fill out this form **{1}**",
+    "fillOutTheForm": "The company was not found. Please fill out the form",
     "fillTheFormWithAttachments": "Please fill out this form **{1}**",
     "takeAPicture": "Please take a **selfie** picture of your face",
     "verifiedBy": "Verified by {1}",
