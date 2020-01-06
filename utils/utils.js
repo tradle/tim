@@ -74,6 +74,7 @@ var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
   'Please take a **selfie** picture of your face': 'takeAPicture',
+  'The company was not found. Please fill out the form': 'fillOutTheForm',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
   'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning'
 }
