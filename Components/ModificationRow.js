@@ -216,10 +216,12 @@ class ModificationRow extends Component {
         for (let part in v) {
           let pprop = props[part]
           let val = v[part]
+          let isLink
           if (isRemoved)
             val = ''
-          else if (pprop  &&  pprop.type === 'date')
-            val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+          else if (pprop)
+            val = this.getVal(pprop, val)
+
           let label = pprop && translate(pprop, model) || part
           cols.push(<View style={styles.col} key={this.getNextKey()}>
                      <View style={{flexDirection: 'row', flex: 1}}>
@@ -235,8 +237,8 @@ class ModificationRow extends Component {
       else {
         let label = prop && translate(prop, model) || p
         let val = v
-        if (prop  &&  prop.type === 'date')
-          val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+        if (prop)
+          val = this.getVal(prop, val)
         cols.push(<View style={styles.col} key={this.getNextKey()}>
                    <View style={{flexDirection: 'row', flex: 1}}>
                      {icon}
@@ -252,6 +254,19 @@ class ModificationRow extends Component {
                   {cols}
                 </View>)
     }
+  }
+  getVal(prop, val) {
+    if (prop.type === 'date')
+      val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+    else if (prop.type === 'boolean')
+      val = val  &&  translate('Yes') || translate('No')
+    else if (prop.ref) {
+      if (isEnum(prop.ref))
+        val = translateEnum(val)
+      else
+        val = val.title ||  val._displayName
+    }
+    return val
   }
   addChecks(checks, p, rows, styles) {
     let label = translate(p)
@@ -298,6 +313,8 @@ class ModificationRow extends Component {
       let label = prop && translate(prop, model) || p
       let pair = json[p]
       let val
+      let value = this.getVal(prop, pair.new)
+      debugger
       switch (prop.type) {
       case 'date':
         val = dateformat(pair.new, 'mmm dS, yyyy h:MM TT')
@@ -305,9 +322,24 @@ class ModificationRow extends Component {
         break
       case 'object':
         if (prop.ref) {
-          val = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{pair.new.title}</Text>
-          if (!isEnum(prop.ref)) {
-            val = <TouchableOpacity onPress={this.showRefResource.bind(this, pair.new, prop)}>
+          // HACK
+
+          let refR = pair.new
+          let title = refR.title
+          if (!title  &&  refR._displayName) {
+            title = refR._displayName
+            refR = {
+              id: `${refR[TYPE]}_${refR._permalink}_${refR._link}`,
+              title
+            }
+          }
+
+          if (!title)
+            continue
+          let isEnumProp = isEnum(prop.ref)
+          val = <Text  style={isEnumProp && styles.sourceTitle || styles.pTitle}>{title}</Text>
+          if (!isEnumProp) {
+            val = <TouchableOpacity onPress={this.showRefResource.bind(this, refR, prop)}>
                    {val}
                  </TouchableOpacity>
           }
@@ -338,7 +370,7 @@ reactMixin(ModificationRow.prototype, ResourceMixin)
 var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, isRM, bankStyle }) {
   return StyleSheet.create({
     headerRow: {
-      fontSize: 24,
+      // fontSize: 24,
       backgroundColor: 'aliceblue',
       padding: 10,
     },
