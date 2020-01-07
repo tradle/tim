@@ -10,7 +10,7 @@ import {
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
-import debounce from 'p-debounce'
+import debounce from 'debounce'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons'
