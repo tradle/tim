@@ -124,6 +124,9 @@ function getPropsForLegalEntity(form) {
   //   }
   // }
 
+  let { streetAddress, city, postalCode, country } = form
+  let addRegion = country  &&  country.id.split('_')[1] === 'US'
+
   if (isNew(form)) {
     let requestedProperties = [
         { name: 'companyName', required: true  },
@@ -132,15 +135,15 @@ function getPropsForLegalEntity(form) {
         { name: 'formerlyKnownAs'}
       ]
 
-    let { streetAddress, city, postalCode, country } = form
     if (streetAddress)
       requestedProperties.push({name: 'streetAddress'})
     if (city)
       requestedProperties.push({name: 'city'})
     if (postalCode)
       requestedProperties.push({name: 'postalCode'})
-    if (country  &&  country.id.split('_')[1] === 'US')
+    if (addRegion)
       requestedProperties.push({name: 'region', required: true})
+
     requestedProperties.push({ name: 'country', required: true })
 
     let omitArr = ['companyName', 'registrationNumber', 'country', 'city', 'streetAddress', 'postalCode', 'region']
@@ -152,6 +155,7 @@ function getPropsForLegalEntity(form) {
     }
     return { requestedProperties }
   }
+
   return {
       requestedProperties: [
         { name: 'info_group' },
@@ -160,6 +164,7 @@ function getPropsForLegalEntity(form) {
         { name: 'companyEmail', required: true },
         { name: 'companyWebsite', required: true },
         { name: 'address_group'},
+        { name: 'region', hide: !addRegion, required: addRegion },
         { name: 'taxIdNumber', required: false },
         { name: 'companyFax', required: false },
         { name: 'companyPhone', required: false },
