@@ -3662,7 +3662,8 @@ var Store = Reflux.createStore({
         requestedProperties.forEach((r) => {
           rprops[r.name] = {
             message: r.message || '',
-            required: r.required // r.hasOwnProperty('required') ? r.required : true
+            required: r.required,
+            hide: r.hide
           }
         })
         rProps = {
@@ -10595,8 +10596,11 @@ if (!res[SIG]  &&  res._message)
       }
       else {
         if (val[TYPE] === FORM_ERROR) {
-          if (!val.prefill.id)
+          if (!val.prefill.id) {
             val.prefill._latest = true
+            if (val.prefill[ROOT_HASH])
+              val.prefill._context = val._context
+          }
           else {
             let memPrefill = this._getItem(val.prefill)
             let phash = memPrefill ? memPrefill[CUR_HASH] : this.getCurHash(val.prefill) //  val.prefill.id.split('_')[2]
