@@ -4142,20 +4142,20 @@ if (!res[SIG]  &&  res._message)
     let r = await this._getItemFromServer({idOrResource: rId, backlink, isChat, isPreviousVersion})
     if (!r)
       return
-    if (resource.id  ||  (!backlink  &&  !forwardlink)) {
-      // Check if there are verifications
-      if (!noTrigger                 &&
-          application                &&
-          application.verifications  &&
-          utils.isForm(r[TYPE])) {
-        // debugger
-        let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
-        if (l) {
-          r.verifications = l.list
-          r._verificationsCount = l.list  &&  l.list.length
-        }
-      }
-    }
+    // if (resource.id  ||  (!backlink  &&  !forwardlink)) {
+    //   // Check if there are verifications
+    //   if (!noTrigger                 &&
+    //       application                &&
+    //       application.verifications  &&
+    //       utils.isForm(r[TYPE])) {
+    //     // debugger
+    //     let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
+    //     if (l) {
+    //       r.verifications = l.list
+    //       r._verificationsCount = l.list  &&  l.list.length
+    //     }
+    //   }
+    // }
     let list, style
     if (application) {
       if (!r._context) {
