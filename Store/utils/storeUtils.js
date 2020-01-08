@@ -143,7 +143,7 @@ var storeUtils = {
       storeUtils.createEnumResources(m, enums)
 
     if (isForm(m)) {
-      storeUtils.addVerificationsToFormModel(m)
+      // storeUtils.addVerificationsToFormModel(m)
       storeUtils.addFromAndTo(m)
     }
   },
