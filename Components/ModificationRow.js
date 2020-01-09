@@ -260,7 +260,7 @@ class ModificationRow extends Component {
       val = dateformat(val, 'mmm dS, yyyy h:MM TT')
     else if (prop.type === 'boolean')
       val = val  &&  translate('Yes') || translate('No')
-    else if (prop.ref) {
+    else if (prop.ref  &&  (typeof val === 'object')) {
       if (isEnum(prop.ref))
         val = translateEnum(val)
       else
