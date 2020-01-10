@@ -124,6 +124,9 @@ function getPropsForLegalEntity(form) {
   //   }
   // }
 
+  let { streetAddress, city, postalCode, country } = form
+  let addRegion = country  &&  country.id.split('_')[1] === 'US'
+
   if (isNew(form)) {
     let requestedProperties = [
         { name: 'companyName', required: true  },
@@ -132,14 +135,13 @@ function getPropsForLegalEntity(form) {
         { name: 'formerlyKnownAs'}
       ]
 
-    let { streetAddress, city, postalCode, country } = form
     if (streetAddress)
       requestedProperties.push({name: 'streetAddress'})
     if (city)
       requestedProperties.push({name: 'city'})
     if (postalCode)
       requestedProperties.push({name: 'postalCode'})
-    if (country  &&  country.id.split('_')[1] === 'US')
+    if (addRegion)
       requestedProperties.push({name: 'region', required: true})
     requestedProperties.push({ name: 'country', required: true })
 
@@ -159,12 +161,13 @@ function getPropsForLegalEntity(form) {
         { name: 'companyType'},
         { name: 'companyEmail', required: true },
         { name: 'address_group'},
+        { name: 'region', hide: !addRegion, required: addRegion },
         { name: 'taxIdNumber' },
         { name: 'companyFax' },
         { name: 'companyPhone' },
         { name: 'DBAName' },
-        { name: 'formerlyKnownAs'}
-
+        { name: 'formerlyKnownAs'},
+        { name: 'alsoKnownAs' }
       ]
     }
 }
@@ -198,8 +201,10 @@ function getPropsForControllingEntity(form) {
     if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
       retProps.requestedProperties.push({name: 'phone', required: true})
 
-    if (!form.inactive)
+    if (!form.inactive) {
       retProps.requestedProperties.push({name: 'personal_group', required: true})
+      retProps.requestedProperties.push({name: 'middleName', required: false})
+    }
 
     retProps.requestedProperties.push({name: 'isSeniorManager'})
     if (form.isSeniorManager)
@@ -223,8 +228,8 @@ function getPropsForControllingEntity(form) {
         // {name: 'controllingLegalEntity'},
         {name: 'name'},
         {name: 'emailAddress', required: true},
-        {name: 'controllingEntityCompanyNumber'},
-        {name: 'controllingEntityRegistrationDate'},
+        {name: 'controllingEntityCompanyNumber', required: true},
+        {name: 'controllingEntityRegistrationDate', required: true},
         {name: 'companyType'},
         {name: 'controllingEntityStreetAddress'},
         {name: 'controllingEntityRegion'},
