@@ -55,7 +55,7 @@
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/bitcoinjs-lib": "^1.6.1",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
-    "@tradle/build-resource": "^4.0.2",
+    "@tradle/build-resource": "^4.0.3",
     "@tradle/cb-blockr": "^3.2.1",
     "@tradle/constants": "^2.5.0",
     "@tradle/custom-models": "github:tradle/custom-models",
