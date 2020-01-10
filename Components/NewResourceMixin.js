@@ -445,23 +445,31 @@ var NewResourceMixin = {
       }
       if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
         continue
+
+      if (requestedProperties[p].hide)
+        continue
+
       eCols.push(p)
       let isRequired = requestedProperties[p].required
       if (idx === -1  &&  props[p].readOnly);
         // showReadOnly = true
       else if (props[p].list) {
         props[p].list.forEach((pp) => {
+          let rProp = requestedProperties[pp]
+          let isHidden = rProp  &&  rProp.hide
           let idx = eCols.indexOf(pp)
           if (idx !== -1)
             eCols.splice(idx, 1)
+          if (isHidden)
+            return
           if (excludeProperties  &&  excludeProperties.indexOf(pp) !== -1)
             return
           eCols.push(pp)
           if (isRequired) {
-            if (!requestedProperties[pp])
+            if (!rProp)
               softRequired.push(pp)
           }
-          else if (requestedProperties[pp]  &&  requestedProperties[pp].required)
+          else if (rProp  &&  rProp.required)
             softRequired.push(pp)
           groupped.push(pp)
         })
