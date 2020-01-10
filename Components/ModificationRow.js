@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
 const { TYPE } = constants
 
-import { translate, getModel, styleFactory, isEnum } from '../utils/utils'
+import { translate, translateEnum, getModel, styleFactory, isEnum } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import { circled } from '../styles/utils'
@@ -52,8 +52,8 @@ class ModificationRow extends Component {
     let date = dateformat(resource.dateModified, 'mmm dS, yyyy h:MM TT')
     let header = (
       <View style={[styles.headerRow, {flexDirection: 'row', justifyContent: 'space-between'}]} key='modificationsHeader'>
-        <Text style={{fontSize: 16, color: '#aaa'}}>{translate(title)}</Text>
-        <Text style={{color: '#aaa', fontSize: 12}}>{date}</Text>
+        <Text style={{fontSize: 18, color: '#757575'}}>{translate(title)}</Text>
+        <Text style={{color: '#757575', fontSize: 12}}>{date}</Text>
       </View>
     )
     let rows = []
@@ -114,10 +114,12 @@ class ModificationRow extends Component {
                          <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                        </View>
                        <View style={{flex: 1}}>
-                         <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
+                         <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
                        </View>
                      </View>)
           }
+          else if (p === 'checks')
+            this.addChecks(v, p, rows, styles)
           continue
         }
         else if (p === 'check') {
@@ -148,7 +150,7 @@ class ModificationRow extends Component {
                             id: `${v.type}_${hash}_${hash}`,
                             title: label
                           })}>
-                           <Text  style={[styles.pTitle, {color: bankStyle.linkColor, paddingRight: 5}]}>{val}</Text>
+                           <Text  style={[styles.pTitle, {paddingRight: 5}]}>{val}</Text>
                           </TouchableOpacity>
                           {icon}
                         </View>
@@ -169,7 +171,7 @@ class ModificationRow extends Component {
                             id: `${v[TYPE]}_${v._permalink}_${v._link}`,
                             title: label
                           })}>
-                           <Text  style={[styles.pTitle, {color: bankStyle.linkColor}]}>{val}</Text>
+                           <Text  style={styles.pTitle}>{val}</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -177,15 +179,31 @@ class ModificationRow extends Component {
           continue
         }
         else if (p !== 'properties') {
+          let title
+          let [etype, id] = p.split('_')
+          if (id) {
+            let m = getModel(etype)
+            if (m  && isEnum(m)) {
+              let val = m.enum.find(e => e.id === id)
+              if (val) {
+                if (val.details)
+                  title = translate(val.details)
+                else
+                  title = translateEnum({id: p})
+              }
+            }
+          }
+          if (!title)
+             title = translate(p)
           rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
-                      <Text  style={styles.pTitle}>{translate(p)}</Text>
+                      <Text  style={styles.sourceTitle}>{title}</Text>
                     </View>)
           this.paintHistory({json:v, rows, model, styles})
           continue
         }
       }
 
-      if (!color) color = '#aaa'
+      if (!color) color = '#757575'
       if (icon)
         icon = <Icon name={iconName} size={20} color={color} style={styles.icon} key={this.getNextKey()} />
       else
@@ -198,10 +216,12 @@ class ModificationRow extends Component {
         for (let part in v) {
           let pprop = props[part]
           let val = v[part]
+          let isLink
           if (isRemoved)
             val = ''
-          else if (pprop  &&  pprop.type === 'date')
-            val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+          else if (pprop)
+            val = this.getVal(pprop, val)
+
           let label = pprop && translate(pprop, model) || part
           cols.push(<View style={styles.col} key={this.getNextKey()}>
                      <View style={{flexDirection: 'row', flex: 1}}>
@@ -209,7 +229,7 @@ class ModificationRow extends Component {
                        <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                      </View>
                      <View style={{flex: 1}}>
-                       <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
+                       <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
                      </View>
                    </View>)
         }
@@ -217,15 +237,15 @@ class ModificationRow extends Component {
       else {
         let label = prop && translate(prop, model) || p
         let val = v
-        if (prop  &&  prop.type === 'date')
-          val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+        if (prop)
+          val = this.getVal(prop, val)
         cols.push(<View style={styles.col} key={this.getNextKey()}>
                    <View style={{flexDirection: 'row', flex: 1}}>
                      {icon}
                      <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                    </View>
                    <View style={{flex: 1}}>
-                     <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
+                     <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
                    </View>
                  </View>)
         // continue
@@ -235,6 +255,56 @@ class ModificationRow extends Component {
                 </View>)
     }
   }
+  getVal(prop, val) {
+    if (prop.type === 'date')
+      val = dateformat(val, 'mmm dS, yyyy h:MM TT')
+    else if (prop.type === 'boolean')
+      val = val  &&  translate('Yes') || translate('No')
+    else if (prop.ref  &&  (typeof val === 'object')) {
+      if (isEnum(prop.ref))
+        val = translateEnum(val)
+      else
+        val = val.title ||  val._displayName
+    }
+    return val
+  }
+  addChecks(checks, p, rows, styles) {
+    let label = translate(p)
+    let bankStyle = this.props.bankStyle
+    let icon, color
+    checks.forEach(v => {
+      let val = translate(v.displayName || v._displayName)
+      let { status } = v
+      if (!status)
+        status = {id: `${STATUS}_fail`}
+      let id = status.id.split('_')[1]
+
+      let m = getModel(STATUS)
+      let elm = m.enum.find(e => e.id === id)
+      if (elm) {
+        ({ icon, color} = elm)
+        icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 10, backgroundColor: color}]}>
+                 <Icon name={icon} size={17} color='#fff' />
+               </View>
+      }
+      let hash = v.hash || v._permalink
+      rows.push(<View style={styles.checkRow} key={this.getNextKey()}>
+                  <View style={{flexDirection: 'row', flex: 1}}>
+                    <View style={{flex: 1}}/>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                      {icon}
+                      <TouchableOpacity onPress={() => this.showRefResource({
+                        id: `${v.type}_${hash}_${hash}`,
+                        title: label
+                      })}>
+                       <Text  style={[styles.pTitle, {paddingLeft: 5}]}>{val}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>)
+    })
+
+  }
   paintChange({json, cols, styles, model, icon}) {
     let props = model.properties
 
@@ -243,23 +313,40 @@ class ModificationRow extends Component {
       let label = prop && translate(prop, model) || p
       let pair = json[p]
       let val
+      let value = this.getVal(prop, pair.new)
+      debugger
       switch (prop.type) {
       case 'date':
         val = dateformat(pair.new, 'mmm dS, yyyy h:MM TT')
-        val = <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{val}</Text>
+        val = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
         break
       case 'object':
         if (prop.ref) {
-          val = <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{pair.new.title}</Text>
-          if (!isEnum(prop.ref)) {
-            val = <TouchableOpacity onPress={this.showRefResource.bind(this, pair.new, prop)}>
+          // HACK
+
+          let refR = pair.new
+          let title = refR.title
+          if (!title  &&  refR._displayName) {
+            title = refR._displayName
+            refR = {
+              id: `${refR[TYPE]}_${refR._permalink}_${refR._link}`,
+              title
+            }
+          }
+
+          if (!title)
+            continue
+          let isEnumProp = isEnum(prop.ref)
+          val = <Text  style={isEnumProp && styles.sourceTitle || styles.pTitle}>{title}</Text>
+          if (!isEnumProp) {
+            val = <TouchableOpacity onPress={this.showRefResource.bind(this, refR, prop)}>
                    {val}
                  </TouchableOpacity>
           }
           break
         }
       default:
-        val = <Text  style={[styles.pTitle, {color: '#555'}]} key={this.getNextKey()}>{pair.new}</Text>
+        val = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{pair.new}</Text>
       }
       cols.push(
         <View style={styles.col} key={this.getNextKey()}>
@@ -283,7 +370,7 @@ reactMixin(ModificationRow.prototype, ResourceMixin)
 var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, isRM, bankStyle }) {
   return StyleSheet.create({
     headerRow: {
-      fontSize: 24,
+      // fontSize: 24,
       backgroundColor: 'aliceblue',
       padding: 10,
     },
@@ -297,6 +384,11 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
     pTitle: {
       fontSize: 16,
       color: bankStyle.linkColor,
+      paddingVertical: 10,
+    },
+    sourceTitle: {
+      fontSize: 16,
+      color: '#757575',
       paddingVertical: 10,
     },
     icon: {
