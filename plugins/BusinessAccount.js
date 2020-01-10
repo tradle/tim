@@ -169,7 +169,8 @@ function getPropsForLegalEntity(form) {
         { name: 'companyFax', required: false },
         { name: 'companyPhone', required: false },
         { name: 'DBAName', required: false },
-        { name: 'formerlyKnownAs'}
+        { name: 'formerlyKnownAs'},
+        { name: 'alsoKnownAs' }
       ]
     }
 }
@@ -202,8 +203,10 @@ function getPropsForControllingEntity(form) {
     if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
       retProps.requestedProperties.push({name: 'phone', required: true})
 
-    if (!form.inactive)
+    if (!form.inactive) {
       retProps.requestedProperties.push({name: 'personal_group', required: true})
+      retProps.requestedProperties.push({name: 'middleName', required: false})
+    }
 
     // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'isSeniorManager'})
