@@ -1472,7 +1472,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       backgroundColor: bankStyle.errorBgColor || '#990000',
       alignSelf: 'stretch',
       alignItems: 'center',
-      paddingHorizontal: 7
+      paddingHorizontal: 15
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
