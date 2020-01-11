@@ -38,6 +38,7 @@ const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
+const MODIFICATION = 'tradle.Modification'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -180,7 +181,8 @@ var ResourceMixin = {
           return
         }
         let value;
-        if (itemMeta.displayAs)
+        let isDisplayName = itemMeta.displayAs
+        if (isDisplayName)
           value = utils.templateIt(itemMeta, v, pModel)
         else if (itemMeta.type === 'date')
           value = utils.formatDate(v[p]);
@@ -195,6 +197,11 @@ var ResourceMixin = {
           }
           else
             value = v[p];
+        }
+        else if (itemMeta.range === 'json') {
+          // let json = {[displayName]: v[p]}
+          ret.push(this.showJson({ json: v[p], prop: itemMeta, isView: true }))
+          return
         }
         else if (itemMeta.ref)
           value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref));
