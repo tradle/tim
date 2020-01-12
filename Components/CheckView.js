@@ -78,7 +78,7 @@ class CheckView extends Component {
       return
     let { bankStyle, application, resource, search } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource)) {
-      if (utils.getCurrentHash(resource) ||  utils.getRootHash(resource) !== utils.getRootHash(params.resource))
+      if (utils.getRootHash(resource) !== utils.getRootHash(params.resource))
         return
       return
     }
