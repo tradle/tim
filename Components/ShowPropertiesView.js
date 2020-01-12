@@ -140,10 +140,10 @@ class ShowPropertiesView extends Component {
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
     // HACK
-    if (me.isEmployee  &&  !checkProperties  &&  resource._sourceOfData) {
-      vCols.push('_sourceOfData')
-      // vCols.push('_dataLineage')
-    }
+    // if (me.isEmployee  &&  !checkProperties  &&  resource._sourceOfData) {
+    //   vCols.push('_sourceOfData')
+    //   // vCols.push('_dataLineage')
+    // }
 
     const ObjectModel = utils.getModel(OBJECT)
 

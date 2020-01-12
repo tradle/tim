@@ -315,7 +315,8 @@ class DataBundle {
         form: REFRESH,
         message: translate('reviewAndConfirm'),
         _dataBundle: dataBundle,
-        prefill: refreshPrefill
+        prefill: refreshPrefill,
+        _hidden: productBundle
       }
       if (!context) {
         let res = await this.Store.searchMessages({to: val.from, modelName: PRODUCT_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
