@@ -283,6 +283,7 @@
     "mocha": "https://registry.npmjs.org/mocha/-/mocha-3.5.3.tgz",
     "my-local-ip": "^1.0.0",
     "node-haste": "github:mvayngrib/node-haste#766d7e6",
+    "patch-package": "^6.2.0",
     "react-test-renderer": "16.8.3",
     "rn-nodeify": "github:tradle/rn-nodeify#mangle",
     "s3-ls": "^2.0.1",
