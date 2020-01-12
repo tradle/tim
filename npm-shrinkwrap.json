@@ -11067,14 +11067,14 @@
       "integrity": "sha1-+p4xn/3u6zWycpbvDz03TawvUqc="
     },
     "react": {
-      "version": "16.8.3",
-      "resolved": "http://registry.npmjs.org/react/-/react-16.8.3.tgz",
-      "integrity": "sha1-xvmIos6JU3XeIW7c+u3WuadkUdk=",
+      "version": "16.8.4",
+      "resolved": "https://registry.npmjs.org/react/-/react-16.8.4.tgz",
+      "integrity": "sha512-0GQ6gFXfUH7aZcjGVymlPOASTuSjlQL4ZtVC5YKH+3JL6bBLCVO21DknzmaPlI90LN253ojj02nsapy+j7wIjg==",
       "requires": {
         "loose-envify": "^1.1.0",
         "object-assign": "^4.1.1",
         "prop-types": "^15.6.2",
-        "scheduler": "^0.13.3"
+        "scheduler": "^0.13.4"
       }
     },
     "react-clone-referenced-element": {
