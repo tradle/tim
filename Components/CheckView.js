@@ -77,8 +77,10 @@ class CheckView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource))
-      return
+    if (utils.getId(params.resource) !== utils.getId(resource)) {
+      if (utils.getRootHash(resource) !== utils.getRootHash(params.resource))
+        return
+    }
     if (action === 'getItem') {
       let state = {
         resource: params.resource,
