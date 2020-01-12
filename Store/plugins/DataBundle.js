@@ -41,6 +41,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const REFRESH = 'tradle.Refresh'
 const MY_PRODUCT = 'tradle.MyProduct'
 const DATA_BUNDLE = 'tradle.DataBundle'
+const PRODUCT_BUNDLE = 'tradle.ProductBundle'
 const DATA_BUNDLE_SUBMITTED = 'tradle.DataBundleSubmitted'
 
 class DataBundle {
@@ -449,7 +450,7 @@ class DataBundle {
 
 debugger
     let context = resource._context || r._context
-    let isProductBundle = context  &&  context.bundleId
+    let isProductBundle = context  &&  context.bundleId || r.form === PRODUCT_BUNDLE
     let delayedItems = []
     let resources = []
     let me = getMe()
@@ -506,7 +507,7 @@ debugger
           continue
         }
       }
-      let promiseAddItem = this.Store.onAddChatItem({ resource: item, noTrigger: true, forceUpdate: true })
+      let promiseAddItem = this.Store.onAddChatItem({ resource: item, noTrigger: !isProductBundle, forceUpdate: true })
       let promiseSentEvent = new Promise(resolve => this.Store.execOnce('sent', resolve))
       let ret = await Promise.all([
         promiseAddItem,
@@ -519,24 +520,33 @@ debugger
       let ritem = ret[0]
       resources.push(ritem)
 
-      await promiseDelay(200)
       let itemId = getId(ritem)
       ritem._latest = false
       this.Store.setItem(itemId, ritem)
     }
-    if (delayedItems) {
+    if (delayedItems.length) {
       await this.processUploadedDataBundleWithSourceIDs({val: resource, resources, dontAdd: isProductBundle})
-
-      let results = await Promise.all(delayedItems.map(item => {
+      for (let i=0; i<delayedItems.length; i++) {
+        let item = delayedItems[i]
         let r = resources.find(rr => item._sourceId === rr._sourceId)
-        return this.Store.onAddChatItem({resource: r, noTrigger: true})
-      }))
+        await promiseDelay(5000)
+        await this.Store.onAddChatItem({resource: r, noTrigger: !isProductBundle})
+      }
       debugger
     }
     Actions.hideModal()
     if (items.length === total) {
       r._documentCreated = true
+      await promiseDelay(5000)
       await this.Store.onAddChatItem({ resource: r })
+
+      let dataBundle
+      if (isProductBundle)
+        dataBundle = r._context.bundleId || getRootHash(r._context._dataBundle)
+      else
+        dataBundle = getRootHash(r._dataBundle)
+
+      await promiseDelay(5000)
       await this.Store.onAddMessage({
         msg: {
           [TYPE]: DATA_BUNDLE_SUBMITTED,
@@ -544,7 +554,7 @@ debugger
           to,
           message: `Submitted ${total} items`,
           _context: resource._context,
-          dataBundle: getRootHash(r._dataBundle)
+          dataBundle
         }
       })
     }

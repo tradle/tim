@@ -21,6 +21,8 @@ node ./scripts/fix-node_modules.js
 # node ./scripts/dedupe-deps.js
 npm run clean:node_modules
 
+patch-package
+
 sed -i '' "s/EMULATOR_LOCALHOST = \"10\.0\.2\.2\";/EMULATOR_LOCALHOST = \"localhost\";/" "./node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/systeminfo/AndroidInfoHelpers.java"
 ./scripts/fix-bluebird.sh
 
@@ -31,3 +33,4 @@ fi
 cp node_modules/react-native-camera/postinstall_project/projectWithoutFaceDetection.pbxproj node_modules/react-native-camera/ios/RNCamera.xcodeproj/project.pbxproj
 
 npm run fix:staging
+
