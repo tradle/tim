@@ -4130,7 +4130,7 @@ if (!res[SIG]  &&  res._message)
   },
   async onGetItemFromServer(params) {
     var {resource, action, noTrigger, backlink, forwardlink,
-         application, isChat, isPreviousVersion} = params
+         application, isChat, isThisVersion} = params
     const rtype = utils.getType(resource)
     if (rtype === MESSAGE)
       return await this.getMessage(params)
@@ -4139,7 +4139,7 @@ if (!res[SIG]  &&  res._message)
       return await this.getApplication(params)
 
     const rId = utils.getId(resource)
-    let r = await this._getItemFromServer({idOrResource: rId, backlink, isChat, isPreviousVersion})
+    let r = await this._getItemFromServer({idOrResource: rId, backlink, isChat, isThisVersion})
     if (!r)
       return
     // if (resource.id  ||  (!backlink  &&  !forwardlink)) {
@@ -11985,14 +11985,14 @@ if (!res[SIG]  &&  res._message)
         return rr.value
     }
   },
-  async _getItemFromServer({idOrResource, backlink, isChat, isPreviousVersion}) {
+  async _getItemFromServer({idOrResource, backlink, isChat, isThisVersion}) {
     let id = (typeof idOrResource !== 'string') &&  utils.getId(idOrResource) || idOrResource
     if (!this.client) {
       // debugger
       return
     }
     try {
-      let result = await graphQL.getItem({id, client: this.client, backlink, isChat, isPreviousVersion})
+      let result = await graphQL.getItem({id, client: this.client, backlink, isChat, isThisVersion})
       if (result) {
         return this.convertToResource(result)
       }

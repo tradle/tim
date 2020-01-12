@@ -67,7 +67,7 @@ import Markdown from './Markdown'
 var component
 
 var ResourceMixin = {
-  showRefResource(resource, prop) {
+  showRefResource(resource, prop, isDataLineage) {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
@@ -99,7 +99,7 @@ var ResourceMixin = {
           search: search,
           currency: currency,
           country: country,
-          // isPreviousVersion: prop.name === PREV_HASH
+          isThisVersion: isDataLineage
         }
       }
       if (isVerifier) {

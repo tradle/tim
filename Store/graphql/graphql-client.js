@@ -863,7 +863,7 @@ var search = {
       )
     }
   },
-  async getItem({id, client, backlink, excludeProps, isChat, isPreviousVersion}) {
+  async getItem({id, client, backlink, excludeProps, isChat, isThisVersion}) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
@@ -872,7 +872,7 @@ var search = {
 
     let table = `r_${modelName.replace(/\./g, '_')}`
     let query
-    if (isChat || isPreviousVersion)
+    if (isChat || isThisVersion)
       query = `query {\n${table} (_link: "${_link}")\n`
     else
       query = `query {\n${table} (_permalink: "${_permalink}")\n`
