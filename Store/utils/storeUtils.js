@@ -524,6 +524,14 @@ var storeUtils = {
         },
         message: 'myCases'
       },
+      {
+        type: APPLICATION,
+        message: 'applications',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+        },
+      },
       { type: APPLICATION,
         bookmark: {
           [TYPE]: APPLICATION,
@@ -580,14 +588,6 @@ var storeUtils = {
            parent: 'NULL',
         },
         message: 'topLevelApplications'
-      },
-      {
-        type: APPLICATION,
-        message: 'applications',
-        bookmark: {
-          [TYPE]: APPLICATION,
-          _org: botPermalink,
-        },
       },
       {
         type: APPLICATION,
