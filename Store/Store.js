@@ -7594,6 +7594,9 @@ if (!res[SIG]  &&  res._message)
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         let item = this._getItem(thisChatMessages[i].id)
+        // HACK for white glove project
+        if (item._hidden)
+          continue
         if (context) {
           if (!item._context)
             continue
