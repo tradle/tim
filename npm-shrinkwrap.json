@@ -11060,9 +11060,8 @@
       }
     },
     "react-native-facetec-zoom": {
-      "version": "1.2.1",
-      "resolved": "http://registry.npmjs.org/react-native-facetec-zoom/-/react-native-facetec-zoom-1.2.1.tgz",
-      "integrity": "sha1-OenkTBWkj+mgwAmAyDD1C8cL+I0="
+      "version": "github:tradle/react-native-facetec-zoom#8af8d40f81b7d522a69df137a3d7fb66f6abc235",
+      "from": "github:tradle/react-native-facetec-zoom#mv/sdk8.x"
     },
     "react-native-flexbox-grid": {
       "version": "git://github.com/tradle/react-native-flexbox-grid.git#c83210d6a6ffe48433fc48d3d0da4b17e8a38bbb",
