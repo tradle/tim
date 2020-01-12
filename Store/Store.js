@@ -11609,14 +11609,14 @@ if (!res[SIG]  &&  res._message)
         return rr.value
     }
   },
-  async _getItemFromServer({idOrResource, backlink, isChat, isPreviousVersion}) {
+  async _getItemFromServer({idOrResource, backlink, isChat, isThisVersion}) {
     let id = (typeof idOrResource !== 'string') &&  utils.getId(idOrResource) || idOrResource
     if (!this.client) {
       // debugger
       return
     }
     try {
-      let result = await graphQL.getItem(id, this.client, backlink, isChat, isPreviousVersion)
+      let result = await graphQL.getItem(id, this.client, backlink, isChat, isThisVersion)
       if (result) {
         return this.convertToResource(result)
       }
