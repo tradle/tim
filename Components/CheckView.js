@@ -80,7 +80,6 @@ class CheckView extends Component {
     if (utils.getId(params.resource) !== utils.getId(resource)) {
       if (utils.getRootHash(resource) !== utils.getRootHash(params.resource))
         return
-      return
     }
     if (action === 'getItem') {
       let state = {
