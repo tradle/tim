@@ -1393,14 +1393,14 @@
       }
     },
     "@react-native-community/netinfo": {
-      "version": "2.0.0",
-      "resolved": "http://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-2.0.0.tgz",
-      "integrity": "sha1-uYFxrqpDJrydmDQ5mj9s7Pj9R4E="
+      "version": "5.3.2",
+      "resolved": "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-5.3.2.tgz",
+      "integrity": "sha512-npNcLAz6iWzwRNh+0tSFMlR+xkpSz9NWzX+5AxW40KE6qEZGWdE3dtGBKsezMdWD2Fh+6Je6P6hgUEF8xuZrbA=="
     },
     "@react-native-community/viewpager": {
-      "version": "1.1.5",
-      "resolved": "https://registry.npmjs.org/@react-native-community/viewpager/-/viewpager-1.1.5.tgz",
-      "integrity": "sha1-mPGjrav8M9r+W6r2U84wDCR15i4="
+      "version": "2.0.2",
+      "resolved": "https://registry.npmjs.org/@react-native-community/viewpager/-/viewpager-2.0.2.tgz",
+      "integrity": "sha512-CKVhIZdX/Cmb80muog8sKpi5vM8npwFp4tx4Dj1IvTBidZweuO22+VH2rDOj7E0LzdV9IYRJ4FGBwcPBD2qUrQ=="
     },
     "@tradle/aws-client": {
       "version": "3.1.1",
@@ -7930,6 +7930,12 @@
       "requires": {
         "merge-stream": "^1.0.1"
       }
+    },
+    "jetifier": {
+      "version": "1.6.5",
+      "resolved": "https://registry.npmjs.org/jetifier/-/jetifier-1.6.5.tgz",
+      "integrity": "sha512-T7yzBSu9PR+DqjYt+I0KVO1XTb1QhAfHnXV5Nd3xpbXM6Xg4e3vP60Q4qkNU8Fh6PHC2PivPUNN3rY7G2MxcDQ==",
+      "dev": true
     },
     "jmespath": {
       "version": "0.15.0",

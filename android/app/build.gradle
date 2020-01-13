@@ -276,10 +276,14 @@ configurations.all {
 }
 
 dependencies {
+def multidex_version = "2.0.1"
+  implementation 'androidx.multidex:multidex:$multidex_version'
+
+
     implementation project(':react-native-webview')
     implementation project(':@react-native-community_viewpager')
     implementation project(':@react-native-community_netinfo')
-    implementation 'com.facetec:zoom-authentication-hybrid:7.0.11'
+    // implementation 'com.facetec:zoom-authentication-hybrid:7.0.11'
     implementation project(':react-native-facetec-zoom')
     implementation project(':react-native-image-store')
     implementation project(':react-native-tradle-keeper')

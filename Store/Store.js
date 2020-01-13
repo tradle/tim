@@ -462,21 +462,28 @@ var Store = Reflux.createStore({
 
     this._identityPromises = {}
     const connectivityPromise = Promise.race([
-        NetInfo.getConnectionInfo()
-          .then(isConnected => this._handleConnectivityChange(isConnected)),
+        NetInfo.fetch()
+          .then(state => this._handleConnectivityChange(state.isConnected)),
         // timeout after 2s
         Promise.delay(2000)
     ])
     .catch(err => debug('failed to get network connectivity', err.message))
 
-    NetInfo.isConnected.addEventListener(
-      'connectionChange',
-      async (isConnected) => {
-        // make sure events arrive after initial fetch
-        await connectivityPromise
-        this._handleConnectivityChange(isConnected)
-      }
-    );
+    NetInfo.addEventListener(async state => {
+      // make sure events arrive after initial fetch
+      await connectivityPromise
+      this._handleConnectivityChange(state.isConnected)
+    });
+
+
+    // NetInfo.isConnected.addEventListener(
+    //   'connectionChange',
+    //   async (isConnected) => {
+    //     // make sure events arrive after initial fetch
+    //     await connectivityPromise
+    //     this._handleConnectivityChange(isConnected)
+    //   }
+    // );
 
     // storeUtils.init({db, list, contextIdToResourceId, models})
     storeUtils.addModels({models, enums})
