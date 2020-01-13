@@ -8,7 +8,7 @@
     "start:ios": "PLATFORM=ios ./scripts/start.sh",
     "start:android": "PLATFORM=android ./scripts/start.sh",
     "start:chrome": "&& node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
-    "postinstall": "./scripts/postinstall.sh  &&  jetify -r",
+    "postinstall": "./scripts/postinstall.sh",
     "postinstal": "npm run postinstall",
     "postintall": "npm run postinstall",
     "postintsal": "npm run postinstall",

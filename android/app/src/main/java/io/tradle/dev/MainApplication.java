@@ -2,9 +2,7 @@ package io.tradle.dev;
 
 import android.app.Application;
 import android.content.Context;
-import androidx.multidex.MultiDex;
-
-import androidx.multidex.MultiDexApplication;
+import android.support.multidex.MultiDex;
 
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.RNFetchBlob.RNFetchBlobPackage;
@@ -59,7 +57,7 @@ import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
 // import com.anyline.reactnative.AnylinePackage;
 // import com.peel.react.TcpSocketsModule;
 
-public class MainApplication extends MultiDexApplication implements ReactApplication {
+public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override

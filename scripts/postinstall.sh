@@ -34,3 +34,5 @@ cp node_modules/react-native-camera/postinstall_project/projectWithoutFaceDetect
 
 npm run fix:staging
 
+jetify -r
+
