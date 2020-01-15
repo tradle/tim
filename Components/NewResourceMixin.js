@@ -949,9 +949,6 @@ var NewResourceMixin = {
     else
       propLabel = <View style={styles.floatingLabel}/>
 
-    let format = 'LL'
-    // let format = 'MMMM Do, YYYY'
-    // let format = 'YYYY-MM-DD'
     let valueMoment = params.value && moment.utc(new Date(params.value))
     // let value = valueMoment && valueMoment.format(format)
     let value = params.value  &&  utils.getDateValue(new Date(params.value))
@@ -964,8 +961,6 @@ var NewResourceMixin = {
       else
         dateProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
     }
-    if (prop.format)
-      dateProps.format = prop.format
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
@@ -980,7 +975,6 @@ var NewResourceMixin = {
     }
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
-    let datePicker
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
 
     let sign
@@ -1001,6 +995,14 @@ var NewResourceMixin = {
     //               })
     //   sign = <View style={{width: 30}}>{sign}</View>
     // }
+    let format = 'LL'
+    if (prop.format) {
+      dateProps.format = prop.format
+      format = prop.format
+      if (localizedDate)
+        value = dateformat(localizedDate, format)
+    }
+    let datePicker
     if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={[styles.dateText, fontF]}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
