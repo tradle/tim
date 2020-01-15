@@ -439,7 +439,7 @@
       "from": "tradle/models-cloud"
     },
     "@tradle/models-corporate-onboarding": {
-      "version": "github:tradle/models-corporate-onboarding#20a6b101856d4484d28471ea28736830407ccd0c",
+      "version": "github:tradle/models-corporate-onboarding#15a0b35e32a5c6f0b6b1e946f8cf5de9177ce36c",
       "from": "github:tradle/models-corporate-onboarding"
     },
     "@tradle/models-nz": {
