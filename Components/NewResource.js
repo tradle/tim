@@ -584,10 +584,10 @@ class NewResource extends Component {
         form: originatingMessage.form,
         from: utils.getMe(),
         to: {id: toId},
-        _context: application._context,
-        context: application.context
+        // _context: application._context,
+        // context: application.context
       }
-      Actions.addMessage({msg, editFormRequestPrefill, originatingMessage})
+      Actions.addMessage({msg, editFormRequestPrefill, originatingMessage, application})
       this.props.navigator.pop()
     }
     else {
