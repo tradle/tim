@@ -2989,7 +2989,8 @@ var Store = Reflux.createStore({
       _.extend(toChain, {
         prefill,
         form: r.form,
-        product: r.product
+        product: r.product,
+        context: application.context
       })
       let ending = ''
       let origMessage = originatingMessage.message
@@ -2997,6 +2998,9 @@ var Store = Reflux.createStore({
         let idx =  origMessage.indexOf(' **')
         ending = idx !== origMessage.length - 3 && origMessage.slice(idx) || ''
       }
+      if (originatingMessage.dataLineage)
+        toChain.dataLineage = originatingMessage.dataLineage
+
       toChain.message = rr.message = translate('prefilledForCustomer') + ending
     }
     else {
