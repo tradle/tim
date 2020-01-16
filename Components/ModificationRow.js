@@ -4,9 +4,6 @@ import {
   View
 } from 'react-native'
 import PropTypes from 'prop-types';
-// import {
-//   View,
-// } from 'react-native-lazyload'
 
 import dateformat from 'dateformat'
 import reactMixin from 'react-mixin'
@@ -54,9 +51,9 @@ class ModificationRow extends Component {
     let styles = createStyles({bankStyle: this.props.bankStyle})
     let date = dateformat(resource.dateModified, 'mmm dS, yyyy h:MM TT')
     let header = (
-      <View style={[styles.headerRow, {flexDirection: 'row', justifyContent: 'space-between'}]} key='modificationsHeader'>
-        <Text style={{fontSize: 18, color: '#757575'}}>{translate(title)}</Text>
-        <Text style={{color: '#757575', fontSize: 12}}>{date}</Text>
+      <View style={styles.headerRow} key='modificationsHeader'>
+        <Text style={styles.headerTitle}>{translate(title)}</Text>
+        <Text style={styles.headerDate}>{date}</Text>
       </View>
     )
     let rows = []
@@ -97,79 +94,18 @@ class ModificationRow extends Component {
           color = 'red'
         }
         else if (prop) {
-          let label = translate(prop, model)
-
-          if (prop.ref  &&  isEnum(prop.ref)) {
-            let val = v.title
-            if (!v.title) {
-              if (v.id) {
-                let id = v.id.split('_')[1]
-                val = getModel(prop.ref).enum.find(e => e.id === id)
-                if (val)
-                  val = val.title
-                else
-                  continue
-              }
-            }
-            rows.push(<View style={styles.col} key={this.getNextKey()}>
-                       <View style={{flexDirection: 'row', flex: 1}}>
-                         {icon}
-                         <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
-                       </View>
-                       <View style={{flex: 1}}>
-                         <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
-                       </View>
-                     </View>)
-          }
-          else if (p === 'checks')
-            this.addChecks(v, p, rows, styles)
-          continue
-        }
-        else if (p === 'check') {
-          let label = translate(p)
-          let val = translate(v.displayName || v._displayName)
-          let { status } = v
-          if (!status)
-            status = {id: `${STATUS}_fail`}
-          let id = status.id.split('_')[1]
-
-          let m = getModel(STATUS)
-          let elm = m.enum.find(e => e.id === id)
-          if (elm) {
-            ({ icon, color} = elm)
-
-            icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 10, backgroundColor: color}]}>
-                     <Icon name={icon} size={17} color='#fff' />
-                   </View>
-          }
-          let hash = v.hash || v._permalink
-          rows.push(<View style={styles.checkRow} key={this.getNextKey()}>
-                      <View style={{flexDirection: 'row', flex: 1}}>
-                        <View style={{flex: 1}}>
-                          <Text  style={[styles.pTitle, {color: '#999999', paddingHorizontal: 10}]}>{label}</Text>
-                        </View>
-                        <View style={{flex: 1, flexDirection: 'row'}}>
-                          <TouchableOpacity onPress={() => this.showRefResource({
-                            id: `${v.type}_${hash}_${hash}`,
-                            title: label
-                          })}>
-                           <Text  style={[styles.pTitle, {paddingRight: 5}]}>{val}</Text>
-                          </TouchableOpacity>
-                          {icon}
-                        </View>
-                      </View>
-                    </View>)
+          this.paintProp({prop, model, value:v, rows, styles, icon})
           continue
         }
         else if (v._permalink) {
           let label = translate(p)
           let val = translate(v._displayName)
           rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
-                      <View style={{flexDirection: 'row', flex: 1}}>
-                        <View style={{flex: 1}}>
+                      <View style={styles.label}>
+                        <View style={styles.value}>
                           <Text  style={[styles.pTitle, {color: '#999999', paddingLeft: 10}]}>{label}</Text>
                         </View>
-                        <View style={{flex: 1}}>
+                        <View style={styles.value}>
                           <TouchableOpacity onPress={() => this.showRefResource({
                             id: `${v[TYPE]}_${v._permalink}_${v._link}`,
                             title: label
@@ -227,11 +163,11 @@ class ModificationRow extends Component {
 
           let label = pprop && translate(pprop, model) || part
           cols.push(<View style={styles.col} key={this.getNextKey()}>
-                     <View style={{flexDirection: 'row', flex: 1}}>
+                     <View style={styles.label}>
                        {icon}
                        <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                      </View>
-                     <View style={{flex: 1}}>
+                     <View style={styles.value}>
                        <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
                      </View>
                    </View>)
@@ -243,11 +179,11 @@ class ModificationRow extends Component {
         if (prop)
           val = this.getVal(prop, val)
         cols.push(<View style={styles.col} key={this.getNextKey()}>
-                   <View style={{flexDirection: 'row', flex: 1}}>
+                   <View style={styles.label}>
                      {icon}
                      <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                    </View>
-                   <View style={{flex: 1}}>
+                   <View style={styles.value}>
                      <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
                    </View>
                  </View>)
@@ -257,6 +193,36 @@ class ModificationRow extends Component {
                   {cols}
                 </View>)
     }
+  }
+  paintProp({prop, model, value, rows, styles, icon}) {
+    let label = translate(prop, model)
+    let pName = prop.name
+    if (pName === 'checks'  &&  prop.type === 'array') {
+      this.addChecks(value, pName, rows, styles)
+      return
+    }
+
+    if (!prop.ref  ||  !isEnum(prop.ref))
+      return
+    let val = value.title
+    if (!value.title) {
+      if (value.id) {
+        let id = value.id.split('_')[1]
+        val = getModel(prop.ref).enum.find(e => e.id === id)
+        if (!val)
+          return
+        val = val.title
+      }
+    }
+    rows.push(<View style={styles.col} key={this.getNextKey()}>
+               <View style={styles.label}>
+                 {icon}
+                 <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
+               </View>
+               <View style={styles.value}>
+                 <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
+               </View>
+             </View>)
   }
   getVal(prop, val) {
     if (prop.type === 'date')
@@ -292,9 +258,9 @@ class ModificationRow extends Component {
       }
       let hash = v.hash || v._permalink
       rows.push(<View style={styles.checkRow} key={this.getNextKey()}>
-                  <View style={{flexDirection: 'row', flex: 1}}>
-                    <View style={{flex: 1}}/>
-                    <View style={{flex: 1, flexDirection: 'row'}}>
+                  <View style={styles.label}>
+                    <View style={styles.value}/>
+                    <View style={styles.label}>
                       {icon}
                       <TouchableOpacity onPress={() => this.showRefResource({
                         id: `${v.type}_${hash}_${hash}`,
@@ -353,11 +319,11 @@ class ModificationRow extends Component {
       }
       cols.push(
         <View style={styles.col} key={this.getNextKey()}>
-          <View style={{flexDirection: 'row', flex: 1}}>
+          <View style={styles.label}>
             {icon}
             <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
           </View>
-          <View style={{flexDirection: 'row', flex: 1}}>
+          <View style={styles.label}>
             <Text  style={[styles.pTitle, {color: '#999', paddingRight: 20, fontStyle: 'italic'}]} key={this.getNextKey()}>{translate('newValue')}</Text>
             {val}
           </View>
@@ -373,13 +339,29 @@ reactMixin(ModificationRow.prototype, ResourceMixin)
 var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, isRM, bankStyle }) {
   return StyleSheet.create({
     headerRow: {
-      // fontSize: 24,
       backgroundColor: 'aliceblue',
       padding: 10,
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    headerTitle: {
+      fontSize: 18,
+      color: '#757575'
+    },
+    headerDate: {
+      color: '#757575',
+      fontSize: 12
+    },
+    label: {
+      flexDirection: 'row',
+      flex: 1
+    },
+    value: {
+      flex: 1
     },
     gridRow: {
       backgroundColor: '#f7f7f7',
-      paddingHorizontal: 10
+      paddingHorizontal: 10,
     },
     checkRow: {
       paddingHorizontal: 10
