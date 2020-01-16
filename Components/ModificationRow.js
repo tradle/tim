@@ -39,6 +39,9 @@ class ModificationRow extends Component {
       resource: this.props.resource
     }
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return false
+  }
   render() {
     let { resource, onSelect, parentResource } = this.props
     let model = getModel(MODIFICATION);
@@ -314,7 +317,7 @@ class ModificationRow extends Component {
       let pair = json[p]
       let val
       let value = this.getVal(prop, pair.new)
-      debugger
+      // debugger
       switch (prop.type) {
       case 'date':
         val = dateformat(pair.new, 'mmm dS, yyyy h:MM TT')
