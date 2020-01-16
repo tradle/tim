@@ -158,6 +158,16 @@ class CheckRow extends Component {
                     </View>
       }
     }
+    else {
+      let ftype = utils.getType(form)
+
+      searchTerm = <View style={{flexDirection: 'row', paddingVertical: 5}}>
+                    <View style={styles.titleView}>
+                      <Text style={styles.label}>{translate(utils.getModel(ftype))}</Text>
+                      <Text style={styles.search}>{`: ${form.title}`}</Text>
+                    </View>
+                  </View>
+    }
 
     let statusId = this.getEnumID(status.id)
     let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
