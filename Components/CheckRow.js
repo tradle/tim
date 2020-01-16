@@ -158,9 +158,8 @@ class CheckRow extends Component {
                     </View>
       }
     }
-    else {
+    else if (form.title) {
       let ftype = utils.getType(form)
-
       searchTerm = <View style={{flexDirection: 'row', paddingVertical: 5}}>
                     <View style={styles.titleView}>
                       <Text style={styles.label}>{translate(utils.getModel(ftype))}</Text>
