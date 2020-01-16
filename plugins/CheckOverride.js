@@ -19,7 +19,8 @@ module.exports = function CheckOverride ({ models }) {
       if (!status) {
         return {
           requestedProperties: [
-            { name: 'status' }
+            { name: 'status' },
+            { name: 'explanationForOverride' }
           ]
         }
       }
@@ -27,7 +28,8 @@ module.exports = function CheckOverride ({ models }) {
       const reasonShow = status.title === 'Pass'  &&  'reasonsToPass' || 'reasonsToFail'
       let requestedProperties = [
           { name: 'status' },
-          { name: reasonShow }
+          { name: reasonShow },
+          { name: 'explanationForOverride' }
         ]
 
       let props = m.properties
