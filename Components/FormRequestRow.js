@@ -827,7 +827,7 @@ class FormRequestRow extends Component {
 
     let hasSharables = this.hasSharables()
 
-    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated // &&  !resource.prefill
+    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated && !resource.dataLineage// &&  !resource.prefill
     // HACK
     if (isRequestForNext) {
       if (resource.message.startsWith(strings.reviewScannedProperties))
