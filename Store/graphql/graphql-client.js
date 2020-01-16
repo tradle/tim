@@ -301,82 +301,20 @@ var search = {
     query += `\n}`   // close properties block
     query += `\n}`   // close query
 
-    let error, retry = true
+    let error, mapping, retry = true
     for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
       let data = await this.execute({client, query, table, versionId})
       if (data.result) {
         return { result:  data.result }
       }
-      ({ error='',  excludeProps={}, retry=true } = await this.checkError(data, model))
+      ({ error='',  excludeProps={}, retry=true, mapping={} } = await this.checkError(data, model))
       if (excludeProps.length) {
         params.excludeProps = excludeProps
+        params.mapping = mapping
         return await this.searchServer(params)
       }
       if (error  &&  error === NETWORK_FAILURE  ||  !retry)
         break
-
-    //   let message, graphQLErrors, networkError
-    //   if (useApollo) {
-    //     ({ message, graphQLErrors, networkError } = data.error)
-    //   }
-    //   else {
-    //     if (data.error.response) {
-    //       graphQLErrors = data.error.response.errors
-    //       message = INVALID_QUERY
-    //     }
-    //     else {
-    //       graphQLErrors = []
-    //       if (data.error.message === 'Failed to fetch') {
-    //         error = NETWORK_FAILURE
-    //         break
-    //       }
-    //       else
-    //         message = data.error.message
-    //     }
-    //   }
-    //   // let { message, graphQLErrors, networkError } = data.error
-    //   if (graphQLErrors  &&  graphQLErrors.length) {
-    //     let excludeProps = []
-    //     let str = 'Cannot query field \"'
-    //     let len = str.length
-    //     graphQLErrors.forEach(err => {
-    //       if (err.path) {
-    //         let prop
-    //         for (let i=err.path.length - 1  &&  !prop; i>=0; i--) {
-    //           let p = err.path[i]
-    //           if (props[p])
-    //             prop = p
-    //         }
-    //         excludeProps.push(prop)
-    //         return
-    //       }
-    //       let msg = err.message
-    //       let idx = msg.indexOf(str)
-    //       if (idx !== 0)
-    //         return
-    //       idx = msg.indexOf('\"', len)
-    //       excludeProps.push(msg.substring(len, idx))
-    //     })
-    //     if (excludeProps.length) {
-    //       params.excludeProps = excludeProps
-    //       return await this.searchServer(params)
-    //     }
-    //     else {
-    //       debugger
-    //       return
-    //     }
-    //   }
-    //   if (networkError  &&  networkError.message === NETWORK_FAILURE) {
-    //     error = NETWORK_FAILURE
-    //     break
-    //   }
-    //   retry = false
-    //   if (message.indexOf(INVALID_QUERY) === 0)
-    //     message = INVALID_QUERY
-    //   else
-    //     debugger
-    //   await utils.submitLog(true)
-    //   error = message
     }
 
     console.log(error)
@@ -643,7 +581,7 @@ var search = {
   },
 
   getSearchProperties(params) {
-    let {model, inlined, properties, backlink} = params
+    let { model, inlined, properties, backlink } = params
     let props = backlink ? {[backlink.name]: backlink} : model.properties
 
     let arr
@@ -717,7 +655,7 @@ var search = {
       }`
     )
   },
-  addProps({isList, backlink, props, currentProp, arr, model, excludeProps}) {
+  addProps({isList, backlink, props, currentProp, arr, model, excludeProps, mapping}) {
     if (!arr)
       arr = []
     let isApplication = model  &&  model.id === APPLICATION
@@ -741,7 +679,8 @@ var search = {
         continue
       let ptype = prop.type
       if (ptype === 'array') {
-        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp})
+        let excludePropsFor = mapping  &&  prop.items.ref  &&  mapping[prop.items.ref]
+        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps: excludePropsFor})
         continue
       }
       if (ptype !== 'object') {
@@ -759,17 +698,12 @@ var search = {
 
       if (prop.inlined  ||  utils.getModel(ref).inlined)
         arr.push(this.addInlined(prop))
-      else {
+      else
         arr.push(this.addRef(prop))
-        // // HACK
-        // let add = model  &&  (model.id !== 'tradle.PhotoID'  ||  prop.name !== 'sex') &&  (model.id !== 'tradle.FormError'  ||  prop.name !== 'status')
-        // if (add)
-        //   arr.push(this.addRef(prop))
-      }
     }
     return arr
   },
-  addArrayProperty({prop, model, arr, isList, backlink, currentProp}) {
+  addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps}) {
     let p = prop.name
     let isApplication = model  &&  model.id === APPLICATION
     if (p === 'verifications')
@@ -788,10 +722,19 @@ var search = {
       if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
         if (isList  &&  !isApplication)
           return
+        let props
+        if (iref !== model.id)
+          props = this.getSearchProperties({model: utils.getModel(iref)})
+        // HACK
+        else if (isApplication)
+          props = arr.concat(['hasFailedChecks', 'hasCheckOverrides'])
+        else
+          props = arr
+
         arr.push(`${p} {
           edges {
             node {
-              ${iref !== model.id && this.getSearchProperties({model: utils.getModel(iref)}) || arr}
+              ${props}
             }
           }
         }`)
@@ -801,18 +744,6 @@ var search = {
           return
         arr.push(this.addInlined(prop))
       }
-      // else if (iref === model.id) {
-      //   arr.push(
-      //     `${p} {
-      //       ${TYPE}
-      //       _permalink
-      //       _link
-      //       _displayName
-      //     }`
-      //   )
-      // }
-      // else if (prop.inlined)
-      //   arr.push(this.addInlined(prop))
       else
         arr.push(
           `${p} {
@@ -824,7 +755,7 @@ var search = {
         )
     }
     else {
-      let allProps = this.addProps({isList, props: prop.items.properties})
+      let allProps = this.addProps({isList, props: prop.items.properties, excludeProps})
       if (allProps.length) {
         arr.push(
           `${p} {
@@ -863,7 +794,7 @@ var search = {
       )
     }
   },
-  async getItem({id, client, backlink, excludeProps, isChat, isThisVersion}) {
+  async getItem({id, client, backlink, excludeProps, mapping, isChat, isThisVersion}) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
@@ -877,15 +808,15 @@ var search = {
     else
       query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    let arr = this.getSearchProperties({model, backlink, excludeProps})
+    let arr = this.getSearchProperties({model, backlink, excludeProps, mapping})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
       let result = await this.execute({client, query, table})
       if (result.error  &&  !excludeProps) {
-        let { excludeProps, error } = await this.checkError(result, model)
+        let { excludeProps, error, mapping } = await this.checkError(result, model)
         if (excludeProps)
-          return await this.getItem(id, client, backlink, excludeProps)
+          return await this.getItem({id, client, backlink, excludeProps, mapping, isThisVersion})
       }
       return result.result
     }
@@ -895,7 +826,7 @@ var search = {
     }
   },
   async checkError(result, model) {
-    let message, graphQLErrors, networkError, excludeProps
+    let message, graphQLErrors, networkError
     if (useApollo) {
       ({ message, graphQLErrors, networkError } = result.error)
     }
@@ -912,7 +843,8 @@ var search = {
       }
     }
     if (graphQLErrors  &&  graphQLErrors.length) {
-      excludeProps = []
+      let excludeProps = []
+      let mapping = {}
       let str = 'Cannot query field \"'
       let len = str.length
       let props = model.properties
@@ -939,12 +871,26 @@ var search = {
         idx = msg.indexOf('\"', len)
         let field = msg.substring(len, idx)
         // check if this is the table itself that is not recognized
-        if (!field.indexOf(`_${model.id.replace('.', '_')}`) === -1)
+        if (field.indexOf(`_${model.id.replace('.', '_')}`) === -1) {
           excludeProps.push(field)
+          let idx = msg.indexOf(' on type "')
+          if (idx === -1)
+            return
+          let idx2 = msg.indexOf('"', idx + 10)
+          if (idx2 === -1)
+            return
+          let type = msg.slice(idx + 10, idx2).replace(/_/g, '.')
+          if (utils.getModel(type)) {
+            let mprops = mapping[type]
+            if (!mprops)
+              mapping[type] = []
+            mapping[type].push(field)
+          }
+        }
       })
 
       if (excludeProps.length)
-        return { excludeProps }
+        return { excludeProps, mapping }
       return { error: message, retry: message === NETWORK_FAILURE }
     }
     if (networkError  &&  networkError.message === NETWORK_FAILURE)
