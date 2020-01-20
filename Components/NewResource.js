@@ -942,22 +942,22 @@ class NewResource extends Component {
     let formStyle = isRegistration
                   ? {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : {justifyContent: 'flex-start', width: width}
-    let jsonProps = utils.getPropertiesWithRange('json', meta)
+    // let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons
-    if (jsonProps  &&  jsonProps.length) {
-      let hidden = meta.hidden
-      jsonProps.forEach((prop) => {
-        if (prop.hidden  ||  (hidden  &&  hidden.includes(prop.name)))
-          return
-        let val = this.state.resource[prop.name]
-        if (val) {
-          let params = {prop: prop, json: val, jsonRows: [], isView: true}
-          if (!jsons)
-            jsons = []
-          jsons.push(this.showJson(params))
-        }
-      })
-    }
+    // if (jsonProps  &&  jsonProps.length) {
+    //   let hidden = meta.hidden
+    //   jsonProps.forEach((prop) => {
+    //     if (prop.hidden  ||  (hidden  &&  hidden.includes(prop.name)))
+    //       return
+    //     let val = this.state.resource[prop.name]
+    //     if (val) {
+    //       let params = {prop: prop, json: val, jsonRows: [], isView: true}
+    //       if (!jsons)
+    //         jsons = []
+    //       jsons.push(this.showJson(params))
+    //     }
+    //   })
+    // }
     // HACK
     let guidanceMsg
     if (meta.id === 'tradle.PhotoID') {
