@@ -249,7 +249,7 @@ class ApplicationTabs extends Component {
   }
   getPieChart(styles) {
     let resource = this.props.resource
-    let scoreDetails = resource.scoreDetails
+    let scoreDetails = resource.scoreDetails.summary
     let data = []
     let j = 0
     for (let p in scoreDetails) {
@@ -269,14 +269,14 @@ class ApplicationTabs extends Component {
              <PieChart
                radius={40}
                ration={1}
-               style={{height: '150px'}}
+               style={{height: '250px'}}
                data={data}
                animate
                label={({ data, dataIndex }) =>
                  data[dataIndex].title
                }
                labelPosition={112}
-               labelStyle={{fontSize: 9, fill: '#9b9b9b'}}
+               labelStyle={{fontSize: 5, fill: '#9b9b9b'}}
              />
            </View>
   }

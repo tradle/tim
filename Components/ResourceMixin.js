@@ -549,11 +549,15 @@ var ResourceMixin = {
 
       }
       else if (pieChart  && prop.name === 'scoreDetails') {
-        content = <View style={{flexDirection: 'row'}}>
+        // content = <View style={{flexDirection: 'row'}}>
+        //            <View style={{flex: 1}}>{content}</View>
+        //            <View style={{flex: 2, marginLeft: -250}}>
+        //              {pieChart}
+        //            </View>
+        //           </View>
+        content = <View>
+                   {pieChart}
                    <View style={{flex: 1}}>{content}</View>
-                   <View style={{flex: 2, marginLeft: -250}}>
-                     {pieChart}
-                   </View>
                   </View>
       }
     }
