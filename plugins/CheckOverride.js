@@ -17,6 +17,11 @@ module.exports = function CheckOverride ({ models }) {
 
       const { status, check } = form
       if (!status) {
+        if (m.editCols) {
+          return {
+            requestedProperties: m.editCols.map(p => {name: p})
+          }
+        }
         return {
           requestedProperties: [
             { name: 'status' },
@@ -24,15 +29,27 @@ module.exports = function CheckOverride ({ models }) {
           ]
         }
       }
-      const reasonSkip = status.title === 'Pass'  &&  'reasonsToFail' || 'reasonsToPass'
-      const reasonShow = status.title === 'Pass'  &&  'reasonsToPass' || 'reasonsToFail'
-      let requestedProperties = [
-          { name: 'status' },
-          { name: reasonShow },
-          { name: 'explanationForOverride' }
-        ]
+      let requestedProperties
+      if (m.editCols) {
+        if (m.editCols) {
+          requestedProperties = {
+            requestedProperties: m.editCols.map(p => {name: p})
+          }
+        }
+      }
+      else
+        requestedProperties = [
+            { name: 'status' },
+            { name: 'explanationForOverride' }
+          ]
 
       let props = m.properties
+      if (!props.reasonToFail  ||  !props.reasonToPass)
+        return { requestedProperties }
+
+      const reasonSkip = status.title === 'Pass'  &&  'reasonsToFail' || 'reasonsToPass'
+      const reasonShow = status.title === 'Pass'  &&  'reasonsToPass' || 'reasonsToFail'
+      requestedProperties.push({ name: reasonShow })
       for (let p in props) {
         if (p === reasonSkip  ||  p === 'status'  ||  p === reasonShow)
           continue
@@ -42,7 +59,7 @@ module.exports = function CheckOverride ({ models }) {
           continue
         requestedProperties.push({name: p})
       }
-      return {requestedProperties}
+      return { requestedProperties }
     }
   }
 }
