@@ -29,8 +29,9 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 const debug = Debug('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
-import validateResource from '@tradle/validate-resource'
+
 import Embed from '@tradle/embed'
+import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
 import {
@@ -76,7 +77,10 @@ var strMap = {
   'Please take a **selfie** picture of your face': 'takeAPicture',
   'The company was not found. Please fill out the form': 'fillOutTheForm',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
-  'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning'
+  'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning',
+  'Please overwrite if data can`t be reused': 'overwriteIfCantReuse',
+  'FinCrime needs to review this application': 'finCrimeReview',
+
 }
 
 var {
@@ -156,6 +160,8 @@ const getVersionInAppStore = Platform.select({
     throw new Error('not supported')
   }
 })
+const parseEnumValue = validateResource.utils.parseEnumValue
+const getEnumValueId = opts => parseEnumValue(opts).id
 
 var utils = {
   ...promiseUtils,
@@ -2405,6 +2411,7 @@ var utils = {
   isDocument(model) {
     return model.interfaces  &&  model.interfaces.indexOf(DOCUMENT) !== -1
   },
+  getEnumValueId,
   getEnumProperty(model) {
     if (typeof model === 'string')
       model = utils.getModel(model)
