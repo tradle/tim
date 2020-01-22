@@ -265,12 +265,14 @@ class ApplicationTabs extends Component {
         data.push({title: `${title} ${scoreDetails[p].score}`, value: scoreDetails[p].score, color: colors[j++]})
       }
     }
+    let pieData = []
+    data.forEach(d => d.value  &&  pieData.push(d))
     return <View>
              <PieChart
                radius={40}
                ration={1}
                style={{height: '250px'}}
-               data={data}
+               data={pieData}
                animate
                label={({ data, dataIndex }) =>
                  data[dataIndex].title
