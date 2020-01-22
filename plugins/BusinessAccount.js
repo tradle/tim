@@ -245,14 +245,10 @@ function getPropsForControllingEntity(form) {
       ]
     }
     let idx = requestedProps.requestedProperties.findIndex(p => p.name === 'typeOfOwnership')
-    if (isTrustee) {
-      requestedProps.requestedProperties.splice(idx, 0, {name: 'roleInTrust', required: true})
-      idx++
-    }
-    if (form.typeOfOwnership  &&  form.typeOfOwnership.id.endsWith('_publiclyTraded')) {
-      requestedProps.requestedProperties.splice(idx, 0, {name: 'tradedOnExchange', required: true})
-      idx++
-    }
+    if (isTrustee)
+      requestedProps.requestedProperties.splice(idx++, 0, {name: 'roleInTrust', required: true})
+    if (form.typeOfOwnership  &&  form.typeOfOwnership.id.endsWith('_publiclyTraded'))
+      requestedProps.requestedProperties.splice(idx++, 0, {name: 'tradedOnExchange', required: true})
     if (typeOfOwnership === 'vcFirmFundPE')
       requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
 
