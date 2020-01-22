@@ -521,18 +521,26 @@ var ResourceMixin = {
                 })
                 return <View>{links}</View>
               }
+
               val = `${translate(val)}`
             }
 
             return <Text style={{ paddingLeft: (isObject || isArray) && 7 || 5, fontSize: 16 }}>{val}</Text>
           }}
           valueRenderer={raw => {
+            let isBold
             if (typeof raw === 'string') {
               raw = raw.replace(/['"]+/g, '')
               if (raw == '$$')
                 return
+
+              if (raw.startsWith('*')  &&  raw.endsWith('*')) {
+                isBold = true
+                raw = raw.slice(1, raw.length - 1)
+              }
             }
-            return <Text style={{ padding: 15, fontSize: 16 }}>{raw}</Text>
+
+            return <Text style={{ padding: 15, fontSize: 16, fontWeight: isBold && '800' || '400' }}>{raw}</Text>
           }}
         />
       </View>
