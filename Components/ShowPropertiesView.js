@@ -18,7 +18,7 @@ import Prompt from 'react-native-prompt'
 import constants from '@tradle/constants'
 import validateModel from '@tradle/validate-model'
 
-import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import { Text } from './Text'
@@ -272,7 +272,7 @@ class ShowPropertiesView extends Component {
         else if (pMeta.ref === IDENTITY) {
           let title = val.title
           if (!title)
-            title = val.id.split('_')[0] === me[ROOT_HASH] ? 'Me' : 'Not me'
+            title = getRootHash(val) === me[ROOT_HASH] ? 'Me' : 'Not me'
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
