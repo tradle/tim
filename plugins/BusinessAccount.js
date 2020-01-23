@@ -209,6 +209,12 @@ function getPropsForControllingEntity(form) {
       // debugger
       retProps.requestedProperties.push({name: 'roleInTrust', required: true})
     }
+    if (typeOfOwnership === 'vcFirmFundPE') {
+      retProps.requestedProperties.push({name: 'isGeneralPartner'})
+      retProps.requestedProperties.push({name: 'isLimitedPartner'})
+      if (form.isLimitedPartner)
+        retProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
+    }
 
     if (form.name) {
       retProps.requestedProperties = retProps.requestedProperties.concat([
@@ -219,7 +225,6 @@ function getPropsForControllingEntity(form) {
         {name: 'doNotReachOut'},
       ])
     }
-
     retProps.requestedProperties.push({name: 'legalEntity', required: true})
 
     return retProps
@@ -249,9 +254,16 @@ function getPropsForControllingEntity(form) {
       requestedProps.requestedProperties.splice(idx++, 0, {name: 'roleInTrust', required: true})
     if (form.typeOfOwnership  &&  form.typeOfOwnership.id.endsWith('_publiclyTraded'))
       requestedProps.requestedProperties.splice(idx++, 0, {name: 'tradedOnExchange', required: true})
-    if (typeOfOwnership === 'vcFirmFundPE')
-      requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
 
+    if (form.typeOfOwnership) {
+      if (getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: form.ownsTypeOfOwnership}) === 'vcFirmFundPE')
+        requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
+    }
+    if (typeOfOwnership === 'vcFirmFundPE') {
+      retProps.requestedProperties.push({name: 'isLimitedPartner'})
+      if (form.isLimitedPartner)
+        retProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
+    }
     return requestedProps
   }
 }
