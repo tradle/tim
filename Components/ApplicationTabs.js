@@ -265,6 +265,7 @@ class ApplicationTabs extends Component {
         data.push({title: `${title} ${scoreDetails[p].score}`, value: scoreDetails[p].score, color: colors[j++]})
       }
     }
+    if (data.length < 2) return
     let pieData = []
     data.forEach(d => d.value  &&  pieData.push(d))
     return <View>
