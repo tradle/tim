@@ -158,7 +158,7 @@ class CheckView extends Component {
                             </View>
                            </TouchableOpacity>
     }
-    else if (!this.state.isLoading  &&  utils.isRM(application)) {
+    else if (!this.state.isLoading) { //  &&  utils.isRM(application)) {
       let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
       if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
