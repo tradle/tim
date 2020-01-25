@@ -242,7 +242,7 @@ function getPropsForControllingEntity(form) {
         {name: 'controllingEntityStreetAddress'},
         {name: 'controllingEntityRegion'},
         {name: 'controllingEntityPostalCode'},
-        {name: 'controllingEntityCountry'},
+        {name: 'controllingEntityCountry', required: true},
         {name: 'natureOfControl'},
         {name: 'percentageOfOwnership'},
         {name: 'phone'},
@@ -261,9 +261,9 @@ function getPropsForControllingEntity(form) {
         requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
     }
     if (typeOfOwnership === 'vcFirmFundPE') {
-      retProps.requestedProperties.push({name: 'isLimitedPartner'})
+      requestedProps.requestedProperties.push({name: 'isLimitedPartner'})
       if (form.isLimitedPartner)
-        retProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
+        requestedProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
     }
     return requestedProps
   }
