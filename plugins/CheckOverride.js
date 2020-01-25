@@ -12,50 +12,34 @@ module.exports = function CheckOverride ({ models }) {
       if (!application)
         return
       let m = getModel(form[TYPE])
-      if (m.subClassOf !== CHECK_OVERRIDE)
+      let { subClassOf, properties } = m
+      if (subClassOf !== CHECK_OVERRIDE)
         return
 
       const { status, check } = form
-      if (!status) {
-        if (m.editCols) {
-          return {
-            requestedProperties: m.editCols.map(p => {name: p})
-          }
-        }
-        return {
-          requestedProperties: [
-            { name: 'status' },
-            { name: 'explanationForOverride' }
-          ]
-        }
-      }
-      let requestedProperties
-      if (m.editCols) {
-        if (m.editCols) {
-          requestedProperties = {
-            requestedProperties: m.editCols.map(p => {name: p})
-          }
-        }
-      }
-      else
-        requestedProperties = [
-            { name: 'status' },
-            { name: 'explanationForOverride' }
-          ]
 
-      let props = m.properties
-      if (!props.reasonToFail  ||  !props.reasonToPass)
+      let requestedProperties
+      if (m.editCols)
+        requestedProperties = m.editCols.map(p => ({name: p}))
+      else {
+        requestedProperties = [
+          { name: 'status' },
+          { name: 'explanationForOverride' }
+        ]
+      }
+
+      if (!status || !properties.reasonsToFail  ||  !properties.reasonsToPass)
         return { requestedProperties }
 
       const reasonSkip = status.title === 'Pass'  &&  'reasonsToFail' || 'reasonsToPass'
       const reasonShow = status.title === 'Pass'  &&  'reasonsToPass' || 'reasonsToFail'
       requestedProperties.push({ name: reasonShow })
-      for (let p in props) {
+      for (let p in properties) {
         if (p === reasonSkip  ||  p === 'status'  ||  p === reasonShow)
           continue
         if (p.charAt(0) === '_')
           continue
-        if (props[p].readOnly  ||  props[p].hidden)
+        if (properties[p].readOnly  ||  properties[p].hidden)
           continue
         requestedProperties.push({name: p})
       }
