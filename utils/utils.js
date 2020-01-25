@@ -39,7 +39,7 @@ import {
   utils as tradleUtils
 } from '@tradle/engine'
 import constants from '@tradle/constants'
-import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
+import { id, calcLinks, omitVirtual, enumValue } from '@tradle/build-resource'
 import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
@@ -2412,6 +2412,7 @@ var utils = {
     return model.interfaces  &&  model.interfaces.indexOf(DOCUMENT) !== -1
   },
   getEnumValueId,
+  enumValue,
   getEnumProperty(model) {
     if (typeof model === 'string')
       model = utils.getModel(model)
