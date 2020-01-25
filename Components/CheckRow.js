@@ -179,20 +179,6 @@ class CheckRow extends Component {
       const statusModel = utils.getModel(STATUS_OVERRIDE)
       checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride.status.title)
     }
-    // else if (application  &&  application.checksOverride) {
-    //   const checkId = utils.getId(resource)
-    //   let checkType = utils.getType(resource)
-    //   let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
-    //   if (checkOverrideProp.length) {
-    //     const pref = checkOverrideProp[0].items.ref
-    //     const rId = utils.getId(resource)
-    //     const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
-    //     if (checkOverride.length) {
-    //       const statusModel = utils.getModel(STATUS_OVERRIDE)
-    //       checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].status.title)
-    //     }
-    //   }
-    // }
     const { icon, color } = statusM
     let style, size, icolor
     if (statusId === 'warning'  ||  statusId === 'error') {
