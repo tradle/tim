@@ -17,7 +17,7 @@ const {
   TYPE,
 } = constants
 
-import utils, { translate, translateEnum, isSubclassOf, isStub } from '../utils/utils'
+import utils, { translate, translateEnum, isSubclassOf, isStub, getEnumValueId } from '../utils/utils'
 import { circled } from '../styles/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 import PageView from './PageView'
@@ -31,7 +31,8 @@ import StyleSheet from '../StyleSheet'
 import ShowPropertiesView from './ShowPropertiesView'
 
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
-const STATUS = 'tradle.OverrideStatus'
+const OVERRIDE_STATUS = 'tradle.OverrideStatus'
+const STATUS = 'tradle.Status'
 
 class CheckView extends Component {
   static displayName = 'CheckView';
@@ -133,7 +134,7 @@ class CheckView extends Component {
 
     let checkOverrideButton, checkOverrideView
     if (resource.checkOverride  &&  resource.checkOverride.length) {
-      const e = utils.getModel(STATUS).enum
+      const e = utils.getModel(OVERRIDE_STATUS).enum
       let checkOverride = resource.checkOverride[0]
       const statusId = checkOverride.status && this.getEnumID(checkOverride.status.id) || 'pass'
       const statusM = e.find(r => r.id === statusId)
@@ -203,13 +204,13 @@ class CheckView extends Component {
     const { navigator, bankStyle, application } = this.props
     const { resource } = this.state
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
-    const statusModel = utils.getModel(STATUS)
+    const statusModel = utils.getModel(OVERRIDE_STATUS)
     const values = statusModel.enum
-    const checkStatus = resource.status.id
+    const checkStatus = getEnumValueId({ model: utils.getModel(STATUS), value: resource.status })
     let status
-    if (checkStatus.indexOf('_pass') !== -1)
+    if (checkStatus === 'pass')
       status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
-    else if (checkStatus.indexOf('_fail') !== -1)
+    else // if (checkStatus.indexOf('fail') !== -1)
       status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
     let r = {
       from: utils.getMe(),
