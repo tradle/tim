@@ -22,7 +22,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, enumValue } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -1210,8 +1210,10 @@ var NewResourceMixin = {
       if (vals  &&  vals[p])
         value = vals[p]
     }
-    else
+    else if (!prop.ref)
       value = prop.default
+    else
+      value = enumValue({model: utils.getModel(prop.ref), value: prop.default})
     if (!value)
       return
     if (prop.type === 'date') {
