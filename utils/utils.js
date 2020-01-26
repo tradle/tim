@@ -2846,7 +2846,7 @@ debugger
     return Math.floor(width * 0.7)
   },
   getContentWidth(component) {
-    let width = component ? this.dimensions(component).width : this.dimensions().width
+    let width = component ? utils.dimensions(component).width : utils.dimensions().width
     return width > MAX_WIDTH ? MAX_WIDTH : width
     // return ENV.fullScreen ? width - 20 : Math.min(width, MAX_WIDTH)
   },
