@@ -17,7 +17,22 @@ const {
   TYPE,
 } = constants
 
-import utils, { translate, translateEnum, isSubclassOf, isStub, getEnumValueId } from '../utils/utils'
+import utils, {
+  translate,
+  translateEnum,
+  isSubclassOf,
+  styleFactory,
+  dimensions,
+  isStub,
+  getMe,
+  isRM,
+  getEnumValueId,
+  getPropertiesWithRef,
+  getContentWidth,
+  buildRef,
+  buildStubByEnumTitleOrId,
+  getRootHash
+} from '../utils/utils'
 import { circled } from '../styles/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 import PageView from './PageView'
@@ -79,7 +94,7 @@ class CheckView extends Component {
       return
     let { bankStyle, application, resource, search } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource)) {
-      if (utils.getRootHash(resource) !== utils.getRootHash(params.resource))
+      if (getRootHash(resource) !== getRootHash(params.resource))
         return
     }
     if (action === 'getItem') {
@@ -122,7 +137,13 @@ class CheckView extends Component {
           rmodel.viewCols.includes('aspects'))
       excludedProperties = ['message']
     }
-    let isVerifier = !rmodel.notEditable && application  && utils.isRM(application)
+    if (resource.top  &&  getRootHash(resource.top) === getRootHash(resource.application)) {
+      if (!excludedProperties)
+        excludedProperties = []
+      excludedProperties.push('top')
+    }
+
+    let isVerifier = !rmodel.notEditable && application  && isRM(application)
 
     let propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource}
@@ -159,8 +180,8 @@ class CheckView extends Component {
                             </View>
                            </TouchableOpacity>
     }
-    else if (!this.state.isLoading) { //  &&  utils.isRM(application)) {
-      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
+    else if (!this.state.isLoading) { //  &&  isRM(application)) {
+      let checkOverrideProp = getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
       if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
                                 <TouchableOpacity
@@ -173,8 +194,8 @@ class CheckView extends Component {
       }
     }
 
-    let height = utils.dimensions(CheckView).height
-    let width = utils.getContentWidth()
+    let height = dimensions(CheckView).height
+    let width = getContentWidth()
     let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, {height, alignItems: 'center', borderTopColor: bankStyle.linkColor, borderTopWidth: 1}]} separator={contentSeparator} bankStyle={bankStyle} >
@@ -209,15 +230,15 @@ class CheckView extends Component {
     const checkStatus = getEnumValueId({ model: utils.getModel(STATUS), value: resource.status })
     let status
     if (checkStatus === 'pass')
-      status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
+      status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
     else // if (checkStatus.indexOf('fail') !== -1)
-      status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
+      status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
     let r = {
-      from: utils.getMe(),
+      from: getMe(),
       to: application.to,
       _context: application._context,
       [TYPE]: model.id,
-      check: utils.buildRef(resource),
+      check: buildRef(resource),
       application,
       status
     }
@@ -243,7 +264,7 @@ reactMixin(CheckView.prototype, ResourceMixin);
 reactMixin(CheckView.prototype, Reflux.ListenerMixin);
 CheckView = makeResponsive(CheckView)
 
-var createStyles = utils.styleFactory(CheckView, function ({ dimensions, bankStyle }) {
+var createStyles = styleFactory(CheckView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
     overrideButton: {
       backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
