@@ -730,7 +730,7 @@ class ResourceList extends Component {
     let route = {
       title: utils.makeTitle(newTitle),
       componentName: 'ResourceView',
-      parentMeta: model,
+      // parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,

@@ -296,7 +296,7 @@ class MessageView extends Component {
       title: newTitle,
       backButtonTitle: 'Back',
       componentName: 'MessageView',
-      parentMeta: model,
+      // parentMeta: model,
       passProps: {
         bankStyle: this.state.bankStyle || this.props.bankStyle,
         resource,

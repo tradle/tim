@@ -655,7 +655,7 @@ class MessageList extends Component {
       title: newTitle,
       backButtonTitle: 'Back',
       componentName: 'MessageView',
-      parentMeta: model,
+      // parentMeta: model,
       passProps: {
         bankStyle,
         isChat: true,
