@@ -72,7 +72,9 @@ const PHOTO = 'tradle.Photo'
 const FILE = 'tradle.File'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
-
+const excludeTemporaryFor = [
+  'tradle.CheckOverride'
+]
 
 class NewResource extends Component {
   static displayName = 'NewResource';
@@ -177,7 +179,7 @@ class NewResource extends Component {
     return isUpdate
   }
   componentWillMount() {
-    let { resource, isUploading } = this.state
+    let { resource, isUploading, prop } = this.state
     let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource: resource})
@@ -197,8 +199,17 @@ class NewResource extends Component {
         if (containerResource)
           this.state.isUploading = false
         else {
-          // if (!isPrefilled)
-          Actions.getTemporary(resource[TYPE])
+          let type = resource[TYPE]
+          let m = utils.getModel(type)
+          let exclude
+          while (!exclude  &&  type) {
+            exclude = excludeTemporaryFor.includes(type)
+            if (!exclude)
+              type = utils.getModel(type).subClassOf
+          }
+          if (!exclude  &&  prop  &&  m.properties[prop].inlined)
+            exclude = true
+          Actions.getTemporary(resource[TYPE], exclude)
           Actions.getRequestedProperties({resource})
         }
       }
