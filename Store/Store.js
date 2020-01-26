@@ -4048,6 +4048,15 @@ var Store = Reflux.createStore({
     await this.setMe(me)
     this.trigger({action: 'showStepIndicator', showStepIndicator})
   },
+  async onRefreshApplication({resource}) {
+    Actions.showModal({title: translate('refreshInProgress'), showIndicator: true})
+    try {
+      let r = await this.onGetItem({resource, search: true})
+      this.trigger({action: 'updateRow', resource: r, forceUpdate: true})
+    } finally {
+      Actions.hideModal()
+    }
+  },
   async onGetItem(params) {
     var {resource, action, noTrigger, search, backlink, backlinks, isChat} = params
     // await this._loadedResourcesDefer.promise
@@ -4523,8 +4532,8 @@ if (!res[SIG]  &&  res._message)
   onSaveTemporary(resource) {
     temporaryResources[resource[TYPE]] = utils.sanitize(resource)
   },
-  async onGetTemporary(type) {
-    var r = temporaryResources[type]
+  async onGetTemporary(type, noFetch) {
+    var r = !noFetch &&  temporaryResources[type]
     let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
     this.trigger({action: 'getTemporary', resource: r || {}, requestedProperties})
   },
