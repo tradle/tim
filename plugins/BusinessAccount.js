@@ -12,6 +12,7 @@ const LEGAL_ENTITY = 'tradle.legal.LegalEntity'
 const LEGAL_DOCUMENT_INTERSECTION = 'tradle.legal.LegalEntityLegalDocument'
 const LEGAL_DOCUMENT = 'tradle.legal.LegalDocument'
 const TYPE_OF_OWNERSHIP = 'tradle.legal.TypeOfOwnership'
+const NOTIFICATION_METHOD = 'tradle.NotificationMethod'
 const COUNTRY = 'tradle.Country'
 
 module.exports = function LegalEntity ({ models }) {
@@ -156,7 +157,8 @@ function getPropsForLegalEntity(form) {
       { name: 'alsoKnownAs' }
     ]
   }
-  if (form.typeOfOwnership  &&  form.typeOfOwnership.id.endsWith('_publiclyTraded'))
+  let { typeOfOwnership } = form
+  if (typeOfOwnership  &&  getEnumValueId({ model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership}) === 'publiclyTraded')
     reqProps.requestedProperties.splice(3, 0, {name: 'tradedOnExchange', required: true})
   return reqProps
 }
@@ -174,8 +176,20 @@ function getPropsForControllingEntity(form) {
       ]
     }
 
-  let typeOfOwnership = form.ownsTypeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: form.ownsTypeOfOwnership})
-  let isTrustee = typeOfOwnership && typeOfOwnership.startsWith('trustee')
+  let { isSeniorManager,
+        controllingEntityCountryOfResidence,
+        isLimitedPartner,
+        inactive,
+        notificationMethod,
+        typeOfOwnership,
+        ownsTypeOfOwnership } = form
+
+  ownsTypeOfOwnership = ownsTypeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: ownsTypeOfOwnership})
+  typeOfOwnership = typeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership})
+
+
+  let isTrustee = ownsTypeOfOwnership && ownsTypeOfOwnership.startsWith('trustee')
+  let isFund = ownsTypeOfOwnership === 'vcFirmFundPE'
   let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'person':
@@ -185,23 +199,25 @@ function getPropsForControllingEntity(form) {
         {name: 'typeOfControllingPerson', required: true},
         {name: 'natureOfControl'},
         {name: 'percentageOfOwnership'},
+        {name: 'sourceOfWealth', required: isFund  &&  isLimitedPartner},
+        {name: 'evidenceOfSourceOfWealth', required: isFund && isLimitedPartner},
         {name: 'inactive'},
       ]
     }
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
-    if (form.notificationMethod  &&  form.notificationMethod.id.endsWith('_sms'))
+    if (notificationMethod  &&  getEnumValueId({model: getModel(NOTIFICATION_METHOD), value: notificationMethod}) === 'sms')
       retProps.requestedProperties.push({name: 'phone', required: true})
 
-    if (!form.inactive) {
+    if (!inactive) {
       retProps.requestedProperties.push({name: 'personal_group', required: true})
       retProps.requestedProperties.push({name: 'middleName', required: false})
-      if (form.controllingEntityCountryOfResidence  &&  getEnumValueId({model: getModel(COUNTRY), value: form.controllingEntityCountryOfResidence}) == 'DE')
+      if (controllingEntityCountryOfResidence  &&  getEnumValueId({model: getModel(COUNTRY), value: controllingEntityCountryOfResidence}) == 'DE')
         retProps.requestedProperties.push({name: 'controllingEntityPlaceOfBirth', required: false})
     }
 
     // retProps.requestedProperties.push({name: 'notificationMethod'})
     retProps.requestedProperties.push({name: 'isSeniorManager'})
-    if (form.isSeniorManager)
+    if (isSeniorManager)
       retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
 
     retProps.requestedProperties.push({name: 'typeOfOwnership'})
@@ -210,11 +226,9 @@ function getPropsForControllingEntity(form) {
       // debugger
       retProps.requestedProperties.push({name: 'roleInTrust', required: true})
     }
-    if (typeOfOwnership === 'vcFirmFundPE') {
+    if (isFund) {
       retProps.requestedProperties.push({name: 'isGeneralPartner'})
       retProps.requestedProperties.push({name: 'isLimitedPartner'})
-      if (form.isLimitedPartner)
-        retProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
     }
 
     if (form.name) {
@@ -253,16 +267,14 @@ function getPropsForControllingEntity(form) {
     let idx = requestedProps.requestedProperties.findIndex(p => p.name === 'typeOfOwnership')
     if (isTrustee)
       requestedProps.requestedProperties.splice(idx++, 0, {name: 'roleInTrust', required: true})
-    if (form.typeOfOwnership  &&  form.typeOfOwnership.id.endsWith('_publiclyTraded'))
+    if (typeOfOwnership === 'publiclyTraded')
       requestedProps.requestedProperties.splice(idx++, 0, {name: 'tradedOnExchange', required: true})
 
-    if (form.typeOfOwnership) {
-      if (getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: form.ownsTypeOfOwnership}) === 'vcFirmFundPE')
-        requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
-    }
-    if (typeOfOwnership === 'vcFirmFundPE') {
+    if (typeOfOwnership === 'vcFirmFundPE')
+      requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
+    if (ownsTypeOfOwnership === 'vcFirmFundPE') {
       requestedProps.requestedProperties.push({name: 'isLimitedPartner'})
-      if (form.isLimitedPartner)
+      if (isLimitedPartner)
         requestedProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
     }
     return requestedProps
