@@ -1212,7 +1212,7 @@ var NewResourceMixin = {
     }
     else if (!prop.ref)
       value = prop.default
-    else
+    else if (prop.default)
       value = enumValue({model: utils.getModel(prop.ref), value: prop.default})
     if (!value)
       return
