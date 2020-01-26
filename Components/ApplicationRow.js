@@ -68,6 +68,12 @@ class ApplicationRow extends Component {
       if (utils.getRootHash(application) === thisHash)
         this.setState({application: application, resource: application})
       break
+    case 'updateRow':
+      let hash = utils.getRootHash(resource)
+      if (hash === utils.getRootHash(this.props.resource)) {
+        if (params.forceUpdate)
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
+      }
     }
   }
 
