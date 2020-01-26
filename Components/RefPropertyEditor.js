@@ -78,7 +78,7 @@ class RefPropertyEditor extends Component {
     return false
   }
   render() {
-    let { prop, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark,
+    let { prop, parentMeta, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark,
           search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
@@ -93,8 +93,12 @@ class RefPropertyEditor extends Component {
 
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
-      if (resource  &&  !resource[pName]  &&  country)
+      if (resource  &&  !resource[pName]  &&  country) {
         resource[pName] = country
+        this.props.floatingProps[pName] = country
+      }
+      else if (parentMeta && resource[pName])
+        this.props.floatingProps[pName] = resource[pName]
     }
     let val = resource && resource[pName]
     if (Array.isArray(val)  &&  !val.length)
