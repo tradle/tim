@@ -714,6 +714,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         title: title,
         componentName: 'ApplicationView',
         backButtonTitle: 'Back',
+        refreshHandler: this.refreshApplication.bind(this, resource),
         passProps: {
           resource: resource,
           search: search,
@@ -774,6 +775,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
       }
     }
     navigator.push(route);
+  }
+  refreshApplication(resource) {
+    Actions.refreshApplication({resource})
   }
   selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props
@@ -916,7 +920,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let route = {
       title: utils.makeTitle(newTitle),
       componentName: 'ResourceView',
-      parentMeta: model,
+      // parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
