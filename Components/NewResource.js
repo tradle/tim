@@ -912,6 +912,9 @@ class NewResource extends Component {
     let arrayItems
     if (!search) {
       for (let p in itemsMeta) {
+        if (!this.checkRequestedProperties(p))
+          continue
+
         let bl = itemsMeta[p]
         if (bl.icon === 'ios-telephone-outline') {
           bl.icon = 'ios-call-outline'
@@ -1148,6 +1151,20 @@ class NewResource extends Component {
       </View>
     )
   }
+  checkRequestedProperties(prop) {
+    let { requestedProperties } = this.state
+    if (!requestedProperties)
+      return true
+    ;({ requestedProperties } = requestedProperties)
+    if (requestedProperties[prop])
+      return true
+    let props = this.props.model.properties
+    for (let p in requestedProperties) {
+      if (p.endsWith('_group')  &&  props[p].list.includes(prop))
+        return true
+    }
+    return false
+  }
   onDropFiles({ prop, files, rejected }) {
     if (!files.length && rejected.length) {
       return Alert.alert(
@@ -1264,7 +1281,7 @@ class NewResource extends Component {
     });
   }
   getItem(bl, styles) {
-    let resource = this.state.resource
+    let { resource } = this.state
     if (utils.isHidden(bl.name, resource))
       return
     let meta = this.props.model
