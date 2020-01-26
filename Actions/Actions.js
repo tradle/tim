@@ -23,6 +23,8 @@ var asyncActions = [
   'getProductList',
   'getItemsToMatch',
 
+  'refreshApplication',
+
   'removeIdentity',
   'showIdentityList',
   'changeIdentity',

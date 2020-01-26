@@ -339,6 +339,8 @@ const goBack = debounce(function (nav) {
 }, 500, true)
 
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
+var HIT_SLOP_TWO = {top:10,right:5,bottom:10,left:0}
+
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
     if (index === 0  ||  route.noLeftButton)
@@ -378,6 +380,28 @@ var NavigationBarRouteMapper = {
                   {lbTitle}
                 </Text>
 
+    if (route.componentName === 'ApplicationView'  &&  route.refreshHandler) {
+    return (
+      <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity
+          hitSlop={HIT_SLOP_TWO}
+          onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
+          <View style={platformStyles.navBarLeftButton2}>
+            {title}
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          hitSlop={HIT_SLOP_TWO}
+          onPress={() => route.refreshHandler()}>
+          <View style={platformStyles.navBarRightButton2}>
+            <Icon name='ios-refresh' size={30} color={color} style={platformStyles.navBarIcon}/>
+          </View>
+        </TouchableOpacity>
+      </View>
+      )
+
+    }
+    else
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
