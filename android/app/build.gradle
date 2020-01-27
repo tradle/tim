@@ -276,6 +276,9 @@ configurations.all {
 }
 
 dependencies {
+    def multidex_version = "2.0.1"
+    implementation "androidx.multidex:multidex:$multidex_version"
+
     implementation project(':react-native-webview')
     implementation project(':@react-native-community_viewpager')
     implementation project(':@react-native-community_netinfo')

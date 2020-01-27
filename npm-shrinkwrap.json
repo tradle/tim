@@ -1393,9 +1393,9 @@
       }
     },
     "@react-native-community/netinfo": {
-      "version": "5.3.2",
-      "resolved": "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-5.3.2.tgz",
-      "integrity": "sha512-npNcLAz6iWzwRNh+0tSFMlR+xkpSz9NWzX+5AxW40KE6qEZGWdE3dtGBKsezMdWD2Fh+6Je6P6hgUEF8xuZrbA=="
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-2.0.0.tgz",
+      "integrity": "sha512-/wjahsPhkWmkxEzXmz93gGDXyR/9B4tJqo2eV5ENxwimUk/qIP5XrHzqWtyqxkwIr7dnYGIlZyWkvuzUslgYYw=="
     },
     "@react-native-community/viewpager": {
       "version": "2.0.2",
@@ -1486,9 +1486,9 @@
       }
     },
     "@tradle/build-resource": {
-      "version": "4.0.3",
-      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-4.0.3.tgz",
-      "integrity": "sha512-0IGELsMQ3dcmSFhbJD+UQ4T7HHBEqqnzYcdXJYHK7PlvUXAYF3YwD1YElBGgoG0pUqFjsAFYdDg4RtOIdftkog==",
+      "version": "4.0.4",
+      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-4.0.4.tgz",
+      "integrity": "sha512-fCNXKjX67ztdBffejXT1bKZPoZJmoQHT+Nis/ppn1ZVUEMAA+ge9WXQ/hBv9m5FZHHuaossvC/xWwn3lQ2yKuQ==",
       "requires": {
         "@tradle/constants": "^2.3.2",
         "lodash": "^4.0.0"
@@ -1764,7 +1764,7 @@
       }
     },
     "@tradle/models": {
-      "version": "github:tradle/models#1ff51c2f0826b9659d39f22beb20a1e62b5357e8",
+      "version": "github:tradle/models#0b2adefc3cea986fe7669dc9e0770b210a4c4265",
       "from": "github:tradle/models"
     },
     "@tradle/models-cloud": {
@@ -1772,7 +1772,7 @@
       "from": "github:tradle/models-cloud"
     },
     "@tradle/models-corporate-onboarding": {
-      "version": "github:tradle/models-corporate-onboarding#4fe807486c687e9a24f8d90c40297865bf748ad7",
+      "version": "github:tradle/models-corporate-onboarding#b4559777583df50c5b370b953d6d04fca194c242",
       "from": "github:tradle/models-corporate-onboarding"
     },
     "@tradle/models-nz": {
@@ -1952,9 +1952,9 @@
       }
     },
     "@tradle/validate-model": {
-      "version": "7.1.19",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.19.tgz",
-      "integrity": "sha512-Vrg7TjBsAgjn+f/DurNTomQA0Kv5bZQP4uPdmfAptTJj1me1tMHu39clMtwVBDdAWHnU+W4BgYZz5VWoCypu4Q==",
+      "version": "7.1.20",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.20.tgz",
+      "integrity": "sha512-eMCEcd0TelHslDCMGKItDEnAMb5+U1rfDW7AI+44rcH3936IqLVIMoDum0ed8n64qdHU4jdymlUXXD4a61T4JQ==",
       "requires": {
         "@tradle/constants": "^2.1.0",
         "@tradle/merge-models": "^2.0.0",
