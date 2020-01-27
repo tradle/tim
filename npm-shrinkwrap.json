@@ -167,9 +167,9 @@
       }
     },
     "@tradle/build-resource": {
-      "version": "4.0.3",
-      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-4.0.3.tgz",
-      "integrity": "sha512-0IGELsMQ3dcmSFhbJD+UQ4T7HHBEqqnzYcdXJYHK7PlvUXAYF3YwD1YElBGgoG0pUqFjsAFYdDg4RtOIdftkog==",
+      "version": "4.0.4",
+      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-4.0.4.tgz",
+      "integrity": "sha512-fCNXKjX67ztdBffejXT1bKZPoZJmoQHT+Nis/ppn1ZVUEMAA+ge9WXQ/hBv9m5FZHHuaossvC/xWwn3lQ2yKuQ==",
       "requires": {
         "@tradle/constants": "^2.3.2",
         "lodash": "^4.0.0"
@@ -431,7 +431,7 @@
       }
     },
     "@tradle/models": {
-      "version": "github:tradle/models#6ff99c77ba32836de74ae034300f8a8a45ce83d8",
+      "version": "github:tradle/models#87c02da761e124b075277a5376fa7f7ee3c4ecfe",
       "from": "github:tradle/models"
     },
     "@tradle/models-cloud": {
