@@ -1156,7 +1156,7 @@ class NewResource extends Component {
     if (!requestedProperties)
       return true
     ;({ requestedProperties } = requestedProperties)
-    if (requestedProperties[prop])
+    if (!requestedProperties  ||  requestedProperties[prop])
       return true
     let props = this.props.model.properties
     for (let p in requestedProperties) {
