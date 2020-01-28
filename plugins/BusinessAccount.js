@@ -144,7 +144,7 @@ function getPropsForLegalEntity(form) {
       { name: 'info_group' },
       { name: 'registrationDate', required: true },
       { name: 'typeOfOwnership', required: true },
-      { name: 'companyType'},
+      // { name: 'companyType'},
       { name: 'companyEmail', required: true },
       { name: 'companyWebsite', required: true },
       { name: 'address_group'},
@@ -248,12 +248,12 @@ function getPropsForControllingEntity(form) {
     let requestedProps = {
       requestedProperties: [
         // {name: 'controllingLegalEntity'},
-        {name: 'name'},
+        {name: 'name', required: true},
         {name: 'emailAddress', required: true},
         {name: 'controllingEntityCompanyNumber', required: true},
         {name: 'controllingEntityRegistrationDate', required: true},
         {name: 'typeOfOwnership', required: true},
-        {name: 'companyType'},
+        // {name: 'companyType'},
         {name: 'controllingEntityStreetAddress'},
         {name: 'controllingEntityRegion'},
         {name: 'controllingEntityPostalCode'},
