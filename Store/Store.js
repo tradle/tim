@@ -4752,12 +4752,17 @@ if (!res[SIG]  &&  res._message)
     }
     // fix dates and money
     for (let pp in json) {
-      if (props[pp]  &&  props[pp].type === 'date')
+      let prop = props[pp]
+      if (!prop)
+        continue
+      if (prop.type === 'date')
         json[pp] = new Date(json[pp]).getTime()
-      else if (props[pp]  &&  props[pp].ref === MONEY) {
+      else if (prop.ref === MONEY) {
         if (typeof json[pp].value === 'string')
           json[pp].value = parseFloat(json[pp].value)
       }
+      else if (prop.type === 'string')
+        json[pp] = json[pp].trim()
     }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
