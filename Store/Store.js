@@ -4753,7 +4753,7 @@ if (!res[SIG]  &&  res._message)
     // fix dates and money
     for (let pp in json) {
       let prop = props[pp]
-      if (!prop)
+      if (!prop || !json[pp])
         continue
       if (prop.type === 'date')
         json[pp] = new Date(json[pp]).getTime()
