@@ -134,8 +134,14 @@ class ModificationRow extends Component {
           }
           if (!title)
              title = translate(p)
-          rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
+          let addPart
+          if (title.startsWith('Pitchbook')) {
+            title = 'Pitchbook'
+            addPart = <Text  style={[styles.sourceTitle, {paddingLeft: 10, color:'red'}]}>{translate('nonAuthoritative')}</Text>
+          }
+          rows.push(<View style={[styles.gridRow, {flexDirection: 'row'}]} key={this.getNextKey()}>
                       <Text  style={styles.sourceTitle}>{title}</Text>
+                      {addPart}
                     </View>)
           this.paintHistory({json:v, rows, model, styles})
           continue
