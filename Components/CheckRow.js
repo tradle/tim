@@ -159,6 +159,15 @@ class CheckRow extends Component {
                     </View>
       }
     }
+    else if (form.title) {
+      let ftype = utils.getType(form)
+      searchTerm = <View style={{flexDirection: 'row', paddingVertical: 5}}>
+                    <View style={styles.titleView}>
+                      <Text style={styles.label}>{translate(utils.getModel(ftype))}</Text>
+                      <Text style={styles.search}>{`: ${form.title}`}</Text>
+                    </View>
+                  </View>
+    }
 
     let statusId = this.getEnumID(status.id)
     let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
@@ -171,20 +180,6 @@ class CheckRow extends Component {
       const statusModel = utils.getModel(STATUS_OVERRIDE)
       checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride.status.title)
     }
-    // if (application  &&  application.checksOverride) {
-    //   const checkId = utils.getId(resource)
-    //   let checkType = utils.getType(resource)
-    //   let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
-    //   if (checkOverrideProp.length) {
-    //     const pref = checkOverrideProp[0].items.ref
-    //     const rId = utils.getId(resource)
-    //     const checkOverride = application.checksOverride.filter(r => utils.getType(r) === pref  &&  utils.getId(r.check) === rId)
-    //     if (checkOverride.length) {
-    //       const statusModel = utils.getModel(STATUS_OVERRIDE)
-    //       checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride[0].status.title)
-    //     }
-    //   }
-    // }
     const { icon, color } = statusM
     let style, size, icolor
     if (statusId === 'warning'  ||  statusId === 'error') {
