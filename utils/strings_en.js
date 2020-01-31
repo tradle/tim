@@ -307,6 +307,8 @@ module.exports = {
     "applicationsHasCheckOverrides": "Applications with Check Overrides",
     "applicationsNotAssigned": "Applications - not assigned",
     "applicationsStarted": "Applications - started",
+    "overwriteIfCantReuse": "Please overwrite if data can`t be reused",
+    "finCrimeReview": "FinCrime needs to review this application",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
