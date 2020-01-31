@@ -419,6 +419,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
         if (params.alert)
           Alert.alert(params.alert)
         else if (search  &&  !isModel) {
+          if (params.modelName !== modelName)
+            return
           if (params.isSearch  &&   resource) {
             // Make sure that is there was modal that it'll be closed before the message appears
             // otherwise it stays and blocks all taps
@@ -710,6 +712,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         title,
         componentName: 'ApplicationView',
         backButtonTitle: 'Back',
+        refreshHandler: this.refreshApplication.bind(this, resource),
         passProps: {
           resource,
           search,
@@ -762,6 +765,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
 
   }
+  refreshApplication(resource) {
+    Actions.refreshApplication({resource})
+  }
+
   selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props
     if (callback) {
@@ -1422,7 +1429,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
                 </View>
     }
     else {
-      content = <ListView  onScroll={isModel ? () => {} : this.onScroll.bind(this)}
+      content = <ListView onScroll={isModel ? () => {} : this.onScroll.bind(this)}
         dataSource={dataSource}
         renderHeader={this.renderHeader.bind(this)}
         enableEmptySections={true}
