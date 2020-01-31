@@ -82,11 +82,13 @@ const normalizeResult = ({results, json}) => {
     personal: {
       firstName: json.ft_Given_Names || json.ft_Surname_And_Given_Names,
       lastName: json.ft_Surname || json.ft_Fathers_Name,
+      lastNameAtBirth: json.ft_Surname_at_Birth,
       middleName: json.ft_Middle_Name,
       full: address,
       city,
       country,
       dateOfBirth: json.ft_Date_of_Birth,
+      placeOfBirth: json.ft_Place_of_Birth,
       nationality,
       sex: json.ft_Sex
     },
