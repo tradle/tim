@@ -68,7 +68,9 @@ const PHOTO = 'tradle.Photo'
 const FILE = 'tradle.File'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
-
+const excludeTemporaryFor = [
+  'tradle.CheckOverride'
+]
 
 class NewResource extends Component {
   static displayName = 'NewResource';
@@ -174,7 +176,7 @@ class NewResource extends Component {
     return isUpdate
   }
   componentWillMount() {
-    let { resource, isUploading } = this.state
+    let { resource, isUploading, prop } = this.state
     let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource: resource})
@@ -194,8 +196,17 @@ class NewResource extends Component {
         if (containerResource)
           this.state.isUploading = false
         else {
-          Actions.getTemporary(resource[TYPE])
-          Actions.getRequestedProperties({resource})
+          let type = resource[TYPE]
+          let m = utils.getModel(type)
+          let exclude
+          while (!exclude  &&  type) {
+            exclude = excludeTemporaryFor.includes(type)
+            if (!exclude)
+              type = utils.getModel(type).subClassOf
+          }
+          if (!exclude  &&  prop  &&  m.properties[prop].inlined)
+            exclude = true
+          Actions.getTemporary(resource[TYPE], exclude)
         }
       }
     }
@@ -569,10 +580,10 @@ class NewResource extends Component {
         form: originatingMessage.form,
         from: utils.getMe(),
         to: {id: toId},
-        _context: application._context,
-        context: application.context
+        // _context: application._context,
+        // context: application.context
       }
-      Actions.addMessage({msg, editFormRequestPrefill, originatingMessage})
+      Actions.addMessage({msg, editFormRequestPrefill, originatingMessage, application})
       this.props.navigator.pop()
     }
     else {
@@ -876,6 +887,8 @@ class NewResource extends Component {
     let arrayItems
     if (!search) {
       for (let p in itemsMeta) {
+        if (!this.checkRequestedProperties(p))
+          continue
         let bl = itemsMeta[p]
         if (bl.icon === 'ios-telephone-outline') {
           bl.icon = 'ios-call-outline'
@@ -916,22 +929,22 @@ class NewResource extends Component {
       formStyle = {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
     else
       formStyle = styles.noRegistration
-    let jsonProps = utils.getPropertiesWithRange('json', meta)
+    // let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons
-    if (jsonProps  &&  jsonProps.length) {
-      let hidden = meta.hidden
-      jsonProps.forEach((prop) => {
-        if (prop.hidden  ||  (hidden  &&  hidden.includes(prop.name)))
-          return
-        let val = this.state.resource[prop.name]
-        if (val) {
-          let params = {prop: prop, json: val, jsonRows: [], isView: true}
-          if (!jsons)
-            jsons = []
-          jsons.push(this.showJson(params))
-        }
-      })
-    }
+    // if (jsonProps  &&  jsonProps.length) {
+    //   let hidden = meta.hidden
+    //   jsonProps.forEach((prop) => {
+    //     if (prop.hidden  ||  (hidden  &&  hidden.includes(prop.name)))
+    //       return
+    //     let val = this.state.resource[prop.name]
+    //     if (val) {
+    //       let params = {prop: prop, json: val, jsonRows: [], isView: true}
+    //       if (!jsons)
+    //         jsons = []
+    //       jsons.push(this.showJson(params))
+    //     }
+    //   })
+    // }
     // add server url sometimes takes a while
     let wait
     if (this.state.disableEditing)
@@ -1067,6 +1080,20 @@ class NewResource extends Component {
 
       </View>
     )
+  }
+  checkRequestedProperties(prop) {
+    let { requestedProperties } = this.state
+    if (!requestedProperties)
+      return true
+    ;({ requestedProperties } = requestedProperties)
+    if (!requestedProperties  ||  requestedProperties[prop])
+      return true
+    let props = this.props.model.properties
+    for (let p in requestedProperties) {
+      if (p.endsWith('_group')  &&  props[p].list.includes(prop))
+        return true
+    }
+    return false
   }
   showResource(r) {
     this.props.navigator.push({
