@@ -264,25 +264,25 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
       requestedProperties.splice(2, 0, {name: 'middleName'})
     requestedProperties.splice(1, 0, {name: 'country'})
   }
-  else {
-    if (isOther) {
-      requestedProperties = [
-       {name: 'personal_group'},
-       {name: 'nationality'},
-       {name: 'sex'},
-       {name: 'idCardDocument_group'}
-       ]
-    }
-    else {
-      requestedProperties = [
-        {name: 'personal_group'},
-        {name: 'nationality'},
-        {name: 'sex'},
-        {name: 'document_group'}
-        ]
-    }
-    requestedProperties.splice(0, 0, {name: 'country'})
+  else if (isOther) {
+    requestedProperties = [
+     {name: 'personal_group'},
+     {name: 'nationality'},
+     {name: 'sex'},
+     {name: 'idCardDocument_group'}
+     ]
   }
+  else {
+    requestedProperties = [
+      {name: 'personal_group'},
+      {name: 'nationality'},
+      {name: 'sex'},
+      {name: 'document_group'},
+      {name: 'issuer'}
+      ]
+  }
+  requestedProperties.splice(0, 0, {name: 'country'})
+
   return commonRP.concat(requestedProperties)
 }
 function cleanupValues(form, values, model) {
@@ -295,8 +295,10 @@ function cleanupValues(form, values, model) {
     if (typeof val === 'object')
       cleanupValues(form, val, model, exclude)
     else if (!props[p]) {
-      if (p === 'birthData')
+      if (p === 'birthData') {
         delete form[p]
+        delete form['dateOfBirth']
+      }
     }
     else
       delete form[p]
