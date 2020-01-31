@@ -462,28 +462,30 @@ var Store = Reflux.createStore({
 
     this._identityPromises = {}
     const connectivityPromise = Promise.race([
-        NetInfo.fetch()
-          .then(state => this._handleConnectivityChange(state.isConnected)),
+        NetInfo.getConnectionInfo()
+          .then(isConnected => this._handleConnectivityChange(isConnected)),
+        // NetInfo.fetch()
+        //   .then(state => this._handleConnectivityChange(state.isConnected)),
         // timeout after 2s
         Promise.delay(2000)
     ])
     .catch(err => debug('failed to get network connectivity', err.message))
 
-    NetInfo.addEventListener(async state => {
-      // make sure events arrive after initial fetch
-      await connectivityPromise
-      this._handleConnectivityChange(state.isConnected)
-    });
+    // NetInfo.addEventListener(async state => {
+    //   // make sure events arrive after initial fetch
+    //   await connectivityPromise
+    //   this._handleConnectivityChange(state.isConnected)
+    // });
 
 
-    // NetInfo.isConnected.addEventListener(
-    //   'connectionChange',
-    //   async (isConnected) => {
-    //     // make sure events arrive after initial fetch
-    //     await connectivityPromise
-    //     this._handleConnectivityChange(isConnected)
-    //   }
-    // );
+    NetInfo.isConnected.addEventListener(
+      'connectionChange',
+      async (isConnected) => {
+        // make sure events arrive after initial fetch
+        await connectivityPromise
+        this._handleConnectivityChange(isConnected)
+      }
+    );
 
     // storeUtils.init({db, list, contextIdToResourceId, models})
     storeUtils.addModels({models, enums})
@@ -2815,7 +2817,8 @@ var Store = Reflux.createStore({
       _.extend(toChain, {
         prefill,
         form: r.form,
-        product: r.product
+        product: r.product,
+        context: application.context
       })
       let ending = ''
       let origMessage = originatingMessage.message
@@ -2823,6 +2826,9 @@ var Store = Reflux.createStore({
         let idx =  origMessage.indexOf(' **')
         ending = idx !== origMessage.length - 3 && origMessage.slice(idx) || ''
       }
+      if (originatingMessage.dataLineage)
+        toChain.dataLineage = originatingMessage.dataLineage
+
       toChain.message = rr.message = translate('prefilledForCustomer') + ending
     }
     else {
@@ -3852,6 +3858,15 @@ var Store = Reflux.createStore({
     await this.setMe(me)
     this.trigger({action: 'showStepIndicator', showStepIndicator})
   },
+  async onRefreshApplication({resource}) {
+    Actions.showModal({title: translate('refreshInProgress'), showIndicator: true})
+    try {
+      let r = await this.onGetItem({resource, search: true})
+      this.trigger({action: 'updateRow', resource: r, forceUpdate: true})
+    } finally {
+      Actions.hideModal()
+    }
+  },
   async onGetItem(params) {
     var {resource, action, noTrigger, search, backlink, backlinks, isChat} = params
     // await this._loadedResourcesDefer.promise
@@ -4321,8 +4336,8 @@ if (!res[SIG]  &&  res._message)
   onSaveTemporary(resource) {
     temporaryResources[resource[TYPE]] = utils.sanitize(resource)
   },
-  async onGetTemporary(type) {
-    var r = temporaryResources[type]
+  async onGetTemporary(type, noFetch) {
+    var r = !noFetch &&  temporaryResources[type]
     let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
     this.trigger({action: 'getTemporary', resource: r, requestedProperties})
   },
@@ -4542,12 +4557,17 @@ if (!res[SIG]  &&  res._message)
     }
     // fix dates and money
     for (let pp in json) {
-      if (props[pp]  &&  props[pp].type === 'date')
+      let prop = props[pp]
+      if (!prop)
+        continue
+      if (prop.type === 'date')
         json[pp] = new Date(json[pp]).getTime()
       else if (props[pp]  &&  props[pp].ref === MONEY) {
         if (typeof json[pp].value === 'string')
           json[pp].value = parseFloat(json[pp].value)
       }
+      else if (prop.type === 'string')
+        json[pp] = json[pp].trim()
     }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
