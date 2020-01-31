@@ -18,7 +18,7 @@ import Prompt from 'react-native-prompt'
 import constants from '@tradle/constants'
 import validateModel from '@tradle/validate-model'
 
-import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -229,10 +229,14 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.type === 'date') {
-        // let valueMoment = moment.utc(val)
-        // let date = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
-        // val = utils.formatDate(date)
-        val = utils.formatDate(val)
+        if (pMeta.format)
+          val = dateformat(val, pMeta.format)
+        else {
+          // let valueMoment = moment.utc(val)
+          // let date = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date(), valueMoment.hours(), valueMoment.minutes())
+          // val = utils.formatDate(date)
+          val = utils.formatDate(val)
+        }
       }
       else if (pMeta.ref) {
         if (pMeta.ref === PHOTO) {
@@ -260,7 +264,7 @@ class ShowPropertiesView extends Component {
         else if (pMeta.ref === IDENTITY) {
           let title = val.title
           if (!title)
-            title = val.id === utils.getId(me) ? 'Me' : 'Not me'
+            title = getRootHash(val) === me[ROOT_HASH] ? 'Me' : 'Not me'
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
