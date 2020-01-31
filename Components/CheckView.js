@@ -17,7 +17,21 @@ const {
   TYPE,
 } = constants
 
-import utils, { translate, translateEnum, isSubclassOf, isStub } from '../utils/utils'
+import utils, {
+  translate,
+  translateEnum,
+  isSubclassOf,
+  styleFactory,
+  dimensions,
+  isStub,
+  getMe,
+  isRM,
+  getEnumValueId,
+  getPropertiesWithRef,
+  buildRef,
+  buildStubByEnumTitleOrId,
+  getRootHash
+} from '../utils/utils'
 import { circled } from '../styles/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 import PageView from './PageView'
@@ -31,7 +45,8 @@ import StyleSheet from '../StyleSheet'
 import ShowPropertiesView from './ShowPropertiesView'
 
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
-const STATUS = 'tradle.OverrideStatus'
+const OVERRIDE_STATUS = 'tradle.OverrideStatus'
+const STATUS = 'tradle.Status'
 
 class CheckView extends Component {
   static displayName = 'CheckView';
@@ -78,7 +93,7 @@ class CheckView extends Component {
       return
     let { bankStyle, application, resource, search } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource)) {
-      if (utils.getRootHash(resource) !== utils.getRootHash(params.resource))
+      if (getRootHash(resource) !== getRootHash(params.resource))
         return
     }
     if (action === 'getItem') {
@@ -121,7 +136,13 @@ class CheckView extends Component {
           rmodel.viewCols.includes('aspects'))
       excludedProperties = ['message']
     }
-    let isVerifier = !rmodel.notEditable && application  && utils.isRM(application)
+    if (resource.top  &&  getRootHash(resource.top) === getRootHash(resource.application)) {
+      if (!excludedProperties)
+        excludedProperties = []
+      excludedProperties.push('top')
+    }
+
+    let isVerifier = !rmodel.notEditable && application  && isRM(application)
 
     let propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource}
@@ -132,7 +153,7 @@ class CheckView extends Component {
 
     let checkOverrideButton, checkOverrideView
     if (resource.checkOverride  &&  resource.checkOverride.length) {
-      const e = utils.getModel(STATUS).enum
+      const e = utils.getModel(OVERRIDE_STATUS).enum
       let checkOverride = resource.checkOverride[0]
       const statusId = checkOverride.status && this.getEnumID(checkOverride.status.id) || 'pass'
       const statusM = e.find(r => r.id === statusId)
@@ -157,8 +178,8 @@ class CheckView extends Component {
                             </View>
                           </TouchableOpacity>
     }
-    else if (!this.state.isLoading  &&  utils.isRM(application)) {
-      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
+    else if (!this.state.isLoading) { //  &&  isRM(application)) {
+      let checkOverrideProp = getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
       if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
                                 <TouchableOpacity
@@ -171,7 +192,7 @@ class CheckView extends Component {
       }
     }
 
-    let { height, width } = utils.dimensions(CheckView)
+    let { height, width } = dimensions(CheckView)
     let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, {height, width, alignItems: 'center', borderTopColor: bankStyle.linkColor, borderTopWidth: 1}]} separator={contentSeparator} bankStyle={bankStyle} >
@@ -202,21 +223,21 @@ class CheckView extends Component {
     const { navigator, bankStyle, application } = this.props
     const { resource } = this.state
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
-    const statusModel = utils.getModel(STATUS)
+    const statusModel = utils.getModel(OVERRIDE_STATUS)
     const values = statusModel.enum
-    const checkStatus = resource.status.id
+    const checkStatus = getEnumValueId({ model: utils.getModel(STATUS), value: resource.status })
     let status
-    if (checkStatus.indexOf('_pass') !== -1)
-      status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
-    else if (checkStatus.indexOf('_fail') !== -1)
-      status = utils.buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
+    if (checkStatus === 'pass')
+      status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
+    else // if (checkStatus.indexOf('_fail') !== -1)
+      status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
 
     let r = {
-      from: utils.getMe(),
+      from: getMe(),
       to: application.to,
       _context: application._context,
       [TYPE]: model.id,
-      check: utils.buildRef(resource),
+      check: buildRef(resource),
       application,
       status
     }
@@ -241,7 +262,8 @@ reactMixin(CheckView.prototype, ResourceMixin);
 reactMixin(CheckView.prototype, Reflux.ListenerMixin);
 CheckView = makeResponsive(CheckView)
 
-var createStyles = utils.styleFactory(CheckView, function ({ dimensions, bankStyle }) {
+var createStyles = styleFactory(CheckView, function ({ dimensions, bankStyle }) {
+  let buttonColor = bankStyle.buttonColor || '#ffffff'
   return StyleSheet.create({
     overrideButton: {
       backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
@@ -254,7 +276,7 @@ var createStyles = utils.styleFactory(CheckView, function ({ dimensions, bankSty
     },
     overrideButtonText: {
       fontSize: 20,
-      color: '#ffffff',
+      color: buttonColor,
       alignSelf: 'center'
     },
     footer: {
