@@ -21,7 +21,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate, isWeb } from '../utils/utils'
+import utils, { translate, isWeb, enumValue } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -932,9 +932,6 @@ var NewResourceMixin = {
     else
       propLabel = <View style={styles.floatingLabel}/>
 
-    let format = 'LL'
-    // let format = 'MMMM Do, YYYY'
-    // let format = 'YYYY-MM-DD'
     let valueMoment = params.value && moment.utc(new Date(params.value))
     // let value = valueMoment && valueMoment.format(format)
     let value = params.value  &&  utils.getDateValue(new Date(params.value))
@@ -947,8 +944,6 @@ var NewResourceMixin = {
       else
         dateProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
     }
-    if (prop.format)
-      dateProps.format = prop.format
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
@@ -961,6 +956,13 @@ var NewResourceMixin = {
     }
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
+    let format = 'LL'
+    if (prop.format) {
+      dateProps.format = prop.format
+      format = prop.format
+      if (localizedDate)
+        value = dateformat(localizedDate, format)
+    }
     let datePicker
     if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
@@ -1167,8 +1169,12 @@ var NewResourceMixin = {
       if (vals  &&  vals[p])
         value = vals[p]
     }
-    else
-      value = prop.default
+    if (prop.default) {
+      if (!prop.ref)
+        value = prop.default
+      else
+        value = enumValue({model: utils.getModel(prop.ref), value: prop.default})
+    }
     if (!value)
       return
     if (prop.type === 'date') {
