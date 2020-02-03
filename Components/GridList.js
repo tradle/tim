@@ -618,6 +618,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (!_.isEqual(this.state.resource, nextState.resource)) {
       return true
     }
+    if (this.state.checksCategory !== nextState.checksCategory)
+      return true
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.chosen !== nextState.chosen)
@@ -1125,6 +1127,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 modelName={rtype}
                 application={application}
                 bankStyle={bankStyle}
+                category={this.state.checksCategory}
+                showCategory={this.showCategory.bind(this)}
                 resource={resource} />
                )
       else if (modelName === MODIFICATION)
@@ -1174,6 +1178,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
       bankStyle={bankStyle}
       chosen={this.state.chosen} />
     );
+  }
+  showCategory(model) {
+    if (this.state.checksCategory === model)
+      this.setState({checksCategory: null})
+    else
+      this.setState({checksCategory: model})
   }
   searchWithFilter(filterResource, bookmark) {
     this.setState({resource: filterResource})

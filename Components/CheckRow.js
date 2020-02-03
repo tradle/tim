@@ -72,7 +72,8 @@ class CheckRow extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (!_.isEqual(this.props.resource, nextProps.resource) ||
-        !_.isEqual(this.state.resource, nextState.resource))
+        !_.isEqual(this.state.resource, nextState.resource) ||
+        this.props.category !== nextProps.category)
       return true
     return false
   }
@@ -92,7 +93,7 @@ class CheckRow extends Component {
 
     let date = this.getDateComponent(model)
     let title = this.getTitleComponent(model)
-    let header =  <View style={styles.header} key={this.getNextKey()}>
+    let header =  <View style={[styles.header, resource.isInactive && {opacity: 0.3} || {opacity: 1}]} key={this.getNextKey()}>
                     <View style={styles.noImageBlock}>
                       <View style={styles.title}>
                         {title}
@@ -102,10 +103,28 @@ class CheckRow extends Component {
                       </View>
                     </View>
                   </View>
+    let identifier
+    let category = this.props.category
+    let isHidden
+    if (model.interfaces) {
+      if (category  &&  !model.interfaces.includes(category.id))
+        return <View style={{height: 0}}/>
+
+      let iModel = utils.getModel(model.interfaces[0])
+      if (iModel.icon)
+        identifier = <Icon name={iModel.icon} size={25} color='#aaaaaa' />
+      else
+        identifier = <Text styles={styles.checkDescription}>{translate(iModel)}</Text>
+      identifier = <TouchableOpacity onPress={() => {this.props.showCategory(iModel)}} style={{position:'absolute', right: 10, top: 3}}>
+                     {identifier}
+                   </TouchableOpacity>
+    }
+
     return <View host={lazy}>
              <TouchableOpacity onPress={onSelect.bind(this)}>
                {header}
              </TouchableOpacity>
+             {identifier}
            </View>
   }
   getDateComponent(model) {
@@ -160,10 +179,26 @@ class CheckRow extends Component {
     }
     else if (form.title) {
       let ftype = utils.getType(form)
+      let title
+      if (form.title.indexOf('\n') === -1) {
+        title = <View style={{flexDirection: 'row'}}>
+                  <Text style={styles.search}>{`: `}</Text>
+                  <Text style={styles.search}>{`${form.title}`}</Text>
+                </View>
+      }
+      else {
+        let t = form.title.split('\n').map(f => f.trim())
+        title = <View style={{flexDirection: 'row'}}>
+                  <Text style={styles.search}>{`: `}</Text>
+                  <Text style={styles.search}>{`${t[0]}\n`}
+                  <Text style={styles.searchG}>{`${t.slice(1).join(' ')}`}</Text>
+                  </Text>
+                </View>
+      }
       searchTerm = <View style={{flexDirection: 'row', paddingVertical: 5}}>
                     <View style={styles.titleView}>
                       <Text style={styles.label}>{translate(utils.getModel(ftype))}</Text>
-                      <Text style={styles.search}>{`: ${form.title}`}</Text>
+                      {title}
                     </View>
                   </View>
     }
@@ -214,7 +249,6 @@ class CheckRow extends Component {
                <Text style={styles.checkDescription}>{'Provider: ' + provider || translate(model)}</Text>
              </View>
            </View>
-
   }
 }
 
@@ -242,6 +276,11 @@ var styles = StyleSheet.create({
   search: {
     fontSize: 16,
     color: '#555555',
+    fontStyle: 'italic',
+  },
+  searchG: {
+    fontSize: 14,
+    color: '#757575',
     fontStyle: 'italic',
   },
   label: {
