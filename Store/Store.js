@@ -4229,34 +4229,50 @@ if (!res[SIG]  &&  res._message)
       if (!r[name])
         this.organizeSubmissions(r)
       if (r[name]) {
-        if (r[name].length !== slength) {
-          list = await this.getObjects(r[name], prop)
-          if (list.length)
-            list.sort((a, b) => b._time - a._time)
-          r[name] = list
-          this.organizeSubmissions(r)
+        if (utils.isSubclassOf(prop.items.ref, FORM)) {
+          if (r[name].length !== slength) {
+            list = await this.getObjects(r[name], prop)
+            if (list.length) {
+              let m = utils.getModel(prop.items.ref)
+              let sortProp = m.sort || '_time'
+              list.sort((a, b) => b[sortProp] - a[sortProp])
+            }
+            r[name] = list
+            this.organizeSubmissions(r)
+          }
         }
-        list = await this.getObjects(r[blProp.name], blProp)
-        r[blProp.name] = list
+        else {
+          let cntProp = `_${name}Count`
+          if (r[cntProp]  &&  r[cntProp] !== r[name].length  ||  !r[name][0].application) {
+            list = await this.getObjects(r[name], prop)
+            if (list.length) {
+              let m = utils.getModel(prop.items.ref)
+              let sortProp = m.sort || '_time'
+              list.sort((a, b) => b[sortProp] - a[sortProp])
+            }
+            r[name] = list
+          }
+          else
+            list = r[name]
+          if (name === 'checks') {
+            let active = list.filter(check => !check.isInactive)
+            let inactive = list.filter(check => check.isInactive)
+            r[name] = active.concat(inactive)
+          }
+        }
+        if (blProp !== prop) {
+          list = await this.getObjects(r[blProp.name], blProp)
+          if (list.length) {
+            let m = utils.getModel(blProp.items.ref)
+            let sortProp = m.sort || '_time'
+            list.sort((a, b) => b[sortProp] - a[sortProp])
+          }
+          r[blProp.name] = list
+        }
       }
     }
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
-    // let m = this.getModel(r[TYPE])
-    // if (r.reviewer) {
-    //     let revId = r.reviewer.id.replace(IDENTITY, PROFILE)
-    //     let reviewer = this._getItem(revId)
-    //     if (reviewer)
-    //       r.reviewer.title = utils.getDisplayName(reviewer)
-    // }
-    // if (r.relationshipManagers) {
-    //   r.relationshipManagers.forEach(relationshipManager => {
-    //     let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
-    //     let rm = this._getItem(rmId)
-    //     if (rm)
-    //       relationshipManager.title = utils.getDisplayName(rm)
-    //   })
-    // }
     if (!r._context) {
       let context = await this.getContext(r.context, r)
       if (context)
@@ -4271,39 +4287,7 @@ if (!res[SIG]  &&  res._message)
     if (list)
       retParams.list = list
 
-    // if (r.requestFor !== 'tradle.legal.LegalEntityProduct') {
-    //   this.trigger(retParams)
-    //   return r
-    // }
-    // debugger
-    // if (prop) {
-      this.trigger(retParams)
-      // return r
-    // }
-    // if (prop)
-    //   return r
-    // let myBot = this.getRepresentative(me.organization)
-
-    // let itemsPR = await this.searchServer({
-    //   modelName: PRODUCT_REQUEST,
-    //   noTrigger: true,
-    //   filterResource: {associatedResource: r[ROOT_HASH]}
-    // })
-    // if (itemsPR  &&  itemsPR.list)  {
-    //   let itemsAPP = await this.searchServer({
-    //     modelName: APPLICATION,
-    //     noTrigger: true,
-    //     filterResource: {context: itemsPR.list.map(pr => pr.contextId), _org: myBot[ROOT_HASH]}
-    //   })
-    //   if (itemsAPP  &&  itemsAPP.list) {
-    //     r.items = itemsAPP.list
-    //   }
-    // }
-    // if (r.items) {
-    //   retParams.resource = {...r}
-
-    //   this.trigger(retParams)
-    // }
+    this.trigger(retParams)
     return r
   },
 
