@@ -213,6 +213,7 @@ function getPropsForControllingEntity(form) {
       retProps.requestedProperties.push({name: 'middleName', required: false})
       if (controllingEntityCountryOfResidence  &&  getEnumValueId({model: getModel(COUNTRY), value: controllingEntityCountryOfResidence}) == 'DE')
         retProps.requestedProperties.push({name: 'controllingEntityPlaceOfBirth', required: false})
+      retProps.requestedProperties.push({name: 'nationality'})
     }
 
     // retProps.requestedProperties.push({name: 'notificationMethod'})
