@@ -260,7 +260,8 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
       {name: 'placeOfBirth', required: countryId === 'DE'},
       {name: 'nationality'},
       {name: 'sex'},
-      {name: 'idCardDocument_group'}
+      {name: 'idCardDocument_group'},
+      {name: 'dateOfIssue'},
       ]
     if (form.middleName)
       requestedProperties.splice(2, 0, {name: 'middleName'})
