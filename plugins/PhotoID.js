@@ -79,7 +79,7 @@ module.exports = function PhotoID ({ models }) {
             message = translate('invalidCountry', countryCCA)
 
           if (!country  ||  country.id !== countryId) {
-            message = translate('invalidCountry', countryCCA)
+            // message = translate('invalidCountry', countryCCA)
             cleanedup = cleanupValues(form, scan, model)
             scan = null
           }
@@ -237,6 +237,7 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
         {name: 'otherSideScan'},
         {name: 'country'},
         {name: 'personal_group'},
+        {name: 'placeOfBirth', required: countryId === 'DE'},
         {name: 'address_group'},
         {name: 'document_group'},
         {name: 'issuer'}
@@ -256,6 +257,7 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
     requestedProperties = [
       {name: 'otherSideScan'},
       {name: 'personal_group'},
+      {name: 'placeOfBirth', required: countryId === 'DE'},
       {name: 'nationality'},
       {name: 'sex'},
       {name: 'idCardDocument_group'}
@@ -267,6 +269,7 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
   else if (isOther) {
     requestedProperties = [
      {name: 'personal_group'},
+     {name: 'placeOfBirth'},
      {name: 'nationality'},
      {name: 'sex'},
      {name: 'idCardDocument_group'}
@@ -275,8 +278,10 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
   else {
     requestedProperties = [
       {name: 'personal_group'},
+      {name: 'placeOfBirth', required: countryId === 'DE'},
       {name: 'nationality'},
       {name: 'sex'},
+      {name: 'lastNameAtBirth'},
       {name: 'document_group'},
       {name: 'issuer'}
       ]
