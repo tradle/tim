@@ -265,6 +265,7 @@ reactMixin(CheckView.prototype, Reflux.ListenerMixin);
 CheckView = makeResponsive(CheckView)
 
 var createStyles = styleFactory(CheckView, function ({ dimensions, bankStyle }) {
+  let buttonColor = bankStyle.buttonColor || '#ffffff'
   return StyleSheet.create({
     overrideButton: {
       backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
@@ -277,7 +278,7 @@ var createStyles = styleFactory(CheckView, function ({ dimensions, bankStyle }) 
     },
     overrideButtonText: {
       fontSize: 20,
-      color: '#ffffff',
+      color: buttonColor,
       alignSelf: 'center'
     },
     footer: {
