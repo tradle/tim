@@ -613,9 +613,11 @@ console.log('GridList.componentWillMount: filterResource', resource)
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    if (!_.isEqual(this.state.resource, nextState.resource)) {
+    if (!_.isEqual(this.state.resource, nextState.resource))
       return true
-    }
+    if (this.state.checksCategory !== nextState.checksCategory)
+      return true
+
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.chosen !== nextState.chosen)
@@ -1114,6 +1116,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 modelName={rtype}
                 application={application}
+                category={this.state.checksCategory}
+                showCategory={this.showCategory.bind(this)}
                 bankStyle={bankStyle}
                 resource={resource} />
                )
@@ -1161,6 +1165,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
       bankStyle={bankStyle}
       chosen={this.state.chosen} />
     );
+  }
+  showCategory(model) {
+    if (this.state.checksCategory === model)
+      this.setState({checksCategory: null})
+    else
+      this.setState({checksCategory: model})
   }
   searchWithFilter(filterResource, bookmark) {
     this.setState({resource: filterResource})
