@@ -202,7 +202,7 @@ class ApplicationRow extends Component {
     if (submittedFormTypesCount) {
       let progress = submittedFormTypesCount / maxFormTypesCount
       let progressColor = '#a0d0a0'
-      progressBar = <View style={{paddingBottom: 5}}><ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} /></View>
+      progressBar = <View style={{paddingBottom: 5}}><ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} /></View>
     }
     return  <View>
               <View style={{padding: 5}}>
