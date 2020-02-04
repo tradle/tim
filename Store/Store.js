@@ -4065,8 +4065,8 @@ if (!res[SIG]  &&  res._message)
           else
             list = r[name]
           if (name === 'checks') {
-            let active = list.filter(check => !check.isInactive)
-            let inactive = list.filter(check => check.isInactive)
+            let active = list.filter(check => !check.nextCheck)
+            let inactive = list.filter(check => check.nextCheck)
             r[name] = active.concat(inactive)
           }
         }
