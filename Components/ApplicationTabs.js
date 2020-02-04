@@ -249,36 +249,8 @@ class ApplicationTabs extends Component {
   }
   getAppStatus(styles) {
     let { resource, bankStyle } = this.props
-    let formTypes = []
-    let progress = 0
-
-    let { submittedFormTypesCount, maxFormTypesCount, forms, requestFor, status } = resource
-    if (submittedFormTypesCount)
-      progress = submittedFormTypesCount / maxFormTypesCount
-    else if (forms) {
-      forms.forEach((item) => {
-        let itype = utils.getType(item)
-        if (formTypes.indexOf(itype) === -1)
-          formTypes.push(itype)
-      })
-      let m = utils.getModel(requestFor)
-
-      if (status === 'approved' || status === 'completed')
-        progress = 1
-      else
-        progress = formTypes.length / m.forms.length
-    }
-    let progressColor = bankStyle.linkColor
-    if (status) {
-      switch (status) {
-        case 'approved':
-          progressColor = '#A6D785'
-          break
-        case 'denied':
-          progressColor = '#EE3333'
-          break
-      }
-    }
+    let progress = this.getProgress(resource)
+    let progressColor = '#a0d0a0'
 
     return <View style={styles.progress}>
              <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 34} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
