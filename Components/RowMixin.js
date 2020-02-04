@@ -1,10 +1,7 @@
-
+import uniqBy from 'lodash/uniqBy'
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons';
-import CustomIcon from '../styles/customicons'
-import CameraView from './CameraView'
-var cnt = 0;
 import {
   // Text,
   View,
@@ -12,9 +9,20 @@ import {
   Platform,
 } from 'react-native'
 import { coroutine as co } from 'bluebird'
-
 import constants from '@tradle/constants'
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
 
+var {
+  MONEY,
+  VERIFICATION,
+  PROFILE,
+} = constants.TYPES
+
+import CustomIcon from '../styles/customicons'
+import CameraView from './CameraView'
 import utils, { translate, translateEnum } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
@@ -29,20 +37,9 @@ const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
 const FORM_ERROR = 'tradle.FormError'
+var cnt = 0;
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
-var {
-  TYPE,
-  ROOT_HASH
-} = constants
-
-var {
-  MONEY,
-  VERIFICATION,
-  PROFILE,
-} = constants.TYPES
-
-var cnt = 0;
 
 var RowMixin = {
   addDateProp(dateProp, style) {
@@ -93,31 +90,28 @@ var RowMixin = {
         </View>
       )
     }
-    else {
-      let isMyProduct = utils.isMyProduct(model)
-      let isForm = utils.isForm(model)
-      let isMyMessage = this.isMyMessage()
-      if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
-      let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
-      let ratio = value.length / propTitle.length
-      let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
+    let isMyProduct = utils.isMyProduct(model)
+    let isForm = utils.isForm(model)
+    let isMyMessage = this.isMyMessage()
+    if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
+      style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
+    let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
+    let ratio = value.length / propTitle.length
+    let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
 
-      let title
-      style = {flexDirection: 'column'}
+    let title
+    style = {flexDirection: 'column'}
 
-      if (!prop.displayName  &&  !prop.displayAs)
-        title =  <Text style={[styles.descriptionG]}>{propTitle}</Text>
-      return (
-        <View style={style} key={this.getNextKey()}>
-          <Text>
-           {title}
-           <Text style={[styles.descriptionB, {color: bankStyle.textColor}]}>{(title &&  '  ' || '') + value}</Text>
-         </Text>
-       </View>
-      )
-    }
-
+    if (!prop.displayName  &&  !prop.displayAs)
+      title =  <Text style={[styles.descriptionG]}>{propTitle}</Text>
+    return (
+      <View style={style} key={this.getNextKey()}>
+        <Text>
+         {title}
+         <Text style={[styles.descriptionB, {color: bankStyle.textColor}]}>{(title &&  '  ' || '') + value}</Text>
+       </Text>
+     </View>
+    )
   },
   getOwnerPhoto(isMyMessage) {
     let { to, resource, application, bankStyle } = this.props
@@ -325,6 +319,20 @@ var RowMixin = {
         return <Text style={{fontSize: 16, color:'red'}}>{resource._context.contextId}</Text>
     }
   },
+  getProgress(resource) {
+    let { status, forms, submittedFormTypesCount, maxFormTypesCount, requestFor } = resource
+
+    let progress = 0
+    if (status === 'approved' || status === 'completed')
+      return 1
+    if (submittedFormTypesCount  &&  maxFormTypesCount)
+      return submittedFormTypesCount / maxFormTypesCount
+    if (!forms)
+      return
+    let formTypes = uniqBy(forms.map(item => utils.getType(item)))
+    let m = utils.getModel(requestFor)
+    return formTypes.length / m.forms.length
+  },
   chooseToShare() {
     let resource = this.props.resource
     let id = utils.getId(resource)
@@ -401,63 +409,3 @@ var styles = StyleSheet.create({
 
 module.exports = RowMixin;
 
-  // onSetSignatureProperty(prop, item) {
-  //   if (!item)
-  //     return;
-
-  //   let resource = this.props.resource
-
-  //   let formRequest
-  //   if (resource[TYPE] === FORM_REQUEST) {
-  //     formRequest = resource
-  //     resource = formRequest.prefill  ||  {}
-  //   }
-  //   // Form request for new resource
-  //   if (formRequest)
-  //     _.extend(resource, {
-  //         [TYPE]: formRequest.form,
-  //         _context: formRequest._context,
-  //         from: utils.getMe(),
-  //         to: formRequest.from
-  //       }
-  //     )
-  //   resource[prop.name] = item
-  //   let params = {resource}
-  //   if (formRequest)
-  //     params.disableFormRequest = formRequest
-  //   Actions.addChatItem(params)
-  // },
-/*
-  isOnePropForm() {
-    const resource = this.props.resource;
-    let type = resource[TYPE]
-    let isFormRequest = type === FORM_REQUEST
-    let isFormError = type === FORM_ERROR
-    if (!isFormRequest  &&  !isFormError)
-      return
-    let ftype = isFormRequest
-              ? resource.form
-              : utils.getType(resource.prefill)
-    const model = utils.getModel(ftype).value
-    const props = model.properties
-    let eCols = []
-    for (let p in props) {
-      let prop = props[p]
-      if (!prop.readOnly  &&
-        !prop.hidden      &&
-        !prop.list )
-        eCols.push(props[p])
-    }
-
-    if (eCols.length === 1) {
-      let p = eCols[0]
-      if (ftype === IPROOV_SELFIE)
-        return p
-      if (ftype === PRODUCT_REQUEST)
-        return p
-      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
-        return p
-    }
-    return
-  },
-*/
