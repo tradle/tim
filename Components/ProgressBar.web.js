@@ -18,7 +18,7 @@ class ProgressBar extends Component {
     let { progress, width, color, height, borderWidth, borderRadius, showProgress } = this.props
     let percentage, opacity = 1
     if (showProgress) {
-      percentage = <Text style={{position: 'absolute', top: 1, left: width/2 - 10, fontSize: 12, alignSelf: 'center'}}>{progress + '%'}</Text>
+      percentage = <Text style={{position: 'absolute', top: 1, left: width/2 - 10, fontSize: 12, alignSelf: 'center'}}>{Math.round(progress * 100) + '%'}</Text>
       if (height < 16) {
         height = 16
         borderRadius = 5

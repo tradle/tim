@@ -10,7 +10,6 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types';
 import PieChart from 'react-minimal-pie-chart';
-
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 
@@ -295,28 +294,7 @@ class ApplicationTabs extends Component {
   getAppStatus(styles) {
     let { resource, bankStyle } = this.props
 
-    let { status, forms, submittedFormTypesCount, maxFormTypesCount } = resource
-    // if (resource.status !== 'started')
-    //   return
-    let progress = 0
-    if (submittedFormTypesCount)
-      progress = submittedFormTypesCount / maxFormTypesCount
-    else if (!forms)
-      return
-    else {
-      let formTypes = []
-      forms.forEach((item) => {
-        let itype = utils.getType(item)
-        if (formTypes.indexOf(itype) === -1)
-          formTypes.push(itype)
-      })
-      let m = utils.getModel(resource.requestFor)
-
-      if (resource.status === 'approved' || resource.status === 'completed')
-        progress = 1
-      else
-        progress = formTypes.length / m.forms.length
-    }
+    let progress = this.getProgress(resource)
     let progressColor = '#a0d0a0' //bankStyle.linkColor
 
     return <View style={styles.progress}>

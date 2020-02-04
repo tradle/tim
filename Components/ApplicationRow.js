@@ -188,7 +188,6 @@ class ApplicationRow extends Component {
     let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center', marginTop: aTitle && -15 || 0}}>
                    {icons}
                  </View>
-    let formsCount, progressBar
 
     let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
     let team
@@ -198,18 +197,15 @@ class ApplicationRow extends Component {
         rightMarginTop = -22
       team = <Text style={{position: 'absolute', bottom: 0, left: 5, fontSize: 14, fontStyle: 'italic', color: '#7AAAC3'}}>{translateEnum(resource.assignedToTeam)}</Text>
     }
-    let { submittedFormTypesCount, maxFormTypesCount } = resource
-    if (submittedFormTypesCount) {
-      let progress = submittedFormTypesCount / maxFormTypesCount
+    let progressBar
+    let progress = this.getProgress(resource)
+    if (progress) {
       let progressColor = '#a0d0a0'
       progressBar = <View style={{paddingBottom: 5}}><ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} /></View>
     }
     return  <View>
               <View style={{padding: 5}}>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={styles.resourceTitle}>{mTitle}</Text>
-                  {formsCount}
-                </View>
+                <Text style={styles.resourceTitle}>{mTitle}</Text>
                 {applicant}
               </View>
               {progressBar}
