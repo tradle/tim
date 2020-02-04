@@ -1,4 +1,4 @@
-
+import uniqBy from 'lodash/uniqBy'
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -9,9 +9,20 @@ import {
   Platform,
 } from 'react-native'
 import { coroutine as co } from 'bluebird'
-
 import constants from '@tradle/constants'
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
 
+var {
+  MONEY,
+  VERIFICATION,
+  PROFILE,
+} = constants.TYPES
+
+import CustomIcon from '../styles/customicons'
+import CameraView from './CameraView'
 import utils, { translate, translateEnum } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
@@ -26,20 +37,9 @@ const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
 const FORM_ERROR = 'tradle.FormError'
+var cnt = 0;
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
-var {
-  TYPE,
-  ROOT_HASH
-} = constants
-
-var {
-  MONEY,
-  VERIFICATION,
-  PROFILE,
-} = constants.TYPES
-
-var cnt = 0;
 
 var RowMixin = {
   addDateProp(dateProp, style) {
@@ -92,31 +92,28 @@ var RowMixin = {
         </View>
       )
     }
-    else {
-      let isMyProduct = utils.isMyProduct(model)
-      let isForm = utils.isForm(model)
-      let isMyMessage = this.isMyMessage()
-      if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, { paddingVertical: 3}]
-      let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
-      let ratio = value.length / propTitle.length
-      let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
+    let isMyProduct = utils.isMyProduct(model)
+    let isForm = utils.isForm(model)
+    let isMyMessage = this.isMyMessage()
+    if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
+      style = [style, { paddingVertical: 3}]
+    let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
+    let ratio = value.length / propTitle.length
+    let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
 
-      let title
-      style = {flexDirection: 'column'}
+    let title
+    style = {flexDirection: 'column'}
 
-      if (!prop.displayName  &&  !prop.displayAs)
-        title =  <Text style={styles.descriptionG}>{propTitle}</Text>
-      return (
-        <View style={style} key={this.getNextKey()}>
-          <Text>
-           {title}
-           <Text style={[styles.descriptionB, {color: bankStyle.textColor}]}>{(title &&  '  ' || '') + value}</Text>
-         </Text>
-       </View>
-      )
-    }
-
+    if (!prop.displayName  &&  !prop.displayAs)
+      title =  <Text style={styles.descriptionG}>{propTitle}</Text>
+    return (
+      <View style={style} key={this.getNextKey()}>
+        <Text>
+         {title}
+         <Text style={[styles.descriptionB, {color: bankStyle.textColor}]}>{(title &&  '  ' || '') + value}</Text>
+       </Text>
+     </View>
+    )
   },
   getOwnerPhoto(isMyMessage) {
     let { to, resource, application, bankStyle } = this.props
@@ -323,6 +320,20 @@ var RowMixin = {
       if (resource._context  &&  resource._context.contextId)
         return <Text style={{fontSize: 16, color:'red'}}>{resource._context.contextId}</Text>
     }
+  },
+  getProgress(resource) {
+    let { status, forms, submittedFormTypesCount, maxFormTypesCount, requestFor } = resource
+
+    let progress = 0
+    if (status === 'approved' || status === 'completed')
+      return 1
+    if (submittedFormTypesCount  &&  maxFormTypesCount)
+      return submittedFormTypesCount / maxFormTypesCount
+    if (!forms)
+      return
+    let formTypes = uniqBy(forms.map(item => utils.getType(item)))
+    let m = utils.getModel(requestFor)
+    return formTypes.length / m.forms.length
   },
   chooseToShare() {
     let resource = this.props.resource
