@@ -201,9 +201,11 @@ class NewItem extends Component {
     if (err)
       error =  <Text style={styles.err}>{err}</Text>
 
-    let model = {};
+    let model = {}
+    let data = {[TYPE]: metadata.items.ref}
     let params = {
         meta: metadata,
+        data,
         model: model,
         editable: true,
         // onSubmitEditing: this.onSavePressed.bind(this),
@@ -233,7 +235,7 @@ class NewItem extends Component {
     var width = utils.getContentWidth(NewItem)
     return (
       <PageView style={[platformStyles.container]}>
-        <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center'}}
+        <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop: 10}}
                     ref='scrollView' {...this.scrollviewProps}
                     keyboardShouldPersistTaps="always"
                     keyboardDismissMode={'on-drag'}>
