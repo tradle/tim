@@ -176,10 +176,12 @@ var ResourceMixin = {
       }
     }
     let cnt = value.length;
+    let isWeb = utils.isWeb()
     return value.map((v) => {
       let ret = [];
       counter++;
       let displayName
+      let hadCancel
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
         if (!v[p]  &&  !itemMeta.displayAs)
@@ -218,18 +220,31 @@ var ResourceMixin = {
 
         if (!value)
           return
-        let item = <View>
-                     <Text style={itemMeta.skipLabel ? {height: 0} : [styles.itemText, {fontSize: 16}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-                     <Text style={styles.itemText}>{value}</Text>
+        let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                       <Text style={itemMeta.skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={styles.itemText}>{value}</Text>
+                     </View>
+                     <View style={{flex: 1}}/>
                    </View>
 
-        if (cancelItem)
+        if (cancelItem  &&  !hadCancel) {
+          hadCancel = true
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                   <View style={[styles.row, {width: utils.getContentWidth(component) - 40}]}>
+                   <View style={[{width: utils.getContentWidth(component) - 40}]}>
                      {item}
+                     <View style={{position: 'absolute', top: 0, right: 0}}>
                      <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                     </View>
                    </View>
                  </TouchableOpacity>
+          // item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+          //          <View style={[styles.row, {width: utils.getContentWidth(component) - 40}]}>
+          //            {item}
+          //            <Icon name='ios-close-circle-outline' size={24} color={linkColor} />
+          //          </View>
+          //        </TouchableOpacity>
+        }
 
 
         ret.push(
@@ -1080,7 +1095,7 @@ var styles = StyleSheet.create({
     borderRadius: 5
   },
   itemText: {
-    fontSize: 18,
+    fontSize: 16,
     marginBottom: 0,
     // marginHorizontal: 7,
     color: '#757575',
