@@ -18,7 +18,7 @@ var {
   TYPE,
   // PREV_HASH
 } = constants
-var { PROFILE, ORGANIZATION } = constants.TYPES
+var { PROFILE, ORGANIZATION, MONEY } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
@@ -184,21 +184,23 @@ var ResourceMixin = {
       let hadCancel
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
-        if (!v[p]  &&  !itemMeta.displayAs)
+        let { type, displayAs, displayName, range, ref, skipLabel } = itemMeta
+        let pVal = v[p]
+        if (!pVal  &&  !displayAs)
           return
-        if (itemMeta.displayName) {
-          displayName = v[p]
+        if (displayName) {
+          displayName = pVal
           return
         }
         let value;
-        let isDisplayName = itemMeta.displayAs
+        let isDisplayName = displayAs
         if (isDisplayName)
           value = utils.templateIt(itemMeta, v, pModel)
-        else if (itemMeta.type === 'date')
-          value = utils.formatDate(v[p]);
-        else if (itemMeta.type === 'boolean')
-          value = v[p] ? 'Yes' : 'No'
-        else if (itemMeta.type !== 'object') {
+        else if (type === 'date')
+          value = utils.formatDate(pVal);
+        else if (type === 'boolean')
+          value = pVal ? 'Yes' : 'No'
+        else if (type !== 'object') {
           if (p == 'photos') {
             ret.push(
                <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
@@ -206,23 +208,30 @@ var ResourceMixin = {
             return
           }
           else
-            value = v[p];
+            value = pVal;
         }
-        else if (itemMeta.range === 'json') {
-          // let json = {[displayName]: v[p]}
-          ret.push(this.showJson({ json: v[p], prop: itemMeta, isView: true }))
+        else if (range === 'json') {
+          // let json = {[displayName]: pVal}
+          ret.push(this.showJson({ json: pVal, prop: itemMeta, isView: true }))
           return
         }
-        else if (itemMeta.ref)
-          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref));
+        else if (ref) {
+          if (ref === MONEY) {
+            let symbol = pVal.currency
+            let c = utils.normalizeCurrencySymbol(pVal.currency)
+            value = (c || symbol) + pVal.value
+          }
+          else
+            value = pVal.title  ||  utils.getDisplayName(pVal, utils.getModel(ref));
+        }
         else
-          value = v[p].title;
+          value = pVal.title;
 
         if (!value)
           return
         let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
-                       <Text style={itemMeta.skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
                      <View style={{flex: 1}}/>
