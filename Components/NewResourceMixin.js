@@ -513,7 +513,7 @@ var NewResourceMixin = {
 
     let vColsList = utils.getViewCols(model)
     vColsList.forEach(p => {
-      if (eCols.indexOf(p) === -1)
+      if (!props.readOnly  &&  eCols.indexOf(p) === -1)
         eCols.push(p)
     })
 
