@@ -359,18 +359,21 @@ var NewResourceMixin = {
             }
           }
           options.fields[p].template = this.myMoneyInputTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
-                    value: value,
+                    value,
                     model: meta,
+                    onSubmitEditing: onSubmitEditing.bind(this),
                     keyboard: 'numeric',
                     component,
                     required: !maybe,
                     errors: formErrors,
+                    editable: params.editable,
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
-          options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing(p);
           continue;
         }
         else if (props[p].signature) {
@@ -1403,11 +1406,12 @@ var NewResourceMixin = {
       <View style={styles.moneyInput}>
           {
              this.myTextInputTemplate({
-                    label: label,
-                    prop:  prop,
+                    label,
+                    prop,
                     value: value.value ? value.value + '' : '',
-                    required: required,
-                    model: model,
+                    required,
+                    model,
+                    onSubmitEditing: params.onSubmitEditing.bind(this),
                     noError: true,
                     // errors: errors,
                     editable,
@@ -1417,9 +1421,9 @@ var NewResourceMixin = {
           }
           {
              this.myEnumTemplate({
-                    prop:     prop,
+                    prop,
                     enumProp: utils.getModel(MONEY).properties.currency,
-                    required: required,
+                    required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
                     // errors:   errors,
                     component,
