@@ -1159,7 +1159,7 @@ var utils = {
     if (!editCols) {
       let viewCols = utils.getViewCols(model)
       if (viewCols)
-        eCols = viewCols.map(p => properties[p])
+        eCols = viewCols.filter(p => properties[p]  &&  !properties[p].readOnly)
       return eCols
     }
     editCols.forEach((p) => {
@@ -1212,8 +1212,9 @@ var utils = {
       })
     }
     for (let p in properties) {
+      if (p.charAt(0) === '_') continue
       let prop = properties[p]
-      if (vCols.indexOf(p) === -1  &&  !prop.readOnly  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
+      if (vCols.indexOf(p) === -1  /*&&  !prop.readOnly*/  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
         vCols.push(p)
     }
     return vCols
