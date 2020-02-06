@@ -1299,7 +1299,7 @@ class NewResource extends Component {
       actionableItem = <View style={{width, alignSelf: 'center'}}>
                          <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
                            <View style={styles.iitems}>
-                             <Text style={[cstyle, {marginTop: 3, color: lcolor}]}>{label}</Text>
+                             <Text style={[cstyle, {marginTop: 3}]}>{label}</Text>
                              <View style={[styles.addButton, {marginTop: 3}]}>
                                <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
                              </View>
