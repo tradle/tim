@@ -113,7 +113,7 @@ var NewResourceMixin = {
 
     let showReadOnly = true
     eCols.forEach(p => {
-      if (!props[p].readOnly)
+      if (props[p]  &&  !props[p].readOnly)
         showReadOnly = false
     })
     let requestedProperties, excludeProperties
