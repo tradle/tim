@@ -12,18 +12,19 @@ import PropTypes from 'prop-types';
 import PieChart from 'react-minimal-pie-chart';
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
+import reactMixin from 'react-mixin'
+import constants from '@tradle/constants'
 
 import { Text } from './Text'
 import ProgressBar from './ProgressBar'
-import constants from '@tradle/constants'
 import utils, {
   translate
 } from '../utils/utils'
 
 import buttonStyles from '../styles/buttonStyles'
 import appStyle from '../styles/appStyle.json'
-import reactMixin from 'react-mixin'
 import RowMixin from './RowMixin'
+
 import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
 import Actions from '../Actions/Actions'
@@ -52,6 +53,7 @@ const {
   FORM,
   IDENTITY
 } = constants.TYPES
+const CHECK = 'tradle.Check'
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
@@ -75,7 +77,8 @@ class ApplicationTabs extends Component {
     }).start();
   }
   render() {
-    var { resource, bankStyle, children, navigator, lazy, showDetails, currency, backlink } = this.props
+    var { resource, bankStyle, children, navigator, lazy,
+          showDetails, currency, backlink, checksCategory } = this.props
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
@@ -172,8 +175,18 @@ class ApplicationTabs extends Component {
     // }
     // explore current backlink
     let flinkRL, details, separator
+    let isChecks = backlink &&  backlink.items.ref === CHECK
     if (!showDetails  &&  currentProp) {
       let modelName = currentProp.items.ref
+      let backlinkList
+      if (isChecks  &&  checksCategory  &&  resource.checks) {
+        let id = checksCategory.id
+        backlinkList = resource.checks.filter(check => {
+          let m = utils.getModel(utils.getType(check))
+          return m.interfaces  &&  m.interfaces.includes(id)
+        })
+      }
+
       flinkRL = <GridList
                     lazy={lazy}
                     modelName={modelName}
@@ -181,6 +194,8 @@ class ApplicationTabs extends Component {
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     search={true}
+                    backlinkList={backlinkList}
+                    checksCategory={checksCategory}
                     isBacklink={true}
                     application={resource}
                     listView={true}
@@ -218,7 +233,6 @@ class ApplicationTabs extends Component {
                   </View>
       }
     }
-
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
       if (refList  &&  refList.length) {
         refList = <View style={buttonStyles.buttonsNoBorder} key={'ApplicationTabs'}>
@@ -236,6 +250,7 @@ class ApplicationTabs extends Component {
                 {separator}
                 {refList}
                 {showDetails  &&  this.getAppStatus(styles)}
+                {isChecks && this.getChecksBar(styles)}
                 {children}
                 <View>
                   {flinkRL}
@@ -298,8 +313,37 @@ class ApplicationTabs extends Component {
     let progressColor = '#a0d0a0' //bankStyle.linkColor
 
     return <View style={styles.progress}>
-             <Text style={styles.title}>Progress</Text>
+             <Text style={styles.title}>{translate('progress')}</Text>
              <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
+           </View>
+  }
+  getChecksBar(styles) {
+    let { resource, bankStyle } = this.props
+    let { checks } = resource
+    if (!checks)
+      return
+
+    let impl = []
+    checks.forEach(check => {
+      let interfaces = utils.getModel(utils.getType(check)).interfaces
+      if (interfaces)
+        interfaces.forEach(inf => !impl.includes(inf)  &&  impl.push(inf))
+    })
+
+    impl = impl.length  &&  impl.map(inf => {
+      let m = utils.getModel(inf)
+      let identifier
+      if (m.icon)
+        identifier = <Icon name={m.icon} size={30} color={'#757575'} />
+      else
+        identifier = <Text style={{fontSize: 20, color: '#757575'}}>{translate(m)}</Text>
+      return <TouchableOpacity onPress={() => {this.props.showCategory(m)}} style={styles.checkCategory} key={this.getNextKey()}>
+               {identifier}
+             </TouchableOpacity>
+    })
+
+    return <View style={styles.checksTabs}>
+             {impl}
            </View>
   }
 }
@@ -433,6 +477,17 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       alignSelf: 'center',
       // paddingBottom: 20,
       color: '#5b5b5b'
+    },
+    checkCategory: {
+      flex: 1,
+      paddingVertical: 5,
+      alignItems: 'center'
+    },
+    checksTabs: {
+      flexDirection: 'row',
+      backgroundColor: '#f9f9f9',
+      borderTopWidth: 1,
+      borderTopColor: '#dddddd'
     }
   })
 })

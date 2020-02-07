@@ -150,7 +150,9 @@ class ApplicationView extends Component {
     return this.props.orientation !== nextProps.orientation    ||
            this.state.resource    !== nextState.resource       ||
            this.state.isLoading   !== nextState.isLoading      ||
-           this.state.backlink    !== nextState.backlink
+           this.state.backlink    !== nextState.backlink       ||
+           this.state.checksCategory !== nextState.checksCategory
+      return true
   }
 
   render() {
@@ -247,6 +249,8 @@ class ApplicationView extends Component {
                             navigator={navigator}
                             currency={currency}
                             backlink={backlink}
+                            checksCategory={this.state.checksCategory}
+                            showCategory={this.showCategory.bind(this)}
                             showDetails={this.state.showDetails}
                             approve={this.approve}
                             deny={this.deny}
@@ -378,6 +382,12 @@ class ApplicationView extends Component {
     else
       params.contextId = resource.contextId
     Actions.addVerification(params)
+  }
+  showCategory(model) {
+    if (this.state.checksCategory === model)
+      this.setState({checksCategory: null})
+    else
+      this.setState({checksCategory: model})
   }
 
   openChat() {
