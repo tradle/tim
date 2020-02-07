@@ -504,7 +504,7 @@ var NewResourceMixin = {
     let eCols = utils.getEditCols(model).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
-        return model.required.slice
+        return model.required.slice()
       else
         return Object.keys(props)
     }
