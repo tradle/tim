@@ -373,7 +373,7 @@ var NewResourceMixin = {
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
           if (onEndEditing)
-            options.fields[p].onEndEditing = onEndEditing(p);
+            options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
         else if (props[p].signature) {

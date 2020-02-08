@@ -1377,7 +1377,7 @@ class NewResource extends Component {
         </View>
     }
     else {
-      itemsArray = <Text style={styles.noItemsText}>{label}</Text>
+      itemsArray = <View><Text style={styles.noItemsText}>{label}</Text></View>
     }
     counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} style={styles.camera} />
     let actionableItem
