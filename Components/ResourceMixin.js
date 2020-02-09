@@ -716,7 +716,8 @@ var ResourceMixin = {
     let type = utils.getType(id)
     let isApplication = type === APPLICATION
     if (isApplication) {
-      title = `${title} -- ${resource.from.title} -> ${title}`
+      if (resource.from)
+        title = `${title} -- ${resource.from.title} -> ${title}`
     }
     else
       title = `${title} -- ${utils.makeModelTitle(type)}`
