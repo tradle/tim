@@ -144,6 +144,7 @@ function getPropsForLegalEntity(form) {
       { name: 'info_group' },
       { name: 'registrationDate', required: true },
       { name: 'typeOfOwnership', required: true },
+      { name: 'numberOfEmployees'},
       // { name: 'companyType'},
       { name: 'companyEmail', required: true },
       { name: 'companyWebsite', required: true },
