@@ -270,14 +270,14 @@ var NewResourceMixin = {
 
         if (type === 'string'  &&  p.length > 6  &&  p.indexOf('_group') === p.length - 6) {
           options.fields[p].template = this.myTextTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                   })
         }
         else if (type === 'string'  &&  props[p].markdown) {
           options.fields[p].template = this.myMarkdownTextInputTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
@@ -288,7 +288,7 @@ var NewResourceMixin = {
         }
         else if (type === 'string'  &&  props[p].signature) {
           options.fields[p].template = this.mySignatureTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: data  &&  data[p] || null,
@@ -301,7 +301,7 @@ var NewResourceMixin = {
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           let editable = (params.editable && !props[p].readOnly) || search || false
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
@@ -349,9 +349,9 @@ var NewResourceMixin = {
             }
           }
           options.fields[p].template = this.myMoneyInputTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
-                    value: value,
+                    value,
                     model: meta,
                     keyboard: 'numeric',
                     component,
@@ -360,13 +360,14 @@ var NewResourceMixin = {
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
-          options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
         else if (props[p].signature) {
           model[p] = maybe ? t.maybe(t.Str) : t.Str;
           options.fields[p].template = this.mySignatureTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: data  &&  data[p] || null,
@@ -396,7 +397,7 @@ var NewResourceMixin = {
 
         // options.fields[p].onFocus = chooser.bind(this, props[p], p)
         options.fields[p].template = this.myCustomTemplate.bind(this, {
-            label: label,
+            label,
             prop:  p,
             required: !maybe,
             errors: formErrors,
@@ -492,7 +493,7 @@ var NewResourceMixin = {
     let eCols = utils.getEditCols(model).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
-        return model.required.slice
+        return model.required.slice()
       else
         return Object.keys(props)
     }
@@ -501,7 +502,7 @@ var NewResourceMixin = {
 
     let vColsList = utils.getViewCols(model)
     vColsList.forEach(p => {
-      if (eCols.indexOf(p) === -1)
+      if (!props.readOnly  &&  eCols.indexOf(p) === -1)
         eCols.push(p)
     })
 
@@ -1219,7 +1220,20 @@ var NewResourceMixin = {
       resource[propName] = value
     }
     else if (isArray || isMultichooser) {
-      ({setItemCount} = this.setArrayOrMultichooser(prop, value, resource))
+      let hasReset
+      if (!Array.isArray(value))
+        hasReset = value[ROOT_HASH] === '__reset'
+      else
+        hasReset = value.find(v => v[ROOT_HASH] === '__reset')
+      if (hasReset) {
+        if (this.floatingProps  &&  this.floatingProps[propName])
+          delete this.floatingProps[propName]
+        // resource[propName] = null
+        delete resource[propName]
+        doDelete = true
+      }
+      else
+        ({setItemCount} = this.setArrayOrMultichooser(prop, value, resource))
     }
     else if (value[ROOT_HASH] === '__reset') {
       if (this.floatingProps  &&  this.floatingProps[propName])
@@ -1364,23 +1378,24 @@ var NewResourceMixin = {
       <View style={styles.moneyInput}>
           {
              this.myTextInputTemplate({
-                    label: label,
-                    prop:  prop,
+                    label,
+                    prop,
                     value: value.value ? value.value + '' : '',
-                    required: required,
-                    model: model,
+                    required,
+                    model,
+                    onSubmitEditing: params.onSubmitEditing.bind(this),
                     noError: true,
                     // errors: errors,
-                    editable: editable,
+                    editable,
                     component,
                     keyboard: search ? null : 'numeric',
                   })
           }
           {
              this.myEnumTemplate({
-                    prop:     prop,
+                    prop,
                     enumProp: utils.getModel(MONEY).properties.currency,
-                    required: required,
+                    required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
                     // errors:   errors,
                     component,

@@ -419,6 +419,7 @@ var storeUtils = {
     const { modelName, limit, query, lastId, prop, pin, isChooser, resource } = params
     let enumList = enums[modelName]
     let property = getEnumProperty(getModel(modelName))
+    let hasReset = enumList.find(e => e[ROOT_HASH] === '__reset')
     if (query) {
       let q = query.toLowerCase()
       return enumList.filter((r) => {
@@ -430,7 +431,7 @@ var storeUtils = {
       })
     }
     let reset
-    if (isChooser  &&  resource[prop.name]) {
+    if (!hasReset  &&  isChooser  &&  resource[prop.name]) {
       let rmodel = getModel(resource[TYPE])
       reset = {
         [TYPE]: modelName,
@@ -445,7 +446,7 @@ var storeUtils = {
       else if (pin)
         ret = applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
       if (ret) {
-        if (reset)
+        if (!hasReset  &&  reset)
           ret.splice(0, 0, reset)
         return ret
       }
