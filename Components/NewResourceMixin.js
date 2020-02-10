@@ -1261,7 +1261,20 @@ var NewResourceMixin = {
       resource[propName] = value
     }
     else if (isArray || isMultichooser) {
-      ({setItemCount} = this.setArrayOrMultichooser(prop, value, resource))
+      let hasReset
+      if (!Array.isArray(value))
+        hasReset = value[ROOT_HASH] === '__reset'
+      else
+        hasReset = value.find(v => v[ROOT_HASH] === '__reset')
+      if (hasReset) {
+        if (this.floatingProps  &&  this.floatingProps[propName])
+          delete this.floatingProps[propName]
+        // resource[propName] = null
+        delete resource[propName]
+        doDelete = true
+      }
+      else
+        ({setItemCount} = this.setArrayOrMultichooser(prop, value, resource))
     }
     else if (value[ROOT_HASH] === '__reset') {
       if (this.floatingProps  &&  this.floatingProps[propName])
