@@ -56,7 +56,6 @@ class ApplicationTreeRow extends Component {
   }
   render()  {
     let { resource, gridCols, bankStyle, rowId, depth, node } = this.props
-    let size = gridCols.length + depth
 
     let colSize =  1
 
@@ -70,6 +69,7 @@ class ApplicationTreeRow extends Component {
       </Col>
     })
 
+    let size = gCols.length + depth
     return <Row size={size} style={styles.gridRow} key={key} nowrap>
              {cols}
            </Row>
@@ -97,12 +97,15 @@ class ApplicationTreeRow extends Component {
 
     let style = [styles.description]
     if (!colProp) {
-      let bgColor
+      let bgColor, units
       if (typeof node[pName] === 'number') {
-        bgColor = typeof gridCols[pName] === 'object' && gridCols[pName][node[pName]+'']
+        if (typeof gridCols[pName] === 'object') {
+          bgColor = typeof gridCols[pName] === 'object' && gridCols[pName][node[pName]+'']
+          units = gridCols[pName].units || ''
+        }
         style.push({alignSelf: 'flex-end', paddingRight: 10})
       }
-      return <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+      return <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{node[pName] + units}</Text></View>
     }
 
     if (colProp.style)

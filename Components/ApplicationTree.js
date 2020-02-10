@@ -66,15 +66,18 @@ const viewCols = {
   'scoreType': 'risk',
   'stalled': {
     label: 'Stalled',
-    type: 'number'
+    type: 'number',
+    units: 'h'
   },
   'delayed': {
     label:'Delayed',
-    type: 'number'
+    type: 'number',
+    units: 'h'
   },
   'waiting': {
     label: 'Waiting',
-    type: 'number'
+    type: 'number',
+    units: 'h'
   },
 }
 
@@ -110,6 +113,8 @@ class ApplicationTree extends Component {
   flatTree({level, nodes, list, depth}) {
     if (!level)
       level = 0
+    let hours = 3600 * 60 * 24
+
     for (let p in nodes) {
       let { _displayName, _permalink, top } = nodes[p]
       let node = _.omit(nodes[p], ['top']) //, '_link', '_permalink', '_displayName'])
@@ -120,6 +125,10 @@ class ApplicationTree extends Component {
         let idx = _displayName.indexOf(title)
         node.node_displayName = idx === -1 && _displayName || _displayName.slice(0, idx).trim()
       }
+      node.stalled = node.lastMsgToClientTime && (node.status === 'started'  &&  Math.round((Date.now() - node.lastMsgToClientTime) / hours))
+      node.waiting = (node.status === 'completed' && Math.round((Date.now() - node.dateCompleted) / hours)) || 0
+      node.delayed = node.dateCompleted && Math.round((node.dateCompleted - node.dateStarted) / hours)
+
       node.node_permalink = _permalink
       node.node_level = level
       list.push(node)
