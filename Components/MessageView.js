@@ -53,20 +53,22 @@ class MessageView extends Component {
   };
   constructor(props) {
     super(props);
+    let { resource, navigator, action, backlink, bankStyle, isReview } = props
     this.state = {
-      resource: props.resource,
-      isConnected: props.navigator.isConnected,
+      resource,
+      isConnected: navigator.isConnected,
       // promptVisible: false,
-      isLoading: utils.isStub(props.resource),
+      isLoading: utils.isStub(resource),
+      backlink,
       // showDetails: true,
       showDetails: false,
-      bankStyle: props.bankStyle || defaultBankStyle
+      bankStyle: bankStyle || defaultBankStyle
     };
-    let currentRoutes = props.navigator.getCurrentRoutes();
+    let currentRoutes = navigator.getCurrentRoutes();
     let len = currentRoutes.length;
     if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle) {
-      if (this.props.isReview)
-        currentRoutes[len - 1].onRightButtonPress = props.action
+      if (isReview)
+        currentRoutes[len - 1].onRightButtonPress = action
       else
         currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
     }
@@ -79,7 +81,7 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message, isChat} = this.props
+    let {resource, isReview, search, application, message, isChat, backlink} = this.props
     if (isReview)
       return
     if (message) {
@@ -95,7 +97,7 @@ class MessageView extends Component {
     let vCols = utils.getViewCols(m)
     if (!vCols)
       return
-    Actions.getItem({resource, search, application, isChat})
+    Actions.getItem({resource, search, application, backlink, isChat})
   }
 
   componentDidMount() {
