@@ -201,10 +201,12 @@ class NewItem extends Component {
     if (err)
       error =  <Text style={styles.err}>{err}</Text>
 
-    let model = {};
+    let model = {}
+    let data = {}
     let params = {
         meta: metadata,
-        model: model,
+        model,
+        data,
         editable: true,
         // onSubmitEditing: this.onSavePressed.bind(this),
         component: NewItem
