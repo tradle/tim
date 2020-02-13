@@ -138,7 +138,8 @@ class GridList extends Component {
         return true
       }
     })
-    let {resource, modelName, prop, filter, serverOffline, search, bookmark} = this.props
+    let {resource, modelName, prop, filter, checksCategory,
+         serverOffline, search, bookmark, checkFilter} = this.props
     let model = utils.getModel(modelName)
 
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
@@ -148,9 +149,11 @@ class GridList extends Component {
       dataSource,
       allLoaded: false,
       allowToAdd: prop  &&  prop.allowToAdd,
-      filter: filter,
+      filter,
+      checksCategory,
+      checkFilter,
       hideMode: false,  // hide provider
-      serverOffline: serverOffline,
+      serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
       refreshing: false,
@@ -158,7 +161,7 @@ class GridList extends Component {
       resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
       isDraft: bookmark  &&  bookmark.bookmark.draft
-    };
+    }
     if (props.multiChooser) {
       this.state.chosen = {}
       if (prop  &&  resource[prop.name])
@@ -203,9 +206,12 @@ class GridList extends Component {
       Actions.list({modelName: ORGANIZATION})
   }
   _handleBacklink(props) {
-    let { resource, prop, application } = props
+    let { resource, prop, application, backlinkList } = props
     if (resource[prop.name]) {
-      this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
+      if (backlinkList)
+        this.state.dataSource = this.state.dataSource.cloneWithRows(backlinkList)
+      else
+        this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
       return
     }
     else
@@ -617,7 +623,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return true
     if (this.state.checksCategory !== nextState.checksCategory)
       return true
-
+    if (this.props.checksCategory !== nextProps.checksCategory)
+      return true
+    if (this.props.checkFilter !== nextProps.checkFilter)
+      return true
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.chosen !== nextState.chosen)
@@ -1116,8 +1125,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 modelName={rtype}
                 application={application}
-                category={this.state.checksCategory}
+                category={this.state.checksCategory ||  this.props.checksCategory}
                 showCategory={this.showCategory.bind(this)}
+                checkFilter={this.props.checkFilter}
                 bankStyle={bankStyle}
                 resource={resource} />
                )
