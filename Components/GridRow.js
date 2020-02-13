@@ -16,7 +16,7 @@ import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
 import RowMixin from './RowMixin'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, getEnumValueId } from '../utils/utils'
 import { circled } from '../styles/utils'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
@@ -264,7 +264,7 @@ class GridRow extends Component {
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
 
         if (utils.isEnum(refM)) {
-          let eVal = refM.enum.find(r => r.id === this.getEnumID(resource[pName].id))
+          let eVal = refM.enum.find(r => r.id === getEnumValueId({model: refM, value: resource[pName]}))
           if (eVal) {
             let { icon, color } = eVal
             if (icon) {
