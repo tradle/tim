@@ -24,7 +24,7 @@ const { TYPE } = constants
 // import ImageComponent from './Image'
 import Image from './Image'
 import Store from '../Store/Store'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, getEnumValueId } from '../utils/utils'
 import { circled } from '../styles/utils'
 import RowMixin from './RowMixin'
 import StyleSheet from '../StyleSheet'
@@ -73,7 +73,8 @@ class CheckRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (!_.isEqual(this.props.resource, nextProps.resource) ||
         !_.isEqual(this.state.resource, nextState.resource) ||
-        this.props.category !== nextProps.category)
+        this.props.category !== nextProps.category          ||
+        this.props.checkFilter !== nextProps.checkFilter)
       return true
     return false
   }
@@ -87,7 +88,7 @@ class CheckRow extends Component {
   }
 
   render() {
-    let { resource, lazy, onSelect } = this.props
+    let { resource, lazy, onSelect, checkFilter } = this.props
     let rType = utils.getType(resource)
     let model = utils.getModel(rType);
 
@@ -111,6 +112,8 @@ class CheckRow extends Component {
       if (category  &&  !model.interfaces.includes(category.id))
         return <View style={{height: 0}}/>
 
+      if (checkFilter  &&  getEnumValueId({model: utils.getModel(STATUS), value: resource.status}) !== checkFilter)
+        return <View style={{height: 0}}/>
       let iModel = utils.getModel(model.interfaces[0])
       if (iModel.icon)
         identifier = <Icon name={iModel.icon} size={25} color='#aaaaaa' />
@@ -204,8 +207,9 @@ class CheckRow extends Component {
                   </View>
     }
 
-    let statusId = this.getEnumID(status.id)
-    let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
+    let sModel = utils.getModel(STATUS)
+    let statusId = getEnumValueId({model: sModel, value: status})
+    let statusM = sModel.enum.find(r => r.id === statusId)
     let checkIcon
     let checkOverrideStatus
     let checkOverrideIcon
@@ -277,6 +281,11 @@ var styles = StyleSheet.create({
   search: {
     fontSize: 16,
     color: '#555555',
+    fontStyle: 'italic',
+  },
+  searchG: {
+    fontSize: 14,
+    color: '#757575',
     fontStyle: 'italic',
   },
   label: {
