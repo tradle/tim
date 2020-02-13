@@ -155,10 +155,10 @@ class CheckView extends Component {
 
     let checkOverrideButton, checkOverrideView
     if (resource.checkOverride  &&  resource.checkOverride.length) {
-      const e = utils.getModel(OVERRIDE_STATUS).enum
+      let coModel = utils.getModel(OVERRIDE_STATUS)
       let checkOverride = resource.checkOverride[0]
-      const statusId = checkOverride.status && this.getEnumID(checkOverride.status.id) || 'pass'
-      const statusM = e.find(r => r.id === statusId)
+      const statusId = checkOverride.status && getEnumValueId({model: coModel, value: checkOverride.status}) || 'pass'
+      const statusM = coModel.enum.find(r => r.id === statusId)
       const { icon, color } = statusM
 
       let reasonProp = statusId  &&  checkOverride[reasonProp] === 'pass' &&  'reasonsToPass' || 'reasonsToFail' || ''
@@ -255,10 +255,6 @@ class CheckView extends Component {
       }
     })
   }
-  getEnumID(id) {
-    return id.split('_')[1]
-  }
-
 }
 reactMixin(CheckView.prototype, ResourceMixin);
 reactMixin(CheckView.prototype, Reflux.ListenerMixin);

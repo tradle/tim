@@ -344,9 +344,6 @@ var RowMixin = {
       this.props.chosen[id] = resource
     }
   },
-  getEnumID(id) {
-    return id.split('_')[1]
-  }
 }
 
 var styles = StyleSheet.create({

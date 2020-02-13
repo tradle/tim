@@ -18,7 +18,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import Actions from '../Actions/Actions'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, getEnumValueId } from '../utils/utils'
 import { circled } from '../styles/utils'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
@@ -144,7 +144,7 @@ class ApplicationTreeRow extends Component {
         row = <Text style={styles.description} key={this.getNextKey(node)}>{title}</Text>
 
         if (utils.isEnum(refM)) {
-          let eVal = refM.enum.find(r => r.id === this.getEnumID(node[pName].id))
+          let eVal = refM.enum.find(r => r.id === getEnumValueId({model: refM, value: node[pName]}))
           if (eVal) {
             let { icon, color } = eVal
             if (icon) {
