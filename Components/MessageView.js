@@ -55,14 +55,14 @@ class MessageView extends Component {
   };
   constructor(props) {
     super(props);
-    let { resource, navigator, action, backlink, bankStyle, isReview } = props
+    let { resource, navigator, action, bankStyle, isReview } = props
     this.state = {
       resource: resource,
       isConnected: navigator.isConnected,
       // promptVisible: false,
       isLoading: utils.isStub(resource),
       // showDetails: true,
-      backlink: backlink,
+      // backlink: backlink,
       showDetails: false,
       bankStyle: bankStyle || defaultBankStyle
     };

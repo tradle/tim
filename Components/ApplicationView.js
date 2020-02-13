@@ -83,7 +83,7 @@ class ApplicationView extends Component {
       isLoading: true,
       isConnected: navigator.isConnected,
       bankStyle,
-      backlink,
+      // backlink,
       checkFilter
     }
     let currentRoutes = navigator.getCurrentRoutes()
