@@ -13,7 +13,8 @@ import { WebView } from 'react-native-webview'
 import React, { Component } from 'react'
 
 import utils, {
-  translate
+  translate,
+  getEnumValueId
 } from '../utils/utils'
 
 import { circled } from '../styles/utils'
@@ -401,8 +402,9 @@ class MessageRow extends Component {
     if (utils.isSubclassOf(model, CHECK)) {
       let checkIcon
       if (resource.status) {
-        let statusId = this.getEnumID(resource.status.id)
-        let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
+        let sModel = utils.getModel(STATUS)
+        let statusId = getEnumValueId({model: sModel, value: resource.status})
+        let statusM = sModel.enum.find(r => r.id === statusId)
         if (statusM) {
           const { icon, color } = statusM
           if (icon) {
