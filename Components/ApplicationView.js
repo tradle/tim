@@ -77,12 +77,14 @@ class ApplicationView extends Component {
     super(props);
     this._lazyId = LAZY_ID + INSTANCE_ID++
 
-    let { resource, action, navigator } = props
+    let { resource, action, backlink, checkFilter, navigator, bankStyle } = props
     this.state = {
-      resource: resource,
+      resource,
       isLoading: true,
-      isConnected: props.navigator.isConnected,
-      bankStyle: props.bankStyle
+      isConnected: navigator.isConnected,
+      bankStyle,
+      backlink,
+      checkFilter
     }
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -150,7 +152,10 @@ class ApplicationView extends Component {
     return this.props.orientation !== nextProps.orientation    ||
            this.state.resource    !== nextState.resource       ||
            this.state.isLoading   !== nextState.isLoading      ||
-           this.state.backlink    !== nextState.backlink
+           this.state.backlink    !== nextState.backlink       ||
+           this.state.checksCategory !== nextState.checksCategory ||
+           this.state.checkFilter !== nextState.checkFilter
+      return true
   }
 
   render() {
@@ -244,6 +249,10 @@ class ApplicationView extends Component {
                             navigator={navigator}
                             currency={currency}
                             backlink={backlink}
+                            checksCategory={this.state.checksCategory}
+                            showCategory={this.showCategory.bind(this)}
+                            checkFilter={this.state.checkFilter}
+                            filterChecks={this.filterChecks.bind(this)}
                             showDetails={this.state.showDetails}
                             approve={this.approve}
                             deny={this.deny}
@@ -376,7 +385,18 @@ class ApplicationView extends Component {
       params.contextId = resource.contextId
     Actions.addVerification(params)
   }
-
+  showCategory(model) {
+    if (this.state.checksCategory === model)
+      this.setState({checksCategory: null, checkFilter: null})
+    else
+      this.setState({checksCategory: model, checkFilter: null})
+  }
+  filterChecks(filter) {
+    if (this.state.checkFilter === filter)
+      this.setState({checksCategory: null, checkFilter: null})
+    else
+      this.setState({checksCategory: null, checkFilter: filter})
+  }
   openChat() {
     let { navigator, application } = this.props
     let { bankStyle } = this.state
