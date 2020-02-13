@@ -139,7 +139,7 @@ class GridList extends Component {
       }
     })
     let {resource, modelName, prop, filter, checksCategory,
-         serverOffline, search, bookmark} = this.props
+         serverOffline, search, bookmark, checkFilter} = this.props
     let model = utils.getModel(modelName)
 
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
@@ -151,6 +151,7 @@ class GridList extends Component {
       allowToAdd: prop  &&  prop.allowToAdd,
       filter,
       checksCategory,
+      checkFilter,
       hideMode: false,  // hide provider
       serverOffline,
       isConnected: this.props.navigator.isConnected,
@@ -626,6 +627,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (this.state.checksCategory !== nextState.checksCategory)
       return true
     if (this.props.checksCategory !== nextProps.checksCategory)
+      return true
+    if (this.props.checkFilter !== nextProps.checkFilter)
       return true
     if (this.props.orientation !== nextProps.orientation)
       return true
@@ -1136,6 +1139,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 bankStyle={bankStyle}
                 category={this.state.checksCategory ||  this.props.checksCategory}
                 showCategory={this.showCategory.bind(this)}
+                checkFilter={this.props.checkFilter}
                 resource={resource} />
                )
       else if (modelName === MODIFICATION)
