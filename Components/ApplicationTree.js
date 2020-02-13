@@ -41,25 +41,43 @@ var {
 
 const APPLICATION = 'tradle.Application'
 const PHOTO_ID = 'tradle.PhotoID'
+const STATUS = 'tradle.Status'
 
 var cnt = 0
 
 const viewCols = {
-  'node_displayName': '',
-  'numberOfChecksFailed': {
-    label: 'Failed',
-    type: 'string',
-    icon: 'tradle.Status_fail'
+  'node_displayName': {
+    type: 'string'
   },
   'progress': {
     label: '%',
     type: 'number',
+    description: 'Progress',
     '100': '#D8F0D8'
+  },
+  'numberOfChecksFailed': {
+    label: 'Failed',
+    type: 'string',
+    description: 'Checks\nfailed',
+    icon: 'tradle.Status_fail',
+    backlink: 'checks',
+    filter: {
+      status: {
+        id: `${STATUS}_fail`
+      }
+    }
   },
   'ok': {
     label: 'ok',
     type: 'number',
-    icon: 'tradle.Status_pass'
+    description: 'Checks\npassed',
+    icon: 'tradle.Status_pass',
+    backlink: 'checks',
+    filter: {
+      status: {
+        id: `${STATUS}_pass`
+      }
+    }
   },
   'assignedToTeam': 'Team',
   'score': 'IRR',
@@ -69,16 +87,41 @@ const viewCols = {
     type: 'number',
     units: 'h'
   },
-  'delayed': {
+  'elapsed': {
     label:'Delayed',
     type: 'number',
+    color: 'teal',
+    icon: 'ios-time-outline',
+    description: 'Time it took\nto complete\napplication',
     units: 'h'
   },
   'waiting': {
     label: 'Waiting',
+    icon: 'ios-timer-outline',
+    color: 'orange',
     type: 'number',
+    description: 'Waiting for\nthe approval',
     units: 'h'
   },
+  lastNotified: {
+    label: 'Last Notified',
+    description: 'Last Notified',
+    type: 'number',
+    valueColor: '#ffdee7',
+    units: 'h',
+    icon: 'ios-mail-outline',
+    color: 'darkblue'
+  },
+  timesNotified: {
+    description: 'Times\nnotified',
+    type: 'number',
+    icon: 'ios-list-outline',
+    color: 'darkgray'
+  },
+  // notifiedStatus: {
+  //   label: 'Status',
+  //   description: 'Notified status'
+  // }
 }
 
 class ApplicationTree extends Component {
@@ -118,21 +161,21 @@ class ApplicationTree extends Component {
     for (let p in nodes) {
       let { _displayName, _permalink, top } = nodes[p]
       let node = _.omit(nodes[p], ['top']) //, '_link', '_permalink', '_displayName'])
-      if (top[TYPE] === PHOTO_ID)
+      if (top  &&  top[TYPE] === PHOTO_ID)
         node.node_displayName = top._displayName.split('\n')[0]
       else {
-        let title = utils.makeModelTitle(node.requestFor)
+        let title = utils.makeModelTitle(node.requestFor || node[TYPE])
         let idx = _displayName.indexOf(title)
-        node.node_displayName = idx === -1 && _displayName || _displayName.slice(0, idx).trim()
+        node.node_displayName = idx <= 0 && _displayName || _displayName.slice(0, idx).trim()
       }
       node.stalled = node.lastMsgToClientTime && (node.status === 'started'  &&  Math.round((Date.now() - node.lastMsgToClientTime) / hours))
       node.waiting = (node.status === 'completed' && Math.round((Date.now() - node.dateCompleted) / hours)) || 0
-      node.delayed = node.dateCompleted && Math.round((node.dateCompleted - node.dateStarted) / hours)
-
+      node.elapsed = node.dateCompleted && Math.round((node.dateCompleted - node.dateStarted) / hours)
+      node.lastNotified = node.lastNotified && Math.round((Date.now() - node.lastNotified) / hours)
       node.node_permalink = _permalink
       node.node_level = level
       list.push(node)
-      if (nodes[p].top.nodes)
+      if (nodes[p].top  &&  nodes[p].top.nodes)
         this.flatTree({nodes: nodes[p].top.nodes, list, level: level + 1})
     }
   }

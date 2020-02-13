@@ -15,6 +15,7 @@ import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
+import Actions from '../Actions/Actions'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import utils, { translate } from '../utils/utils'
@@ -83,27 +84,41 @@ class ApplicationTreeRow extends Component {
     let level = node.node_level
     let cellStyle = {/*paddingVertical: 5,*/ paddingLeft: 7}
     if (colIdx === 0) {
-      let style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor}
-      return <TouchableOpacity onPress={this.showTreeNode.bind(this, {
-                 id: `${APPLICATION}_${node._permalink}`,
+      let approved
+      if (node.status === 'approved') {
+        approved = <Icon name='ios-done-all' size={30} color='green' style={{marginLeft: 10}}/>
+        cellStyle.flexDirection = 'row'
+      }
+      let r = {
+                 id: `${node._t}_${node._permalink}`,
                  title: node._displayName
-               })}>
-               <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+               }
+      let style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: approved && 7 || 0}
+      return <TouchableOpacity onPress={this.showTreeNode.bind(this, r)}>
+               <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text>{approved}</View>
              </TouchableOpacity>
     }
     // Handle MESSAGE type RL accross providers
     let properties = model.properties;
     let colProp = properties[pName]
 
+    let { backlink, filter, units, valueColor } = gridCols[pName]
     let style = [styles.description]
     if (!colProp) {
-      let bgColor, units
+      let bgColor, units = ''
       if (typeof node[pName] === 'number') {
-        if (typeof gridCols[pName] === 'object') {
-          bgColor = typeof gridCols[pName] === 'object' && gridCols[pName][node[pName]+'']
-          units = gridCols[pName].units || ''
-        }
+        bgColor = typeof gridCols[pName] === 'object' && gridCols[pName][node[pName]+'']
+        if (!bgColor) bgColor = valueColor
+        if (!units)
+          units  =  ''
         style.push({alignSelf: 'flex-end', paddingRight: 10})
+        if (backlink  &&  filter) {
+          return <TouchableOpacity onPress={this.showBacklinks.bind(this, gridCols[pName])}>
+                   <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}>
+                     <Text style={style} key={this.getNextKey(node)}>{node[pName] + units}</Text>
+                   </View>
+                 </TouchableOpacity>
+        }
       }
       return <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{node[pName] + units}</Text></View>
     }
@@ -159,7 +174,14 @@ class ApplicationTreeRow extends Component {
     if (node[pName]  &&  (typeof node[pName] != 'string')) {
       if (colProp.type === 'number')
         style.push({alignSelf: 'flex-end', paddingRight: 10})
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+
+      if (backlink  &&  filter) {
+        return <TouchableOpacity onPress={this.showBacklinks.bind(this, gridCols[pName])}>
+                 <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+               </TouchableOpacity>
+      }
+      else
+        return <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
     }
     if (!node[pName]  && (node[pName].indexOf('http://') === 0  ||  node[pName].indexOf('https://') === 0))
       // return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, node)} key={this.getNextKey(node)}>{node[pName]}</Text></View>
@@ -182,6 +204,30 @@ class ApplicationTreeRow extends Component {
     return <View style={[styles.button, {alignItems: 'center', backgroundColor: color}]}>
              <Icon name={icon} color='#ffffff' size={25}/>
            </View>
+  }
+  showBacklinks(col) {
+    let { resource, navigator, bankStyle, node } = this.props
+    let { backlink, filter } = col
+
+    let r = {
+              id: `${node._t}_${node._permalink}`,
+              title: node._displayName
+            }
+
+    backlink = utils.getModel(node[TYPE]).properties[backlink]
+    let route = {
+      title: node._displayName,
+      componentName: node[TYPE] === APPLICATION && 'ApplicationView' || 'MessageView',
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: r,
+        backlink,
+        bankStyle,
+        checkFilter: filter.status.id.split('_')[1],
+        application: resource
+      }
+    }
+    navigator.push(route)
   }
 }
 reactMixin(ApplicationTreeRow.prototype, Reflux.ListenerMixin);
