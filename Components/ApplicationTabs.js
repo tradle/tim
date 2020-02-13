@@ -19,7 +19,8 @@ import constants from '@tradle/constants'
 import { Text } from './Text'
 import ProgressBar from './ProgressBar'
 import utils, {
-  translate
+  translate,
+  getEnumValueId
 } from '../utils/utils'
 
 import buttonStyles from '../styles/buttonStyles'
@@ -56,6 +57,7 @@ const {
   IDENTITY
 } = constants.TYPES
 const CHECK = 'tradle.Check'
+const STATUS = 'tradle.Status'
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
@@ -91,7 +93,7 @@ class ApplicationTabs extends Component {
   }
   render() {
     var { resource, bankStyle, children, navigator, lazy,
-          showDetails, currency, backlink, checksCategory } = this.props
+          showDetails, currency, backlink, checksCategory, checkFilter } = this.props
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
@@ -192,12 +194,21 @@ class ApplicationTabs extends Component {
     if (!showDetails  &&  currentProp) {
       let modelName = currentProp.items.ref
       let backlinkList
-      if (isChecks  &&  checksCategory  &&  resource.checks) {
-        let id = checksCategory.id
-        backlinkList = resource.checks.filter(check => {
-          let m = utils.getModel(utils.getType(check))
-          return m.interfaces  &&  m.interfaces.includes(id)
-        })
+      if (isChecks) {
+        if (checksCategory  &&  resource.checks) {
+          let id = checksCategory.id
+          backlinkList = resource.checks.filter(check => {
+            let m = utils.getModel(utils.getType(check))
+            return m.interfaces  &&  m.interfaces.includes(id)
+          })
+        }
+        else if (checkFilter) {
+          let sModel = utils.getModel(STATUS)
+          backlinkList = resource.checks.filter(check => {
+            let id = getEnumValueId({model: sModel, value: check.status})
+            return id === checkFilter
+          })
+        }
       }
 
       flinkRL = <GridList
@@ -209,6 +220,7 @@ class ApplicationTabs extends Component {
                     search={true}
                     backlinkList={backlinkList}
                     checksCategory={checksCategory}
+                    checkFilter={checkFilter}
                     isBacklink={true}
                     application={resource}
                     listView={true}
@@ -389,6 +401,19 @@ class ApplicationTabs extends Component {
                {identifier}
              </TouchableOpacity>
     })
+    if (resource.checks  &&  resource.checks.length  &&  resource.checks[0].status) {
+      let statusM = utils.getModel(STATUS).enum.find(r => r.id === 'fail')
+      let { icon, color } = statusM
+      let style = [styles.checkButton, {backgroundColor: color}]
+
+      impl.push(
+         <TouchableOpacity onPress={() => {this.props.filterChecks('fail')}} style={styles.checkCategory} key={this.getNextKey()}>
+           <View style={style}>
+             <Icon name={icon} color='#fff' size={25} />
+           </View>
+         </TouchableOpacity>
+      )
+    }
 
     return <View style={styles.checksTabs}>
              {impl}
@@ -553,6 +578,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     checkCategory: {
       flex: 1,
       paddingVertical: 5,
+      justifyContent: 'center',
       alignItems: 'center'
     },
     checksTabs: {
@@ -560,6 +586,13 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       backgroundColor: '#f9f9f9',
       borderTopWidth: 1,
       borderTopColor: '#dddddd'
+    },
+    checkButton: {
+      ...circled(25),
+      shadowOpacity: 0.7,
+      opacity: 0.9,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
     },
     treeButton: {
       ...circled(40),
