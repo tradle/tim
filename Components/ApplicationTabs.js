@@ -9,26 +9,29 @@ import {
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
-// import Icon from 'react-native-vector-icons/Ionicons'
+import Icon from 'react-native-vector-icons/Ionicons'
+import reactMixin from 'react-mixin'
 import ScrollableTabView from 'react-native-scrollable-tab-view'
+import constants from '@tradle/constants'
 
 import { Text } from './Text'
 import ProgressBar from './ProgressBar'
-import constants from '@tradle/constants'
 import utils, {
-  translate
+  translate,
+  getEnumValueId
 } from '../utils/utils'
 
 // import buttonStyles from '../styles/buttonStyles'
 import appStyle from '../styles/appStyle.json'
-import reactMixin from 'react-mixin'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
+import ApplicationTree from './ApplicationTree'
 import BacklinksTabBar from './BacklinksTabBar'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
+import { circled } from '../styles/utils'
 
 const {
   TYPE
@@ -39,6 +42,8 @@ const {
   FORM,
   IDENTITY
 } = constants.TYPES
+const CHECK = 'tradle.Check'
+const STATUS = 'tradle.Status'
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
@@ -54,7 +59,8 @@ class ApplicationTabs extends Component {
     super(props);
   }
   render() {
-    var { resource, bankStyle, children, navigator, lazy, showDetails, currency, backlink } = this.props
+    var { resource, bankStyle, children, navigator, lazy,
+          showDetails, currency, backlink, checksCategory, checkFilter } = this.props
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
@@ -159,8 +165,26 @@ class ApplicationTabs extends Component {
     }
     // explore current backlink
     let flinkRL, details, separator
+    let isChecks = backlink &&  backlink.items.ref === CHECK
     if (!showDetails  &&  currentProp) {
       let modelName = currentProp.items.ref
+      let backlinkList
+      if (isChecks) {
+        if (checksCategory  &&  resource.checks) {
+          let id = checksCategory.id
+          backlinkList = resource.checks.filter(check => {
+            let m = utils.getModel(utils.getType(check))
+            return m.interfaces  &&  m.interfaces.includes(id)
+          })
+        }
+        else if (checkFilter) {
+          let sModel = utils.getModel(STATUS)
+          backlinkList = resource.checks.filter(check => {
+            let id = getEnumValueId({model: sModel, value: check.status})
+            return id === checkFilter
+          })
+        }
+      }
       flinkRL = <GridList
                     lazy={lazy}
                     modelName={modelName}
@@ -168,6 +192,9 @@ class ApplicationTabs extends Component {
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     search={true}
+                    backlinkList={backlinkList}
+                    checksCategory={checksCategory}
+                    checkFilter={checkFilter}
                     isBacklink={true}
                     application={resource}
                     listView={true}
@@ -229,6 +256,7 @@ class ApplicationTabs extends Component {
                 {separator}
                 {refListTabs}
                 {showDetails  &&  this.getAppStatus(styles)}
+                {isChecks && this.getChecksBar(styles)}
                 {children}
                 <View>
                   {flinkRL}
@@ -249,13 +277,94 @@ class ApplicationTabs extends Component {
   }
   getAppStatus(styles) {
     let { resource, bankStyle } = this.props
-    let progress = this.getProgress(resource)
-    let progressColor = '#a0d0a0'
 
-    return <View style={styles.progress}>
-             <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 34} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
+    let progress = this.getProgress(resource)
+    let progressColor = '#a0d0a0' //bankStyle.linkColor
+    const spin = this.spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '90deg']
+    })
+    let style = {transform: [{rotate: spin}]}
+    let tree
+    if (resource.tree)
+      tree = <TouchableOpacity onPress={() => this.showTree()} style={styles.tree}>
+               <Animated.View style={style}>
+                 <View style={styles.treeButton}>
+                   <Icon name='ios-git-network' size={25} color='#555555' />
+                 </View>
+               </Animated.View>
+             </TouchableOpacity>
+
+    return <View style={[styles.row, {justifyContent: 'space-between'}]}>
+             <View style={styles.progress}>
+               <Text style={styles.title}>{translate('progress')}</Text>
+               <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
+             </View>
+             {tree}
            </View>
   }
+  getChecksBar(styles) {
+    let { resource, bankStyle } = this.props
+    let { checks } = resource
+    if (!checks)
+      return
+
+    let impl = []
+    checks.forEach(check => {
+      let interfaces = utils.getModel(utils.getType(check)).interfaces
+      if (interfaces)
+        interfaces.forEach(inf => !impl.includes(inf)  &&  impl.push(inf))
+    })
+
+    impl = impl.length  &&  impl.map(inf => {
+      let m = utils.getModel(inf)
+      let identifier
+      if (m.icon)
+        identifier = <Icon name={m.icon} size={30} color={'#757575'} />
+      else
+        identifier = <Text style={{fontSize: 20, color: '#757575'}}>{translate(m)}</Text>
+      return <TouchableOpacity onPress={() => {this.props.showCategory(m)}} style={styles.checkCategory} key={this.getNextKey()}>
+               {identifier}
+             </TouchableOpacity>
+    })
+    if (resource.checks  &&  resource.checks.length  &&  resource.checks[0].status) {
+      let statusM = utils.getModel(STATUS).enum.find(r => r.id === 'fail')
+      let { icon, color } = statusM
+      let style = [styles.checkButton, {backgroundColor: color}]
+
+      impl.push(
+         <TouchableOpacity onPress={() => {this.props.filterChecks('fail')}} style={styles.checkCategory} key={this.getNextKey()}>
+           <View style={style}>
+             <Icon name={icon} color='#fff' size={25} />
+           </View>
+         </TouchableOpacity>
+      )
+    }
+
+    return <View style={styles.checksTabs}>
+             {impl}
+           </View>
+  }
+  showTree() {
+    let { resource, bankStyle, navigator } = this.props
+    let me = utils.getMe()
+    let title
+    let aTitle = resource.applicantName || resource.applicant.title
+    if (aTitle)
+      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
+    else
+      title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
+
+    navigator.push({
+      title,
+      componentName: 'ApplicationTree',
+      passProps: {
+        resource,
+        bankStyle,
+      }
+    })
+  }
+
 }
 
 reactMixin(ApplicationTabs.prototype, RowMixin);
@@ -355,6 +464,34 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     },
     tabText: {
       marginTop: Platform.OS === 'android' ? 3 : 0
+    },
+    checkCategory: {
+      flex: 1,
+      paddingVertical: 5,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    checksTabs: {
+      flexDirection: 'row',
+      backgroundColor: '#f9f9f9',
+      borderTopWidth: 1,
+      borderTopColor: '#dddddd'
+    },
+    checkButton: {
+      ...circled(25),
+      shadowOpacity: 0.7,
+      opacity: 0.9,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+    },
+    treeButton: {
+      ...circled(40),
+      // backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
+      shadowOpacity: 0.7,
+      opacity: 1,
+      shadowRadius: 5,
+      backgroundColor: '#a0d0a0',
+      shadowColor: '#afafaf',
     },
   })
 })
