@@ -4033,10 +4033,10 @@ if (!res[SIG]  &&  res._message)
       let { name } = prop
       let resourceWithBacklink = r
       if (resourceWithBacklink  &&  resourceWithBacklink[name]) {
-        r = _.cloneDeep(resource)
+        r = !resource.id  &&  _.cloneDeep(resource)
         r[name] = resourceWithBacklink[name]
       }
-      if (!r[name])
+      if (!resource[name])
         this.organizeSubmissions(r)
       if (r[name]) {
         if (utils.isSubclassOf(prop.items.ref, FORM)) {
@@ -7874,7 +7874,7 @@ if (!res[SIG]  &&  res._message)
               rcontext = r._context
             else if (type === FORM_REQUEST  &&  r.form === PRODUCT_REQUEST)
               rcontext = r
-            if ((resourceContextId  &&  utils.getId(rcontext) !== resourceContextId)  &&
+            if ((resourceContextId  &&  rcontext  &&  utils.getId(rcontext) !== resourceContextId)  &&
                  r[backlink]  &&  utils.getId(r[backlink]) !== resourceId)
               return
           }
