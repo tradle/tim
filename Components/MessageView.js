@@ -61,6 +61,7 @@ class MessageView extends Component {
       // promptVisible: false,
       isLoading: utils.isStub(props.resource),
       // showDetails: true,
+      backlink: props.backlink,
       showDetails: false,
       bankStyle: props.bankStyle || defaultBankStyle
     };
@@ -81,7 +82,7 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message, isChat} = this.props
+    let {resource, isReview, search, application, message, isChat, backlink} = this.props
     if (isReview)
       return
     if (message) {
@@ -89,7 +90,7 @@ class MessageView extends Component {
       return
     }
     if (resource.id) {
-      Actions.getItem({resource, search, application, isChat})
+      Actions.getItem({resource, search, application, backlink, isChat})
       return
     }
 
@@ -397,6 +398,8 @@ class MessageView extends Component {
           break
         }
       }
+      if (!backlink)
+        backlink = this.props.backlink
                                  // parentResource={isPrefill && resource}
 
       actionPanel = <ShowRefList {...this.props}
