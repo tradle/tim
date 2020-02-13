@@ -14,7 +14,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import constants from '@tradle/constants'
 
 var { TYPE } = constants
-var { PROFILE, ORGANIZATION } = constants.TYPES
+var { PROFILE, ORGANIZATION, MONEY } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
@@ -169,27 +169,31 @@ var ResourceMixin = {
       }
     }
     let cnt = value.length;
+    let isWeb = utils.isWeb()
     return value.map((v) => {
       let ret = [];
       counter++;
       let displayName
+      let hadCancel
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
-        if (!v[p]  &&  !itemMeta.displayAs)
+        let { type, displayAs, displayName, range, ref, skipLabel, title } = itemMeta
+        let pVal = v[p]
+        if (!pVal  &&  !displayAs)
           return
-        if (itemMeta.displayName) {
-          displayName = v[p]
+        if (displayName) {
+          displayName = pVal
           return
         }
         let value;
-        let isDisplayName = itemMeta.displayAs
+        let isDisplayName = displayAs
         if (isDisplayName)
           value = utils.templateIt(itemMeta, v, pModel)
-        else if (itemMeta.type === 'date')
-          value = utils.formatDate(v[p]);
-        else if (itemMeta.type === 'boolean')
-          value = v[p] ? 'Yes' : 'No'
-        else if (itemMeta.type !== 'object') {
+        else if (type === 'date')
+          value = utils.formatDate(pVal);
+        else if (type === 'boolean')
+          value = pVal ? 'Yes' : 'No'
+        else if (type !== 'object') {
           if (p == 'photos') {
             ret.push(
                <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
@@ -197,32 +201,48 @@ var ResourceMixin = {
             return
           }
           else
-            value = v[p];
+            value = pVal;
         }
-        else if (itemMeta.range === 'json') {
-          // let json = {[displayName]: v[p]}
-          ret.push(this.showJson({ json: v[p], prop: itemMeta, isView: true }))
+        else if (range === 'json') {
+          // let json = {[displayName]: pVal}
+          ret.push(this.showJson({ json: pVal, prop: itemMeta, isView: true }))
           return
         }
-        else if (itemMeta.ref)
-          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref));
+        else if (ref) {
+          if (ref === MONEY) {
+            let symbol = pVal.currency
+            let c = utils.normalizeCurrencySymbol(pVal.currency)
+            value = (c || symbol) + pVal.value
+          }
+          else
+            value = pVal.title  ||  utils.getDisplayName(pVal, utils.getModel(ref));
+        }
         else
-          value = v[p].title;
+          value = pVal.title;
 
         if (!value)
           return
-        let item = <View>
-                     <Text style={itemMeta.skipLabel ? {height: 0} : [styles.itemText, {fontSize: 16}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-                     <Text style={styles.itemText}>{value}</Text>
+        let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : title || utils.makeLabel(p)}</Text>
+                       <Text style={styles.itemText}>{value}</Text>
+                     </View>
+                     <View style={{flex: 1}}/>
                    </View>
+        // let item = <View>
+        //              <Text style={skipLabel ? {height: 0} : [styles.itemText, {fontSize: 16}]}>{skipLabel ? '' : title || utils.makeLabel(p)}</Text>
+        //              <Text style={styles.itemText}>{value}</Text>
+        //            </View>
 
-        if (cancelItem)
+        if (cancelItem  &&  !hadCancel) {
+          hadCancel = true
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={styles.row}>
                      {item}
                      <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                    </View>
                  </TouchableOpacity>
+        }
 
 
         ret.push(
@@ -357,89 +377,6 @@ var ResourceMixin = {
     }
     return val
   },
-  // showJson(params) {
-  //   let { json, prop, isView } = params
-  //   let { resource, bankStyle } = this.props
-  //   const theme = {
-  //     scheme: 'custom',
-  //     base00: '#ffffff', // background
-  //     base01: '#272935',
-  //     base02: '#3a4055',
-  //     base03: '#5a647e',
-  //     base04: '#d4cfc9',
-  //     base05: '#e6e1dc',
-  //     base06: '#f4f1ed',
-  //     base07: '#f9f7f3',
-  //     base08: '#da4939',
-  //     base09: bankStyle.confirmationColor, // number
-  //     base0A: '#ffc66d',
-  //     base0B: bankStyle.linkColor, // string
-  //     base0C: '#519f50',
-  //     base0D: '#757575', // label
-  //     base0E: '#b6b3eb',
-  //     base0F: '#bc9458'
-  //   };
-  //   json = utils.sanitize(json)
-  //   let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
-  //   let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-  //   let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
-
-  //   let icon
-  //   const rType = resource[TYPE]
-  //   const showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
-  //   // if (showCollapsed  &&  showCollapsed === prop.name)
-  //   //   icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
-  //   let header = <TouchableOpacity onPress={() => {
-  //     this.state.hidden ? this.setState({hidden: false}) : this.setState({hidden: true})
-  //   }} style={style} key={this.getNextKey()}>
-  //                  <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
-  //                  {icon}
-  //               </TouchableOpacity>
-  //   let content = (
-  //     <View ref='json'>
-  //       <JSONTree data={json} invertTheme={false} hideRoot={true} theme={{
-  //           extend: theme,
-  //           nestedNodeItemString: ({ style }, nodeType, expanded) => ({
-  //             style: {
-  //               ...style,
-  //               fontSize: 18
-  //             }
-  //           })
-  //         }}
-  //         shouldExpandNode = {(keyName, data, level) => {
-  //           if (!keyName.length)
-  //             return this.state.hidden && false || true
-  //           else
-  //             return false
-  //         }}
-  //         getItemString={(type, data, itemType, itemString) => {
-  //           if (type === 'Array')
-  //             return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
-  //           if (type === 'Object')
-  //             return
-  //           return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
-  //         }}
-  //         labelRenderer={(raw, nodeType, expanded, hasItems) => {
-  //           const isArray = nodeType === 'Array'
-  //           // if (isArray  &&  !hasItems) {
-  //           //   return <View style={{height: 0}} />
-  //           const isObject = nodeType === 'Object'
-  //           let val = isObject && raw[0] || `${raw[0]}:`
-  //           return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16 }}>{val}</Text>
-  //         }}
-  //         valueRenderer={raw => {
-  //           if (typeof raw === 'string')
-  //             raw = raw.replace(/['"]+/g, '')
-  //           return <Text style={{ padding: 15, fontSize: 16 }}>{raw}</Text>
-  //         }}
-  //       />
-  //     </View>
-  //   )
-  //   return <View>
-  //             {header}
-  //             {content}
-  //          </View>
-  // },
   showJson(params) {
     let { json, indent, isView } = params
     _.extend(params, {rawStyles: createStyles({bankStyle: this.props.bankStyle, indent, isView})})
@@ -751,7 +688,7 @@ var styles = StyleSheet.create({
     borderRadius: 5
   },
   itemText: {
-    fontSize: 18,
+    fontSize: 16,
     marginBottom: 0,
     // marginHorizontal: 7,
     color: '#757575',
@@ -844,3 +781,86 @@ var styles = StyleSheet.create({
 })
 
 module.exports = ResourceMixin;
+  // showJson(params) {
+  //   let { json, prop, isView } = params
+  //   let { resource, bankStyle } = this.props
+  //   const theme = {
+  //     scheme: 'custom',
+  //     base00: '#ffffff', // background
+  //     base01: '#272935',
+  //     base02: '#3a4055',
+  //     base03: '#5a647e',
+  //     base04: '#d4cfc9',
+  //     base05: '#e6e1dc',
+  //     base06: '#f4f1ed',
+  //     base07: '#f9f7f3',
+  //     base08: '#da4939',
+  //     base09: bankStyle.confirmationColor, // number
+  //     base0A: '#ffc66d',
+  //     base0B: bankStyle.linkColor, // string
+  //     base0C: '#519f50',
+  //     base0D: '#757575', // label
+  //     base0E: '#b6b3eb',
+  //     base0F: '#bc9458'
+  //   };
+  //   json = utils.sanitize(json)
+  //   let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
+  //   let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
+  //   let style = {opacity: 0.7, backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10, marginBottom: 10}
+
+  //   let icon
+  //   const rType = resource[TYPE]
+  //   const showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
+  //   // if (showCollapsed  &&  showCollapsed === prop.name)
+  //   //   icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
+  //   let header = <TouchableOpacity onPress={() => {
+  //     this.state.hidden ? this.setState({hidden: false}) : this.setState({hidden: true})
+  //   }} style={style} key={this.getNextKey()}>
+  //                  <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
+  //                  {icon}
+  //               </TouchableOpacity>
+  //   let content = (
+  //     <View ref='json'>
+  //       <JSONTree data={json} invertTheme={false} hideRoot={true} theme={{
+  //           extend: theme,
+  //           nestedNodeItemString: ({ style }, nodeType, expanded) => ({
+  //             style: {
+  //               ...style,
+  //               fontSize: 18
+  //             }
+  //           })
+  //         }}
+  //         shouldExpandNode = {(keyName, data, level) => {
+  //           if (!keyName.length)
+  //             return this.state.hidden && false || true
+  //           else
+  //             return false
+  //         }}
+  //         getItemString={(type, data, itemType, itemString) => {
+  //           if (type === 'Array')
+  //             return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+  //           if (type === 'Object')
+  //             return
+  //           return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+  //         }}
+  //         labelRenderer={(raw, nodeType, expanded, hasItems) => {
+  //           const isArray = nodeType === 'Array'
+  //           // if (isArray  &&  !hasItems) {
+  //           //   return <View style={{height: 0}} />
+  //           const isObject = nodeType === 'Object'
+  //           let val = isObject && raw[0] || `${raw[0]}:`
+  //           return <Text style={{ padding: 15, paddingLeft: (isObject || isArray) && 7 || 15, fontSize: 16 }}>{val}</Text>
+  //         }}
+  //         valueRenderer={raw => {
+  //           if (typeof raw === 'string')
+  //             raw = raw.replace(/['"]+/g, '')
+  //           return <Text style={{ padding: 15, fontSize: 16 }}>{raw}</Text>
+  //         }}
+  //       />
+  //     </View>
+  //   )
+  //   return <View>
+  //             {header}
+  //             {content}
+  //          </View>
+  // },
