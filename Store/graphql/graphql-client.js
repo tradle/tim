@@ -1,6 +1,7 @@
 'use strict'
 
 import omit from 'lodash/omit'
+import size from 'lodash/size'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
 // import gql from 'graphql-tag'
@@ -582,7 +583,7 @@ var search = {
 
   getSearchProperties(params) {
     let { model, inlined, properties, backlink } = params
-    let props = backlink ? {[backlink.name]: backlink} : model.properties
+    let props = /*backlink ? {[backlink.name]: backlink} :*/ model.properties
 
     let arr
     if (utils.isInlined(model))
@@ -808,6 +809,15 @@ var search = {
     else
       query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
+    if (backlink) {
+      if (!excludeProps)
+        excludeProps = []
+      let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
+      if (size(itemsProps) > 1) {
+        itemsProps = Object.keys(itemsProps).filter(item => item !== backlink.name)
+        excludeProps = excludeProps.concat(itemsProps)
+      }
+    }
     let arr = this.getSearchProperties({model, backlink, excludeProps, mapping})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
