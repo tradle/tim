@@ -77,13 +77,13 @@ class ApplicationView extends Component {
     super(props);
     this._lazyId = LAZY_ID + INSTANCE_ID++
 
-    let { resource, action, backlink, checkFilter, navigator, bankStyle } = props
+    let { resource, action, backlink, tab, checkFilter, navigator, bankStyle } = props
     this.state = {
       resource,
       isLoading: true,
       isConnected: navigator.isConnected,
       bankStyle,
-      // backlink,
+      backlink: tab,
       checkFilter
     }
     let currentRoutes = navigator.getCurrentRoutes()
@@ -97,7 +97,7 @@ class ApplicationView extends Component {
       currentRoutes[len - 1].onRightButtonPress = action.bind(this)
   }
   componentWillMount() {
-    let { resource, search, backlink } = this.props
+    let { resource, search, backlink, tab } = this.props
 
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
@@ -105,7 +105,7 @@ class ApplicationView extends Component {
     let m = utils.getModel(rtype)
     if (utils.isInlined(m))
       return
-    Actions.getItem( {resource, search, backlink} )
+    Actions.getItem( {resource, search, backlink: backlink ||  tab} )
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
@@ -138,7 +138,7 @@ class ApplicationView extends Component {
       break
     case 'showDetails':
       if (this.state.backlink)
-        this.setState({showDetails: true, backlink: null})
+        this.setState({showDetails: true, backlink: null, checkFilter: null, checksCategory: null})
       break
     case 'assignRM_Confirmed':
       if (utils.getRootHash(application) === hash) {
@@ -159,7 +159,7 @@ class ApplicationView extends Component {
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected, showDetails } = this.state
     let { navigator, currency, bankStyle } = this.props
 
     // hasRM = hasRM  ||  resource.relationshipManagers
@@ -251,7 +251,7 @@ class ApplicationView extends Component {
                             resource={resource}
                             navigator={navigator}
                             currency={currency}
-                            backlink={backlink}
+                            backlink={!showDetails  &&   backlink}
                             checksCategory={this.state.checksCategory}
                             showCategory={this.showCategory.bind(this)}
                             checkFilter={this.state.checkFilter}
