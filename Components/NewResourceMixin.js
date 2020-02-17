@@ -1246,15 +1246,19 @@ var NewResourceMixin = {
       model = utils.getModel(metadata.items.ref)
 
     let prop = model.properties[propName]
-    let isEnum = prop.ref  &&  utils.isEnum(prop.ref)
+    let isEnum
+    if (prop.ref)
+      isEnum = utils.isEnum(prop.ref)
+    else if (prop.items  && prop.items.ref)
+      isEnum = utils.isEnum(prop.items.ref)
     let isMultichooser = search  &&  prop.ref  &&  utils.isEnum(prop.ref)
     let isArray = prop.type === 'array'
     let doDelete
     let currentR = _.cloneDeep(resource)
     // clause for the items properies - need to redesign
-    if (metadata  &&  metadata.type === 'array') {
+    if (prop  &&  prop.type === 'array') {
       if (isEnum)
-        value = utils.buildRef(value)
+        value = value.map(v => utils.buildRef(v))
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value

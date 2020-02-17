@@ -76,8 +76,10 @@ class NewItem extends Component {
     }
 
     if (this.floatingProps) {
-      for (let p in this.floatingProps)
-        value[p] = this.floatingProps[p]
+      value = this.floatingProps
+      // _.extend(value, this.floatingProps)
+      // for (let p in this.floatingProps)
+      //   value[p] = this.floatingProps[p]
     }
     let propName = this.props.metadata.name;
     let resource = this.props.resource
