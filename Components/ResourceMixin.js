@@ -184,12 +184,20 @@ var ResourceMixin = {
       let hadCancel
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
-        let { type, displayAs, displayName, range, ref, skipLabel } = itemMeta
+        let { type, displayAs, displayName, range, ref, skipLabel, items } = itemMeta
         let pVal = v[p]
         if (!pVal  &&  !displayAs)
           return
         if (displayName) {
-          displayName = pVal
+          displayName = type === 'object' && pVal.title ||  pVal
+          ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={styles.itemText}>{displayName}</Text>
+                     </View>
+                     <View style={{flex: 1}}/>
+                   </View>)
+
           return
         }
         let value;
@@ -200,14 +208,39 @@ var ResourceMixin = {
           value = utils.formatDate(pVal);
         else if (type === 'boolean')
           value = pVal ? 'Yes' : 'No'
-        else if (type !== 'object') {
-          if (p == 'photos') {
-            ret.push(
-               <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
-            );
-            return
+        else if (type === 'array') {
+          let iref = items.ref
+          if (iref) {
+            if (p == 'photos') {
+              ret.push(
+                 <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
+              );
+              return
+            }
+            if (utils.isEnum(iref)) {
+              ret.push(
+                   <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <View style={{flexDirection: 'column', alignItems: 'flex-end'}} key={this.getNextKey()}>
+                         {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
+                       </View>
+                     </View>
+                     <View style={{flex: 1}}/>
+                   </View>
+              )
+              return
+            }
           }
-          else
+        }
+        else if (type !== 'object') {
+          // if (p == 'photos') {
+          //   ret.push(
+          //      <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
+          //   );
+          //   return
+          // }
+          // else
             value = pVal;
         }
         else if (range === 'json') {
