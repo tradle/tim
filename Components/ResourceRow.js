@@ -211,6 +211,12 @@ class ResourceRow extends Component {
     }
     if (!style)
       style = defaultBankStyle
+    let borderBottomColor
+    if (isNewContact)
+      borderBottomColor = '#139459'
+    else
+      borderBottomColor = '#eeeeee'
+    let borderStyle = {borderBottomWidth: 1, borderBottomColor}
     if (isModel) {
       let title = translate(utils.getModel(rType))
       let parts = resource.id.split('.')
@@ -221,7 +227,7 @@ class ResourceRow extends Component {
 
       else
         title = <Text style={styles.resourceTitle}>{title}</Text>
-      return  <View style={styles.content} key={this.getNextKey()}>
+      return  <View style={[styles.content, borderStyle]} key={this.getNextKey()}>
                 <TouchableOpacity onPress={() => this.props.selectModel(resource)} underlayColor='transparent'>
                   <View style={[styles.row, { width: utils.dimensions(ResourceRow).width - 10}]}>
                     <View style={[styles.textContainer, {margin: 7}]}>
@@ -229,7 +235,6 @@ class ResourceRow extends Component {
                     </View>
                   </View>
                 </TouchableOpacity>
-                <View style={styles.cellBorder}  key={this.getNextKey()} />
               </View>
     }
     if (resource.photos &&  resource.photos.length  &&  resource.photos[0].url) {
@@ -369,7 +374,6 @@ class ResourceRow extends Component {
             {cancelResource}
             {hideModeComponent}
           </View>
-          <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
       )
 
@@ -397,13 +401,8 @@ class ResourceRow extends Component {
                          </View>
                        </View>
                      </TouchableOpacity>
-    let cellBorder
-    if (isNewContact)
-      cellBorder = styles.highlightedCellBorder
-    else
-      cellBorder = styles.cellBorder
 
-    let content =  <View style={[styles.content, bg, {paddingHorizontal: 10}]} key={this.getNextKey()}>
+    let content =  <View style={[styles.content, bg, borderStyle, { paddingHorizontal: 10}]} key={this.getNextKey()}>
                     {actionItem}
                     {counter}
                     {action}
@@ -411,7 +410,6 @@ class ResourceRow extends Component {
                     {multiChooserComponent}
                     {hideModeComponent}
                     {cancelResource}
-                    <View style={cellBorder}  key={this.getNextKey()} />
                   </View>
     return content
   }
@@ -650,8 +648,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   rowWrapper: {
-    borderColor: '#f7f7f7',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#eeeeee',
     justifyContent: 'center',
     backgroundColor: '#ffffff'
@@ -738,16 +735,11 @@ var styles = StyleSheet.create({
     marginHorizontal: -4,
     marginTop: -1
   },
-  cellBorder: {
-    backgroundColor: '#eeeeee',
-    height: 1,
-    marginLeft: 4,
-  },
-  highlightedCellBorder: {
-    backgroundColor: '#139459',
-    height: 1,
-    marginLeft: 4,
-  },
+  // cellBorder: {
+  //   backgroundColor: '#eeeeee',
+  //   height: 1,
+  //   marginLeft: 4,
+  // },
   icon: {
     alignSelf: 'center',
     marginLeft: 10,
