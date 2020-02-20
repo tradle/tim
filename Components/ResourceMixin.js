@@ -176,6 +176,7 @@ var ResourceMixin = {
       }
     }
     let cnt = value.length;
+    let isView = component  &&  component.name === 'ShowPropertiesView'
     let isWeb = utils.isWeb()
     return value.map((v) => {
       let ret = [];
@@ -195,7 +196,7 @@ var ResourceMixin = {
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{displayName}</Text>
                      </View>
-                     <View style={{flex: 1}}/>
+                     {!isView  &&  <View style={{flex: 1}}/>}
                    </View>)
 
           return
@@ -226,7 +227,7 @@ var ResourceMixin = {
                          {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
                        </View>
                      </View>
-                     <View style={{flex: 1}}/>
+                     {!isView  &&  <View style={{flex: 1}}/>}
                    </View>
               )
               return
@@ -267,7 +268,7 @@ var ResourceMixin = {
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
-                     <View style={{flex: 1}}/>
+                     {!isView  &&  <View style={{flex: 1}}/>}
                    </View>
 
         if (cancelItem  &&  !hadCancel) {
@@ -275,8 +276,8 @@ var ResourceMixin = {
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={[{width: utils.getContentWidth(component) - 40}]}>
                      {item}
-                     <View style={{position: 'absolute', top: 0, right: 0}}>
-                     <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                     <View style={{position: 'absolute', top: 0, right: 10}}>
+                       <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                      </View>
                    </View>
                  </TouchableOpacity>
@@ -336,7 +337,7 @@ var ResourceMixin = {
 
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
       return (
-        <View key={this.getNextKey()} style={{paddingVertical: 10}} >
+        <View key={this.getNextKey()} style={{paddingVertical: 10, paddingLeft:10}} >
            {ret}
            {sep}
         </View>
@@ -1141,7 +1142,8 @@ var styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 0,
     // marginHorizontal: 7,
-    color: '#757575',
+    color: '#2E3B4E',
+    // color: '#757575',
   },
   itemSeparator: {
     height: 1,

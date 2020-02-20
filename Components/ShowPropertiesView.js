@@ -351,9 +351,9 @@ class ShowPropertiesView extends Component {
             let values = val.map((v) => translateEnum(v)).join(', ')
             viewCols.push(
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
-                <View style={{paddingLeft: 10}}>
+                <View style={{paddingLeft: 10, width: utils.getContentWidth(ShowPropertiesView)}}>
                   <Text style={styles.title}>{translate(pMeta, model)}</Text>
-                  <Text style={styles.description}>{values}</Text>
+                  <Text style={[styles.description, {fontSize: 16}]}>{values}</Text>
                 </View>
                 {checkForCorrection}
               </View>
