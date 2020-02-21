@@ -4,6 +4,7 @@ import {
   View
 } from 'react-native'
 import PropTypes from 'prop-types';
+import _ from 'lodash'
 
 import dateformat from 'dateformat'
 import reactMixin from 'react-mixin'
@@ -44,10 +45,36 @@ class ModificationRow extends Component {
     let model = getModel(MODIFICATION);
 
     let { modifications } = resource
-    let { dataLineage } = modifications
+    let { dataLineage, initialSubmission } = modifications
 
     let json = dataLineage &&  dataLineage || modifications
-    let title = dataLineage && translate('prefill') || translate('clientEdit')
+    let title
+    if (!dataLineage) {
+      title = translate('clientEdit')
+      if (initialSubmission) {
+        title = `${title} - ${translate('initialSubmission')}`
+        json = initialSubmission
+      }
+    }
+    else {
+      title = translate('prefill')
+      if (_.size(dataLineage) === 1) {
+        let p = Object.keys(dataLineage)[0]
+        let [etype, id] = p.split('_')
+
+        let m = getModel(etype)
+        if (m  && isEnum(m)) {
+          let val = m.enum.find(e => e.id === id)
+          if (val) {
+            if (val.details)
+              title = `${title} - ${translate(val.details)}`
+            else
+              title = `${title} - ${translateEnum({id: p})}`
+          }
+          json = dataLineage[p]
+        }
+      }
+    }
     let styles = createStyles({bankStyle: this.props.bankStyle})
     let date = dateformat(resource.dateModified, 'mmm dS, yyyy h:MM TT')
     let header = (
@@ -57,7 +84,7 @@ class ModificationRow extends Component {
       </View>
     )
     let rows = []
-    this.paintHistory({json, rows, styles, model: getModel(parentResource[TYPE])})
+    this.paintHistory({json, rows, styles, model: getModel(parentResource[TYPE]), dataLineage})
     return <View style={styles.modifications} key='modifications'>
             {header}
             {rows}
@@ -184,14 +211,21 @@ class ModificationRow extends Component {
         let val = v
         if (prop)
           val = this.getVal(prop, val)
+        let value = <View style={styles.value}>
+                      <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
+                    </View>
+
+        if (prop.range === 'url') {
+          value = <TouchableOpacity onPress={() => this.showUrl(val)}>
+                    {value}
+                  </TouchableOpacity>
+        }
         cols.push(<View style={styles.col} key={this.getNextKey()}>
                    <View style={styles.label}>
                      {icon}
                      <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                    </View>
-                   <View style={styles.value}>
-                     <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
-                   </View>
+                   {value}
                  </View>)
         // continue
       }
@@ -199,6 +233,12 @@ class ModificationRow extends Component {
                   {cols}
                 </View>)
     }
+  }
+  showUrl(href) {
+    this.props.navigator.push({
+      componentName: 'ArticleView',
+      passProps: {href}
+    })
   }
   paintProp({prop, model, value, rows, styles, icon}) {
     let label = translate(prop, model)
@@ -258,8 +298,8 @@ class ModificationRow extends Component {
       let elm = m.enum.find(e => e.id === id)
       if (elm) {
         ({ icon, color} = elm)
-        icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 10, backgroundColor: color}]}>
-                 <Icon name={icon} size={17} color='#fff' />
+        icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 5, backgroundColor: color}]}>
+                 <Icon name={icon} size={17} color='#fff' style={{marginTop: 2}} />
                </View>
       }
       let hash = v.hash || v._permalink
@@ -285,6 +325,8 @@ class ModificationRow extends Component {
 
     for (let p in json) {
       let prop = props[p]
+      if (prop  &&  prop.readOnly)
+        continue
       let label = prop && translate(prop, model) || p
       let pair = json[p]
       let val
@@ -351,7 +393,7 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
       justifyContent: 'space-between'
     },
     headerTitle: {
-      fontSize: 18,
+      fontSize: 20,
       color: '#757575'
     },
     headerDate: {
@@ -375,18 +417,18 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
     pTitle: {
       fontSize: 16,
       color: bankStyle.linkColor,
-      paddingVertical: 10,
+      paddingVertical: 5,
     },
     sourceTitle: {
       fontSize: 16,
       color: '#757575',
-      paddingVertical: 10,
+      paddingVertical: 5,
     },
     icon: {
       padding: 10
     },
     modifications: {
-      paddingVertical: 5,
+      // paddingVertical: 5,
       backgroundColor: 'transparent',
     },
     col: {
