@@ -269,7 +269,7 @@ class ShowRefList extends Component {
                 </View>
                 {children}
                 {comment}
-                <View style={{margin: 1, flex: 1}}>
+                <View style={{/*margin: 1, */flex: 1}}>
                   {backlinkRL}
                   {details}
                 </View>
