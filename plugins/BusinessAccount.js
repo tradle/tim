@@ -197,7 +197,7 @@ function getPropsForControllingEntity(form) {
     let retProps = {
       requestedProperties: [
         {name: 'name', required: true},
-        {name: 'typeOfControllingPerson'},
+        // {name: 'typeOfControllingPerson'},
         {name: 'natureOfControl'},
         {name: 'percentageOfOwnership'},
         {name: 'sourceOfWealth', required: isFund  &&  isLimitedPartner},
