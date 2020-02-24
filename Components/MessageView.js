@@ -53,13 +53,13 @@ class MessageView extends Component {
   };
   constructor(props) {
     super(props);
-    let { resource, navigator, action, backlink, bankStyle, isReview } = props
+    let { resource, navigator, action, bankStyle, isReview } = props
     this.state = {
       resource,
       isConnected: navigator.isConnected,
       // promptVisible: false,
       isLoading: utils.isStub(resource),
-      backlink,
+      // backlink,
       // showDetails: true,
       showDetails: false,
       bankStyle: bankStyle || defaultBankStyle
@@ -81,7 +81,7 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message, isChat, backlink} = this.props
+    let {resource, isReview, search, application, message, isChat, tab} = this.props
     if (isReview)
       return
     if (message) {
@@ -97,7 +97,7 @@ class MessageView extends Component {
     let vCols = utils.getViewCols(m)
     if (!vCols)
       return
-    Actions.getItem({resource, search, application, backlink, isChat})
+    Actions.getItem({resource, search, application, backlink: tab, isChat})
   }
 
   componentDidMount() {

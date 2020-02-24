@@ -104,8 +104,9 @@ class ApplicationTreeRow extends Component {
 
     let { backlink, filter, units, valueColor } = gridCols[pName]
     let style = [styles.description]
+    let value = node[pName] + (units || '')
     if (!colProp) {
-      let bgColor, units = ''
+      let bgColor
       if (typeof node[pName] === 'number') {
         bgColor = typeof gridCols[pName] === 'object' && gridCols[pName][node[pName]+'']
         if (!bgColor) bgColor = valueColor
@@ -115,12 +116,12 @@ class ApplicationTreeRow extends Component {
         if (backlink  &&  filter) {
           return <TouchableOpacity onPress={this.showBacklinks.bind(this, gridCols[pName])}>
                    <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}>
-                     <Text style={style} key={this.getNextKey(node)}>{node[pName] + units}</Text>
+                     <Text style={style} key={this.getNextKey(node)}>{value}</Text>
                    </View>
                  </TouchableOpacity>
         }
       }
-      return <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{node[pName] + units}</Text></View>
+      return <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
     }
 
     if (colProp.style)
@@ -221,9 +222,9 @@ class ApplicationTreeRow extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: r,
-        backlink,
+        tab: backlink,
         bankStyle,
-        checkFilter: filter.status.id.split('_')[1],
+        checkFilter: filter && filter.status.id.split('_')[1],
         application: resource
       }
     }

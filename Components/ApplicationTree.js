@@ -49,6 +49,13 @@ const viewCols = {
   'node_displayName': {
     type: 'string'
   },
+  'percentageOfOwnership': {
+    icon: 'ios-ribbon-outline',
+    type: 'number',
+    units: '%',
+    description: 'Shares',
+    color: 'turquoise'
+  },
   'progress': {
     label: '%',
     type: 'number',
@@ -116,7 +123,8 @@ const viewCols = {
     description: 'Times\nnotified',
     type: 'number',
     icon: 'ios-list-outline',
-    color: 'darkgray'
+    color: 'darkgray',
+    backlink: 'notifications',
   },
   // notifiedStatus: {
   //   label: 'Status',
