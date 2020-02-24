@@ -298,7 +298,7 @@ class RefPropertyEditor extends Component {
     if (utils.isEnum(rModel)) {
       if (prop.type === 'array') {
         let l = resource[pName].map(r => translateEnum(r))
-        label = l.join(',')
+        label = l.join(', ')
       }
       else {
         let val = resource[pName]
