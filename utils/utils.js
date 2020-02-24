@@ -1158,8 +1158,12 @@ var utils = {
     let isWeb = utils.isWeb()
     if (!editCols) {
       let viewCols = utils.getViewCols(model)
-      if (viewCols)
-        eCols = viewCols.filter(p => properties[p]  &&  !properties[p].readOnly)
+      if (viewCols) {
+        viewCols.forEach(p => {
+          if (!properties[p].readOnly)
+            eCols.push(properties[p])
+        })
+      }
       return eCols
     }
     editCols.forEach((p) => {
