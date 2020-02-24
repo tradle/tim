@@ -207,6 +207,7 @@ class NewResource extends Component {
           if (!exclude  &&  prop  &&  m.properties[prop].inlined)
             exclude = true
           Actions.getTemporary(resource[TYPE], exclude)
+          Actions.getRequestedProperties({resource})
         }
       }
     }
