@@ -169,6 +169,7 @@ var ResourceMixin = {
       }
     }
     let cnt = value.length;
+    let isView = component  &&  component.name === 'ShowPropertiesView'
     let isWeb = utils.isWeb()
     return value.map((v) => {
       let ret = [];
@@ -177,12 +178,19 @@ var ResourceMixin = {
       let hadCancel
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
-        let { type, displayAs, displayName, range, ref, skipLabel, title } = itemMeta
+        let { type, displayAs, displayName, range, ref, skipLabel, items } = itemMeta
         let pVal = v[p]
         if (!pVal  &&  !displayAs)
           return
         if (displayName) {
-          displayName = pVal
+          displayName = type === 'object' && pVal.title ||  pVal
+          ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={styles.itemText}>{displayName}</Text>
+                     </View>
+                      {!isView  &&  <View style={{flex: 1}}/>}
+                   </View>)
           return
         }
         let value;
@@ -193,14 +201,40 @@ var ResourceMixin = {
           value = utils.formatDate(pVal);
         else if (type === 'boolean')
           value = pVal ? 'Yes' : 'No'
-        else if (type !== 'object') {
-          if (p == 'photos') {
-            ret.push(
-               <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
-            );
-            return
+
+        else if (type === 'array') {
+          let iref = items.ref
+          if (iref) {
+            if (p == 'photos') {
+              ret.push(
+                 <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
+              );
+              return
+            }
+            if (utils.isEnum(iref)) {
+              ret.push(
+                   <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <View style={{flexDirection: 'column', alignItems: 'flex-end'}} key={this.getNextKey()}>
+                         {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
+                       </View>
+                     </View>
+                     {!isView  &&  <View style={{flex: 1}}/>}
+                   </View>
+              )
+              return
+            }
           }
-          else
+        }
+        else if (type !== 'object') {
+          // if (p == 'photos') {
+          //   ret.push(
+          //      <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
+          //   );
+          //   return
+          // }
+          // else
             value = pVal;
         }
         else if (range === 'json') {
@@ -224,10 +258,10 @@ var ResourceMixin = {
           return
         let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
-                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : title || utils.makeLabel(p)}</Text>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
-                     <View style={{flex: 1}}/>
+                     {!isView  &&  <View style={{flex: 1}}/>}
                    </View>
         // let item = <View>
         //              <Text style={skipLabel ? {height: 0} : [styles.itemText, {fontSize: 16}]}>{skipLabel ? '' : title || utils.makeLabel(p)}</Text>
@@ -239,7 +273,9 @@ var ResourceMixin = {
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={styles.row}>
                      {item}
-                     <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                     <View style={{position: 'absolute', top: 0, right: 10}}>
+                       <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                     </View>
                    </View>
                  </TouchableOpacity>
         }

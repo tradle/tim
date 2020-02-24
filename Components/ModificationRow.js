@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import {
   TouchableOpacity,
-  View
+  View,
+  Linking
 } from 'react-native'
 import PropTypes from 'prop-types';
-// import {
-//   View,
-// } from 'react-native-lazyload'
+import _ from 'lodash'
 
 import dateformat from 'dateformat'
 import reactMixin from 'react-mixin'
@@ -15,7 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
 const { TYPE } = constants
 
-import { translate, translateEnum, getModel, styleFactory, isEnum } from '../utils/utils'
+import { translate, translateEnum, getModel, styleFactory, isEnum, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import { circled } from '../styles/utils'
@@ -43,24 +42,54 @@ class ModificationRow extends Component {
     return false
   }
   render() {
-    let { resource, onSelect, parentResource } = this.props
+    let { resource, onSelect, parentResource, bankStyle } = this.props
     let model = getModel(MODIFICATION);
 
     let { modifications } = resource
-    let { dataLineage } = modifications
+    let { dataLineage, initialSubmission } = modifications
 
     let json = dataLineage &&  dataLineage || modifications
-    let title = dataLineage && translate('prefill') || translate('clientEdit')
-    let styles = createStyles({bankStyle: this.props.bankStyle})
+    let title
+    if (!dataLineage) {
+      title = translate('clientEdit')
+      if (initialSubmission) {
+        title = `${title} - ${translate('initialSubmission')}`
+        json = initialSubmission
+      }
+    }
+    else {
+      title = translate('prefill')
+      if (_.size(dataLineage) === 1) {
+        let p = Object.keys(dataLineage)[0]
+        let [etype, id] = p.split('_')
+
+        let m = getModel(etype)
+        if (m  && isEnum(m)) {
+          let val = m.enum.find(e => e.id === id)
+          if (val) {
+            if (val.details)
+              title = `${title} - ${translate(val.details)}`
+            else
+              title = `${title} - ${translateEnum({id: p})}`
+          }
+          json = dataLineage[p]
+        }
+      }
+    }
+    let idx = parentResource.modificationHistory.length - parentResource.modificationHistory.findIndex(r => getRootHash(r) === getRootHash(resource))
+    let styles = createStyles({bankStyle})
     let date = dateformat(resource.dateModified, 'mmm dS, yyyy h:MM TT')
     let header = (
-      <View style={styles.headerRow} key='modificationsHeader'>
-        <Text style={styles.headerTitle}>{translate(title)}</Text>
-        <Text style={styles.headerDate}>{date}</Text>
+      <View style={{flexDirection: 'row', backgroundColor:'aliceblue'}}>
+        <View style={[styles.numberButton, {marginLeft: 10, marginTop: 7, backgroundColor: bankStyle.linkColor}]}><Text style={{fontSize: 14, color: '#ffffff'}}>{idx}</Text></View>
+        <View style={styles.headerRow} key='modificationsHeader'>
+          <Text style={styles.headerTitle}>{translate(title)}</Text>
+          <Text style={styles.headerDate}>{date}</Text>
+        </View>
       </View>
     )
     let rows = []
-    this.paintHistory({json, rows, styles, model: getModel(parentResource[TYPE])})
+    this.paintHistory({json, rows, styles, model: getModel(parentResource[TYPE]), dataLineage})
     return <View style={styles.modifications} key='modifications'>
             {header}
             {rows}
@@ -79,70 +108,11 @@ class ModificationRow extends Component {
       let prop = props[p]
       let v = json[p]
       let iconName
+      let doContinue
       if (typeof v == 'object') {
-        // continue
-        if (p === 'added') {
-          iconName = 'ios-add-circle-outline'
-          color = 'green'
-        }
-        else if (p === 'changed') {
-          iconName = 'ios-create-outline'
-          color = 'darkblue'
-          isChanged = true
-          // isChanged = true
-        }
-        else if (p === 'removed') {
-          iconName = 'ios-remove-circle-outline'
-          isRemoved = true
-          color = 'red'
-        }
-        else if (prop) {
-          this.paintProp({prop, model, value:v, rows, styles, icon})
+        ({iconName, color, isChanged, isRemoved, doContinue} = this.parseObject({p, v, icon, rows, model, styles}))
+        if (doContinue)
           continue
-        }
-        else if (v._permalink) {
-          let label = translate(p)
-          let val = translate(v._displayName)
-          rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
-                      <View style={styles.label}>
-                        <View style={styles.value}>
-                          <Text  style={[styles.pTitle, {color: '#999999', paddingLeft: 10}]}>{label}</Text>
-                        </View>
-                        <View style={styles.value}>
-                          <TouchableOpacity onPress={() => this.showRefResource({
-                            id: `${v[TYPE]}_${v._permalink}_${v._link}`,
-                            title: label
-                          })}>
-                           <Text  style={styles.pTitle}>{val}</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </View>)
-          continue
-        }
-        else if (p !== 'properties') {
-          let title
-          let [etype, id] = p.split('_')
-          if (id) {
-            let m = getModel(etype)
-            if (m  && isEnum(m)) {
-              let val = m.enum.find(e => e.id === id)
-              if (val) {
-                if (val.details)
-                  title = translate(val.details)
-                else
-                  title = translateEnum({id: p})
-              }
-            }
-          }
-          if (!title)
-             title = translate(p)
-          rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
-                      <Text  style={styles.sourceTitle}>{title}</Text>
-                    </View>)
-          this.paintHistory({json:v, rows, model, styles})
-          continue
-        }
       }
 
       if (!color) color = '#757575'
@@ -165,7 +135,7 @@ class ModificationRow extends Component {
             val = this.getVal(pprop, val)
 
           let label = pprop && translate(pprop, model) || part
-          cols.push(<View style={styles.col} key={this.getNextKey()}>
+          cols.push(<View style={styles.row} key={this.getNextKey()}>
                      <View style={styles.label}>
                        {icon}
                        <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
@@ -181,14 +151,22 @@ class ModificationRow extends Component {
         let val = v
         if (prop)
           val = this.getVal(prop, val)
-        cols.push(<View style={styles.col} key={this.getNextKey()}>
+        let isUrl = prop.range === 'url'
+        let value = <View style={styles.value}>
+                      <Text  style={isUrl && styles.pTitle || styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
+                    </View>
+
+        if (isUrl) {
+          value = <TouchableOpacity onPress={() => Linking.openURL(val)}>
+                    {value}
+                  </TouchableOpacity>
+        }
+        cols.push(<View style={styles.row} key={this.getNextKey()}>
                    <View style={styles.label}>
                      {icon}
                      <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                    </View>
-                   <View style={styles.value}>
-                     <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
-                   </View>
+                   {value}
                  </View>)
         // continue
       }
@@ -196,6 +174,71 @@ class ModificationRow extends Component {
                   {cols}
                 </View>)
     }
+  }
+  parseObject({p, v, rows, model, styles, icon}) {
+    // continue
+    if (p === 'added')
+      return {iconName: 'ios-add-circle-outline', color: 'green'}
+    if (p === 'changed')
+      return {iconName: 'ios-create-outline', color: 'darkblue', isChanged: true}
+    if (p === 'removed')
+      return {iconName: 'ios-remove-circle-outline', color: 'red', isRemoved: true}
+
+    let prop = model.properties[p]
+    if (prop) {
+      this.paintProp({prop, model, value:v, rows, styles, icon})
+      return {doContinue: true}
+    }
+    if (v._permalink) {
+      let label = translate(p)
+      let val = translate(v._displayName)
+      rows.push(<View style={styles.gridRow} key={this.getNextKey()}>
+                  <View style={styles.label}>
+                    <View style={styles.value}>
+                      <Text  style={[styles.pTitle, {color: '#999999', paddingLeft: 10}]}>{label}</Text>
+                    </View>
+                    <View style={styles.value}>
+                      <TouchableOpacity onPress={() => this.showRefResource({
+                        id: `${v[TYPE]}_${v._permalink}_${v._link}`,
+                        title: label
+                      })}>
+                       <Text  style={styles.pTitle}>{val}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>)
+      return {doContinue: true}
+    }
+    if (p !== 'properties') {
+      let title
+      let [etype, id] = p.split('_')
+      if (id) {
+        let m = getModel(etype)
+        if (m  && isEnum(m)) {
+          let val = m.enum.find(e => e.id === id)
+          if (val) {
+            if (val.details)
+              title = translate(val.details)
+            else
+              title = translateEnum({id: p})
+          }
+        }
+      }
+      if (!title)
+         title = translate(p)
+      let addPart
+      if (title.startsWith('Pitchbook')) {
+        title = 'Pitchbook'
+        addPart = <Text  style={[styles.sourceTitle, {paddingLeft: 10, color:'red'}]}>{translate('nonAuthoritative')}</Text>
+      }
+      rows.push(<View style={[styles.gridRow, {flexDirection: 'row'}]} key={this.getNextKey()}>
+                  <Text  style={styles.sourceTitle}>{title}</Text>
+                  {addPart}
+                </View>)
+      this.paintHistory({json:v, rows, model, styles})
+      return {doContinue: true}
+    }
+    return {}
   }
   paintProp({prop, model, value, rows, styles, icon}) {
     let label = translate(prop, model)
@@ -217,7 +260,7 @@ class ModificationRow extends Component {
         val = val.title
       }
     }
-    rows.push(<View style={styles.col} key={this.getNextKey()}>
+    rows.push(<View style={styles.row} key={this.getNextKey()}>
                <View style={styles.label}>
                  {icon}
                  <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
@@ -255,23 +298,21 @@ class ModificationRow extends Component {
       let elm = m.enum.find(e => e.id === id)
       if (elm) {
         ({ icon, color} = elm)
-        icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 10, backgroundColor: color}]}>
-                 <Icon name={icon} size={17} color='#fff' />
+        icon = <View style={[styles.checkButton, {alignItems: 'center', marginTop: 5, backgroundColor: color}]}>
+                 <Icon name={icon} size={17} color='#fff' style={{marginTop: 2}} />
                </View>
       }
       let hash = v.hash || v._permalink
-      rows.push(<View style={styles.checkRow} key={this.getNextKey()}>
+      rows.push(<View style={styles.row}  key={this.getNextKey()}>
+                  <View style={{flex: 1}}/>
                   <View style={styles.label}>
-                    <View style={styles.value}/>
-                    <View style={styles.label}>
-                      {icon}
-                      <TouchableOpacity onPress={() => this.showRefResource({
-                        id: `${v.type}_${hash}_${hash}`,
-                        title: label
-                      })}>
-                       <Text  style={[styles.pTitle, {paddingLeft: 5}]}>{val}</Text>
-                      </TouchableOpacity>
-                    </View>
+                    {icon}
+                    <TouchableOpacity onPress={() => this.showRefResource({
+                      id: `${v.type}_${hash}_${hash}`,
+                      title: label
+                    })}>
+                     <Text  style={[styles.pTitle, {paddingLeft: 5}]}>{val}</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>)
     })
@@ -282,6 +323,8 @@ class ModificationRow extends Component {
 
     for (let p in json) {
       let prop = props[p]
+      if (prop  &&  prop.readOnly)
+        continue
       let label = prop && translate(prop, model) || p
       let pair = json[p]
       let val
@@ -321,7 +364,7 @@ class ModificationRow extends Component {
         val = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{pair.new}</Text>
       }
       cols.push(
-        <View style={styles.col} key={this.getNextKey()}>
+        <View style={styles.row} key={this.getNextKey()}>
           <View style={styles.label}>
             {icon}
             <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
@@ -342,14 +385,14 @@ reactMixin(ModificationRow.prototype, ResourceMixin)
 var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, isRM, bankStyle }) {
   return StyleSheet.create({
     headerRow: {
-      // fontSize: 24,
       backgroundColor: 'aliceblue',
       padding: 10,
       flexDirection: 'row',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      flex: 1
     },
     headerTitle: {
-      fontSize: 18,
+      fontSize: 20,
       color: '#757575'
     },
     headerDate: {
@@ -365,31 +408,35 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
     },
     gridRow: {
       backgroundColor: '#f7f7f7',
-      paddingHorizontal: 10
-    },
-    checkRow: {
-      paddingHorizontal: 10
+      paddingHorizontal: 10,
     },
     pTitle: {
       fontSize: 16,
       color: bankStyle.linkColor,
-      paddingVertical: 10,
+      paddingVertical: 5,
     },
     sourceTitle: {
       fontSize: 16,
       color: '#757575',
-      paddingVertical: 10,
+      paddingVertical: 5,
     },
     icon: {
       padding: 10
     },
     modifications: {
-      paddingVertical: 5,
+      // paddingVertical: 5,
       backgroundColor: 'transparent',
     },
-    col: {
+    row: {
       flexDirection: 'row',
       paddingRight: 10
+    },
+    numberButton: {
+      ...circled(25),
+      shadowOpacity: 0.7,
+      opacity: 0.9,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
     },
     checkButton: {
       ...circled(17),
