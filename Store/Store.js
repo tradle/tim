@@ -4745,8 +4745,12 @@ if (!res[SIG]  &&  res._message)
         if (typeof json[pp].value === 'string')
           json[pp].value = parseFloat(json[pp].value)
       }
-      else if (prop.type === 'string')
-        json[pp] = json[pp].trim()
+      else if (prop.type === 'string') {
+        if (json[pp])
+          json[pp] = json[pp].trim()
+        else
+          delete json[pp]
+      }
     }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
@@ -11945,13 +11949,34 @@ if (!res[SIG]  &&  res._message)
     return utils.buildRef(resource)
   },
   getRootHash(r) {
-    return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
+    return utils.getRootHash(r)
   },
   getCurHash(r) {
-    return r[CUR_HASH] ? r[CUR_HASH] : r.id.split('_')[2]
+    return utils.getCurrentHash(r)
   },
   setItem(key, value) {
     this._setItem(key, value)
+  },
+  async deleteItemFromDB(id) {
+    let items = Object.keys(list).filter(key => this.getRootHash(key) === id)
+    let toId
+    await Promise.all(items.map(itemId => {
+      let item = this._getItem(itemId)
+debug(`deleteItemFromDB: ${itemId}`)
+      if (!toId) {
+        toId = utils.getId(item.to)
+        let toR = this._getItem(toId)
+        if (toR[TYPE] !== ORGANIZATION) {
+          // debugger
+          toR = toR.organization
+          if (toR)
+            toId = utils.getId(toR)
+        }
+      }
+      this.deleteMessageFromChat(toId, item)
+      this._deleteItem(itemId)
+      return db.del(itemId)
+    }))
   },
   _setItem(key, value) {
     if (!value[TYPE]  ||  value[TYPE] === SELF_INTRODUCTION)
