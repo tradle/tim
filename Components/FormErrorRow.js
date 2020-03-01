@@ -27,6 +27,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import ENV from '../utils/env'
+import { parseMessage } from '../utils/uiUtils'
 import { Text } from './Text'
 
 class FormErrorRow extends Component {
@@ -241,7 +242,7 @@ class FormErrorRow extends Component {
 
   }
   formatRow(isMyMessage, renderedRow) {
-    let {resource, to, application } = this.props
+    let {resource, to, application, bankStyle } = this.props
     var model = utils.getModel(resource[TYPE] || resource.id)
 
     let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
@@ -287,15 +288,31 @@ class FormErrorRow extends Component {
       let iconName = resource._documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
       let iconSize = resource._documentCreated ? 30 : 20
 
-      vCols.push(
-        <View key={this.getNextKey()} style={{paddingBottom: 3}}>
-          <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
-          <View style={chatStyles.rowContainer}>
-            <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : this.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype))}</Text>
-            <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? this.props.bankStyle.fixErrorColor : this.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+      let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
+      let params = { resource, message: resource.message, bankStyle, noLink }
+
+      let msg = parseMessage(params)
+      if (typeof msg === 'string') {
+        vCols.push(
+          <View key={this.getNextKey()} style={{paddingBottom: 3}}>
+            <Text style={[style, {color: '#555555'}]}>{msg} </Text>
+            <View style={chatStyles.rowContainer}>
+              <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : this.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype))}</Text>
+              <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? this.props.bankStyle.fixErrorColor : this.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+            </View>
           </View>
-        </View>
-      )
+        )
+      }
+      else {
+        vCols.push(
+          <View style={chatStyles.rowContainer} key={this.getNextKey()}>
+                <View style={styles.container}>
+                  {msg}
+                </View>
+                <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? this.props.bankStyle.fixErrorColor : this.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+              </View>
+        )
+      }
     });
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {

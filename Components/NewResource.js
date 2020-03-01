@@ -808,10 +808,10 @@ class NewResource extends Component {
   }
 
   render() {
-    if (this.state.isUploading)
+    let { message, isUploading, resource, disableEditing, isRegistration, validationErrors,
+          termsAccepted, isLoadingVideo, err, missedRequiredOrErrorValue } = this.state
+    if (isUploading)
       return <View/>
-
-    let resource = this.state.resource;
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let editProps = utils.getEditableProperties(resource)
@@ -832,7 +832,7 @@ class NewResource extends Component {
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
-      this.state.resource[setProperty.name] = setProperty.value;
+      resource[setProperty.name] = setProperty.value;
     let data = {};
     let model = {};
     let arrays = [];
@@ -846,12 +846,12 @@ class NewResource extends Component {
             data[p] = [bPropVal]
           else
             data[p] = bPropVal
-          this.state.resource[p] = bPropVal
+          resource[p] = bPropVal
         }
       }
     }
     let editable
-    if (this.state.disableEditing)
+    if (disableEditing)
       editable = false
     else
       editable = true
@@ -866,7 +866,6 @@ class NewResource extends Component {
       };
     if (editCols)
       params.editCols = editCols;
-    let isRegistration = this.state.isRegistration
     if (isRegistration)
       params.isRegistration = true
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
@@ -875,8 +874,8 @@ class NewResource extends Component {
         params.formErrors[r.name] = r.error
       })
     }
-    else if (this.state.validationErrors)
-      params.validationErrors = this.state.validationErrors
+    else if (validationErrors)
+      params.validationErrors = validationErrors
 
     let options = this.getFormFields(params);
     let contentSeparator = getContentSeparator(bankStyle)
@@ -945,7 +944,7 @@ class NewResource extends Component {
     if (isRegistration)
       button = <View>
                  <TouchableOpacity style={styles.thumbButton}
-                    onPress={this.state.termsAccepted ? this.onSavePressed : this.showTermsAndConditions}>
+                    onPress={termsAccepted ? this.onSavePressed : this.showTermsAndConditions}>
                     <View style={styles.getStarted}>
                        <Text style={styles.getStartedText}>ENTER</Text>
                     </View>
@@ -997,7 +996,7 @@ class NewResource extends Component {
     }
     // add server url sometimes takes a while
     let wait
-    if (this.state.disableEditing)
+    if (disableEditing)
       wait = <View style={styles.indicator}>
                <ActivityIndicator animating={true} size='large' color='#7AAAC3'/>
              </View>
@@ -1007,7 +1006,7 @@ class NewResource extends Component {
                     <PhotoView resource={resource} navigator={this.props.navigator}/>
                   </View>
     let loadingVideo
-    if (this.state.isLoadingVideo)
+    if (isLoadingVideo)
       loadingVideo = <View style={styles.indicator}>
                        <ActivityIndicator animating={true} size='large' color='#ffffff'/>
                     </View>
@@ -1030,9 +1029,9 @@ class NewResource extends Component {
     let submit
     if (!isRegistration  &&  !isRefresh) {
       let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
-      if (this.state.err) {
-        Alert.alert(this.state.err)
-        this.state.err = null
+      if (err) {
+        Alert.alert(err)
+        err = null
       }
       if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={onPress}>
@@ -1062,7 +1061,7 @@ class NewResource extends Component {
                   ref='scrollView' {...this.scrollviewProps}>
         <View style={formStyle}>
           {photoView}
-          <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
+          <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             {guidanceMsg}
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
             {formsToSign}
@@ -1081,14 +1080,17 @@ class NewResource extends Component {
 
     let errors
     if (!isRegistration) {
-      if (this.state.missedRequiredOrErrorValue  &&  !utils.isEmpty(this.state.missedRequiredOrErrorValue)) {
+      if (missedRequiredOrErrorValue  &&  !utils.isEmpty(missedRequiredOrErrorValue)) {
         errors = <View style={styles.errors}>
                    <Text style={styles.errorsText}>{translate('fillRequiredFields')}</Text>
                  </View>
       }
-      else if (this.state.message) {
+      else if (message) {
+        let idx = message.indexOf(' **')
+        message = idx === -1 && message || message.slice(0, idx)
+
         errors = <View style={styles.errors}>
-                   <Text style={styles.errorsText}>{translate(this.state.message)}</Text>
+                   <Text style={styles.errorsText}>{translate(message)}</Text>
                  </View>
       }
       else if (params.validationErrors) {
