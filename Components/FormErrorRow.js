@@ -328,6 +328,10 @@ class FormErrorRow extends Component {
     else
       return {onPressCall: this.showEditResource.bind(this)}
   }
+  canEmployeePrefill(resource) {
+    let { application } = this.props
+    return !resource._documentCreated  &&  application  &&  utils.isRM(application)
+  }
 }
 
 var styles = StyleSheet.create({
