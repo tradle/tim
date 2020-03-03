@@ -9,13 +9,18 @@ import {
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
-import constants from '@tradle/constants'
+import Reflux from 'reflux'
+
 import Icon from 'react-native-vector-icons/Ionicons'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 
+import constants from '@tradle/constants'
 import { Text } from './Text'
+import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
 import NoResources from './NoResources'
+import ResourceMixin from './ResourceMixin'
 import ApplicationTreeRow from './ApplicationTreeRow'
 import ApplicationTreeHeader from './ApplicationTreeHeader'
 import PageView from './PageView'
@@ -87,10 +92,14 @@ const viewCols = {
     }
   },
   'assignedToTeam': 'Team',
-  'score': 'IRR',
+  'score': {
+    label: 'IRR',
+    link: 'showScoreDetails'
+  },
   'scoreType': 'risk',
   'stalled': {
     label: 'Stalled',
+    link: 'showTreeNode',
     type: 'number',
     units: 'h'
   },
@@ -159,6 +168,20 @@ class ApplicationTree extends Component {
       dataSource: dataSource.cloneWithRows(list),
       resource,
       depth
+    }
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onAction')
+  }
+  onAction(params) {
+    let { action, application, context } = params
+    switch(action) {
+    case 'openApplicationChat':
+      this.openApplicationChat(application, context)
+      return
+    case 'showScoreDetails':
+      this.showScoreDetails(application)
+      return
     }
   }
   flatTree({level, nodes, list, depth}) {
@@ -243,7 +266,22 @@ class ApplicationTree extends Component {
   renderHeader() {
     return <ApplicationTreeHeader gridCols={viewCols} depth={this.state.depth} />
   }
+  showScoreDetails(application) {
+    let m = utils.getModel(APPLICATION)
+    let { navigator, bankStyle } = this.props
+    navigator.push({
+      componentName: 'ScoreDetails',
+      backButtonTitle: 'Back',
+      title: `${translate(m.properties.scoreDetails, m)} - ${application.applicantName}`,
+      passProps: {
+        bankStyle,
+        resource: application
+      }
+    })
+  }
 }
+reactMixin(ApplicationTree.prototype, Reflux.ListenerMixin);
+reactMixin(ApplicationTree.prototype, ResourceMixin);
 ApplicationTree = makeResponsive(ApplicationTree)
 ApplicationTree = makeStylish(ApplicationTree)
 
