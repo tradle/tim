@@ -96,7 +96,7 @@ class ApplicationTreeRow extends Component {
       }
 
       let style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: approved && 7 || 0}
-      return <TouchableOpacity onPress={this.showTreeNode.bind(this, r)}>
+      return <TouchableOpacity onPress={this.showTreeNode.bind(this, {stub: r})}>
                <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text>{approved}</View>
              </TouchableOpacity>
     }
