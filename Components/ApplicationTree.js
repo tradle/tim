@@ -192,8 +192,12 @@ class ApplicationTree extends Component {
     for (let p in nodes) {
       let { _displayName, _permalink, top } = nodes[p]
       let node = _.omit(nodes[p], ['top']) //, '_link', '_permalink', '_displayName'])
-      if (top  &&  top[TYPE] === PHOTO_ID)
-        node.node_displayName = top._displayName.split('\n')[0]
+      if (top) {
+        if (top[TYPE] === PHOTO_ID)
+          node.node_displayName = top._displayName.split('\n')[0]
+        else
+          node.node_displayName = top._displayName
+      }
       else {
         let title = utils.makeModelTitle(node.requestFor || node[TYPE])
         let idx = _displayName.indexOf(title)
