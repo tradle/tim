@@ -234,12 +234,12 @@ class ApplicationTabs extends Component {
       let { scoreDetails } = resource
       let pieChart = scoreDetails  &&  this.getPieChart(styles)
       details = <ShowPropertiesView resource={resource}
-                                      pieChart={pieChart}
-                                      showRefResource={this.getRefResource.bind(this)}
-                                      currency={currency}
-                                      bankStyle={bankStyle}
-                                      excludedProperties={['photos']}
-                                      navigator={navigator} />
+                                    pieChart={pieChart}
+                                    showRefResource={this.getRefResource.bind(this)}
+                                    currency={currency}
+                                    bankStyle={bankStyle}
+                                    excludedProperties={['photos']}
+                                    navigator={navigator} />
       if (/*!resource.draft  &&*/ utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
