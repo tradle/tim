@@ -23,6 +23,7 @@ const {
 
 const APPLICATION = 'tradle.Application'
 const PHOTO = 'tradle.Photo'
+const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 
 var HomePageMixin = {
   scanFormsQRCode(opts) {
@@ -306,6 +307,36 @@ console.log('HomePageMixin: filterResource', resource)
         }
       }
     });
+  },
+  assignRM(resource) {
+    // let resource = this.state.resource || this.props.resource
+    if (utils.isRM(resource)) {
+      Alert.alert(translate('youAreTheRM'))
+      return
+    }
+    Alert.alert(
+      translate('areYouSureYouWantToServeThisCustomer', resource.from.title),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {}},
+        {text: translate('Yes'), onPress: () => {
+          let me = utils.getMe()
+          let msg = {
+            [TYPE]: ASSIGN_RM,
+            employee: {
+              id: utils.makeId('tradle.Identity', utils.getRootHash(me))
+            },
+            application: resource,
+            _context: resource._context,
+            from: me,
+            to: resource.to
+          }
+          Actions.addChatItem({resource: msg})
+          this.setState({hasRM: true})
+          Actions.showModal({title: translate('inProgress'), showIndicator: true})
+        }}
+      ]
+    )
   }
 }
 
