@@ -6294,13 +6294,14 @@ if (!res[SIG]  &&  res._message)
     context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
     this.trigger({action: 'openApplicationChat', application, context})
   },
-  async onShowScoreDetails(stub) {
+  async onShowScoreDetails(stub, applicantName) {
     let application
     if (stub[ROOT_HASH])
       application = stub
     else
       application = await this._getItemFromServer({idOrResource: stub, noBacklinks: true})
-
+    if (!application.applicantName)
+      application.applicantName = applicantName
     this.trigger({action: 'showScoreDetails', application})
   },
 

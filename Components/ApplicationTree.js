@@ -270,13 +270,13 @@ class ApplicationTree extends Component {
   renderHeader() {
     return <ApplicationTreeHeader gridCols={viewCols} depth={this.state.depth} />
   }
-  showScoreDetails(application) {
+  showScoreDetails(application, applicantName) {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle } = this.props
     navigator.push({
       componentName: 'ScoreDetails',
       backButtonTitle: 'Back',
-      title: `${translate(m.properties.scoreDetails, m)} - ${application.applicantName}`,
+      title: `${translate(m.properties.scoreDetails, m)} - ${application.applicantName  ||  applicantName}`,
       passProps: {
         bankStyle,
         resource: application
