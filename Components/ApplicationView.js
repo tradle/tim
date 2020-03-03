@@ -198,7 +198,7 @@ class ApplicationView extends Component {
 
     let assignRM
     if (!isRM  &&  !utils.isMe(resource.applicant))
-      assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
+      assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
@@ -228,7 +228,7 @@ class ApplicationView extends Component {
 
     let chatButton
     if (resource._context)
-      chatButton = <TouchableOpacity onPress={this.openChat} style={[styles.openChatPadding]}>
+      chatButton = <TouchableOpacity onPress={this.openApplicationChat.bind(this, resource)} style={[styles.openChatPadding]}>
                       <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                         <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                       </View>
@@ -266,36 +266,6 @@ class ApplicationView extends Component {
      );
   }
 
-  assignRM() {
-    let resource = this.state.resource || this.props.resource
-    if (utils.isRM(resource)) {
-      Alert.alert(translate('youAreTheRM'))
-      return
-    }
-    Alert.alert(
-      translate('areYouSureYouWantToServeThisCustomer', resource.from.title),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {}},
-        {text: translate('Yes'), onPress: () => {
-          let me = utils.getMe()
-          let msg = {
-            [TYPE]: ASSIGN_RM,
-            employee: {
-              id: utils.makeId('tradle.Identity', me[ROOT_HASH])
-            },
-            application: resource,
-            _context: resource._context,
-            from: me,
-            to: resource.to
-          }
-          Actions.addChatItem({resource: msg})
-          this.setState({hasRM: true})
-          Actions.showModal({title: translate('inProgress'), showIndicator: true})
-        }}
-      ]
-    )
-  }
   compareImages(photoId, selfie) {
     let { navigator, bankStyle } = this.props
     let resource = this.state.resource || this.props.resource
@@ -400,6 +370,7 @@ class ApplicationView extends Component {
     else
       this.setState({checksCategory: null, checkFilter: filter})
   }
+
   openChat() {
     let { navigator, application } = this.props
     let { bankStyle } = this.state
