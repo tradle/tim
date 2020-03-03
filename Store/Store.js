@@ -2916,8 +2916,19 @@ var Store = Reflux.createStore({
     let r = params.msg
     let { editFormRequestPrefill, originatingMessage } = params
     let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
-
+    // Case of prefilled 'kid-glove' form by employee for the customer
     if (application) {
+      if (!application._context)
+        application._context = originatingMessage && originatingMessage._context
+      if (!application._context) {
+        let context = await this.searchServer({
+            modelName: PRODUCT_REQUEST,
+            noTrigger: true,
+            filterResource: {contextId: application.context}
+          })
+        context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
+        application._context = context
+      }
       r.to = application._context.from
       r._context = application._context
     }
@@ -4193,7 +4204,7 @@ if (!res[SIG]  &&  res._message)
   },
 
   async getApplication(params) {
-    var {resource, action, backlink, forwardlink, application} = params
+    var {resource, action, backlink, forwardlink} = params //, application} = params
     let blProp = backlink ||  forwardlink
     let prop
     let submissions = utils.getModel(APPLICATION).properties.submissions
@@ -6264,9 +6275,35 @@ if (!res[SIG]  &&  res._message)
     })
     return provider
   },
-  onMessageList(params) {
-    this.onList(params);
+  async onMessageList(params) {
+    await this.onList(params);
   },
+  async onOpenApplicationChat(stub) {
+    let application
+    if (stub[ROOT_HASH])
+      application = stub
+    else
+      application = await this._getItemFromServer({idOrResource: stub, noBacklinks: true})
+
+    let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    let context = await this.searchServer({
+        modelName: PRODUCT_REQUEST,
+        noTrigger: true,
+        filterResource: {contextId: application.context}
+      })
+    context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
+    this.trigger({action: 'openApplicationChat', application, context})
+  },
+  async onShowScoreDetails(stub) {
+    let application
+    if (stub[ROOT_HASH])
+      application = stub
+    else
+      application = await this._getItemFromServer({idOrResource: stub, noBacklinks: true})
+
+    this.trigger({action: 'showScoreDetails', application})
+  },
+
   async onList(params) {
     if (isLoaded) {
       await this.getList(params)
@@ -12012,14 +12049,14 @@ debug(`deleteItemFromDB: ${itemId}`)
         return rr.value
     }
   },
-  async _getItemFromServer({idOrResource, backlink, isChat, isThisVersion}) {
+  async _getItemFromServer({idOrResource, backlink, noBacklinks, isChat, isThisVersion}) {
     let id = (typeof idOrResource !== 'string') &&  utils.getId(idOrResource) || idOrResource
     if (!this.client) {
       // debugger
       return
     }
     try {
-      let result = await graphQL.getItem({id, client: this.client, backlink, isChat, isThisVersion})
+      let result = await graphQL.getItem({id, client: this.client, backlink, noBacklinks, isChat, isThisVersion})
       if (result) {
         return this.convertToResource(result)
       }
