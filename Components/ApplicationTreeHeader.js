@@ -39,6 +39,7 @@ class ApplicationTreeHeader extends Component {
     let gCols = Object.keys(gridCols)
     let self = this
     let descriptionHeader = []
+    let hasDescription
     let cols = gCols.map((p, i) => {
       let prop = props[p]
       let textStyle
@@ -69,10 +70,12 @@ class ApplicationTreeHeader extends Component {
                     {translate(label).toUpperCase()}
                   </Text>
 
-      if (description)
+      if (description) {
         description = <Text style={[styles.cellD, textStyle]}>
                         {translate(description)}
                       </Text>
+        hasDescription = true
+      }
       else
         description = <View/>
       let size = i === 0 && depth + 1 || 1
@@ -87,10 +90,14 @@ class ApplicationTreeHeader extends Component {
     })
 
     let size = depth + gCols.length
+    let description
+    if (hasDescription)
+      description = <Row size={size} style={styles.dHeaderRow} key='Datagrid_h3' nowrap>
+                      {descriptionHeader}
+                    </Row>
+
     return <View key='Datagrid_h1'>
-            <Row size={size} style={styles.dHeaderRow} key='Datagrid_h3' nowrap>
-              {descriptionHeader}
-            </Row>
+            {description}
             <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
               {cols}
             </Row>

@@ -54,6 +54,7 @@ class ApplicationTreeRow extends Component {
       resource,
       node
     }
+    this.showTreeNode = this.showTreeNode.bind(this)
   }
   render()  {
     let { resource, gridCols, bankStyle, rowId, depth, node } = this.props
@@ -82,17 +83,18 @@ class ApplicationTreeRow extends Component {
       return
     let model = utils.getModel(APPLICATION);
     let level = node.node_level
-    let cellStyle = {/*paddingVertical: 5,*/ paddingLeft: 7}
+    let r = {
+             id: `${node._t}_${node._permalink}`,
+             title: node._displayName
+           }
     if (colIdx === 0) {
       let approved
+      let cellStyle = { paddingLeft: 7 }
       if (node.status === 'approved') {
         approved = <Icon name='ios-done-all' size={30} color='green' style={{marginLeft: 10}}/>
         cellStyle.flexDirection = 'row'
       }
-      let r = {
-                 id: `${node._t}_${node._permalink}`,
-                 title: node._displayName
-               }
+
       let style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: approved && 7 || 0}
       return <TouchableOpacity onPress={this.showTreeNode.bind(this, r)}>
                <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text>{approved}</View>
@@ -102,26 +104,40 @@ class ApplicationTreeRow extends Component {
     let properties = model.properties;
     let colProp = properties[pName]
 
-    let { backlink, filter, units, valueColor } = gridCols[pName]
+    let gProps = gridCols[pName]
+    let { backlink, filter, units, valueColor } = gProps
     let style = [styles.description]
     let value = node[pName] + (units || '')
+
+    let link = typeof gProps === 'object'  &&  gProps.link
+    let self = this
+    if (link) {
+      let style // = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
+      if (colProp  &&  colProp.type === 'number')
+        style = {alignSelf: 'flex-end', paddingRight: 10, fontWeight: '600', color: bankStyle.linkColor, marginTop: 0 }
+      else
+        style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
+      return <TouchableOpacity onPress={() => self[link]({stub: r, openChat: true})}>
+               <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
+             </TouchableOpacity>
+    }
     if (!colProp) {
       let bgColor
       if (typeof node[pName] === 'number') {
-        bgColor = typeof gridCols[pName] === 'object' && gridCols[pName][node[pName]+'']
+        bgColor = typeof gProps === 'object' && gProps[node[pName]+'']
         if (!bgColor) bgColor = valueColor
         if (!units)
           units  =  ''
         style.push({alignSelf: 'flex-end', paddingRight: 10})
         if (backlink) {
-          return <TouchableOpacity onPress={this.showBacklinks.bind(this, gridCols[pName])}>
-                   <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}>
+          return <TouchableOpacity onPress={this.showBacklinks.bind(this, gProps)}>
+                   <View style={[styles.cellStyle, {backgroundColor: bgColor || '#fff'}]}>
                      <Text style={style} key={this.getNextKey(node)}>{value}</Text>
                    </View>
                  </TouchableOpacity>
         }
       }
-      return <View style={[cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
+      return <View style={[styles.cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
     }
 
     if (colProp.style)
@@ -129,64 +145,25 @@ class ApplicationTreeRow extends Component {
     let ref = colProp.ref;
     let row
 
-    if (ref) {
-      if (!node[pName])
-        return
+    if (ref)
+      return this.showRef(node, pName, ref)
 
-      let refM = utils.getModel(ref)
-      if (ref === MONEY) {
-        style.push({alignSelf: 'flex-end', paddingRight: 10})
-        row = <Text style={style} key={this.getNextKey(node)}>{node[pName].currency + node[pName].value}</Text>
-      }
-      else if (ref === PHOTO)
-        row = <Image source={{uri: node[pName].url}} style={styles.thumb} />
-      else {
-        let title = utils.getDisplayName(node[pName])
-        row = <Text style={styles.description} key={this.getNextKey(node)}>{title}</Text>
-
-        if (utils.isEnum(refM)) {
-          let eVal = refM.enum.find(r => r.id === getEnumValueId({model: refM, value: node[pName]}))
-          if (eVal) {
-            let { icon, color } = eVal
-            if (icon) {
-              row = <View key={this.getNextKey(node)} style={styles.row}>
-                      {this.paintIcon(model, eVal)}
-                      <View style={{paddingLeft: 5, justifyContent: 'center'}}>
-                        {row}
-                      </View>
-                    </View>
-            }
-          }
-        }
-        else if (refM.isInterface || refM.id === FORM) {
-          let resType = utils.getType(node[pName])
-          let resM = utils.getModel(resType)
-          row = <View key={this.getNextKey(node)}>
-                  <Text style={styles.type}>{translate(resM)}</Text>
-                  {row}
-                </View>
-        }
-      }
-      return <View style={cellStyle}>{row}</View>
-    }
     if (colProp.type === 'date')
-      return <View style={cellStyle}>{this.addDateProp(pName)}</View>
+      return <View style={styles.cellStyle}>{this.addDateProp(pName)}</View>
 
     if (node[pName]  &&  (typeof node[pName] != 'string')) {
       if (colProp.type === 'number')
         style.push({alignSelf: 'flex-end', paddingRight: 10})
 
       if (backlink  &&  filter) {
-        return <TouchableOpacity onPress={this.showBacklinks.bind(this, gridCols[pName])}>
-                 <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+        return <TouchableOpacity onPress={this.showBacklinks.bind(this, gProps)}>
+                 <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
                </TouchableOpacity>
       }
-      else
-        return <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+      return <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
     }
     if (!node[pName]  && (node[pName].indexOf('http://') === 0  ||  node[pName].indexOf('https://') === 0))
-      // return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, node)} key={this.getNextKey(node)}>{node[pName]}</Text></View>
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName]}</Text></View>
+      return <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName]}</Text></View>
 
     let val = colProp.displayAs ? utils.templateIt(colProp, node) : node[pName];
     let msgParts = utils.splitMessage(val);
@@ -198,13 +175,60 @@ class ApplicationTreeRow extends Component {
         val += msgParts[i];
     }
     val = val  &&  val.replace(/\*/g, '')  ||  utils.getDisplayName(node)
-    return <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{val}</Text></View>
+    return <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{val}</Text></View>
   }
   paintIcon(model, eVal) {
     let { icon, color } = eVal
     return <View style={[styles.button, {alignItems: 'center', backgroundColor: color}]}>
              <Icon name={icon} color='#ffffff' size={25}/>
            </View>
+  }
+  showRef(node, pName, ref) {
+    if (!node[pName])
+      return
+
+    let style = [styles.description]
+    let refM = utils.getModel(ref)
+    let model = utils.getModel(APPLICATION);
+
+    let row
+    if (ref === MONEY) {
+      style.push({alignSelf: 'flex-end', paddingRight: 10})
+      row = <Text style={style} key={this.getNextKey(node)}>{node[pName].currency + node[pName].value}</Text>
+    }
+    else if (ref === PHOTO)
+      row = <Image source={{uri: node[pName].url}} style={styles.thumb} />
+    else {
+      let title = utils.getDisplayName(node[pName])
+      row = <Text style={styles.description} key={this.getNextKey(node)}>{title}</Text>
+
+      if (utils.isEnum(refM)) {
+        let eVal = refM.enum.find(r => r.id === getEnumValueId({model: refM, value: node[pName]}))
+        if (eVal) {
+          let { icon, color } = eVal
+          if (icon) {
+            row = <View key={this.getNextKey(node)} style={styles.row}>
+                    {this.paintIcon(model, eVal)}
+                    <View style={{paddingLeft: 5, justifyContent: 'center'}}>
+                      {row}
+                    </View>
+                  </View>
+          }
+        }
+      }
+      else if (refM.isInterface || refM.id === FORM) {
+        let resType = utils.getType(node[pName])
+        let resM = utils.getModel(resType)
+        row = <View key={this.getNextKey(node)}>
+                <Text style={styles.type}>{translate(resM)}</Text>
+                {row}
+              </View>
+      }
+    }
+    return <View style={styles.cellStyle}>{row}</View>
+  }
+  showScoreDetails({stub}) {
+    Actions.showScoreDetails(stub)
   }
   showBacklinks(col) {
     let { resource, navigator, bankStyle, node } = this.props
@@ -243,6 +267,9 @@ var styles = StyleSheet.create({
   },
   col: {
     paddingVertical: 5,
+  },
+  cellStyle: {
+    paddingLeft: 7
   },
   type: {
     fontSize: 18,

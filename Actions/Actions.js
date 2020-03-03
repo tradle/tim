@@ -51,6 +51,9 @@ var asyncActions = [
   'updateMe',
   'scheduleUpdate',
 
+  'openApplicationChat',
+  'showScoreDetails',
+
   'genPairingData',
   'sendPairingRequest',
   'processPairingRequest',
