@@ -36,8 +36,9 @@ import TourRow from './TourRow'
 // import ProductChooser from './ProductChooser'
 import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
+import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
-import utils, { translate, isIphone10orMore, isAndroid, isWeb } from '../utils/utils'
+import utils, { translate, isIphone10orMore, isAndroid, isWeb, isRM } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -66,7 +67,6 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
 const REFRESH = 'tradle.Refresh'
 const SELFIE = 'tradle.Selfie'
-
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 const MAX_STEPS = isWeb() ? 10 : 5
 
@@ -229,8 +229,13 @@ class MessageList extends Component {
     }
     if (action === 'assignRM_Confirmed') {
       if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
-        let r = _.cloneDeep(application)
-        this.setState({application: r})
+        Actions.hideModal()
+        let additionalForms = this.getAdditionalForms(application)
+        let state = {application: params.application}
+        if (additionalForms.length)
+          state.additionalForms = additionalForms.map(f => ({id: f}))
+
+        this.setState(state)
       }
       return
     }
@@ -853,6 +858,8 @@ class MessageList extends Component {
           onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
     if (currentContext)
       context = currentContext
+    let styles = createStyles({ bankStyle })
+
     let alert = <View />
     let hideTextInput
     if (modelName === ORGANIZATION)
@@ -871,6 +878,30 @@ class MessageList extends Component {
     }
     let stepIndicator = this.getStepIndicator(context)
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
+    let assignRM
+    if (application  &&  !isRM(application)) {
+      let hasRM = application.analyst != null
+      let iconName = 'ios-person-add-outline'
+      let icolor
+      let rmStyle
+      if (hasRM) {
+        iconName = 'ios-person'
+        icolor =  isAndroid() &&  '#CA9DF2' || '#ffffff'
+        rmStyle = styles.hasRM
+      }
+      else {
+        icolor = bankStyle.linkColor
+        rmStyle = styles.noRM
+      }
+      assignRM = <View style={styles.footer}>
+                    <TouchableOpacity onPress={() => this.assignRM(application)}>
+                      <View style={[buttonStyles.menuButton, rmStyle]}>
+                        <Icon name={iconName} color={icolor} size={30}/>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+    }
     if (!content) {
       let h = utils.dimensions(MessageList).height
       let maxHeight = h - NAV_BAR_HEIGHT
@@ -878,6 +909,7 @@ class MessageList extends Component {
       let isChooser = originatingMessage && originatingMessage.verifiers
       let notRemediation = (context  &&  context.requestFor !== REMEDIATION) ||
                            (isContext && resource.requestFor !== REMEDIATION)
+
       if (this.hasChatContext())
         maxHeight -= 45
       else if (notRemediation &&  !isChooser  &&  (!isConnected  ||  (!isContext  &&  onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
@@ -894,7 +926,8 @@ class MessageList extends Component {
       // Hide TextInput for shared context since it is read-only
       if (stepIndicator)
         maxHeight -= 12
-
+      if (assignRM)
+        maxHeight -= 30
       let textInputHeight = isIphone10orMore() ? 60 : 45
 
       content = <GiftedMessenger style={{ marginLeft, marginRight, width, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
@@ -967,6 +1000,7 @@ class MessageList extends Component {
         {content}
         {actionSheet}
         {alert}
+        {assignRM}
       </PageView>
     );
   }
@@ -1090,7 +1124,8 @@ class MessageList extends Component {
            </View>
   }
   getActionSheetItems() {
-    const { application, resource } = this.props
+    const { resource } = this.props
+    let application = this.state.application || this.props.application
     const buttons = []
     const push = btn => buttons.push({ ...btn, index: buttons.length })
 
@@ -1315,7 +1350,8 @@ class MessageList extends Component {
   }
 
   paintMenuButton() {
-    let { application } = this.props
+    let application = this.state.application || this.props.application
+
     if (application) {
       if (!utils.isRM(application)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
         return
@@ -1459,57 +1495,72 @@ class MessageList extends Component {
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 reactMixin(MessageList.prototype, TimerMixin)
+reactMixin(MessageList.prototype, HomePageMixin)
 MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
 
-var styles = StyleSheet.create({
-  footer: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'flex-end',
-    height: 45,
-    // width: Dimensions.get('window').width,
-    backgroundColor: '#eeeeee',
-    // borderColor: '#eeeeee',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#cccccc',
-    paddingRight: 10
-  },
-  textInputContainer: {
-    backgroundColor: '#ffffff',
-    height: 45,
-    borderTopWidth: Platform.OS === 'android' ? 1 : 1 / PixelRatio.get(),
-    borderColor: '#b2b2b2',
-    flexDirection: 'row',
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  container: {
-    alignItems: 'center'
-  },
-  mainWrap: {
-    flex: 1,
-    alignItems: 'stretch',
-    justifyContent: 'flex-start',
-  },
-  flex1: {
-    flex: 1,
-  },
-  bottom: {
-    position: 'absolute',
-    bottom: 30
-  },
-  loading: {
-    fontSize: 17,
-    alignSelf: 'center',
-    marginTop: 80,
-    color: '#629BCA'
-  },
-  indicator: {
-    alignSelf: 'center',
-    backgroundColor: 'transparent',
-    marginTop: 20
-  },
-});
+var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankStyle }) {
+  let isAndroid = Platform.OS === 'android'
+  let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
+  return StyleSheet.create({
+    footer: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+      justifyContent: 'flex-end',
+      height: 45,
+      // width: Dimensions.get('window').width,
+      backgroundColor: '#eeeeee',
+      // borderColor: '#eeeeee',
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: '#cccccc',
+      paddingRight: 10
+    },
+    textInputContainer: {
+      backgroundColor: '#ffffff',
+      height: 45,
+      borderTopWidth: Platform.OS === 'android' ? 1 : 1 / PixelRatio.get(),
+      borderColor: '#b2b2b2',
+      flexDirection: 'row',
+      paddingLeft: 10,
+      paddingRight: 10,
+    },
+    container: {
+      alignItems: 'center'
+    },
+    mainWrap: {
+      flex: 1,
+      alignItems: 'stretch',
+      justifyContent: 'flex-start',
+    },
+    flex1: {
+      flex: 1,
+    },
+    bottom: {
+      position: 'absolute',
+      bottom: 30
+    },
+    loading: {
+      fontSize: 17,
+      alignSelf: 'center',
+      marginTop: 80,
+      color: '#629BCA'
+    },
+    indicator: {
+      alignSelf: 'center',
+      backgroundColor: 'transparent',
+      marginTop: 20
+    },
+    hasRM: {
+      backgroundColor: isAndroid  &&  'transparent' ||  '#CA9DF2',
+      opacity: isAndroid && 1 || 0.5
+    },
+    noRM: {
+      backgroundColor: isAndroid && 'transparent' || '#ffffff',
+      opacity: 0.7,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: bgcolor
+    },
+  })
+})
 module.exports = MessageList;
 
