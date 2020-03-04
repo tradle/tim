@@ -96,7 +96,7 @@ class ApplicationTreeRow extends Component {
       }
 
       let style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: approved && 7 || 0}
-      return <TouchableOpacity onPress={this.showTreeNode.bind(this, r)}>
+      return <TouchableOpacity onPress={this.showTreeNode.bind(this, {stub: r})}>
                <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text>{approved}</View>
              </TouchableOpacity>
     }
@@ -113,11 +113,11 @@ class ApplicationTreeRow extends Component {
     let self = this
     if (link) {
       let style // = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
-      if (colProp  &&  colProp.type === 'number')
+      if (colProp  &&  colProp.type === 'number'  ||  gProps.type === 'number')
         style = {alignSelf: 'flex-end', paddingRight: 10, fontWeight: '600', color: bankStyle.linkColor, marginTop: 0 }
       else
         style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
-      return <TouchableOpacity onPress={() => self[link]({stub: r, openChat: true})}>
+      return <TouchableOpacity onPress={() => self[link]({stub: r, openChat: true, applicantName: node.node_displayName})}>
                <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
              </TouchableOpacity>
     }
@@ -227,8 +227,8 @@ class ApplicationTreeRow extends Component {
     }
     return <View style={styles.cellStyle}>{row}</View>
   }
-  showScoreDetails({stub}) {
-    Actions.showScoreDetails(stub)
+  showScoreDetails({stub, applicantName}) {
+    Actions.showScoreDetails(stub, applicantName)
   }
   showBacklinks(col) {
     let { resource, navigator, bankStyle, node } = this.props

@@ -174,10 +174,10 @@ class ApplicationTree extends Component {
     this.listenTo(Store, 'onAction')
   }
   onAction(params) {
-    let { action, application, context } = params
+    let { action, application } = params
     switch(action) {
     case 'openApplicationChat':
-      this.openApplicationChat(application, context)
+      this.openApplicationChat(application)
       return
     case 'showScoreDetails':
       this.showScoreDetails(application)
@@ -192,8 +192,12 @@ class ApplicationTree extends Component {
     for (let p in nodes) {
       let { _displayName, _permalink, top } = nodes[p]
       let node = _.omit(nodes[p], ['top']) //, '_link', '_permalink', '_displayName'])
-      if (top  &&  top[TYPE] === PHOTO_ID)
-        node.node_displayName = top._displayName.split('\n')[0]
+      if (top) {
+        if (top[TYPE] === PHOTO_ID)
+          node.node_displayName = top._displayName.split('\n')[0]
+        else
+          node.node_displayName = top._displayName
+      }
       else {
         let title = utils.makeModelTitle(node.requestFor || node[TYPE])
         let idx = _displayName.indexOf(title)
@@ -266,13 +270,13 @@ class ApplicationTree extends Component {
   renderHeader() {
     return <ApplicationTreeHeader gridCols={viewCols} depth={this.state.depth} />
   }
-  showScoreDetails(application) {
+  showScoreDetails(application, applicantName) {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle } = this.props
     navigator.push({
       componentName: 'ScoreDetails',
       backButtonTitle: 'Back',
-      title: `${translate(m.properties.scoreDetails, m)} - ${application.applicantName}`,
+      title: `${application.applicantName ||  applicantName}  →  ${translate(m.properties.score, m)} ${application.score}`,
       passProps: {
         bankStyle,
         resource: application
