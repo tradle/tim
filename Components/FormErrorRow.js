@@ -1,22 +1,3 @@
-
-import utils from '../utils/utils'
-var translate = utils.translate
-import Icon from 'react-native-vector-icons/Ionicons';
-import constants from '@tradle/constants'
-import RowMixin from './RowMixin'
-import ResourceMixin from './ResourceMixin'
-import equal from 'lodash/isEqual'
-import { makeResponsive } from 'react-native-orient'
-import StyleSheet from '../StyleSheet'
-import reactMixin from 'react-mixin'
-import chatStyles from '../styles/chatStyles'
-import ImageInput from './ImageInput'
-
-const PHOTO = 'tradle.Photo'
-const IPROOV_SELFIE = 'tradle.IProovSelfie'
-
-const TYPE = constants.TYPE
-
 import {
   Text,
   TouchableHighlight,
@@ -26,6 +7,24 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
+import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
+import equal from 'lodash/isEqual'
+
+import constants from '@tradle/constants'
+const { TYPE } = constants
+
+import utils, { translate } from '../utils/utils'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import StyleSheet from '../StyleSheet'
+import reactMixin from 'react-mixin'
+import chatStyles from '../styles/chatStyles'
+import ImageInput from './ImageInput'
+import { parseMessage } from '../utils/uiUtils'
+
+const PHOTO = 'tradle.Photo'
+const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
 class FormErrorRow extends Component {
   static propTypes = {
@@ -46,14 +45,7 @@ class FormErrorRow extends Component {
         resource._sendStatus !== nextProps.resource._sendStatus)
       return true
     let rid = utils.getId(resource)
-    // if (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === rid) {
-    //   // HACK for when the form status that is fulfilling this request changes the rendering uses
-    //   // the old list for that
-    //   if (nextProps.addedItem._documentCreated  &&  !nextProps.resource._documentCreated)
-    //     return false
-    //   return true
-    // }
-    if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
+    if (rid !== utils.getId(nextProps.resource) ||
         !equal(to, nextProps.to)                ||
         utils.resized(this.props, nextProps))
       return true
@@ -229,7 +221,7 @@ class FormErrorRow extends Component {
 
   }
   formatRow(isMyMessage, renderedRow) {
-    let {resource, to, application } = this.props
+    let {resource, to, application, bankStyle } = this.props
     var model = utils.getModel(resource[TYPE] || resource.id)
 
     let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
@@ -274,16 +266,31 @@ class FormErrorRow extends Component {
       let rtype = resource.prefill[TYPE] || utils.getId(resource.prefill).split('_')[0]
       let iconName = resource._documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
       let iconSize = resource._documentCreated ? 30 : 20
+      let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
+      let params = { resource, message: resource.message, bankStyle, noLink }
 
-      vCols.push(
-        <View key={this.getNextKey()} style={{paddingBottom: 3}}>
-          <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
-          <View style={chatStyles.rowContainer}>
-            <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : this.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype))}</Text>
-            <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? this.props.bankStyle.fixErrorColor : this.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+      let msg = parseMessage(params)
+      if (typeof msg === 'string') {
+        vCols.push(
+          <View key={this.getNextKey()} style={{paddingBottom: 3}}>
+            <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
+            <View style={chatStyles.rowContainer}>
+              <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : this.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype))}</Text>
+              <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? this.props.bankStyle.fixErrorColor : this.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+            </View>
           </View>
-        </View>
-      )
+        )
+      }
+      else {
+        vCols.push(
+          <View style={chatStyles.rowContainer} key={this.getNextKey()}>
+                <View style={styles.container}>
+                  {msg}
+                </View>
+                <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? this.props.bankStyle.fixErrorColor : this.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+              </View>
+        )
+      }
     });
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {
@@ -298,6 +305,10 @@ class FormErrorRow extends Component {
       return null
     else
       return {onPressCall: this.showEditResource.bind(this)}
+  }
+  canEmployeePrefill(resource) {
+    let { application } = this.props
+    return !resource._documentCreated  &&  application  &&  utils.isRM(application)
   }
 }
 
