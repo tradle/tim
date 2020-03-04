@@ -81,7 +81,9 @@ class ModificationRow extends Component {
     let date = dateformat(resource.dateModified, 'mmm dS, yyyy h:MM TT')
     let header = (
       <View style={{flexDirection: 'row', backgroundColor:'aliceblue'}}>
-        <View style={[styles.numberButton, {marginLeft: 10, marginTop: 7, backgroundColor: bankStyle.linkColor}]}><Text style={{fontSize: 14, color: '#ffffff'}}>{idx}</Text></View>
+        <View style={[styles.numberButton, {marginLeft: 10, marginTop: 10, backgroundColor: bankStyle.linkColor}]}>
+          <Text style={{fontSize: 14, color: '#ffffff'}}>{idx}</Text>
+        </View>
         <View style={styles.headerRow} key='modificationsHeader'>
           <Text style={styles.headerTitle}>{translate(title)}</Text>
           <Text style={styles.headerDate}>{date}</Text>
@@ -152,12 +154,15 @@ class ModificationRow extends Component {
         if (prop)
           val = this.getVal(prop, val)
         let isUrl = prop.range === 'url'
+        if (isUrl && val.length > 55)
+          val = `${val.slice(0, 55)}...`
+
         let value = <View style={styles.value}>
                       <Text  style={isUrl && styles.pTitle || styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
                     </View>
 
         if (isUrl) {
-          value = <TouchableOpacity onPress={() => Linking.openURL(val)}>
+          value = <TouchableOpacity onPress={() => Linking.openURL(val)}  style={styles.value}>
                     {value}
                   </TouchableOpacity>
         }
