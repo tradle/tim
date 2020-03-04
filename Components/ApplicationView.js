@@ -99,8 +99,6 @@ class ApplicationView extends Component {
   componentWillMount() {
     let { resource, search, backlink, tab } = this.props
 
-    // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
-    // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
     let m = utils.getModel(rtype)
     if (utils.isInlined(m))
@@ -234,9 +232,18 @@ class ApplicationView extends Component {
                       </View>
                     </TouchableOpacity>
 
+    let tree
+    if (resource.tree  &&  resource.tree.top.nodes) {
+      tree = <TouchableOpacity onPress={() => this.showTree()} style={styles.tree}>
+                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                   <Icon name='ios-options-outline' size={30} color={bankStyle.linkColor} />
+                 </View>
+             </TouchableOpacity>
+    }
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
+                    {tree}
                     {compareImages}
                     {chatButton}
                     {assignRM}
@@ -460,8 +467,27 @@ class ApplicationView extends Component {
         }}
       ]
     )
-
   }
+  showTree() {
+    let { resource, bankStyle, navigator } = this.props
+    let me = utils.getMe()
+    let title
+    let aTitle = resource.applicantName || resource.applicant.title
+    if (aTitle)
+      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
+    else
+      title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
+
+    navigator.push({
+      title,
+      componentName: 'ApplicationTree',
+      passProps: {
+        resource,
+        bankStyle,
+      }
+    })
+  }
+
 }
 
 reactMixin(ApplicationView.prototype, Reflux.ListenerMixin);
@@ -516,62 +542,16 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
       borderColor: bgcolor,
       borderWidth: 1,
       opacity: 0.5
-    }
+    },
+    treeButton: {
+      borderColor: bgcolor,
+      borderWidth: 1,
+      opacity: 0.5
+    },
+    tree: {
+      paddingRight,
+    },
   })
 })
 
 module.exports = ApplicationView;
-  // chosenApprove() {
-  //   let resource = this.props.resource
-  //   console.log('Approve was chosen!')
-  //   if (!resource._appSubmitted)
-  //     Alert.alert('Application is not yet submitted')
-  //   else if (resource.status === 'approved') {
-  //     Alert.alert('Application was approved')
-  //     return
-  //   }
-  //   let applicant = resource[TYPE] === APPLICATION ? utils.getDisplayName(resource.applicant) : resource.from.title
-  //   Actions.showModal({
-  //     title: translate('approveApplication', translate(applicant)),
-  //     buttons: [
-  //       {
-  //         text: translate('cancel'),
-  //         onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
-  //       },
-  //       {
-  //         text: translate('Approve'),
-  //         onPress: () => {
-  //           console.log('Approve was chosen!')
-  //           if (!resource._appSubmitted)
-  //             Alert.alert('Application is not yet submitted')
-  //           else
-  //             this.approve(resource)
-  //         }
-  //       },
-  //     ]
-  //   })
-  // }
-  // chosenDeny() {
-  //   let resource = this.props.resource
-  //   if (resource.status === 'denied') {
-  //     Alert.alert('Application was denied')
-  //     return
-  //   }
-  //   let applicant = resource[TYPE] === APPLICATION ? utils.getDisplayName(resource.applicant) : resource.from.title
-  //   Actions.showModal({
-  //     title: translate('denyApplication', translate(applicant)),
-  //     buttons: [
-  //       {
-  //         text: translate('cancel'),
-  //         onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
-  //       },
-  //       {
-  //         text: translate('Deny'),
-  //         onPress: () => {
-  //           console.log('Deny was chosen!')
-  //           this.deny(resource)
-  //         }
-  //       },
-  //     ]
-  //   })
-  // }

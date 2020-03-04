@@ -29,7 +29,6 @@ import RowMixin from './RowMixin'
 
 import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
-import ApplicationTree from './ApplicationTree'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
@@ -232,13 +231,13 @@ class ApplicationTabs extends Component {
 
     if (showDetails) {
       let { scoreDetails } = resource
-      let pieChart = scoreDetails  &&  this.getPieChart(styles)
+      let pieChart // = scoreDetails  &&  this.getPieChart(styles)
       details = <ShowPropertiesView resource={resource}
                                     pieChart={pieChart}
                                     showRefResource={this.getRefResource.bind(this)}
                                     currency={currency}
                                     bankStyle={bankStyle}
-                                    excludedProperties={['photos']}
+                                    excludedProperties={['photos', 'tree']}
                                     navigator={navigator} />
       if (/*!resource.draft  &&*/ utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
@@ -258,21 +257,6 @@ class ApplicationTabs extends Component {
                   </View>
       }
     }
-    // let treeTab = resource.tree && (
-    //           <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-    //            <TouchableOpacity onPress={this.showTree.bind(this)}>
-    //              <View style={styles.item}>
-    //                <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-    //                <Text style={[buttonStyles.text, styles.tabText]}>{'Tree'}</Text>
-    //              </View>
-    //            </TouchableOpacity>
-    //            {!showDetails && !backlink && showCurrent}
-    //           </View>
-    //         )
-
-
-    // if (treeTab)
-    //   refList.push(treeTab)
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
       if (refList  &&  refList.length) {
         refList = <View style={buttonStyles.buttonsNoBorder} key={'ApplicationTabs'}>
@@ -343,9 +327,6 @@ class ApplicationTabs extends Component {
   showDetails() {
     Actions.getDetails(this.props.resource)
   }
-  // showTree() {
-  //   Actions.getTree(this.props.resource)
-  // }
   getRefResource(resource, prop) {
     this.showRefResource(resource, prop)
   }
@@ -354,27 +335,11 @@ class ApplicationTabs extends Component {
 
     let progress = this.getProgress(resource)
     let progressColor = '#a0d0a0' //bankStyle.linkColor
-    const spin = this.spinValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '90deg']
-    })
-    let style = {transform: [{rotate: spin}]}
-    let tree
-    if (resource.tree)
-      tree = <TouchableOpacity onPress={() => this.showTree()} style={styles.tree}>
-               <Animated.View style={style}>
-                 <View style={styles.treeButton}>
-                   <Icon name='ios-git-network' size={25} color='#555555' />
-                 </View>
-               </Animated.View>
-             </TouchableOpacity>
-
     return <View style={[styles.row, {justifyContent: 'space-between'}]}>
              <View style={styles.progress}>
                <Text style={styles.title}>{translate('progress')}</Text>
                <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
              </View>
-             {tree}
            </View>
   }
   getChecksBar(styles) {
@@ -418,25 +383,6 @@ class ApplicationTabs extends Component {
     return <View style={styles.checksTabs}>
              {impl}
            </View>
-  }
-  showTree() {
-    let { resource, bankStyle, navigator } = this.props
-    let me = utils.getMe()
-    let title
-    let aTitle = resource.applicantName || resource.applicant.title
-    if (aTitle)
-      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
-    else
-      title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
-
-    navigator.push({
-      title,
-      componentName: 'ApplicationTree',
-      passProps: {
-        resource,
-        bankStyle,
-      }
-    })
   }
 }
 
@@ -486,11 +432,6 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       fontSize: 20,
       alignSelf: 'center',
       color: '#555555'
-    },
-    tree: {
-      marginTop: 25,
-      marginBottom: 10,
-      paddingHorizontal: 10,
     },
     progress: {
       marginTop: 20,
@@ -594,16 +535,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       shadowRadius: 5,
       shadowColor: '#afafaf',
     },
-    treeButton: {
-      ...circled(40),
-      // backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
-      shadowOpacity: 0.7,
-      opacity: 1,
-      shadowRadius: 5,
-      backgroundColor: '#a0d0a0',
-      shadowColor: '#afafaf',
-    },
   })
 })
 
-module.exports = ApplicationTabs;
+module.exports = ApplicationTabs
