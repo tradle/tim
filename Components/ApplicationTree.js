@@ -174,10 +174,10 @@ class ApplicationTree extends Component {
     this.listenTo(Store, 'onAction')
   }
   onAction(params) {
-    let { action, application, context } = params
+    let { action, application } = params
     switch(action) {
     case 'openApplicationChat':
-      this.openApplicationChat(application, context)
+      this.openApplicationChat(application)
       return
     case 'showScoreDetails':
       this.showScoreDetails(application)
@@ -276,7 +276,7 @@ class ApplicationTree extends Component {
     navigator.push({
       componentName: 'ScoreDetails',
       backButtonTitle: 'Back',
-      title: `${translate(m.properties.scoreDetails, m)} - ${application.applicantName  ||  applicantName}`,
+      title: `${application.applicantName ||  applicantName}  →  ${translate(m.properties.score, m)} ${application.score}`,
       passProps: {
         bankStyle,
         resource: application

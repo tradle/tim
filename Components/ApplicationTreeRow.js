@@ -113,7 +113,7 @@ class ApplicationTreeRow extends Component {
     let self = this
     if (link) {
       let style // = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
-      if (colProp  &&  colProp.type === 'number')
+      if (colProp  &&  colProp.type === 'number'  ||  gProps.type === 'number')
         style = {alignSelf: 'flex-end', paddingRight: 10, fontWeight: '600', color: bankStyle.linkColor, marginTop: 0 }
       else
         style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}

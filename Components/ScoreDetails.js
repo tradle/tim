@@ -129,14 +129,13 @@ class ScoreDetails extends Component {
           if (branch.riskClass) {
             branch = {...copy}
             delete branch.totalScore
+            delete branch.riskFactor
+            branch.form = d.form
             list.push(branch)
           }
-          if (dd.risk) {
+          if (dd[c].risk  ||  (_.size(dd) <= 2  &&  d.risk))
             branch.totalScore = 100
-            branch.score = 100
-          }
-          else
-            branch.score = dd.score
+          branch.score = dd[c].score || dd.score || (_.size(dd) === 1  &&  Object.values(dd)[0])
 
           branch.riskClass = translate(criteria)
           branch.riskValue = c
