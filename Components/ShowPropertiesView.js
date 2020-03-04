@@ -21,7 +21,6 @@ import validateModel from '@tradle/validate-model'
 import utils, { translate, translateEnum, isEnum, isStub, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
-import ScoreDetails from './ScoreDetails'
 import { Text } from './Text'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
@@ -440,7 +439,7 @@ class ShowPropertiesView extends Component {
     navigator.push({
       componentName: 'ScoreDetails',
       backButtonTitle: 'Back',
-      title: `${translate(m.properties.scoreDetails, m)} - ${resource.applicantName}`,
+      title: `${resource.applicantName}  →  ${translate(m.properties.score, m)} ${resource.score}`,
       passProps: {
         bankStyle,
         resource
