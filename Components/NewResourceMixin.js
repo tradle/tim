@@ -114,7 +114,12 @@ var NewResourceMixin = {
     let softRequired
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       showReadOnly = true
-      ;({ eCols, softRequired } = this.addRequestedProps({eCols, params, props}))
+      if (!formErrors) {
+        _.extend(params, {formErrors: {}})
+        formErrors = params.formErrors
+      }
+
+      ;({ eCols, softRequired } = this.addRequestedProps({eCols, props}))
     }
     else if (data) {
       for (let p in data) {
@@ -204,7 +209,12 @@ var NewResourceMixin = {
       if (formType) {
         if (props[p].keyboard)
           options.fields[p].keyboardType = props[p].keyboard
-
+        else if (props[p].range === 'email')
+          options.fields[p].keyboardType = 'email-address'
+        else if (props[p].range === 'url')  {
+          if (utils.isIOS())
+            options.fields[p].keyboardType = 'url'
+        }
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
           model[p] = t.Str
@@ -300,6 +310,7 @@ var NewResourceMixin = {
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           let editable = (params.editable && !props[p].readOnly) || search || false
+          let keyboard = props[p].keyboard  ||  options.fields[p].keyboardType  ||  (!search && type === 'number' ? 'numeric' : 'default')
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label,
                     prop:  props[p],
@@ -309,7 +320,7 @@ var NewResourceMixin = {
                     errors: formErrors,
                     component,
                     editable,
-                    keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
+                    keyboard,
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -426,6 +437,7 @@ var NewResourceMixin = {
     }
     return options;
   },
+
   addRequestedProps({eCols, params, props}) {
     let {requestedProperties, excludeProperties, formErrors, model} = this.state.requestedProperties
     if (!formErrors) {
@@ -480,7 +492,6 @@ var NewResourceMixin = {
     }
     return { eCols, softRequired }
   },
-
   getEditCols(props, model) {
     const { editCols, exploreData, bookmark, search } = this.props
     const isMessage = model.id === MESSAGE
@@ -958,12 +969,12 @@ var NewResourceMixin = {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
     let format = 'LL'
-    if (prop.format) {
-      dateProps.format = prop.format
-      format = prop.format
-      if (localizedDate)
-        value = dateformat(localizedDate, format)
-    }
+    // if (prop.format) {
+    //   dateProps.format = prop.format
+    //   format = prop.format
+    //   if (localizedDate)
+    //     value = dateformat(localizedDate, format)
+    // }
     let datePicker
     if (prop.readOnly  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
