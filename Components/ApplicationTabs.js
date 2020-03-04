@@ -26,7 +26,6 @@ import appStyle from '../styles/appStyle.json'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
-import ApplicationTree from './ApplicationTree'
 import BacklinksTabBar from './BacklinksTabBar'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
@@ -285,22 +284,12 @@ class ApplicationTabs extends Component {
       outputRange: ['0deg', '90deg']
     })
     let style = {transform: [{rotate: spin}]}
-    let tree
-    if (resource.tree)
-      tree = <TouchableOpacity onPress={() => this.showTree()} style={styles.tree}>
-               <Animated.View style={style}>
-                 <View style={styles.treeButton}>
-                   <Icon name='ios-git-network' size={25} color='#555555' />
-                 </View>
-               </Animated.View>
-             </TouchableOpacity>
 
     return <View style={[styles.row, {justifyContent: 'space-between'}]}>
              <View style={styles.progress}>
                <Text style={styles.title}>{translate('progress')}</Text>
                <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
              </View>
-             {tree}
            </View>
   }
   getChecksBar(styles) {
@@ -345,26 +334,6 @@ class ApplicationTabs extends Component {
              {impl}
            </View>
   }
-  showTree() {
-    let { resource, bankStyle, navigator } = this.props
-    let me = utils.getMe()
-    let title
-    let aTitle = resource.applicantName || resource.applicant.title
-    if (aTitle)
-      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
-    else
-      title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
-
-    navigator.push({
-      title,
-      componentName: 'ApplicationTree',
-      passProps: {
-        resource,
-        bankStyle,
-      }
-    })
-  }
-
 }
 
 reactMixin(ApplicationTabs.prototype, RowMixin);
@@ -484,16 +453,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       shadowRadius: 5,
       shadowColor: '#afafaf',
     },
-    treeButton: {
-      ...circled(40),
-      // backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
-      shadowOpacity: 0.7,
-      opacity: 1,
-      shadowRadius: 5,
-      backgroundColor: '#a0d0a0',
-      shadowColor: '#afafaf',
-    },
   })
 })
 
-module.exports = ApplicationTabs;
+module.exports = ApplicationTabs
