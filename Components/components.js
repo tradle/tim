@@ -26,6 +26,9 @@ module.exports = {
   get ApplicationTree() {
     return require('./ApplicationTree')
   },
+  get ScoreDetails() {
+    return require('./ScoreDetails')
+  },
   get SignatureView() {
     return require('./SignatureView')
   },

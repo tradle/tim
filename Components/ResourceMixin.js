@@ -14,12 +14,13 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import constants from '@tradle/constants'
 
 var { TYPE } = constants
-var { PROFILE, ORGANIZATION, MONEY } = constants.TYPES
+var { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import Accordion from './Accordion'
+import Actions from '../Actions/Actions'
 import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
@@ -683,6 +684,62 @@ var ResourceMixin = {
         <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
       </TouchableOpacity>
     )
+  },
+  showTreeNode({stub, prop, openChat}) {
+    let {id, title} = stub
+    debugger
+    const { bankStyle, navigator, resource } = this.props
+    let type = utils.getType(id)
+    let isApplication = type === APPLICATION
+    if (isApplication) {
+      if (resource.from)
+        title = `${title} -- ${resource.from.title} -> ${title}`
+    }
+    else
+      title = `${title} -- ${utils.makeModelTitle(type)}`
+    if (isApplication &&  openChat) {
+      Actions.openApplicationChat(stub)
+      return
+    }
+    navigator.push({
+      componentName: isApplication ? APPLICATION_VIEW : MESSAGE_VIEW,
+      backButtonTitle: 'Back',
+      title,
+      passProps: {
+        bankStyle,
+        resource: {
+          id
+        }
+      }
+    })
+  },
+  openApplicationChat(resource) {
+    let { navigator, bankStyle } = this.props
+    // let { bankStyle } = this.state
+    // let resource = this.state.resource || this.props.resource
+    let me = utils.getMe()
+    let title
+    let name = resource.applicantName || resource.applicant.title
+    if (name)
+      title = name  + '  →  ' + me.organization.title
+    else
+      title = me.organization.title
+    let style = resource.style ? this.mergeStyle(resource.style) : bankStyle
+    let route = {
+      componentName: 'MessageList',
+      backButtonTitle: 'Back',
+      title: title,
+      passProps: {
+        resource: resource._context,
+        filter: '',
+        search: true,
+        modelName: MESSAGE,
+        application: resource,
+        currency: resource.currency,
+        bankStyle: style,
+      }
+    }
+    navigator.push(route)
   },
 }
 

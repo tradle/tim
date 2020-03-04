@@ -33,6 +33,7 @@ const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
 const FILE = 'tradle.File'
 const CHECK = 'tradle.Check'
+const APPLICATION = 'tradle.Application'
 
 const {
   TYPE,
@@ -180,7 +181,18 @@ class ShowPropertiesView extends Component {
 
         let params = {prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
         // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
-        let jVal = this.showJson(params)
+        let jVal
+        if (p === 'scoreDetails') {
+          jVal = <View style={{backgroundColor:'#f7f7f7'}}>
+                   <View style={{flex: 1}}>
+                     <TouchableOpacity onPress={this.showScoreDetails.bind(this)}>
+                       <Text style={{padding: 17, color: bankStyle.linkColor, fontWeight: '600', fontSize: 18}}>{translate(pMeta, model).toUpperCase()}</Text>
+                     </TouchableOpacity>
+                   </View>
+                  </View>
+        }
+        else
+          jVal = this.showJson(params)
 
         if (!jVal)
           return
@@ -392,6 +404,19 @@ class ShowPropertiesView extends Component {
         )
     }
     return viewCols;
+  }
+  showScoreDetails() {
+    let m = utils.getModel(APPLICATION)
+    let { navigator, bankStyle, resource } = this.props
+    navigator.push({
+      componentName: 'ScoreDetails',
+      backButtonTitle: 'Back',
+      title: `${resource.applicantName}  →  ${translate(m.properties.score, m)} ${resource.score}`,
+      passProps: {
+        bankStyle,
+        resource
+      }
+    })
   }
   addForPartial(val, styles) {
     let labels = []
