@@ -87,4 +87,5 @@ export function navBarTitleWidth(component) {
 export const MenuIcon = menuIcon
 export const menuButtonObject = footerButton
 export const homeButtonObject = footerButton
+export const treeButtonObject = footerButton
 export const conversationButtonObject = footerButton

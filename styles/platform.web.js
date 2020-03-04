@@ -52,6 +52,7 @@ export {
   MenuIcon,
   footerButtonObject,
   homeButtonObject,
+  treeButtonObject,
   menuButtonObject,
   conversationButtonObject
 } from './platform.ios'
