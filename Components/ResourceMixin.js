@@ -32,7 +32,7 @@ import platformStyles from '../styles/platform'
 import Image from './Image'
 import { Text } from './Text'
 import uiUtils from '../utils/uiUtils'
-import { VictorySunburst } from './victory-sunburst'
+// import { VictorySunburst } from './victory-sunburst'
 // import { VictoryContainer } from 'victory'
 
 const RESOURCE_VIEW = 'ResourceView'
@@ -604,6 +604,7 @@ var ResourceMixin = {
         />
       </View>
     )
+    /*
     if (resource.submissions) {
       if (isTree  &&  params.showTree) {
         let tree = this.paintTree(json, resource)
@@ -628,6 +629,7 @@ var ResourceMixin = {
                   </View>
       }
     }
+    */
     return <View>
               {header}
               {content}
@@ -773,7 +775,7 @@ var ResourceMixin = {
       }
     })
   },
-  openApplicationChat(resource, context) {
+  openApplicationChat(resource) {
     let { navigator, bankStyle } = this.props
     // let { bankStyle } = this.state
     // let resource = this.state.resource || this.props.resource
@@ -790,7 +792,7 @@ var ResourceMixin = {
       backButtonTitle: 'Back',
       title: title,
       passProps: {
-        resource: resource._context || context,
+        resource: resource._context,
         filter: '',
         search: true,
         modelName: MESSAGE,
