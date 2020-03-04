@@ -65,10 +65,8 @@ class DataBundle {
     let resources = []
     await this.fillResources({result, context, val, resources, doAdd: true})
 
-    if (items[0][SOURCE_ID]) {
-      await this.processDataBundleWithSourceIDs({val, context, resources})
-      return
-    }
+    if (items[0][SOURCE_ID])
+      await this.processDataBundleWithSourceIDs({val, context, resources}) // , dontAdd: true})
 
     await this.fireRefresh({val, context})
     Actions.hideModal()
@@ -97,48 +95,25 @@ class DataBundle {
     }
 
     await this.fireRefresh({val, context, productBundle})
-    if (!productBundle) {
+    if (!productBundle)
       Actions.hideModal()
-    }
   }
 
   async processUploadedDataBundleWithSourceIDs({val, resources, dontAdd}) {
     if (!this.refs) {
-      let refs = {}
       let { items } = val
-      items.forEach(item => {
-        let sourceId = item[SOURCE_ID]
-        refs[sourceId] = {}
-
-        for (let p in item) {
-          if (typeof item[p] === 'object'  &&  item[p][REF_ID])
-            refs[sourceId][p] = item[p][REF_ID]
-        }
-      })
-      this.refs = refs
+      this.refs = this.getRefs(items)
     }
-    resources.forEach(async r => {
-      // debugger
-      let irefs = this.refs[r._sourceId]
-      let props = Object.keys(irefs)
-      if (!props)
-        return
-      props.forEach(prop => {
-        let sourceId = irefs[prop]
-        let rr = resources.find(r => r._sourceId === sourceId)
-        if (!rr)
-          return
-        r[prop] = this.Store.buildRef(rr)
-      })
-      // Can't do it async since the order matters forms should be processed before verifications
-      if (!dontAdd)
-        await this.Store.onAddChatItem({resource: r, noTrigger: true})
-    })
+    await this.addRefs({refs: this.refs, resources, dontAdd})
   }
-
-  async processDataBundleWithSourceIDs({val, context, resources}) {
+  async processDataBundleWithSourceIDs({val, resources, dontAdd}) {
     let { items } = val
 
+    this.refs = this.getRefs(items)
+    await this.addRefs({refs: this.refs, resources, dontAdd})
+  }
+
+  getRefs(items) {
     let refs = {}
     items.forEach(item => {
       let sourceId = item[SOURCE_ID]
@@ -149,6 +124,9 @@ class DataBundle {
           refs[sourceId][p] = item[p][REF_ID]
       }
     })
+    return refs
+  }
+  async addRefs({refs, resources, dontAdd}) {
     resources.forEach(async r => {
       // debugger
       let irefs = refs[r._sourceId]
@@ -163,11 +141,9 @@ class DataBundle {
         r[prop] = this.Store.buildRef(rr)
       })
       // Can't do it async since the order matters forms should be processed before verifications
-      await this.Store.onAddChatItem({resource: r, noTrigger: true})
+      if (!dontAdd)
+        await this.Store.onAddChatItem({resource: r, noTrigger: true})
     })
-
-    await this.fireRefresh({val, context})
-    Actions.hideModal()
   }
 
   async fillResources({result, context, val, resources, doAdd}) {
@@ -281,7 +257,7 @@ class DataBundle {
         let r = {
           [TYPE]: f,
           from: me,
-          to: this.getRepresentative(to)
+          to: this.Store.getRepresentative(to)
         }
         if (context.id)
           r._context = context
@@ -328,7 +304,7 @@ class DataBundle {
       if (!productBundle)
         await promiseDelay(timeout)
       debug('fireRefresh: ' + JSON.stringify(context, null, 2))
-      await this.Store.onAddChatItem({resource: requestForRefresh, doNotSend: true, noTrigger: true})
+      await this.Store.onAddChatItem({resource: requestForRefresh, doNotSend: true, noTrigger: productBundle})
     }, timeout)
   }
   async createProductBundle(resource) {
@@ -455,6 +431,8 @@ debugger
     let resources = []
     let me = getMe()
     let toRep = to[TYPE] === ORGANIZATION ? this.Store.getRepresentative(to) : to
+
+    let itemsForBundleUpdate = {}
     for (let i = 0; i < items.length; i++) {
       // debugger
       let item = { ...items[i], _context: context, from : me, to: r.from }
@@ -494,19 +472,24 @@ debugger
         message: messages.join('\n\n')
       })
 
-      if (isProductBundle) {
-        const propNames = Object.keys(itemModel.properties)
-        const toKeep = ['_sourceId', '_context', 'from', 'to'].concat(propNames)
-        item._latest = false
-        this.Store._setItem(getId(item), item)
-        item = _.pick(item, toKeep)
-        let props = this.refs  &&  this.refs[item._sourceId]
-        if (props &&  _.size(props)) {
-          delayedItems.push(item)
-          resources.push(item)
-          continue
-        }
+      // if (isProductBundle) {
+      const propNames = Object.keys(itemModel.properties)
+      let dataBundle = !isProductBundle && item._dataBundle
+      let oldItemHash = item[ROOT_HASH]
+      const toKeep = ['_sourceId', '_context', 'from', 'to'].concat(propNames)
+      item._latest = false
+      if (dataBundle)
+        item._dataBundle = dataBundle
+      this.Store._setItem(getId(item), item)
+      item = _.pick(item, toKeep)
+      let props = this.refs  &&  this.refs[item._sourceId]
+      if (props &&  _.size(props)) {
+        delayedItems.push({item, oldItemHash})
+        resources.push(item)
+        continue
       }
+      // }
+
       let promiseAddItem = this.Store.onAddChatItem({ resource: item, noTrigger: !isProductBundle, forceUpdate: true })
       let promiseSentEvent = new Promise(resolve => this.Store.execOnce('sent', resolve))
       let ret = await Promise.all([
@@ -521,43 +504,54 @@ debugger
       resources.push(ritem)
 
       let itemId = getId(ritem)
-      ritem._latest = false
+      // ritem._latest = false
+
+      await this.Store.deleteItemFromDB(oldItemHash)
+
       this.Store.setItem(itemId, ritem)
     }
     if (delayedItems.length) {
-      await this.processUploadedDataBundleWithSourceIDs({val: resource, resources, dontAdd: isProductBundle})
+      debugger
+      await this.processUploadedDataBundleWithSourceIDs({val: resource, resources, dontAdd: true})
       for (let i=0; i<delayedItems.length; i++) {
-        let item = delayedItems[i]
+        let { item, oldItemHash } = delayedItems[i]
         let r = resources.find(rr => item._sourceId === rr._sourceId)
         await promiseDelay(5000)
-        await this.Store.onAddChatItem({resource: r, noTrigger: !isProductBundle})
+        let itemR = await this.Store.onAddChatItem({resource: r, noTrigger: !isProductBundle})
+        // if (itemR._sourceId)
+        //   itemsForBundleUpdate[itemR._sourceId] = itemR
+        await this.Store.deleteItemFromDB(oldItemHash)
       }
       debugger
     }
+    let dbRes
     Actions.hideModal()
-    if (items.length === total) {
-      r._documentCreated = true
-      await promiseDelay(5000)
-      await this.Store.onAddChatItem({ resource: r })
+    if (items.length !== total)
+      return
+    r._documentCreated = true
+    await promiseDelay(5000)
+    await this.Store.onAddChatItem({ resource: r })
 
-      let dataBundle
-      if (isProductBundle)
-        dataBundle = r._context.bundleId || getRootHash(r._context._dataBundle)
-      else
-        dataBundle = getRootHash(r._dataBundle)
-
-      await promiseDelay(5000)
-      await this.Store.onAddMessage({
-        msg: {
-          [TYPE]: DATA_BUNDLE_SUBMITTED,
-          from: me,
-          to,
-          message: `Submitted ${total} items`,
-          _context: resource._context,
-          dataBundle
-        }
-      })
+    let dataBundle
+    if (isProductBundle)
+      dataBundle = r._context.bundleId || getRootHash(r._context._dataBundle)
+    else {
+      dataBundle = getRootHash(r._dataBundle)
+      let dbRes = await this.Store.onGetItem({resource: {id: r._dataBundle}, noTrigger: true})
+      total = dbRes.items  &&  dbRes.items.length
     }
+
+    await promiseDelay(5000)
+    await this.Store.onAddMessage({
+      msg: {
+        [TYPE]: DATA_BUNDLE_SUBMITTED,
+        from: me,
+        to,
+        message: `Submitted ${total || 'all'} items`,
+        _context: resource._context,
+        dataBundle
+      }
+    })
   }
 }
 module.exports = DataBundle
