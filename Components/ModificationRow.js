@@ -426,7 +426,9 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
       paddingVertical: 5,
     },
     icon: {
-      padding: 10
+      paddingLeft: 5,
+      paddingTop: 3,
+      paddingRight: 1
     },
     modifications: {
       // paddingVertical: 5,
