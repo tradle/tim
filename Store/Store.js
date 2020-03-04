@@ -6292,7 +6292,8 @@ if (!res[SIG]  &&  res._message)
         filterResource: {contextId: application.context}
       })
     context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
-    this.trigger({action: 'openApplicationChat', application, context})
+    application._context = context
+    this.trigger({action: 'openApplicationChat', application})
   },
   async onShowScoreDetails(stub, applicantName) {
     let application
