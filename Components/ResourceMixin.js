@@ -347,28 +347,66 @@ var ResourceMixin = {
   },
   renderSimpleProp(val, pMeta, modelName, component) {
     let { bankStyle } = this.props
-    if (Array.isArray(val)) {
-      if (pMeta.items.backlink)
-        return <View  key={this.getNextKey()} />
+    if (Array.isArray(val))
+      return this.renderSimpleArray(val, pMeta, modelName, component)
 
-      let vCols = pMeta.viewCols;
-      if (!vCols)
-        vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-      val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
-      let title = pMeta.title || utils.makeLabel(pMeta.name)
-      const titleEl = <Text style={styles.title}>{title}</Text>
-      let icon
-      let cnt = val.length;
-      if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
-        icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-      let header = <View style={{flexDirection: 'row'}}>
-                    {titleEl}
-                    {icon}
-                  </View>
+    let { units } = pMeta
+    if (units === '%')
+      val += units
+    else if (units  &&  units.charAt(0) != '[')
+      val += ' ' + units
 
-      let separator = <View style={styles.separator}></View>;
-      if (cnt > 3)
-        val = <View key={this.getNextKey()}>
+    if (val === NOT_SPECIFIED)
+      return <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
+    if (typeof val === 'number')
+      return <Text style={styles.description}>{val}</Text>;
+    if (typeof val === 'boolean')
+      return <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
+    if (pMeta.signature) {
+      let { width } = utils.dimensions(component)
+      let h = 200
+      let w = width - 40
+      return <View style={styles.container}>
+              <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
+            </View>
+    }
+    if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
+      return <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
+    if (pMeta.markdown) {
+      return <View style={styles.container}>
+              <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
+                {val}
+              </Markdown>
+            </View>
+    }
+    if (pMeta.range === 'model')
+      val = translate(utils.getModel(val))
+    else if (pMeta.range === 'password')
+      val = '*********'
+    return <Text style={[styles.description]}>{val}</Text>;
+  },
+  renderSimpleArrayProp(val, pMeta, modelName, component) {
+    if (pMeta.items.backlink)
+      return <View  key={this.getNextKey()} />
+
+    let vCols = pMeta.viewCols;
+    if (!vCols)
+      vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
+    val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
+    let title = pMeta.title || utils.makeLabel(pMeta.name)
+    const titleEl = <Text style={styles.title}>{title}</Text>
+    let icon
+    let cnt = val.length;
+    if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
+      icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
+    let header = <View style={{flexDirection: 'row'}}>
+                  {titleEl}
+                  {icon}
+                </View>
+
+    let separator = <View style={styles.separator}></View>;
+    if (cnt > 3)
+      return <View key={this.getNextKey()}>
                 {separator}
                 <Accordion
                   sections={[title]}
@@ -377,49 +415,11 @@ var ResourceMixin = {
                   underlayColor='transparent'
                   easing='easeIn' />
              </View>
-      else {
-        val = <View key={this.getNextKey()}>
+    else
+      return <View key={this.getNextKey()}>
                {titleEl}
                {val}
              </View>
-      }
-    }
-    else  {
-      if (pMeta.units  &&  pMeta.units.charAt(0) != '[')
-        val += ' ' + pMeta.units
-
-      if (val === NOT_SPECIFIED)
-        val = <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
-      else if (typeof val === 'number')
-        val = <Text style={styles.description}>{val}</Text>;
-      else if (typeof val === 'boolean')
-        val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
-      else if (pMeta.signature) {
-        let { width } = utils.dimensions(component)
-        let h = 200
-        let w = width - 40
-        val = <View style={styles.container}>
-                <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
-              </View>
-      }
-      else if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
-      else if (pMeta.markdown) {
-        val = <View style={styles.container}>
-                <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
-                  {val}
-                </Markdown>
-              </View>
-      }
-      else {
-        if (pMeta.range === 'model')
-          val = translate(utils.getModel(val))
-        else if (pMeta.range === 'password')
-          val = '*********'
-        val = <Text style={[styles.description]}>{val}</Text>;
-      }
-    }
-    return val
   },
   changeResourceTree(tree, newTree) {
     let isNodes = !tree._displayName
