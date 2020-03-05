@@ -72,13 +72,14 @@ class ApplicationRow extends Component {
       let hash = utils.getRootHash(resource)
       if (hash === utils.getRootHash(this.props.resource)) {
         if (params.forceUpdate)
-          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource})
       }
     }
   }
 
   render() {
-    const { resource, bankStyle, onSelect } = this.props
+    const { bankStyle, onSelect } = this.props
+    let resource = this.state.resource // || this.props.resource
     let rType = utils.getType(resource)
     let style
     if (bankStyle)
