@@ -61,7 +61,6 @@ class ShowPropertiesView extends Component {
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
     excludedProperties: PropTypes.array,
-    pieChart: PropTypes.object
   };
   constructor(props) {
     super(props);
@@ -106,7 +105,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, pieChart } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
@@ -153,10 +152,6 @@ class ShowPropertiesView extends Component {
     let isPartial = model.id === PARTIAL
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
-    // if (me.isEmployee  &&  !checkProperties  && resource._sourceOfData) {
-    //   vCols.push('_sourceOfData')
-    //   // vCols.push('_dataLineage')
-    // }
 
     const ObjectModel = utils.getModel(OBJECT)
 
@@ -170,58 +165,9 @@ class ShowPropertiesView extends Component {
       if (!pMeta)
         pMeta = ObjectModel.properties[p]
 
-      // if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
-      //   return
       var val = resource[p];
       if (pMeta.range === 'json') {
-        if (!val  ||  utils.isEmpty(val))
-          return
-        if (pMeta.ref) {
-          let v = _.cloneDeep(val)
-          let rprops = utils.getModel(v[TYPE]  ||  pMeta.ref).properties
-          let exclude = [TYPE, '_time']
-          for (let p in v) {
-            if (!rprops[p]  ||  exclude.includes(p))
-              delete v[p]
-          }
-          if (utils.isEmpty(v))
-            return
-          val = v
-        }
-        let jsonRows = []
-
-        let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
-
-        let params = {prop: pMeta, json: val, pieChart, showTree: true, isView: true, jsonRows, isOnfido}
-        // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
-
-        let jVal
-        if (p === 'scoreDetails') {
-          jVal = <View style={{backgroundColor:'#f7f7f7'}}>
-                   <View style={{flex: 1}}>
-                     <TouchableOpacity onPress={this.showScoreDetails.bind(this)}>
-                       <Text style={{padding: 17, color: bankStyle.linkColor, fontWeight: '600', fontSize: 18}}>{translate(pMeta, model).toUpperCase()}</Text>
-                     </TouchableOpacity>
-                   </View>
-                   {pieChart}
-                  </View>
-
-        }
-        else
-          jVal = this.showJson(params)
-        if (!jVal)
-          return
-
-        if (!Array.isArray(jVal))
-          viewCols.push(jVal)
-        else if (jVal.length)
-          viewCols.push(
-            <View key={this.getNextKey()}>
-               <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
-                 {jVal}
-               </View>
-             </View>
-             )
+        this.renderJsonProp(val, model, pMeta, viewCols)
         return
       }
       var isRef;
@@ -266,77 +212,9 @@ class ShowPropertiesView extends Component {
         }
       }
       else if (pMeta.ref) {
-        if (pMeta.ref === PHOTO) {
-          if (vCols.length === 1  &&  resource._time)
-            viewCols.push(
-              <View  key={this.getNextKey()} style={{padding: 10}}>
-                <Text style={styles.title}>{translate('Date')}</Text>
-                <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource._time), 'mmm d, yyyy')}</Text>
-              </View>
-            )
-          if (!checkProperties)
-            return
-          val = <Image source={{uri: val.url}} resizeMode='cover' style={styles.thumb} />
-        }
-        else if (val && utils.isSubclassOf(pMeta.ref, FILE)) {
-          let idx = val.url.indexOf(',')
-          let dn = val.url.substring(0, idx)
-          val = <Text style={[styles.title, styles.linkTitle]}>{dn}</Text>
-        }
-        else if (pMeta.ref == MONEY) {
-          let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
-          let c = utils.normalizeCurrencySymbol(val.currency)
-          val = (c || CURRENCY_SYMBOL) + val.value
-        }
-        else if (pMeta.ref === IDENTITY) {
-          let title = val.title
-          if (!title)
-            title = getRootHash(val) === me[ROOT_HASH] ? 'Me' : 'Not me'
-          val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
-        }
-        else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
-          if (isStub(val)) {
-            val[TYPE] = utils.getType(val.id)
-            val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
-                    <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
-                    <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
-                  </TouchableOpacity>
-            isRef = true
-          }
-          else {
-            if (!val[TYPE])
-              val[TYPE] = pMeta.ref
-            let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
-            if (pViewCols.length) {
-              pViewCols.forEach((v) => viewCols.push(v))
-              return
-            }
-            val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
-                    <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
-                    <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
-                  </TouchableOpacity>
-            isRef = true
-          }
-        }
-        // else if (pMeta.mainPhoto)
-        //   return
-        // Could be enum like props
-        else if (isEnum(pMeta.ref)) {
-          if (typeof val === 'object')
-            val = translateEnum(val)
-        }
-        else if (showRefResource) {
-          // ex. property that is referencing to the Organization for the contact
-          var value = utils.getDisplayName(val)
-          if (!value)
-            value = translate(utils.getModel(utils.getType(val)))
-          val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
-                  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
-                  <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
-               </TouchableOpacity>
-
-          isRef = true;
-        }
+        ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles}))
+        if (!val)
+          return
       }
 
       let checkForCorrection = !model.notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
@@ -388,7 +266,7 @@ class ShowPropertiesView extends Component {
       if (isPromptVisible)
         console.log(this.state.promptVisible)
 
-      var isDirectionRow;
+      var isDirectionRow
       if (checkProperties)
         isDirectionRow = true
 
@@ -413,17 +291,6 @@ class ShowPropertiesView extends Component {
          </View>
       )
     })
-    // if (isMessage  &&  utils.isSubclassOf(model, FORM)  &&  me.isEmployee) {
-    //   if (resource[PREV_HASH]  &&  resource[PREV_HASH] !== resource[ROOT_HASH]) {
-    //     let title = utils.getDisplayName(resource)
-    //     viewCols.push(
-    //       <TouchableOpacity onPress={showRefResource.bind(this, {id: `${resource[TYPE]}_${resource[ROOT_HASH]}_${resource[PREV_HASH]}`, title }, ObjectModel.properties[PREV_HASH])} key={this.getNextKey()}>
-    //         <Text style={styles.title}>{translate('previousVersion')}</Text>
-    //         <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
-    //       </TouchableOpacity>
-    //     )
-    //   }
-    // }
     if (resource.txId) { // || utils.isSealableModel(model)) {
       viewCols.push(
           <View key={this.getNextKey()} ref='propertySheet'>
@@ -433,6 +300,147 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
+  renderJsonProp(val, model, pMeta, viewCols) {
+    if (!val  ||  utils.isEmpty(val))
+      return
+    let { resource, bankStyle, checkProperties } = this.props
+    if (pMeta.ref) {
+      let v = _.cloneDeep(val)
+      let rprops = utils.getModel(v[TYPE]  ||  pMeta.ref).properties
+      let exclude = [TYPE, '_time']
+      for (let p in v) {
+        if (!rprops[p]  ||  exclude.includes(p))
+          delete v[p]
+      }
+      if (utils.isEmpty(v))
+        return
+      val = v
+    }
+    let jsonRows = []
+
+    let isMethod = utils.isSubclassOf(model, METHOD)
+    let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
+
+    let params = {prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
+    // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
+    let jVal
+    if (pMeta.name === 'scoreDetails') {
+      jVal = <View style={{backgroundColor:'#f7f7f7'}}>
+               <View style={{flex: 1}}>
+                 <TouchableOpacity onPress={this.showScoreDetails.bind(this)}>
+                   <Text style={{padding: 17, color: bankStyle.linkColor, fontWeight: '600', fontSize: 18}}>{translate(pMeta, model).toUpperCase()}</Text>
+                 </TouchableOpacity>
+               </View>
+              </View>
+    }
+    else
+      jVal = this.showJson(params)
+
+    if (!jVal)
+      return
+
+    if (!Array.isArray(jVal)) {
+      viewCols.push(jVal)
+      return
+    }
+    if (jVal.length) {
+      var isDirectionRow
+      if (checkProperties)
+        isDirectionRow = true
+      viewCols.push(
+        <View key={this.getNextKey()}>
+           <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
+             {jVal}
+           </View>
+         </View>
+         )
+    }
+  }
+  renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}) {
+    let { showRefResource, currency, bankStyle, checkProperties } = this.props
+    let { ref } = pMeta
+    if (ref === PHOTO) {
+      if (vCols.length === 1  &&  resource._time)
+        viewCols.push(
+          <View  key={this.getNextKey()} style={{padding: 10}}>
+            <Text style={styles.title}>{translate('Date')}</Text>
+            <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource._time), 'mmm d, yyyy')}</Text>
+          </View>
+        )
+      if (!checkProperties)
+        return {}
+      return {val: <Image source={{uri: val.url}} resizeMode='cover' style={styles.thumb} />}
+    }
+    if (val  &&  utils.isSubclassOf(ref, FILE)) {
+      let idx = val.url.indexOf(',')
+      let dn = val.url.substring(0, idx)
+      return {val: <Text style={[styles.title, styles.linkTitle]}>{dn}</Text>}
+    }
+    if (ref === MONEY) {
+      let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
+      let c = utils.normalizeCurrencySymbol(val.currency)
+      return {val: (c || CURRENCY_SYMBOL) + val.value}
+    }
+    if (ref === IDENTITY) {
+      let title = val.title
+      let me = utils.getMe()
+      if (!title)
+        title = getRootHash(val) === me[ROOT_HASH] ? 'Me' : 'Not me'
+      return {val: <Text style={[styles.title, styles.linkTitle]}>{title}</Text>}
+    }
+    if (pMeta.inlined  ||  utils.getModel(ref).inlined) {
+      if (isStub(val)) {
+        val[TYPE] = utils.getType(val.id)
+        val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
+                <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
+                <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
+              </TouchableOpacity>
+        return { val, isRef: true }
+      }
+      if (!val[TYPE])
+        val[TYPE] = ref
+      let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
+      if (pViewCols.length) {
+        pViewCols.forEach((v) => viewCols.push(v))
+        return {}
+      }
+      val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
+              <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
+              <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
+            </TouchableOpacity>
+      return { val, isRef: true }
+    }
+    // Could be enum like props
+    if (isEnum(ref)) {
+      if (typeof val === 'object')
+        return {val: translateEnum(val)}
+      else
+        return {val}
+    }
+    if (showRefResource) {
+      // ex. property that is referencing to the Organization for the contact
+      var value = utils.getDisplayName(val)
+      if (!value)
+        value = translate(utils.getModel(utils.getType(val)))
+      let type = utils.getType(val)
+      let m = utils.getModel(type)
+      let typeRow
+      if (pMeta.title.toLowerCase() !== m.title.toLowerCase())
+        typeRow = <Text style={[styles.title, styles.smallLetters]}>{translate(m)}</Text>
+
+      val = <View>
+             <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
+               <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
+               <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
+             </TouchableOpacity>
+             {typeRow}
+           </View>
+
+      return { val, isRef: true }
+    }
+    return {val}
+  }
+
   showScoreDetails() {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle, resource } = this.props
@@ -541,6 +549,10 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       color: '#555555',
       alignSelf: 'center'
     },
+    smallLetters: {
+      fontSize: 12,
+      color: '#aaaaaa',
+    },
     linkTitle: {
       fontSize: 18,
       color: bankStyle.linkColor
@@ -580,33 +592,3 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
 })
 
 module.exports = ShowPropertiesView;
-
-  // getCheckForCorrection(pMeta) {
-  //   let { checkProperties, errorProps, bankStyle } = this.props
-  //   if (!checkProperties)
-  //     return
-  //   let p = pMeta.name
-  //   let isPromptVisible = this.state.promptVisible !== null
-
-  //   return <View>
-  //             <TouchableOpacity underlayColor='transparent' onPress={() => {
-  //               if (errorProps  &&  errorProps[p]) {
-  //                 delete errorProps[p]
-  //                 this.setState({promptVisible: null, uncheck: p})
-  //               }
-  //               else
-  //                 this.setState({promptVisible: pMeta})
-  //             }}>
-  //               <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
-  //             </TouchableOpacity>
-  //             <Prompt
-  //               title={translate('fieldErrorMessagePrompt')}
-  //               placeholder={translate('thisValueIsInvalidPlaceholder')}
-  //               visible={isPromptVisible}
-  //               onCancel={() => this.setState({ promptVisible: null })}
-  //               onSubmit={(value) => {
-  //                 this.setState({ promptVisible: null})
-  //                 this.props.checkProperties(this.state.promptVisible, value)
-  //               }}/>
-  //          </View>
-  // }
