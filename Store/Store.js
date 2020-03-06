@@ -4254,7 +4254,7 @@ if (!res[SIG]  &&  res._message)
         }
         else {
           let cntProp = `_${name}Count`
-          if (r[cntProp]  &&  r[cntProp] !== r[name].length  ||  !r[name][0].application) {
+          if (r[cntProp]  &&  r[cntProp] !== r[name].length  ||  (r[name].length  &&  !r[name][0].application)) {
             list = await this.getObjects(r[name], prop)
             if (list.length) {
               let m = utils.getModel(prop.items.ref)
