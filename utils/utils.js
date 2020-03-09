@@ -491,6 +491,20 @@ var utils = {
 
     return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
   },
+  translateForGrid({model, isPlural, property}) {
+    if (property) {
+      if (property.shortTitle)
+        return property.shortTitle
+      else
+        return utils.translateProperty(property, model)
+    }
+    if (model) {
+      if (model.shortTitle)
+        return model.shortTitle
+      else
+        return utils.translateModel(model, isPlural)
+    }
+  },
   translateEnum(resource) {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
@@ -511,7 +525,7 @@ var utils = {
     if (rtype === LANGUAGE)
       return resource.language
     let e = dictionary.enums[rtype]
-    if (utils.isStub(resource))  {
+    if (utils.isStub(resource)) {
       if (!e) {
         if (title)
           return title
@@ -524,13 +538,9 @@ var utils = {
       let [type, id] = resource.id.split('_')
       return e[id]  ||  title
     }
-    else if (e)
+    if (e)
       return e[resource[ROOT_HASH]] || resource[utils.getEnumProperty(utils.getModel(rtype))]
-    else {
-      return utils.buildRef(resource, utils.getModel(rtype)).title
-      // let prop = Object.keys(utils.getModel(rtype).properties)[0]
-      // return resource[prop]
-    }
+    return utils.buildRef(resource, utils.getModel(rtype)).title
   },
   translateString(...args) {
     // const { strings } = Strings
