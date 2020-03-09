@@ -1,7 +1,7 @@
 'use strict'
 
 import {
-  View,
+  // View,
   StyleSheet,
   TouchableHighlight,
   Text
@@ -49,9 +49,7 @@ export default class DatePickerAdapter extends Component {
     // )
     return (
       <TouchableHighlight underlayColor="transparent" style={this.props.style} onPress={() => this.onPress()}>
-        <View>
-          <Text style={textStyle}>{dateString}</Text>
-        </View>
+        <Text style={textStyle}>{dateString}</Text>
       </TouchableHighlight>
     )
   }
