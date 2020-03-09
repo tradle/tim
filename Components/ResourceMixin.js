@@ -348,7 +348,7 @@ var ResourceMixin = {
   renderSimpleProp(val, pMeta, modelName, component) {
     let { bankStyle } = this.props
     if (Array.isArray(val))
-      return this.renderSimpleArray(val, pMeta, modelName, component)
+      return this.renderSimpleArrayProp(val, pMeta, modelName, component)
 
     let { units } = pMeta
     if (units === '%')
@@ -763,15 +763,18 @@ var ResourceMixin = {
       Actions.openApplicationChat(stub)
       return
     }
+    let r
+    if (resource &&  id === utils.getId(resource))
+      r = resource
+    else
+      r = { id }
     navigator.push({
       componentName: isApplication ? APPLICATION_VIEW : MESSAGE_VIEW,
       backButtonTitle: 'Back',
       title,
       passProps: {
         bankStyle,
-        resource: {
-          id
-        }
+        resource: r
       }
     })
   },
