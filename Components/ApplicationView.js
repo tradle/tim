@@ -118,7 +118,7 @@ class ApplicationView extends Component {
     switch (action) {
     case 'getItem':
       this.setState({
-        resource: resource,
+        resource,
         isLoading: false,
         bankStyle: style || this.state.bankStyle
       })
@@ -127,11 +127,11 @@ class ApplicationView extends Component {
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         if (backlink.items.backlink) {
           let r = params.resource || this.state.resource
-          this.setState({backlink: backlink, showDetails: false, showDocuments: false}) //, resource: r})
+          this.setState({backlink, showDetails: false, showDocuments: false}) //, resource: r})
           Actions.getItem({resource: r, application: resource, search: true, backlink: backlink})
         }
         else
-          this.setState({backlink: backlink, showDetails: false})
+          this.setState({backlink, showDetails: false})
       }
       break
     case 'showDetails':
@@ -171,13 +171,13 @@ class ApplicationView extends Component {
     let contentSeparator = getContentSeparator(bankStyle)
     let loading
     if (isLoading) {
-      // loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
-      //   {this.showLoading({bankStyle, component: ApplicationView})}
-      // </View>
-      // if (!resource[TYPE])
-      //   return loading
+      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+        {this.showLoading({bankStyle, component: ApplicationView})}
+      </View>
       if (!resource[TYPE])
-        return <View/>
+        return loading
+      // if (!resource[TYPE])
+      //   return <View/>
     }
     let isAndroid = utils.isAndroid()
     let color = isAndroid ? bankStyle.linkColor : '#ffffff'
@@ -469,7 +469,8 @@ class ApplicationView extends Component {
     )
   }
   showTree() {
-    let { resource, bankStyle, navigator } = this.props
+    let { bankStyle, navigator } = this.props
+    let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
     let title
     let aTitle = resource.applicantName || resource.applicant.title
