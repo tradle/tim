@@ -101,36 +101,37 @@ const viewCols = {
     label: 'Stalled',
     link: 'showTreeNode',
     type: 'number',
-    units: 'h'
+    range: 'time',
   },
   'elapsed': {
     label:'Delayed',
     type: 'number',
+    range: 'time',
     color: 'teal',
     icon: 'ios-time-outline',
     description: 'Time it took\nto complete\napplication',
-    units: 'h'
   },
   'waiting': {
     label: 'Waiting',
     icon: 'ios-timer-outline',
     color: 'orange',
     type: 'number',
-    description: 'Waiting for\nthe approval',
-    units: 'h'
+    range: 'time',
+    description: 'Waiting for\nthe approval'
   },
   lastNotified: {
     label: 'Last Notified',
     description: 'Last Notified',
     type: 'number',
+    range: 'time',
     valueColor: '#ffdee7',
-    units: 'h',
     icon: 'ios-mail-outline',
     color: 'darkblue'
   },
   timesNotified: {
     description: 'Times\nnotified',
     type: 'number',
+    range: 'time',
     icon: 'ios-list-outline',
     color: 'darkgray',
     backlink: 'notifications',
@@ -175,6 +176,10 @@ class ApplicationTree extends Component {
   }
   onAction(params) {
     let { action, application } = params
+
+    // if (!application.top  ||  utils.getId(application.top) !== utils.getId(this.props.resource))
+    //   return
+
     switch(action) {
     case 'openApplicationChat':
       this.openApplicationChat(application)
@@ -187,7 +192,7 @@ class ApplicationTree extends Component {
   flatTree({level, nodes, list, depth}) {
     if (!level)
       level = 0
-    let hours = 3600 * 60 * 24
+    let minutes = 60000
 
     for (let p in nodes) {
       let { _displayName, _permalink, top } = nodes[p]
@@ -203,10 +208,10 @@ class ApplicationTree extends Component {
         let idx = _displayName.indexOf(title)
         node.node_displayName = idx <= 0 && _displayName || _displayName.slice(0, idx).trim()
       }
-      node.stalled = node.lastMsgToClientTime && (node.status === 'started'  &&  Math.round((Date.now() - node.lastMsgToClientTime) / hours))
-      node.waiting = (node.status === 'completed' && Math.round((Date.now() - node.dateCompleted) / hours)) || 0
-      node.elapsed = node.dateCompleted && Math.round((node.dateCompleted - node.dateStarted) / hours)
-      node.lastNotified = node.lastNotified && Math.round((Date.now() - node.lastNotified) / hours)
+      node.stalled = node.lastMsgToClientTime && (node.status === 'started'  &&  Math.round((Date.now() - node.lastMsgToClientTime) / minutes))
+      node.waiting = (node.status === 'completed' && Math.round((Date.now() - node.dateCompleted) / minutes)) || 0
+      node.elapsed = node.dateCompleted && Math.round((node.dateCompleted - node.dateStarted) / minutes)
+      node.lastNotified = node.lastNotified && Math.round((Date.now() - node.lastNotified) / minutes)
       node.node_permalink = _permalink
       node.node_level = level
       list.push(node)
@@ -293,50 +298,6 @@ var styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: '#eeeeee',
-  },
-  row: {
-    flexDirection: 'row',
-    padding: 5,
-  },
-  textContainer: {
-    alignSelf: 'center',
-  },
-  resourceTitle: {
-    fontSize: 20,
-    fontWeight: '400',
-    color: '#757575',
-    marginBottom: 2,
-    paddingLeft: 5
-  },
-  headerRow: {
-    borderBottomColor: '#cccccc',
-    borderBottomWidth: 1,
-  },
-  type: {
-    fontSize: 18,
-    color: '#555555'
-  },
-  description: {
-    fontSize: 16,
-    color: '#555555'
-  },
-  gridHeader: {
-    backgroundColor: '#eeeeee'
-  },
-  employee: {
-    fontSize: 18,
-  },
-  loading: {
-    fontSize: 17,
-    alignSelf: 'center',
-    // marginTop: 0,
-    color: '#629BCA'
-  },
-  noResourcesIcon: {
-    opacity: 0.4,
-    marginTop: 0,
-    width: 30,
-    height: 30
   }
 });
 

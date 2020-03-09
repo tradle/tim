@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Image,
   View,
-  Text,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -15,10 +14,11 @@ import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
+import { Text } from './Text'
 import Actions from '../Actions/Actions'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
-import utils, { translate, getEnumValueId } from '../utils/utils'
+import { translate, getEnumValueId, isEnum, getType, makeModelTitle, getModel, templateIt, getDisplayName, splitMessage } from '../utils/utils'
 import { circled } from '../styles/utils'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
@@ -81,7 +81,7 @@ class ApplicationTreeRow extends Component {
 
     if (!node[pName])
       return
-    let model = utils.getModel(APPLICATION);
+    let model = getModel(APPLICATION);
     let level = node.node_level
     let r = {
              id: `${node._t}_${node._permalink}`,
@@ -93,11 +93,12 @@ class ApplicationTreeRow extends Component {
       if (node.status === 'approved') {
         approved = <Icon name='ios-done-all' size={30} color='green' style={{marginLeft: 10}}/>
         cellStyle.flexDirection = 'row'
+        cellStyle.justifyContent = 'space-between'
       }
 
-      let style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: approved && 7 || 0}
+      let style = {alignSelf: 'flex-start', fontSize: 14, fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: approved && 7 || 0}
       return <TouchableOpacity onPress={this.showTreeNode.bind(this, {stub: r})}>
-               <View style={cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text>{approved}</View>
+               <View style={cellStyle}><Text style={style}>{node[pName] + ''}</Text>{approved}</View>
              </TouchableOpacity>
     }
     // Handle MESSAGE type RL accross providers
@@ -105,30 +106,34 @@ class ApplicationTreeRow extends Component {
     let colProp = properties[pName]
 
     let gProps = gridCols[pName]
-    let { backlink, filter, units, valueColor } = gProps
+    let { backlink, filter, units, valueColor, type, range } = gProps
     let style = [styles.description]
     let value = node[pName] + (units || '')
 
     let link = typeof gProps === 'object'  &&  gProps.link
-    let self = this
+    let isTime = range === 'time'
+    if (isTime)
+      value = this.stringifyTime(value)
+
     if (link) {
       let style // = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
-      if (colProp  &&  colProp.type === 'number'  ||  gProps.type === 'number')
+      if (colProp  &&  (colProp.type === 'number' || colProp.type === 'date')  ||  gProps.type === 'number')
         style = {alignSelf: 'flex-end', paddingRight: 10, fontWeight: '600', color: bankStyle.linkColor, marginTop: 0 }
       else
         style = {alignSelf: 'flex-start', fontWeight: '600', paddingHorizontal: 10, marginLeft: 30 * level, color: bankStyle.linkColor, marginTop: 0}
+      let self = this
       return <TouchableOpacity onPress={() => self[link]({stub: r, openChat: true, applicantName: node.node_displayName})}>
                <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
              </TouchableOpacity>
     }
     if (!colProp) {
-      let bgColor
-      if (typeof node[pName] === 'number') {
-        bgColor = typeof gProps === 'object' && gProps[node[pName]+'']
-        if (!bgColor) bgColor = valueColor
-        if (!units)
-          units  =  ''
+      let bgColor = typeof gProps === 'object' && gProps[node[pName]+'']
+      if (!bgColor) bgColor = valueColor
+      if (!units)
+        units  =  ''
+      if (typeof node[pName] === 'number' || isTime) {
         style.push({alignSelf: 'flex-end', paddingRight: 10})
+
         if (backlink) {
           return <TouchableOpacity onPress={this.showBacklinks.bind(this, gProps)}>
                    <View style={[styles.cellStyle, {backgroundColor: bgColor || '#fff'}]}>
@@ -140,6 +145,7 @@ class ApplicationTreeRow extends Component {
       return <View style={[styles.cellStyle, {backgroundColor: bgColor || '#fff'}]}><Text style={style} key={this.getNextKey(node)}>{value}</Text></View>
     }
 
+
     if (colProp.style)
       style.push(colProp.style);
     let ref = colProp.ref;
@@ -149,15 +155,14 @@ class ApplicationTreeRow extends Component {
       return this.showRef(node, pName, ref)
 
     if (colProp.type === 'date')
-      return <View style={styles.cellStyle}>{this.addDateProp(pName)}</View>
-
+      return <View style={[styles.cellStyle, {alignSelf: 'center'}]}>{this.addDateProp(pName)}</View>
     if (node[pName]  &&  (typeof node[pName] != 'string')) {
       if (colProp.type === 'number')
         style.push({alignSelf: 'flex-end', paddingRight: 10})
 
       if (backlink  &&  filter) {
         return <TouchableOpacity onPress={this.showBacklinks.bind(this, gProps)}>
-                 <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
+                 <View style={styles.cellStyle}><Text style={style}>{node[pName] + ''}</Text></View>
                </TouchableOpacity>
       }
       return <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName] + ''}</Text></View>
@@ -165,8 +170,11 @@ class ApplicationTreeRow extends Component {
     if (!node[pName]  && (node[pName].indexOf('http://') === 0  ||  node[pName].indexOf('https://') === 0))
       return <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{node[pName]}</Text></View>
 
-    let val = colProp.displayAs ? utils.templateIt(colProp, node) : node[pName];
-    let msgParts = utils.splitMessage(val);
+    let val = colProp.displayAs ? templateIt(colProp, node) : node[pName];
+    if (colProp.range === 'model')
+      return <View style={styles.cellStyle}><Text style={style}>{makeModelTitle(getModel(val))}</Text></View>
+
+    let msgParts = splitMessage(val);
     if (msgParts.length <= 2)
       val = msgParts[0];
     else {
@@ -174,8 +182,42 @@ class ApplicationTreeRow extends Component {
       for (let i=0; i<msgParts.length - 1; i++)
         val += msgParts[i];
     }
-    val = val  &&  val.replace(/\*/g, '')  ||  utils.getDisplayName(node)
-    return <View style={styles.cellStyle}><Text style={style} key={this.getNextKey(node)}>{val}</Text></View>
+    val = val  &&  val.replace(/\*/g, '')  ||  getDisplayName(node)
+    return <View style={styles.cellStyle}><Text style={style}>{val}</Text></View>
+  }
+  stringifyTime(value) {
+    let hours = value / 60
+    let minutes
+    if (hours < 1)
+      return `${value}m`
+    if (hours < 24) {
+      hours = Math.floor(hours)
+      minutes = Math.round((value / 3600) * 10)/10
+      if (minutes >= 0.1)
+        hours += minutes
+      return `${hours}h`
+    }
+    let days = Math.floor(hours / 24)
+    if (days < 365) {
+      hours = Math.round(Math.floor(hours % 24) * 10 / 24)/10
+      if (hours >= 0.1)
+        days += hours
+      return `${days}d`
+    }
+    let months = Math.floor(days / 30)
+    days = Math.floor(days % 30)
+    if (months < 12) {
+      let daysFraction = Math.round(days * 10 / 30)/10
+      if (daysFraction >= 0.1)
+        months += daysFraction
+      return `${months}m`
+    }
+    let years = Math.floor(months / 12)
+    months = Math.floor(months % 12)
+    let monthsFraction = Math.round(months * 10 / 12) /10
+    if (monthsFraction > 0.1)
+      years += monthsFraction
+    return `${years}y`
   }
   paintIcon(model, eVal) {
     let { icon, color } = eVal
@@ -188,8 +230,8 @@ class ApplicationTreeRow extends Component {
       return
 
     let style = [styles.description]
-    let refM = utils.getModel(ref)
-    let model = utils.getModel(APPLICATION);
+    let refM = getModel(ref)
+    let model = getModel(APPLICATION);
 
     let row
     if (ref === MONEY) {
@@ -199,10 +241,10 @@ class ApplicationTreeRow extends Component {
     else if (ref === PHOTO)
       row = <Image source={{uri: node[pName].url}} style={styles.thumb} />
     else {
-      let title = utils.getDisplayName(node[pName])
+      let title = getDisplayName(node[pName])
       row = <Text style={styles.description} key={this.getNextKey(node)}>{title}</Text>
 
-      if (utils.isEnum(refM)) {
+      if (isEnum(refM)) {
         let eVal = refM.enum.find(r => r.id === getEnumValueId({model: refM, value: node[pName]}))
         if (eVal) {
           let { icon, color } = eVal
@@ -217,8 +259,8 @@ class ApplicationTreeRow extends Component {
         }
       }
       else if (refM.isInterface || refM.id === FORM) {
-        let resType = utils.getType(node[pName])
-        let resM = utils.getModel(resType)
+        let resType = getType(node[pName])
+        let resM = getModel(resType)
         row = <View key={this.getNextKey(node)}>
                 <Text style={styles.type}>{translate(resM)}</Text>
                 {row}
@@ -239,7 +281,7 @@ class ApplicationTreeRow extends Component {
               title: node._displayName
             }
 
-    backlink = utils.getModel(node[TYPE]).properties[backlink]
+    backlink = getModel(node[TYPE]).properties[backlink]
     let route = {
       title: node._displayName,
       componentName: node[TYPE] === APPLICATION && 'ApplicationView' || 'MessageView',
@@ -276,7 +318,7 @@ var styles = StyleSheet.create({
     color: '#555555'
   },
   description: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#555555'
   },
   gridRow: {
