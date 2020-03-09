@@ -131,7 +131,6 @@ const viewCols = {
   timesNotified: {
     description: 'Times\nnotified',
     type: 'number',
-    range: 'time',
     icon: 'ios-list-outline',
     color: 'darkgray',
     backlink: 'notifications',
