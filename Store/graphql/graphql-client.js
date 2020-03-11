@@ -709,11 +709,12 @@ var search = {
     let isApplication = model  &&  model.id === APPLICATION
     if (p === 'verifications')
       return
-
+    let isSubmissions
     if (isApplication) {
       if (isList  &&  p !== 'relationshipManagers')
         return
-      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+      isSubmissions = p === 'submissions'
+      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  !isSubmissions)
         return
     }
     let iref = prop.items.ref
@@ -732,7 +733,7 @@ var search = {
         else
           props = arr
 
-        arr.push(`${p} {
+        arr.push(`${p}${isSubmissions && '(limit: 100)' || ''} {
           edges {
             node {
               ${props}
