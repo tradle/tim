@@ -435,7 +435,8 @@ class ApplicationView extends Component {
             from: me,
             to: applicant
           }
-          Actions.addMessage({msg: msg})
+          // Actions.addMessage({msg: msg})
+          Actions.approveApplication({application: resource, msg: msg})
         }}
       ]
     )

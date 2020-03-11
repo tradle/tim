@@ -13,6 +13,7 @@ var asyncActions = [
   'addVerification',
   'addAll',
   'applyForProduct',
+  'approveApplication',
 
   'getItem',
   'getMe',
