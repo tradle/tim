@@ -9,12 +9,12 @@ import PropTypes from 'prop-types'
 
 import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
-
+import Icon from 'react-native-vector-icons/Ionicons';
 import {Column as Col, Row} from 'react-native-flexbox-grid'
-import utils, {
-  translate
-} from '../utils/utils'
+
+import { getModel, translateForGrid } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
+import { circled } from '../styles/utils'
 
 const { MONEY } = constants.TYPES
 const PHOTO = 'tradle.Photo'
@@ -41,7 +41,7 @@ class GridHeader extends Component {
     if (!gridCols)
       return <View />
 
-    let model = utils.getModel(modelName)
+    let model = getModel(modelName)
     let props = model.properties
 
     let size
@@ -66,23 +66,34 @@ class GridHeader extends Component {
         colStyle = [styles.col, asc ? styles.sortAscending : styles.sortDescending]
       }
       else
-        colStyle = styles.col
+        colStyle = [styles.col]
       let prop = props[p]
+      let { ref, type, icon, color } = prop
       let textStyle
-      if (prop  &&  (prop.type === 'number'  ||  prop.ref === MONEY))
+      if (prop  &&  (type === 'number'  ||  ref === MONEY))
         textStyle = {alignSelf: 'flex-end', paddingRight: 10}
       else
         textStyle = {}
-      let title = <Text style={[styles.cell, textStyle]}>
-                    {translate(props[p], model).toUpperCase()}
-                  </Text>
+      let title
+      if (icon)
+        title = <View style={[styles.button, {alignItems: 'center', backgroundColor: color}]}>
+                  <Icon name={icon} color='#ffffff' size={20}/>
+                </View>
+      else
+        title = <Text style={[styles.cell, textStyle]}>
+                  {translateForGrid({property: props[p], model}).toUpperCase()}
+                </Text>
+
+      if (prop.type === 'number')
+        colStyle.push({alignItems: 'flex-end'})
+      if (icon)
+        colStyle.push({marginTop: 3})
 
       let isSortable = prop.ref !== PHOTO  &&  (!notSortable  ||  !notSortable.includes(p))
       if (isSortable)
         title = <TouchableOpacity onPress={() => this.props.sort(p)}>
                   {title}
                 </TouchableOpacity>
-
       return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p}>
                {title}
              </Col>
@@ -153,6 +164,13 @@ var styles = StyleSheet.create({
   },
   gridHeader: {
     backgroundColor: '#e7e7e7'
+  },
+  button: {
+    ...circled(20),
+    shadowOpacity: 0.7,
+    opacity: 0.9,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
   },
 });
 

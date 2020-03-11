@@ -28,7 +28,8 @@ import CheckRow from './CheckRow'
 import ModificationRow from './ModificationRow'
 import ApplicationRow from './ApplicationRow'
 import PageView from './PageView'
-import { showBookmarks, showLoading, getContentSeparator } from '../utils/uiUtils'
+import { showBookmarks, showLoading, getContentSeparator, getGridCols } from '../utils/uiUtils'
+import { onScrollEvent, loadMoreContentAsync } from './utils/gridUtils'
 import ActionSheet from './ActionSheet'
 import NotFoundRow from './NotFoundRow'
 import utils, {
@@ -138,12 +139,24 @@ class GridList extends Component {
         return true
       }
     })
-    let {resource, modelName, prop, filter, checksCategory,
-         serverOffline, search, bookmark, checkFilter} = this.props
+    let {resource, modelName, prop, filter, isBacklink, isChooser, isModel,
+         serverOffline, search, bookmark, checksCategory, checkFilter} = this.props
     let model = utils.getModel(modelName)
 
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     this.limit = 20 //this.isSmallScreen ? 20 : 40
+    let isGrid
+    if (!this.isSmallScreen)  {
+      if (!model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION)
+        isGrid = true
+      if (bookmark)
+        isGrid = bookmark.grid
+      else if (!isBacklink  &&  !isModel  &&  !isChooser  &&  isGrid  &&  (modelName !== APPLICATION  ||  !bookmark ||  !bookmark.grid)  &&  modelName !== BOOKMARK)
+        isGrid = true
+      else
+        isGrid = false
+    }
+
     this.state = {
       isLoading: true,
       dataSource,
@@ -159,7 +172,7 @@ class GridList extends Component {
       refreshing: false,
       notFoundMap: {},
       resource: search  &&  resource,
-      isGrid:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
+      isGrid, //:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
       isDraft: bookmark && bookmark.bookmark.draft
     }
     if (props.multiChooser) {
@@ -182,7 +195,8 @@ class GridList extends Component {
     this.numberOfPages = 0
     this.offset = 0
     this.contentHeight = 0
-    this._loadMoreContentAsync = debounce(this._loadMoreContentAsync.bind(this), 500)
+    this._loadMoreContentAsync = this._loadMoreContentAsync.bind(this)
+    // this._loadMoreContentAsync = debounce(this._loadMoreContentAsync.bind(this), 500)
   }
   done() {
     let orgs = []
@@ -300,16 +314,11 @@ class GridList extends Component {
   onScroll(event) {
     if (this.state.refreshing || this.props.isModel)
       return
-
-    let currentOffset = event.nativeEvent.contentOffset.y
-    this.contentHeight = event.nativeEvent.contentSize.height
-    let delta = currentOffset - (this.offset || 0)
-    this.direction = delta > 0 || Math.abs(delta) < 3 ? 'down' : 'up'
-    this.offset = currentOffset
+    _.extend(this, onScrollEvent(event))
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, navigator, search, application, prop, bookmark,
+    let { chat, resource, navigator, search, application, prop, bookmark, backlinkList, checkFilter,
           modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
 
     if (chat) {
@@ -327,7 +336,11 @@ class GridList extends Component {
       else if (isBacklink) { //  &&  application) {
         if (resource[prop.name]) {
           this.state.isLoading = false
-          this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
+          // Case when came from the stats page.
+          if (checkFilter  &&  backlinkList)
+            this.state.dataSource = this.state.dataSource.cloneWithRows(backlinkList)
+          else
+            this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
         }
       }
@@ -511,11 +524,11 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
-      list: list,
+      list,
       isLoading: false,
       refreshing: false,
-      allLoaded: allLoaded,
-      endCursor: endCursor
+      allLoaded,
+      endCursor
     }
     if (this.state.endCursor)
       state.prevEndCursor = this.state.endCursor
@@ -694,11 +707,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
           return;
         }
       }
-      else {
-        if (this.state.isRegistration) {
-          this._selectResource(resource);
-          return;
-        }
+      else if (this.state.isRegistration) {
+        this._selectResource(resource);
+        return;
       }
     }
     let title
@@ -792,8 +803,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     Actions.refreshApplication({resource})
   }
   selectMessage(resource) {
-    let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props
+    let { modelName, search, bankStyle, navigator, currency, prop,
+          returnRoute, callback, application, isBacklink } = this.props
     if (callback) {
+      debugger
       callback(prop, resource); // HACK for now
       if (returnRoute)
         navigator.popToRoute(returnRoute);
@@ -1092,10 +1105,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
 
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
-    let isGrid = !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
-
-    if (!isBacklink  &&  !isModel  &&  !isChooser  &&  isGrid  &&  (modelName !== APPLICATION  ||  !bookmark)  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
-      let viewCols = this.getGridCols()
+    let isGrid = this.state.isGrid
+    if (isGrid) {
+      let viewCols = getGridCols(model)
       // Overwrite viewCols for MESSAGE after renderHeader call
       if (model.id === MESSAGE)
         viewCols = ['_provider', '_payloadType', '_context', '_time']
@@ -1223,42 +1235,44 @@ console.log('GridList.componentWillMount: filterResource', resource)
     return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
   }
   async _loadMoreContentAsync() {
-    if (this.state.refreshing)
-      return
-    if (this.state.allLoaded)
-      return
-    // if (this.direction === 'up' &&  this.numberOfPages < 2)
-    //   return
-    if (this.direction !== 'down')
-      return
-    // if (this.offset < this.contentHeight / 2)
-    //   return
-    // debugger
-    let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
-    let { modelName, search, resource, bookmark, isBacklink, prop } = this.props
-    if (isBacklink  &&  prop  &&  resource[prop.name].length < this.limit) {
-      this.state.allLoaded = true
-      return
-    }
-    if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
-      return
-    this.state.refreshing = true
-console.log('GridList._loadMoreContentAsync: filterResource', resource)
+    loadMoreContentAsync(this)
 
-    Actions.list({
-      modelName,
-      sortProperty,
-      asc: this.state.order  &&  this.state.order[sortProperty],
-      limit: this.limit,
-      direction: this.direction,
-      search,
-      endCursor,
-      to: modelName === BOOKMARK ? utils.getMe() : null,
-      filterResource: (search  &&  this.state.resource) || resource,
-      bookmark,
-      // from: list.length,
-      lastId: utils.getId(list[list.length - 1])
-    })
+//     if (this.state.refreshing)
+//       return
+//     if (this.state.allLoaded)
+//       return
+//     // if (this.direction === 'up' &&  this.numberOfPages < 2)
+//     //   return
+//     if (this.direction !== 'down')
+//       return
+//     // if (this.offset < this.contentHeight / 2)
+//     //   return
+//     // debugger
+//     let { list=[], sortProperty, endCursor, prevEndCursor } = this.state
+//     let { modelName, search, resource, bookmark, isBacklink, prop } = this.props
+//     if (isBacklink  &&  prop  &&  resource[prop.name].length < this.limit) {
+//       this.state.allLoaded = true
+//       return
+//     }
+//     if (endCursor === prevEndCursor  &&  !utils.isEnum(modelName))
+//       return
+//     this.state.refreshing = true
+// console.log('GridList._loadMoreContentAsync: filterResource', resource)
+
+//     Actions.list({
+//       modelName,
+//       sortProperty,
+//       asc: this.state.order  &&  this.state.order[sortProperty],
+//       limit: this.limit,
+//       direction: this.direction,
+//       search,
+//       endCursor,
+//       to: modelName === BOOKMARK ? utils.getMe() : null,
+//       filterResource: (search  &&  this.state.resource) || resource,
+//       bookmark,
+//       // from: list.length,
+//       lastId: utils.getId(list[list.length - 1])
+//     })
   }
 
   openSharedContextChat(resource) {
@@ -1437,9 +1451,11 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
   }
   render() {
     let content;
-    let { filter, dataSource, isLoading, list, isConnected, allLoaded} = this.state
+    let { props, state } = this
+    let { filter, dataSource, isLoading, list, isConnected,
+          allLoaded, serverOffline } = state
     let { isChooser, modelName, isModel, application,
-          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
+          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = props
     let model = utils.getModel(modelName);
     let me = utils.getMe()
 
@@ -1475,7 +1491,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
         pageSize={20}
         canLoadMore={true}
         renderScrollComponent={props => <InfiniteScrollView {...props} allLoaded={allLoaded}/>}
-        onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
+        onLoadMoreAsync={this._loadMoreContentAsync}
         scrollRenderAhead={10}
         showsVerticalScrollIndicator={false} />;
     }
@@ -1483,7 +1499,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
     let searchBar
-    let { search, _readOnly } = this.props
+    let { search, _readOnly } = props
 
     if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
       let hasSearch = isModel  ||  utils.isEnum(model)
@@ -1514,7 +1530,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
           network = <NetworkInfoProvider connected={isConnected} serverOffline={!org._online} />
       }
       else
-        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+        network = <NetworkInfoProvider connected={isConnected} serverOffline={this.state.serverOffline} />
     }
 
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
@@ -1648,6 +1664,7 @@ console.log('GridList._loadMoreContentAsync: filterResource', resource)
     let { search, modelName, isChooser, isModel } = this.props
     if (!search || isModel || isChooser)
       return
+
     if (modelName !== PROFILE) {
       if (this.state.isGrid  &&  !utils.isContext(modelName))
         return this.renderGridHeader()
@@ -1782,4 +1799,4 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = GridList;
+module.exports = GridList
