@@ -210,7 +210,11 @@ class ApplicationTabs extends Component {
                                     bankStyle={bankStyle}
                                     excludedProperties={['photos']}
                                     navigator={navigator} />
-      if (/*!resource.draft  &&*/ utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
+      if (utils.isRM(resource)           &&
+          resource.submissions           &&
+          /*!resource.draft  &&*/
+          resource.status !== 'approved' &&
+          resource.status !== 'denied') {
         details = <View style={styles.buttonsFooter}>
                    {details}
                    <View style={styles.buttons}>
