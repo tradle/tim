@@ -26,6 +26,9 @@ module.exports = {
   get ApplicationTree() {
     return require('./ApplicationTree')
   },
+  get ApplicationsGrid() {
+    return require('./ApplicationsGrid')
+  },
   get ScoreDetails() {
     return require('./ScoreDetails')
   },

@@ -10,7 +10,7 @@ import constants from '@tradle/constants'
 import extend from 'lodash/extend'
 
 var { TYPE } = constants
-import { translate, getModel, getContentSeparator, isMyProduct,
+import { translate, getModel, getContentSeparator, isMyProduct, ungroup,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
@@ -22,10 +22,12 @@ import PageView from '../Components/PageView'
 import chatStyles from '../styles/chatStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
-const GRID_LIST = 'GridList'
-const NEW_RESOURCE = 'NewResource'
-
+const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
+``
+const GRID_LIST = 'GridList'
+const APPLICATIONS_GRID = 'ApplicationsGrid'
+const NEW_RESOURCE = 'NewResource'
 
 var component
 
@@ -37,7 +39,7 @@ var uiUtils = {
     let route = {
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
-      componentName: GRID_LIST,
+      componentName: resource.grid && APPLICATIONS_GRID || GRID_LIST,
       passProps: {
         modelName: btype,
         bookmark: resource,
@@ -168,6 +170,30 @@ var uiUtils = {
       }
     }
     return separator
+  },
+  getGridCols(model) {
+    if (typeof model === 'string')
+      model = getModel(model)
+    let props = model.properties
+    let hasGridCols = model.gridCols != null
+    let gridCols = hasGridCols  &&  model.gridCols || model.viewCols
+    if (!gridCols)
+      return
+    let vCols = []
+    gridCols.forEach((v) => {
+      if (!props[v].list             &&
+           props[v].range !== 'json' &&
+           props[v].range !== 'url'  &&
+           (props[v].ref !== PHOTO)) //   &&  !hasGridCols))
+        vCols.push(v)
+      else if (v.indexOf('_group') !== -1) {
+        let group = ungroup({model, viewCols: [v]})
+        group.forEach(p => vCols.push(p))
+      }
+    })
+    // if (vCols.length === 7)
+    //   vCols.splice(6, 1)
+    return vCols
   },
 }
 var createStyles = styleFactory(component || PhotoList, function ({ dimensions, bankStyle, indent, isView }) {
