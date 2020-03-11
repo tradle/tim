@@ -1449,7 +1449,7 @@ class MessageList extends Component {
     this.setState({userInput: ''}) //, selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage({msg: value, application: application});
+    Actions.addMessage({msg: value, application});
   }
   switchChat(resource) {
     let to = resource.from.organization  ||  resource.from
