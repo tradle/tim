@@ -222,6 +222,8 @@ const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
 const MODIFICATION        = 'tradle.Modification'
 const PRODUCT_BUNDLE      = 'tradle.ProductBundle'
+const STATUS              = 'tradle.Status'
+const OVERRIDE_STATUS     = 'tradle.OverrideStatus'
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -3279,7 +3281,62 @@ var Store = Reflux.createStore({
       await db.batch(batch)
     }
   },
+  async onApproveApplication({application, approval}) {
+    let { status, checks, checksOverride, hasFailedChecks, hasCheckOverrides,
+          numberOfChecksFailed, numberOfCheckOverrides, items, notifications } = application
+    // if (status !== 'completed') {
+    //   Alert.alert(translate('applicationIsNotCompleted'))
+    //   return
+    // }
+    if (notifications.length  &&  !items.length) {
 
+    }
+
+    if (!hasFailedChecks) {
+      if (!hasCheckOverrides)
+        await this.onAddMessage({msg: approval})
+      else
+        numberOfChecksFailed = 0
+      return
+    }
+    if (!hasCheckOverrides) {
+      Alert.alert(translate('pleaseResolveFailedChecks'))
+      return
+    }
+    // if (numberOfChecksFailed  &&  numberOfChecksFailed > numberOfCheckOverrides) {
+    //   Alert.alert('pleaseResolveFailedChecks')
+    //   return
+    // }
+    let props = this.getModel(APPLICATION).properties
+    if (numberOfChecksFailed  &&  checks && !checks[0].status) {
+      ({ checks } = await this.getApplication({resource: application, backlink: props.checks}))
+    }
+    if (numberOfCheckOverrides && !checksOverride)
+      ({ checksOverride } = await this._getItemFromServer({idOrResource: application, backlink: props.checksOverride}))
+
+    const sModel = this.getModel(STATUS)
+    const oModel = this.getModel(OVERRIDE_STATUS)
+
+    checks = checks  &&  checks.filter(c => !c.isInactive  &&  utils.getEnumValueId({model: sModel, value: c.status}) === 'fail')
+
+    if (checksOverride) {
+      let passChecksOverride = checksOverride.filter(c => utils.getEnumValueId({model: oModel, value: c.status}) === 'pass')
+      if (passChecksOverride.length !== checksOverride.length) {
+        Alert.alert('applcationIsNotApprovable')
+        return
+      }
+    }
+
+    if (!numberOfChecksFailed) {
+      await this.onAddMessage({msg: approval})
+      return
+    }
+    let overridenChecks = checks.filter(check => checksOverride.find(co => co.check.id === utils.getId(check)))
+    if (overridenChecks.length === checks.length)
+      await this.onAddMessage({msg: approval})
+    else
+      Alert.alert(translate('pleaseResolveFailedChecks'))
+  },
   async prepareToSend({resource, model, isPrefill}) {
     let toChain = _.omit(resource, excludeWhenSignAndSend)
     if (!model)
@@ -4206,8 +4263,9 @@ if (!res[SIG]  &&  res._message)
   async getApplication(params) {
     var {resource, action, backlink, forwardlink} = params //, application} = params
     let blProp = backlink ||  forwardlink
+    let props = utils.getModel(APPLICATION).properties
     let prop
-    let submissions = utils.getModel(APPLICATION).properties.submissions
+    let submissions = props.submissions
     let sname = submissions.name
     let slength = resource[sname]  &&  resource[submissions.name].length
     if (blProp) {
@@ -5546,6 +5604,8 @@ if (!res[SIG]  &&  res._message)
     }
     _.extend(productListR, pl)
     let plist = productListR.chooser.oneOf.map(p => (typeof p === 'object') && p || {id: p})
+    if (!me.isEmployee)
+      plist = plist.filter(p => !utils.getModel(utils.getType(p)).internalUse)
     productListR.chooser.oneOf = plist
     this.trigger({action: 'productList', resource: productListR, to: resource})
   },
@@ -6721,7 +6781,8 @@ if (!res[SIG]  &&  res._message)
       Alert.alert(translate('serverIsUnreachable'))
       return
     }
-    let {direction, first, noTrigger, modelName, application, filterResource, endCursor, limit} = params
+    let {direction, first, noTrigger, modelName, application,
+         filterResource, endCursor, limit, bookmark} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
 
@@ -6732,6 +6793,7 @@ if (!res[SIG]  &&  res._message)
       filterResource = utils.clone(filterResource)
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
+    let noInternalUse = bookmark  &&  bookmark.noInternalUse
     if (me.isEmployee) {
       if (application  &&  (!filterResource  ||  !filterResource._org)) {
         let applicant = this._getItem(applicantId)
@@ -6765,6 +6827,16 @@ if (!res[SIG]  &&  res._message)
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
     list = result.edges.map((r) => this.convertToResource(r.node))
+    let len = list.length
+    if (noInternalUse) {
+      if (modelName === APPLICATION)
+        list = list.filter(r => !this.getModel(r.requestFor).internalUse)
+      else
+        list = list.filter(r => !this.getModel(r[TYPE]).internalUse)
+      if (len === limit  &&  list.length < limit / 2)
+        debugger
+    }
+
     if (!noTrigger)
       this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
     return {list, endCursor: newCursor}
