@@ -684,10 +684,12 @@ var search = {
     if (p === 'verifications')
       return
 
+    let isSubmissions
     if (isApplication) {
       if (isList  &&  p !== 'relationshipManagers')
         return
-      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+      isSubmissions = p === 'submissions'
+      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  !isSubmissions)
         return
     }
     let iref = prop.items.ref
@@ -706,7 +708,7 @@ var search = {
         else
           props = arr
 
-         arr.push(`${p} {
+          arr.push(`${p}${isSubmissions && '(limit: 100)' || ''} {
            edges {
              node {
               ${props}
@@ -769,7 +771,7 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink, excludeProps, mapping, isChat, isThisVersion) {
+  async getItem(id, client, backlink, noBacklinks, excludeProps, mapping, isChat, isThisVersion) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
@@ -784,12 +786,15 @@ var search = {
     else
       query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    if (backlink) {
+    if (backlink || noBacklinks) {
       if (!excludeProps)
         excludeProps = []
       let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
       if (size(itemsProps) > 1) {
-        itemsProps = Object.keys(itemsProps).filter(item => item !== backlink.name)
+        if (noBacklinks)
+          itemsProps = Object.keys(itemsProps)
+        else
+          itemsProps = Object.keys(itemsProps).filter(item => item !== backlink.name)
         excludeProps = excludeProps.concat(itemsProps)
       }
     }
