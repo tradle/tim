@@ -537,6 +537,16 @@ var storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
+           parent: 'NULL',
+        },
+        noInternalUse: true,
+        message: 'topLevelApplications',
+        grid: true
+      },
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
           hasFailedChecks: true,
         },
         message: 'applicationsHasFailedChecks',
@@ -582,14 +592,6 @@ var storeUtils = {
         },
         message: 'applicationsNotAssigned'
       },
-      { type: APPLICATION,
-        bookmark: {
-          [TYPE]: APPLICATION,
-          _org: botPermalink,
-           parent: 'NULL',
-        },
-        message: 'topLevelApplications'
-      },
       {
         type: APPLICATION,
         message: 'applicationDrafts',
@@ -614,9 +616,9 @@ var storeUtils = {
     moreBookmarks.forEach(b => bookmarks.push(b))
 
     return bookmarks.map(b => {
-      const { type, bookmark, message } = b
+      const { type, bookmark, message, grid, noInternalUse } = b
       const model = getModel(type)
-      return {
+      let bookmarkR = {
         [TYPE]: BOOKMARK,
         message: message  ||  translate(model), // makeModelTitle(model, true),
         bookmark: bookmark  ||  {
@@ -625,6 +627,11 @@ var storeUtils = {
         },
         from
       }
+      if (grid)
+        bookmarkR.grid = grid
+      if (noInternalUse)
+        bookmarkR.noInternalUse = noInternalUse
+      return bookmarkR
     })
   }
 }
