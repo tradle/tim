@@ -250,11 +250,25 @@ class CheckRow extends Component {
   }
   getCheckOverrideStatus() {
     let { checkOverride } = this.state
+    let { application, resource } = this.props
     const statusModel = utils.getModel(STATUS_OVERRIDE)
+
+    // if (!checkOverride  &&  application.checkOverrides) {
+    //   const checkId = utils.getId(resource)
+    //   let checkType = utils.getType(resource)
+    //   let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+    //   if (checkOverrideProp.length) {
+    //     const pref = checkOverrideProp[0].items.ref
+    //     const rId = utils.getId(resource)
+    //     const checkOverrides = application.checksOverride.filter(r => r && r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
+    //     if (checkOverrides.length)
+    //       checkOverride = checkOverrides[0]
+    //   }
+    // }
+
     if (checkOverride  &&  checkOverride.check.id === utils.getId(resource))
       return statusModel.enum.find(r => r.title === checkOverride.status.title)
 
-    let { resource, application } = this.props
     if (!application  ||  !application.checksOverride)
       return
     const checkId = utils.getId(resource)
@@ -264,7 +278,12 @@ class CheckRow extends Component {
       return
     const pref = checkOverrideProp[0].items.ref
     const rId = utils.getId(resource)
-    const checkOverrides = application.checksOverride.filter(r => r && r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
+    const checkOverrides = application.checksOverride.filter(r => {
+      return r &&
+             r.check  &&
+             utils.getType(r) === pref  &&
+             utils.getId(r.check) === rId
+    })
     if (checkOverrides.length) {
       checkOverride = checkOverrides[0]
       return statusModel.enum.find(r => r.title === checkOverride.status.title)
