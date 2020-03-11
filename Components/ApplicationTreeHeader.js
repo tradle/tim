@@ -13,7 +13,7 @@ import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import utils, {
-  translate
+  translate, translateForGrid
 } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 import { circled } from '../styles/utils'
@@ -34,8 +34,8 @@ class ApplicationTreeHeader extends Component {
     let { gridCols, depth } = this.props
     if (!gridCols)
       return <View />
-
-    let props = utils.getModel(APPLICATION).properties
+    const model = utils.getModel(APPLICATION)
+    const props = model.properties
     let gCols = Object.keys(gridCols)
     let self = this
     let descriptionHeader = []
@@ -54,12 +54,17 @@ class ApplicationTreeHeader extends Component {
       if (typeof val === 'object') {
         isNumber = isNumber || val.type === 'number'
         label = val.label
+        if (val.label)
+          label = translate(label).toUpperCase()
+        else if (prop)
+          label = translateForGrid({property: prop, model}).toUpperCase()
         if (val.icon)
           ({icon, color} = self.getIcon(val))
         description = val.description
       }
       else
-        label = val
+        label = translate(val).toUpperCase()
+
       if (isNumber || isDate)
         textStyle = {alignSelf: 'flex-end', paddingRight: 10}
       // else if (isDate)
@@ -72,7 +77,7 @@ class ApplicationTreeHeader extends Component {
         title = <View style={[textStyle, {marginTop: 3}]}>{this.paintIcon({icon, color: color || '#757575'})}</View>
       else if (label)
         title = <Text style={[styles.cell, textStyle]}>
-                    {translate(label).toUpperCase()}
+                    {label}
                   </Text>
 
       if (description) {

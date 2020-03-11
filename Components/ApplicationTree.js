@@ -33,6 +33,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import StyleSheet from '../StyleSheet'
 import { makeStylish } from './makeStylish'
 import platformStyles from '../styles/platform'
+import { showScoreDetails } from './utils/gridUtils'
 
 var {
   TYPE,
@@ -174,17 +175,15 @@ class ApplicationTree extends Component {
     this.listenTo(Store, 'onAction')
   }
   onAction(params) {
-    let { action, application } = params
-
-    // if (!application.top  ||  utils.getId(application.top) !== utils.getId(this.props.resource))
-    //   return
+    let { action, application, applicantName } = params
 
     switch(action) {
     case 'openApplicationChat':
       this.openApplicationChat(application)
       return
     case 'showScoreDetails':
-      this.showScoreDetails(application)
+      let { bankStyle, navigator } = this.props
+      showScoreDetails({application, applicantName, bankStyle, navigator})
       return
     }
   }
@@ -239,10 +238,7 @@ class ApplicationTree extends Component {
         resource={this.props.resource}
         bankStyle={bankStyle  ||  defaultBankStyle}
         />
-      );
-  }
-  getNextKey(resource) {
-    return resource[ROOT_HASH] + '_' + cnt++
+      )
   }
   render() {
     let model = utils.getModel(APPLICATION);
@@ -273,19 +269,6 @@ class ApplicationTree extends Component {
   }
   renderHeader() {
     return <ApplicationTreeHeader gridCols={viewCols} depth={this.state.depth} />
-  }
-  showScoreDetails(application, applicantName) {
-    let m = utils.getModel(APPLICATION)
-    let { navigator, bankStyle } = this.props
-    navigator.push({
-      componentName: 'ScoreDetails',
-      backButtonTitle: 'Back',
-      title: `${application.applicantName ||  applicantName}  →  ${translate(m.properties.score, m)} ${application.score}`,
-      passProps: {
-        bankStyle,
-        resource: application
-      }
-    })
   }
 }
 reactMixin(ApplicationTree.prototype, Reflux.ListenerMixin);
