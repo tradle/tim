@@ -565,8 +565,8 @@
       }
     },
     "@tradle/validate-model": {
-      "version": "7.1.20",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.20.tgz",
+      "version": "7.1.22",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.22.tgz",
       "integrity": "sha512-eMCEcd0TelHslDCMGKItDEnAMb5+U1rfDW7AI+44rcH3936IqLVIMoDum0ed8n64qdHU4jdymlUXXD4a61T4JQ==",
       "requires": {
         "@tradle/constants": "^2.1.0",
