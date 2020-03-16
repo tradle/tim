@@ -5055,90 +5055,10 @@ if (!res[SIG]  &&  res._message)
         if (isForm  &&  !isRefresh)
           await deactivateFormRequests()
       }
+
       let { toChain, error } = await self.prepareToSend({resource: returnVal})
       if (error)
         return
-      // let toChain = _.omit(returnVal, excludeWhenSignAndSend)
-      // let properties = rModel.properties
-
-      // self.rewriteStubs(toChain)
-      // let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
-      // // if (isNew) {
-
-      // for (let p in toChain) {
-      //   let prop = properties[p]
-
-      //   if (!isNew  &&  !prop  &&  !keepProps.includes(p)) { // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
-      //     delete toChain[p]
-      //     continue
-      //   }
-      //   if (!prop) {
-      //     prop = ObjectModel.properties[p]
-      //     if (!prop  ||  prop.virtual  ||  toChain[p]._link)
-      //       continue
-      //   }
-      //   if (prop  &&  prop.partial)
-      //     continue
-      //   let isArray = prop.type === 'array'
-
-      //   if (isArray  &&  prop.items.filter) {
-      //     delete toChain[p]
-      //     continue
-      //   }
-
-      //   let ref = prop.ref  ||  isArray  &&  prop.items.ref
-
-      //   if (!ref)
-      //     continue
-
-      //   let refM = self.getModel(ref)
-      //   if (!refM)
-      //     continue
-      //   if (!utils.isWeb()  &&  prop.range === 'document') {
-      //       debugger
-      //     let { url } = toChain[p]
-      //     if (url  &&  url.indexOf('data:application/pdf;') === 0)
-      //       await self._keeper.replaceDataUrls(toChain[p])
-      //   }
-      //   if (refM.inlined)
-      //     continue
-
-      //   let isObject = prop.type === 'object'
-      //   if (isObject)
-      //     toChain[p] = self.buildSendRef(returnVal[p])
-      //   else
-      //     toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
-      // }
-      // if (!isNew) {
-      //   if (!returnVal[SIG]) debugger
-
-      //   const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
-      //     _link: returnVal[CUR_HASH],
-      //     _permalink: returnVal[ROOT_HASH],
-      //     ...returnVal
-      //   })
-
-      //   _.extend(toChain, nextVersionScaffold)
-      //   _.extend(returnVal, nextVersionScaffold)
-      // }
-
-      // toChain = utils.sanitize(toChain)
-      // try {
-      //   if (rtype !== DATA_BUNDLE)
-      //     validateResource({ resource: toChain, models: self.getModels() })
-      // } catch (err) {
-      //   if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
-      //   // if (err.name === 'InvalidPropertyValue')
-      //     self.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
-      //   else if (Errors.matches(err, ValidateResourceErrors.Required)) {
-      //     let validationErrors = {}
-      //     err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
-      //     self.trigger({action: 'validationError', validationErrors})
-      //   }
-      //    else
-      //     self.trigger({action: 'validationError', error: err.message})
-      //   return
-      // }
 
       try {
         let data = await self.createObject(toChain)
