@@ -1261,12 +1261,17 @@ var utils = {
         // eCols[p] = props[p]
       })
     }
+    let onePropView = []
     for (let p in properties) {
       if (p.charAt(0) === '_') continue
       let prop = properties[p]
-      if (vCols.indexOf(p) === -1  /*&&  !prop.readOnly*/  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
+      if (prop.signature)
+        onePropView.push(p)
+      else if (vCols.indexOf(p) === -1  /*&&  !prop.readOnly*/  &&  !prop.hidden  &&  !p.endsWith('_group'))
         vCols.push(p)
     }
+    if (vCols.length)
+      vCols = onePropView.concat(vCols)
     return vCols
   },
   template (t, o) {

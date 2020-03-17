@@ -21,11 +21,14 @@ const FORM_ERROR = 'tradle.FormError'
 const SELFIE = 'tradle.Selfie'
 
 var OnePropFormMixin = {
-  onSetSignatureProperty(prop, item) {
+  onSetSignatureProperty(prop, doSet, item) {
     if (!item)
       return;
 
-    let { resource, isRefresh } = this.props
+    // let { resource, isRefresh } = this.props
+    let { isRefresh, resource } = this.props
+    if (doSet)
+     ({ resource } = this.state)
 
     let formRequest
     if (resource[TYPE] === FORM_REQUEST) {
@@ -43,17 +46,24 @@ var OnePropFormMixin = {
       )
     if (!resource[prop.name])
       this.props.navigator.pop()
+
+    if (doSet) {
+      let r = _.cloneDeep(resource)
+      r[prop.name] = item
+      this.setState({resource: r})
+      return
+    }
     resource[prop.name] = item
     let params = {resource, isRefresh}
     if (formRequest)
       params.disableFormRequest = formRequest
     Actions.addChatItem(params)
   },
-  showSignatureView(prop, onSet) {
-    const { navigator, bankStyle, isRefresh } = this.props
+  showSignatureView({prop, doSet, onSet}) {
+    const { navigator, bankStyle, isRefresh, resource } = this.props
     let sigView
     navigator.push({
-      title: translate(prop), //m.title,
+      title: translate(prop, utils.getModel(resource[TYPE])), //m.title,
       componentName: 'SignatureView',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
@@ -66,8 +76,9 @@ var OnePropFormMixin = {
         ref: ref => {
           sigView = ref
         },
+        doSet,
         bankStyle,
-        onSignature: this.onSetSignatureProperty.bind(this, prop),
+        onSignature: this.onSetSignatureProperty.bind(this, prop, doSet),
         sigViewStyle: bankStyle
       }
     })

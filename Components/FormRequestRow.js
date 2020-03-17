@@ -921,7 +921,7 @@ class FormRequestRow extends Component {
           else if (prop.signature) {
             msg = <View key={this.getNextKey()}>
                     <View style={styles.messageLink}>
-                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop, this.onSetSignatureProperty.bind(this))})}
+                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, {prop, onSet: this.onSetSignatureProperty.bind(this)})})}
                     </View>
                   </View>
           }
