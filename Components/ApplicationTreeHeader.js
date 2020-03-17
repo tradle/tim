@@ -43,10 +43,13 @@ class ApplicationTreeHeader extends Component {
     let cols = gCols.map((p, i) => {
       let prop = props[p]
       let textStyle
-      let isNumber, label, icon, color
+      let isNumber, label, icon, color, isDate
       let val = gridCols[p]
-      if (prop)
+      if (prop) {
+        isDate = prop.type === 'date'
         isNumber = prop.type === 'number'  ||  prop.ref === MONEY
+      }
+
       let description
       if (typeof val === 'object') {
         isNumber = isNumber || val.type === 'number'
@@ -57,8 +60,10 @@ class ApplicationTreeHeader extends Component {
       }
       else
         label = val
-      if (isNumber)
+      if (isNumber || isDate)
         textStyle = {alignSelf: 'flex-end', paddingRight: 10}
+      // else if (isDate)
+      //   textStyle = {alignSelf: 'center'}
       else
         textStyle = {}
 
