@@ -32,8 +32,6 @@ import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
 import FormErrorRow from './FormErrorRow'
 import TourRow from './TourRow'
-// import NewResource from './NewResource'
-// import ProductChooser from './ProductChooser'
 import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
 import HomePageMixin from './HomePageMixin'
@@ -46,14 +44,11 @@ import ProgressInfo from './ProgressInfo'
 import PageView from './PageView'
 import { makeStylish } from './makeStylish'
 import ActivityIndicator from './ActivityIndicator'
-import platformStyles, {MenuIcon} from '../styles/platform'
+import platformStyles, { MenuIcon } from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 import BackgroundImage from './BackgroundImage'
-// import AddNewMessage from './AddNewMessage'
-// import SearchBar from 'react-native-search-bar'
-// import ResourceTypesScreen from './ResourceTypesScreen'
 var LIMIT = 50
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE } = TYPES
@@ -97,7 +92,7 @@ class MessageList extends Component {
       bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: utils.getMe()._showStepIndicator
     }
-    if (application  &&  utils.isRM(application)) {
+    if (application  &&  isRM(application)) {
       let additionalForms = this.getAdditionalForms(application)
       if (additionalForms.length)
         this.state.additionalForms = additionalForms.map(f => ({id: f}))
@@ -126,7 +121,7 @@ class MessageList extends Component {
     // HACK - needs rewrite
     let me = utils.getMe()
     if (me.isEmployee)  {
-      if (application  &&  utils.isRM(application))
+      if (application  &&  isRM(application))
         return true
       let isChattingWithPerson = utils.getType(resource) === PROFILE
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
@@ -176,7 +171,7 @@ class MessageList extends Component {
 
   _watchSubmit() {
     const self = this
-    if (!utils.isWeb() || !this._GiftedMessenger || !this._GiftedMessenger.refs.textInput) return
+    if (!isWeb() || !this._GiftedMessenger || !this._GiftedMessenger.refs.textInput) return
 
     const input = this._GiftedMessenger.refs.textInput.refs.input
     if (this._watchedInput === input) return
@@ -580,23 +575,13 @@ class MessageList extends Component {
       let keys = thisKeys.filter((key) => nextKeys.indexOf(key) === -1)
       if (keys && keys.length)
         return true
-
     }
-
 
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
-    // if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
-    //   return true
     if (utils.resized(this.props, nextProps)           ||
         this.state.allLoaded !== nextState.allLoaded)
       return true
-         // this.state.sendStatus !== nextState.sendStatus   ||)
-         // this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]))
-
-    // if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
-    //     this.state.sendStatus !== nextState.sendStatus)
-    //   return true
     for (let i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
       let nr = nextState.list[i]
@@ -636,13 +621,12 @@ class MessageList extends Component {
     if (!title)
       title = translate(model) //translate(utils.makeModelTitle(model))
     let dn = utils.getDisplayName(r)
-    // let newTitle = title + (dn ? ' -- ' + dn : '');
     let newTitle = (dn ? dn + ' -- '  : '') + title;
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier
     if (!model.notEditable) {
       if (application) {
-        if (utils.isRM(application)  &&  r._latest)
+        if (isRM(application)  &&  r._latest)
           isVerifier = true
         else
           isVerifier = !verification && utils.isVerifier(r)
@@ -676,7 +660,7 @@ class MessageList extends Component {
     }
     let showEdit
     if (verification)  {
-      // if (application  &&  utils.isRM(application))
+      // if (application  &&  isRM(application))
       //   showEdit = true
     }
     else
@@ -696,31 +680,23 @@ class MessageList extends Component {
         }
       }
       else {
-        // let editProps = utils.getEditableProperties(r)
-        // let prop = editProps.length === 1  &&  editProps[0]
-        // if (prop  &&  prop.signature) {
-        //   route.onRightButtonPress = this.showSignatureView.bind(this, prop, r)
-        // }
-        // else {
-          passProps = {
-            model: utils.getLensedModel(r, lensId),
-            resource: r,
-            currency: resource.currency || this.props.currency,
-            country: resource.country,
-            chat: resource,
-            lensId,
-            bankStyle,
-            isReview
-          }
-        // }
+        passProps = {
+          model: utils.getLensedModel(r, lensId),
+          resource: r,
+          currency: resource.currency || this.props.currency,
+          country: resource.country,
+          chat: resource,
+          lensId,
+          bankStyle,
+          isReview
+        }
       }
 
       route.rightButtonTitle =  isReview  &&  'Review' || 'Edit'
       if (!route.onRightButtonPress)
         route.onRightButtonPress = {
-          title: newTitle, //utils.getDisplayName(resource),
+          title: newTitle,
           componentName: 'NewResource',
-          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps
@@ -865,8 +841,8 @@ class MessageList extends Component {
     if (modelName === ORGANIZATION)
       hideTextInput = !utils.hasSupportLine(resource)
     else if (application)
-      hideTextInput = !utils.isRM(application)
-      // hideTextInput = !utils.isRM(application)
+      hideTextInput = !isRM(application)
+      // hideTextInput = !isRM(application)
     // HACK for RM
     // hideTextInput = false
     let content
@@ -916,7 +892,6 @@ class MessageList extends Component {
         maxHeight -= 35
       if (hideTextInput)
         maxHeight -= 10
-      // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       var marginLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
       var marginRight = 10
@@ -947,9 +922,9 @@ class MessageList extends Component {
         textInputHeight={textInputHeight}
         menu={this.generateMenu}
         navigator={navigator}
-        keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
+        keyboardShouldPersistTaps={isWeb() ? 'never' : 'always'}
         keyboardType={'default'}
-        keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
+        keyboardDismissMode={isWeb() ? 'none' : 'on-drag'}
         initialListSize={LIMIT}
         hideTextInput={hideTextInput}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
@@ -1130,7 +1105,7 @@ class MessageList extends Component {
     const push = btn => buttons.push({ ...btn, index: buttons.length })
 
     if (application) {
-      if (!utils.isRM(application)  ||  !this.state.additionalForms)//this.hasAdditionalForms(application))
+      if (!isRM(application)  ||  !this.state.additionalForms)//this.hasAdditionalForms(application))
         return
 
       push({
@@ -1274,13 +1249,6 @@ class MessageList extends Component {
   selectContext(context) {
     this.props.navigator.pop()
     this.switchToOneContext(context, this.props.resource)
-    // let limit = context ? 300 : LIMIT
-    // Actions.list({
-    //   modelName: this.props.modelName,
-    //   to: this.props.resource,
-    //   context: context,
-    //   limit: limit
-    // })
     this.setState({context: context, allContexts: context == null, limit: this.state.limit})
   }
   // Show chooser of the organizations to share context with
@@ -1353,7 +1321,7 @@ class MessageList extends Component {
     let application = this.state.application || this.props.application
 
     if (application) {
-      if (!utils.isRM(application)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
+      if (!isRM(application)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
         return
     }
     return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
