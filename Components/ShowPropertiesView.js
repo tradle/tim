@@ -561,7 +561,7 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       fontSize: 18,
       marginVertical: 3,
       marginHorizontal: 7,
-      color: '#2E3B4E',
+      color: '#555555',
     },
     icon: {
       width: 40,

@@ -935,7 +935,7 @@ var ResourceMixin = {
         if (jVal.indexOf('http://') === 0  ||  jVal.indexOf('https://') === 0)
           val = <Text style={[styles.title, {flex: 1, color: bankStyle.linkColor}]} onPress={() => Linking.openURL(jVal)}>{jVal}</Text>
         else
-          val = <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{jVal}</Text>
+          val = <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{jVal}</Text>
         jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
                         <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
                           {label}
@@ -987,7 +987,7 @@ var ResourceMixin = {
                               <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
                             </Col>
                             <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
-                              <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{js + ''}</Text>
+                              <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{js + ''}</Text>
                             </Col>
                           </Row>)
           }
@@ -1181,7 +1181,7 @@ var styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 0,
     // marginHorizontal: 7,
-    color: '#2E3B4E',
+    color: '#555555',
     // color: '#757575',
   },
   itemSeparator: {
@@ -1225,7 +1225,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 3,
     marginHorizontal: 7,
-    color: '#2E3B4E',
+    color: '#555555',
   },
   hugeTitle: {
     fontSize: 24,
@@ -1254,7 +1254,7 @@ var styles = StyleSheet.create({
   dsValue: {
     fontSize: 18,
     marginHorizontal: 7,
-    color: '#2E3B4E',
+    color: '#555555',
   },
   content: {
     color: '#9b9b9b',
