@@ -981,7 +981,8 @@ var utils = {
     let props = model.properties
     let rType = utils.getType(resource)
     let resourceModel = rType && utils.getModel(rType)
-    let rProps = resourceModel.properties
+    props = resourceModel  &&  resourceModel.properties || props
+    let rProps = props
 
     var displayName = '';
 
@@ -991,6 +992,7 @@ var utils = {
         if (!resource[p]  &&  !props[p].displayAs)
           continue
         let dn
+        let prop = props[p]
         if (props[p].ref  &&  utils.isEnum(props[p].ref))
           dn = utils.translateEnum(resource[p])
         else if (props[p].range === 'model')
