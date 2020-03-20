@@ -48,6 +48,7 @@ const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const SELFIE = 'tradle.Selfie'
 const REFRESH = 'tradle.Refresh'
 const PRODUCT_BUNDLE = 'tradle.ProductBundle'
+const ATTESTATION = 'tradle.Attestation'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {
   TYPE,
@@ -199,7 +200,8 @@ class FormRequestRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isProductBundle = resource.form === PRODUCT_BUNDLE
-    if (isFormRequest  &&  !isProductBundle)
+    let isAttestation = resource.form === ATTESTATION
+    if (isFormRequest  &&  !isProductBundle && !isAttestation)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
       let linkColor
@@ -211,6 +213,8 @@ class FormRequestRow extends Component {
       if (!resource._documentCreated) {
         if (isProductBundle)
           onPressCall = this.reviewFormsInDraft.bind(this)
+        else if (isAttestation)
+          onPressCall = this.reviewForAttestation.bind(this)
         else
           onPressCall = this.reviewFormsInContext.bind(this)
       }
@@ -1089,6 +1093,24 @@ class FormRequestRow extends Component {
         reviewed: {},
         to,
         list: resource.prefill.items,
+        currency
+      }
+    })
+  }
+  reviewForAttestation() {
+    const { navigator, bankStyle, resource, to, currency, list } = this.props
+    this.props.navigator.push({
+      title: translate("reviewData"),
+      backButtonTitle: 'Back',
+      componentName: 'AttestationItemsList',
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: ATTESTATION,
+        resource,
+        bankStyle,
+        reviewed: {},
+        to,
+        list: resource.prefill.items || list,
         currency
       }
     })

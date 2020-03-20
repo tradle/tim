@@ -313,7 +313,8 @@ class MessageView extends Component {
     let { backlink, bankStyle, resource } = this.state
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: MessageView})
-    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
+    let { lensId, style, navigator, currency, isVerifier,
+          defaultPropertyValues, verification, application, isReview } = this.props
 
     if (resource[TYPE] === MESSAGE)
       resource = resource.object
@@ -464,7 +465,7 @@ class MessageView extends Component {
     }
     let me = utils.getMe()
     let warning
-    if (!me.isEmployee  &&  !resource._latest) {
+    if (!me.isEmployee  &&  !resource._latest  &&  !isReview) {
       warning = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.errorBgColor, alignItems: 'center'}}>
                   <Text style={{fontSize: 18, color: bankStyle.errorColor}}>{translate('olderResourceVersion')}</Text>
                 </View>

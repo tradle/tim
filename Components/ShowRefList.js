@@ -245,6 +245,7 @@ class ShowRefList extends Component {
         details = <ShowPropertiesView resource={resource}
                                       showRefResource={this.getRefResource.bind(this)}
                                       currency={currency}
+                                      bankStyle={bankStyle}
                                       excludedProperties={['photos']}
                                       navigator={navigator} />
     }

@@ -92,6 +92,9 @@ module.exports = {
   get ReviewPrefilledItemsList() {
     return require('./ReviewPrefilledItemsList')
   },
+  get AttestationItemsList() {
+    return require('./AttestationItemsList')
+  },
   get CameraView() {
     return require('./CameraView')
   },
