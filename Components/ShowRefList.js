@@ -38,6 +38,7 @@ const {
   FORM,
   ENUM
 } = constants.TYPES
+const MY_PRODUCT = 'tradle.MyProduct'
 
 class ShowRefList extends Component {
   constructor(props) {
@@ -199,7 +200,13 @@ class ShowRefList extends Component {
          </View>
         );
     })
-    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !isEmployee
+    let showQR
+    if (ENV.showMyQRCode) {
+      if (utils.getId(me) === utils.getId(resource)  &&  !isEmployee)
+        showQR = true
+      else if (utils.isSubclassOf(resource[TYPE], MY_PRODUCT))
+        showQR = true
+    }
     if (showQR) {
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
@@ -212,7 +219,7 @@ class ShowRefList extends Component {
          </View>
         )
     }
-    if (!hasBacklinks  &&  !showDocuments) {
+    if (!hasBacklinks  &&  !showDocuments  &&  !showQR) {
       if (showDetails) {
         if (utils.isNew(resource)  ||  !utils.hasModificationHistory(resource))
           refList = null

@@ -643,7 +643,7 @@ class MessageList extends Component {
     let route = {
       title: newTitle,
       backButtonTitle: 'Back',
-      componentName: 'MessageView',
+      componentName: utils.isSubclassOf(utils.getType(r), MY_PRODUCT) ? 'ResourceView' : 'MessageView',
       // parentMeta: model,
       passProps: {
         bankStyle,

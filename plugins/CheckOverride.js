@@ -22,9 +22,10 @@ module.exports = function CheckOverride ({ models }) {
       if (m.editCols)
         requestedProperties = m.editCols.map(p => ({name: p}))
       else {
+        let notes = properties.explanationForOverride || properties.reviewNotes || properties.notes
         requestedProperties = [
           { name: 'status' },
-          { name: 'explanationForOverride' }
+          { name: notes.name }
         ]
       }
 
