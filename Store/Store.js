@@ -8910,7 +8910,7 @@ if (!res[SIG]  &&  res._message)
           let sw = r._sharedWith.filter(rr => {
             if (reps.filter((rep) => {
                   if (utils.getId(rep) === rr.bankRepresentative) {
-                    // if (rr.bankRepresentative !== r.from.id)
+                    if (rr.bankRepresentative !== r.from.id)
                       return true
                   }
                 }).length)
