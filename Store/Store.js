@@ -3281,23 +3281,25 @@ var Store = Reflux.createStore({
       await db.batch(batch)
     }
   },
-  async onApproveApplication({application, approval}) {
+  async onApproveApplication({application, msg}) {
     let { status, checks, checksOverride, hasFailedChecks, hasCheckOverrides,
           numberOfChecksFailed, numberOfCheckOverrides, items, notifications } = application
     // if (status !== 'completed') {
     //   Alert.alert(translate('applicationIsNotCompleted'))
     //   return
     // }
+    await this.onAddMessage({msg})
+    return
     if (notifications.length  &&  !items.length) {
 
     }
 
     if (!hasFailedChecks) {
       if (!hasCheckOverrides)
-        await this.onAddMessage({msg: approval})
+        await this.onAddMessage({msg})
       else
         numberOfChecksFailed = 0
-      return
+      // return
     }
     if (!hasCheckOverrides) {
       Alert.alert(translate('pleaseResolveFailedChecks'))
@@ -3310,30 +3312,33 @@ var Store = Reflux.createStore({
     let props = this.getModel(APPLICATION).properties
     if (numberOfChecksFailed  &&  checks && !checks[0].status) {
       ({ checks } = await this.getApplication({resource: application, backlink: props.checks}))
+      checks = await Promise.all(checks.map(check => this._getItemFromServer({idOrResource: check})))
     }
-    if (numberOfCheckOverrides && !checksOverride)
+    if (numberOfCheckOverrides && !checksOverride) {
       ({ checksOverride } = await this._getItemFromServer({idOrResource: application, backlink: props.checksOverride}))
+      checksOverride = await Promise.all(checksOverride.map(checkO => this._getItemFromServer({idOrResource: checkO})))
+    }
 
     const sModel = this.getModel(STATUS)
     const oModel = this.getModel(OVERRIDE_STATUS)
 
-    checks = checks  &&  checks.filter(c => !c.isInactive  &&  utils.getEnumValueId({model: sModel, value: c.status}) === 'fail')
+    checks = numberOfChecksFailed  &&  checks.filter(c => !c.isInactive  &&  utils.getEnumValueId({model: sModel, value: c.status}) === 'fail')
 
     if (checksOverride) {
       let passChecksOverride = checksOverride.filter(c => utils.getEnumValueId({model: oModel, value: c.status}) === 'pass')
       if (passChecksOverride.length !== checksOverride.length) {
-        Alert.alert('applcationIsNotApprovable')
+        Alert.alert(translate('applcationIsNotApprovable'))
         return
       }
     }
 
     if (!numberOfChecksFailed) {
-      await this.onAddMessage({msg: approval})
+      await this.onAddMessage({msg})
       return
     }
     let overridenChecks = checks.filter(check => checksOverride.find(co => co.check.id === utils.getId(check)))
     if (overridenChecks.length === checks.length)
-      await this.onAddMessage({msg: approval})
+      await this.onAddMessage({msg})
     else
       Alert.alert(translate('pleaseResolveFailedChecks'))
   },
@@ -8902,11 +8907,13 @@ if (!res[SIG]  &&  res._message)
       productsToShare.forEach((r) => {
         // let fromId = utils.getId(r.from)
         if (r._sharedWith) {
-          let sw = r._sharedWith.filter((r) => {
+          let sw = r._sharedWith.filter(rr => {
             if (reps.filter((rep) => {
-                    if (utils.getId(rep) === r.bankRepresentative)
+                  if (utils.getId(rep) === rr.bankRepresentative) {
+                    // if (rr.bankRepresentative !== r.from.id)
                       return true
-                  }).length)
+                  }
+                }).length)
               return true
           })
           if (sw.length)
