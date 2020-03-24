@@ -76,7 +76,7 @@ var {
 const APPLICATION = 'tradle.Application'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
 const CHECK = 'tradle.Check'
-
+const MY_PRODUCT = 'tradle.MyProduct'
 const METHOD = 'tradle.Method'
 const BOOKMARK = 'tradle.Bookmark'
 
@@ -688,9 +688,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { modelName, search, bankStyle, navigator, currency } = this.props
     let isContact = modelName === PROFILE;
 
+    let isMyProduct = utils.isSubclassOf(resource[TYPE], MY_PRODUCT)
     let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
-    if (!isApplication  &&   utils.isMessage(resource)  ||  utils.isStub(resource)) {
+    if (!isApplication  &&  !isMyProduct && utils.isMessage(resource)  ||  utils.isStub(resource)) {
       this.selectMessage(resource)
       return;
     }
@@ -949,7 +950,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
-        bankStyle: style,
+        bankStyle: style || bankStyle,
         currency: currency
       },
     }
