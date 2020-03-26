@@ -68,11 +68,18 @@ class ApplicationRow extends Component {
       if (utils.getRootHash(application) === thisHash)
         this.setState({application: application, resource: application})
       break
+    case 'updateRow':
+      let hash = utils.getRootHash(resource)
+      if (hash === utils.getRootHash(this.props.resource)) {
+        if (params.forceUpdate)
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource})
+      }
     }
   }
 
   render() {
-    const { resource, bankStyle, onSelect } = this.props
+    const { bankStyle, onSelect } = this.props
+    let resource = this.state.resource // || this.props.resource
     let rType = utils.getType(resource)
     let style
     if (bankStyle)
@@ -197,7 +204,6 @@ class ApplicationRow extends Component {
       let progressColor = '#a0d0a0'
       progressBar = <View style={{paddingBottom: 5}}><ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} /></View>
     }
-    // let { subm
     return  <View>
               <View style={{padding: 5}}>
                 <Text style={styles.resourceTitle}>{mTitle}</Text>
