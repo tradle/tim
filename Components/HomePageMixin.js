@@ -3,6 +3,7 @@ import React from 'react'
 import _ from 'lodash'
 
 import utils, { translate } from '../utils/utils'
+import { getGridCols } from '../utils/uiUtils'
 import constants from '@tradle/constants'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -195,9 +196,9 @@ var HomePageMixin = {
 
   renderGridHeader() {
     let { modelName, navigator, multiChooser, bookmark, isBacklink } = this.props
-    if ((modelName === APPLICATION  &&  bookmark) || isBacklink)
+    if ((modelName === APPLICATION  &&  bookmark && !bookmark.grid) || isBacklink)
       return
-    let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
+    let gridCols = getGridCols(modelName) // model.gridCols || model.viewCols;
     if (!gridCols)
       return
     let notSortable
@@ -212,29 +213,6 @@ var HomePageMixin = {
     return (
       <GridHeader sortProperty={sortProperty} order={order} gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)} notSortable={notSortable}/>
     )
-  },
-  getGridCols() {
-    let model = utils.getModel(this.props.modelName)
-    let props = model.properties
-    let hasGridCols = model.gridCols != null
-    let gridCols = hasGridCols  &&  model.gridCols || model.viewCols
-    if (!gridCols)
-      return
-    let vCols = []
-    gridCols.forEach((v) => {
-      if (!props[v].list             &&
-           props[v].range !== 'json' &&
-           props[v].range !== 'url'  &&
-           (props[v].ref !== PHOTO   &&  !hasGridCols))
-        vCols.push(v)
-      else if (v.indexOf('_group') !== -1) {
-        let group = utils.ungroup({model, viewCols: [v]})
-        group.forEach(p => vCols.push(p))
-      }
-    })
-    // if (vCols.length === 7)
-    //   vCols.splice(6, 1)
-    return vCols
   },
   checkAll() {
     let chosen = {}
