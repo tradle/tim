@@ -75,6 +75,10 @@ export const homeButtonObject = {
   ...footerButton,
   backgroundColor: '#fff'
 }
+export const treeButtonObject = {
+  ...footerButton,
+  backgroundColor: '#fff'
+}
 
 export const MenuIcon = {
   name: 'md-more',
