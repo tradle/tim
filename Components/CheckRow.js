@@ -10,8 +10,8 @@ import {
   LazyloadView as View,
   // LazyloadImage as Image
 } from 'react-native-lazyload'
-
 import Reflux from 'reflux'
+
 import React, { Component } from 'react'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -24,6 +24,7 @@ const { TYPE } = constants
 // import ImageComponent from './Image'
 import Image from './Image'
 import Store from '../Store/Store'
+
 import utils, { translate, getEnumValueId } from '../utils/utils'
 import { circled } from '../styles/utils'
 import RowMixin from './RowMixin'
@@ -41,35 +42,34 @@ class CheckRow extends Component {
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
     application: PropTypes.object,
-    modelName: PropTypes.string,
+    modelName: PropTypes.string
   };
 
   constructor(props) {
     super(props)
     let { resource, application } = props
-    let checkOverride
-    if (application  &&  application.checksOverride) {
-      const checkId = utils.getId(resource)
-      let checkType = utils.getType(resource)
-      let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
-      if (checkOverrideProp.length) {
-        const pref = checkOverrideProp[0].items.ref
-        const rId = utils.getId(resource)
-        const checkOverrides = application.checksOverride.filter(r => r && r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
-        if (checkOverrides.length)
-          checkOverride = checkOverrides[0]
-      }
-    }
+    // let checkOverride
+    // if (application  &&  application.checksOverride) {
+    //   const checkId = utils.getId(resource)
+    //   let checkType = utils.getType(resource)
+    //   let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+    //   if (checkOverrideProp.length) {
+    //     const pref = checkOverrideProp[0].items.ref
+    //     const rId = utils.getId(resource)
+    //     const checkOverrides = application.checksOverride.filter(r => r && r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
+    //     if (checkOverrides.length)
+    //       checkOverride = checkOverrides[0]
+    //   }
+    // }
 
     this.state = {
       resource,
-      checkOverride
+      // checkOverride
     }
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
-
   shouldComponentUpdate(nextProps, nextState) {
     if (!_.isEqual(this.props.resource, nextProps.resource) ||
         !_.isEqual(this.state.resource, nextState.resource) ||
@@ -104,14 +104,12 @@ class CheckRow extends Component {
                       </View>
                     </View>
                   </View>
-
     let identifier
     let category = this.props.category
     let isHidden
     if (model.interfaces) {
       if (category  &&  !model.interfaces.includes(category.id))
         return <View style={{height: 0}}/>
-
       if (checkFilter  &&  getEnumValueId({model: utils.getModel(STATUS), value: resource.status}) !== checkFilter)
         return <View style={{height: 0}}/>
       let iModel = utils.getModel(model.interfaces[0])
@@ -152,7 +150,7 @@ class CheckRow extends Component {
     }
   }
   getTitleComponent(model) {
-    let {resource, application, modelName } = this.props
+    let { resource, application, modelName } = this.props
     let dn = utils.getDisplayName(resource)
     let title
     if (utils.getModel(modelName).abstract)
@@ -211,14 +209,8 @@ class CheckRow extends Component {
     let statusId = getEnumValueId({model: sModel, value: status})
     let statusM = sModel.enum.find(r => r.id === statusId)
     let checkIcon
-    let checkOverrideStatus
-    let checkOverrideIcon
+    let checkOverrideStatus = this.getCheckOverrideStatus()
 
-    let { checkOverride } = this.state
-    if (checkOverride) {
-      const statusModel = utils.getModel(STATUS_OVERRIDE)
-      checkOverrideStatus = statusModel.enum.find(r => r.title === checkOverride.status.title)
-    }
     const { icon, color } = statusM
     let style, size, icolor
     if (statusId === 'warning'  ||  statusId === 'error') {
@@ -237,6 +229,7 @@ class CheckRow extends Component {
                     <Icon color={icolor} size={size} name={icon} />
                   </View>
     }
+    let checkOverrideIcon
     if (checkOverrideStatus) {
       style = [styles.checkButton, {alignSelf: 'flex-end', alignItems: 'center', width: 20, height: 20, marginTop: -20, backgroundColor: checkOverrideStatus.color}]
       checkOverrideIcon = <View style={style}>
@@ -251,9 +244,50 @@ class CheckRow extends Component {
              <View style={{justifyContent: 'center', paddingLeft: 10}}>
                <Text style={styles.rTitle}>{dn}</Text>
                {searchTerm}
-               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
+               <Text style={styles.checkDescription}>{'Provider: ' + provider || translate(model)}</Text>
              </View>
            </View>
+  }
+  getCheckOverrideStatus() {
+    let { checkOverride } = this.state
+    let { application, resource } = this.props
+    const statusModel = utils.getModel(STATUS_OVERRIDE)
+
+    // if (!checkOverride  &&  application.checkOverrides) {
+    //   const checkId = utils.getId(resource)
+    //   let checkType = utils.getType(resource)
+    //   let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+    //   if (checkOverrideProp.length) {
+    //     const pref = checkOverrideProp[0].items.ref
+    //     const rId = utils.getId(resource)
+    //     const checkOverrides = application.checksOverride.filter(r => r && r.check  &&  utils.getType(r) === pref  && utils.getId(r.check) === rId)
+    //     if (checkOverrides.length)
+    //       checkOverride = checkOverrides[0]
+    //   }
+    // }
+
+    if (checkOverride  &&  checkOverride.check.id === utils.getId(resource))
+      return statusModel.enum.find(r => r.title === checkOverride.status.title)
+
+    if (!application  ||  !application.checksOverride)
+      return
+    const checkId = utils.getId(resource)
+    let checkType = utils.getType(resource)
+    let checkOverrideProp = utils.getPropertiesWithRef(CHECK_OVERRIDE, utils.getModel(checkType))
+    if (!checkOverrideProp.length)
+      return
+    const pref = checkOverrideProp[0].items.ref
+    const rId = utils.getId(resource)
+    const checkOverrides = application.checksOverride.filter(r => {
+      return r &&
+             r.check  &&
+             utils.getType(r) === pref  &&
+             utils.getId(r.check) === rId
+    })
+    if (checkOverrides.length) {
+      checkOverride = checkOverrides[0]
+      return statusModel.enum.find(r => r.title === checkOverride.status.title)
+    }
   }
 }
 
