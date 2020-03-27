@@ -228,6 +228,8 @@ const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
 const MODIFICATION        = 'tradle.Modification'
 const PRODUCT_BUNDLE      = 'tradle.ProductBundle'
+const STATUS              = 'tradle.Status'
+const OVERRIDE_STATUS     = 'tradle.OverrideStatus'
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -2024,21 +2026,20 @@ var Store = Reflux.createStore({
 
       if (payload[TYPE] === PAIRING_REQUEST) {
         console.error('received pairing request, but pairing not supported yet')
-        // this.receivePairingRequest({ payload })
+        this.receivePairingRequest({ payload })
       }
 
       return
 
       // else if (payload[TYPE] === PAIRING_RESPONSE) {
-      //   return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
-      //   .then(() => {
-      //     debugger
+      //   try {
+      //     await this.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
       //     Alert.alert('Pairing was successful')
-      //   })
-      //   .catch((err) => {
+      //   } catch(err) {
       //     debugger
       //     Alert.alert(err)
-    //   })
+      //   }
+      //   return
       // }
     }
 
@@ -2742,10 +2743,22 @@ var Store = Reflux.createStore({
 
   async onAddMessage (params) {
     let r = params.msg
-    let { editFormRequestPrefill, originatingMessage,
-          isWelcome, requestForForm, disableAutoResponse, cb, application } = params
+    let { editFormRequestPrefill, originatingMessage, isWelcome,
+          requestForForm, disableAutoResponse, cb, application } = params
 
+    // Case of prefilled 'kid-glove' form by employee for the customer
     if (application) {
+      if (!application._context)
+        application._context = originatingMessage && originatingMessage._context
+      if (!application._context) {
+        let context = await this.searchServer({
+            modelName: PRODUCT_REQUEST,
+            noTrigger: true,
+            filterResource: {contextId: application.context}
+          })
+        context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
+        application._context = context
+      }
       r.to = application._context.from
       r._context = application._context
     }
@@ -2962,7 +2975,8 @@ var Store = Reflux.createStore({
       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
       // prevent the not needed duplicate expensive operations for obtaining ProductList
       await self.getDriver(me)
-      if (!self.isConnected  ||  publishRequestSent[orgId])
+      let isPublishRequestSent = publishRequestSent[orgId]
+      if (!self.isConnected  ||  isPublishRequestSent)
         return
       // TODO:
       // do we need identity publish status anymore
@@ -3074,6 +3088,67 @@ var Store = Reflux.createStore({
       })
       await db.batch(batch)
     }
+  },
+  async onApproveApplication({application, msg}) {
+    let { status, checks, checksOverride, hasFailedChecks, hasCheckOverrides,
+          numberOfChecksFailed, numberOfCheckOverrides, items, notifications } = application
+    // if (status !== 'completed') {
+    //   Alert.alert(translate('applicationIsNotCompleted'))
+    //   return
+    // }
+    await this.onAddMessage({msg})
+    return
+    if (notifications.length  &&  !items.length) {
+
+    }
+
+    if (!hasFailedChecks) {
+      if (!hasCheckOverrides)
+        await this.onAddMessage({msg})
+      else
+        numberOfChecksFailed = 0
+      return
+    }
+    if (!hasCheckOverrides) {
+      Alert.alert(translate('pleaseResolveFailedChecks'))
+      return
+    }
+    // if (numberOfChecksFailed  &&  numberOfChecksFailed > numberOfCheckOverrides) {
+    //   Alert.alert('pleaseResolveFailedChecks')
+    //   return
+    // }
+    let props = this.getModel(APPLICATION).properties
+    if (numberOfChecksFailed  &&  checks && !checks[0].status) {
+      ({ checks } = await this.getApplication({resource: application, backlink: props.checks}))
+       checks = await Promise.all(checks.map(check => this._getItemFromServer({idOrResource: check})))
+    }
+    if (numberOfCheckOverrides && !checksOverride) {
+      ({ checksOverride } = await this.getApplication({resource: application, backlink: props.checksOverride}))
+      checksOverride = await Promise.all(checksOverride.map(checkO => this._getItemFromServer({idOrResource: checkO})))
+    }
+    const sModel = this.getModel(STATUS)
+    const oModel = this.getModel(OVERRIDE_STATUS)
+
+    checks = checks  &&  checks.filter(c => !c.isInactive  &&  utils.getEnumValueId({model: sModel, value: c.status}) === 'fail')
+
+    if (checksOverride) {
+      let passChecksOverride = checksOverride.filter(c => utils.getEnumValueId({model: oModel, value: c.status}) === 'pass')
+      if (passChecksOverride.length !== checksOverride.length) {
+        Alert.alert(translate('applcationIsNotApprovable'))
+        return
+      }
+    }
+
+    if (!numberOfChecksFailed) {
+      await this.onAddMessage({msg})
+      return
+    }
+    // let overridenChecks = checks.filter(check => checksOverride.find(co => co.check.id === utils.getId(check)))
+    // if (overridenChecks.length === checks.length)
+    //   await this.onAddMessage({msg: approval})
+    // else
+    //   Alert.alert(translate('pleaseResolveFailedChecks'))
+    await this.onAddMessage({msg})
   },
   async prepareToSend({resource, model, isPrefill}) {
     let toChain = _.omit(resource, excludeWhenSignAndSend)
@@ -4001,10 +4076,11 @@ if (!res[SIG]  &&  res._message)
   },
 
   async getApplication(params) {
-    var {resource, action, backlink, forwardlink, application} = params
+    var {resource, action, backlink, forwardlink} = params
     let blProp = backlink ||  forwardlink
+    let props = utils.getModel(APPLICATION).properties
     let prop
-    let submissions = utils.getModel(APPLICATION).properties.submissions
+    let submissions = props.submissions
     let sname = submissions.name
     let slength = resource[sname]  &&  resource[submissions.name].length
     if (blProp) {
@@ -4053,7 +4129,7 @@ if (!res[SIG]  &&  res._message)
         }
         else {
           let cntProp = `_${name}Count`
-          if (r[cntProp]  &&  r[cntProp] !== r[name].length  ||  !r[name][0].application) {
+          if (r[cntProp]  &&  r[cntProp] !== r[name].length  ||  (r[name].length  &&  !r[name][0].application)) {
             list = await this.getObjects(r[name], prop)
             if (list.length) {
               let m = utils.getModel(prop.items.ref)
@@ -4555,8 +4631,12 @@ if (!res[SIG]  &&  res._message)
         if (typeof json[pp].value === 'string')
           json[pp].value = parseFloat(json[pp].value)
       }
-      else if (prop.type === 'string')
-        json[pp] = json[pp].trim()
+      else if (prop.type === 'string') {
+        if (json[pp])
+          json[pp] = json[pp].trim()
+        else
+          delete json[pp]
+      }
     }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
@@ -4797,88 +4877,6 @@ if (!res[SIG]  &&  res._message)
       let { toChain, error } = await self.prepareToSend({resource: returnVal})
       if (error)
         return
-
-      // let toChain = _.omit(returnVal, excludeWhenSignAndSend)
-      // let properties = rModel.properties
-
-      // self.rewriteStubs(toChain)
-      // let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
-      // // if (isNew) {
-
-      // for (let p in toChain) {
-      //   let prop = properties[p]
-
-      //   if (!isNew  &&  !prop  &&  !keepProps.includes(p)) {// !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
-      //     delete toChain[p]
-      //     continue
-      //   }
-      //   if (!prop) {
-      //     prop = ObjectModel.properties[p]
-      //     if (!prop  ||  prop.virtual  ||  toChain[p]._link)
-      //       continue
-      //   }
-      //   if (prop  &&  prop.partial)          continue
-      //   let isArray = prop.type === 'array'
-
-      //   if (isArray  &&  prop.items.filter) {
-      //     delete toChain[p]
-      //     continue
-      //   }
-
-      //   let ref = prop.ref  ||  isArray  &&  prop.items.ref
-
-      //   if (!ref)
-      //     continue
-
-      //   let refM = self.getModel(ref)
-      //   if (!refM)
-      //     continue
-      //   if (!utils.isWeb()  &&  prop.range === 'document') {
-      //       debugger
-      //     let { url } = toChain[p]
-      //     if (url  &&  url.indexOf('data:application/pdf;') === 0)
-      //       await self._keeper.replaceDataUrls(toChain[p])
-      //   }
-      //   if (refM.inlined)
-      //     continue
-
-      //   let isObject = prop.type === 'object'
-      //   if (isObject)
-      //     toChain[p] = self.buildSendRef(returnVal[p])
-      //   else
-      //     toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
-      // }
-      // if (!isNew) {
-      //   if (!returnVal[SIG]) debugger
-
-      //   const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
-      //     _link: returnVal[CUR_HASH],
-      //     _permalink: returnVal[ROOT_HASH],
-      //     ...returnVal
-      //   })
-
-      //   _.extend(toChain, nextVersionScaffold)
-      //   _.extend(returnVal, nextVersionScaffold)
-      // }
-
-      // toChain = utils.sanitize(toChain)
-      // try {
-      //   if (rtype !== DATA_BUNDLE)
-      //     validateResource({ resource: toChain, models: self.getModels() })
-      // } catch (err) {
-      //   if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
-      //   // if (err.name === 'InvalidPropertyValue')
-      //     self.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
-      //   else if (Errors.matches(err, ValidateResourceErrors.Required)) {
-      //     let validationErrors = {}
-      //     err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
-      //     self.trigger({action: 'validationError', validationErrors})
-      //   }
-      //    else
-      //     self.trigger({action: 'validationError', error: err.message})
-      //   return
-      // }
-
       try {
         let data = await self.createObject(toChain)
         let hash = data.link
@@ -5328,6 +5326,8 @@ if (!res[SIG]  &&  res._message)
     }
     _.extend(productListR, pl)
     let plist = productListR.chooser.oneOf.map(p => (typeof p === 'object') && p || {id: p})
+    if (!me.isEmployee)
+      plist = plist.filter(p => !utils.getModel(utils.getType(p)).internalUse)
     productListR.chooser.oneOf = plist
     this.trigger({action: 'productList', resource: productListR, to: resource})
   },
@@ -6007,7 +6007,8 @@ if (!res[SIG]  &&  res._message)
     }
     if (providerBot) {
       let provider = this._getItem(utils.getId(providerBot.organization))
-      await this.insurePublishingIdentity(provider)
+      if (!me.isEmployee)
+        await this.insurePublishingIdentity(provider)
       this.trigger({action: 'getProvider', provider: provider, termsAccepted: params.termsAccepted})
     }
   },
@@ -6019,9 +6020,37 @@ if (!res[SIG]  &&  res._message)
     })
     return provider
   },
-  onMessageList(params) {
-    this.onList(params);
+  async onMessageList(params) {
+    await this.onList(params);
   },
+  async onOpenApplicationChat(stub) {
+    let application
+    if (stub[ROOT_HASH])
+      application = stub
+    else
+      application = await this._getItemFromServer({idOrResource: stub, noBacklinks: true})
+
+    let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    let context = await this.searchServer({
+        modelName: PRODUCT_REQUEST,
+        noTrigger: true,
+        filterResource: {contextId: application.context}
+      })
+    context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
+    application._context = context
+    this.trigger({action: 'openApplicationChat', application})
+  },
+  async onShowScoreDetails(stub, applicantName) {
+    let application
+    if (stub[ROOT_HASH])
+      application = stub
+    else
+      application = await this._getItemFromServer({idOrResource: stub, noBacklinks: true})
+    if (!application.applicantName)
+      application.applicantName = applicantName
+    this.trigger({action: 'showScoreDetails', application})
+  },
+
   async onList(params) {
     if (isLoaded) {
       await this.getList(params)
@@ -6433,7 +6462,8 @@ if (!res[SIG]  &&  res._message)
       Alert.alert(translate('serverIsUnreachable'))
       return
     }
-    let {direction, first, noTrigger, modelName, application, filterResource, endCursor, limit} = params
+    let {direction, first, noTrigger, modelName, application,
+         filterResource, endCursor, limit, bookmark} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
 
@@ -6444,6 +6474,7 @@ if (!res[SIG]  &&  res._message)
       filterResource = utils.clone(filterResource)
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
+    let noInternalUse = bookmark  &&  bookmark.noInternalUse
     if (me.isEmployee) {
       if (application  &&  (!filterResource  ||  !filterResource._org)) {
         let applicant = this._getItem(applicantId)
@@ -6475,6 +6506,16 @@ if (!res[SIG]  &&  res._message)
 
     let newCursor = limit  &&  result.pageInfo  &&  result.pageInfo.endCursor
     list = result.edges.map((r) => this.convertToResource(r.node))
+    let len = list.length
+    if (noInternalUse) {
+      if (modelName === APPLICATION)
+        list = list.filter(r => !this.getModel(r.requestFor).internalUse)
+      else
+        list = list.filter(r => !this.getModel(r[TYPE]).internalUse)
+      if (len === limit  &&  list.length < limit / 2)
+        debugger
+    }
+
     if (!noTrigger)
       this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
     return {list, endCursor: newCursor}
@@ -7579,7 +7620,21 @@ if (!res[SIG]  &&  res._message)
 
       let stub = resource[p]
       if (Array.isArray(stub)) {
-        resource[p] = stub.map(s => s._link ?  this.makeStub(s) : s)
+        resource[p] = stub.map(s => {
+          if (s._link)
+            return this.makeStub(s)
+          else {
+            let itype = s[TYPE]
+            if (!itype)
+              return s
+            let iprops = utils.getModel(itype).properties
+            for (let p in s) {
+              if (iprops[p]  &&  iprops[p].type === 'object'  &&  s[p]._link)
+                s[p] = this.makeStub(s[p])
+            }
+            return s
+          }
+        })
         continue
       }
       if (!stub[TYPE])
@@ -7898,7 +7953,7 @@ if (!res[SIG]  &&  res._message)
             if (utils.isForm(m)) {
               // Make sure to not return Items and Documents in this list
               let ilen = m.interfaces  &&  m.interfaces.length
-              if (isForgetting  ||  !ilen  ||  (ilen === 1  &&  m.interfaces[0] === VERIFIABLE))
+              if (isForgetting  ||  !ilen  ||  (ilen === 1  &&  m.interfaces.includes(VERIFIABLE)))
                 addMessage = true
             }
           }
@@ -8563,9 +8618,11 @@ if (!res[SIG]  &&  res._message)
         if (r._sharedWith) {
           let sw = r._sharedWith.filter((r) => {
             if (reps.filter((rep) => {
-                    if (utils.getId(rep) === r.bankRepresentative)
+                  if (utils.getId(rep) === r.bankRepresentative) {
+                    if (rr.bankRepresentative !== r.from.id)
                       return true
-                  }).length)
+                  }
+                }).length)
               return true
           })
           if (sw.length)
@@ -11583,10 +11640,10 @@ if (!res[SIG]  &&  res._message)
     return utils.buildRef(resource)
   },
   getRootHash(r) {
-    return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
+    return utils.getRootHash(r)
   },
   getCurHash(r) {
-    return r[CUR_HASH] ? r[CUR_HASH] : r.id.split('_')[2]
+    return utils.getCurrentHash(r)
   },
   setItem(key, value) {
     this._setItem(key, value)
@@ -11598,6 +11655,27 @@ if (!res[SIG]  &&  res._message)
 
     // list[key] = { key, value}
     list[key] = { key, value: isMessage ? utils.optimizeResource(value, true)  : value}
+  },
+  async deleteItemFromDB(id) {
+    let items = Object.keys(list).filter(key => this.getRootHash(key) === id)
+    let toId
+    await Promise.all(items.map(itemId => {
+      let item = this._getItem(itemId)
+debug(`deleteItemFromDB: ${itemId}`)
+      if (!toId) {
+        toId = utils.getId(item.to)
+        let toR = this._getItem(toId)
+        if (toR[TYPE] !== ORGANIZATION) {
+          // debugger
+          toR = toR.organization
+          if (toR)
+            toId = utils.getId(toR)
+        }
+      }
+      this.deleteMessageFromChat(toId, item)
+      this._deleteItem(itemId)
+      return db.del(itemId)
+    }))
   },
   _deleteItem(id) {
     delete list[id]
@@ -11625,14 +11703,14 @@ if (!res[SIG]  &&  res._message)
         return rr.value
     }
   },
-  async _getItemFromServer({idOrResource, backlink, isChat, isThisVersion}) {
+  async _getItemFromServer({idOrResource, backlink, noBacklinks, isChat, isThisVersion}) {
     let id = (typeof idOrResource !== 'string') &&  utils.getId(idOrResource) || idOrResource
     if (!this.client) {
       // debugger
       return
     }
     try {
-      let result = await graphQL.getItem(id, this.client, backlink, isChat, isThisVersion)
+      let result = await graphQL.getItem(id, this.client, backlink, noBacklinks, isChat, isThisVersion)
       if (result) {
         return this.convertToResource(result)
       }
@@ -11795,7 +11873,444 @@ if (!res[SIG]  &&  res._message)
     if (dbID)
       _.set(ENV, regulaDbPath, dbID)
   },
+  /*
+  // PAIRING FIRST TAKE
+  // Devices one
+  onGenPairingData() {
+    if (!SERVICE_PROVIDERS.length) {
+      this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
+      return
+    }
+    let pairingData = {
+      nonce: crypto.randomBytes(32).toString('base64'),
+      identity: meDriver.link,
+      firstName: me.firstName,
+      rendezvous: {
+        url: SERVICE_PROVIDERS[0].url + '/' + SERVICE_PROVIDERS[0].id
+      }
+    }
+    let dbPairingData = utils.clone(pairingData)
+    dbPairingData[TYPE] = PAIRING_DATA
+    // db.put(PAIRING_DATA + '_1', pairingData)
+    list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
+    this.trigger({action: 'genPairingData', pairingData: JSON.stringify(pairingData)})
+  },
 
+  onSendPairingRequest (pairingData) {
+    // device 2 sends pairing request
+    let publishedIdentity
+    let deviceId
+
+    let myIdentities = this._getItem(MY_IDENTITIES)
+    if (myIdentities) {
+      publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
+      deviceId = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).deviceId
+    }
+
+    let promise = myIdentities
+                ? Q()
+                : this.createNewIdentity()
+                // : Q.ninvoke(tradleUtils, 'newIdentity', {
+                //       networkName,
+                //       keys: KEY_SET
+                //   })
+    return promise
+    .then(({ encryptionKey, identityInfo }) => {
+      if (!identityInfo)
+        return
+      publishedIdentity = identityInfo.identity
+      let mePub = publishedIdentity.pubkeys
+      let mePriv = identityInfo.keys
+      let currentIdentity = utils.makeId(PROFILE, pairingData.identity)
+      var myIdentities = {
+        [TYPE]: MY_IDENTITIES_TYPE,
+        currentIdentity: currentIdentity,
+        allIdentities: [{
+          id: currentIdentity,
+          // title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
+          privkeys: mePriv,
+          publishedIdentity: publishedIdentity
+        }]
+      }
+      var profile = {
+        [TYPE]: PROFILE,
+        [ROOT_HASH]: pairingData.identity,
+        firstName: pairingData.firstName,
+        formatted: pairingData.firstName,
+      }
+      deviceId = identityInfo.link
+      var identity = {
+        [TYPE]: IDENTITY,
+        [ROOT_HASH]: pairingData.identity,
+        pubkeys: mePub,
+        deviceId: deviceId
+      }
+      let batch = []
+      list[currentIdentity] = {
+        key: currentIdentity,
+        value: profile
+      }
+      let identityId = utils.getId(identity)
+      list[identityId] = {
+        key: identityId,
+        value: identity
+      }
+      list[MY_IDENTITIES] = {
+        key: MY_IDENTITIES,
+        value: myIdentities
+      }
+      batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+      batch.push({type: 'put', key: currentIdentity, value: profile})
+      batch.push({type: 'put', key: utils.getId(identity), value: identity})
+      db.batch(batch)
+    })
+   .then(() => {
+      const pairingReq = {
+        [TYPE]: PAIRING_REQUEST,
+        identity: publishedIdentity
+      }
+
+      const hmac = crypto.createHmac('sha256', pairingData.nonce)
+      hmac.update(tradleUtils.stringify(pairingReq))
+      pairingReq.auth = hmac.digest('base64')
+
+      const url = pairingData.rendezvous.url
+      let transport = driverInfo.wsClients.byUrl[url]
+      if (!transport) {
+        let wsClient = this.getWsClient(url, deviceId)
+        transport = this.getTransport(wsClient, deviceId)
+        driverInfo.wsClients.byUrl[url] = transport
+      }
+      let self = this
+      transport.on('message', (msg, from) => {
+        try {
+          const payload = JSON.parse(msg)
+          if (payload[TYPE] === PAIRING_RESPONSE) {
+            transport.destroy()
+            delete driverInfo.wsClients.byUrl[url]
+
+            return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
+            .then(() => {
+              debugger
+              Alert.alert('Pairing was successful')
+              this.trigger({action: 'pairingSuccessful'})
+            })
+            .catch((err) => {
+              debugger
+              Alert.alert(err)
+            })
+          }
+        } catch (err) {
+          debugger
+        }
+      })
+
+      // if (!transport) {
+      //   let wsClient = this.getWsClient(url, meDriver.permalink)
+      //   transport = this.getTransport(wsClient, meDriver.permalink)
+      //   driverInfo.wsClients.byUrl[url] = transport
+      // }
+      const pairingReqStr = tradleUtils.stringify(pairingReq)
+
+      function send () {
+        return Q.ninvoke(transport, 'send', pairingData.identity, pairingReqStr)
+          .then(() => {
+            // debugger
+            let dbPairingData = utils.clone(pairingData)
+            dbPairingData[TYPE] = PAIRING_DATA
+            // db.put(PAIRING_DATA + '_1', pairingData)
+            list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
+          })
+          .catch((err) => {
+            debugger
+          })
+      }
+
+      return utils.tryWithExponentialBackoff(send)
+    })
+      // .then(() => {
+      //   this.trigger({action: 'sentPairingRequest', pairingData: pairingData})
+      // })
+  },
+
+  onProcessPairingRequest(pairingData, pairingReq) {
+    const myPubKeys = meDriver.identity.pubkeys
+    const alreadyPaired = pairingReq.identity.pubkeys.some(a => {
+      return myPubKeys.some(b => {
+        return a.pub === b.pub
+      })
+    })
+
+    const verify = crypto.createHmac('sha256', pairingData.nonce)
+    verify.update(tradleUtils.stringify(tradleUtils.omit(pairingReq, 'auth')))
+    if (verify.digest('base64') !== pairingReq.auth) {
+      return Promise.reject(new Error('invalidPairingRequest'))
+    }
+
+    if (alreadyPaired) {
+      // won't work because prev is not right
+      return sendResponse()
+    }
+
+    const allPubKeys = meDriver.identity.pubkeys.concat(pairingReq.identity.pubkeys)
+    const pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
+    let identity = {
+            keys: meDriver.keys.concat(pairingReq.identity.pubkeys),
+            identity: tradleUtils.clone(meDriver.identity, {
+              pubkeys: pubkeys // allPubKeys.map(pk => tradleUtils.clone(pk))
+            })
+          }
+    return Q.ninvoke(meDriver, 'updateIdentity', identity)
+    .then(() => {
+      let batch = []
+      batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
+      this.updatePubkeys(batch)
+      // let batch = []
+      // let id = IDENTITY + '_' + utils.getMe()[ROOT_HASH]
+      // let myIdentity = list[id].value
+
+      // myIdentity.pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
+
+      // updatePubkeys(myIdentity.pubkeys)
+      // let myIdentities = list[MY_IDENTITIES].value
+      // let currentIdentity = myIdentities.currentIdentity
+      // myIdentities.allIdentities.forEach((r) => {
+      //   if (r.id === currentIdentity)
+      //     r.publishedIdentity.pubkeys = utils.clone(myIdentity.pubkeys)
+      // })
+
+      // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+      // batch.push({type: 'put', key: id, value: myIdentity})
+      // batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
+
+      // // If pairing request was not verified what do we want to do
+      // db.batch(batch)
+    })
+    .then(() => {
+      return sendResponse()
+    })
+
+    function sendResponse () {
+      const getPrev = meDriver.identity[PREV_HASH] ? Q.ninvoke(meDriver.keeper, 'get',  meDriver.identity[PREV_HASH]) : Promise.resolve(meDriver.identity)
+      return getPrev.then(prev => {
+        const pairingRes = {
+          [TYPE]: PAIRING_RESPONSE,
+          // can we make it secure without sending prev?
+          prev: prev,
+          identity: meDriver.identity
+        }
+
+        const url = pairingData.rendezvous.url
+        let transport = driverInfo.wsClients.byUrl[url]
+        const pairingResStr = tradleUtils.stringify(pairingRes)
+        return utils.tryWithExponentialBackoff(send)
+
+        function send () {
+          return Q.ninvoke(transport, 'send', tradleUtils.hexLink(pairingReq.identity), pairingResStr)
+            .then(() => {
+              db.put(PAIRING_RESPONSE + '_1', pairingRes)
+              debugger
+            })
+            .catch((err) => {
+              debugger
+            })
+        }
+      })
+    }
+  },
+  updatePubkeys(batch, identity) {
+    let myIdentities = this._getItem(MY_IDENTITIES)
+    let currentIdentity = myIdentities.currentIdentity
+
+    let id = currentIdentity.replace(PROFILE, IDENTITY)
+    list[id].value = identity || meDriver.identity
+
+    myIdentities.allIdentities.forEach((r) => {
+      if (r.id === currentIdentity)
+        r.publishedIdentity = this._getItem(id)
+    })
+
+    batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+    batch.push({type: 'put', key: id, value: this._getItem(id)})
+
+    // If pairing request was not verified what do we want to do
+    db.batch(batch)
+  },
+
+  onProcessPairingResponse (pairingData, pairingRes) {
+    // device 2 validate response
+    if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
+      return Promise.reject(new Error('prev identity does not match expected'))
+
+    let pubkeys = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).pubkeys
+    const hasMyKeys = pubkeys.every(myKey => {
+      return pairingRes.identity.pubkeys.some(theirKey => {
+        return _.isEqual(theirKey, myKey)
+      })
+    })
+    // const hasMyKeys = meDriver.identity.pubkeys.every(myKey => {
+    //   return pairingRes.identity.pubkeys.some(theirKey => {
+    //     return deepEqual(theirKey, myKey)
+    //   })
+    // })
+
+    if (!hasMyKeys)
+      return Promise.reject(new Error(translate('deviceDoesNotHaveMyKeys')))
+
+    let batch = []
+    this.updatePubkeys(batch, pairingRes.identity)
+
+
+    // let myIdentities = list[MY_IDENTITIES].value
+    // let currentIdentity = myIdentities.currentIdentity
+
+    // myIdentities.allIdentities.forEach((r) => {
+    //   if (r.id === currentIdentity)
+    //     r.publishedIdentity.pubkeys = pairingRes.identity.pubkeys
+    // })
+
+    // let id = IDENTITY + '_' + pairingData.identity
+    // list[id].value.pubkeys = utils.clone(pairingRes.identity.pubkeys)
+    // let batch = []
+    // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+    // batch.push({type: 'put', key: id, value: list[id].value})
+    // db.batch(batch)
+
+    let me = this._getItem(utils.makeId(PROFILE, pairingData.identity))
+    return this.getDriver(me)
+    .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
+    .then(() => {
+      Q.ninvoke(meDriver, 'setIdentity', {
+        keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
+        identity: pairingRes.identity
+      })
+    })
+    .then(() => {
+      this.setMe(me)
+      // let me = utils.getMe()
+      // let oldId = IDENTITY + '_' + me[ROOT_HASH]
+      // delete list[oldId]
+
+      // let oldProfileId = utils.getId(me)
+      // let profile = list[oldProfileId].value
+      // delete list[oldProfileId]
+
+      // profile[ROOT_HASH] = pairingRes.identity[ROOT_HASH]
+      // profile[CUR_HASH] = pairingRes.identity[ROOT_HASH]
+
+      // let newId = IDENTITY + '_' + pairingRes.identity[ROOT_HASH]
+      // list[newId] = {
+      //   key: newId,
+      //   value: utils.clone(pairingRes.identity)
+      // }
+      // let newProfileId = PROFILE + '_' +  pairingRes.identity[ROOT_HASH]
+      // list[newProfileId] = {
+      //   key: newProfileId,
+      //   value: profile
+      // }
+      // let myIdentities = list[MY_IDENTITIES].value
+      // myIdentities.currentIdentity = newProfileId
+      // myIdentities.allIdentities.forEach((r) => {
+      //   if (r.id !== oldProfileId)
+      //     return
+      //   r.id = newProfileId,
+      //   r.publishedIdentity.pubkeys = utils.clone(pairingRes.identity.pubkeys)
+      // })
+
+      // let batch = []
+      // batch.push({type: 'del', key: oldId})
+      // batch.push({type: 'del', key: oldProfileId})
+      // batch.push({type: 'put', key: MY_IDENTITIES, value: list[MY_IDENTITIES].value})
+      // batch.push({type: 'put', key: newId, value: list[newId].value})
+      // batch.push({type: 'put', key: newProfileId, value: list[newProfileId].value})
+      // batch.push({type: 'put', key: PAIRING_RESPONSE + '_1', value: pairingRes})
+      // db.batch(batch)
+    })
+  },
+  async receivePairingRequest({ payload }) {
+    const rootHash = storeUtils.getPermalink(payload.identity)
+    Alert.alert(
+      translate('pairingRequest'),
+      null,
+      [
+        {text: translate('Ok'),
+        onPress: () => {
+          this.trigger({action: 'acceptingPairingRequest', resource: payload})
+          // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+          // .then(() => {
+          //   Alert.alert(translate('pairingRequestWasProcesseed'))
+          // })
+          // .catch((err) => {
+          //   debugger
+          // })
+        }},
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+      ]
+    )
+  },
+
+  onPairingRequestAccepted(payload) {
+    return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
+    .then(() => {
+      this.trigger({action: 'pairingRequestAccepted'})
+    })
+    .catch((err) => {
+      debugger
+      this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
+    })
+  },
+
+  async getReviewableResources(val) {
+    // let dataBundle = val.dataBundle
+    // if (!dataBundle)
+    //   return
+    let dataBundles = this.searchNotMessages({modelName: DATA_BUNDLE})
+    if (!dataBundles.length)
+      return
+    let dataBundle = this._getItem(dataBundles[0])
+    try {
+      let kres = await this._keeper.get(this.getCurHash(dataBundle))
+      _.extend(dataBundle, kres)
+    } catch (err) {
+      debug('Store.onAddVerification', err)
+      debugger
+    }
+    let form = val.form
+    let reviewable = []
+    this._getItem(dataBundle).items.forEach(r => {
+      let rtype = utils.getType(r)
+      if (rtype === form)
+        reviewable.push(r)
+    })
+    if (!reviewable.length)
+      return null
+    let result = await this.searchMessages({modelName: form, dataBundle: utils.getId(dataBundle), to: dataBundle.from})
+    return result
+  },
+  // deleteAppFromDevice(submissions, batch) {
+  //   if (!submissions)
+  //     return
+  //   let submissionStubs
+  //   if (Array.isArray(submissions))
+  //     submissionStubs = submissions.map((sub) => sub.submission)
+  //   else {
+  //     const { submissions={} } = application
+  //     if (!submissions.edges ||  !submissions.edges.length)
+  //       return
+  //     submissionStubs = submissions.edges.map(s => s.node.submission)
+  //   }
+  //   submissionStubs.forEach(sub => {
+  //     let m = this.getModel(utils.getType(sub))
+  //     let type = m.subClassOf || m.id
+  //     let stub = this.makeStub(sub)
+  //     let item = this._getItem(stub.id)
+  //     if (item) {
+  //       this._deleteItem(stub.id)
+  //       batch.push({type: 'del', key: stub.id})
+  //     }
+  //   })
+  // },
+*/
 })
 // );
 
