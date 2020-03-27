@@ -305,6 +305,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
+                    doSet: eCols.length > 1,
                     editable: !props[p].readOnly || search,
                   })
         }
@@ -385,6 +386,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     component,
+                    doSet: eCols.length > 1,
                     editable: !props[p].readOnly
                   })
           continue
@@ -681,7 +683,7 @@ var NewResourceMixin = {
   },
 
   mySignatureTemplate(params) {
-    let {prop, required, model, value} = params
+    let {prop, required, model, value, doSet} = params
     let label = translate(prop, model)
     if (required)
       label += ' *'
@@ -730,7 +732,7 @@ var NewResourceMixin = {
     }
     else {
       return <View style={st}>
-               <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.changeValue.bind(this, prop))}>
+               <TouchableOpacity onPress={this.showSignatureView.bind(this, { prop, doSet, onSet: this.changeValue.bind(this, prop) })}>
                  {sig}
                </TouchableOpacity>
             </View>
