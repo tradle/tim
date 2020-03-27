@@ -446,7 +446,7 @@ class FormRequestRow extends Component {
   }
   formatShareables(params) {
     let { verification, onPress, styles } = params
-    let { resource, onSelect, to, share } = this.props
+    let { resource, onSelect, to, share, bankStyle } = this.props
 
     let document = verification.document
 
@@ -461,14 +461,14 @@ class FormRequestRow extends Component {
 
     let displayName
     let propLabel
-    if (utils.isMyProduct(docModel))
-      displayName = translate(docModel)
-    else {
+    // if (utils.isMyProduct(docModel))
+    //   displayName = translate(docModel)
+    // else {
       let propsUsed = []
       displayName = utils.getDisplayName(document, docModel, propsUsed)
       if (propsUsed.length)
         propLabel = <Text style={styles.propertyTitle}>{translate(propsUsed[0], docModel)}</Text>
-    }
+    // }
 
     let headerContent = <View style={styles.headerStyle}>
                           {propLabel}
@@ -484,7 +484,8 @@ class FormRequestRow extends Component {
     // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
     if (verification  && (verification.organization || isItem)) {
-      let {verifiedBy, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
+      let oneLineTitle = displayName.indexOf('\n') === -1
+      let {verifiedBy, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles, oneLineTitle)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -529,7 +530,7 @@ class FormRequestRow extends Component {
              {content}
            </View>
   }
-  getParts(verification, isItem, styles) {
+  getParts(verification, isItem, styles, oneLineTitle) {
     let { resource, to, shareableResources } = this.props
     let document = verification.document
     let providers = shareableResources.providers
@@ -1379,7 +1380,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     docText: {
       fontSize: 16,
-      color: '#555555'
+      color: '#555555',
+      // paddingLeft: 5,
+      // paddingRight: 10
     },
     multiEntryDocText: {
       marginRight: -4,
