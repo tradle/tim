@@ -12,7 +12,8 @@ module.exports = function CheckOverride ({ models }) {
       if (!application)
         return
       let m = getModel(form[TYPE])
-      if (m.subClassOf !== CHECK_OVERRIDE)
+      let { subClassOf, properties } = m
+      if (subClassOf !== CHECK_OVERRIDE)
         return
 
       const { status, check } = form
@@ -37,11 +38,14 @@ module.exports = function CheckOverride ({ models }) {
           }
         }
       }
-      else
+      else {
+        // HACK
+        let notes = properties.explanationForOverride || properties.reviewNotes || properties.notes
         requestedProperties = [
             { name: 'status' },
-            { name: 'explanationForOverride' }
+            { name: notes.name }
           ]
+      }
 
       let props = m.properties
       if (!props.reasonToFail  ||  !props.reasonToPass)
