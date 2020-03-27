@@ -63,8 +63,8 @@ class RefPropertyEditor extends Component {
     let prop = this.props.prop
     if (prop !== nextProps.prop)
       return false
-    if (this.props.inFocus !== nextProps.inFocus)
-      return true
+    // if (this.props.inFocus !== nextProps.inFocus)
+    //   return true
      let pName = prop.name
     if (!_.isEqual(nextProps.resource[pName], this.props.resource[pName]))
       return true

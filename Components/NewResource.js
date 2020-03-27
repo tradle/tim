@@ -483,7 +483,7 @@ class NewResource extends Component {
     if (reqProperties) {
       let { requestedProperties } = reqProperties
       let eCols = []
-      let { softRequired } = this.addRequestedProperties({eCols, props})
+      let { softRequired } = this.addRequestedProps({eCols, props})
       for (let p in softRequired) {
         if (required.indexOf(p) === -1)
           required.push(p)
