@@ -13,7 +13,7 @@ var {
 } = constants
 import HomePageMixin from './HomePageMixin'
 import utils, { translate } from '../utils/utils'
-import { getContentSeparator } from '../utils/uiUtils'
+import { getContentSeparator, getGridCols } from '../utils/uiUtils'
 
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
@@ -111,7 +111,7 @@ class ShareResourceList extends Component {
   }
   renderRow(resource, sectionId, rowId)  {
     let { navigator, bankStyle, multiChooser } = this.props
-    let gridCols = !this.isSmallScreen  &&  this.getGridCols()
+    let gridCols = !this.isSmallScreen  &&  getGridCols()
     let modelName = resource[TYPE]
     if (gridCols)
       return (
