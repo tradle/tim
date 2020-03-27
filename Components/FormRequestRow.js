@@ -47,6 +47,7 @@ const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const SELFIE = 'tradle.Selfie'
 const REFRESH = 'tradle.Refresh'
 const PRODUCT_BUNDLE = 'tradle.ProductBundle'
+const ATTESTATION = 'tradle.Attestation'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {
   TYPE,
@@ -198,7 +199,8 @@ class FormRequestRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isProductBundle = resource.form === PRODUCT_BUNDLE
-    if (isFormRequest  &&  !isProductBundle)
+    let isAttestation = resource.form === ATTESTATION
+    if (isFormRequest  &&  !isProductBundle  &&  !isAttestation)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
       let linkColor
@@ -210,6 +212,8 @@ class FormRequestRow extends Component {
       if (!resource._documentCreated) {
         if (isProductBundle)
           onPressCall = this.reviewFormsInDraft.bind(this)
+        else if (isAttestation)
+          onPressCall = this.reviewForAttestation.bind(this)
         else
           onPressCall = this.reviewFormsInContext.bind(this)
       }
@@ -919,7 +923,7 @@ class FormRequestRow extends Component {
           else if (prop.signature) {
             msg = <View key={this.getNextKey()}>
                     <View style={styles.messageLink}>
-                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop, this.onSetSignatureProperty.bind(this))})}
+                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, {prop, onSet: this.onSetSignatureProperty.bind(this)})})}
                     </View>
                   </View>
           }
@@ -1091,6 +1095,24 @@ class FormRequestRow extends Component {
              {content}
            </TouchableOpacity>
 
+  }
+  reviewForAttestation() {
+    const { navigator, bankStyle, resource, to, currency, list } = this.props
+    this.props.navigator.push({
+      title: translate("reviewData"),
+      backButtonTitle: 'Back',
+      componentName: 'AttestationItemsList',
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: ATTESTATION,
+        resource,
+        bankStyle,
+        reviewed: {},
+        to,
+        list: resource.prefill.items || list,
+        currency
+      }
+    })
   }
 
   reviewFormsInDraft() {
