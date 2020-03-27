@@ -204,7 +204,7 @@ var utils = {
     let me = utils.getMe()
     let type = utils.getType(resource)
     if (type !== PROFILE  &&  type !== IDENTITY) {
-      debugger
+      // debugger
       debug(`utils.isMe was called for the resource with the type ${type}`)
       return false
     }
