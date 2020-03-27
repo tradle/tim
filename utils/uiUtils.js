@@ -10,7 +10,7 @@ import constants from '@tradle/constants'
 import extend from 'lodash/extend'
 
 var { TYPE } = constants
-import { translate, getModel, getContentSeparator, isMyProduct, ungroup,
+import { translate, getModel, isMyProduct, ungroup,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
@@ -24,7 +24,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
-``
+
 const GRID_LIST = 'GridList'
 const APPLICATIONS_GRID = 'ApplicationsGrid'
 const NEW_RESOURCE = 'NewResource'
@@ -135,9 +135,10 @@ var uiUtils = {
     let newParams = extend({}, params)
     newParams.idx = idx
     newParams.message = message2.trim()
+    let msg = ` ${uiUtils.parseMessage(newParams)}`
     return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{translate(message1) + ' '}
              <Text style={{color: linkColor}}>{formTitle}</Text>
-             <Text>{` ${uiUtils.parseMessage(newParams)}`}</Text>
+             <Text>{msg}</Text>
            </Text>
   },
   getMarkdownStyles(bankStyle, isItalic, isMyMessage, isChat) {
