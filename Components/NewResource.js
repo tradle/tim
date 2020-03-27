@@ -982,7 +982,7 @@ class NewResource extends Component {
       let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
       if (err) {
         Alert.alert(err)
-        err = null
+        this.state.err = null
       }
       if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={onPress}>
