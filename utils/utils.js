@@ -468,6 +468,20 @@ var utils = {
 
     return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
   },
+  translateForGrid({model, isPlural, property}) {
+    if (property) {
+      if (property.shortTitle)
+        return property.shortTitle
+      else
+        return utils.translateProperty(property, model)
+    }
+    if (model) {
+      if (model.shortTitle)
+        return model.shortTitle
+      else
+        return utils.translateModel(model, isPlural)
+    }
+  },
   translateEnum(resource) {
     let me = utils.getMe()
     let lang = me  &&  me.languageCode
@@ -482,7 +496,7 @@ var utils = {
     if (rtype === LANGUAGE)
       return resource.language
     let e = dictionary.enums[rtype]
-    if (utils.isStub(resource))  {
+    if (utils.isStub(resource)) {
       if (!e) {
         if (title)
           return title
@@ -495,13 +509,9 @@ var utils = {
       let [type, id] = resource.id.split('_')
       return e[id]  ||  title
     }
-    else if (e)
+    if (e)
       return e[resource[ROOT_HASH]] || resource[utils.getEnumProperty(utils.getModel(rtype))]
-    else {
-      return utils.buildRef(resource, utils.getModel(rtype)).title
-      // let prop = Object.keys(utils.getModel(rtype).properties)[0]
-      // return resource[prop]
-    }
+    return utils.buildRef(resource, utils.getModel(rtype)).title
   },
   translateString(...args) {
     // const { strings } = Strings
@@ -935,21 +945,22 @@ var utils = {
       }
       model = utils.getModel(resource[TYPE])
     }
-    let props = model.properties
     let rType = utils.getType(resource)
     let resourceModel = rType && utils.getModel(rType)
+    let props = resourceModel  &&  resourceModel.properties || model.properties
 
     var displayName = '';
 
     let dnProps = utils.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
-        if (!resource[p]  &&  !props[p].displayAs)
+        let prop = props[p]
+        if (!resource[p]  &&  !prop.displayAs)
           continue
         let dn
-        if (props[p].ref  &&  utils.isEnum(props[p].ref))
+        if (prop.ref  &&  utils.isEnum(prop.ref))
           dn = utils.translateEnum(resource[p])
-        else if (props[p].range === 'model')
+        else if (prop.range === 'model')
           dn = utils.translate(utils.getModel(resource[p]))
         else if (rType === BOOKMARK)
           dn = utils.translate(resource.message)
@@ -1215,12 +1226,17 @@ var utils = {
         // eCols[p] = props[p]
       })
     }
+    let onePropView = []
     for (let p in properties) {
       if (p.charAt(0) === '_') continue
       let prop = properties[p]
-      if (vCols.indexOf(p) === -1  /*&&  !prop.readOnly*/  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
+      if (prop.signature)
+        onePropView.push(p)
+      else if (vCols.indexOf(p) === -1  /*&&  !prop.readOnly*/  &&  !prop.hidden  &&  !p.endsWith('_group'))
         vCols.push(p)
     }
+    if (vCols.length)
+      vCols = onePropView.concat(vCols)
     return vCols
   },
   template (t, o) {
