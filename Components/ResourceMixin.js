@@ -338,28 +338,68 @@ var ResourceMixin = {
   },
   renderSimpleProp(val, pMeta, modelName, component) {
     let { bankStyle } = this.props
-    if (Array.isArray(val)) {
-      if (pMeta.items.backlink)
-        return <View  key={this.getNextKey()} />
+    if (Array.isArray(val))
+      return this.renderSimpleArrayProp(val, pMeta, modelName, component)
 
-      let vCols = pMeta.viewCols;
-      if (!vCols)
-        vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-      val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
-      let title = pMeta.title || utils.makeLabel(pMeta.name)
-      const titleEl = <Text style={styles.title}>{title}</Text>
-      let icon
-      let cnt = val.length;
-      if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
-        icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-      let header = <View style={{flexDirection: 'row'}}>
-                    {titleEl}
-                    {icon}
-                  </View>
+    let { units } = pMeta
+    if (units === '%')
+      val += units
+    else if (units  &&  units.charAt(0) != '[')
+      val += ' ' + units
 
-      let separator = <View style={styles.separator}></View>;
-      if (cnt > 3)
-        val = <View key={this.getNextKey()}>
+    if (val === NOT_SPECIFIED)
+      return <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
+    if (typeof val === 'number')
+      return <Text style={styles.description}>{val}</Text>;
+    if (typeof val === 'boolean')
+      val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
+    if (pMeta.signature) {
+      let { width } = utils.dimensions(component)
+      let h = 200
+      let w = width - 40
+      return <View style={styles.container}>
+              <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
+            </View>
+    }
+    if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
+      return <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.textColor}]}>{val}</Text>;
+    // else if (modelName === TERMS_AND_CONDITIONS) {
+    //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
+    if (pMeta.markdown) {
+      return <View style={styles.container}>
+              <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
+                {val}
+              </Markdown>
+            </View>
+    }
+    if (pMeta.range === 'model')
+      val = translate(utils.getModel(val))
+    else if (pMeta.range === 'password')
+      val = '*********'
+    return <Text style={[styles.description]}>{val}</Text>;
+  },
+  renderSimpleArrayProp(val, pMeta, modelName, component) {
+    if (pMeta.items.backlink)
+      return <View  key={this.getNextKey()} />
+
+    let vCols = pMeta.viewCols;
+    if (!vCols)
+      vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
+    val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
+    let title = pMeta.title || utils.makeLabel(pMeta.name)
+    const titleEl = <Text style={styles.title}>{title}</Text>
+    let icon
+    let cnt = val.length;
+    if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
+      icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
+    let header = <View style={{flexDirection: 'row'}}>
+                  {titleEl}
+                  {icon}
+                </View>
+
+    let separator = <View style={styles.separator}></View>;
+    if (cnt > 3)
+      return <View key={this.getNextKey()}>
                 {separator}
                 <Accordion
                   sections={[title]}
@@ -368,51 +408,12 @@ var ResourceMixin = {
                   underlayColor='transparent'
                   easing='easeIn' />
              </View>
-      else {
-        val = <View key={this.getNextKey()}>
+    else
+      return <View key={this.getNextKey()}>
                {titleEl}
                {val}
              </View>
-      }
-    }
-    else  {
-      if (pMeta.units  &&  pMeta.units.charAt(0) != '[')
-        val += ' ' + pMeta.units
 
-      if (val === NOT_SPECIFIED)
-        val = <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
-      else if (typeof val === 'number')
-        val = <Text style={styles.description}>{val}</Text>;
-      else if (typeof val === 'boolean')
-        val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
-      else if (pMeta.signature) {
-        let { width } = utils.dimensions(component)
-        let h = 200
-        let w = width - 40
-        val = <View style={styles.container}>
-                <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
-              </View>
-      }
-      else if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.textColor}]}>{val}</Text>;
-      // else if (modelName === TERMS_AND_CONDITIONS) {
-      //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
-      else if (pMeta.markdown) {
-        val = <View style={styles.container}>
-                <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
-                  {val}
-                </Markdown>
-              </View>
-      }
-      else {
-        if (pMeta.range === 'model')
-          val = translate(utils.getModel(val))
-        else if (pMeta.range === 'password')
-          val = '*********'
-        val = <Text style={[styles.description]}>{val}</Text>;
-      }
-    }
-    return val
   },
   showJson(params) {
     let { json, indent, isView } = params
@@ -484,7 +485,7 @@ var ResourceMixin = {
         if (jVal.indexOf('http://') === 0  ||  jVal.indexOf('https://') === 0)
           val = <Text style={[styles.title, {flex: 1, color: bankStyle.linkColor}]} onPress={() => Linking.openURL(jVal)}>{jVal}</Text>
         else
-          val = <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{jVal}</Text>
+          val = <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{jVal}</Text>
         jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
                         <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
                           {label}
@@ -536,7 +537,7 @@ var ResourceMixin = {
                               <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
                             </Col>
                             <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
-                              <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{js + ''}</Text>
+                              <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{js + ''}</Text>
                             </Col>
                           </Row>)
           }
@@ -701,15 +702,18 @@ var ResourceMixin = {
       Actions.openApplicationChat(stub)
       return
     }
+    let r
+    if (resource &&  id === utils.getId(resource))
+      r = resource
+    else
+      r = { id }
     navigator.push({
       componentName: isApplication ? APPLICATION_VIEW : MESSAGE_VIEW,
       backButtonTitle: 'Back',
       title,
       passProps: {
         bankStyle,
-        resource: {
-          id
-        }
+        resource: r
       }
     })
   },
@@ -827,7 +831,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 3,
     marginHorizontal: 7,
-    color: '#2E3B4E',
+    color: '#555555',
   },
   hugeTitle: {
     fontSize: 24,
@@ -856,7 +860,7 @@ var styles = StyleSheet.create({
   dsValue: {
     fontSize: 18,
     marginHorizontal: 7,
-    color: '#2E3B4E',
+    color: '#555555',
   },
   content: {
     color: '#9b9b9b',
