@@ -12,6 +12,7 @@ const {
   menuButtonObject,
   conversationButtonObject,
   homeButtonObject={},
+  treeButtonObject
 } = platformButtons
 
 var FONT_SIZE = 12;
@@ -99,6 +100,7 @@ var buttonStyles = Object.freeze({
   },
   menuButton: menuButtonObject,
   conversationButton: conversationButtonObject,
+  treeButton: treeButtonObject,
   homeButton: {
     ...homeButtonObject,
     opacity: 0.9
