@@ -8616,9 +8616,9 @@ if (!res[SIG]  &&  res._message)
       productsToShare.forEach((r) => {
         // let fromId = utils.getId(r.from)
         if (r._sharedWith) {
-          let sw = r._sharedWith.filter((r) => {
+          let sw = r._sharedWith.filter((rr) => {
             if (reps.filter((rep) => {
-                  if (utils.getId(rep) === r.bankRepresentative) {
+                  if (utils.getId(rep) === rr.bankRepresentative) {
                     if (rr.bankRepresentative !== r.from.id)
                       return true
                   }
