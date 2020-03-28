@@ -35,6 +35,7 @@ const {
   FORM,
   ENUM
 } = constants.TYPES
+const MY_PRODUCT = 'tradle.MyProduct'
 
 class ShowRefList extends Component {
   constructor(props) {
@@ -149,13 +150,19 @@ class ShowRefList extends Component {
       if (!currentBacklink  &&  !showDetails)
         currentBacklink = props[p]
     })
-    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !isEmployee
+    let showQR
+    if (ENV.showMyQRCode) {
+      if (utils.getId(me) === utils.getId(resource)  &&  !isEmployee)
+        showQR = true
+      else if (utils.isSubclassOf(resource[TYPE], MY_PRODUCT))
+        showQR = true
+    }
     if (showQR  &&  this.props.showQR) {
       let tabName = translate('showQR')
       this.tabDetail[tabName] = { icon: 'ios-qr-scanner', action: this.props.showQR.bind(this) }
       refList.push(<View style={buttonStyles.container} key={this.getNextKey()} tabLabel={tabName}/>)
     }
-    if (!hasBacklinks  &&  !showDocuments) {
+    if (!hasBacklinks  &&  !showDocuments  &&  !showQR) {
       if (showDetails) {
         if (utils.isNew(resource)  ||  !utils.hasModificationHistory(resource))
           refList = null
@@ -188,6 +195,7 @@ class ShowRefList extends Component {
         details = <ShowPropertiesView resource={resource}
                                       showRefResource={this.getRefResource.bind(this)}
                                       currency={currency}
+                                      bankStyle={bankStyle}
                                       excludedProperties={['photos']}
                                       navigator={navigator} />
 
