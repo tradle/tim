@@ -1518,7 +1518,7 @@
       "integrity": "sha1-Q8Jj7hDsPJxviCjZr2dSyJzZsFI="
     },
     "@tradle/custom-models": {
-      "version": "github:tradle/custom-models#c6e0fe8ef0bfe98658b5a1d3343c1d8d5c83ace3",
+      "version": "github:tradle/custom-models#2770e9395542dc41db4ff0de6d7a997c7ed01d3c",
       "from": "github:tradle/custom-models",
       "requires": {
         "@tradle/validate-model": "^7.1.18"
@@ -1764,7 +1764,7 @@
       }
     },
     "@tradle/models": {
-      "version": "github:tradle/models#b9c9826dd89fce7b479160e0e0fc038f3b238c13",
+      "version": "github:tradle/models#19ece855b5e70a56f8b8f85cdd6013e01d5a14c3",
       "from": "github:tradle/models"
     },
     "@tradle/models-cloud": {
@@ -1772,7 +1772,7 @@
       "from": "github:tradle/models-cloud"
     },
     "@tradle/models-corporate-onboarding": {
-      "version": "github:tradle/models-corporate-onboarding#ef49c4c344ed99504f43dea064ee74623de0aa11",
+      "version": "github:tradle/models-corporate-onboarding#68e3c09531b459bed3dcf456e4d17f2158394745",
       "from": "github:tradle/models-corporate-onboarding"
     },
     "@tradle/models-nz": {
@@ -1878,8 +1878,8 @@
       }
     },
     "@tradle/qr-schema": {
-      "version": "2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.0.tgz",
+      "version": "2.0.2",
+      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.2.tgz",
       "integrity": "sha1-lMucUE/MHQ9bOBoM2QsGPLhdXBc=",
       "requires": {
         "object.omit": "^3.0.0",
@@ -1952,8 +1952,8 @@
       }
     },
     "@tradle/validate-model": {
-      "version": "7.1.20",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.20.tgz",
+      "version": "7.1.22",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.22.tgz",
       "integrity": "sha512-eMCEcd0TelHslDCMGKItDEnAMb5+U1rfDW7AI+44rcH3936IqLVIMoDum0ed8n64qdHU4jdymlUXXD4a61T4JQ==",
       "requires": {
         "@tradle/constants": "^2.1.0",
