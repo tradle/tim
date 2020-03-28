@@ -206,7 +206,7 @@ class ShowPropertiesView extends Component {
         }
       }
       else if (pMeta.ref) {
-        ({val, isRef} = this.renderRefProperty(val, pMeta, viewCols, styles))
+        ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
         if (!val)
           return
       }
@@ -351,6 +351,7 @@ class ShowPropertiesView extends Component {
     }
   }
   renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}) {
+    // debugger
     let { showRefResource, currency, bankStyle, checkProperties } = this.props
     let { ref } = pMeta
     if (ref === PHOTO) {
