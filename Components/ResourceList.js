@@ -1174,6 +1174,15 @@ class ResourceList extends Component {
       Actions.addApp({ url: host, permalink: provider, addSettings: true })
       return
     }
+    // if (schema === 'PairDevices') {
+    //   debugger
+    //   Actions.sendPairingRequest(data)
+    //   return
+    // }
+    if (schema === 'ProductAuthorization') {
+      debugger
+      return
+    }
 
     Alert.alert(translate('invalidQR'), translate('supportedQrCodes'))
   }
