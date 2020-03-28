@@ -490,21 +490,27 @@ class NewResource extends Component {
 
     let reqProperties = this.state.requestedProperties || this.props.requestedProperties
     if (reqProperties) {
-      let requestedProperties = reqProperties.requestedProperties
-      for (let p in requestedProperties) {
-        if (p.indexOf('_group') !== -1) {
-          if (requestedProperties[p].required) {
-            props[p].list.forEach(p => {
-              if (!requestedProperties[p])
-                required.push(p)
-            })
-          }
-        }
-        else if (required.indexOf(p) === -1) {
-          if (requestedProperties[p].required)
-            required.push(p)
-        }
-      }
+      let { requestedProperties } = reqProperties
+      let eCols = []
+      let { softRequired } = this.addRequestedProps({eCols, props})
+      softRequired.forEach(p => {
+        if (required.indexOf(p) === -1)
+          required.push(p)
+      })
+      // for (let p in requestedProperties) {
+      //   if (p.indexOf('_group') !== -1) {
+      //     if (requestedProperties[p].required) {
+      //       props[p].list.forEach(p => {
+      //         if (!requestedProperties[p])
+      //           required.push(p)
+      //       })
+      //     }
+      //   }
+      //   else if (required.indexOf(p) === -1) {
+      //     if (requestedProperties[p].required)
+      //       required.push(p)
+      //   }
+      // }
     }
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
       Object.keys(errs).forEach(prop => {
