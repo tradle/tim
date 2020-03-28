@@ -2623,10 +2623,10 @@ var utils = {
     return hasBacklinks
   },
   ungroup({model, viewCols, includeGroupProp, edit}) {
-    if (!viewCols)
-      return
-    let props = model.properties
     let newArr = []
+    if (!viewCols)
+      return newArr
+    let props = model.properties
     viewCols.forEach((p) => {
       if (p.indexOf('_group') !== -1  && props[p].list) {
         if (includeGroupProp)
