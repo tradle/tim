@@ -212,7 +212,7 @@ class ShowPropertiesView extends Component {
         }
       }
       else if (pMeta.ref) {
-        ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles}))
+        ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
         if (!val)
           return
       }
