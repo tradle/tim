@@ -101,8 +101,8 @@
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
-      "from": "github:tradle/custom-models",
-      "resolved": "github:tradle/custom-models#c6e0fe8ef0bfe98658b5a1d3343c1d8d5c83ace3"
+      "from": "tradle/custom-models",
+      "resolved": "git://github.com/tradle/custom-models.git#2770e9395542dc41db4ff0de6d7a997c7ed01d3c"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -268,9 +268,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.1.tgz"
     },
     "@tradle/qr-schema": {
-      "version": "2.0.0",
+      "version": "2.0.2",
       "from": "@tradle/qr-schema@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.0.tgz",
+      "resolved": "http://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.2.tgz",
       "dependencies": {
         "is-extendable": {
           "version": "1.0.1",
