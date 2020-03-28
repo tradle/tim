@@ -554,9 +554,10 @@ var NewResourceMixin = {
     let r = _.cloneDeep(resource)
     if(ptype === 'number'  &&  !search) {
       let val = Number(value)
-      if (value.charAt(value.length - 1) === '.')
-        value = val + '.00'
-      else
+      if (value.endsWith('.'))
+        return
+        // value = val + .00
+      // else
         value = val
     }
     if (!this.floatingProps)
