@@ -65,6 +65,7 @@ const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const WIPE_DEVICE = 6
 const CONFIRMATION_PRODUCT_REQUEST = 'tradle.ConfirmPackageRequest'
+const MY_PRODUCT = 'tradle.MyProduct'
 
 const {
   PROFILE,
@@ -281,7 +282,7 @@ class ResourceView extends Component {
     let me = utils.getMe()
     let actionPanel
     let isMe = utils.isMe(resource)
-    let isMyProduct = utils.isSubclassOf(utils.getType(resource), 'tradle.MyProduct')
+    let isMyProduct = utils.isSubclassOf(utils.getType(resource), MY_PRODUCT)
     let attachmentsView
     if (me) {
       if (resource.attachments  &&  resource.attachments.length) {
@@ -306,19 +307,19 @@ class ResourceView extends Component {
                                   showQR={this.openModal.bind(this)}
                                   backlinkList={backlinkList}/>
     }
-    let qrcode, w
-    let { width } = utils.dimensions(ResourceView)
+    let qr
+    let w = Math.floor((utils.getContentWidth(ResourceView) / 3) * 2)
+    w = Math.min(w, 300)
     if (pairingData) {
-      w = Math.floor((width / 3) * 2)
-      qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={pairingData} dimension={w} />
-               </View>
+      qr = QR.toHex({
+        schema: 'PairDevices',
+        data: pairingData
+      })
     }
     else if (isMe) {
-      w = Math.min(Math.floor((width / 3) * 2), 300)
       if (me.isEmployee  &&  me.organization && me.organization.url) {
         let parts = utils.getId(me.organization).split('_')
-        let qr = QR.toHex({
+        qr = QR.toHex({
           schema: 'OrgProfile',
           data: {
             permalink: me[ROOT_HASH],
@@ -328,13 +329,9 @@ class ResourceView extends Component {
             name: me.organization.title,
           }
         })
-        qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                   <QRCode inline={true} content={qr} dimension={w} />
-                 </View>
-        qrcode = <View />
       }
       else {
-        let qr = QR.toHex({
+        qr = QR.toHex({
           schema: 'Profile',
           data: {
             permalink: me[ROOT_HASH],
@@ -343,27 +340,32 @@ class ResourceView extends Component {
             lastName: me.lastName
           }
         })
-
-        qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                   <QRCode inline={true} content={qr} dimension={w} />
-                 </View>
       }
     }
     else if (isMyProduct) {
-      w = Math.min(Math.floor((width / 3) * 2), 300)
-      let qr = QR.toHex({
-        schema: 'Profile',
+      // let r = {}
+      // let exclude = ['myProductId', 'owner', 'revoked']
+      // for (let p in resource) {
+      //   if (p.charAt(0) !== '_'  &&  !exclude.includes(p))
+      //     r[p] = resource[p]
+      // }
+      qr = QR.toHex({
+        schema: 'ProductAuthorization',
         data: {
-          permalink: me[ROOT_HASH],
-          link: me[CUR_HASH],
+          contextId: resource._context.contextId,
+          product: resource[ROOT_HASH],
           firstName: me.firstName,
-          lastName: me.lastName
+          // product: resource[TYPE].replace('.My', ''),
+          // identity: me[ROOT_HASH],
+          // authorization: JSON.stringify(r)
         }
       })
-
+    }
+    let qrcode
+    if (qr) {
       qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={qr} dimension={w} />
-               </View>
+           <QRCode inline={true} content={qr} dimension={w} />
+         </View>
     }
 
     let footer
