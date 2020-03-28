@@ -484,10 +484,10 @@ class NewResource extends Component {
       let { requestedProperties } = reqProperties
       let eCols = []
       let { softRequired } = this.addRequestedProps({eCols, props})
-      for (let p in softRequired) {
+      softRequired.forEach(p => {
         if (required.indexOf(p) === -1)
           required.push(p)
-
+      })
       // for (let p in requestedProperties) {
       //   if (p.indexOf('_group') !== -1) {
       //     // props[p].list.forEach(p => {
@@ -499,7 +499,7 @@ class NewResource extends Component {
       //     if (requestedProperties[p].required)
       //       required.push(p)
       //   }
-      }
+      // }
     }
     if (!required.length  &&  !reqProperties) {
       const props = model.properties
