@@ -78,10 +78,15 @@ const normalizeResult = ({results, json}) => {
   if (nationality  &&  nationality.length === 1  &&  nationality === 'D')
     nationality = 'DEU'
 
+  let firstName = json.ft_Given_Names || json.ft_Surname_And_Given_Names
+  let lastName = json.ft_Surname || json.ft_Fathers_Name
+  if (firstName  &&  !lastName  &&  json.ft_Issuing_State_Code === 'MEX')
+    ([firstName, lastName] = firstName.split('^'))
+
   let result = {
     personal: {
-      firstName: json.ft_Given_Names || json.ft_Surname_And_Given_Names,
-      lastName: json.ft_Surname || json.ft_Fathers_Name,
+      firstName,
+      lastName,
       lastNameAtBirth: json.ft_Surname_at_Birth,
       middleName: json.ft_Middle_Name,
       full: address,
