@@ -16,6 +16,8 @@ import Reflux from 'reflux'
 import TimerMixin from 'react-timer-mixin'
 import { SyncStatus } from 'react-native-code-push'
 import { parse as parseURL } from 'url'
+import reactMixin from 'react-mixin'
+import QR from '@tradle/qr-schema'
 
 const debug = require('debug')('tradle:app:Home')
 
@@ -25,7 +27,7 @@ import components from './components'
 import utils, { translate } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
-import reactMixin from 'react-mixin'
+import QRCode from './QRCode'
 import constants from '@tradle/constants'
 import PasswordCheck from './PasswordCheck'
 import FadeInView from './FadeInView'
@@ -79,7 +81,8 @@ class TimHome extends Component {
     super(props);
     this.state = {
       isLoading: true,
-      hasMe: utils.getMe()
+      hasMe: utils.getMe(),
+      isModalOpen: false,
     };
 
     this._handleOpenURL = this._handleOpenURL.bind(this)
@@ -153,15 +156,16 @@ class TimHome extends Component {
       // this.register(() => this.showFirstPage())
       return
     }
-
     this.signInAndContinue()
   }
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
         this.state.busyWith !== nextState.busyWith                             ||
         this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
-        this.state.isLoading  !== nextState.isLoading   ||
-        this.state.message !== nextState.message        ||
+        this.state.isLoading  !== nextState.isLoading     ||
+        this.state.message !== nextState.message          ||
+        this.state.isModalOpen  !== nextState.isModalOpen ||
+        this.state.pairingData !== nextState.pairingData  ||
         this.state.hasMe !== nextState.hasMe
   }
 
@@ -331,11 +335,13 @@ class TimHome extends Component {
     if (components[afterAuthRoute.componentName].displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
-    return this.showFirstPage()
+    if (!this.state.isModalOpen)
+      return this.showFirstPage()
   }
 
   async handleEvent(params) {
-    let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted, url} = params
+    let {action, activity, isConnected, models, me,
+        isRegistration, pairingData, provider, termsAccepted, url} = params
     var nav = this.props.navigator
     let { wasDeepLink } = this.state
     switch(action) {
@@ -384,6 +390,10 @@ class TimHome extends Component {
     case 'start':
       this.onStart(params)
       return
+    case 'genPairingData':
+      // debugger
+      this.setState({pairingData, isModalOpen: true})
+      break
     case 'pairingSuccessful':
       this.signInAndContinue()
       return
@@ -847,7 +857,8 @@ class TimHome extends Component {
   }
   render() {
     // StatusBar.setHidden(true);
-    if (this.state.message) {
+    let { message, isModalOpen, err, isLoading, pairingData } = this.state
+    if (message) {
       this.restartTiM()
       return
     }
@@ -859,11 +870,11 @@ class TimHome extends Component {
       return this.getSplashScreen()
     }
 
-    if (this.state.isLoading) {
+    if (isLoading) {
       return this.getSplashScreen(h)
     }
 
-    var err = this.state.err || '';
+    var err = err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var me = utils.getMe()
     var settings = <View/>
@@ -888,7 +899,9 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let regView = !ENV.autoRegister &&
+    let regView
+    if (utils.getMe()) {
+      regView = !ENV.autoRegister &&
                   <View  style={styles.center}>
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
@@ -909,23 +922,50 @@ class TimHome extends Component {
                       </TouchableOpacity>
                     </FadeInView>
                  </View>
+    }
+    else {
+      regView = <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
+                    onPress={() => this._pressHandler()}>
+                  <View style={styles.getStarted}>
+                     <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
+                  </View>
+                </TouchableOpacity>
+    }
 
+    let qrcode
+    if (pairingData) {
+      let w = 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
+      let qr = QR.toHex({
+        schema: 'PairingDevices',
+        data: pairingData // {crypto: 'Hello world'}
+      })
+      qrcode = <View style={{padding: 20}}>
+                 <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                   <QRCode inline={true} content={qr} dimension={w} />
+                 </View>
+                 <View style={[styles.qrcode, {width: w + 20, alignItems: 'center', paddingTop: 30, paddingVertical: 10}]}>
+                   <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
+                 </View>
+               </View>
+    }
     return (
       <View style={styles.container}>
         <BackgroundImage testID="homeBG" source={BG_IMAGE} />
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View style={styles.flexGrow} />
-          { utils.getMe()
-            ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
-                  onPress={() => this._pressHandler()}>
-                <View style={styles.getStarted}>
-                   <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
-                </View>
-              </TouchableOpacity>
-            : regView
-          }
+          {regView}
           <Text style={errStyle}>{err}</Text>
           {dev}
+          <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+            <TouchableOpacity  onPress={() => {
+              this.closeModal()
+              this.showFirstPage()
+            }}>
+              <View style={styles.modalBackgroundStyle}>
+                {qrcode}
+              </View>
+            </TouchableOpacity>
+          </Modal>
         </TouchableOpacity>
       </View>
     );
@@ -1058,6 +1098,12 @@ class TimHome extends Component {
       signIn(this.props.navigator)
         .then(() => this.showFirstPage())
   }
+  openModal() {
+    this.setState({isModalOpen: true});
+  }
+  closeModal() {
+    this.setState({isModalOpen: false});
+  }
 }
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
@@ -1181,7 +1227,19 @@ var styles = (function () {
     },
     bottom: {
       marginBottom: 20
-    }
+    },
+    modalBackgroundStyle: {
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      padding: 20,
+      height,
+    },
+    qrcode: {
+      alignSelf: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#ffffff',
+      padding:10
+    },
   });
 })()
 
