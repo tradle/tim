@@ -182,7 +182,7 @@ class ResourceView extends Component {
       if (error)
         Alert.alert(error)
       else
-        this.setState({pairingData: pairingData, isModalOpen: true})
+        this.setState({pairingData, isModalOpen: true})
       break
     case 'invalidPairingRequest':
       this.props.navigator.pop()
@@ -342,6 +342,7 @@ class ResourceView extends Component {
         })
       }
     }
+    /*
     else if (isMyProduct) {
       // let r = {}
       // let exclude = ['myProductId', 'owner', 'revoked']
@@ -361,6 +362,7 @@ class ResourceView extends Component {
         }
       })
     }
+    */
     let qrcode
     if (qr) {
       qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
