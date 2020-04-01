@@ -324,6 +324,7 @@ class ResourceView extends Component {
         })
       }
     }
+    /*
     else if (isMyProduct) {
       // let r = {}
       // let exclude = ['myProductId', 'owner', 'revoked']
@@ -334,7 +335,7 @@ class ResourceView extends Component {
       qr = QR.toHex({
         schema: 'ProductAuthorization',
         data: {
-          contextId: resource._context.contextId,
+          contextId: resource._context.contextId || '',
           product: resource[ROOT_HASH],
           firstName: me.firstName,
           // product: resource[TYPE].replace('.My', ''),
@@ -343,7 +344,7 @@ class ResourceView extends Component {
         }
       })
     }
-
+    */
     let { width } = utils.dimensions(ResourceView)
     let w = Math.floor((width / 3) * 2)
     let qrcode = qr  &&  (
