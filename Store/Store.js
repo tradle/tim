@@ -105,7 +105,7 @@ const excludeWhenSignAndSend = [
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
 
-import utils, {translate, translateEnum} from '../utils/utils'
+import utils, {translate, translateEnum, isWeb} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
 import DataBundle from './plugins/DataBundle'
@@ -120,7 +120,7 @@ const NON_VIRTUAL_OBJECT_PROPS = Object.keys(ObjectModel.properties).filter(p =>
 import sampleProfile from '../data/sampleProfile.json'
 
 import sha from 'stable-sha1'
-var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
+var Keychain = ENV.useKeychain !== false && !isWeb() && require('../utils/keychain')
 import promisify from 'pify'
 var collect = promisify(require('stream-collector'))
 import debounce from 'debounce'
@@ -186,7 +186,7 @@ const FORM_REQUEST        = 'tradle.FormRequest'
 const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 // const PAIRING_RESPONSE    = 'tradle.PairingResponse'
-// const PAIRING_DATA        = 'tradle.PairingData'
+const PAIRING_DATA        = 'tradle.PairingData'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 
@@ -500,7 +500,7 @@ var Store = Reflux.createStore({
     if (false) {
       return await this.wipe()
     }
-    if (!utils.isWeb())
+    if (!isWeb())
       this.initRegula()
 
     await this.getReady()
@@ -969,19 +969,12 @@ var Store = Reflux.createStore({
 
     this.trigger({ action: 'authenticated', value: authenticated })
   },
-  getSettings() {
+  async getSettings() {
     let self = this
     let key = SETTINGS + '_1'
-    return db.get(key)
-    .then((value) => {
-      if (value) {
-        self._setItem(key, value)
-      }
-    })
-    .catch(() => {
-      // debugger
-      // return self.loadModels()
-    })
+    let value = await db.get(key)
+    if (value)
+      self._setItem(key, value)
   },
 
   setBusyWith(reason) {
@@ -2623,7 +2616,7 @@ var Store = Reflux.createStore({
       if (typeof config.greeting === 'string')
         org._greeting = config.greeting
       else
-        org._greeting = utils.isWeb() ? config.greeting.web : config.greeting.mobile
+        org._greeting = isWeb() ? config.greeting.web : config.greeting.mobile
     }
   },
 
@@ -3188,7 +3181,7 @@ var Store = Reflux.createStore({
       let refM = this.getModel(ref)
       if (!refM)
         continue
-      if (!utils.isWeb()  &&  prop.range === 'document') {
+      if (!isWeb()  &&  prop.range === 'document') {
           debugger
         let { url } = toChain[p]
         if (!isPrefill  &&  url  &&  url.indexOf('data:application/pdf;') === 0)
@@ -4786,20 +4779,32 @@ if (!res[SIG]  &&  res._message)
 
     return returnVal
 
-    function handleRegistration () {
+    async function handleRegistration () {
       self.trigger({action: 'runVideo'})
-      return Q.all([
+
+      await Promise.all([
         self.loadDB(),
         utils.resetPasswords()
       ])
-      .then(() => self.getDriver(returnVal))
-      .then(() => {
-        if (!resource || isNew) {
-          returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
-        }
+      await self.getDriver(returnVal)
 
-        return save(returnVal)
-      })
+      if (!resource || isNew)
+        returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
+
+      await save(returnVal)
+      if (isNew  &&  isWeb())
+        genPairingData()
+    }
+
+    function genPairingData() {
+      let { pubkeys } = meDriver.identity
+      let key = pubkeys.find(key => key.purpose === 'sign')
+      key.importedFrom = me[ROOT_HASH]
+      let pairingData = {
+        key: JSON.stringify(key),
+        nonce: crypto.randomBytes(32).toString('base64')
+      }
+      self.trigger({action: 'genPairingData', pairingData})
     }
 
     async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
@@ -5193,6 +5198,39 @@ if (!res[SIG]  &&  res._message)
       // title: utils.getDisplayName(r)
     }
   },
+  async onSendPairingRequest (pairingData) {
+    let newKey = JSON.parse(pairingData.key)
+
+    let { pubkeys } = meDriver.identity
+    if (pubkeys.find(key => _.isEqual(key, newKey)))
+      return
+    const newIdentity = _.cloneDeep(meDriver.identity)
+
+    newIdentity.pubkeys = newIdentity.pubkeys.slice()
+    newIdentity.pubkeys.push(newKey)
+    await meDriver.updateIdentity({
+      keys: meDriver.keys.slice(),
+      identity: newIdentity
+    }, async (err) => {
+      if (err)
+        debugger
+      await this.handlePairing()
+    })
+  },
+  async handlePairing() {
+    let identity = meDriver.identity
+    let iId = utils.getId(identity)
+    await db.put(iId, identity)
+    this.setItem(iId, identity)
+    var myIdentities = this._getItem(MY_IDENTITIES)
+    // if (!myIdentities)
+    //   debugger
+    let meId = utils.getId(me).replace(PROFILE, IDENTITY)
+    let currentId = myIdentities.allIdentities.find(id => id.id === meId)
+    currentId.publishedIdentity = identity
+    this._setItem(MY_IDENTITIES, myIdentities)
+    await this.dbPut(MY_IDENTITIES, myIdentities)
+  },
   async insurePublishingIdentity(org) {
     if (!me)
       return
@@ -5284,16 +5322,6 @@ if (!res[SIG]  &&  res._message)
     application.draftCompleted = true
 
     await this.onAddChatItem({resource: application})
-    // let { toChain, error } = await this.prepareResource(application)
-    // if (error) {
-    //   debugger
-    //   return
-    // }
-    // let data = await this.createObject(toChain)
-    // let sendParams = await this.packMessage(application)
-    // await this.meDriverSend(sendParams)
-
-    // debugger
   },
   async onGetProductList({resource}) {
     if (resource[TYPE] !== ORGANIZATION) {
@@ -6249,9 +6277,7 @@ if (!res[SIG]  &&  res._message)
         if (!to.bot) {
           to._unread = 0
           await this.dbPut(toId, to)
-          .then(() => {
-            this.trigger({action: 'updateRow', resource: to})
-          })
+          this.trigger({action: 'updateRow', resource: to})
         }
       }
       let orgId
@@ -7411,50 +7437,49 @@ if (!res[SIG]  &&  res._message)
 
     let refsObj = {}
 
-    return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
-    }))
-    .then((l) => {
-      if (!foundResources.length)
-        return
-      foundResources = this.filterFound({foundResources, filterProps, refsObj})
-      foundResources.forEach((r) => {
-        // Check if this message was shared, display the time when it was shared not when created
-        if (!r._sharedWith  ||  !to)
-          return
-        let orgTo = r.to.organization
-        if (!orgTo &&  utils.getId(r.to) === utils.getId(me))
-          orgTo = r.from.organization
-        if (utils.getId(to) === utils.getId(orgTo))
-          return
-        let author = to._author
-        if (author) {
-          let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
-          if (sh.length)
-            r._time = sh[0].timeShared
-        }
-      })
-      // Minor hack before we intro sort property here
-      let sortedFR = []
-
-      for (let i=links.length - 1; i>=0; i--) {
-        let fr = foundResources.find((r) => r[CUR_HASH] === links[i])
-        if (fr)
-          sortedFR.push(fr)
-      }
-      foundResources = sortedFR
-
-      if (duplicateItems.length) {
-        removeDuplicates(duplicateItems, foundResources)
-      }
-
-      utils.pinFormRequest(foundResources)
-      return foundResources
-    })
-    .catch((err) => {
+    try {
+      let l = await Promise.all(allLinks.map(link => {
+        return this.handleOne({ link, links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
+      }))
+    } catch(err) {
       debugger
+    }
+    if (!foundResources.length)
+      return
+    foundResources = this.filterFound({foundResources, filterProps, refsObj})
+    foundResources.forEach((r) => {
+      // Check if this message was shared, display the time when it was shared not when created
+      if (!r._sharedWith  ||  !to)
+        return
+      let orgTo = r.to.organization
+      if (!orgTo &&  utils.getId(r.to) === utils.getId(me))
+        orgTo = r.from.organization
+      if (utils.getId(to) === utils.getId(orgTo))
+        return
+      let author = to._author
+      if (author) {
+        let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
+        if (sh.length)
+          r._time = sh[0].timeShared
+      }
     })
-    function removeDuplicates(duplicateItems, foundResources) {
+    // Minor hack before we intro sort property here
+    let sortedFR = []
+
+    for (let i=links.length - 1; i>=0; i--) {
+      let fr = foundResources.find((r) => r[CUR_HASH] === links[i])
+      if (fr)
+        sortedFR.push(fr)
+    }
+    foundResources = sortedFR
+
+    if (duplicateItems.length)
+      removeDuplicates()
+
+    utils.pinFormRequest(foundResources)
+    return foundResources
+
+    function removeDuplicates() {
       for (let i=0; i<duplicateItems.length; i++) {
         let hash = duplicateItems[i]
         let res
@@ -8062,47 +8087,45 @@ if (!res[SIG]  &&  res._message)
     let list = []
     let refsObj = {}
 
-    return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, links, all, filterProps, isForgetting, isRefresh, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
-      // return handleOne(r)
-    }))
-    .then((l) => {
-      if (isBacklinkProp) {
-        let l = list.filter((r) => {
-          if (r.hasOwnProperty('_latest')  &&  !r._latest)
-            return false
-          if (links.indexOf(r[CUR_HASH]) === -1)
-            return false
-          if (r[TYPE] === VERIFICATION) {
-            let d = refsObj[utils.getId(r.document)]
-            if (d)
-              r.document = d
-          }
-          this.addVisualProps(r)
-          return true
-        })
-        return l
-      }
-      if (!foundResources.length)
-        return
-
-      foundResources = this.filterFound({foundResources, filterProps, refsObj})
-      // Minor hack before we intro sort property here
-      foundResources.sort((a, b) => a._time - b._time)
-      let result = params._readOnly  &&  utils.isContext(modelName)
-                 ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
-                 : foundResources
-
-      if (result  &&  result.length  &&  isBacklinkProp  &&  modelName === FORM) {
-        // Filter out the older versions of the resources
-        return getFreshResources(result)
-      }
-      else
-        return result
-    })
-    .catch((err) => {
+    try {
+      let l = await Promise.all(allLinks.map(link => {
+        return this.handleOne({ link, links, all, filterProps, isForgetting, isRefresh, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
+      }))
+    } catch (err) {
       debugger
-    })
+    }
+    if (isBacklinkProp) {
+      let l = list.filter((r) => {
+        if (r.hasOwnProperty('_latest')  &&  !r._latest)
+          return false
+        if (links.indexOf(r[CUR_HASH]) === -1)
+          return false
+        if (r[TYPE] === VERIFICATION) {
+          let d = refsObj[utils.getId(r.document)]
+          if (d)
+            r.document = d
+        }
+        this.addVisualProps(r)
+        return true
+      })
+      return l
+    }
+    if (!foundResources.length)
+      return
+
+    foundResources = this.filterFound({foundResources, filterProps, refsObj})
+    // Minor hack before we intro sort property here
+    foundResources.sort((a, b) => a._time - b._time)
+    let result = params._readOnly  &&  utils.isContext(modelName)
+               ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
+               : foundResources
+
+    if (result  &&  result.length  &&  isBacklinkProp  &&  modelName === FORM) {
+      // Filter out the older versions of the resources
+      return getFreshResources(result)
+    }
+    else
+      return result
 
     function getFreshResources(result) {
     // Filter out the older versions of the resources
@@ -9523,8 +9546,7 @@ if (!res[SIG]  &&  res._message)
       allIdentities: [{
         id: pKey,
         title: utils.getDisplayName(value),
-        privkeys: me.privkeys,
-        publishedIdentity: publishedIdentity
+        publishedIdentity
       }]};
     delete me.privkeys
 
@@ -9888,6 +9910,9 @@ if (!res[SIG]  &&  res._message)
       // if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
       // me[NONCE] = me[NONCE] || this.getNonce()
       // driverInfo.deviceID = result.deviceID
+      keys.forEach(k => {
+        if (k.purpose && !k.get('purpose')) k.set('purpose', k.purpose)
+      })
       return this.buildDriver({
         identity,
         keys,
@@ -10345,7 +10370,7 @@ if (!res[SIG]  &&  res._message)
     else if (!isMessage  &&  val[TYPE] === PARTIAL)
       this.trigger({action: 'hasPartials'})
 
-    if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
+    if (isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
       setTimeout(() => {
         this.trigger({action: 'offerKillSwitchAfterApplication'})
       }, 2000)
@@ -11873,444 +11898,6 @@ debug(`deleteItemFromDB: ${itemId}`)
     if (dbID)
       _.set(ENV, regulaDbPath, dbID)
   },
-  /*
-  // PAIRING FIRST TAKE
-  // Devices one
-  onGenPairingData() {
-    if (!SERVICE_PROVIDERS.length) {
-      this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
-      return
-    }
-    let pairingData = {
-      nonce: crypto.randomBytes(32).toString('base64'),
-      identity: meDriver.link,
-      firstName: me.firstName,
-      rendezvous: {
-        url: SERVICE_PROVIDERS[0].url + '/' + SERVICE_PROVIDERS[0].id
-      }
-    }
-    let dbPairingData = utils.clone(pairingData)
-    dbPairingData[TYPE] = PAIRING_DATA
-    // db.put(PAIRING_DATA + '_1', pairingData)
-    list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
-    this.trigger({action: 'genPairingData', pairingData: JSON.stringify(pairingData)})
-  },
-
-  onSendPairingRequest (pairingData) {
-    // device 2 sends pairing request
-    let publishedIdentity
-    let deviceId
-
-    let myIdentities = this._getItem(MY_IDENTITIES)
-    if (myIdentities) {
-      publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
-      deviceId = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).deviceId
-    }
-
-    let promise = myIdentities
-                ? Q()
-                : this.createNewIdentity()
-                // : Q.ninvoke(tradleUtils, 'newIdentity', {
-                //       networkName,
-                //       keys: KEY_SET
-                //   })
-    return promise
-    .then(({ encryptionKey, identityInfo }) => {
-      if (!identityInfo)
-        return
-      publishedIdentity = identityInfo.identity
-      let mePub = publishedIdentity.pubkeys
-      let mePriv = identityInfo.keys
-      let currentIdentity = utils.makeId(PROFILE, pairingData.identity)
-      var myIdentities = {
-        [TYPE]: MY_IDENTITIES_TYPE,
-        currentIdentity: currentIdentity,
-        allIdentities: [{
-          id: currentIdentity,
-          // title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
-          privkeys: mePriv,
-          publishedIdentity: publishedIdentity
-        }]
-      }
-      var profile = {
-        [TYPE]: PROFILE,
-        [ROOT_HASH]: pairingData.identity,
-        firstName: pairingData.firstName,
-        formatted: pairingData.firstName,
-      }
-      deviceId = identityInfo.link
-      var identity = {
-        [TYPE]: IDENTITY,
-        [ROOT_HASH]: pairingData.identity,
-        pubkeys: mePub,
-        deviceId: deviceId
-      }
-      let batch = []
-      list[currentIdentity] = {
-        key: currentIdentity,
-        value: profile
-      }
-      let identityId = utils.getId(identity)
-      list[identityId] = {
-        key: identityId,
-        value: identity
-      }
-      list[MY_IDENTITIES] = {
-        key: MY_IDENTITIES,
-        value: myIdentities
-      }
-      batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-      batch.push({type: 'put', key: currentIdentity, value: profile})
-      batch.push({type: 'put', key: utils.getId(identity), value: identity})
-      db.batch(batch)
-    })
-   .then(() => {
-      const pairingReq = {
-        [TYPE]: PAIRING_REQUEST,
-        identity: publishedIdentity
-      }
-
-      const hmac = crypto.createHmac('sha256', pairingData.nonce)
-      hmac.update(tradleUtils.stringify(pairingReq))
-      pairingReq.auth = hmac.digest('base64')
-
-      const url = pairingData.rendezvous.url
-      let transport = driverInfo.wsClients.byUrl[url]
-      if (!transport) {
-        let wsClient = this.getWsClient(url, deviceId)
-        transport = this.getTransport(wsClient, deviceId)
-        driverInfo.wsClients.byUrl[url] = transport
-      }
-      let self = this
-      transport.on('message', (msg, from) => {
-        try {
-          const payload = JSON.parse(msg)
-          if (payload[TYPE] === PAIRING_RESPONSE) {
-            transport.destroy()
-            delete driverInfo.wsClients.byUrl[url]
-
-            return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
-            .then(() => {
-              debugger
-              Alert.alert('Pairing was successful')
-              this.trigger({action: 'pairingSuccessful'})
-            })
-            .catch((err) => {
-              debugger
-              Alert.alert(err)
-            })
-          }
-        } catch (err) {
-          debugger
-        }
-      })
-
-      // if (!transport) {
-      //   let wsClient = this.getWsClient(url, meDriver.permalink)
-      //   transport = this.getTransport(wsClient, meDriver.permalink)
-      //   driverInfo.wsClients.byUrl[url] = transport
-      // }
-      const pairingReqStr = tradleUtils.stringify(pairingReq)
-
-      function send () {
-        return Q.ninvoke(transport, 'send', pairingData.identity, pairingReqStr)
-          .then(() => {
-            // debugger
-            let dbPairingData = utils.clone(pairingData)
-            dbPairingData[TYPE] = PAIRING_DATA
-            // db.put(PAIRING_DATA + '_1', pairingData)
-            list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
-          })
-          .catch((err) => {
-            debugger
-          })
-      }
-
-      return utils.tryWithExponentialBackoff(send)
-    })
-      // .then(() => {
-      //   this.trigger({action: 'sentPairingRequest', pairingData: pairingData})
-      // })
-  },
-
-  onProcessPairingRequest(pairingData, pairingReq) {
-    const myPubKeys = meDriver.identity.pubkeys
-    const alreadyPaired = pairingReq.identity.pubkeys.some(a => {
-      return myPubKeys.some(b => {
-        return a.pub === b.pub
-      })
-    })
-
-    const verify = crypto.createHmac('sha256', pairingData.nonce)
-    verify.update(tradleUtils.stringify(tradleUtils.omit(pairingReq, 'auth')))
-    if (verify.digest('base64') !== pairingReq.auth) {
-      return Promise.reject(new Error('invalidPairingRequest'))
-    }
-
-    if (alreadyPaired) {
-      // won't work because prev is not right
-      return sendResponse()
-    }
-
-    const allPubKeys = meDriver.identity.pubkeys.concat(pairingReq.identity.pubkeys)
-    const pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
-    let identity = {
-            keys: meDriver.keys.concat(pairingReq.identity.pubkeys),
-            identity: tradleUtils.clone(meDriver.identity, {
-              pubkeys: pubkeys // allPubKeys.map(pk => tradleUtils.clone(pk))
-            })
-          }
-    return Q.ninvoke(meDriver, 'updateIdentity', identity)
-    .then(() => {
-      let batch = []
-      batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
-      this.updatePubkeys(batch)
-      // let batch = []
-      // let id = IDENTITY + '_' + utils.getMe()[ROOT_HASH]
-      // let myIdentity = list[id].value
-
-      // myIdentity.pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
-
-      // updatePubkeys(myIdentity.pubkeys)
-      // let myIdentities = list[MY_IDENTITIES].value
-      // let currentIdentity = myIdentities.currentIdentity
-      // myIdentities.allIdentities.forEach((r) => {
-      //   if (r.id === currentIdentity)
-      //     r.publishedIdentity.pubkeys = utils.clone(myIdentity.pubkeys)
-      // })
-
-      // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-      // batch.push({type: 'put', key: id, value: myIdentity})
-      // batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
-
-      // // If pairing request was not verified what do we want to do
-      // db.batch(batch)
-    })
-    .then(() => {
-      return sendResponse()
-    })
-
-    function sendResponse () {
-      const getPrev = meDriver.identity[PREV_HASH] ? Q.ninvoke(meDriver.keeper, 'get',  meDriver.identity[PREV_HASH]) : Promise.resolve(meDriver.identity)
-      return getPrev.then(prev => {
-        const pairingRes = {
-          [TYPE]: PAIRING_RESPONSE,
-          // can we make it secure without sending prev?
-          prev: prev,
-          identity: meDriver.identity
-        }
-
-        const url = pairingData.rendezvous.url
-        let transport = driverInfo.wsClients.byUrl[url]
-        const pairingResStr = tradleUtils.stringify(pairingRes)
-        return utils.tryWithExponentialBackoff(send)
-
-        function send () {
-          return Q.ninvoke(transport, 'send', tradleUtils.hexLink(pairingReq.identity), pairingResStr)
-            .then(() => {
-              db.put(PAIRING_RESPONSE + '_1', pairingRes)
-              debugger
-            })
-            .catch((err) => {
-              debugger
-            })
-        }
-      })
-    }
-  },
-  updatePubkeys(batch, identity) {
-    let myIdentities = this._getItem(MY_IDENTITIES)
-    let currentIdentity = myIdentities.currentIdentity
-
-    let id = currentIdentity.replace(PROFILE, IDENTITY)
-    list[id].value = identity || meDriver.identity
-
-    myIdentities.allIdentities.forEach((r) => {
-      if (r.id === currentIdentity)
-        r.publishedIdentity = this._getItem(id)
-    })
-
-    batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-    batch.push({type: 'put', key: id, value: this._getItem(id)})
-
-    // If pairing request was not verified what do we want to do
-    db.batch(batch)
-  },
-
-  onProcessPairingResponse (pairingData, pairingRes) {
-    // device 2 validate response
-    if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
-      return Promise.reject(new Error('prev identity does not match expected'))
-
-    let pubkeys = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).pubkeys
-    const hasMyKeys = pubkeys.every(myKey => {
-      return pairingRes.identity.pubkeys.some(theirKey => {
-        return _.isEqual(theirKey, myKey)
-      })
-    })
-    // const hasMyKeys = meDriver.identity.pubkeys.every(myKey => {
-    //   return pairingRes.identity.pubkeys.some(theirKey => {
-    //     return deepEqual(theirKey, myKey)
-    //   })
-    // })
-
-    if (!hasMyKeys)
-      return Promise.reject(new Error(translate('deviceDoesNotHaveMyKeys')))
-
-    let batch = []
-    this.updatePubkeys(batch, pairingRes.identity)
-
-
-    // let myIdentities = list[MY_IDENTITIES].value
-    // let currentIdentity = myIdentities.currentIdentity
-
-    // myIdentities.allIdentities.forEach((r) => {
-    //   if (r.id === currentIdentity)
-    //     r.publishedIdentity.pubkeys = pairingRes.identity.pubkeys
-    // })
-
-    // let id = IDENTITY + '_' + pairingData.identity
-    // list[id].value.pubkeys = utils.clone(pairingRes.identity.pubkeys)
-    // let batch = []
-    // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-    // batch.push({type: 'put', key: id, value: list[id].value})
-    // db.batch(batch)
-
-    let me = this._getItem(utils.makeId(PROFILE, pairingData.identity))
-    return this.getDriver(me)
-    .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
-    .then(() => {
-      Q.ninvoke(meDriver, 'setIdentity', {
-        keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
-        identity: pairingRes.identity
-      })
-    })
-    .then(() => {
-      this.setMe(me)
-      // let me = utils.getMe()
-      // let oldId = IDENTITY + '_' + me[ROOT_HASH]
-      // delete list[oldId]
-
-      // let oldProfileId = utils.getId(me)
-      // let profile = list[oldProfileId].value
-      // delete list[oldProfileId]
-
-      // profile[ROOT_HASH] = pairingRes.identity[ROOT_HASH]
-      // profile[CUR_HASH] = pairingRes.identity[ROOT_HASH]
-
-      // let newId = IDENTITY + '_' + pairingRes.identity[ROOT_HASH]
-      // list[newId] = {
-      //   key: newId,
-      //   value: utils.clone(pairingRes.identity)
-      // }
-      // let newProfileId = PROFILE + '_' +  pairingRes.identity[ROOT_HASH]
-      // list[newProfileId] = {
-      //   key: newProfileId,
-      //   value: profile
-      // }
-      // let myIdentities = list[MY_IDENTITIES].value
-      // myIdentities.currentIdentity = newProfileId
-      // myIdentities.allIdentities.forEach((r) => {
-      //   if (r.id !== oldProfileId)
-      //     return
-      //   r.id = newProfileId,
-      //   r.publishedIdentity.pubkeys = utils.clone(pairingRes.identity.pubkeys)
-      // })
-
-      // let batch = []
-      // batch.push({type: 'del', key: oldId})
-      // batch.push({type: 'del', key: oldProfileId})
-      // batch.push({type: 'put', key: MY_IDENTITIES, value: list[MY_IDENTITIES].value})
-      // batch.push({type: 'put', key: newId, value: list[newId].value})
-      // batch.push({type: 'put', key: newProfileId, value: list[newProfileId].value})
-      // batch.push({type: 'put', key: PAIRING_RESPONSE + '_1', value: pairingRes})
-      // db.batch(batch)
-    })
-  },
-  async receivePairingRequest({ payload }) {
-    const rootHash = storeUtils.getPermalink(payload.identity)
-    Alert.alert(
-      translate('pairingRequest'),
-      null,
-      [
-        {text: translate('Ok'),
-        onPress: () => {
-          this.trigger({action: 'acceptingPairingRequest', resource: payload})
-          // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
-          // .then(() => {
-          //   Alert.alert(translate('pairingRequestWasProcesseed'))
-          // })
-          // .catch((err) => {
-          //   debugger
-          // })
-        }},
-        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-      ]
-    )
-  },
-
-  onPairingRequestAccepted(payload) {
-    return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
-    .then(() => {
-      this.trigger({action: 'pairingRequestAccepted'})
-    })
-    .catch((err) => {
-      debugger
-      this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
-    })
-  },
-
-  async getReviewableResources(val) {
-    // let dataBundle = val.dataBundle
-    // if (!dataBundle)
-    //   return
-    let dataBundles = this.searchNotMessages({modelName: DATA_BUNDLE})
-    if (!dataBundles.length)
-      return
-    let dataBundle = this._getItem(dataBundles[0])
-    try {
-      let kres = await this._keeper.get(this.getCurHash(dataBundle))
-      _.extend(dataBundle, kres)
-    } catch (err) {
-      debug('Store.onAddVerification', err)
-      debugger
-    }
-    let form = val.form
-    let reviewable = []
-    this._getItem(dataBundle).items.forEach(r => {
-      let rtype = utils.getType(r)
-      if (rtype === form)
-        reviewable.push(r)
-    })
-    if (!reviewable.length)
-      return null
-    let result = await this.searchMessages({modelName: form, dataBundle: utils.getId(dataBundle), to: dataBundle.from})
-    return result
-  },
-  // deleteAppFromDevice(submissions, batch) {
-  //   if (!submissions)
-  //     return
-  //   let submissionStubs
-  //   if (Array.isArray(submissions))
-  //     submissionStubs = submissions.map((sub) => sub.submission)
-  //   else {
-  //     const { submissions={} } = application
-  //     if (!submissions.edges ||  !submissions.edges.length)
-  //       return
-  //     submissionStubs = submissions.edges.map(s => s.node.submission)
-  //   }
-  //   submissionStubs.forEach(sub => {
-  //     let m = this.getModel(utils.getType(sub))
-  //     let type = m.subClassOf || m.id
-  //     let stub = this.makeStub(sub)
-  //     let item = this._getItem(stub.id)
-  //     if (item) {
-  //       this._deleteItem(stub.id)
-  //       batch.push({type: 'del', key: stub.id})
-  //     }
-  //   })
-  // },
-*/
 })
 // );
 
@@ -12435,4 +12022,3 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   await this._yuki.welcome()
   //   // this.postHistory()
   // },
-

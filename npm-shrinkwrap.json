@@ -981,7 +981,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#19ece855b5e70a56f8b8f85cdd6013e01d5a14c3"
+      "resolved": "git://github.com/tradle/models.git#d94f15ccf6845576c7bacc1697b98f356e9aef33"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -1032,8 +1032,8 @@
     },
     "@tradle/qr-schema": {
       "version": "2.0.2",
-      "from": "@tradle/qr-schema@>=2.0.2 <3.0.0",
-      "resolved": "http://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.2.tgz",
+      "from": "tradle/qr-schema",
+      "resolved": "git://github.com/tradle/qr-schema.git#f697d3d44c2b32a6f88ccce04900780b2ca12c66",
       "dependencies": {
         "is-extendable": {
           "version": "1.0.1",
