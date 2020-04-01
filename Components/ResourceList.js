@@ -1185,6 +1185,14 @@ class ResourceList extends Component {
       Actions.addApp({ url: host, permalink: provider, addSettings: true })
       return
     }
+    if (schema === 'PairingDevices') {
+      Actions.sendPairingRequest(data)
+      return
+    }
+    if (schema === 'ProductAuthorization') {
+      debugger
+      return
+    }
 
     Alert.alert(translate('invalidQR'), translate('supportedQrCodes'))
   }
@@ -1442,7 +1450,7 @@ class ResourceList extends Component {
       rightButtonTitle: 'Profile',
       passProps: {
         modelName: ORGANIZATION,
-        bankStyle: this.state.bankStyle,
+        bankStyle: this.state.bankStƒyle,
         isTest: true,
         officialAccounts: true
       },
