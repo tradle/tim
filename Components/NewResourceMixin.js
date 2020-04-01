@@ -440,7 +440,7 @@ var NewResourceMixin = {
     }
     return options;
   },
-  addRequestedProps({eCols, params, props}) {
+  addRequestedProps({eCols, params={}, props}) {
     let {requestedProperties, excludeProperties, formErrors, model} = this.state.requestedProperties
     if (!formErrors) {
       _.extend(params, {formErrors: {}})
