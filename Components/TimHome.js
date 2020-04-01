@@ -958,7 +958,7 @@ class TimHome extends Component {
                  <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
                    <QRCode inline={true} content={qr} dimension={w} />
                  </View>
-                 <View style={[styles.qrcode, {width: w + 20, alignItems: 'center', paddingTop: 30, paddingVertical: 10}]}>
+                 <View style={[styles.qrcode, {alignItems: 'center', paddingTop: 30}]}>
                    <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
                  </View>
                </View>
@@ -973,7 +973,6 @@ class TimHome extends Component {
           <Text style={errStyle}>{err}</Text>
           {dev}
           <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => {
-
             this.closeModal()
           }}>
             <TouchableOpacity  onPress={() => {
