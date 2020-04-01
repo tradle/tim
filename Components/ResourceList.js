@@ -1450,7 +1450,7 @@ class ResourceList extends Component {
       rightButtonTitle: 'Profile',
       passProps: {
         modelName: ORGANIZATION,
-        bankStyle: this.state.bankStƒyle,
+        bankStyle: this.state.bankStyle,
         isTest: true,
         officialAccounts: true
       },
