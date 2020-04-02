@@ -7,7 +7,8 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  Platform
+  Platform,
+  Modal
 } from 'react-native'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
@@ -874,7 +875,7 @@ class TimHome extends Component {
       return this.getSplashScreen(h)
     }
 
-    var err = err || '';
+    err = err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var me = utils.getMe()
     var settings = <View/>
