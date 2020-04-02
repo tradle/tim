@@ -5225,7 +5225,7 @@ if (!res[SIG]  &&  res._message)
     var myIdentities = this._getItem(MY_IDENTITIES)
     // if (!myIdentities)
     //   debugger
-    let meId = utils.getId(me).replace(PROFILE, IDENTITY)
+    let meId = utils.getId(me)
     let currentId = myIdentities.allIdentities.find(id => id.id === meId)
     currentId.publishedIdentity = identity
     this._setItem(MY_IDENTITIES, myIdentities)
@@ -9545,6 +9545,7 @@ if (!res[SIG]  &&  res._message)
       currentIdentity: pKey,
       allIdentities: [{
         id: pKey,
+        privkeys: me.privkeys,
         title: utils.getDisplayName(value),
         publishedIdentity
       }]};
