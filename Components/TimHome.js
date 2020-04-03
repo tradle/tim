@@ -25,7 +25,7 @@ const debug = require('debug')('tradle:app:Home')
 import { Text, setFontFamily } from './Text'
 import HomePageMixin from './HomePageMixin'
 import components from './components'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import QRCode from './QRCode'
@@ -157,7 +157,8 @@ class TimHome extends Component {
   }
 
   show() {
-    if (!utils.getMe()) {
+    let me = utils.getMe()
+    if (!me) {
       if (ENV.autoRegister)
         this.showFirstPage()
       else
@@ -165,7 +166,12 @@ class TimHome extends Component {
       // this.register(() => this.showFirstPage())
       return
     }
-    this.signInAndContinue()
+    if (isWeb()  &&  !me._masterAuthor) {
+      this.setState({isModalOpen: true})
+      Actions.genPairingData()
+    }
+    else
+      this.signInAndContinue()
   }
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
@@ -405,6 +411,10 @@ class TimHome extends Component {
       // debugger
       this.setState({pairingData, isModalOpen: true})
       break
+    case 'masterIdentity':
+      this.setState({isModalOpen: false})
+      this.signInAndContinue()
+      break
     case 'pairingSuccessful':
       this.signInAndContinue()
       return
@@ -425,7 +435,7 @@ class TimHome extends Component {
       this.showLandingPage(null, ENV.tour)
       break
     case 'offerKillSwitchAfterApplication':
-      if (!utils.isWeb()) return
+      if (!isWeb()) return
 
       if (ENV.wipeAfterApplication) {
         Alert.alert(
@@ -520,7 +530,7 @@ class TimHome extends Component {
     if (!noResetNavStack) {
       // After tour
       var nav = this.props.navigator
-      if (utils.isWeb()) {
+      if (isWeb()) {
         if (nav.getCurrentRoutes().length > 1)
           replace = true
       }
@@ -961,69 +971,29 @@ class TimHome extends Component {
                  <View style={[styles.qrcode, {alignItems: 'center', paddingTop: 30}]}>
                    <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
                  </View>
+        <TouchableOpacity onPress={() => Actions.requestWipe({ confirmed: true })}>
+          <Text>WIPE</Text>
+        </TouchableOpacity>
                </View>
     }
 
     return (
       <View style={styles.container}>
         <BackgroundImage testID="homeBG" source={BG_IMAGE} />
-        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
+        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler(pairingData)}>
           <View style={styles.flexGrow} />
           {regView}
           <Text style={errStyle}>{err}</Text>
           {dev}
-          <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => {
-            this.closeModal()
-          }}>
-            <TouchableOpacity  onPress={() => {
-              this.closeModal()
-              this.showFirstPage()
-            }}>
-              <View style={styles.modalBackgroundStyle}>
-                {qrcode}
-              </View>
-            </TouchableOpacity>
+          <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+            <View style={styles.modalBackgroundStyle}>
+              {qrcode}
+            </View>
           </Modal>
         </TouchableOpacity>
       </View>
     );
-
-    // return (
-    //   <View style={styles.container}>
-    //     <BackgroundImage testID="homeBG" source={BG_IMAGE} />
-    //     <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
-    //       <View style={styles.flexGrow} />
-    //       { utils.getMe()
-    //         ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
-    //               onPress={() => this._pressHandler()}>
-    //             <View style={styles.getStarted}>
-    //                <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
-    //             </View>
-    //           </TouchableOpacity>
-    //         : regView
-    //       }
-    //       <Text style={errStyle}>{err}</Text>
-    //       {dev}
-    //     </TouchableOpacity>
-    //   </View>
-    // );
   }
-
-        // <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
-        //   <View style={{flexGrow:1}} />
-        //   { utils.getMe()
-        //     ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
-        //           underlayColor='transparent' onPress={() => this._pressHandler()}>
-        //         <View style={styles.getStarted}>
-        //            <Text style={styles.getStartedText}>Get started</Text>
-        //         </View>
-        //       </TouchableOpacity>
-        //     : regView
-        //   }
-        //   <Text style={errStyle}>{err}</Text>
-        //   {dev}
-        // </TouchableOpacity>
-
   renderVersion() {
     return (
       <View>
@@ -1150,10 +1120,16 @@ class TimHome extends Component {
     )
   }
 
-  _pressHandler() {
-    if (utils.getMe())
-      signIn(this.props.navigator)
-        .then(() => this.showFirstPage())
+  _pressHandler(pairingData) {
+    let me = utils.getMe()
+    if (!me)
+      return
+    if (isWeb()  &&  !me._masterAuthor) {
+      Actions.getMasterIdentity(pairingData)
+      return
+    }
+    signIn(this.props.navigator)
+    .then(() => this.showFirstPage())
   }
   openModal() {
     this.setState({isModalOpen: true});

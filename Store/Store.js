@@ -111,7 +111,7 @@ const excludeWhenSignAndSend = [
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
 
-import utils, {translate, translateEnum, isWeb} from '../utils/utils'
+import utils, {translate, translateEnum, isWeb, tryWithExponentialBackoff} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
 import DataBundle from './plugins/DataBundle'
@@ -1069,11 +1069,7 @@ var Store = Reflux.createStore({
     let meId = utils.getId(r)
     this._setItem(meId, r)
     await this.dbPut(meId, r)
-      // .then(() => {
-      //   if (params.registered) {
-      //     this.trigger({action: 'registered'})
-      //   } else if (params)
-      // })
+    await this.setMe(r)
   },
   async onSetAuthenticated(authenticated) {
     if (!authenticated && meDriver) meDriver.pause()
@@ -3446,6 +3442,8 @@ var Store = Reflux.createStore({
   },
   async packMessage(toChain, from, to, context) {
     var sendParams = {}
+    if (me._masterAuthor)
+      toChain._masterAuthor = me._masterAuthor
     if (toChain[CUR_HASH]) {
       sendParams.link = toChain[CUR_HASH]
       from = toChain.from
@@ -4980,18 +4978,7 @@ if (!res[SIG]  &&  res._message)
 
       await save(returnVal)
       if (isNew  &&  isWeb())
-        genPairingData()
-    }
-
-    function genPairingData() {
-      let { pubkeys } = meDriver.identity
-      let key = pubkeys.find(key => key.purpose === 'sign')
-      key.importedFrom = me[ROOT_HASH]
-      let pairingData = {
-        key: JSON.stringify(key),
-        nonce: crypto.randomBytes(32).toString('base64')
-      }
-      self.trigger({action: 'genPairingData', pairingData})
+        self.onGenPairingData()
     }
 
     async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
@@ -5384,11 +5371,22 @@ if (!res[SIG]  &&  res._message)
       // title: utils.getDisplayName(r)
     }
   },
+  onGenPairingData() {
+    let { pubkeys } = meDriver.identity
+    let key = pubkeys.find(key => key.purpose === 'sign')
+
+    let newKey = { ...key, importedFrom: me[ROOT_HASH]}
+    let pairingData = {
+      key: JSON.stringify(newKey),
+      nonce: crypto.randomBytes(32).toString('base64')
+    }
+    this.trigger({action: 'genPairingData', pairingData})
+  },
   async onSendPairingRequest (pairingData) {
     let newKey = JSON.parse(pairingData.key)
 
     let { pubkeys } = meDriver.identity
-    if (pubkeys.find(key => _.isEqual(key, newKey)))
+    if (pubkeys.find(key => key.pub === newKey.pub))
       return
     const newIdentity = _.cloneDeep(meDriver.identity)
 
@@ -5411,11 +5409,51 @@ if (!res[SIG]  &&  res._message)
     var myIdentities = this._getItem(MY_IDENTITIES)
     // if (!myIdentities)
     //   debugger
-    let meId = utils.getId(me).replace(PROFILE, IDENTITY)
+    let meId = utils.getId(me)
     let currentId = myIdentities.allIdentities.find(id => id.id === meId)
     currentId.publishedIdentity = identity
     this._setItem(MY_IDENTITIES, myIdentities)
     await this.dbPut(MY_IDENTITIES, myIdentities)
+  },
+  async onGetMasterIdentity(pairingData) {
+    let delay = delay || 1000
+    if (!this.client)
+      this.client = graphQL.initClient(meDriver, SERVICE_PROVIDERS[0].url)
+    let masterIdentity = await tryWithExponentialBackoff(async () => {
+      try {
+        let masterAuthor = await this.lookupKeyWithMasterAuthor(pairingData)
+        me._masterAuthor = masterAuthor
+        await this.onUpdateMe(me)
+        this.trigger({action: 'masterIdentity', masterAuthor, me})
+      } catch (err) {
+        debug('key not found, will retry', err)
+        throw err
+      }
+    }, {
+      intialDelay: 1000,
+      maxDelay: 1000,
+      maxAttempts: 5,
+    })
+  },
+  async lookupKeyWithMasterAuthor(pairingData) {
+    let pub  = JSON.parse(pairingData.key)
+    let importedFrom = me[ROOT_HASH]
+    let masterAuthor = await graphQL.getMasterAuthorKey({pub: pub.pub, importedFrom})
+    if (!masterAuthor)
+      throw new Error('not found')
+
+    debugger
+    let { list } = await this.searchServer({
+        modelName: MY_EMPLOYEE_PASS,
+        noTrigger: true,
+        filterResource: {owner: {id: `${IDENTITY}_${masterAuthor}_${masterAuthor}`}}
+      })
+    if (!list  ||  !list.length)
+      return masterAuthor
+    let myEmployeeBadge = list[0]
+    let org = this._getItem(myEmployeeBadge.from).organization
+    await this.setupEmployee(myEmployeeBadge, org)
+    return masterAuthor
   },
   async insurePublishingIdentity(org) {
     if (!me)
@@ -7180,8 +7218,19 @@ if (!res[SIG]  &&  res._message)
     let authorId = utils.makeId(PROFILE, isIdentity && r._permalink || (r._org  ||  r._author))
     let author = this._getItem(authorId)
     let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
-    let myOrgRep = this.getRepresentative(me.organization)
-    let myOrgRepId = utils.getId(myOrgRep)
+    let org
+    let myOrgRepId
+    if (me.isEmployee) {
+      org = me.organization
+      let myOrgRep = this.getRepresentative(org)
+      myOrgRepId = utils.getId(myOrgRep)
+    }
+    else {
+      myOrgRepId = `${PROFILE}_${r._org}_${r._org}`
+      let item = this._getItem(myOrgRepId)
+      org = item.organization
+    }
+
     // let from, to
     switch (m.id) {
     case FORM_ERROR:
@@ -7190,14 +7239,14 @@ if (!res[SIG]  &&  res._message)
     case APPLICATION_DENIAL:
     case APPLICATION_APPROVAL:
     case CONFIRMATION:
-      rr.from = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
+      rr.from = {id: myOrgRepId, title: utils.getDisplayName(org)}
       rr.to = {id: authorId, title: authorTitle}
       break
     case APPLICATION:
       // this.organizeSubmissions(rr)
     default:
       rr.from = {id: authorId, title: authorTitle}
-      rr.to = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
+      rr.to = {id: myOrgRepId, title: utils.getDisplayName(org)}
       break
     }
     let props = m.properties
@@ -9884,6 +9933,7 @@ if (!res[SIG]  &&  res._message)
       currentIdentity: pKey,
       allIdentities: [{
         id: pKey,
+        privkeys: me.privkeys,
         title: utils.getDisplayName(value),
         publishedIdentity
       }]};
@@ -11103,7 +11153,7 @@ if (!res[SIG]  &&  res._message)
         else {
           // Employee could approve other employee onboarding applications
           if (!me.isEmployee)
-            await setupEmployee()
+            await this.setupEmployee(val, org)
           else
             doInit = false
         }
@@ -11230,51 +11280,42 @@ if (!res[SIG]  &&  res._message)
       await self.onAddChatItem({resource: bookmark, noTrigger: true})
       disableBlockchainSync(meDriver)
     }
-    async function setupEmployee() {
-      me.isEmployee = true
-      me.organization = self.buildRef(org)
-      self.resetForEmployee(me, org)
-      // let bookmark = {
-      //   [TYPE]: BOOKMARK,
-      //   message: 'My Customers',
-      //   bookmark: {
-      //     [TYPE]: APPLICATION,
-      //     relationshipManagers: [self._makeIdentityStub(me)]
-      //   },
-      //   from: me
-      // }
-      // await self.onAddChatItem({resource: bookmark, noTrigger: true})
-
-      me.employeePass = self.buildRef(val)
-      const bookmarks = storeUtils.getEmployeeBookmarks({
-        me,
-        botPermalink: self.getRepresentative(me.organization)[ROOT_HASH]
-      })
-
-      for (const bookmark of bookmarks) {
-        // can we do this in parallel?
-        await self.onAddChatItem({resource: bookmark, noTrigger: true})
-      }
-
-      if (me.firstName === FRIEND) {
-        let result = []
-        let arr = [NAME, PERSONAL_INFO, APPLICANT, BASIC_CONTACT_INFO]
-        for (let j=0; j<arr.length; j++) {
-          let sr = await self.searchMessages({modelName: arr[j], to: org})
-          if (sr)
-            result = result.concat(sr)
-        }
-
-        if (result.length) {
-          let fRes = result.find((r) => utils.getId(r.from) === meId)
-          me.firstName = fRes.firstName || fRes.givenName
-        }
-      }
-      self._setItem(meId, me)
-      await self.dbPut(meId, me)
-      disableBlockchainSync(meDriver)
-    }
   },
+
+  async setupEmployee(val, org) {
+    me.isEmployee = true
+    me.organization = this.buildRef(org)
+    this.resetForEmployee(me, org)
+    me.employeePass = this.buildRef(val)
+    const bookmarks = storeUtils.getEmployeeBookmarks({
+      me,
+      botPermalink: this.getRepresentative(me.organization)[ROOT_HASH]
+    })
+
+    for (const bookmark of bookmarks) {
+      // can we do this in parallel?
+      await this.onAddChatItem({resource: bookmark, noTrigger: true})
+    }
+    let meId = utils.getId(me)
+    if (me.firstName === FRIEND) {
+      let result = []
+      let arr = [NAME, PERSONAL_INFO, APPLICANT, BASIC_CONTACT_INFO]
+      for (let j=0; j<arr.length; j++) {
+        let sr = await this.searchMessages({modelName: arr[j], to: org})
+        if (sr)
+          result = result.concat(sr)
+      }
+
+      if (result.length) {
+        let fRes = result.find((r) => utils.getId(r.from) === meId)
+        me.firstName = fRes.firstName || fRes.givenName
+      }
+    }
+    this._setItem(meId, me)
+    await this.dbPut(meId, me)
+    disableBlockchainSync(meDriver)
+  },
+
   async disableFormRequests({form, noTrigger, batch, org}) {
     let formRequests = await this.searchMessages({modelName: FORM_REQUEST, to: org})
     if (formRequests)

@@ -979,24 +979,33 @@ var search = {
 
     return results[0]
   },
-//   async executeApollo({client, query, table, versionId}) {
-// let start = Date.now()
-//     try {
-//       let data = await client.query({
-//           fetchPolicy: 'network-only',
-//           errorPolicy: 'all',
-//           query: gql(`${query}`),
-//           variables: versionId  &&  {modelsVersionId: versionId}
-//         })
-// console.log('searchServer.apollo ' + (Date.now() - start))
-//       return { result: data.data[table] }
-//     } catch(error) {
-//       // debugger
-//       console.log(error)
-//       return { error }
-//     }
-//   },
-
+  async getMasterAuthorKey({pub, importedFrom}) {
+    let table = 'rl_tradle_PubKey'
+    let query = `query {
+      ${table}(
+        limit:1
+        orderBy: {
+          property: _time,
+          desc: true
+        }
+        filter:{
+          EQ: {
+            pub: "${pub}",
+            importedFrom: "${importedFrom}"
+          },
+        }
+      ) {
+        edges {
+          node {
+            permalink
+          }
+        }
+      }
+    }`
+    let data = await this.execute({query, table})
+    if (data.result  &&  data.result.edges.length)
+      return data.result.edges[0].node.permalink
+  },
   async execute(params) {
     if (useApollo)
       return this.executeApollo(params)
