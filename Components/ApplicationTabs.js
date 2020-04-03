@@ -283,11 +283,6 @@ class ApplicationTabs extends Component {
 
     let progress = this.getProgress(resource)
     let progressColor = '#a0d0a0' //bankStyle.linkColor
-    const spin = this.spinValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '90deg']
-    })
-    let style = {transform: [{rotate: spin}]}
 
     return <View style={[styles.row, {justifyContent: 'space-between'}]}>
              <View style={styles.progress}>
@@ -383,6 +378,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     progress: {
       marginTop: 20,
       marginBottom: 10,
+      paddingHorizontal: 10,
       justifyContent: 'center',
       alignSelf: 'center'
     },

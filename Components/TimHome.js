@@ -25,7 +25,7 @@ const debug = require('debug')('tradle:app:Home')
 import { Text, setFontFamily } from './Text'
 import HomePageMixin from './HomePageMixin'
 import components from './components'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import QRCode from './QRCode'
@@ -149,7 +149,8 @@ class TimHome extends Component {
   }
 
   show() {
-    if (!utils.getMe()) {
+    let me = utils.getMe()
+    if (!me) {
       if (ENV.autoRegister)
         this.showFirstPage()
       else
@@ -157,7 +158,12 @@ class TimHome extends Component {
       // this.register(() => this.showFirstPage())
       return
     }
-    this.signInAndContinue()
+    if (isWeb()  &&  !me._masterAuthor) {
+      this.setState({isModalOpen: true})
+      Actions.genPairingData()
+    }
+    else
+      this.signInAndContinue()
   }
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
@@ -395,6 +401,10 @@ class TimHome extends Component {
       // debugger
       this.setState({pairingData, isModalOpen: true})
       break
+    case 'masterIdentity':
+      this.setState({isModalOpen: false})
+      this.signInAndContinue()
+      break
     case 'pairingSuccessful':
       this.signInAndContinue()
       return
@@ -415,7 +425,7 @@ class TimHome extends Component {
       this.showLandingPage(null, ENV.tour)
       break
     case 'offerKillSwitchAfterApplication':
-      if (utils.isWeb()) {
+      if (isWeb()) {
         Alert.alert(
           translate('enterPasswordOrWipeOutTheAppData'),
           null,
@@ -497,8 +507,10 @@ class TimHome extends Component {
     if (!noResetNavStack) {
       // After tour
       var nav = this.props.navigator
-      if (utils.isWeb()  &&  nav.getCurrentRoutes().length > 1)
-        replace = true
+      if (isWeb()) {
+        if (nav.getCurrentRoutes().length > 1)
+          replace = true
+      }
       else
         nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     }
@@ -952,20 +964,15 @@ class TimHome extends Component {
     return (
       <View style={styles.container}>
         <BackgroundImage testID="homeBG" source={BG_IMAGE} />
-        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
+        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler(pairingData)}>
           <View style={styles.flexGrow} />
           {regView}
           <Text style={errStyle}>{err}</Text>
           {dev}
           <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-            <TouchableOpacity  onPress={() => {
-              this.closeModal()
-              this.showFirstPage()
-            }}>
-              <View style={styles.modalBackgroundStyle}>
-                {qrcode}
-              </View>
-            </TouchableOpacity>
+            <View style={styles.modalBackgroundStyle}>
+              {qrcode}
+            </View>
           </Modal>
         </TouchableOpacity>
       </View>
@@ -1093,11 +1100,16 @@ class TimHome extends Component {
       'Please restart TiM'
     )
   }
-
-  _pressHandler() {
-    if (utils.getMe())
-      signIn(this.props.navigator)
-        .then(() => this.showFirstPage())
+  _pressHandler(pairingData) {
+    let me = utils.getMe()
+    if (!me)
+      return
+    if (isWeb()  &&  !me._masterAuthor) {
+      Actions.getMasterIdentity(pairingData)
+      return
+    }
+    signIn(this.props.navigator)
+    .then(() => this.showFirstPage())
   }
   openModal() {
     this.setState({isModalOpen: true});
