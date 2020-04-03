@@ -22,7 +22,7 @@ import ResourceRow from './ResourceRow'
 import VerificationRow from './VerificationRow'
 import PageView from './PageView'
 import ActionSheet from './ActionSheet'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
@@ -633,7 +633,7 @@ class ResourceList extends Component {
       if (dn === meOrgName)
         title = meOrgName
       else {
-        // let sep = utils.isWeb() ? '  →  ' : ' -- '
+        // let sep = isWeb() ? '  →  ' : ' -- '
         let sep = '  →  '
         title = meOrgName + sep + dn
       }
@@ -1071,8 +1071,8 @@ class ResourceList extends Component {
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
-          keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
-          keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
+          keyboardDismissMode={isWeb() ? 'none' : 'on-drag'}
+          keyboardShouldPersistTaps={isWeb() ? 'never' : 'always'}
           initialListSize={1000}
           pageSize={20}
           refreshControl={
@@ -1154,11 +1154,13 @@ class ResourceList extends Component {
           text: translate(hideText, translate(utils.getModel(this.props.modelName), true)),
           onPress: () => this.setState({hideMode: !this.state.hideMode, dataSource: this.state.dataSource.cloneWithRows(utils.clone(this.state.list))})
         },
-        {
+      ]
+      if (!isWeb()) {
+        buttons.push({
           text: translate('scanQRcode'),
           onPress: () => this.scanQRAndProcess()
-        }
-      ]
+        })
+      }
     }
 
     buttons.push({ text: translate('cancel') })
@@ -1463,7 +1465,7 @@ ResourceList = makeStylish(ResourceList)
 ResourceList = makeResponsive(ResourceList)
 
 // TODO: use utils.normalizeBoxShadow
-var PRETTY_ROW_SHADOW = utils.isWeb()
+var PRETTY_ROW_SHADOW = isWeb()
 ? {
     boxShadow: '0 0px 10px 0 rgba(0,0,0,0.12)'
   }
