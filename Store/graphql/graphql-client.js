@@ -946,6 +946,34 @@ var search = {
     return results[0]
   },
 
+  async getMasterAuthorKey({pub, importedFrom}) {
+    let table = 'rl_tradle_PubKey'
+    let query = `query {
+      ${table}(
+        limit:1
+        orderBy: {
+          property: _time,
+          desc: true
+        }
+        filter:{
+          EQ: {
+            pub: "${pub}",
+            importedFrom: "${importedFrom}"
+          },
+        }
+      ) {
+        edges {
+          node {
+            permalink
+          }
+        }
+      }
+    }`
+    let data = await this.execute({query, table})
+    if (data.result  &&  data.result.edges.length)
+      return data.result.edges[0].node.permalink
+  },
+
   async execute(params) {
     if (useApollo)
       return this.executeApollo(params)

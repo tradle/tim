@@ -54,6 +54,8 @@ var asyncActions = [
 
   'genPairingData',
   'sendPairingRequest',
+  'getMasterIdentity',
+
   'processPairingRequest',
   'processPairingResponse',
   'pairingRequestAccepted',
