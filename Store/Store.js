@@ -1879,6 +1879,7 @@ var Store = Reflux.createStore({
 
     return node.createObject({ object })
   },
+
   async meDriverSend(sendParams) {
     await this._preSendCheck(sendParams)
     await this.maybeWaitForIdentity(sendParams.to)
@@ -1897,6 +1898,12 @@ var Store = Reflux.createStore({
 
   async meDriverExec(method, ...args) {
     // give animations a chance to animate
+    if (method === 'sign'  ||  method === 'signAndSend') {
+      if (args[0].object  &&  !args[0].object._masterAuthor) {
+        debugger
+        args[0].object._masterAuthor = me._masterAuthor
+      }
+    }
     if (method === 'sign' || method === 'send' || method === 'signAndSend') {
       await this._preSendCheck(...args)
     }
@@ -3063,6 +3070,8 @@ var Store = Reflux.createStore({
       await this.maybeWaitForIdentity({ permalink: hash })
 
       toChain = utils.sanitize(toChain)
+      // if (me._masterAuthor)
+      //   toChain._masterAuthor = me._masterAuthor
       result = await this.meDriverExec('sign', { object: toChain })
       toChain = result.object
       let hash = protocol.linkString(toChain)
@@ -4977,8 +4986,8 @@ if (!res[SIG]  &&  res._message)
         returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
 
       await save(returnVal)
-      if (isNew  &&  isWeb())
-        self.onGenPairingData()
+      // if (isNew  &&  isWeb())
+      //   self.onGenPairingData()
     }
 
     async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
@@ -5415,10 +5424,10 @@ if (!res[SIG]  &&  res._message)
     this._setItem(MY_IDENTITIES, myIdentities)
     await this.dbPut(MY_IDENTITIES, myIdentities)
   },
-  async onGetMasterIdentity(pairingData) {
+  async onGetMasterIdentity(pairingData, url) {
     let delay = delay || 1000
     if (!this.client)
-      this.client = graphQL.initClient(meDriver, SERVICE_PROVIDERS[0].url)
+      this.client = graphQL.initClient(meDriver, url || SERVICE_PROVIDERS[0].url)
     let masterIdentity = await tryWithExponentialBackoff(async () => {
       try {
         let masterAuthor = await this.lookupKeyWithMasterAuthor(pairingData)
@@ -5430,9 +5439,9 @@ if (!res[SIG]  &&  res._message)
         throw err
       }
     }, {
-      intialDelay: 1000,
-      maxDelay: 1000,
-      maxAttempts: 5,
+      intialDelay: 2000,
+      maxDelay: 2000,
+      maxAttempts: Infinity,
     })
   },
   async lookupKeyWithMasterAuthor(pairingData) {
@@ -10428,6 +10437,8 @@ if (!res[SIG]  &&  res._message)
         firstName: me.firstName
       }
     }
+    if (me._masterAuthor)
+      msg._masterAuthor = me._masterAuthor
     var opts = {
       object: msg,
       to: { permalink: orgRep[ROOT_HASH] }
