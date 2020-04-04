@@ -1899,7 +1899,7 @@ var Store = Reflux.createStore({
   async meDriverExec(method, ...args) {
     // give animations a chance to animate
     if (method === 'sign'  ||  method === 'signAndSend') {
-      if (args[0].object  &&  !args[0].object._masterAuthor) {
+      if (me._masterAuthor  &&  args[0].object  &&  !args[0].object._masterAuthor) {
         debugger
         args[0].object._masterAuthor = me._masterAuthor
       }
