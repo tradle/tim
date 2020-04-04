@@ -6,6 +6,7 @@ import {
   View,
   // Text,
   StatusBar,
+  Modal,
   TouchableOpacity,
   Alert,
 } from 'react-native'
@@ -20,6 +21,7 @@ import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
 import debounce from 'debounce'
 import StepIndicator from 'react-native-step-indicator'
+import QR from '@tradle/qr-schema'
 
 import constants from '@tradle/constants'
 
@@ -31,6 +33,7 @@ import VerificationMessageRow from './VerificationMessageRow'
 import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
 import FormErrorRow from './FormErrorRow'
+import QRCode from './QRCode'
 import TourRow from './TourRow'
 import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
@@ -90,6 +93,7 @@ class MessageList extends Component {
       limit: LIMIT,
       hasProducts: resource  &&  this.hasProducts(resource),
       allLoaded: false,
+      isModalOpen: false,
       step: -1,
       bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: utils.getMe()._showStepIndicator
@@ -165,12 +169,15 @@ class MessageList extends Component {
       Actions.getProductList({ resource })
     // if (resource  &&  resource[TYPE] === ORGANIZATION)
     setFontFamily(bankStyle)
+    // Temp HACK
+    if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
+      Actions.genPairingData()
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let {action, error, to, isConnected} = params
+    let {action, error, to, isConnected, pairingData} = params
     if (error)
       return
     if (action === 'connectivity') {
@@ -188,6 +195,15 @@ class MessageList extends Component {
       //   state.resource = chatWith
       if (online !== this.state.onlineStatus)
         this.setState({onlineStatus: online})
+      return
+    }
+    if (action === 'genPairingData') {
+      // debugger
+      this.setState({pairingData, isModalOpen: true})
+      return
+    }
+    if (action === 'masterIdentity') {
+      this.setState({isModalOpen: false})
       return
     }
     if (action === 'getItem'  &&  utils.getId(resource) === utils.getId(chatWith)) {
@@ -261,6 +277,12 @@ class MessageList extends Component {
       return
     if (action !== 'messageList')
       return
+
+    if (isWeb()  &&  !utils.getMe()._masterAuthor) {
+      this.setState({isModalOpen: true})
+      Actions.genPairingData()
+      return
+    }
 
     if (params.forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
@@ -515,6 +537,8 @@ class MessageList extends Component {
       return true
     if (this.state.list.length !== nextState.list.length)
       return true
+    if (this.state.isModalOpen  !== nextState.isModalOpen)
+      return true
     if (this.state.application !== nextState.application)
       return true
     if (this.state.productList !== nextState.productList)
@@ -701,7 +725,7 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, originatingMessage, currency, navigator } = this.props
+    let { application, isAggregation, originatingMessage, currency, navigator, isModalOpen } = this.props
 
     let bankStyle = this.state.bankStyle
 
@@ -804,7 +828,7 @@ class MessageList extends Component {
     if (!modelName)
       modelName = MESSAGE
     let application = this.state.application ||  this.props.application
-    let { list, isLoading, context, isConnected, isForgetting, allLoaded,
+    let { list, isLoading, context, isConnected, isForgetting, allLoaded, pairingData, isModalOpen,
           onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
     if (currentContext)
       context = currentContext
@@ -931,6 +955,34 @@ class MessageList extends Component {
       let image = [{ width, height: height - 1 }, platformStyles.navBarMargin]
       backgroundImage = <BackgroundImage source={{uri: bgImage}}  resizeMode='cover' style={image} />
     }
+    let qrcode
+    let me = utils.getMe()
+    if (pairingData  &&  !me._masterAuthor) {
+      let w = 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
+      let qr = QR.toHex({
+        schema: 'PairingDevices',
+        data: pairingData // {crypto: 'Hello world'}
+      })
+      qrcode = <View style={{padding: 20}}>
+                 <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                   <QRCode inline={true} content={qr} dimension={w} />
+                 </View>
+                 <View style={[styles.qrcode, {alignItems: 'center', paddingTop: 30}]}>
+                   <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
+                 </View>
+               </View>
+      return (
+        <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
+          <TouchableOpacity style={styles.splashLayout} onPress={() => Actions.getMasterIdentity(pairingData, resource.url)}>
+            <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+              <View style={styles.modalBackgroundStyle}>
+                {qrcode}
+              </View>
+            </Modal>
+          </TouchableOpacity>
+        </PageView>
+      )
+    }
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
@@ -945,9 +997,14 @@ class MessageList extends Component {
         {alert}
         {assignRM}
       </PageView>
-    );
+    )
   }
-
+  openModal() {
+    this.setState({isModalOpen: true});
+  }
+  closeModal() {
+    this.setState({isModalOpen: false});
+  }
   hasMenuButton() {
     return !!this.getActionSheetItems()
   }
@@ -1440,6 +1497,7 @@ MessageList = makeStylish(MessageList)
 var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankStyle }) {
   let isAndroid = Platform.OS === 'android'
   let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
+  let { width, height } = utils.dimensions(MessageList)
   return StyleSheet.create({
     footer: {
       flexDirection: 'row',
@@ -1497,6 +1555,26 @@ var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankS
       opacity: 0.7,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: bgcolor
+    },
+    modalBackgroundStyle: {
+      // backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      // backgroundColor: 'rgba(27, 87, 136, 0.8)',
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      padding: 20,
+      height,
+    },
+    qrcode: {
+      alignSelf: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#ffffff',
+      padding:10
+    },
+    splashLayout: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      width,
+      height
     },
   })
 })

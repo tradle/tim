@@ -158,11 +158,11 @@ class TimHome extends Component {
       // this.register(() => this.showFirstPage())
       return
     }
-    if (isWeb()  &&  !me._masterAuthor) {
-      this.setState({isModalOpen: true})
-      Actions.genPairingData()
-    }
-    else
+    // if (isWeb()  &&  !me._masterAuthor) {
+    //   this.setState({isModalOpen: true})
+    //   Actions.genPairingData()
+    // }
+    // else
       this.signInAndContinue()
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -397,14 +397,14 @@ class TimHome extends Component {
     case 'start':
       this.onStart(params)
       return
-    case 'genPairingData':
-      // debugger
-      this.setState({pairingData, isModalOpen: true})
-      break
-    case 'masterIdentity':
-      this.setState({isModalOpen: false})
-      this.signInAndContinue()
-      break
+    // case 'genPairingData':
+    //   // debugger
+    //   this.setState({pairingData, isModalOpen: true})
+    //   break
+    // case 'masterIdentity':
+    //   this.setState({isModalOpen: false})
+    //   this.signInAndContinue()
+    //   break
     case 'pairingSuccessful':
       this.signInAndContinue()
       return
@@ -913,30 +913,29 @@ class TimHome extends Component {
               </View>
 
     let regView
-    if (utils.getMe()) {
-      regView = !ENV.autoRegister &&
-                  <View  style={styles.center}>
-                    <FadeInView>
-                      <TouchableOpacity  onPress={() => {
-                        this.register(this.showFirstPage.bind(this))
-                        }}>
-                        <View style={styles.signIn}>
-                          <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </FadeInView>
-                    <FadeInView>
-                      <TouchableOpacity  onPress={() => {
-                        this.pairDevices(this.showFirstPage.bind(this))
-                        }}>
-                        <View style={[styles.signIn, styles.shadow]}>
-                          <Text style={styles.pairDivicesText}>{translate('I have another Tradle device')}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </FadeInView>
-                 </View>
+    if (!ENV.autoRegister) {
+      regView = <View  style={styles.center}>
+                  <FadeInView>
+                    <TouchableOpacity  onPress={() => {
+                      this.register(this.showFirstPage.bind(this))
+                      }}>
+                      <View style={styles.signIn}>
+                        <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </FadeInView>
+                  <FadeInView>
+                    <TouchableOpacity  onPress={() => {
+                      this.pairDevices(this.showFirstPage.bind(this))
+                      }}>
+                      <View style={[styles.signIn, styles.shadow]}>
+                        <Text style={styles.pairDivicesText}>{translate('I have another Tradle device')}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </FadeInView>
+               </View>
     }
-    else {
+    else if (utils.getMe()) {
       regView = <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                     onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
