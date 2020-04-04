@@ -166,11 +166,11 @@ class TimHome extends Component {
       // this.register(() => this.showFirstPage())
       return
     }
-    if (isWeb()  &&  !me._masterAuthor) {
-      this.setState({isModalOpen: true})
-      Actions.genPairingData()
-    }
-    else
+    // if (isWeb()  &&  !me._masterAuthor) {
+    //   this.setState({isModalOpen: true})
+    //   Actions.genPairingData()
+    // }
+    // else
       this.signInAndContinue()
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -407,14 +407,14 @@ class TimHome extends Component {
     case 'start':
       this.onStart(params)
       return
-    case 'genPairingData':
-      // debugger
-      this.setState({pairingData, isModalOpen: true})
-      break
-    case 'masterIdentity':
-      this.setState({isModalOpen: false})
-      this.signInAndContinue()
-      break
+    // case 'genPairingData':
+    //   // debugger
+    //   this.setState({pairingData, isModalOpen: true})
+    //   break
+    // case 'masterIdentity':
+    //   this.setState({isModalOpen: false})
+    //   this.signInAndContinue()
+    //   break
     case 'pairingSuccessful':
       this.signInAndContinue()
       return
