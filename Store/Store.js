@@ -5219,12 +5219,20 @@ if (!res[SIG]  &&  res._message)
     let { pubkeys } = meDriver.identity
     if (pubkeys.find(key => key.pub === newKey.pub))
       return
-    const newIdentity = _.cloneDeep(meDriver.identity)
-    newIdentity.pubkeys.push(newKey)
+
+    const now = Date.now()
+    const newIdentity = {
+      ...meDriver.identity,
+      pubkeys: meDriver.identity.pubkeys.concat(newKey),
+      _time: now
+    }
+
+    console.log('IDENTITY BEFORE', meDriver.identity)
     meDriver.updateIdentity({
       keys: meDriver.keys.slice(),
       identity: newIdentity
     }, async (err) => {
+      console.log('IDENTITY AFTER', meDriver.identity)
       if (err)
         debugger
       await this.handlePairing()
