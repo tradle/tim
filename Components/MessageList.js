@@ -168,7 +168,7 @@ class MessageList extends Component {
     // if (resource  &&  resource[TYPE] === ORGANIZATION)
     setFontFamily(bankStyle)
     if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
-      Actions.genPairingData()
+      Actions.genPairingData(resource.url)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -298,11 +298,11 @@ class MessageList extends Component {
       return
 
 
-    if (isWeb()  &&  !utils.getMe()._masterAuthor) {
-      this.setState({isModalOpen: true})
-      Actions.genPairingData()
-      return
-    }
+    // if (isWeb()  &&  !utils.getMe()._masterAuthor) {
+    //   this.setState({isModalOpen: true})
+    //   Actions.genPairingData(resource.url)
+    //   return
+    // }
 
     if (params.forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
