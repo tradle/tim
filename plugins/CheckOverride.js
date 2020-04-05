@@ -16,37 +16,23 @@ module.exports = function CheckOverride ({ models }) {
       if (subClassOf !== CHECK_OVERRIDE)
         return
 
-      const { status, check } = form
-      if (!status) {
-        if (m.editCols) {
-          return {
-            requestedProperties: m.editCols.map(p => {name: p})
-          }
-        }
-        return {
-          requestedProperties: [
-            { name: 'status' },
-            { name: 'explanationForOverride' }
-          ]
-        }
-      }
       let requestedProperties
       if (m.editCols) {
-        if (m.editCols) {
-          requestedProperties = {
-            requestedProperties: m.editCols.map(p => {name: p})
-          }
-        }
+        requestedProperties = m.editCols.map(p => {
+            return { name: p }
+          })
       }
       else {
-        // HACK
-        let notes = properties.explanationForOverride || properties.reviewNotes || properties.notes
         requestedProperties = [
             { name: 'status' },
             { name: notes.name }
           ]
       }
+      const { status, check } = form
+      if (!status)
+        return { requestedProperties }
 
+      let notes = properties.explanationForOverride || properties.reviewNotes || properties.notes
       let props = m.properties
       if (!props.reasonToFail  ||  !props.reasonToPass)
         return { requestedProperties }
