@@ -5380,19 +5380,22 @@ if (!res[SIG]  &&  res._message)
       // title: utils.getDisplayName(r)
     }
   },
-  onGenPairingData() {
+  async onGenPairingData(url) {
     let { pubkeys } = meDriver.identity
     let key = pubkeys.find(key => key.purpose === 'sign')
 
     let newKey = { ...key, importedFrom: me[ROOT_HASH]}
     let pairingData = {
       key: JSON.stringify(newKey),
-      nonce: crypto.randomBytes(32).toString('base64')
+      nonce: '', // crypto.randomBytes(32).toString('base64'),
+      url
     }
     this.trigger({action: 'genPairingData', pairingData})
+    await this.onGetMasterIdentity(pairingData, url)
   },
   async onSendPairingRequest (pairingData) {
-    let newKey = JSON.parse(pairingData.key)
+    let { key, url } = pairingData
+    let newKey = JSON.parse(key)
 
     let { pubkeys } = meDriver.identity
     if (pubkeys.find(key => key.pub === newKey.pub))
@@ -5407,10 +5410,10 @@ if (!res[SIG]  &&  res._message)
     }, async (err) => {
       if (err)
         debugger
-      await this.handlePairing()
+      await this.handlePairing(url)
     })
   },
-  async handlePairing() {
+  async handlePairing(url) {
     let identity = meDriver.identity
     let iId = utils.getId(identity)
     await db.put(iId, identity)
@@ -5423,6 +5426,13 @@ if (!res[SIG]  &&  res._message)
     currentId.publishedIdentity = identity
     this._setItem(MY_IDENTITIES, myIdentities)
     await this.dbPut(MY_IDENTITIES, myIdentities)
+    const { wsClients } = driverInfo
+    // HACK for local
+    if (!url || url.indexOf('localhost') !== -1)
+      url = SERVICE_PROVIDERS  &&  SERVICE_PROVIDERS[0].url
+    let client = wsClients.byUrl[url]
+    if (client)
+      client.reset()
   },
   async onGetMasterIdentity(pairingData, url) {
     let delay = delay || 1000
