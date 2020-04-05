@@ -171,7 +171,7 @@ class MessageList extends Component {
     setFontFamily(bankStyle)
     // Temp HACK
     if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
-      Actions.genPairingData()
+      Actions.genPairingData(resource.url)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -278,11 +278,11 @@ class MessageList extends Component {
     if (action !== 'messageList')
       return
 
-    if (isWeb()  &&  !utils.getMe()._masterAuthor) {
-      this.setState({isModalOpen: true})
-      Actions.genPairingData()
-      return
-    }
+    // if (isWeb()  &&  !utils.getMe()._masterAuthor) {
+    //   this.setState({isModalOpen: true})
+    //   Actions.genPairingData()
+    //   return
+    // }
 
     if (params.forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
