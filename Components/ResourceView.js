@@ -61,7 +61,7 @@ const SCAN_QR_CODE = 0
 const USE_TOUCH_ID = 1
 const USE_GESTURE_PASSWORD = 2
 const CHANGE_GESTURE_PASSWORD = 3
-const PAIR_DEVICES = 4
+// const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const WIPE_DEVICE = 6
 const CONFIRMATION_PRODUCT_REQUEST = 'tradle.ConfirmPackageRequest'
@@ -469,10 +469,10 @@ class ResourceView extends Component {
       actions.push(CHANGE_GESTURE_PASSWORD)
     }
 
-    if (ENV.allowPairDevices) {
-      buttons.push(translate('pairDevices'))
-      actions.push(PAIR_DEVICES)
-    }
+    // if (ENV.allowPairDevices) {
+    //   buttons.push(translate('pairDevices'))
+    //   actions.push(PAIR_DEVICES)
+    // }
 
     if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
@@ -534,9 +534,9 @@ class ResourceView extends Component {
       return this.updateAuthSettings(r, r.useGesturePassword)
     case CHANGE_GESTURE_PASSWORD:
       return this.updateAuthSettings(r, true)
-    case PAIR_DEVICES:
-      Actions.genPairingData()
-      return
+    // case PAIR_DEVICES:
+    //   Actions.genPairingData()
+    //   return
     case SCAN_QR_CODE:
       this.scanFormsQRCode({isView: true})
       return
