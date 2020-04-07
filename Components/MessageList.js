@@ -199,9 +199,16 @@ class MessageList extends Component {
     if (error)
       return
     if (action === 'connectivity') {
-      this.setState({isConnected: isConnected})
+      this.setState({isConnected})
       return
     }
+    if (action === 'genPairingData') {
+      // debugger
+      this.setState({pairingData, isModalOpen: true})
+      return
+    }
+    if (this.state.isModalOpen)
+      return
     let chatWith = this.props.resource
     if (to  &&  utils.getRootHash(to) !== utils.getRootHash(chatWith))
       return
@@ -213,11 +220,6 @@ class MessageList extends Component {
       //   state.resource = chatWith
       if (online !== this.state.onlineStatus)
         this.setState({onlineStatus: online})
-      return
-    }
-    if (action === 'genPairingData') {
-      // debugger
-      this.setState({pairingData, isModalOpen: true})
       return
     }
     if (action === 'masterIdentity') {
@@ -296,13 +298,6 @@ class MessageList extends Component {
       return
     if (action !== 'messageList')
       return
-
-
-    // if (isWeb()  &&  !utils.getMe()._masterAuthor) {
-    //   this.setState({isModalOpen: true})
-    //   Actions.genPairingData(resource.url)
-    //   return
-    // }
 
     if (params.forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
