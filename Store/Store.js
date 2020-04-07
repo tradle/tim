@@ -1876,6 +1876,10 @@ var Store = Reflux.createStore({
       object = _.clone(object)
       this._maybePrepForEmployerBot(object)
     }
+    if (me._masterAuthor) {
+      debugger
+      object._masterAuthor = me._masterAuthor
+    }
 
     return node.createObject({ object })
   },
@@ -2937,11 +2941,11 @@ var Store = Reflux.createStore({
     if (!r._time)
       r._time = new Date().getTime();
     var toOrg
-    // r.to could be a reference to a resource
-    var to = this._getItem(r.to)
+    // r.to could be from the paired device
+    var to = this._getItem(r.to) || r.to
     let toType
     if (to)
-      toType = to[TYPE]
+      toType = utils.getType(to)
     let isReadOnlyContext, orgId, orgRep
     if (toType === ORGANIZATION) {
       orgId = utils.getId(r.to)
@@ -3039,12 +3043,16 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     // var promise = Q(protocol.linkString(toChain))
-    let applicant
-    if (application  &&  utils.isRM(application))
-      applicant = this._getItem(utils.getId(application.applicant))
-    else
-      applicant = r.to
-    let hash = applicant[ROOT_HASH]
+    let hash
+    if (application  &&  utils.isRM(application)) {
+      hash = utils.getRootHash(application.applicant)
+      // applicant = this._getItem(utils.getId(application.applicant))
+    }
+    else {
+      hash = utils.getRootHash(r.to)
+      // applicant = r.to
+    }
+    // let hash = applicant[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = utils.makeId(IDENTITY, hash)
@@ -3462,16 +3470,18 @@ var Store = Reflux.createStore({
     else
       sendParams.object = toChain
 
-    if (typeof to === 'string'  ||  utils.isStub(to))
-      to = this._getItem(utils.getId(to))
-    let provider, hash
-    if (to[ROOT_HASH] === me[ROOT_HASH]) {
-      provider = this._getItem(from)
+    // if (typeof to === 'string'  ||  utils.isStub(to))
+    //   to = this._getItem(utils.getId(to))
+    // let provider
+    let hash = utils.getRootHash(to)
+    if (hash === me[ROOT_HASH]) {
+      let provider = this._getItem(from)
       hash = provider[ROOT_HASH]
     }
-    else
-      provider = to
-    hash = provider[ROOT_HASH]
+    // else
+    //   provider = to
+
+    // hash = provider[ROOT_HASH]
 
     var isEmployee
     if (me.organization) {
@@ -4986,8 +4996,6 @@ if (!res[SIG]  &&  res._message)
         returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
 
       await save(returnVal)
-      // if (isNew  &&  isWeb())
-      //   self.onGenPairingData()
     }
 
     async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
@@ -5387,7 +5395,7 @@ if (!res[SIG]  &&  res._message)
     let newKey = { ...key, importedFrom: me[ROOT_HASH]}
     let pairingData = {
       key: JSON.stringify(newKey),
-      nonce: '', // crypto.randomBytes(32).toString('base64'),
+      nonce: crypto.randomBytes(32).toString('base64'),
       url
     }
     this.trigger({action: 'genPairingData', pairingData})
@@ -5427,9 +5435,6 @@ if (!res[SIG]  &&  res._message)
     this._setItem(MY_IDENTITIES, myIdentities)
     await this.dbPut(MY_IDENTITIES, myIdentities)
     const { wsClients } = driverInfo
-    // HACK for local
-    if (!url || url.indexOf('localhost') !== -1)
-      url = SERVICE_PROVIDERS  &&  SERVICE_PROVIDERS[0].url
     let client = wsClients.byUrl[url]
     if (client)
       client.reset()
@@ -5583,7 +5588,7 @@ if (!res[SIG]  &&  res._message)
 
     await this.onAddChatItem({resource: application})
   },
-  async onGetProductList({resource}) {
+  async onGetProductList({ resource }) {
     if (resource[TYPE] !== ORGANIZATION) {
       let org = resource.organization
       if (!org)
@@ -6315,12 +6320,22 @@ if (!res[SIG]  &&  res._message)
     }
     await this.onAddItem({resource: r, isRegistration: true})
   },
+  async onGetRepresentative(resource) {
+    if (!resource)
+      return
+    utils.getType(resource) === ORGANIZATION
+    let org = this._getItem(resource)
+    let rep = this.getRepresentative(org)
+    return {provider: rep[ROOT_HASH]}
+  },
   async onGetProvider(params) {
     await this.ready
     await this._loadedResourcesDefer.promise
-    // backwards compat
-    let permalink = params.permalink || params.provider
-    let serverUrl = params.url || params.host
+
+    let { termsAccepted, host, url, permalink, provider } = params
+
+    permalink = permalink || provider
+    let serverUrl = url || host
     let providerBot = permalink && this._getItem(utils.makeId(PROFILE, permalink))
     if (!providerBot  &&  serverUrl) {
       await this.onAddItem({
@@ -6332,7 +6347,7 @@ if (!res[SIG]  &&  res._message)
     if (providerBot) {
       let provider = this._getItem(utils.getId(providerBot.organization))
       await this.insurePublishingIdentity(provider)
-      this.trigger({action: 'getProvider', provider: provider, termsAccepted: params.termsAccepted})
+      this.trigger({action: 'getProvider', provider, termsAccepted})
     }
   },
   getProviderById(providerId) {
