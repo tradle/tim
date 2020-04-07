@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
-  Modal
 } from 'react-native'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
@@ -18,7 +17,6 @@ import TimerMixin from 'react-timer-mixin'
 import { SyncStatus } from 'react-native-code-push'
 import { parse as parseURL } from 'url'
 import reactMixin from 'react-mixin'
-import QR from '@tradle/qr-schema'
 
 const debug = require('debug')('tradle:app:Home')
 
@@ -28,7 +26,6 @@ import components from './components'
 import utils, { translate, isWeb } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
-import QRCode from './QRCode'
 import constants from '@tradle/constants'
 import PasswordCheck from './PasswordCheck'
 import FadeInView from './FadeInView'
@@ -83,7 +80,6 @@ class TimHome extends Component {
     this.state = {
       isLoading: true,
       hasMe: utils.getMe(),
-      isModalOpen: false,
     };
 
     this._handleOpenURL = this._handleOpenURL.bind(this)
@@ -100,17 +96,6 @@ class TimHome extends Component {
     this._pressHandler = debounce(this._pressHandler, 500, true)
     Linking.addEventListener('url', this._handleOpenURL);
 
-    // var url = LinkingIOS.popInitialURL()
-    // if (url)
-    //   this._handleOpenURL({url});
-    // if (utils.isSimulator())
-    //   this._handleConnectivityChange(true)
-
-    // NetInfo.isConnected.addEventListener(
-    //   'change',
-    //   this._handleConnectivityChange
-    // );
-    // NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     Actions.start();
   }
   _handleConnectivityChange(isConnected) {
@@ -119,16 +104,9 @@ class TimHome extends Component {
   }
   componentWillUnmount() {
     Linking.removeEventListener('url', this._handleOpenURL);
-    // NetInfo.isConnected.removeEventListener(
-    //   'change',
-    //   this._handleConnectivityChange
-    // );
   }
   async componentDidMount() {
-    // this._checkConnectivity()
-
     try {
-      // const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       let url = await Linking.getInitialURL()
       if (url) {
         let action = url.match(/.*\/([^?]+)/)
@@ -153,17 +131,9 @@ class TimHome extends Component {
     if (!me) {
       if (ENV.autoRegister)
         this.showFirstPage()
-      else
-        this.setState({isModalOpen: true})
-      // this.register(() => this.showFirstPage())
       return
     }
-    // if (isWeb()  &&  !me._masterAuthor) {
-    //   this.setState({isModalOpen: true})
-    //   Actions.genPairingData()
-    // }
-    // else
-      this.signInAndContinue()
+    this.signInAndContinue()
   }
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
@@ -171,8 +141,6 @@ class TimHome extends Component {
         this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
         this.state.isLoading  !== nextState.isLoading     ||
         this.state.message !== nextState.message          ||
-        this.state.isModalOpen  !== nextState.isModalOpen ||
-        this.state.pairingData !== nextState.pairingData  ||
         this.state.hasMe !== nextState.hasMe
   }
 
@@ -307,8 +275,6 @@ class TimHome extends Component {
       return
     }
 
-    // utils.setMe(params.me);
-    // utils.setModels(params.models);
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
 
@@ -342,13 +308,12 @@ class TimHome extends Component {
     if (components[afterAuthRoute.componentName].displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
-    if (!this.state.isModalOpen)
-      return this.showFirstPage()
+    return this.showFirstPage()
   }
 
   async handleEvent(params) {
     let {action, activity, isConnected, models, me,
-        isRegistration, pairingData, provider, termsAccepted, url} = params
+        isRegistration, provider, termsAccepted, url} = params
     var nav = this.props.navigator
     let { wasDeepLink } = this.state
     switch(action) {
@@ -377,10 +342,6 @@ class TimHome extends Component {
       break
     case 'getProvider':
       this.showChatPage({resource: provider, termsAccepted, showProfile: true})
-      // this.setState({
-      //   provider: params.provider,
-      //   action: 'chat'
-      // })
       return
     case 'getItemFromDeepLink':
       this.showResource(params)
@@ -397,17 +358,6 @@ class TimHome extends Component {
     case 'start':
       this.onStart(params)
       return
-    // case 'genPairingData':
-    //   // debugger
-    //   this.setState({pairingData, isModalOpen: true})
-    //   break
-    // case 'masterIdentity':
-    //   this.setState({isModalOpen: false})
-    //   this.signInAndContinue()
-    //   break
-    case 'pairingSuccessful':
-      this.signInAndContinue()
-      return
     case 'getMe':
       await utils.setMe({meRes: me})
       this.setState({hasMe: me})
@@ -415,8 +365,6 @@ class TimHome extends Component {
         debugger
       }
       this.signInAndContinue()
-      // await signIn(this.props.navigator)
-      // this.showFirstPage()
       return
     case 'addItem':
       if (!isRegistration  ||  !ENV.tour)
@@ -764,9 +712,6 @@ class TimHome extends Component {
         model: model,
         bankStyle: defaultBankStyle,
         isConnected: this.state.isConnected,
-        // callback: () => {
-        //   cb()
-        // }
       },
     };
 
@@ -815,50 +760,6 @@ class TimHome extends Component {
     })
   }
 
-  pairDevices(cb) {
-    let modelName = this.props.modelName;
-    if (!utils.getModel(modelName)) {
-      this.setState({err: 'Can find model: ' + modelName});
-      return;
-    }
-
-    let model = utils.getModel(modelName);
-    let route = {
-      componentName: 'NewResource',
-      titleTextColor: '#BCD3E6',
-      passProps: {
-        model: model,
-        bankStyle: defaultBankStyle,
-        isConnected: this.state.isConnected,
-        // callback: () => {
-        //   cb()
-        // }
-      },
-    };
-
-    route.passProps.callback = () => {
-      setPassword(this.props.navigator)
-      .then (() => {
-        this.setState({hasMe: true})
-        Actions.setAuthenticated(true)
-        this.showFirstPage()
-        // cb()
-      })
-
-    }
-    // let nav = self.props.navigator
-    // route.passProps.callback = (me) => {
-    //   this.showVideoTour(() => {
-    //     Actions.getMe()
-    //     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
-    //   })
-    // }
-
-    route.passProps.editCols = ['firstName', 'lastName'] //, 'language']
-    route.titleTintColor = '#ffffff'
-    this.props.navigator.push(route);
-  }
-
   onReloadDBPressed() {
     utils.setMe({meRes: null});
     utils.setModels(null);
@@ -870,7 +771,7 @@ class TimHome extends Component {
   }
   render() {
     // StatusBar.setHidden(true);
-    let { message, isModalOpen, err, isLoading, pairingData } = this.state
+    let { message, err, isLoading } = this.state
     if (message) {
       this.restartTiM()
       return
@@ -913,29 +814,7 @@ class TimHome extends Component {
               </View>
 
     let regView
-    if (!ENV.autoRegister) {
-      regView = <View  style={styles.center}>
-                  <FadeInView>
-                    <TouchableOpacity  onPress={() => {
-                      this.register(this.showFirstPage.bind(this))
-                      }}>
-                      <View style={styles.signIn}>
-                        <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </FadeInView>
-                  <FadeInView>
-                    <TouchableOpacity  onPress={() => {
-                      this.pairDevices(this.showFirstPage.bind(this))
-                      }}>
-                      <View style={[styles.signIn, styles.shadow]}>
-                        <Text style={styles.pairDivicesText}>{translate('I have another Tradle device')}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </FadeInView>
-               </View>
-    }
-    else if (utils.getMe()) {
+    if (utils.getMe()) {
       regView = <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                     onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
@@ -944,35 +823,14 @@ class TimHome extends Component {
                 </TouchableOpacity>
     }
 
-    let qrcode
-    if (pairingData) {
-      let w = 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
-      let qr = QR.toHex({
-        schema: 'PairingDevices',
-        data: pairingData // {crypto: 'Hello world'}
-      })
-      qrcode = <View style={{padding: 20}}>
-                 <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                   <QRCode inline={true} content={qr} dimension={w} />
-                 </View>
-                 <View style={[styles.qrcode, {width: w + 20, alignItems: 'center', paddingTop: 30, paddingVertical: 10}]}>
-                   <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
-                 </View>
-               </View>
-    }
     return (
       <View style={styles.container}>
         <BackgroundImage testID="homeBG" source={BG_IMAGE} />
-        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler(pairingData)}>
+        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View style={styles.flexGrow} />
           {regView}
           <Text style={errStyle}>{err}</Text>
           {dev}
-          <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-            <View style={styles.modalBackgroundStyle}>
-              {qrcode}
-            </View>
-          </Modal>
         </TouchableOpacity>
       </View>
     );
@@ -1079,42 +937,15 @@ class TimHome extends Component {
     )
   }
 
-  pairDevices() {
-    this.props.navigator.push({
-      title: translate('scanQRcode'),
-      componentName: 'QRCodeScanner',
-      titleTintColor: '#eeeeee',
-      backButtonTitle: 'Cancel',
-      // rightButtonTitle: 'ion|ios-reverse-camera',
-      passProps: {
-        onread: (result) => {
-          Actions.sendPairingRequest(JSON.parse(result.data))
-          this.props.navigator.pop()
-        }
-      }
-    })
-  }
   restartTiM() {
     Alert.alert(
       'Please restart TiM'
     )
   }
-  _pressHandler(pairingData) {
-    let me = utils.getMe()
-    if (!me)
-      return
-    if (isWeb()  &&  !me._masterAuthor) {
-      Actions.getMasterIdentity(pairingData)
-      return
-    }
-    signIn(this.props.navigator)
-    .then(() => this.showFirstPage())
-  }
-  openModal() {
-    this.setState({isModalOpen: true});
-  }
-  closeModal() {
-    this.setState({isModalOpen: false});
+  _pressHandler() {
+    if (utils.getMe())
+      signIn(this.props.navigator)
+      .then(() => this.showFirstPage())
   }
 }
 
@@ -1205,12 +1036,6 @@ var styles = (function () {
       color: FOOTER_TEXT_COLOR,
       fontSize: 10
     },
-    pairDivicesText: {
-      backgroundColor: 'transparent',
-      color: '#467EAE',
-      fontSize: 18,
-      alignSelf: 'center'
-    },
     signInText: {
       backgroundColor: 'transparent',
       color: 'lightblue',
@@ -1240,18 +1065,6 @@ var styles = (function () {
     bottom: {
       marginBottom: 20
     },
-    modalBackgroundStyle: {
-      backgroundColor: '#fff',
-      justifyContent: 'center',
-      padding: 20,
-      height,
-    },
-    qrcode: {
-      alignSelf: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#ffffff',
-      padding:10
-    },
   });
 })()
 
@@ -1262,3 +1075,4 @@ function getIconSize (dimensions) {
 }
 
 module.exports = TimHome;
+
