@@ -1707,6 +1707,10 @@ var Store = Reflux.createStore({
       object = _.clone(object)
       this._maybePrepForEmployerBot(object)
     }
+    if (me._masterAuthor) {
+      debugger
+      object._masterAuthor = me._masterAuthor
+    }
 
     return node.createObject({ object })
   },
@@ -2764,11 +2768,11 @@ var Store = Reflux.createStore({
     if (!r._time)
       r._time = new Date().getTime();
     var toOrg
-    // r.to could be a reference to a resource
-    var to = this._getItem(r.to)
+    // r.to could be from the paired device
+    var to = this._getItem(r.to) || r.to
     let toType
     if (to)
-      toType = to[TYPE]
+      toType = utils.getType(to)
     let isReadOnlyContext, orgId, orgRep
     if (toType === ORGANIZATION) {
       orgId = utils.getId(r.to)
@@ -2866,12 +2870,16 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     // var promise = Q(protocol.linkString(toChain))
-    let applicant
-    if (application  &&  utils.isRM(application))
-      applicant = this._getItem(utils.getId(application.applicant))
-    else
-      applicant = r.to
-    let hash = applicant[ROOT_HASH]
+    let hash
+    if (application  &&  utils.isRM(application)) {
+      hash = utils.getRootHash(application.applicant)
+      // applicant = this._getItem(utils.getId(application.applicant))
+    }
+    else {
+      hash = utils.getRootHash(r.to)
+      // applicant = r.to
+    }
+    // let hash = applicant[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = utils.makeId(IDENTITY, hash)
@@ -3230,7 +3238,7 @@ var Store = Reflux.createStore({
         this.trigger({action: 'validationError', error: err.message})
        error = err.message
     }
-     return { toChain, error }
+    return { toChain, error }
   },
 
   async getModelsPack(to) {
@@ -3268,17 +3276,17 @@ var Store = Reflux.createStore({
     else
       sendParams.object = toChain
 
-    if (typeof to === 'string'  ||  utils.isStub(to))
-      to = this._getItem(utils.getId(to))
-    let provider, hash
-    if (to[ROOT_HASH] === me[ROOT_HASH]) {
-      provider = this._getItem(from)
+    // if (typeof to === 'string'  ||  utils.isStub(to))
+    //   to = this._getItem(utils.getId(to))
+    // let provider
+    let hash = utils.getRootHash(to)
+    if (hash === me[ROOT_HASH]) {
+      let provider = this._getItem(from)
       hash = provider[ROOT_HASH]
     }
-    else
-      provider = to
-    hash = provider[ROOT_HASH]
-
+    // else
+    //   provider = to
+    //  hash = provider[ROOT_HASH]
     var isEmployee
     if (me.organization) {
       isEmployee = utils.isEmployee(to)
@@ -4796,17 +4804,16 @@ if (!res[SIG]  &&  res._message)
         returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
 
       await save(returnVal)
-      // if (isNew  &&  isWeb())
-      //   self.onGenPairingData()
     }
 
-    function genPairingData() {
+    function genPairingData(url) {
       let { pubkeys } = meDriver.identity
       let key = pubkeys.find(key => key.purpose === 'sign')
       key.importedFrom = me[ROOT_HASH]
       let pairingData = {
         key: JSON.stringify(key),
-        nonce: crypto.randomBytes(32).toString('base64')
+        nonce: crypto.randomBytes(32).toString('base64'),
+        url
       }
       self.trigger({action: 'genPairingData', pairingData})
     }
@@ -4884,6 +4891,7 @@ if (!res[SIG]  &&  res._message)
       }
 
       let { toChain, error } = await self.prepareToSend({resource: returnVal})
+
       if (error)
         return
       try {
@@ -5202,7 +5210,7 @@ if (!res[SIG]  &&  res._message)
       // title: utils.getDisplayName(r)
     }
   },
-  onGenPairingData() {
+  async onGenPairingData(url) {
     let { pubkeys } = meDriver.identity
     let key = pubkeys.find(key => key.purpose === 'sign')
 
@@ -5212,9 +5220,11 @@ if (!res[SIG]  &&  res._message)
       nonce: crypto.randomBytes(32).toString('base64')
     }
     this.trigger({action: 'genPairingData', pairingData})
+    await this.onGetMasterIdentity(pairingData, url)
   },
   async onSendPairingRequest (pairingData) {
-    let newKey = JSON.parse(pairingData.key)
+    let { key, url } = pairingData
+    let newKey = JSON.parse(key)
 
     let { pubkeys } = meDriver.identity
     if (pubkeys.find(key => key.pub === newKey.pub))
@@ -5235,10 +5245,10 @@ if (!res[SIG]  &&  res._message)
       console.log('IDENTITY AFTER', meDriver.identity)
       if (err)
         debugger
-      await this.handlePairing()
+      await this.handlePairing(url)
     })
   },
-  async handlePairing() {
+  async handlePairing(url) {
     let identity = meDriver.identity
     let iId = utils.getId(identity)
     await db.put(iId, identity)
@@ -5251,6 +5261,10 @@ if (!res[SIG]  &&  res._message)
     currentId.publishedIdentity = identity
     this._setItem(MY_IDENTITIES, myIdentities)
     await this.dbPut(MY_IDENTITIES, myIdentities)
+    const { wsClients } = driverInfo
+    let client = wsClients.byUrl[url]
+    if (client)
+      client.reset()
   },
   async onGetMasterIdentity(pairingData, url) {
     let delay = delay || 1000
@@ -5385,7 +5399,7 @@ if (!res[SIG]  &&  res._message)
 
     await this.onAddChatItem({resource: application})
   },
-  async onGetProductList({resource}) {
+  async onGetProductList({ resource }) {
     if (resource[TYPE] !== ORGANIZATION) {
       let org = resource.organization
       if (!org)
@@ -6081,12 +6095,22 @@ if (!res[SIG]  &&  res._message)
     }
     await this.onAddItem({resource: r, isRegistration: true})
   },
+  async onGetRepresentative(resource) {
+    if (!resource)
+      return
+    utils.getType(resource) === ORGANIZATION
+    let org = this._getItem(resource)
+    let rep = this.getRepresentative(org)
+    return {provider: rep[ROOT_HASH]}
+  },
   async onGetProvider(params) {
     await this.ready
     await this._loadedResourcesDefer.promise
-    // backwards compat
-    let permalink = params.permalink || params.provider
-    let serverUrl = params.url || params.host
+
+    let { termsAccepted, host, url, permalink, provider } = params
+
+    permalink = permalink || provider
+    let serverUrl = url || host
     let providerBot = permalink && this._getItem(utils.makeId(PROFILE, permalink))
     if (!providerBot  &&  serverUrl) {
       await this.onAddItem({
@@ -6099,7 +6123,7 @@ if (!res[SIG]  &&  res._message)
       let provider = this._getItem(utils.getId(providerBot.organization))
       if (!me.isEmployee)
         await this.insurePublishingIdentity(provider)
-      this.trigger({action: 'getProvider', provider: provider, termsAccepted: params.termsAccepted})
+      this.trigger({action: 'getProvider', provider, termsAccepted})
     }
   },
   getProviderById(providerId) {
