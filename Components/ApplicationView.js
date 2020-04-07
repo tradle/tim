@@ -158,7 +158,8 @@ class ApplicationView extends Component {
     let { resource, backlink, isLoading, hasRM, isConnected, showDetails } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
-    hasRM = hasRM  ||  resource.reviewer
+    hasRM = hasRM  ||  resource.analyst
+
     let isRM = hasRM  &&  utils.isRM(resource)
     let styles = createStyles({ hasRM, isRM, bankStyle })
 
