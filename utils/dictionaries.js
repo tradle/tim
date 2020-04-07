@@ -35,14 +35,15 @@ async function dictionaries({lang, dictionaryDomains, providerDictionaries}) {
   }
   if (!dictionaryDomains)
     return d
-  Object.keys(dictionaryDomains).forEach(async d => {
+  Object.keys(dictionaryDomains).forEach(async dd => {
     if (providerDictionaries[d])
       return
     // debugger
-    const f = await fetchWithBackoff(`${URL}${d.split('.')[0]}/${fn}`, { headers }, 5000)
+    let url = `${URL}${dd.split('.')[0]}/${fn}`
+    const f = await fetchWithBackoff(url, { headers }, 5000)
     if (f.status > 300)
       return
-    providerDictionaries[d] = true
+    providerDictionaries[dd] = true
     const m = await f.json()
     if (m) {
       let dict = genDictionary(m, lang, d.enums)
