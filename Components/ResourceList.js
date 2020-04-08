@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StatusBar,
   View,
+  Modal
   // Text,
 } from 'react-native'
 import PropTypes from 'prop-types';
@@ -15,12 +16,15 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import _ from 'lodash'
+import { links, toHex } from '@tradle/qr-schema'
 
+import Navigator from './Navigator'
 import { Text, resetFontFamily } from './Text'
 import NoResources from './NoResources'
 import ResourceRow from './ResourceRow'
 import VerificationRow from './VerificationRow'
 import PageView from './PageView'
+import QRCode from './QRCode'
 import ActionSheet from './ActionSheet'
 import utils, { translate, isWeb } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
@@ -87,43 +91,44 @@ class ResourceList extends Component {
       }
     })
 
+    let { prop, filter, serverOffline, navigator, bankStyle,
+          multiChooser, isRegistration, resource, chat, onDone } = this.props
     this.state = {
       isLoading: true,
       dataSource,
-      allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
-      filter: this.props.filter,
+      allowToAdd: prop  &&  prop.allowToAdd,
+      filter,
       hideMode: false,  // hide provider
-      serverOffline: this.props.serverOffline,
-      isConnected: this.props.navigator.isConnected,
+      serverOffline,
+      isConnected: navigator.isConnected,
+      isModalOpen: false,
       userInput: '',
       sharedContextCount: 0,
       refreshing: false,
       hasPartials: false,
       hasBookmarks: false,
       hasTestProviders: false,
-      bankStyle: props.bankStyle
+      bankStyle
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
     // }
     if (props.multiChooser) {
       this.state.chosen = {}
-      let resource = this.props.resource
-      let prop = this.props.prop
       if (prop  &&  resource[prop.name])
         resource[prop.name].forEach(r => this.state.chosen[utils.getId(r)] = r)
     }
-    let isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
+    isRegistration = isRegistration ||  (resource  &&  resource[TYPE] === PROFILE  &&  !resource[ROOT_HASH])
     if (isRegistration)
       this.state.isRegistration = isRegistration;
-    let routes = this.props.navigator.getCurrentRoutes()
-    if (this.props.chat) {
+    let routes = navigator.getCurrentRoutes()
+    if (chat) {
       this.state.sharedWith = {}
       routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
     }
-    else if (this.props.onDone) {
+    else if (onDone) {
       this.state.sharedWith = {}
-      routes[routes.length - 1].onRightButtonPress = this.props.onDone.bind(this, this.state.chosen)
+      routes[routes.length - 1].onRightButtonPress = onDone.bind(this, this.state.chosen)
     }
     this.selectResource = this.selectResource.bind(this)
     this.onSettingsPressed = this.onSettingsPressed.bind(this)
@@ -164,8 +169,14 @@ class ResourceList extends Component {
   }
   componentWillMount() {
     let { officialAccounts, modelName, chat, navigator, resource } = this.props
-    if (officialAccounts  &&  modelName === PROFILE)
+    if (officialAccounts  &&  modelName === PROFILE) {
+      let me = utils.getMe()
+      if (me.isEmployee) {
+        Actions.getProductList({ resource: me })
+        Actions.getProvider({resource: me.organization})
+      }
       return
+    }
     if (officialAccounts)
       resetFontFamily()
     if (chat) {
@@ -262,6 +273,14 @@ class ResourceList extends Component {
       if (curRoute.componentName === 'MessageList'  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
+      return
+    }
+    if (action === 'productList') {
+      this.setState({productList: params.resource})
+      return
+    }
+    if (action === 'getProvider') {
+      this.setState({provider: params.provider})
       return
     }
     if (action === 'connectivity') {
@@ -495,6 +514,8 @@ class ResourceList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
+      return true
+    if (this.state.isModalOpen  !== nextState.isModalOpen)
       return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop !== nextProps.prop)
@@ -1042,7 +1063,8 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly } = this.props
+    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, bankStyle } = this.props
+    let { isModalOpen } = this.state
     let model = utils.getModel(modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1064,7 +1086,7 @@ class ResourceList extends Component {
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps='always'
           initialListSize={10}
           pageSize={20}
           refreshControl={
@@ -1097,15 +1119,37 @@ class ResourceList extends Component {
     if (!isChooser && officialAccounts && modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let contentSeparator = getContentSeparator(this.state.bankStyle)
+
+    let { qr } = this.state
+    let { width, height } = utils.dimensions(ResourceList)
+    let w = 350
+    let bgStyle = {backgroundColor: '#eeeeee', justifyContent: 'center'}
+    let separator = getContentSeparator(this.state.bankStyle)
+    let qrcode = (
+       <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+         <TouchableOpacity style={[styles.splashLayout, {width, height}]} onPress={() => this.closeModal()}>
+           <View style={[styles.modalBackgroundStyle, {width, height}]}>
+             <View style={{padding: 20}}>
+               <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                 <QRCode inline={true} content={qr} dimension={w} />
+               </View>
+               <View style={[{alignItems: 'center', paddingTop: 30}]}>
+                 <Text style={{fontSize: 24, color: '#fff'}}>{translate('scanToLogInToTradle')}</Text>
+               </View>
+             </View>
+           </View>
+         </TouchableOpacity>
+       </Modal>
+      )
+
     let style = {backgroundColor: '#fff'}
-    // let isProfile = modelName === PROFILE
-    // let useStyle = isProfile  &&  officialAccounts &&  defaultBankStyle || this.state.bankStyle
     return (
       <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
         {network}
         {searchBar}
         <View style={styles.separator} />
         {content}
+        {qrcode}
         {footer}
         {actionSheet}
       </PageView>
@@ -1169,7 +1213,10 @@ class ResourceList extends Component {
       Actions.importData(data)
       return
     }
-
+    if (schema === 'ApplyForProduct') {
+      Actions.applyForProduct(data)
+      return
+    }
     if (schema === 'AddProvider') {
       const { host, provider } = data
       // Actions.addApp({ url: host, permalink: provider })
@@ -1230,6 +1277,8 @@ class ResourceList extends Component {
     let conversations
     let testProviders
     let newCustomer
+    let search
+    let products
     let isOrg = this.props.modelName === ORGANIZATION
     let isProfile = this.props.modelName === PROFILE
     if (!isOrg  &&  !isProfile)
@@ -1253,108 +1302,9 @@ class ResourceList extends Component {
       //   </View>
       // )
     }
-    let search
-    let me = utils.getMe()
-    if (isProfile) {
-      if (utils.isAgent()) {
-        let color = '#1F59A3'
-        newCustomer = <View style={styles.newCustomerRow}>
-          <TouchableOpacity onPress={this.newCustomer.bind(this)}>
-            <View style={styles.row}>
-              <Icon name='ios-people-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
-              <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('newCustomer')}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      }
-      else {
-        search = <View style={styles.searchRow}>
-            <TouchableOpacity onPress={this.showSearch.bind(this)}>
-              <View style={styles.row}>
-                <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
-                <View style={styles.textContainer}>
-                  <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+    if (isProfile)
+      ({ search, newCustomer, products,conversations, partial, bookmarks, sharedContext } = this.getEmployeeComponents())
 
-
-        if (this.state.hasPartials)
-          partial = (
-            <View>
-              <View style={styles.statisticsRow}>
-                <TouchableOpacity onPress={this.showPartials.bind(this)}>
-                  <View style={styles.row}>
-                    <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                    <View style={styles.textContainer}>
-                      <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.partialsRow}>
-                <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-                  <View style={styles.row}>
-                    <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                    <View style={styles.textContainer}>
-                      <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-        )
-      }
-      conversations = <View style={styles.conversationsRow}>
-          <TouchableOpacity onPress={this.showBanks.bind(this)}>
-            <View style={styles.row}>
-              <ConversationsIcon />
-              <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      if (this.state.bookmarksCount) {
-        let color = '#6C4EA3'
-        bookmarks = (
-            <View style={styles.bookmarksRow}>
-              <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('bookmarks')}</Text>
-                  </View>
-                  <View style={[styles.sharedContext, {backgroundColor: color}]}>
-                    <Text style={styles.sharedContextText}>{this.state.bookmarksCount}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )
-      }
-
-      if (this.state.sharedContextCount)
-        sharedContext = (
-          <View style={styles.sharedContextRow}>
-            <TouchableOpacity onPress={this.showContexts.bind(this)}>
-              <View style={styles.row}>
-                <Icon name='md-share' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                <View style={styles.textContainer}>
-                  <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-                </View>
-                <View style={styles.sharedContext}>
-                  <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )
-    }
     return  (
       <View style={{paddingHorizontal: 20}}>
         {search}
@@ -1366,6 +1316,149 @@ class ResourceList extends Component {
         {testProviders}
       </View>
     )
+  }
+  getEmployeeComponents() {
+    if (utils.isAgent()) {
+      let color = '#1F59A3'
+      let newCustomer = <View style={styles.newCustomerRow}>
+        <TouchableOpacity onPress={this.newCustomer.bind(this)}>
+          <View style={styles.row}>
+            <Icon name='ios-people-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
+            <View style={styles.textContainer}>
+              <Text style={styles.resourceTitle}>{translate('newCustomer')}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
+      return { newCustomer }
+    }
+    let search = <View style={styles.searchRow}>
+        <TouchableOpacity onPress={this.showSearch.bind(this)}>
+          <View style={styles.row}>
+            <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
+            <View style={styles.textContainer}>
+              <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
+      // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+
+    let partial
+    if (this.state.hasPartials) {
+      partial = (
+        <View>
+          <View style={styles.statisticsRow}>
+            <TouchableOpacity onPress={this.showPartials.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.partialsRow}>
+            <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )
+    }
+    let conversations = <View style={styles.conversationsRow}>
+        <TouchableOpacity onPress={this.showBanks.bind(this)}>
+          <View style={styles.row}>
+            <ConversationsIcon />
+            <View style={styles.textContainer}>
+              <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+    let products = <View style={styles.productsRow}>
+        <TouchableOpacity onPress={this.showProducts.bind(this)}>
+          <View style={styles.row}>
+          <Icon name='ios-color-filter-outline' size={45} color='#C8C8A8' style={[styles.cellImage, {paddingLeft: 5}]} />
+            <View style={styles.textContainer}>
+              <Text style={styles.resourceTitle}>{translate('ourProducts')}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
+    let bookmarks
+    if (this.state.bookmarksCount) {
+      let color = '#6C4EA3'
+      bookmarks = (
+          <View style={styles.bookmarksRow}>
+            <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-apps-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('bookmarks')}</Text>
+                </View>
+                <View style={[styles.sharedContext, {backgroundColor: color}]}>
+                  <Text style={styles.sharedContextText}>{this.state.bookmarksCount}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )
+    }
+    let sharedContext
+    if (this.state.sharedContextCount)
+      sharedContext = (
+        <View style={styles.sharedContextRow}>
+          <TouchableOpacity onPress={this.showContexts.bind(this)}>
+            <View style={styles.row}>
+              <Icon name='md-share' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+              <View style={styles.textContainer}>
+                <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+              </View>
+              <View style={styles.sharedContext}>
+                <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )
+    return { search, conversations, partial, bookmarks, sharedContext, products }
+  }
+  showProducts() {
+    const { productList, bankStyle } = this.state
+    this.props.navigator.push({
+      title: translate('pleaseChoose'),
+      componentName: 'StringChooser',
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings:   productList.chooser.oneOf,
+        bankStyle,
+        forScan: true,
+        callback:  (val) => {
+          this.showProductQR(val)
+        },
+      }
+    })
+  }
+  showProductQR(val) {
+    let org = utils.getMe().organization
+    let host = org.url
+    let qr = toHex({
+      schema: 'ApplyForProduct',
+      data: {
+        provider: utils.getRootHash(org),
+        product: val,
+        host,
+      }
+    })
+    this.setState({qr, isModalOpen: true})
   }
   newCustomer() {
     const { navigator, bankStyle } = this.props
@@ -1444,6 +1537,12 @@ class ResourceList extends Component {
       },
     })
   }
+  openModal() {
+    this.setState({isModalOpen: true});
+  }
+  closeModal() {
+    this.setState({isModalOpen: false});
+  }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceList.prototype, HomePageMixin)
@@ -1491,6 +1590,9 @@ var styles = StyleSheet.create({
   conversationsRow: prettifyRow({
     backgroundColor: '#CDE4F7'
   }),
+  productsRow: prettifyRow({
+    backgroundColor: '#FAFAD2'
+  }),
   newCustomerRow: prettifyRow({
     backgroundColor: '#FBFFE5'
   }),
@@ -1500,12 +1602,6 @@ var styles = StyleSheet.create({
   partialsRow: prettifyRow({
     backgroundColor: '#FBFFE5'
   }),
-  // container: {
-  //   flex: 1,
-  //   backgroundColor: '#f7f7f7',
-  //   // backgroundColor: 'white',
-  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
-  // },
   centerText: {
     alignItems: 'center',
   },
@@ -1513,11 +1609,6 @@ var styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#eeeeee',
   },
-  // icon: {
-  //   marginLeft: -23,
-  //   marginTop: -25,
-  //   color: 'red'
-  // },
   image: {
     width: 25,
     height: 25,
@@ -1530,7 +1621,6 @@ var styles = StyleSheet.create({
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
-    // borderColor: '#eeeeee',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
   },
@@ -1594,7 +1684,22 @@ var styles = StyleSheet.create({
   testProvidersDescription: {
     fontSize: 16,
     color: '#757575'
-  }
+  },
+  modalBackgroundStyle: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  qrcode: {
+    alignSelf: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    padding:10
+  },
+  splashLayout: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 module.exports = ResourceList;
