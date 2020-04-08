@@ -38,20 +38,24 @@ class StringChooser extends Component {
     if (typeof product === 'string')
       product = { product }
     let { id, title, description } = product
-    if (!this.props.notModel) {
+    let { notModel, forScan, bankStyle, navigator } = this.props
+    let icon
+    if (!notModel) {
       let model = utils.getModel(id)
       if (!model)
         return null
       if (!title)
         title = translate(model)
+      icon = model.icon
     }
     return (
       <StringRow
-        onSelect={() => this.selectResource(id)}
         title={title}
+        forScan={forScan}
+        icon={icon}
         description={description}
-        bankStyle={this.props.bankStyle}
-        navigator={this.props.navigator}
+        bankStyle={bankStyle}
+        navigator={navigator}
         callback={() => this.selectResource(id)}
         />
       );

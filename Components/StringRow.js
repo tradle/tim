@@ -7,8 +7,10 @@ var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 import {
   // Text,
   TouchableOpacity,
+  View
 } from 'react-native'
 import PropTypes from 'prop-types'
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import React, { Component } from 'react'
 import { Text } from './Text'
@@ -18,15 +20,23 @@ class StringRow extends Component {
     super(props);
   }
   render() {
-    let { title, bankStyle, description } = this.props
+    let { title, bankStyle, description, forScan, icon } = this.props
     let styles = createStyles({bankStyle, description})
     let d
+    if (icon)
+      icon = <Icon name={icon} size={45} color={DEFAULT_PRODUCT_ROW_TEXT_COLOR} />
+
     if (description)
       d = <Text style={styles.modelDescription}>{description}</Text>
     return (
       <TouchableOpacity style={styles.viewStyle} onPress={this.props.callback}>
-        <Text style={styles.modelTitle}>{title}</Text>
-        {d}
+        <View>
+          <View style={styles.row}>
+            {icon}
+            <Text style={styles.modelTitle}>{title}</Text>
+          </View>
+          {d}
+        </View>
       </TouchableOpacity>
     );
   }
@@ -34,6 +44,13 @@ class StringRow extends Component {
 
 var createStyles = utils.styleFactory(StringRow, function ({ bankStyle, description }) {
   return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 15,
+      marginBottom: description ? 7 : 15,
+      marginLeft: 15,
+    },
     modelTitle: {
       flex: 1,
       flexWrap: 'wrap',
