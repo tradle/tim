@@ -207,6 +207,11 @@ class MessageList extends Component {
       this.setState({pairingData, isModalOpen: true})
       return
     }
+    if (action === 'masterIdentity') {
+      this.setState({ isModalOpen: false })
+      setTimeout(() => Actions.list({ modelName: MESSAGE, to: this.props.resource }), 3000)
+      return
+    }
     if (this.state.isModalOpen)
       return
     let chatWith = this.props.resource
@@ -220,10 +225,6 @@ class MessageList extends Component {
       //   state.resource = chatWith
       if (online !== this.state.onlineStatus)
         this.setState({onlineStatus: online})
-      return
-    }
-    if (action === 'masterIdentity') {
-      this.setState({isModalOpen: false})
       return
     }
     if (action === 'getItem'  &&  utils.getId(resource) === utils.getId(chatWith)) {
