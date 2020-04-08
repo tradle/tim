@@ -1708,7 +1708,7 @@ var Store = Reflux.createStore({
       this._maybePrepForEmployerBot(object)
     }
     if (me._masterAuthor) {
-      debugger
+      // debugger
       object._masterAuthor = me._masterAuthor
     }
 
@@ -5272,28 +5272,44 @@ if (!res[SIG]  &&  res._message)
       this.client = graphQL.initClient(meDriver, url || SERVICE_PROVIDERS[0].url)
     let masterIdentity = await tryWithExponentialBackoff(async () => {
       try {
-        let masterAuthor = await this.lookupKeyWithMasterAuthor(pairingData)
-        await this.checkAndSetupIfEmployee(masterAuthor)
-        me._masterAuthor = masterAuthor
-        await this.onUpdateMe(me)
-        this.trigger({action: 'masterIdentity', masterAuthor, me})
+        let masterAuthor = await this.lookupAndSetMasterAuthor(pairingData)
+        // me._masterAuthor = masterAuthor
+        // await this.onUpdateMe(me)
+        // this.trigger({action: 'masterIdentity', masterAuthor, me})
       } catch (err) {
         debug('key not found, will retry', err)
         throw err
       }
     }, {
-      intialDelay: 1000,
-      maxDelay: 1000,
+      intialDelay: 2000,
+      maxDelay: 2000,
       maxAttempts: Infinity,
     })
   },
-  async lookupKeyWithMasterAuthor(pairingData) {
+  async lookupAndSetMasterAuthor(pairingData) {
     let pub  = JSON.parse(pairingData.key)
     let importedFrom = me[ROOT_HASH]
     let masterAuthor = await graphQL.getMasterAuthorKey({pub: pub.pub, importedFrom})
     if (!masterAuthor)
       throw new Error('not found')
-    return masterAuthor
+
+    debugger
+    let { list } = await this.searchServer({
+        modelName: MY_EMPLOYEE_PASS,
+        noTrigger: true,
+        filterResource: {owner: {id: `${IDENTITY}_${masterAuthor}_${masterAuthor}`}}
+      })
+
+    me._masterAuthor = masterAuthor
+
+    this.trigger({action: 'masterIdentity', masterAuthor, me})
+    if (!list  ||  !list.length)
+      await this.onUpdateMe(me)
+    else {
+      let myEmployeeBadge = list[0]
+      let org = this._getItem(myEmployeeBadge.from).organization
+      await this.setupEmployee(myEmployeeBadge, org)
+    }
   },
   async checkAndSetupIfEmployee(masterAuthor) {
     let { list } = await this.searchServer({
