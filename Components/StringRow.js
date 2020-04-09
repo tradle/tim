@@ -24,7 +24,7 @@ class StringRow extends Component {
     let styles = createStyles({bankStyle, description})
     let d
     if (icon)
-      icon = <Icon name={icon} size={45} color={DEFAULT_PRODUCT_ROW_TEXT_COLOR} />
+      icon = <Icon name={icon} size={45} color={DEFAULT_PRODUCT_ROW_TEXT_COLOR} style={{paddingTop: 2, paddingBottom: 5, paddingLeft: 15}}/>
 
     if (description)
       d = <Text style={styles.modelDescription}>{description}</Text>
@@ -47,8 +47,8 @@ var createStyles = utils.styleFactory(StringRow, function ({ bankStyle, descript
     row: {
       flexDirection: 'row',
       justifyContent: 'center',
-      marginTop: 15,
-      marginBottom: description ? 7 : 15,
+      // marginTop: 15,
+      // marginBottom: description ? 7 : 15,
       marginLeft: 15,
     },
     modelTitle: {
