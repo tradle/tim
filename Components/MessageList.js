@@ -207,14 +207,15 @@ class MessageList extends Component {
       this.setState({pairingData, isModalOpen: true})
       return
     }
+    let chatWith = this.props.resource
     if (action === 'masterIdentity') {
       this.setState({ isModalOpen: false })
-      setTimeout(() => Actions.list({ modelName: MESSAGE, to: this.props.resource }), 3000)
+      Actions.getProductList({ resource: chatWith })
+      setTimeout(() => Actions.list({ modelName: MESSAGE, to: chatWith }), 3000)
       return
     }
     if (this.state.isModalOpen)
       return
-    let chatWith = this.props.resource
     if (to  &&  utils.getRootHash(to) !== utils.getRootHash(chatWith))
       return
 
