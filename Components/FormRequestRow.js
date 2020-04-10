@@ -1237,7 +1237,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       marginRight: -4,
       marginLeft: -1,
       flexDirection: 'row',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     shareablesArea: {
       borderBottomLeftRadius: 0,
@@ -1382,7 +1382,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       fontSize: 16,
       color: '#555555',
       // paddingLeft: 5,
-      // paddingRight: 10
+      paddingRight: 10
     },
     multiEntryDocText: {
       marginRight: -4,
