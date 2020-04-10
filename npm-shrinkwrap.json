@@ -110,9 +110,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.2.4.tgz"
     },
     "@tradle/engine": {
-      "version": "8.1.0",
+      "version": "8.2.0",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-8.1.0.tgz",
+      "resolved": "http://registry.npmjs.org/@tradle/engine/-/engine-8.2.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -120,9 +120,16 @@
           "resolved": "https://registry.npmjs.org/abstract-leveldown/-/abstract-leveldown-2.6.3.tgz"
         },
         "async": {
-          "version": "2.6.1",
+          "version": "2.6.3",
           "from": "async@>=2.6.1 <3.0.0",
-          "resolved": "https://registry.npmjs.org/async/-/async-2.6.1.tgz"
+          "resolved": "http://registry.npmjs.org/async/-/async-2.6.3.tgz",
+          "dependencies": {
+            "lodash": {
+              "version": "4.17.15",
+              "from": "lodash@>=4.17.14 <5.0.0",
+              "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz"
+            }
+          }
         },
         "bs58check": {
           "version": "1.3.4",
@@ -2895,9 +2902,9 @@
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.4.0.tgz",
       "dependencies": {
         "readable-stream": {
-          "version": "2.3.6",
+          "version": "2.3.7",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.7.tgz"
         },
         "string_decoder": {
           "version": "1.1.1",
@@ -6115,9 +6122,9 @@
       "resolved": "https://registry.npmjs.org/pull-level/-/pull-level-1.5.2.tgz",
       "dependencies": {
         "pull-stream": {
-          "version": "3.6.9",
+          "version": "3.6.14",
           "from": "pull-stream@>=3.4.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.6.9.tgz"
+          "resolved": "http://registry.npmjs.org/pull-stream/-/pull-stream-3.6.14.tgz"
         }
       }
     },
@@ -6278,9 +6285,9 @@
       "optional": true
     },
     "re-emitter": {
-      "version": "1.1.3",
+      "version": "1.1.4",
       "from": "re-emitter@>=1.1.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/re-emitter/-/re-emitter-1.1.3.tgz"
+      "resolved": "http://registry.npmjs.org/re-emitter/-/re-emitter-1.1.4.tgz"
     },
     "react": {
       "version": "16.3.1",
@@ -7417,9 +7424,9 @@
       "resolved": "https://registry.npmjs.org/stream-combiner2/-/stream-combiner2-1.1.1.tgz",
       "dependencies": {
         "readable-stream": {
-          "version": "2.3.6",
-          "from": "readable-stream@>=2.0.2 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
+          "version": "2.3.7",
+          "from": "readable-stream@^2.0.2",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.7.tgz"
         },
         "string_decoder": {
           "version": "1.1.1",
@@ -7457,9 +7464,9 @@
       "resolved": "https://registry.npmjs.org/stream-shift/-/stream-shift-1.0.0.tgz"
     },
     "stream-to-pull-stream": {
-      "version": "1.7.2",
+      "version": "1.7.3",
       "from": "stream-to-pull-stream@>=1.6.6 <2.0.0",
-      "resolved": "https://registry.npmjs.org/stream-to-pull-stream/-/stream-to-pull-stream-1.7.2.tgz",
+      "resolved": "http://registry.npmjs.org/stream-to-pull-stream/-/stream-to-pull-stream-1.7.3.tgz",
       "dependencies": {
         "looper": {
           "version": "3.0.0",
@@ -7467,9 +7474,9 @@
           "resolved": "https://registry.npmjs.org/looper/-/looper-3.0.0.tgz"
         },
         "pull-stream": {
-          "version": "3.6.9",
+          "version": "3.6.14",
           "from": "pull-stream@>=3.2.3 <4.0.0",
-          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.6.9.tgz"
+          "resolved": "http://registry.npmjs.org/pull-stream/-/pull-stream-3.6.14.tgz"
         }
       }
     },
