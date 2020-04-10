@@ -899,7 +899,7 @@ var NewResourceMixin = {
       }
       if (typeof initial === 'undefined')
         initial = 1
-      let switchWidth = Math.floor(utils.getChatWidth() / 2)
+      let switchWidth = Math.floor(utils.dimensions(component).width / 2)
       switchView = { paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
       booleanContentStyle = {}
       switchC = <TouchableOpacity onPress={() => this.changeValue(prop, isTroolean && value ||  !value)}>
@@ -1021,9 +1021,9 @@ var NewResourceMixin = {
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}]}>
           {propLabel}
           {datePicker}
-          {help}
           {icon}
         </View>
+        {help}
         {this.paintError(params)}
        </View>
       )
