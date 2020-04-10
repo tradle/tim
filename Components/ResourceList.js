@@ -161,10 +161,8 @@ class ResourceList extends Component {
       else
         this.state.dataSource = this.state.dataSource.cloneWithRows([])
     }
-    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
+    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider))))
       Actions.list({modelName: ORGANIZATION})
-      // this.state.customStyles = props.customStyles
-    }
   }
   componentWillUnmount() {
     if (this.props.navigator.getCurrentRoutes().length === 1)
@@ -177,6 +175,8 @@ class ResourceList extends Component {
       if (me.isEmployee) {
         Actions.getProductList({ resource: me })
         Actions.getProvider({resource: me.organization})
+        if (!utils.isAgent(me))
+          Actions.getRepresentative(me.organization)
       }
       return
     }
@@ -276,6 +276,10 @@ class ResourceList extends Component {
       if (curRoute.componentName === 'MessageList'  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
+      return
+    }
+    if (action === 'getRepresentative') {
+      this.setState({representative: params.representative})
       return
     }
     if (action === 'productList') {
@@ -1479,12 +1483,9 @@ class ResourceList extends Component {
     let qr = toHex({
       schema: 'ApplyForProduct',
       data: {
-        provider: utils.getRootHash(org),
+        provider: this.state.representative,
         product: val,
-        // platform: 'mobile',
-        // baseUrl: 'https://link.tradle.io',
         host,
-        // message: translate('pleaseScanQrCode'),
       }
     })
     this.setState({qr, isModalOpen: true})
