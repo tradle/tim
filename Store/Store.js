@@ -6117,7 +6117,7 @@ if (!res[SIG]  &&  res._message)
     utils.getType(resource) === ORGANIZATION
     let org = this._getItem(resource)
     let rep = this.getRepresentative(org)
-    return {provider: rep[ROOT_HASH]}
+    this.trigger({action: 'getRepresentative', representative: rep[ROOT_HASH]})
   },
   async onGetProvider(params) {
     await this.ready

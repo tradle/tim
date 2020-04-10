@@ -174,6 +174,8 @@ class ResourceList extends Component {
       if (me.isEmployee) {
         Actions.getProductList({ resource: me })
         Actions.getProvider({resource: me.organization})
+        if (!utils.isAgent(me))
+          Actions.getRepresentative(me.organization)
       }
       return
     }
@@ -273,6 +275,10 @@ class ResourceList extends Component {
       if (curRoute.componentName === 'MessageList'  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
+      return
+    }
+    if (action === 'getRepresentative') {
+      this.setState({representative: params.representative})
       return
     }
     if (action === 'productList') {
@@ -1453,7 +1459,7 @@ class ResourceList extends Component {
     let qr = toHex({
       schema: 'ApplyForProduct',
       data: {
-        provider: utils.getRootHash(org),
+        provider: this.state.representative,
         product: val,
         host,
       }
