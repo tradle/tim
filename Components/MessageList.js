@@ -987,9 +987,10 @@ class MessageList extends Component {
     let qrcode
     let me = utils.getMe()
     if (pairingData  &&  !me._masterAuthor) {
-      let w = 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
-      let qr = QR.toHex({
-        schema: 'PairingDevices',
+      let w = isWeb() ? 500 : 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
+      debugger
+      let qr = JSON.stringify({
+        schema: 'Pair',
         data: pairingData // {crypto: 'Hello world'}
       })
       qrcode = <View style={{padding: 20}}>
@@ -1607,4 +1608,3 @@ var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankS
   })
 })
 module.exports = MessageList;
-
