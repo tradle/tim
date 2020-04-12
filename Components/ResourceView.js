@@ -294,15 +294,15 @@ class ResourceView extends Component {
     }
     let qr
     if (pairingData) {
-      qr = QR.toHex({
+      qr = {
         schema: 'PairDevices',
         allData: pairingData
-      })
+      }
     }
     else if (isMe) {
       if (me.isEmployee  &&  me.organization && me.organization.url) {
         let parts = utils.getId(me.organization).split('_')
-        qr = QR.toHex({
+        qr = {
           schema: 'OrgProfile',
           data: {
             permalink: me[ROOT_HASH],
@@ -311,10 +311,10 @@ class ResourceView extends Component {
             orgLink: parts[2],
             name: me.organization.title,
           }
-        })
+        }
       }
       else {
-        qr = QR.toHex({
+        qr = {
           schema: 'Profile',
           data: {
             permalink: me[ROOT_HASH],
@@ -322,7 +322,7 @@ class ResourceView extends Component {
             firstName: me.firstName,
             lastName: me.lastName
           }
-        })
+        }
       }
     }
     let { width, height } = utils.dimensions(ResourceView)
@@ -338,7 +338,7 @@ class ResourceView extends Component {
       }
       qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
                  {photo}
-                 <QRCode inline={true} content={qr} dimension={w} bgColor='green' />
+                 <QRCode inline={true} content={JSON.stringify(qr)} dimension={w} />
                </View>
     }
 

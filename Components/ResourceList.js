@@ -1229,7 +1229,7 @@ class ResourceList extends Component {
       Actions.addApp({ url: host, permalink: provider, addSettings: true })
       return
     }
-    if (schema === 'PairingDevices') {
+    if (schema === 'Pair') {
       Actions.sendPairingRequest(data)
       return
     }
