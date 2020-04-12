@@ -5214,10 +5214,14 @@ if (!res[SIG]  &&  res._message)
     let { pubkeys } = meDriver.identity
     let key = pubkeys.find(key => key.purpose === 'sign')
 
-    let newKey = { ...key, importedFrom: me[ROOT_HASH]}
+    let newKey = { ...key, me: me[ROOT_HASH]}
+    delete newKey.fingerprint
+    delete newKey.purpose
+
     let pairingData = {
       key: JSON.stringify(newKey),
-      nonce: crypto.randomBytes(32).toString('base64')
+      // nonce: crypto.randomBytes(32).toString('base64')
+      url
     }
     this.trigger({action: 'genPairingData', pairingData})
     await this.onGetMasterIdentity(pairingData, url)
@@ -5225,6 +5229,16 @@ if (!res[SIG]  &&  res._message)
   async onSendPairingRequest (pairingData) {
     let { key, url } = pairingData
     let newKey = JSON.parse(key)
+
+    if (!newKey.purpose)
+      newKey.purpose = 'sign'
+
+    newKey.importedFrom = newKey.me
+    delete newKey.me
+    if (!newKey.fingerprint) {
+      let pKey = await tradleUtils.importKey(newKey)
+      newKey.fingerprint = pKey.fingerprint
+    }
 
     let { pubkeys } = meDriver.identity
     if (pubkeys.find(key => key.pub === newKey.pub))
