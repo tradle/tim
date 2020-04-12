@@ -8,7 +8,8 @@ import constants from '@tradle/constants'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
-import qrCodeDecoder from '@tradle/qr-schema'
+// import qrCodeDecoder from '@tradle/qr-schema'
+
 import {
   Alert,
   StatusBar
@@ -39,7 +40,9 @@ var HomePageMixin = {
         passProps: {
           onread: async (result) => {
             try {
-              resolve(qrCodeDecoder.fromHex(result.data))
+              debugger
+              resolve(JSON.parse(result.data))
+              // resolve(qrCodeDecoder.fromHex(result.data))
             } catch (err) {
               reject(err)
             } finally {
