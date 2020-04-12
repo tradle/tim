@@ -958,7 +958,7 @@ class MessageList extends Component {
     if (pairingData  &&  !me._masterAuthor) {
       let w = 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
       let qr = QR.toHex({
-        schema: 'PairingDevices',
+        schema: 'Pair',
         data: pairingData // {crypto: 'Hello world'}
       })
       qrcode = <View style={{padding: 20}}>
