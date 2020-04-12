@@ -1456,14 +1456,14 @@ class ResourceList extends Component {
   showProductQR(val) {
     let org = utils.getMe().organization
     let host = org.url
-    let qr = toHex({
+    let qr = {
       schema: 'ApplyForProduct',
       data: {
         provider: this.state.representative,
         product: val,
         host,
       }
-    })
+    }
     this.setState({qr, isModalOpen: true})
   }
   newCustomer() {
