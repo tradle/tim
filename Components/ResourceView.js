@@ -30,6 +30,7 @@ import utils, {
   getFontSize as fontSize
 } from '../utils/utils'
 
+import Image from './Image'
 import ShowPropertiesView from './ShowPropertiesView'
 import PhotoView from './PhotoView'
 import PhotoList from './PhotoList'
@@ -324,34 +325,22 @@ class ResourceView extends Component {
         })
       }
     }
-    /*
-    else if (isMyProduct) {
-      // let r = {}
-      // let exclude = ['myProductId', 'owner', 'revoked']
-      // for (let p in resource) {
-      //   if (p.charAt(0) !== '_'  &&  !exclude.includes(p))
-      //     r[p] = resource[p]
-      // }
-      qr = QR.toHex({
-        schema: 'ProductAuthorization',
-        data: {
-          contextId: resource._context.contextId || '',
-          product: resource[ROOT_HASH],
-          firstName: me.firstName,
-          // product: resource[TYPE].replace('.My', ''),
-          // identity: me[ROOT_HASH],
-          // authorization: JSON.stringify(r)
-        }
-      })
+    let { width, height } = utils.dimensions(ResourceView)
+    let w = Math.floor((width / 5) * 4)
+    let qrcode
+    if (qr) {
+      let photo
+      if (isMe) {
+        if (me.photos  &&  me.photos.length)
+          photo = <View style={{paddingBottom: 10}}>
+                    <Image source={{uri: me.photos[0].url}} style={{width: w, height: w}} />
+                  </View>
+      }
+      qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                 {photo}
+                 <QRCode inline={true} content={qr} dimension={w} bgColor='green' />
+               </View>
     }
-    */
-    let { width } = utils.dimensions(ResourceView)
-    let w = Math.floor((width / 3) * 2)
-    let qrcode = qr  &&  (
-         <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-           <QRCode inline={true} content={qr} dimension={w} />
-         </View>
-         )
 
     let footer
     // let conversations
