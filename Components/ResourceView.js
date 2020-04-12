@@ -33,6 +33,7 @@ import utils, {
   getFontSize as fontSize
 } from '../utils/utils'
 
+import Image from './Image'
 import ShowPropertiesView from './ShowPropertiesView'
 import PhotoView from './PhotoView'
 import PhotoList from './PhotoList'
@@ -311,15 +312,15 @@ class ResourceView extends Component {
     let w = Math.floor((utils.getContentWidth(ResourceView) / 3) * 2)
     w = Math.min(w, 300)
     if (pairingData) {
-      qr = QR.toHex({
+      qr = {
         schema: 'PairDevices',
         data: pairingData
-      })
+      }
     }
     else if (isMe) {
       if (me.isEmployee  &&  me.organization && me.organization.url) {
         let parts = utils.getId(me.organization).split('_')
-        qr = QR.toHex({
+        qr = {
           schema: 'OrgProfile',
           data: {
             permalink: me[ROOT_HASH],
@@ -328,10 +329,10 @@ class ResourceView extends Component {
             orgLink: parts[2],
             name: me.organization.title,
           }
-        })
+        }
       }
       else {
-        qr = QR.toHex({
+        qr = {
           schema: 'Profile',
           data: {
             permalink: me[ROOT_HASH],
@@ -339,35 +340,24 @@ class ResourceView extends Component {
             firstName: me.firstName,
             lastName: me.lastName
           }
-        })
+        }
       }
     }
-    /*
-    else if (isMyProduct) {
-      // let r = {}
-      // let exclude = ['myProductId', 'owner', 'revoked']
-      // for (let p in resource) {
-      //   if (p.charAt(0) !== '_'  &&  !exclude.includes(p))
-      //     r[p] = resource[p]
-      // }
-      qr = QR.toHex({
-        schema: 'ProductAuthorization',
-        data: {
-          contextId: resource._context.contextId,
-          product: resource[ROOT_HASH],
-          firstName: me.firstName,
-          // product: resource[TYPE].replace('.My', ''),
-          // identity: me[ROOT_HASH],
-          // authorization: JSON.stringify(r)
-        }
-      })
-    }
-    */
     let qrcode
+    let {width, height} = utils.dimensions()
     if (qr) {
+      let photo
+      if (isMe) {
+        if (me.photos  &&  me.photos.length) {
+          photo = <View style={{paddingBottom: 10}}>
+                   <Image source={{uri: me.photos[0].url}} style={{width: w, height: w}} />
+                  </View>
+        }
+      }
       qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-           <QRCode inline={true} content={qr} dimension={w} />
-         </View>
+                 {photo}
+                 <QRCode inline={true} content={JSON.stringify(qr)} dimension={w} />
+               </View>
     }
 
     let footer
@@ -410,9 +400,13 @@ class ResourceView extends Component {
       photoView = <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
     }
     let contentSeparator = getContentSeparator(bankStyle)
+    if (isModalOpen)
+      width = utils.dimensions(ResourceView).width
+    else
+      width = utils.getContentWidth(ResourceView)
     return (
       <PageView style={platformStyles.container} bankStyle={bankStyle} separator={contentSeparator}>
-        <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center', backgroundColor: '#fff'}} name={this._lazyId}>
+        <ScrollView  ref='this' style={{width, alignSelf: 'center', backgroundColor: '#fff'}} name={this._lazyId}>
           <View style={styles.photoBG}>
             {photoView}
             {identityPhotoList}
@@ -613,10 +607,11 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bank
       paddingRight: 10,
     },
     qrcode: {
+      marginTop: -100,
       alignSelf: 'center',
       justifyContent: 'center',
       backgroundColor: '#ffffff',
-      padding:10
+      padding: 10,
     },
   })
 })

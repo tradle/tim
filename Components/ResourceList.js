@@ -1146,7 +1146,7 @@ class ResourceList extends Component {
                    <View style={[styles.modalBackgroundStyle, {width, height}]}>
                      <View style={{padding: 20}}>
                        <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                         <QRCode inline={true} content={qr} dimension={w} />
+                         <QRCode inline={true} content={JSON.stringify(qr)} dimension={w} />
                        </View>
                        <View style={[{alignItems: 'center', paddingTop: 30}]}>
                          <Text style={{fontSize: 24, color: '#fff'}}>{translate('scanToLogInToTradle')}</Text>
@@ -1237,7 +1237,7 @@ class ResourceList extends Component {
       Actions.addApp({ url: host, permalink: provider, addSettings: true })
       return
     }
-    if (schema === 'PairingDevices') {
+    if (schema === 'Pair') {
       Actions.sendPairingRequest(data)
       return
     }
@@ -1480,14 +1480,14 @@ class ResourceList extends Component {
   showProductQR(val) {
     let org = utils.getMe().organization
     let host = org.url
-    let qr = toHex({
+    let qr = {
       schema: 'ApplyForProduct',
       data: {
         provider: this.state.representative,
         product: val,
         host,
       }
-    })
+    }
     this.setState({qr, isModalOpen: true})
   }
   newCustomer() {
