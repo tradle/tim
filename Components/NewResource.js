@@ -1279,7 +1279,9 @@ class NewResource extends Component {
         </View>
     }
     else {
-      itemsArray = <Text style={styles.noItemsText}>{label}</Text>
+      itemsArray = <View style={{paddingBottom: 10}}>
+                     <Text style={styles.noItemsText}>{label}</Text>
+                   </View>
     }
     counter = <Icon name='ios-camera-outline'  size={25} color={linkColor}  style={styles.camera} />
     let actionableItem
@@ -1356,7 +1358,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     noItemsText: {
       fontSize: 20,
       color: '#777777',
-      paddingLeft: 10,
+      paddingLeft: 5,
     },
     forms: {
       fontSize: 18,
@@ -1380,6 +1382,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       ...formField,
       minHeight: 60,
       justifyContent: 'flex-end',
+      marginHorizontal: 15,
+      marginTop: 10
     },
     photoButton: {
       ...formField,
