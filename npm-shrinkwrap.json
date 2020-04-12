@@ -1031,9 +1031,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.1.0.tgz"
     },
     "@tradle/qr-schema": {
-      "version": "2.0.3",
+      "version": "2.0.5",
       "from": "@tradle/qr-schema@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.3.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.5.tgz",
       "dependencies": {
         "is-extendable": {
           "version": "1.0.1",
