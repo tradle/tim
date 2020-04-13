@@ -348,9 +348,10 @@ class ResourceView extends Component {
     if (qr) {
       let photo
       if (isMe) {
+        let h = Math.min(w, height - 200 - w)
         if (me.photos  &&  me.photos.length) {
           photo = <View style={{paddingBottom: 10}}>
-                   <Image source={{uri: me.photos[0].url}} style={{width: w, height: w}} />
+                   <Image source={{uri: me.photos[0].url}} style={{width: w, height: h}} />
                   </View>
         }
       }
