@@ -7830,6 +7830,13 @@ if (!res[SIG]  &&  res._message)
     if (!foundResources.length)
       return
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
+    if (isWeb()  &&  !me._masterAuthor) {
+      let isEmployeeOnboarding = foundResources.find(r => r[TYPE] === PRODUCT_REQUEST  &&  r.requestFor === EMPLOYEE_ONBOARDING)
+      if (isEmployeeOnboarding) {
+        this.onGenPairingData(to.url)
+        return
+      }
+    }
     foundResources.forEach((r) => {
       // Check if this message was shared, display the time when it was shared not when created
       if (!r._sharedWith  ||  !to)
