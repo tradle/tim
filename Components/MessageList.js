@@ -170,8 +170,8 @@ class MessageList extends Component {
     // if (resource  &&  resource[TYPE] === ORGANIZATION)
     setFontFamily(bankStyle)
     // Temp HACK
-    if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
-      Actions.genPairingData(resource.url)
+    // if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
+    //   Actions.genPairingData(resource.url)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
