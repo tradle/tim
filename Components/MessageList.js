@@ -147,7 +147,8 @@ class MessageList extends Component {
     return true
   }
   componentWillMount() {
-    let { navigator, bankStyle, modelName, resource, prop, context, search, isAggregation, application, newCustomer } = this.props
+    let { navigator, bankStyle, modelName, resource, prop, context, search,
+          isAggregation, application, newCustomer } = this.props
     let params = {
       modelName: MESSAGE,
       to: resource,
@@ -167,8 +168,9 @@ class MessageList extends Component {
       Actions.getProductList({ resource })
     // if (resource  &&  resource[TYPE] === ORGANIZATION)
     setFontFamily(bankStyle)
-    if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
-      Actions.genPairingData(resource.url)
+
+    // if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
+    //   Actions.genPairingData(resource.url)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
