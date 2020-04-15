@@ -74,12 +74,13 @@ class EnumList extends Component {
   }
   onSearchChange(filter) {
     let vals = this.props.enumProp.oneOf
+    filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     let f = filter.toLowerCase()
     let list = vals.filter((s) => {
       let key = Object.keys(s)[0]
       return key.toLowerCase().indexOf(f) !== -1
     })
-    this.setState({filter: filter, dataSource: this.state.dataSource.cloneWithRows(list)})
+    this.setState({filter, dataSource: this.state.dataSource.cloneWithRows(list)})
   }
 
   renderRow(value) {
