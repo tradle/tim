@@ -982,7 +982,6 @@ var search = {
     const body = tradleUtils.stringify({
       query
     })
-    let start = Date.now()
     const result = await this.meDriver.sign({
       object: {
         [TYPE]: 'tradle.GraphQLQuery',
