@@ -33,7 +33,7 @@ import chatStyles from '../styles/chatStyles'
 import Image from './Image'
 
 const SHOW_TIME_INTERVAL = 60000
-const DEFAULT_CURRENCY_SYMBOL = '£'
+const DEFAULT_CURRENCY_SYMBOL = '$'
 const SENT = 'Sent'
 
 const FORM_ERROR = 'tradle.FormError'
