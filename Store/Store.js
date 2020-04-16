@@ -184,9 +184,6 @@ const MY_EMPLOYEE_PASS    = 'tradle.MyEmployeeOnboarding'
 const MY_AGENT_PASS       = 'tradle.MyAgentOnboarding'
 const FORM_REQUEST        = 'tradle.FormRequest'
 const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
-const PAIRING_REQUEST     = 'tradle.PairingRequest'
-// const PAIRING_RESPONSE    = 'tradle.PairingResponse'
-const PAIRING_DATA        = 'tradle.PairingData'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 
@@ -2023,33 +2020,8 @@ var Store = Reflux.createStore({
         return
       }
 
-      if (payload[TYPE] === PAIRING_REQUEST) {
-        console.error('received pairing request, but pairing not supported yet')
-        this.receivePairingRequest({ payload })
-      }
-
       return
-
-      // else if (payload[TYPE] === PAIRING_RESPONSE) {
-      //   try {
-      //     await this.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
-      //     Alert.alert('Pairing was successful')
-      //   } catch(err) {
-      //     debugger
-      //     Alert.alert(err)
-      //   }
-      //   return
-      // }
     }
-
-    // const prop = 'pubKey'
-    // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
-
-    // const identifier = prop === 'permalink' ? from : {
-    //   type: 'ec',
-    //   curve: 'curve25519',
-    //   pub: new Buffer(from, 'hex')
-    // }
 
     if (progressUpdate) {
       this.triggerProgress({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
@@ -2462,10 +2434,16 @@ var Store = Reflux.createStore({
       // if (newOrg.name.indexOf('[TEST]') === 0)
       //   newOrg._isTest = true
     }
+    let config = sp.publicConfig
+    if (sp.currency) {
+      if (!config)
+        config = {currency: sp.currency}
+    }
+
     if (sp.tour)
       org._tour = sp.tour
 
-    await this.configProvider(sp, org)
+    await this.configProvider(config, sp, org)
     await this.resetForEmployee(me, org)
     batch.push({type: 'put', key: okey, value: org})
 
@@ -2572,8 +2550,7 @@ var Store = Reflux.createStore({
     await this.setMe(me)
     await this.dbPut(utils.getId(me), me)
   },
-  async configProvider(sp, org) {
-    let config = sp.publicConfig
+  async configProvider(config, sp, org) {
     if (!config)
       return
     let orgId = utils.getId(org)
@@ -2637,35 +2614,26 @@ var Store = Reflux.createStore({
 
     var batch = []
     var newContact = !profile  ||  !identity
-    var isDevicePairing = data[TYPE]  &&  data[TYPE] === PAIRING_REQUEST
     if (newContact) {
       if (data.name === '')
         data.name = data.identity.name && data.identity.name.formatted
-      if (isDevicePairing) {
-        profile = {
-          [TYPE]: PROFILE,
-          [ROOT_HASH]: hash,
-          firstName:  me.firstName,
-          formatted: me.formatted
-        }
-      }
-      else {
-        profile = {
-          [TYPE]: PROFILE,
-          [ROOT_HASH]: hash,
-          ...data.profile
-        }
 
-        if (!profile.firstName  &&  data.name) {
-          profile.firstName = data.name || data.message.split(' ')[0]
-
-          if (!profile.formatted)
-            profile.formatted = profile.firstName
-        }
-        profile._unread = 1
-        if (noMessage)
-          profile._inactive = true
+      profile = {
+        [TYPE]: PROFILE,
+        [ROOT_HASH]: hash,
+        ...data.profile
       }
+
+      if (!profile.firstName  &&  data.name) {
+        profile.firstName = data.name || data.message.split(' ')[0]
+
+        if (!profile.formatted)
+          profile.formatted = profile.firstName
+      }
+      profile._unread = 1
+      if (noMessage)
+        profile._inactive = true
+
       if (!profile.firstName)
         profile.firstName = `[${translate('nameUnknown')}]`
 
@@ -2684,20 +2652,15 @@ var Store = Reflux.createStore({
       profile.firstName = identity.name.firstName
       profile.formatted = identity.name.formatted || profile.firstName
     }
-    if (!isDevicePairing) {
-      if (!this._getItem(utils.getId(profile)).bot)
-        this.trigger({action: 'newContact', newContact: profile})
-    }
+    if (!this._getItem(utils.getId(profile)).bot)
+      this.trigger({action: 'newContact', newContact: profile})
 
-    if (!isDevicePairing) {
-      let r = this._getItem(utils.getId(profile))
-      // if ((r  &&  r.bot) || noMessage);
-      if (r  &&  !r.bot && !noMessage) {
-        if (profile._inactive) {
-          profile._inactive = false
-          batch.push({type: 'put', key: pkey, value: profile })
-        }
-
+    let r = this._getItem(utils.getId(profile))
+    // if ((r  &&  r.bot) || noMessage);
+    if (r  &&  !r.bot && !noMessage) {
+      if (profile._inactive) {
+        profile._inactive = false
+        batch.push({type: 'put', key: pkey, value: profile })
       }
     }
 
@@ -4806,18 +4769,6 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal)
     }
 
-    function genPairingData(url) {
-      let { pubkeys } = meDriver.identity
-      let key = pubkeys.find(key => key.purpose === 'sign')
-      key.importedFrom = me[ROOT_HASH]
-      let pairingData = {
-        key: JSON.stringify(key),
-        nonce: crypto.randomBytes(32).toString('base64'),
-        url
-      }
-      self.trigger({action: 'genPairingData', pairingData})
-    }
-
     async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
@@ -5287,16 +5238,14 @@ if (!res[SIG]  &&  res._message)
     let masterIdentity = await tryWithExponentialBackoff(async () => {
       try {
         let masterAuthor = await this.lookupAndSetMasterAuthor(pairingData)
-        // me._masterAuthor = masterAuthor
-        // await this.onUpdateMe(me)
-        // this.trigger({action: 'masterIdentity', masterAuthor, me})
       } catch (err) {
-        debug('key not found, will retry', err)
+        debug('key not found, will retry') //, err)
         throw err
       }
     }, {
       intialDelay: 2000,
       maxDelay: 2000,
+      maxTime: Infinity,
       maxAttempts: Infinity,
     })
   },
@@ -7444,8 +7393,7 @@ if (!res[SIG]  &&  res._message)
   async searchAllMessages(params) {
     let self = this
 
-    let {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, filterProps} = params
-    _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
+    let {resource, query, context, to, isForgetting, lastId, limit, prop, filterProps} = params
     let foundResources = [];
 
     let meId = utils.getId(me)
