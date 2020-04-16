@@ -553,7 +553,8 @@ var utils = {
           return false
         if (r1[p].length !== r2[p].length)
           return false
-        if (!r1[p].some((r) => r2[p].some((rr2) => _.isEqual(r, rr2))))
+        let arr = r1[p].filter(r => r2[p].find(rr2 => !_.isEqual(r, rr2)))
+        if (arr.length)
           return false
       }
       else if (typeof r1[p] === 'object') {
