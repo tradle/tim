@@ -1,4 +1,4 @@
-var sha = require('stable-sha1');
+import sha from 'stable-sha1'
 import _ from 'lodash'
 import levelErrors from 'levelup/lib/errors'
 import Promise from 'bluebird'
@@ -43,9 +43,9 @@ const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE, LANGUAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
-var dictionary
+let dictionary
 
-var storeUtils = {
+const storeUtils = {
   addModels({models, enums}) {
     for (let id in voc) {
       let m = voc[id]
@@ -141,8 +141,7 @@ var storeUtils = {
     storeUtils.addNameAndTitleProps(m)
     if (isEnum(m))
       storeUtils.createEnumResources(m, enums)
-
-    if (isForm(m)) {
+    else if (isForm(m)) {
       // storeUtils.addVerificationsToFormModel(m)
       storeUtils.addFromAndTo(m)
     }
@@ -651,7 +650,7 @@ function rebuf (json) {
     Object.keys(json).length === 2) {
     return new Buffer(json.data)
   } else {
-    for (var p in json) {
+    for (let p in json) {
       json[p] = rebuf(json[p])
     }
 
