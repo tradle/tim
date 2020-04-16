@@ -10,7 +10,7 @@ import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 
 var NOT_SPECIFIED = '[not specified]'
-var DEFAULT_CURRENCY_SYMBOL = '£'
+var DEFAULT_CURRENCY_SYMBOL = '$'
 const {
   VERIFICATION,
   MONEY,

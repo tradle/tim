@@ -24,7 +24,7 @@ import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
 const NOT_SPECIFIED = '[not specified]'
-const DEFAULT_CURRENCY_SYMBOL = '£'
+const DEFAULT_CURRENCY_SYMBOL = '$'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const OBJECT = 'tradle.Object'
 

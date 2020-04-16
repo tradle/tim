@@ -51,7 +51,7 @@ var {
   ENUM
 } = constants.TYPES
 
-const DEFAULT_CURRENCY_SYMBOL = '£'
+const DEFAULT_CURRENCY_SYMBOL = '$'
 const MAX_LENGTH = 70
 
 class ResourceRow extends Component {

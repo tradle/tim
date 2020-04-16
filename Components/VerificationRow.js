@@ -31,7 +31,7 @@ import StyleSheet from '../StyleSheet'
 import appStyle from '../styles/appStyle.json'
 import { Text } from './Text'
 
-var DEFAULT_CURRENCY_SYMBOL = '£'
+var DEFAULT_CURRENCY_SYMBOL = '$'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
