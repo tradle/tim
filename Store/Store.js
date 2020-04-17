@@ -5259,14 +5259,14 @@ if (!res[SIG]  &&  res._message)
     debugger
     me._masterAuthor = masterAuthor
     await this.setMe(me)
-    Actions.showModal({title: translate('pairing'), showIndicator: true})
+    Actions.showModal({title: translate('pleaseWait'), showIndicator: true})
     let { list } = await this.searchServer({
         modelName: MY_EMPLOYEE_PASS,
         noTrigger: true,
         filterResource: {owner: {id: `${IDENTITY}_${masterAuthor}_${masterAuthor}`}}
       })
 
-    this.trigger({action: 'masterIdentity', masterAuthor, me})
+    this.trigger({action: 'masterIdentity', me, isEmployee: list.length})
     if (!list  ||  !list.length)
       await this.onUpdateMe(me)
     else {
