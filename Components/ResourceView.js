@@ -185,10 +185,10 @@ class ResourceView extends Component {
       else
         this.setState({pairingData, isModalOpen: true})
       break
-    case 'invalidPairingRequest':
-      this.props.navigator.pop()
-      Alert.alert(translate(error))
-      break
+    // case 'invalidPairingRequest':
+    //   this.props.navigator.pop()
+    //   Alert.alert(translate(error))
+    //   break
     case 'acceptingPairingRequest':
       this.closeModal()
       // check signature

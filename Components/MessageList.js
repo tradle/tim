@@ -209,11 +209,18 @@ class MessageList extends Component {
       this.setState({pairingData, isModalOpen: true})
       return
     }
+    let { application, modelName, navigator } = this.props
     let chatWith = this.props.resource
     if (action === 'masterIdentity') {
       this.setState({ isModalOpen: false })
-      Actions.getProductList({ resource: chatWith })
-      setTimeout(() => Actions.list({ modelName: MESSAGE, to: chatWith }), 3000)
+      if (utils.getMe().isEmployee || params.isEmployee) {
+        let routes = navigator.getCurrentRoutes()
+        navigator.jumpTo(routes[0])
+      }
+      else {
+        Actions.getProductList({ resource: chatWith })
+        setTimeout(() => Actions.list({ modelName: MESSAGE, to: chatWith }), 3000)
+      }
       return
     }
     if (this.state.isModalOpen)
@@ -236,7 +243,6 @@ class MessageList extends Component {
         this.setState({productToForms: productToForms})
       return
     }
-    let { application, modelName, navigator } = this.props
     if (!modelName)
       modelName = MESSAGE
     if (action === 'productList') {
