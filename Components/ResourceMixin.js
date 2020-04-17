@@ -40,6 +40,7 @@ const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
 const MODIFICATION = 'tradle.Modification'
+const DEFAULT_CURRENCY_SYMBOL = '$'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -148,7 +149,7 @@ var ResourceMixin = {
     });
   },
 
-  renderItems({value, prop, cancelItem, component}) {
+  renderItems({value, prop, cancelItem, editItem, component}) {
     let { bankStyle, navigator, resource } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = prop.items.properties;
@@ -177,6 +178,7 @@ var ResourceMixin = {
       counter++;
       let displayName
       let hadCancel
+      let hasEdit
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
         let { type, displayAs, displayName, range, ref, skipLabel, items } = itemMeta
@@ -264,17 +266,31 @@ var ResourceMixin = {
                      </View>
                      {!isView  &&  <View style={{flex: 1}}/>}
                    </View>
-        // let item = <View>
-        //              <Text style={skipLabel ? {height: 0} : [styles.itemText, {fontSize: 16}]}>{skipLabel ? '' : title || utils.makeLabel(p)}</Text>
-        //              <Text style={styles.itemText}>{value}</Text>
-        //            </View>
-
-        if (cancelItem  &&  !hadCancel) {
+        if (editItem  &&  !hasEdit) {
+          hasEdit = true
+          let cancel
+          if (cancelItem  &&  !hadCancel)  {
+            hadCancel = true
+            cancel = <View style={{position: 'absolute', top: 0, right: 10}}>
+                       <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                        <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                       </TouchableOpacity>
+                     </View>
+          }
+          let { width } = utils.dimensions(component)
+          item = <View style={{width: width - 40}}>
+                   <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
+                      {item}
+                   </TouchableOpacity>
+                   {cancel}
+                 </View>
+        }
+        else if (cancelItem  &&  !hadCancel) {
           hadCancel = true
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={styles.row}>
                      {item}
-                     <View style={{position: 'absolute', top: 0, right: 10}}>
+                     <View style={{position: 'absolute', top: 0, right: 7}}>
                        <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                      </View>
                    </View>

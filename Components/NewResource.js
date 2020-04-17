@@ -10,7 +10,7 @@ import React, { Component } from 'react'
 
 import {
   View,
-  Text,
+  // Text,
   ScrollView,
   Platform,
   Alert,
@@ -36,6 +36,7 @@ const {
 
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
+import { Text } from './Text'
 import ResourceMixin from './ResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import ShowPropertiesView from './ShowPropertiesView'
@@ -119,6 +120,7 @@ class NewResource extends Component {
     this.onEndEditing = this.onEndEditing.bind(this)
     this.onChange = this.onChange.bind(this)
     this.cancelItem = this.cancelItem.bind(this)
+    this.editItem = this.editItem.bind(this)
 
     let currentRoutes = props.navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
@@ -157,17 +159,16 @@ class NewResource extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
            utils.resized(this.props, nextProps)              ||
-           this.state.requestedProperties !== nextState.requestedProperties ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
-           this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
-           // this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
            this.state.disableEditing !== nextState.disableEditing  ||
-           this.state.validationErrors !== nextState.validationErrors ||
+           this.state.requestedProperties !== nextState.requestedProperties ||
+           this.state.validationErrors !== nextState.validationErrors       ||
+           this.state.itemsChangesCounter !== nextState.itemsChangesCounter ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !_.isEqual(this.state.resource, nextState.resource)
 
@@ -272,7 +273,9 @@ class NewResource extends Component {
         navigator.pop()
     }
     if (action === 'formEdit') {
-      if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
+
+      if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
+      // if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
         if (requestedProperties) {
           let r = resource ||  this.state.resource
           if (originatingMessage  &&  originatingMessage.prefill)
@@ -709,20 +712,53 @@ class NewResource extends Component {
     if (!item)
       return;
     let resource = this.addFormValues();
-    if (this.props.model.properties[propName].items.ref)
+    if (this.props.model.properties[propName].items.ref) {
       item[TYPE] = this.props.model.properties[propName].items.ref
+      if (item.file)  {
+        if (item[TYPE] !== PHOTO) {
+          item.name = item.file.name
+          if (item.file.mimeType)
+            item.mimeType = item.file.mimeType
+          item.size = item.file.size
+        }
+        delete item.file
+      }
+    }
     let items = resource[propName];
     if (!items) {
       items = [];
       resource[propName] = items;
     }
-    items.push(item);
-    let itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
+    let itemsChangesCounter
+    let { _editItem } = resource
+    if (_editItem) {
+      let idx = items.findIndex(item => _.isEqual(item, _editItem))
+      if (idx !== -1) {
+        itemsChangesCounter = this.state.itemsChangesCounter ? this.state.itemsChangesCounter  + 1 : 1
+        _.extend(items[idx], item)
+      }
+      item = { ..._editItem, ...item }
+      delete resource._editItem
+    }
+    else {
+      items.push(item)
+      itemsChangesCounter = this.state.itemsChangesCounter ? this.state.itemsChangesCounter  + 1 : 1
+    }
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
+
+    if (item[TYPE]) {
+      let iprops = utils.getModel(item[TYPE]).properties
+      let prefix = `${propName}_`
+      for (let p in item) {
+        if (p.charAt(0) !== '_'  &&  iprops[p])
+          delete resource[`${prefix}${p}`]
+      }
+    }
+
     this.setState({
-      resource: resource,
-      itemsCount: itemsCount,
+      resource,
+      itemsChangesCounter,
       prop: propName,
       inFocus: propName
     });
@@ -730,7 +766,7 @@ class NewResource extends Component {
 
   onNewPressed(bl) {
     let resource = this.addFormValues();
-    this.setState({resource: resource, err: '', inFocus: bl.name});
+    this.setState({resource, err: '', inFocus: bl.name});
     let { bankStyle, currency, model, navigator } = this.props
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
     if (bl.items.ref  &&  bl.allowToAdd) {
@@ -766,6 +802,18 @@ class NewResource extends Component {
       }
     });
   }
+  editItem(pMeta, item) {
+    let resource = this.state.resource
+    let prefix = `${pMeta.name}_`
+
+    for (let p in item) {
+      if (p.charAt(0) !== '_')
+        resource[`${prefix}${p}`] = item[p]
+    }
+    resource._editItem = item
+    this.onNewPressed(pMeta)
+  }
+
   getSearchResult() {
     let value = this.refs.form.getValue();
     if (!value) {
@@ -825,7 +873,7 @@ class NewResource extends Component {
       for (let p in bookmark.bookmark) {
         if (props[p]) {
           let bPropVal = bookmark.bookmark[p]
-          if (props[p].ref  &&  utils.isEnum(props[p].ref))
+          if (props[p].ref  &&  utils.isEnum(props[p].ref)  &&  !Array.isArray(bPropVal))
             data[p] = [bPropVal]
           else
             data[p] = bPropVal
@@ -833,7 +881,11 @@ class NewResource extends Component {
         }
       }
     }
-    let editable = !disableEditing
+    let editable
+    if (disableEditing)
+      editable = false
+    else
+      editable = true
     let params = {
         meta,
         data,
@@ -1153,7 +1205,7 @@ class NewResource extends Component {
         list.splice(i, 1);
         this.setState({
           resource: this.state.resource,
-          itemsCount: list.length
+          itemsChangesCounter: list.length
         })
         return
       }
@@ -1198,33 +1250,31 @@ class NewResource extends Component {
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
-    let width = utils.dimensions(NewResource).width - 20
+    // let width = utils.dimensions(NewResource).width - 40
+    let width = utils.getMessageWidth(NewResource)
     if (count) {
       let cstyle = styles.activePropTitle
-      actionableItem = <View style={{width, alignSelf: 'center'}}>
+      actionableItem = <View style={{paddingLeft:10, paddingVertical: 5}}>
                          <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
-                           <View style={styles.iitems}>
-                             <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
+                           <View style={styles.noCountItems}>
+                             <Text style={[cstyle, {color: lcolor, paddingTop: 3}]}>{label}</Text>
                              <View style={styles.addButton}>
                                <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff' style={{marginTop: 2}}/>
                              </View>
                            </View>
                          </TouchableOpacity>
-                         {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
+                         {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem, editItem: bl.items.ref &&  this.editItem})}
                        </View>
-
     }
     else {
-      actionableItem = <View style={{width}}>
-                       <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
-                         <View style={[styles.iitems, {paddingBottom: 10}]}>
+      actionableItem = <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
+                         <View style={styles.noCountItems}>
                            <Text style={styles.noItemsText}>{label}</Text>
                            <View style={styles.addButton}>
                               <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' style={{marginTop: 2}}/>
                            </View>
                          </View>
                        </TouchableOpacity>
-                       </View>
     }
     let err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[bl.name]
@@ -1429,6 +1479,12 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     iitems: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+    },
+    noCountItems: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingBottom: 10,
+      paddingRight: 8
     },
     activePropTitle: {
       fontSize: 12,

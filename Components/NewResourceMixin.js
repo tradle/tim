@@ -28,7 +28,7 @@ import RefPropertyEditor from './RefPropertyEditor'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
-const DEFAULT_CURRENCY_SYMBOL = '£';
+const DEFAULT_CURRENCY_SYMBOL = '$';
 
 const {
   MONEY,
@@ -75,8 +75,11 @@ var NewResourceMixin = {
 
     // Case when clicked in the FormRequest and modelsPack changed
     let meta = this.props.model
-    if (!meta)
+    let isInlineArray
+    if (!meta) {
       meta = utils.getModel(this.props.metadata.items.ref)
+      isInlineArray = true
+    }
     let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     let props, bl
@@ -203,9 +206,11 @@ var NewResourceMixin = {
       }
       if (props[p].description)
         options.fields[p].help = props[p].description;
-      if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
+      if (props[p].readOnly  ||  (props[p].immutable  &&  data[p]))
         options.fields[p] = {editable:  false };
 
+      let pName = isInlineArray  &&  `${params.meta.name}_${p}`
+      let val = isInlineArray && resource[pName] || data[p]
       if (formType) {
         if (props[p].keyboard)
           options.fields[p].keyboardType = props[p].keyboard
@@ -216,39 +221,39 @@ var NewResourceMixin = {
             options.fields[p].keyboardType = 'url'
         }
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
-        if (data  &&  (type == 'date')) {
+        if (type == 'date') {
           model[p] = t.Str
+          if (val)
+            val = new Date(val)
           options.fields[p].template = this.myDateTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     required: !maybe,
                     model: meta,
                     errors: formErrors,
                     component,
                     editable: !props[p].readOnly || search,
-                    value: data[p] ? new Date(data[p]) : data[p]
+                    value: val
                   })
 
-          if (data[p])
-            data[p] = new Date(data[p]);
-          options.fields[p].mode = 'date';
-          options.fields[p].auto = 'labels';
+          if (val)
+            data[p] = val
+          options.fields[p].mode = 'date'
+          options.fields[p].auto = 'labels'
           options.fields[p].label = label
           options.fields[p].onDateChange = this.onDateChange
         }
         else if (type === 'boolean') {
-          // HACK for old values
-          let v = data && data[p]
-          if (v) {
-            if (typeof v !== 'boolean')
-              v = v.title === 'No' ? false : true
+          if (val) {
+            if (typeof val !== 'boolean')
+              val = val.title === 'No' ? false : true
           }
 
           options.fields[p].template = this.myBooleanTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
-                    value: v,
+                    value: val,
                     required: !maybe,
                     component,
                     errors: formErrors,
@@ -273,8 +278,8 @@ var NewResourceMixin = {
           if (!search) {
             if (!props[p].keyboard)
               options.fields[p].keyboardType = 'numeric'
-            if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
-              data[p] = parseFloat(data[p])
+            if (val  &&  (typeof val != 'number'))
+              data[p] = parseFloat(val)
           }
         }
 
@@ -290,7 +295,7 @@ var NewResourceMixin = {
                     label,
                     prop:  props[p],
                     model: meta,
-                    value: data  &&  data[p] ? data[p] + '' : null,
+                    value: val || null,
                     required: !maybe,
                     errors: formErrors,
                     editable: !props[p].readOnly || search,
@@ -301,7 +306,7 @@ var NewResourceMixin = {
                     label,
                     prop:  props[p],
                     model: meta,
-                    value: data  &&  data[p] || null,
+                    value: val,
                     required: !maybe,
                     errors: formErrors,
                     component,
@@ -311,12 +316,16 @@ var NewResourceMixin = {
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           let editable = (params.editable && !props[p].readOnly) || search || false
+          if (val)
+            val += ''
+          else
+            val = null
           let keyboard = props[p].keyboard  ||  options.fields[p].keyboardType  ||  (!search && type === 'number' ? 'numeric' : 'default')
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label,
                     prop:  props[p],
                     model: meta,
-                    value: data  &&  data[p] ? data[p] + '' : null,
+                    value: val,
                     required: !maybe,
                     errors: formErrors,
                     component,
@@ -344,11 +353,11 @@ var NewResourceMixin = {
         }
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
-          let value = data[p]
+          let value = val
           if (value) {
             if (typeof value !== 'object') {
               value = {
-                value: value,
+                value,
                 currency: CURRENCY_SYMBOL
               }
             }
@@ -382,7 +391,7 @@ var NewResourceMixin = {
                     label,
                     prop:  props[p],
                     model: meta,
-                    value: data  &&  data[p] || null,
+                    value: val || null,
                     required: !maybe,
                     errors: formErrors,
                     component,
@@ -398,13 +407,13 @@ var NewResourceMixin = {
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
-        if (data  &&  data[p]) {
-          let vType = utils.getType(data[p])
+        if (val) {
+          let vType = utils.getType(val)
           if (vType) {
             let subModel = utils.getModel(vType)
-            options.fields[p].value = utils.getId(data[p])
+            options.fields[p].value = utils.getId(val)
             if (!search  &&  !bookmark)
-              data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
+              data[p] = utils.getDisplayName(val, subModel) || val.title;
           }
         }
 
@@ -553,6 +562,10 @@ var NewResourceMixin = {
     const { resource, missedRequiredOrErrorValue } = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
+    let { metadata, parentMeta } = this.props
+    if (parentMeta)
+      pname = `${metadata.name}_${pname}`
+
     if(ptype === 'number'  &&  !search) {
       let val = Number(value)
       if (value.endsWith('.'))
@@ -1228,6 +1241,10 @@ var NewResourceMixin = {
     let isArray = prop.type === 'array'
     let doDelete
     let currentR = _.cloneDeep(resource)
+
+    if (isItem)
+      propName = `${metadata.name}_${propName}`
+
     // clause for the items properies - need to redesign
     if (prop  &&  prop.type === 'array') {
       if (isEnum)
@@ -1286,7 +1303,7 @@ var NewResourceMixin = {
 
       if (value.photos)
         state[propName + '_photo'] = value.photos[0]
-      else if (model  && model.properties[propName].ref === PHOTO)
+      else if (model  && prop.ref === PHOTO)
         state[propName + '_photo'] = value
     }
     state.inFocus = propName
@@ -1387,8 +1404,10 @@ var NewResourceMixin = {
     if (!search  &&  required)
       label += ' *'
     let currency = this.props.currency
+    let isMoney = prop.ref  &&  prop.ref === MONEY
+
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
-    label += (prop.ref  &&  prop.ref === MONEY)
+    label += isMoney
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
     return (
