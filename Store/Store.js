@@ -5257,13 +5257,14 @@ if (!res[SIG]  &&  res._message)
       throw new Error('not found')
 
     debugger
+    me._masterAuthor = masterAuthor
+    await this.setMe(me)
+    Actions.showModal({title: translate('pairing'), showIndicator: true})
     let { list } = await this.searchServer({
         modelName: MY_EMPLOYEE_PASS,
         noTrigger: true,
         filterResource: {owner: {id: `${IDENTITY}_${masterAuthor}_${masterAuthor}`}}
       })
-
-    me._masterAuthor = masterAuthor
 
     this.trigger({action: 'masterIdentity', masterAuthor, me})
     if (!list  ||  !list.length)
@@ -5273,6 +5274,7 @@ if (!res[SIG]  &&  res._message)
       let org = this._getItem(myEmployeeBadge.from).organization
       await this.setupEmployee(myEmployeeBadge, org)
     }
+    Actions.hideModal()
   },
   async checkAndSetupIfEmployee(masterAuthor) {
     let { list } = await this.searchServer({

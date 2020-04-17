@@ -3,6 +3,7 @@
 import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
 import size from 'lodash/size'
+import extend from 'lodash/extend'
 import getPropertyAtPath from 'lodash/get'
 import { utils as tradleUtils } from '@tradle/engine'
 import { GraphQLClient } from 'graphql-request'
@@ -982,13 +983,23 @@ var search = {
     const body = tradleUtils.stringify({
       query
     })
-    const result = await this.meDriver.sign({
+
+    let obj = {
       object: {
         [TYPE]: 'tradle.GraphQLQuery',
         body,
         _time: Date.now()
       }
+    }
+    let { _masterAuthor } = utils.getMe()
+    if (_masterAuthor)
+      extend(obj, {_masterAuthor})
+
+    const result = await this.meDriver.sign({
+      object: obj
     })
+    // const result = await this.meDriver.sign({ object })
+
 
     const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
