@@ -4,6 +4,7 @@ import omit from 'lodash/omit'
 import size from 'lodash/size'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
+import extend from 'lodash/extend'
 // import gql from 'graphql-tag'
 import { utils as tradleUtils } from '@tradle/engine'
 // import { ApolloClient, createNetworkInterface } from 'apollo-client'
@@ -1014,14 +1015,19 @@ var search = {
     const body = tradleUtils.stringify({
       query
     })
-    let start = Date.now()
-    const result = await this.meDriver.sign({
-      object: {
+    let obj = {
         [TYPE]: 'tradle.GraphQLQuery',
         body,
         _time: Date.now()
       }
+    let { _masterAuthor } = utils.getMe()
+    if (_masterAuthor)
+      extend(obj, {_masterAuthor})
+
+    const result = await this.meDriver.sign({
+      object: obj
     })
+    // const result = await this.meDriver.sign({ object })
 
     const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
