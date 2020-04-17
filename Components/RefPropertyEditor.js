@@ -78,7 +78,7 @@ class RefPropertyEditor extends Component {
     return false
   }
   render() {
-    let { prop, parentMeta, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark,
+    let { prop, parentMeta, metadata, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark,
           search, photo, component, paintError, paintHelp, required, exploreData } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
@@ -91,19 +91,26 @@ class RefPropertyEditor extends Component {
     let isFile = prop.ref  &&  (prop.ref === FILE ||  utils.isSubclassOf(prop.ref, FILE))
     let isIdentity = prop.ref === IDENTITY
 
+    let isInlineArray = parentMeta  &&  metadata
+    let ipName = isInlineArray  &&  `${metadata.name}_${pName}`
     if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName]  &&  country) {
         resource[pName] = country
         this.props.floatingProps[pName] = country
       }
-      else if (parentMeta && resource[pName])
-        this.props.floatingProps[pName] = resource[pName]
+      else if (isInlineArray && resource[ipName])
+        this.props.floatingProps[ipName] = resource[ipName]
     }
-    let val = resource && resource[pName]
-    if (Array.isArray(val)  &&  !val.length)
-      val = null
-
+    let val
+    if (isInlineArray) {
+      if (resource[ipName]) val = resource[ipName]
+    }
+    else {
+      val = resource && resource[pName]
+      if (Array.isArray(val)  &&  !val.length)
+        val = null
+    }
     let pLabel = this.getPropertyLabel(prop) + (!search  &&  required ? ' *' : '')
     let label, propLabel, isImmutable
 
@@ -118,7 +125,7 @@ class RefPropertyEditor extends Component {
       else if (isFile  &&  resource[pName].name)
         label = resource[pName].name
       if (!label)
-        label = this.getRefLabel(prop, resource)
+        label = this.getRefLabel(prop, val, resource)
       propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
@@ -267,26 +274,21 @@ class RefPropertyEditor extends Component {
       this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
     }
   }
-  getRefLabel(prop, resource) {
+  getRefLabel(prop, val) {
     let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
-    // let m = utils.getId(resource[pName]).split('_')[0]
-    let pName = prop.name
     let label
     if (utils.isEnum(rModel)) {
       if (prop.type === 'array') {
-        let l = resource[pName].map(r => translateEnum(r))
+        let l = val.map(r => translateEnum(r))
         label = l.join(', ')
       }
-      else {
-        let val = resource[pName]
-        if (Array.isArray(val))
-          label = val.map(r => translateEnum(r)).join(',')
-        else
-          label = translateEnum(val)
-      }
+      else if (Array.isArray(val))
+        label = val.map(r => translateEnum(r)).join(',')
+      else
+        label = translateEnum(val)
     }
     if (!label) { // see if stub
-      label = resource[pName].title
+      label = val.title
       if (!label)
         label = prop.title
     }

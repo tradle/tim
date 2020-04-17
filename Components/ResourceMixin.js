@@ -47,6 +47,7 @@ const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
 const MODIFICATION = 'tradle.Modification'
+var DEFAULT_CURRENCY_SYMBOL = '$'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -155,8 +156,8 @@ var ResourceMixin = {
     });
   },
 
-  renderItems({value, prop, cancelItem, component}) {
-    let { bankStyle, navigator, resource } = this.props
+  renderItems({value, prop, cancelItem, editItem, component}) {
+    let { bankStyle, navigator, resource, currency } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = prop.items.properties;
     let pModel
@@ -179,18 +180,20 @@ var ResourceMixin = {
     let cnt = value.length;
     let isView = component  &&  component.name === 'ShowPropertiesView'
     let isWeb = utils.isWeb()
+
     return value.map((v) => {
       let ret = [];
       counter++;
       let displayName
       let hadCancel
+      let hasEdit
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
         let { type, displayAs, displayName, range, ref, skipLabel, items } = itemMeta
         let pVal = v[p]
         if (!pVal  &&  !displayAs)
           return
-        if (displayName) {
+        if (displayName  &&  !editItem) {
           displayName = type === 'object' && pVal.title ||  pVal
           ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
@@ -252,9 +255,15 @@ var ResourceMixin = {
         }
         else if (ref) {
           if (ref === MONEY) {
-            let symbol = pVal.currency
-            let c = utils.normalizeCurrencySymbol(pVal.currency)
-            value = (c || symbol) + pVal.value
+            let pCurrency = pVal.currency
+            if (!pCurrency) {
+              pCurrency = currency  &&  currency.symbol
+              if (!pCurrency)
+                pCurrency = DEFAULT_CURRENCY_SYMBOL
+            }
+
+            let c = utils.normalizeCurrencySymbol(pCurrency)
+            value = (c || pCurrency) + pVal.value
           }
           else
             value = pVal.title  ||  utils.getDisplayName(pVal, utils.getModel(ref));
@@ -272,7 +281,26 @@ var ResourceMixin = {
                      {!isView  &&  <View style={{flex: 1}}/>}
                    </View>
 
-        if (cancelItem  &&  !hadCancel) {
+        if (editItem  &&  !hasEdit) {
+          hasEdit = true
+          let cancel
+          if (cancelItem  &&  !hadCancel)  {
+            hadCancel = true
+            cancel = <View style={{position: 'absolute', top: 0, right: 10}}>
+                       <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                        <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                       </TouchableOpacity>
+                     </View>
+          }
+          item = <View style={[{width: utils.getContentWidth(component) - 40}]}>
+                   <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
+                     {item}
+                   </TouchableOpacity>
+                   {cancel}
+                 </View>
+        }
+
+        else if (cancelItem  &&  !hadCancel) {
           hadCancel = true
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={[{width: utils.getContentWidth(component) - 40}]}>

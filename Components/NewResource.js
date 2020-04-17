@@ -122,6 +122,7 @@ class NewResource extends Component {
     this.onEndEditing = this.onEndEditing.bind(this)
     this.onChange = this.onChange.bind(this)
     this.cancelItem = this.cancelItem.bind(this)
+    this.editItem = this.editItem.bind(this)
 
     let currentRoutes = props.navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
@@ -160,17 +161,17 @@ class NewResource extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
            utils.resized(this.props, nextProps)              ||
-           this.state.requestedProperties !== nextState.requestedProperties ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
-           this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
            this.state.disableEditing !== nextState.disableEditing  ||
-           this.state.validationErrors !== nextState.validationErrors ||
+           this.state.requestedProperties !== nextState.requestedProperties ||
+           this.state.validationErrors !== nextState.validationErrors       ||
+           this.state.itemsChangesCounter !== nextState.itemsChangesCounter ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !_.isEqual(this.state.resource, nextState.resource)
 
@@ -739,13 +740,36 @@ class NewResource extends Component {
       items = [];
       resource[propName] = items;
     }
-    items.push(item);
-    let itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
+    let itemsChangesCounter
+    let { _editItem } = resource
+    if (_editItem) {
+      let idx = items.findIndex(item => _.isEqual(item, _editItem))
+      if (idx !== -1) {
+        itemsChangesCounter = this.state.itemsChangesCounter ? this.state.itemsChangesCounter  + 1 : 1
+        _.extend(items[idx], item)
+      }
+      item = { ..._editItem, ...item }
+      delete resource._editItem
+    }
+    else {
+      items.push(item)
+      itemsChangesCounter = this.state.itemsChangesCounter ? this.state.itemsChangesCounter  + 1 : 1
+    }
+
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
+
+    if (item[TYPE]) {
+      let iprops = utils.getModel(item[TYPE]).properties
+      let prefix = `${propName}_`
+      for (let p in item) {
+        if (p.charAt(0) !== '_'  &&  iprops[p])
+          delete resource[`${prefix}${p}`]
+      }
+    }
     this.setState({
-      resource: resource,
-      itemsCount: itemsCount,
+      resource,
+      itemsChangesCounter,
       prop: propName,
       inFocus: propName
     });
@@ -753,7 +777,7 @@ class NewResource extends Component {
 
   onNewPressed(bl) {
     let resource = this.addFormValues();
-    this.setState({resource: resource, err: '', inFocus: bl.name});
+    this.setState({resource, err: '', inFocus: bl.name});
     let { bankStyle, currency, model, navigator } = this.props
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
     if (bl.items.ref  &&  bl.allowToAdd) {
@@ -1256,11 +1280,23 @@ class NewResource extends Component {
         list.splice(i, 1);
         this.setState({
           resource: this.state.resource,
-          itemsCount: list.length
+          itemsChangesCounter: list.length
         })
         return
       }
     }
+  }
+
+  editItem(pMeta, item) {
+    let resource = this.state.resource
+    let prefix = `${pMeta.name}_`
+
+    for (let p in item) {
+      if (p.charAt(0) !== '_')
+        resource[`${prefix}${p}`] = item[p]
+    }
+    resource._editItem = item
+    this.onNewPressed(pMeta)
   }
 
   showItems(prop) {
@@ -1313,7 +1349,7 @@ class NewResource extends Component {
                              </View>
                            </View>
                          </TouchableOpacity>
-                         {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
+                         {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem, editItem: bl.items.ref &&  this.editItem})}
                        </View>
 
     }

@@ -77,15 +77,25 @@ class NewItem extends Component {
 
     if (this.floatingProps) {
       value = this.floatingProps
-      // _.extend(value, this.floatingProps)
-      // for (let p in this.floatingProps)
-      //   value[p] = this.floatingProps[p]
     }
-    let propName = this.props.metadata.name;
-    let resource = this.props.resource
+    const { metadata, resource } = this.props
+    let propName = metadata.name;
     // value is a tcomb Struct
-    let item = utils.clone(value);
-    let missedRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
+    // let item = utils.clone(value);
+    const { items } = metadata
+    let item
+    let ref = items  &&  items.ref
+    if (ref) {
+      let prefix = `${propName}_`
+      item = { [TYPE]: ref }
+      for (let p in value) {
+        if (p.indexOf(prefix) !== -1)
+          item[p.slice(prefix.length)] = value[p]
+      }
+    }
+    else
+      item = utils.clone(value)
+    let missedRequiredOrErrorValue = this.checkRequired(metadata, item, resource)
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
       let state = {
@@ -97,7 +107,7 @@ class NewItem extends Component {
 
     if (this.props.metadata.items) {
       // HACK ref props of array type props reside on resource for now
-      let props = this.props.metadata.items.properties
+      let props = items.properties
       if (props) {
         let rProps = utils.getModel(resource[TYPE]).properties
         for (let p in props) {
@@ -111,7 +121,7 @@ class NewItem extends Component {
       }
     }
 
-    if (!this.validateValues(this.props.metadata, item)) {
+    if (!this.validateValues(metadata, item)) {
       this.state.submitted = false
       return;
     }
