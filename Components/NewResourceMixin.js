@@ -79,7 +79,7 @@ var NewResourceMixin = {
   },
   getFormFields(params) {
     let { currency, editCols, originatingMessage, search, exploreData, errs, bookmark } = this.props
-    let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
+    let CURRENCY_SYMBOL = this.getCurrency()
     let { component, formErrors, model, data, validationErrors } = params
 
     let meta = this.props.model
@@ -1436,10 +1436,8 @@ var NewResourceMixin = {
     let { search } = this.props
     if (!search  &&  required)
       label += ' *'
-    let currency = this.props.currency
     let isMoney = prop.ref  &&  prop.ref === MONEY
-
-    let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
+    let CURRENCY_SYMBOL = this.getCurrency()
     label += isMoney
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
@@ -1461,6 +1459,7 @@ var NewResourceMixin = {
                     keyboard: search ? null : 'numeric',
                   })
           }
+          <View style={{width:5}}/>
           {
              this.myEnumTemplate({
                     prop,
@@ -1479,7 +1478,14 @@ var NewResourceMixin = {
       </View>
     );
   },
-
+  getCurrency() {
+    let { currency } = this.props
+    if (!currency)
+      return DEFAULT_CURRENCY_SYMBOL
+    if (typeof currency === 'string')
+      return currency
+    return currency.symbol
+  },
   myEnumTemplate(params) {
     let { prop, enumProp, errors } = params
     let error
@@ -1542,7 +1548,7 @@ var NewResourceMixin = {
     // clause for the items properies - need to redesign
     // resource[propName][enumPropName] = value
     const { metadata, parentMeta } = this.props
-     let isItem = metadata !== null && parentMeta !== null
+     let isItem = metadata && parentMeta
      if (isItem)
       propName = `${metadata.name}_${propName}`
 
