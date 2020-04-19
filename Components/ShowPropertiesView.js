@@ -377,18 +377,9 @@ class ShowPropertiesView extends Component {
     if (ref === MONEY) {
       let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
       let c = utils.normalizeCurrencySymbol(val.currency)
-      if (c) {
-        let currencyName
-        let mm = utils.getModel(MONEY)
-        let formattedCurrency = mm.properties.currency.oneOf.find(r => {
-          let cName = Object.keys(r)[0]
-          if (r[cName] === c) {
-            currencyName = cName
-            return true
-          }
-        })
-        if (locale)
-         return {val: new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)}
+      if (c  &&  locale) {
+        let currencyName = this.getCurrencyName(c)
+        return {val: new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)}
       }
 
       return {val: (c || CURRENCY_SYMBOL) + ' ' + val.value}

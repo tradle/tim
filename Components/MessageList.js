@@ -730,7 +730,7 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, originatingMessage, currency, navigator, isModalOpen } = this.props
+    let { application, isAggregation, originatingMessage, currency, locale, navigator, isModalOpen } = this.props
 
     let bankStyle = this.state.bankStyle
 
@@ -756,6 +756,7 @@ class MessageList extends Component {
 
     let moreProps = {
       share: this.share,
+      locale,
       // sendStatus: sendStatus,
       currency: this.calcCurrency(),
       country: this.props.resource.country,

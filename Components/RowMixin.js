@@ -1,3 +1,4 @@
+/*global Intl*/
 import uniqBy from 'lodash/uniqBy'
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
@@ -53,21 +54,36 @@ var RowMixin = {
   getNextKey() {
     return this.props.resource[ROOT_HASH] + '_' + cnt++
   },
+  getCurrencyName(c) {
+    let currencyName
+    let mm = utils.getModel(MONEY)
+    let formattedCurrency = mm.properties.currency.oneOf.find(r => {
+      let cName = Object.keys(r)[0]
+      if (r[cName] === c) {
+        currencyName = cName
+        return true
+      }
+    })
+    return currencyName
+  },
   getPropRow(prop, resource, val, isVerification) {
-    let {currency, isAggregation, bankStyle} = this.props
+    let { currency, isAggregation, bankStyle, locale } = this.props
     if (prop.ref) {
       if (prop.ref === MONEY) {
-        let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
-        let c = utils.normalizeCurrencySymbol(val.currency)
-        val = (c || CURRENCY_SYMBOL) + val.value
-        // val = (val.currency || CURRENCY_SYMBOL) + val.value
+        if (currency && locale) {
+          let currencyName = this.getCurrencyName(currency)
+          val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)
+        }
+        else {
+          let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
+          let c = utils.normalizeCurrencySymbol(val.currency)
+          val = (c || CURRENCY_SYMBOL) + val.value
+        }
       }
       else {
         let m = utils.getModel(prop.ref)
-        if (utils.isEnum(m)) {
-          // let tVal = (typeof val === 'string') && val || val.title
+        if (utils.isEnum(m))
           val = translateEnum(resource[prop.name])
-        }
       }
     }
     let model = utils.getModel(resource[TYPE])
