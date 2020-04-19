@@ -2435,11 +2435,18 @@ var Store = Reflux.createStore({
       //   newOrg._isTest = true
     }
     let config = sp.publicConfig
-    if (sp.currency) {
-      if (!config)
-        config = {currency: sp.currency}
+    if (!config) {
+      if (sp.currency) {
+        if (!config)
+          config = {}
+        config.currency = sp.currency
+      }
+      if (sp.locale) {
+        if (!config)
+          config = {}
+        config.locale = sp.locale
+      }
     }
-
     if (sp.tour)
       org._tour = sp.tour
 
@@ -2593,6 +2600,8 @@ var Store = Reflux.createStore({
         await this.dbPut(orgId, org)
       }
     }
+    if (org._locale)
+      org.locale = org._locale
     if (org._hidePropertyInEdit)
       utils.addHidePropertyInEditFor(org)
     if (config.greeting) {
