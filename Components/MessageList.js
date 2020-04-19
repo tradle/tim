@@ -680,7 +680,8 @@ class MessageList extends Component {
         resource: r,
         lensId: lensId,
         application,
-        currency: this.getCurrency(),
+        currency: this.calcCurrency(),
+        locale: resource.locale,
         country: resource.country,
         verification,
         isReview,
@@ -712,7 +713,7 @@ class MessageList extends Component {
         passProps = {
           model: utils.getLensedModel(r, lensId),
           resource: r,
-          currency: this.getCurrency(),
+          currency: this.calcCurrency(),
           country: resource.country,
           chat: resource,
           lensId,
@@ -780,7 +781,7 @@ class MessageList extends Component {
     let moreProps = {
       share: this.share,
       // sendStatus: sendStatus,
-      currency: this.getCurrency(),
+      currency: this.calcCurrency(),
       country: this.props.resource.country,
       defaultPropertyValues: this.props.resource._defaultPropertyValues,
       previousMessageTime: previousMessageTime,
@@ -817,7 +818,7 @@ class MessageList extends Component {
     else
       return <MessageRow {...props} />
   }
-  getCurrency() {
+  calcCurrency() {
     let { resource, currency } = this.props
     let rcurrency = resource.currency
     if (rcurrency)
@@ -1498,7 +1499,7 @@ class MessageList extends Component {
       passProps: {
         resource: to,
         modelName: MESSAGE,
-        currency: this.getCurrency(),
+        currency: this.calcCurrency(),
         bankStyle:  this.state.bankStyle
       }
     })
