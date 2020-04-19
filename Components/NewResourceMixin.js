@@ -78,7 +78,7 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, editCols, originatingMessage, search, exploreData, errs, bookmark } = this.props
+    let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
     let CURRENCY_SYMBOL = this.getCurrency()
     let { component, formErrors, model, data, validationErrors } = params
 
@@ -810,7 +810,7 @@ var NewResourceMixin = {
           autoCapitalize={autoCapitalize}
           onFocus={this.inputFocused.bind(this, prop)}
           inputStyle={this.state.isRegistration ? styles.regInput : [styles.textInput, fontF]}
-          style={[styles.formInput, {borderColor: bcolor}]}
+          style={[styles.formInput, {borderColor: bcolor, paddingRight: 5}]}
           value={value}
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
           keyboardShouldPersistTaps='always'
@@ -1459,7 +1459,6 @@ var NewResourceMixin = {
                     keyboard: search ? null : 'numeric',
                   })
           }
-          <View style={{width:5}}/>
           {
              this.myEnumTemplate({
                     prop,
