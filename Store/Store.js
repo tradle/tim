@@ -6619,7 +6619,7 @@ if (!res[SIG]  &&  res._message)
     }
 
     if (!noTrigger)
-      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
+      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit})
     return {list, endCursor: newCursor}
   },
   async getBookmarkChat(parameters) {
