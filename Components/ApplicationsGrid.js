@@ -147,14 +147,15 @@ class ApplicationsGrid extends Component {
     this.listenTo(Store, 'onAction')
   }
   onAction(params) {
-    let { action, list, application, endCursor, applicantName } = params
+    let { action, list, application, endCursor, applicantName, allLoaded } = params
     switch(action) {
     case 'list':
       if (!list  ||  !list.length  ||  list[0][TYPE] !== APPLICATION) return
       let nodes = this.transformTree({list})
       let newNodes = this.state.nodes.slice().concat(nodes)
       let newList = this.state.list.slice().concat(list)
-      let allLoaded =  list  &&  list.length < this.limit
+      if (allLoaded === 'undefined')
+        allLoaded =  list  &&  list.length < this.limit
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(newNodes),
         list: newList,
@@ -181,7 +182,7 @@ class ApplicationsGrid extends Component {
       bookmark,
       search: true,
       first: true,
-      limit: this.limit
+      limit: this.limit * 2
     })
   }
   async _loadMoreContentAsync() {
@@ -301,6 +302,7 @@ class ApplicationsGrid extends Component {
         initialListSize={20}
         renderScrollComponent={props => <InfiniteScrollView {...props} allLoaded={allLoaded}/>}
         onLoadMoreAsync={this._loadMoreContentAsync}
+        scrollRenderAhead={10}
         pageSize={20}
         canLoadMore={true}
         showsVerticalScrollIndicator={false} />;
