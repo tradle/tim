@@ -354,6 +354,7 @@ class ResourceList extends Component {
           filter: '',
           modelName: MESSAGE,
           currency: params.to.currency,
+          // locale: params.to.locale,
           bankStyle: style,
           dictionary: params.dictionary
         },
@@ -573,7 +574,7 @@ class ResourceList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
     let isContact = modelName === PROFILE;
-    let rType = resource[TYPE]
+    let rType = utils.getType(resource)
     let isVerificationR  = rType === VERIFICATION
     let isMessage = utils.isMessage(resource)
 
@@ -690,11 +691,12 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       title: title,
       passProps: {
-        resource: resource,
+        resource,
         limit: LIMIT,
         filter: '',
         modelName: MESSAGE,
         currency: resource.currency,
+        locale: resource.locale,
         bankStyle: style,
         hadTour: action !== null
       }
@@ -711,9 +713,9 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: utils.getModel(utils.getType(resource)),
-            resource: resource,
-            currency: currency,
+            model: utils.getModel(rType),
+            resource,
+            currency,
           }
         }
       }

@@ -69,8 +69,8 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
-    let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
+    let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
+    let CURRENCY_SYMBOL = this.getCurrency()
     let { component, formErrors, model, data, validationErrors, editable } = params
 
     // Case when clicked in the FormRequest and modelsPack changed
@@ -374,9 +374,11 @@ var NewResourceMixin = {
                     prop:  props[p],
                     value,
                     model: meta,
+                    onSubmitEditing: onSubmitEditing.bind(this),
                     keyboard: 'numeric',
                     component,
                     required: !maybe,
+                    editable: !props[p].readOnly,
                     errors: formErrors,
                   })
 
@@ -1403,10 +1405,9 @@ var NewResourceMixin = {
     let { search } = this.props
     if (!search  &&  required)
       label += ' *'
-    let currency = this.props.currency
+    let CURRENCY_SYMBOL = this.getCurrency()
     let isMoney = prop.ref  &&  prop.ref === MONEY
 
-    let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     label += isMoney
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
@@ -1480,6 +1481,14 @@ var NewResourceMixin = {
       </View>
     );
   },
+  getCurrency() {
+    let { currency } = this.props
+    if (!currency)
+      return DEFAULT_CURRENCY_SYMBOL
+    if (typeof currency === 'string')
+      return currency
+    return currency.symbol
+  },
   enumChooser(prop, enumProp, event) {
     let resource = this.state.resource;
     let model = (this.props.model  ||  this.props.metadata)
@@ -1508,6 +1517,11 @@ var NewResourceMixin = {
     let resource = _.cloneDeep(this.state.resource)
     // clause for the items properies - need to redesign
     // resource[propName][enumPropName] = value
+    const { metadata, parentMeta } = this.props
+    let isItem = metadata && parentMeta
+    if (isItem)
+      propName = `${metadata.name}_${propName}`
+
     if (resource[propName]) {
       if (typeof resource[propName] === 'object')
         resource[propName][enumPropName] = value[Object.keys(value)[0]]
