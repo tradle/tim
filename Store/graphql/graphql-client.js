@@ -985,12 +985,10 @@ var search = {
     })
 
     let obj = {
-      object: {
         [TYPE]: 'tradle.GraphQLQuery',
         body,
         _time: Date.now()
       }
-    }
     let { _masterAuthor } = utils.getMe()
     if (_masterAuthor)
       extend(obj, {_masterAuthor})
