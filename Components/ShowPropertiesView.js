@@ -1,3 +1,4 @@
+/*global Intl*/
 import React, { Component } from 'react'
 import {
   // StyleSheet,
@@ -6,7 +7,6 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native'
-
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -105,7 +105,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency, locale } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
@@ -211,6 +211,8 @@ class ShowPropertiesView extends Component {
           val = utils.formatDate(val)
         }
       }
+      else if (pMeta.type === 'number'  &&  locale)
+        val = new Intl.NumberFormat(locale).format(val)
       else if (pMeta.ref) {
         ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
         if (!val)
@@ -357,7 +359,7 @@ class ShowPropertiesView extends Component {
     }
   }
   renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}) {
-    let { showRefResource, currency, bankStyle, checkProperties } = this.props
+    let { showRefResource, currency, bankStyle, checkProperties, locale } = this.props
     let { ref } = pMeta
     if (ref === PHOTO) {
       if (vCols.length === 1  &&  resource._time)
@@ -379,6 +381,19 @@ class ShowPropertiesView extends Component {
     if (ref === MONEY) {
       let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
       let c = utils.normalizeCurrencySymbol(val.currency)
+      if (c) {
+        let currencyName
+        let mm = utils.getModel(MONEY)
+        let formattedCurrency = mm.properties.currency.oneOf.find(r => {
+          let cName = Object.keys(r)[0]
+          if (r[cName] === c) {
+            currencyName = cName
+            return true
+          }
+        })
+        if (locale)
+         return {val: new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)}
+      }
       return {val: (c || CURRENCY_SYMBOL) + val.value}
     }
     if (ref === IDENTITY) {
