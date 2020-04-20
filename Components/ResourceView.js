@@ -52,8 +52,6 @@ import { signIn } from '../utils/localAuth'
 // import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
 
-// const SERVER_URL = 'http://192.168.0.162:44444/'
-
 const SCAN_QR_CODE = 0
 const USE_TOUCH_ID = 1
 const USE_GESTURE_PASSWORD = 2
@@ -121,8 +119,6 @@ class ResourceView extends Component {
   componentWillMount() {
     let { resource, search, backlink } = this.props
 
-    // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
-    // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
     let m = utils.getModel(rtype)
     if (utils.isInlined(m)) {
@@ -179,22 +175,7 @@ class ResourceView extends Component {
       if (error)
         Alert.alert(error)
       else
-        this.setState({pairingData: pairingData, isModalOpen: true})
-      break
-    case 'invalidPairingRequest':
-      this.props.navigator.pop()
-      Alert.alert(translate(error))
-      break
-    case 'acceptingPairingRequest':
-      this.closeModal()
-      // check signature
-      signIn(this.props.navigator, utils.getMe())
-        .then(() => {
-          Actions.pairingRequestAccepted(resource)
-        })
-      break
-    case 'pairingRequestAccepted':
-      this.props.navigator.pop()
+        this.setState({pairingData, isModalOpen: true})
       break
     case 'newContact':
       this.closeModal()
@@ -257,14 +238,14 @@ class ResourceView extends Component {
 
   render() {
     let { navigator, bankStyle, currency, application } = this.props
+    if (!bankStyle)
+      bankStyle = defaultBankStyle
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: ResourceView})
 
     let { backlink, backlinkList, pairingData, isModalOpen } = this.state
     let styles = createStyles({bankStyle})
 
-    if (!bankStyle)
-      bankStyle = defaultBankStyle
     let resource = this.state.resource;
     let modelName = resource[TYPE];
     let model = utils.getModel(modelName);
@@ -296,7 +277,17 @@ class ResourceView extends Component {
     if (pairingData) {
       qr = {
         schema: 'PairDevices',
-        allData: pairingData
+        data: pairingData
+      }
+    }
+    else if (utils.isSubclassOf(model, MY_PRODUCT)) {
+      qr = {
+        schema: 'ProductAuthorization',
+        data: {
+          contextId: resource.contextId,
+          product: resource.requestFor,
+          firstName: me.firstName
+        }
       }
     }
     else if (isMe) {
@@ -435,11 +426,6 @@ class ResourceView extends Component {
       actions.push(CHANGE_GESTURE_PASSWORD)
     }
 
-    // if (ENV.allowPairDevices) {
-    //   buttons.push(translate('pairDevices'))
-    //   actions.push(PAIR_DEVICES)
-    // }
-
     if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
       actions.push(SCAN_QR_CODE)
@@ -500,9 +486,6 @@ class ResourceView extends Component {
       return this.updateAuthSettings(r, r.useGesturePassword)
     case CHANGE_GESTURE_PASSWORD:
       return this.updateAuthSettings(r, true)
-    // case PAIR_DEVICES:
-    //   Actions.genPairingData()
-    //   return
     case SCAN_QR_CODE:
       this.scanFormsQRCode({isView: true})
       return
@@ -562,8 +545,6 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bank
       paddingHorizontal: 10,
       marginRight: -10,
       flexDirection: 'row',
-      // alignItems: 'flex-end'
-      // justifyContent: 'space-between'
     },
     resourceTitle: {
       fontSize: 20,
