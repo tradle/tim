@@ -56,13 +56,10 @@ import { signIn } from '../utils/localAuth'
 import Navs from '../utils/navs'
 import ArticleView from './ArticleView'
 
-// const SERVER_URL = 'http://192.168.0.162:44444/'
-
 const SCAN_QR_CODE = 0
 const USE_TOUCH_ID = 1
 const USE_GESTURE_PASSWORD = 2
 const CHANGE_GESTURE_PASSWORD = 3
-// const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const WIPE_DEVICE = 6
 const CONFIRMATION_PRODUCT_REQUEST = 'tradle.ConfirmPackageRequest'
@@ -185,27 +182,10 @@ class ResourceView extends Component {
       else
         this.setState({pairingData, isModalOpen: true})
       break
-    // case 'invalidPairingRequest':
-    //   this.props.navigator.pop()
-    //   Alert.alert(translate(error))
-    //   break
-    case 'acceptingPairingRequest':
-      this.closeModal()
-      // check signature
-      signIn(this.props.navigator, utils.getMe())
-        .then(() => {
-          Actions.pairingRequestAccepted(resource)
-        })
-      break
-    case 'pairingRequestAccepted':
-      this.props.navigator.pop()
-      break
     case 'newContact':
       this.closeModal()
       break
     case 'employeeOnboarding':
-      // let routes = this.props.navigator.getCurrentRoutes()
-      // this.props.navigator.jumpTo(routes[1])
       let style = {}
       _.extend(style, defaultBankStyle)
       if (to.style)
@@ -223,15 +203,12 @@ class ResourceView extends Component {
           // dictionary: params.dictionary,
         }
       }, 2)
-      // this.props.navigator.jumpTo(routes[2])
       break
     case 'exploreBacklink':
       if (params.backlink !== this.state.backlink || params.backlinkAdded) {
         this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
         Actions.getItem({resource: this.props.resource})
       }
-      // if (backlink !== this.state.backlink)
-      //   this.setState({backlink: backlink})
       break
     }
   }
@@ -261,14 +238,17 @@ class ResourceView extends Component {
 
   render() {
     let { navigator, bankStyle, currency, application } = this.props
+    if (!bankStyle)
+      bankStyle = defaultBankStyle
+
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: ResourceView})
 
     let { backlink, backlinkList, pairingData, isModalOpen } = this.state
-    let styles = createStyles({bankStyle})
-
     if (!bankStyle)
       bankStyle = defaultBankStyle
+    let styles = createStyles({bankStyle})
+
     let resource = this.state.resource;
     let modelName = resource[TYPE];
     let model = utils.getModel(modelName);
@@ -315,6 +295,16 @@ class ResourceView extends Component {
       qr = {
         schema: 'PairDevices',
         data: pairingData
+      }
+    }
+    else if (utils.isSubclassOf(model, MY_PRODUCT)) {
+      qr = {
+        schema: 'ProductAuthorization',
+        data: {
+          contextId: resource.contextId,
+          product: resource.requestFor,
+          firstName: me.firstName
+        }
       }
     }
     else if (isMe) {
@@ -464,11 +454,6 @@ class ResourceView extends Component {
       actions.push(CHANGE_GESTURE_PASSWORD)
     }
 
-    // if (ENV.allowPairDevices) {
-    //   buttons.push(translate('pairDevices'))
-    //   actions.push(PAIR_DEVICES)
-    // }
-
     if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
       actions.push(SCAN_QR_CODE)
@@ -591,8 +576,6 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bank
       paddingHorizontal: 10,
       marginRight: -10,
       flexDirection: 'row',
-      // alignItems: 'flex-end'
-      // justifyContent: 'space-between'
     },
     resourceTitle: {
       fontSize: 20,
