@@ -649,7 +649,7 @@ class MessageList extends Component {
     }
     if (!title)
       title = translate(model) //translate(utils.makeModelTitle(model))
-    let dn = utils.getDisplayName(r)
+    let dn = utils.getDisplayName({ resource: r })
     let newTitle = (dn ? dn + ' -- '  : '') + title;
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier
@@ -1450,7 +1450,7 @@ class MessageList extends Component {
     let resource = this.props.resource
     this.setState({show: false})
     Alert.alert(
-      translate('confirmForgetMe', utils.getDisplayName(resource)),
+      translate('confirmForgetMe', utils.getDisplayName({ resource })),
       translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},

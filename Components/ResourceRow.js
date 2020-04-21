@@ -419,7 +419,7 @@ class ResourceRow extends Component {
 
   showProviderView() {
     let resource = this.props.resource
-    let title = utils.getDisplayName(resource)
+    let title = utils.getDisplayName({ resource })
     let route = {
       title: title,
       componentName: 'ResourceView',
@@ -471,7 +471,7 @@ class ResourceRow extends Component {
           dn = dn.toUpperCase()
       }
       else
-        dn = utils.getDisplayName(resource);
+        dn = utils.getDisplayName({ resource });
 
       if (dn && dn.length)
         return <Text style={isSeparator ? styles.sepTitle : styles.resourceTitle}>{dn}</Text>;
@@ -479,7 +479,7 @@ class ResourceRow extends Component {
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
     else if (this.props.isChooser)
-      return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
+      return <Text style={styles.resourceTitle}>{utils.getDisplayName({ resource })}</Text>
 
     let vCols = [];
     let properties = model.properties;
@@ -614,7 +614,7 @@ class ResourceRow extends Component {
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
-      let dn = utils.getDisplayName(resource, model);
+      let dn = utils.getDisplayName({ resource, model });
       return <Text style={styles.resourceTitle}>{dn}</Text>;
     }
     if (!backlink)
@@ -631,7 +631,7 @@ class ResourceRow extends Component {
   onPress(event) {
     let { resource, navigator } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
-    let title = utils.makeTitle(utils.getDisplayName(resource, model));
+    let title = utils.makeTitle(utils.getDisplayName({ resource, model }));
     navigator.push({
       title: title,
       componentName: 'ArticleView',

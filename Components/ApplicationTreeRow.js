@@ -182,7 +182,7 @@ class ApplicationTreeRow extends Component {
       for (let i=0; i<msgParts.length - 1; i++)
         val += msgParts[i];
     }
-    val = val  &&  val.replace(/\*/g, '')  ||  getDisplayName(node)
+    val = val  &&  val.replace(/\*/g, '')  ||  getDisplayName({ resource: node })
     return <View style={styles.cellStyle}><Text style={style}>{val}</Text></View>
   }
   stringifyTime(value) {
@@ -241,7 +241,7 @@ class ApplicationTreeRow extends Component {
     else if (ref === PHOTO)
       row = <Image source={{uri: node[pName].url}} style={styles.thumb} />
     else {
-      let title = getDisplayName(node[pName])
+      let title = getDisplayName({ resource: node[pName] })
       row = <Text style={styles.description} key={this.getNextKey(node)}>{title}</Text>
 
       if (isEnum(refM)) {

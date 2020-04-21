@@ -415,7 +415,7 @@ var NewResourceMixin = {
             let subModel = utils.getModel(vType)
             options.fields[p].value = utils.getId(val)
             if (!search  &&  !bookmark)
-              data[p] = utils.getDisplayName(val, subModel) || val.title;
+              data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title;
           }
         }
         // options.fields[p].onFocus = chooser.bind(this, props[p], p)
@@ -1684,6 +1684,7 @@ var styles= StyleSheet.create({
   enumText: {
     marginTop: 10,
     marginLeft: 20,
+    marginRight: 3,
     color: '#757575',
     fontSize: 20
   },

@@ -198,7 +198,7 @@ var HomePageMixin = {
     let { modelName, navigator, multiChooser, bookmark, isBacklink } = this.props
     if ((modelName === APPLICATION  &&  bookmark && !bookmark.grid) || isBacklink)
       return
-    let gridCols = getGridCols(modelName) // model.gridCols || model.viewCols;
+    let gridCols = getGridCols(modelName)
     if (!gridCols)
       return
     let notSortable
@@ -242,14 +242,14 @@ console.log('HomePageMixin: filterResource', resource)
   },
   showRefResources({resource, prop, component}) {
     let rType = utils.getType(resource)
-    let props = utils.getModel(rType).properties;
-    let propJson = props[prop];
-    let resourceTitle = utils.getDisplayName(resource);
-    resourceTitle = utils.makeTitle(resourceTitle);
+    let props = utils.getModel(rType).properties
+    let propJson = props[prop]
+    let resourceTitle = utils.getDisplayName({ resource })
+    resourceTitle = utils.makeTitle(resourceTitle)
 
-    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
-    backlinksTitle = utils.makeTitle(backlinksTitle);
-    let modelName = propJson.items.ref;
+    let backlinksTitle = propJson.title + ' - ' + resourceTitle
+    backlinksTitle = utils.makeTitle(backlinksTitle)
+    let modelName = propJson.items.ref
     let { style, currency, navigator } = this.props
     navigator.push({
       title: backlinksTitle,
@@ -284,7 +284,7 @@ console.log('HomePageMixin: filterResource', resource)
           currency: currency
         }
       }
-    });
+    })
   },
   assignRM(resource) {
     // let resource = this.state.resource || this.props.resource
@@ -318,7 +318,7 @@ console.log('HomePageMixin: filterResource', resource)
   }
 }
 
-module.exports = HomePageMixin;
+module.exports = HomePageMixin
 /*
   async onread(params, result) {
     let {isView, callback, prop} = params

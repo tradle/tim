@@ -1,4 +1,3 @@
-/*global Intl*/
 import uniqBy from 'lodash/uniqBy'
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
@@ -54,25 +53,14 @@ var RowMixin = {
   getNextKey() {
     return this.props.resource[ROOT_HASH] + '_' + cnt++
   },
-  getCurrencyName(c) {
-    let currencyName
-    let mm = utils.getModel(MONEY)
-    let formattedCurrency = mm.properties.currency.oneOf.find(r => {
-      let cName = Object.keys(r)[0]
-      if (r[cName] === c) {
-        currencyName = cName
-        return true
-      }
-    })
-    return currencyName
-  },
   getPropRow(prop, resource, val, isVerification) {
     let { currency, isAggregation, bankStyle, locale } = this.props
     if (prop.ref) {
       if (prop.ref === MONEY) {
         if (currency && locale) {
-          let currencyName = this.getCurrencyName(currency)
-          val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)
+          val = utils.formatCurrency({...val, currency })
+          // let currencyName = utils.getCurrencyName(currency)
+          // val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)
         }
         else {
           let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL

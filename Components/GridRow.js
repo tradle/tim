@@ -187,7 +187,7 @@ class GridRow extends Component {
       cols = [<View style={cellStyle}>
                {typeTitle}
                <Col sm={1} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + rowId}>
-                 <Text style={styles.description}>{utils.getDisplayName(resource)}</Text>
+                 <Text style={styles.description}>{utils.getDisplayName({ resource })}</Text>
                </Col>
              </View>]
     }
@@ -261,7 +261,7 @@ class GridRow extends Component {
       else if (ref === PHOTO)
         row = <Image source={{uri: resource[pName].url}} style={styles.thumb} />
       else {
-        let title = utils.getDisplayName(resource[pName])
+        let title = utils.getDisplayName({ resource: resource[pName] })
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
 
         if (utils.isEnum(refM)) {
@@ -313,7 +313,7 @@ class GridRow extends Component {
       for (let i=0; i<msgParts.length - 1; i++)
         val += msgParts[i];
     }
-    val = val  &&  val.replace(/\*/g, '')  ||  utils.getDisplayName(resource)
+    val = val  &&  val.replace(/\*/g, '')  ||  utils.getDisplayName({ resource })
     if (criteria) {
       if (criteria.indexOf('*') === -1) {
         style.push({fontWeight: '600'})
@@ -360,34 +360,8 @@ class GridRow extends Component {
              </View>
     }
     return <View key={this.getNextKey(resource)}>
-             <Text style={style}>{utils.getDisplayName(pval)}</Text>
+             <Text style={style}>{utils.getDisplayName({ resource: pval })}</Text>
            </View>
-  }
-
-  formatMessageProperty(pName) {
-    let { resource } = this.props
-    let pval = resource[pName]
-
-    if (!pval)
-      return
-    if (typeof pval === 'object') {
-      let style = [styles.description, {paddingLeft: 5}]
-      // HACK to show provider icon
-      if (utils.isStub(pval)  &&  pName === '_provider') {
-        if (resource._icon) {
-          return <View key={this.getNextKey(resource)} style={[styles.row, {paddingLeft: 10}]}>
-                   <Image style={styles.icon} source={{uri: resource._icon.url}} />
-                   <Text style={style}>{pval.title}</Text>
-                 </View>
-        }
-        return <View key={this.getNextKey(resource)}>
-                 <Text style={style}>{pval.title}</Text>
-               </View>
-      }
-      return <View key={this.getNextKey(resource)}>
-               <Text style={style}>{utils.getDisplayName(pval)}</Text>
-             </View>
-    }
   }
 
   paintIcon(model, eVal) {
@@ -410,7 +384,7 @@ class GridRow extends Component {
            </View>
   }
   onPress(resource) {
-    let title = utils.makeTitle(utils.getDisplayName(resource));
+    let title = utils.makeTitle(utils.getDisplayName({ resource }));
     this.props.navigator.push({
       title: title,
       componentName: 'ArticleView',

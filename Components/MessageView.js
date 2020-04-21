@@ -214,7 +214,7 @@ class MessageView extends Component {
     let { resource } = this.state
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
-        translate('verifyPrompt'), // + utils.getDisplayName(resource),
+        translate('verifyPrompt'), // + utils.getDisplayName({ resource }),
         null,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},

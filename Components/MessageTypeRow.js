@@ -45,7 +45,7 @@ class MessageTypeRow extends Component {
                     </View>
     }
     else {
-      title = utils.getDisplayName(resource)
+      title = utils.getDisplayName({ resource })
       renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]}>{title}</Text>;
     }
 

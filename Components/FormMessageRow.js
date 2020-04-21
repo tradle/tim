@@ -305,7 +305,7 @@ class FormMessageRow extends Component {
         if (resource[v]  &&  ref  &&  utils.isEnum(ref)) {
           let val
           resource[v].forEach((r) => {
-            let title = utils.getDisplayName(r)
+            let title = utils.getDisplayName({ resource: r })
             val = val ? val + '\n' + title : title
           })
           vCols.push(this.getPropRow(properties[v], resource, val))

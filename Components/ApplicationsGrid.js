@@ -223,7 +223,7 @@ class ApplicationsGrid extends Component {
       let node = _.pick(r, gridCols)
 
       let title = makeModelTitle(r.requestFor)
-      let displayName = getDisplayName(r)
+      let displayName = getDisplayName({ resource: r })
       node._displayName = displayName
       let idx = displayName.indexOf(title)
       node.node_displayName = idx <= 0 && displayName || displayName.slice(0, idx).trim()

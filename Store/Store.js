@@ -4471,7 +4471,7 @@ if (!res[SIG]  &&  res._message)
          newResource[prop] = val.value;
          newResource[prop].id = propValue
          if (!newResource[prop].title)
-            newResource[prop].title = utils.getDisplayName(newResource);
+            newResource[prop].title = utils.getDisplayName({ resource: newResource });
        }
      }
      return newResource;
@@ -5658,7 +5658,7 @@ if (!res[SIG]  &&  res._message)
       claimId: dataHash,
       from: {
         id: utils.getId(me),
-        title: utils.getDisplayName(me)
+        title: utils.getDisplayName({ resource: me })
       },
       to: {
         id: providerId
@@ -7071,7 +7071,7 @@ if (!res[SIG]  &&  res._message)
             let docId = utils.getId(rr.document)
             let docs = chatItems.filter((r) => utils.getId(r) === docId)
             if (docs  &&  docs.length)
-              rr.document.title = utils.getDisplayName(docs[0])
+              rr.document.title = utils.getDisplayName({ resource: docs[0] })
           }
           if (li.node._time)
             rr._time = li.node._time
@@ -7170,14 +7170,14 @@ if (!res[SIG]  &&  res._message)
     let recipient = this._getItem(recipientId)
     r.to = {
       id: recipientId,
-      title: recipient && utils.getDisplayName(recipient.organization || recipient)
+      title: recipient && utils.getDisplayName({ resource: recipient.organization || recipient })
     }
     let authorLink = msg._author
     let authorId = utils.makeId(PROFILE, authorLink)
     let author = this._getItem(authorId)
     r.from = { id: authorId }
     if (author)
-      r.from.title = utils.getDisplayName(author.organization || author)
+      r.from.title = utils.getDisplayName({ resource: author.organization || author })
 
     this.addVisualProps(r)
     return r
@@ -7238,7 +7238,7 @@ if (!res[SIG]  &&  res._message)
     let isIdentity = r[TYPE] === IDENTITY
     let authorId = utils.makeId(PROFILE, isIdentity && r._permalink || (r._org  ||  r._author))
     let author = this._getItem(authorId)
-    let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
+    let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName({ resource: author.organization }))
     let org
     let myOrgRepId
     if (me.isEmployee) {
@@ -7260,14 +7260,14 @@ if (!res[SIG]  &&  res._message)
     case APPLICATION_DENIAL:
     case APPLICATION_APPROVAL:
     case CONFIRMATION:
-      rr.from = {id: myOrgRepId, title: utils.getDisplayName(org)}
+      rr.from = {id: myOrgRepId, title: utils.getDisplayName({ resource: org })}
       rr.to = {id: authorId, title: authorTitle}
       break
     case APPLICATION:
       // this.organizeSubmissions(rr)
     default:
       rr.from = {id: authorId, title: authorTitle}
-      rr.to = {id: myOrgRepId, title: utils.getDisplayName(org)}
+      rr.to = {id: myOrgRepId, title: utils.getDisplayName({ resource: org })}
       break
     }
     let props = m.properties
@@ -7292,9 +7292,9 @@ if (!res[SIG]  &&  res._message)
         let applicant = this._getItem(rr.applicant.id.replace(IDENTITY, PROFILE))
         if (applicant) {
           if (applicant.organization)
-            rr.applicantName = utils.getDisplayName(applicant.organization)
+            rr.applicantName = utils.getDisplayName({ resource: applicant.organization })
           else
-            rr.applicantName = utils.getDisplayName(applicant)
+            rr.applicantName = utils.getDisplayName({ resource: applicant })
         }
       }
       this.organizeSubmissions(rr)
@@ -7319,7 +7319,7 @@ if (!res[SIG]  &&  res._message)
     if (rr._author) {
       let authorId = utils.makeId(PROFILE, rr._author)
       let author = this._getItem(authorId)
-      let authorTitle = rr._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
+      let authorTitle = rr._authorTitle || (author && author.organization &&  utils.getDisplayName({ resource: author.organization }))
       rr.from = {id: authorId, title: authorTitle}
     }
     return rr
@@ -9109,7 +9109,7 @@ if (!res[SIG]  &&  res._message)
         }
         if (this.checkIfWasShared(r, to, context))
           return
-        if (filter  &&  utils.getDisplayName(r).indexOf(filter) === -1)
+        if (filter  &&  utils.getDisplayName({ resource: r }).indexOf(filter) === -1)
           return
         if (!curContext  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
           let rr = {
@@ -9855,7 +9855,7 @@ if (!res[SIG]  &&  res._message)
         dn = translate('submittingModifiedForm', translate(model))
     }
     else {
-      dn = value.message || utils.getDisplayName(value);
+      dn = value.message || utils.getDisplayName({ resource: value });
       if (!dn)
         return
     }
@@ -9962,7 +9962,7 @@ if (!res[SIG]  &&  res._message)
       allIdentities: [{
         id: pKey,
         privkeys: me.privkeys,
-        title: utils.getDisplayName(value),
+        title: utils.getDisplayName({ resource: value }),
         publishedIdentity
       }]};
     delete me.privkeys
@@ -12074,7 +12074,7 @@ if (!res[SIG]  &&  res._message)
       _permalink: this.getRootHash(resource),
       _link: this.getCurHash(resource)
     }
-    let title = resource[ROOT_HASH]  &&  utils.getDisplayName(resource) || resource.title
+    let title = resource[ROOT_HASH]  &&  utils.getDisplayName({ resource }) || resource.title
     if (title)
       stub._displayName = title
     return stub

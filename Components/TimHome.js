@@ -460,7 +460,7 @@ class TimHome extends Component {
     if (me.organization)
       profileTitle = me.organization.title
     else
-      profileTitle = utils.getDisplayName(me)
+      profileTitle = utils.getDisplayName({ resource: me })
     navigator[action]({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       title: translate('officialAccounts'),
@@ -668,7 +668,7 @@ class TimHome extends Component {
     extend(style, defaultBankStyle)
     if (bankStyle)
       extend(style, bankStyle)
-    let title = utils.getDisplayName(resource)
+    let title = utils.getDisplayName({ resource })
     let route = {
       title,
       componentName,

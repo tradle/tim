@@ -79,7 +79,7 @@ class FormErrorRow extends Component {
     const bankStyle = this.props.bankStyle
 
     if (!renderedRow.length) {
-      var vCols = utils.getDisplayName(resource);
+      var vCols = utils.getDisplayName({ resource });
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
@@ -211,7 +211,7 @@ class FormErrorRow extends Component {
     let me = utils.getMe()
     r.from = {
       id: utils.getId(me),
-      title: utils.getDisplayName(me)
+      title: utils.getDisplayName({ resource: me })
     }
     r.to = this.props.resource.from
 

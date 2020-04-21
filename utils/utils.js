@@ -1,3 +1,4 @@
+/*global Intl*/
 import React from 'react'
 import {
   NativeModules,
@@ -955,7 +956,7 @@ var utils = {
     return props
   },
 
-  getDisplayName(resource, model, propsUsed) {
+  getDisplayName({ resource, model, propsUsed, locale }) {
     if (Array.isArray(resource))
       return
     if (!model) {
@@ -983,7 +984,6 @@ var utils = {
     let rType = utils.getType(resource)
     let resourceModel = rType && utils.getModel(rType)
     props = resourceModel  &&  resourceModel.properties || props
-    let rProps = props
 
     var displayName = '';
 
@@ -1001,7 +1001,7 @@ var utils = {
         else if (rType === BOOKMARK)
           dn = utils.translate(resource.message)
         else
-          dn = utils.getStringValueForProperty(resource, p, props)
+          dn = utils.getStringValueForProperty({resource, meta: props[p], locale})
         if (dn)
           displayName += displayName.length ? ' ' + dn : dn;
       }
@@ -1028,7 +1028,7 @@ var utils = {
       }
       if (utils.isContainerProp(prop, resourceModel))
         continue
-      let dn = utils.getStringValueForProperty(resource, p, props)
+      let dn = utils.getStringValueForProperty({resource, meta: props[p], locale})
       if (dn) {
         displayName += displayName.length ? ' ' + dn : dn;
         if (propsUsed)
@@ -1067,23 +1067,24 @@ var utils = {
 
       if (utils.isContainerProp(p, resourceModel))
         continue
-      displayName = utils.getStringValueForProperty(resource, p, rProps)
+      displayName = utils.getStringValueForProperty({resource, meta: props[p], locale})
       if (propsUsed)
         propsUsed.push(prop)
     }
     return displayName;
   },
 
-  getStringValueForProperty(resource, p, meta) {
+  getStringValueForProperty({resource, meta, locale}) {
     let displayName = ''
+    let p = meta.name
     if (resource[p]) {
-      if (meta[p].type === 'date')
+      if (meta.type === 'date')
         return utils.getDateValue(resource[p])
-      if (meta[p].type === 'array') {
-        let { items } = meta[p]
+      if (meta.type === 'array') {
+        let { items } = meta
         if (items.ref  &&  utils.isEnum(items.ref))
           return resource[p].map((v) => utils.translateEnum(v)).join(', ')
-        else if (meta[p].inlined) {
+        else if (meta.inlined) {
           let mProps = items.properties
           if (_.size(mProps) === 1)
             return resource[p][Object.keys(mProps)][0]
@@ -1105,34 +1106,55 @@ var utils = {
           return dn
         }
       }
-      else if (meta[p].type !== 'object') {
-        if (meta[p].range  ===  'model') {
+      else if (meta.type !== 'object') {
+        if (meta.range  ===  'model') {
           let m = utils.getModel(resource[p])
           if (m)
             return utils.makeModelTitle(m)
         }
-        return resource[p] + (meta[p].units || '')
+        return resource[p] + (meta.units || '')
       }
       if (resource[p].title)
         return resource[p].title;
-      if (meta[p].ref) {
-        if (meta[p].ref == MONEY)  {
+      if (meta.ref) {
+        if (meta.ref == MONEY) {
+          if (locale) {
+            return utils.formatCurrency(resource[p], locale)
+            // let currencyName = utils.getCurrencyName(resource[p].currency)
+            // return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource[p].value)
+          }
           let c = utils.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
         else if (resource[p][TYPE]) {
           let rm = utils.getModel(resource[p][TYPE])
           if (rm)
-            return utils.getDisplayName(resource[p], rm);
+            return utils.getDisplayName({ resource: resource[p], model: rm })
         }
       }
     }
-    else if (meta[p].displayAs) {
-      var dn = utils.templateIt(meta[p], resource);
+    else if (meta.displayAs) {
+      var dn = utils.templateIt(meta, resource);
       if (dn)
         return dn
     }
     return displayName
+  },
+  formatCurrency(resource, locale) {
+    let currencyName = utils.getCurrencyName(resource.currency)
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
+  },
+  getCurrencyName(c) {
+    let currencyName
+    let mm = utils.getModel(MONEY)
+    let formattedCurrency = mm.properties.currency.oneOf.find(r => {
+      let cName = Object.keys(r)[0]
+      if (r[cName] === c) {
+        currencyName = cName
+        return true
+      }
+    })
+    return currencyName
   },
   getPropByTitle(props, propTitle) {
     let propTitleLC = propTitle.toLowerCase()
@@ -1197,7 +1219,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return utils.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || utils.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).properties);
+      return resource[p].title || utils.getDisplayName({ resource: resource[p], model: utils.getModel(resource[p][TYPE]) });
     else
       return resource[p] + '';
   },
@@ -1307,12 +1329,12 @@ var utils = {
       if (typeof v === 'object') {
         let ref = prop.ref  ||  prop.items.ref
         if (Array.isArray(v))
-          v = v.map(r => r.title || utils.getDisplayName(r, utils.getModel(ref))).join(', ')
+          v = v.map(r => r.title || utils.getDisplayName({ resource: r, model: utils.getModel(ref) })).join(', ')
         else {
           if (utils.isEnum(ref))
             v = utils.translateEnum(v)
           else
-            v = v.title || utils.getDisplayName(v, utils.getModel(ref))
+            v = v.title || utils.getDisplayName({ resource: v, model: utils.getModel(ref) })
         }
       }
       else if (prop.range  &&  prop.range  === 'check')
@@ -1374,7 +1396,7 @@ var utils = {
                 val += resource[t].title
               else {
                 let m = self.getModel(resource[t][TYPE])
-                val += self.getDisplayName(resource[t], m.properties)
+                val += self.getDisplayName({ resource: resource[t], model: m })
               }
             }
           }
@@ -1550,7 +1572,7 @@ var utils = {
       return resource
     let ref = {
       id: utils.getId(resource),
-      title: resource.id ? resource.title : utils.getDisplayName(resource)
+      title: resource.id ? resource.title : utils.getDisplayName({ resource })
     }
     if (resource._time)
       ref._time = resource._time

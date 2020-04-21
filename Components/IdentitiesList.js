@@ -66,7 +66,7 @@ class IdentitiesList extends Component {
     var me = params.me;
     var modelName = me[constants.TYPE];
     var model = utils.getModel(modelName);
-    var meName = utils.getDisplayName(me);
+    var meName = utils.getDisplayName({ resource: me });
     var route = {
       title: model.title,
       componentName: 'ResourceList',

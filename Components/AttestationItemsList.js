@@ -143,7 +143,7 @@ class AttestationItemsList extends Component {
       }
     }
 
-    let dn = utils.getDisplayName(resource.item)
+    let dn = utils.getDisplayName({ resource: resource.item })
     let reviewedOrNew
     if (reviewed[rowId]) {
       let backgroundColor = resource.confirmation && bankStyle.linkColor || '#d95067'

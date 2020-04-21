@@ -151,7 +151,7 @@ class CheckRow extends Component {
   }
   getTitleComponent(model) {
     let { resource, application, modelName } = this.props
-    let dn = utils.getDisplayName(resource)
+    let dn = utils.getDisplayName({ resource })
     let title
     if (utils.getModel(modelName).abstract)
       title = translate(model)

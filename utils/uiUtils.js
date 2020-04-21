@@ -130,7 +130,7 @@ var uiUtils = {
     }
     if (!formTitle)
       formTitle = translate(formType)
-    let key = getDisplayName(resource).replace(' ', '_') + (idx || 0)
+    let key = getDisplayName({ resource }).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
     let newParams = extend({}, params)
     newParams.idx = idx

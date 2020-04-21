@@ -119,7 +119,7 @@ class MessageRow extends Component {
     let isDataBundle = rtype === DATA_BUNDLE
 
     if (!renderedRow.length) {
-      let vCols = noMessage ? null : utils.getDisplayName(resource);
+      let vCols = noMessage ? null : utils.getDisplayName({ resource });
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle}>{vCols}</Text>;
     }
@@ -322,7 +322,7 @@ class MessageRow extends Component {
 
   editVerificationRequest() {
     let resource = this.props.resource.document;
-    let title = utils.getDisplayName(resource);
+    let title = utils.getDisplayName({ resource });
     this.props.navigator.push({
       title: title,
       componentName: 'NewResource',

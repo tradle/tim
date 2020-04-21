@@ -606,7 +606,7 @@ class ResourceList extends Component {
         });
       }
       else {
-        let title = utils.makeTitle(utils.getDisplayName(resource))
+        let title = utils.makeTitle(utils.getDisplayName({ resource }))
         navigator.push({
           title: title,
           componentName: 'ResourceView',
@@ -654,7 +654,7 @@ class ResourceList extends Component {
     if (isContact)
       title = resource.firstName
     else if (me.isEmployee) {
-      let dn = utils.getDisplayName(resource)
+      let dn = utils.getDisplayName({ resource })
       let meOrgName = me.organization.title
       if (dn === meOrgName)
         title = meOrgName
@@ -742,7 +742,7 @@ class ResourceList extends Component {
 
   _selectResource(resource) {
     let model = utils.getModel(this.props.modelName);
-    let title = utils.getDisplayName(resource);
+    let title = utils.getDisplayName({ resource });
     let newTitle = title;
     if (title.length > 20) {
       let t = title.split(' ');

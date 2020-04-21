@@ -64,7 +64,7 @@ class ResourceTypesScreen extends Component {
       }];
       var to = this.props.resource;
       AlertIOS.prompt(
-        'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to),
+        'Sending ' + resource.title + ' form to ' + utils.getDisplayName({ resource: to }),
         buttons
       );
       return;
@@ -97,8 +97,8 @@ class ResourceTypesScreen extends Component {
     var resource = {from: utils.getMe(), to: this.props.resource};
     // var model = utils.getModel(this.props.modelName);
 
-    var toName = utils.getDisplayName(resource.to);
-    var meName = utils.getDisplayName(me);
+    var toName = utils.getDisplayName({ resource: resource.to });
+    var meName = utils.getDisplayName({ resource: me });
     var modelName = constants.TYPES.SIMPLE_MESSAGE;
     var value = {
       message: '[' + msg + '](' + model.id + ')',

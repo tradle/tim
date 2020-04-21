@@ -138,7 +138,7 @@ class PhotoView extends Component {
         height: maxHeight,
       }
 
-      var title = utils.getDisplayName(this.props.resource)
+      var title = utils.getDisplayName({ resource: this.props.resource })
               // <Image resizeMode='cover' source={coverPhotoSource} style={{width: width, height: cpHeight}}>
 
       let fontSize = title.length < 15 ? 30 : 24

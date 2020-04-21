@@ -719,13 +719,13 @@ console.log('GridList.componentWillMount: filterResource', resource)
     else if (isApplication) {
       let aTitle = resource.applicantName || resource.applicant.title
       if (aTitle)
-        title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
+        title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName({ resource })
       else {
-        title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
+        title = me.organization.title  + '  --  ' + utils.getDisplayName({ resource })
       }
     }
     else if (me.isEmployee)
-      title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
+      title = me.organization.title + '  →  ' + utils.getDisplayName({ resource })
     else
       title = resource.name; //utils.getDisplayName(resource, model.properties);
     let style
@@ -851,7 +851,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         }
       }
       else
-        dn = utils.getDisplayName(resource)
+        dn = utils.getDisplayName({ resource })
       title = (dn ? dn + ' -- '  : '') + title;
     }
     const isCheck = utils.isSubclassOf(rModel, CHECK)
@@ -930,7 +930,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         title = translate(pm)
     }
     if (!title)
-      title = utils.getDisplayName(resource);
+      title = utils.getDisplayName({ resource });
 
     let newTitle = title;
     if (title.length > 20) {

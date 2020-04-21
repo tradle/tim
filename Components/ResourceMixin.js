@@ -72,7 +72,7 @@ var ResourceMixin = {
   showRefResource(resource, prop, isDataLineage) {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
-    let title = utils.getDisplayName(resource);
+    let title = utils.getDisplayName({ resource });
     let modelTitle = translate(model)
     if (title  &&  title.length)
       title = title + ' -- ' + modelTitle
@@ -266,7 +266,7 @@ var ResourceMixin = {
             value = (c || pCurrency) + pVal.value
           }
           else
-            value = pVal.title  ||  utils.getDisplayName(pVal, utils.getModel(ref));
+            value = pVal.title  ||  utils.getDisplayName({ resource: pVal, model: utils.getModel(ref) });
         }
         else
           value = pVal.title;
@@ -693,7 +693,7 @@ var ResourceMixin = {
   makeSunbirstTree(jsonO, data, resource) {
     let size = _.size(data)
     if (!size) {
-      data.name = utils.getDisplayName(resource).split(' ').slice(0, 2).join('\n')
+      data.name = utils.getDisplayName({ resource }).split(' ').slice(0, 2).join('\n')
       data.children = []
     }
     let bo = translate('beneficialOwners')
