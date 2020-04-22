@@ -49,12 +49,12 @@ class NetworkInfoProvider extends Component {
       return <View/>
     let dn = resource
            ? isConnected
-               ? translate('learnMoreDescriptionTo', utils.getDisplayName(resource))
-               : translate('learnMoreServerIsDown', utils.getDisplayName(resource))
+               ? translate('learnMoreDescriptionTo', utils.getDisplayName({ resource }))
+               : translate('learnMoreServerIsDown', utils.getDisplayName({ resource }))
            : translate('learnMoreDescription')
 
     let msg = connected
-            ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(resource)) : translate('serverIsUnreachable'))
+            ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName({ resource })) : translate('serverIsUnreachable'))
             : translate('noNetwork')
 
     return  <Animated.View style={{opacity: this.state.fadeAnim}}>

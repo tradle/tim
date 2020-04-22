@@ -373,7 +373,7 @@ class NewResource extends Component {
     }
 
     let self = this;
-    let title = utils.getDisplayName(resource);
+    let title = utils.getDisplayName({ resource })
     let isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
