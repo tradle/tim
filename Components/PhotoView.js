@@ -48,7 +48,7 @@ class PhotoView extends Component {
     return !_.isEqual(this.props.resource.photos, nextProps.resource.photos)
   }
   render() {
-    var resource = this.props.resource;
+    var { resource, mainPhoto } = this.props
     if (!resource)
       return <View />;
     var modelName = resource[constants.TYPE];
@@ -57,7 +57,7 @@ class PhotoView extends Component {
       return <View />
 
     var hasPhoto = resource.photos && resource.photos.length;
-    var currentPhoto = this.state.currentPhoto || this.props.mainPhoto || (hasPhoto  &&  resource.photos[0]);
+    var currentPhoto = this.state.currentPhoto || mainPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto)
       return <View />
 
@@ -107,7 +107,7 @@ class PhotoView extends Component {
         height: maxHeight,
       }
 
-      var title = utils.getDisplayName(this.props.resource)
+      var title = utils.getDisplayName({ resource })
       let fontSize = title.length < 15 ? 30 : 24
       photoView = (
         <ImageBackground resizeMode='cover' source={coverPhotoSource} style={image}>
@@ -127,7 +127,7 @@ class PhotoView extends Component {
 
     return (
           <Animated.View style={style}>
-            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, this.props.mainPhoto || resource.photos[0], true)}>
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, mainPhoto || resource.photos[0], true)}>
               {photoView}
             </TouchableHighlight>
           </Animated.View>

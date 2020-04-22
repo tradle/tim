@@ -189,7 +189,7 @@ class ResourceView extends Component {
         style = _.extend(style, to.style)
       this.props.navigator.replacePreviousAndPop({
         componentName: 'MessageList',
-        title: utils.getDisplayName(to),
+        title: utils.getDisplayName({ resource: to }),
         backButtonTitle: 'Back',
         passProps: {
           resource: to,

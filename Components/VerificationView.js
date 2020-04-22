@@ -61,7 +61,7 @@ class VerificationView extends Component {
     }
     let model = utils.getModel(VERIFICATION)
     let dprop = model.properties.document
-    let dtitle = utils.getDisplayName(resource.document)
+    let dtitle = utils.getDisplayName({ resource: resource.document })
     if (!dtitle)
       dtitle = translate(utils.getModel(utils.getType(resource.document)))
 
@@ -87,7 +87,7 @@ class VerificationView extends Component {
     resource = resource || this.props.resource;
     let bankStyle = this.props.bankStyle
     if (resource.method) {
-      let displayName = utils.getDisplayName(resource.method)
+      let displayName = utils.getDisplayName({ resource: resource.method })
       // let val = <View>{this.renderResource(resource, m)}</View>
       vTree.push(<TouchableOpacity onPress={() => this.showMethod(resource)} key={this.getNextKey()}>
                   <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
@@ -133,7 +133,7 @@ class VerificationView extends Component {
   onPress(url, event) {
     this.props.navigator.push({
       backButtonTitle: 'Back',
-      title: utils.getDisplayName(this.props.resource),
+      title: utils.getDisplayName({ resource:  this.props.resource }),
       componentName: 'ArticleView',
       passProps: {url: url ? url : this.props.resource.url}
     });
@@ -227,7 +227,7 @@ class VerificationView extends Component {
         else if (utils.isEnum(pMeta.ref))
           val = val.title
         else if (this.props.showVerification) {
-          let value = val[TYPE] ? utils.getDisplayName(val) : val.title
+          let value = val[TYPE] ? utils.getDisplayName({ resource: val }) : val.title
           val = <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
           isRef = true;
         }

@@ -344,7 +344,7 @@ class VerificationMessageRow extends Component {
 
     let docName
     if (!isThirdParty || me.isEmployee)
-      docName = <Text style={[hs, {color: '#555555', fontSize: 18}]}>{utils.getDisplayName(document)}</Text>
+      docName = <Text style={[hs, {color: '#555555', fontSize: 18}]}>{utils.getDisplayName({ resource: document })}</Text>
 
     var headerContent = <View style={headerStyle}>
                           <Text style={[hs, {fontSize: isThirdParty || onPress ? 16 : 12}]}>{translate(model)}</Text>

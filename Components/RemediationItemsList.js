@@ -165,7 +165,7 @@ class RemediationItemsList extends Component {
         dn = utils.makeModelTitle(products[0].requestFor)
     }
     else
-      dn = utils.getDisplayName(resource)
+      dn = utils.getDisplayName({ resource })
     let reviewedOrNew
     if (reviewed[rowId])
       reviewedOrNew = <View style={[styles.checkButton, {backgroundColor: bankStyle.linkColor}]}><Icon name='ios-checkmark' size={30} color='#ffffff' style={{marginHorizontal: 10}} /></View>

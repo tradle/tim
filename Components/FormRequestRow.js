@@ -465,7 +465,7 @@ class FormRequestRow extends Component {
     //   displayName = translate(docModel)
     // else {
       let propsUsed = []
-      displayName = utils.getDisplayName(document, docModel, propsUsed)
+      displayName = utils.getDisplayName({ resource: document, model: docModel, propsUsed })
       if (propsUsed.length)
         propLabel = <Text style={styles.propertyTitle}>{translate(propsUsed[0], docModel)}</Text>
     // }

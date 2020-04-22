@@ -483,7 +483,7 @@ const storeUtils = {
     if (!query)
       return r
     if (isChooser) {
-      let dn = getDisplayName(r)
+      let dn = getDisplayName({ resource: r })
       return (dn.toLowerCase().indexOf(query.toLowerCase()) !== -1) ? r : null
     }
     let rtype = r[TYPE]
@@ -498,7 +498,7 @@ const storeUtils = {
       if (!r[rr]  ||  rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
         continue;
       if (props[rr].type === 'object') {
-        let title = getDisplayName(r[rr], rModel)
+        let title = getDisplayName({ resource: r[rr], model: rModel })
         combinedValue += combinedValue ? ' ' + title : title
         continue
       }

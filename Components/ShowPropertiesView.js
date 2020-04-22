@@ -378,8 +378,9 @@ class ShowPropertiesView extends Component {
       let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
       let c = utils.normalizeCurrencySymbol(val.currency)
       if (c  &&  locale) {
-        let currencyName = this.getCurrencyName(c)
-        return {val: new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)}
+        let valS = utils.formatCurrency({...val, currency: c}, locale)
+        // let currencyName = utils.getCurrencyName(c)
+        // return {val: new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)}
       }
 
       return {val: (c || CURRENCY_SYMBOL) + ' ' + val.value}
@@ -408,7 +409,7 @@ class ShowPropertiesView extends Component {
         return {}
       }
       val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
-              <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
+              <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName({ resource: val })}</Text>
               <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
             </TouchableOpacity>
       return { val, isRef: true }
@@ -422,7 +423,7 @@ class ShowPropertiesView extends Component {
     }
     if (showRefResource) {
       // ex. property that is referencing to the Organization for the contact
-      var value = utils.getDisplayName(val)
+      var value = utils.getDisplayName({ resource: val })
       if (!value)
         value = translate(utils.getModel(utils.getType(val)))
       let type = utils.getType(val)

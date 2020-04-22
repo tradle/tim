@@ -287,7 +287,7 @@ class ApplicationView extends Component {
         rightButtonTitle: 'VerifyOrCorrect',
         onRightButtonPress: () => {
           Alert.alert(
-            translate('createManualMatchCheck'), // + utils.getDisplayName(resource),
+            translate('createManualMatchCheck'), // + utils.getDisplayName({ resource }),
             null,
             [
               {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -439,7 +439,7 @@ class ApplicationView extends Component {
   deny() {
     let resource = this.state.resource || this.props.resource
     let isApplication = resource[TYPE] === APPLICATION
-    let applicantTitle = utils.getDisplayName(resource.applicant || resource.from)
+    let applicantTitle = utils.getDisplayName({ resource: resource.applicant || resource.from })
     Alert.alert(
       translate('denyApplication', applicantTitle),
       null,
@@ -471,9 +471,9 @@ class ApplicationView extends Component {
     let title
     let aTitle = resource.applicantName || resource.applicant.title
     if (aTitle)
-      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
+       title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName({ resource })
     else
-      title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
+      title = me.organization.title  + '  --  ' + utils.getDisplayName({ resource })
 
     navigator.push({
       title,

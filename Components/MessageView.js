@@ -212,7 +212,7 @@ class MessageView extends Component {
     let { resource } = this.state
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
-        translate('verifyPrompt'), // + utils.getDisplayName(resource),
+        translate('verifyPrompt'),
         null,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -287,9 +287,9 @@ class MessageView extends Component {
 
   showVerification(resource, document) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    let model = utils.getModel(document[TYPE]);
-    let title = model.title; //utils.getDisplayName(resource, model.properties);
-    let newTitle = title;
+    let model = utils.getModel(document[TYPE])
+    let title = model.title
+    let newTitle = title
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !resource && utils.isVerifier(document)
     let route = {
@@ -305,7 +305,7 @@ class MessageView extends Component {
         isVerifier
       }
     }
-    this.props.navigator.push(route);
+    this.props.navigator.push(route)
   }
   render() {
     let { backlink, bankStyle, resource } = this.state

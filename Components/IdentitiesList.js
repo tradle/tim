@@ -21,33 +21,33 @@ import Actions from '../Actions/Actions'
 
 class IdentitiesList extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     var dataSource = new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
-      });
+      })
     this.state = {
       isLoading: utils.getModels() ? false : true,
       list: this.props.list,
       dataSource: dataSource.cloneWithRows(this.props.list),
       filter: this.props.filter,
       userInput: ''
-    };
+    }
   }
 
   componentDidMount() {
-    this.listenTo(Store, 'onChangeIdentity');
+    this.listenTo(Store, 'onChangeIdentity')
   }
 
   selectResource(resource) {
-    Actions.changeIdentity(resource);
+    Actions.changeIdentity(resource)
   }
   onRemoveIdentity(params) {
-    var list = [];
-    extend(list, this.state.list);
+    var list = []
+    extend(list, this.state.list)
     for (var i=0; i<list.length; i++) {
       if (list[i][constants.ROOT_HASH] == params.resource[constants.ROOT_HASH]) {
-        list.splice(i, 1);
-        break;
+        list.splice(i, 1)
+        break
       }
     }
     this.setState({
@@ -57,16 +57,16 @@ class IdentitiesList extends Component {
   }
   onChangeIdentity(params) {
     if (params.action === 'removeIdentity') {
-      this.onRemoveIdentity(params);
-      return;
+      this.onRemoveIdentity(params)
+      return
     }
 
     if (params.action !== 'changeIdentity')
-      return;
-    var me = params.me;
-    var modelName = me[constants.TYPE];
-    var model = utils.getModel(modelName);
-    var meName = utils.getDisplayName(me);
+      return
+    var me = params.me
+    var modelName = me[constants.TYPE]
+    var model = utils.getModel(modelName)
+    var meName = utils.getDisplayName({ resource: me })
     var route = {
       title: model.title,
       componentName: 'ResourceList',
@@ -96,12 +96,12 @@ class IdentitiesList extends Component {
         passProps: {resource: me}
       }
     }
-    this.props.navigator.replace(route);
+    this.props.navigator.replace(route)
   }
 
   // onSearchChange(event) {
-  //   var filter = event.nativeEvent.text.toLowerCase();
-  //   Actions.list(filter, this.props.list[0][constants.TYPE]);
+  //   var filter = event.nativeEvent.text.toLowerCase()
+  //   Actions.list(filter, this.props.list[0][constants.TYPE])
   // }
 
   renderRow(resource)  {
@@ -111,10 +111,10 @@ class IdentitiesList extends Component {
         resource={resource}
         navigator={this.props.navigator}
         onCancel={() => Actions.removeIdentity(resource)} />
-    );
+    )
   }
   removeIdentity(resource) {
-    Actions.removeIdentity(resource);
+    Actions.removeIdentity(resource)
   }
   render() {
     if (this.state.isLoading)
@@ -130,11 +130,11 @@ class IdentitiesList extends Component {
           keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false} />
       </View>
-    );
+    )
   }
 
 }
-reactMixin(IdentitiesList.prototype, Reflux.ListenerMixin);
+reactMixin(IdentitiesList.prototype, Reflux.ListenerMixin)
 
 var styles = StyleSheet.create({
   container: {

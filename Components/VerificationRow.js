@@ -90,7 +90,7 @@ class VerificationRow extends Component {
 
   render() {
     let {resource, isChooser, lazy, parentResource, onSelect, search, searchCriteria,
-         prop, modelName, multiChooser, bankStyle } = this.props
+         prop, modelName, multiChooser, bankStyle, locale } = this.props
     let rType = utils.getType(resource)
     let model = utils.getModel(rType);
     let isMyProduct = utils.isMyProduct(model)
@@ -180,14 +180,14 @@ class VerificationRow extends Component {
     }
     let dn
     if (isVerification) {
-      dn = utils.getDisplayName(resource.document)
+      dn = utils.getDisplayName({ resource: resource.document })
       if (!dn)
         dn = translate(utils.getModel(utils.getType(resource.document)))
     }
     else if (isMyProduct  &&  modelName === MY_PRODUCT)
       dn = translate(model)
     else
-      dn = utils.getDisplayName(resource)
+      dn = utils.getDisplayName({ resource, locale })
     let title
     if (isChooser)
       title = dn

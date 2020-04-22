@@ -118,7 +118,7 @@ class MessageRow extends Component {
     let isDataBundle = rtype === DATA_BUNDLE
 
     if (!renderedRow.length) {
-      let vCols = noMessage ? null : utils.getDisplayName(resource);
+      let vCols = noMessage ? null : utils.getDisplayName({ resource });
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
@@ -318,7 +318,7 @@ class MessageRow extends Component {
 
   editVerificationRequest() {
     let resource = this.props.resource.document;
-    let title = utils.getDisplayName(resource);
+    let title = utils.getDisplayName({ resource });
     this.props.navigator.push({
       title: title,
       componentName: 'NewResource',
@@ -931,8 +931,8 @@ var createStyles = utils.styleFactory(MessageRow, function ({ dimensions, bankSt
     },
   })
 })
-reactMixin(MessageRow.prototype, RowMixin);
+reactMixin(MessageRow.prototype, RowMixin)
 reactMixin(MessageRow.prototype, ResourceMixin)
 MessageRow = makeResponsive(MessageRow)
 
-module.exports = MessageRow;
+module.exports = MessageRow

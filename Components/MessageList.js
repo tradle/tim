@@ -615,7 +615,7 @@ class MessageList extends Component {
       return;
     let application = this.state.application || this.props.application
     let model = utils.getModel(rtype);
-    let title //utils.getDisplayName(resource, model.properties);
+    let title
 
     if (rtype === VERIFICATION) {
       let type = utils.getType(r.document)
@@ -624,7 +624,7 @@ class MessageList extends Component {
     }
     if (!title)
       title = translate(model) //translate(utils.makeModelTitle(model))
-    let dn = utils.getDisplayName(r)
+    let dn = utils.getDisplayName({ resource: r })
     // let newTitle = title + (dn ? ' -- ' + dn : '');
     let newTitle = (dn ? dn + ' -- '  : '') + title;
     // Check if I am a customer or a verifier and if I already verified this resource
@@ -699,9 +699,8 @@ class MessageList extends Component {
       route.rightButtonTitle =  isReview  &&  'Review' || 'Edit'
       if (!route.onRightButtonPress)
         route.onRightButtonPress = {
-          title: newTitle, //utils.getDisplayName(resource),
+          title: newTitle,
           componentName: 'NewResource',
-          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps
@@ -1416,7 +1415,7 @@ class MessageList extends Component {
     let resource = this.props.resource
     this.setState({show: false})
     Alert.alert(
-      translate('confirmForgetMe', utils.getDisplayName(resource)),
+      translate('confirmForgetMe', utils.getDisplayName({ resource })),
       translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},

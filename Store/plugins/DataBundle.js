@@ -443,7 +443,7 @@ debugger
       let displayName = ''
       if (itemModel) displayName += itemModel.title
 
-      let resourceDisplayName = item.title || getDisplayName(item)
+      let resourceDisplayName = item.title || getDisplayName({ resource: item })
       if (resourceDisplayName) {
         displayName += ': ' + resourceDisplayName
       }
