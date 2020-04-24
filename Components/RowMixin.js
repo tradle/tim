@@ -58,6 +58,8 @@ var RowMixin = {
     if (prop.ref) {
       if (prop.ref === MONEY) {
         if (currency && locale) {
+          if (!val.currency)
+            val = {...val, currency }
           val = utils.formatCurrency({...val, currency })
           // let currencyName = this.getCurrencyName(currency)
           // val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)

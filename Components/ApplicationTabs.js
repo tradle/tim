@@ -58,7 +58,7 @@ class ApplicationTabs extends Component {
     super(props);
   }
   render() {
-    var { resource, bankStyle, children, navigator, lazy,
+    var { resource, bankStyle, children, navigator, lazy, locale,
           showDetails, currency, backlink, checksCategory, checkFilter } = this.props
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
@@ -191,6 +191,7 @@ class ApplicationTabs extends Component {
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     search={true}
+                    locale={locale}
                     backlinkList={backlinkList}
                     checksCategory={checksCategory}
                     checkFilter={checkFilter}
@@ -206,6 +207,7 @@ class ApplicationTabs extends Component {
     if (showDetails) {
       details = <ShowPropertiesView resource={resource}
                                     showRefResource={this.getRefResource.bind(this)}
+                                    locale={locale}
                                     currency={currency}
                                     bankStyle={bankStyle}
                                     excludedProperties={['photos']}

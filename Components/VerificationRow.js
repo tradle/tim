@@ -1,4 +1,3 @@
-
 import {
   // Text,
   TouchableOpacity,
@@ -410,7 +409,7 @@ class VerificationRow extends Component {
   formatFilteredResource(model, resource, renderedRows) {
     let rType = utils.getType(resource)
     let props = utils.getModel(rType).properties
-    let searchCriteria = this.props.searchCriteria
+    let { searchCriteria, locale } = this.props
     let viewCols = []
     for (let p in searchCriteria) {
       if (!props[p] || p.charAt(0) === '_')
@@ -441,8 +440,12 @@ class VerificationRow extends Component {
         if (resource[v]) {
           let val
           if (properties[v].ref === MONEY) {
-            let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
-            val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+            if (locale)
+              val = utils.formatCurrency(resource[v], locale)
+            else {
+              let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
+              val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+            }
           }
           else if (resource[v].title)
             val = resource[v].title
@@ -536,6 +539,7 @@ class VerificationRow extends Component {
         viewCols.push(p)
     }
 
+    const { locale, currency } = this.props
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL
     let vCols = []
@@ -553,8 +557,12 @@ class VerificationRow extends Component {
         if (resource[v]) {
           let val
           if (ref === MONEY) {
-            let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
-            val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+            if (locale)
+              val = utils.formatCurrency(resource[v], locale)
+            else {
+              let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
+              val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+            }
           }
           else if (resource[v].title)
             val = resource[v].title

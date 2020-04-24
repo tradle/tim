@@ -107,7 +107,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style} = params
+    let {resource, action, backlink, application, style, provider} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -118,7 +118,8 @@ class ApplicationView extends Component {
       this.setState({
         resource: resource,
         isLoading: false,
-        bankStyle: style || this.state.bankStyle
+        bankStyle: style || this.state.bankStyle,
+        locale: provider && provider.locale
       })
       break
     case 'exploreBacklink':
@@ -155,7 +156,7 @@ class ApplicationView extends Component {
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected, showDetails } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -254,6 +255,7 @@ class ApplicationView extends Component {
                             resource={resource}
                             navigator={navigator}
                             currency={currency}
+                            locale={locale}
                             backlink={!showDetails && backlink}
                             checksCategory={this.state.checksCategory}
                             showCategory={this.showCategory.bind(this)}
