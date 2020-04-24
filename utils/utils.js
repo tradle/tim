@@ -1142,7 +1142,12 @@ var utils = {
   },
   formatCurrency(resource, locale) {
     let currencyName = utils.getCurrencyName(resource.currency)
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
+    let val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
+    val = val.replace(currencyName, resource.currency)
+    return val
+  },
+  formatNumber(val, locale) {
+    return new Intl.NumberFormat(locale).format(val)
   },
   getCurrencyName(c) {
     let currencyName
