@@ -1105,6 +1105,9 @@ var utils = {
     let currencyName = utils.getCurrencyName(resource.currency)
     return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
   },
+  formatNumber(val, locale) {
+    return new Intl.NumberFormat(locale).format(val)
+  },
   getCurrencyName(c) {
     let currencyName
     let mm = utils.getModel(MONEY)
