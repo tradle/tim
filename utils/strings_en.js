@@ -336,6 +336,12 @@ module.exports = {
     "Please scan your": "Please scan your",
     "ID document": "ID document",
     "Sending": "Sending",
+
+    "Is it your company?": "Is it your company?",
+    "Please review and correct the data below": "Please review and correct the data below",
+    "Please correct the field": "Please correct the field",
+    "Please correct the highlighted property": "Please correct the highlighted property",
+
     "Please tap here and sign": "Please tap here and sign",
     "Give me a moment...": "Give me a moment...",
     "Please click to scan your": "Please click to scan your",
