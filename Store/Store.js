@@ -2602,8 +2602,10 @@ var Store = Reflux.createStore({
         await this.dbPut(orgId, org)
       }
     }
-    if (org._locale)
+    if (org._locale) {
       org.locale = org._locale
+      delete org._locale
+    }
     if (org._hidePropertyInEdit)
       utils.addHidePropertyInEditFor(org)
     if (config.greeting) {
@@ -4051,6 +4053,9 @@ if (!res[SIG]  &&  res._message)
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
+    let org = r.to.organization
+    if (org)
+      retParams.provider = this._getItem(org)
     this.trigger(retParams)
     return r
   },
@@ -5248,7 +5253,7 @@ if (!res[SIG]  &&  res._message)
   async onGetMasterIdentity(pairingData, url) {
     let delay = delay || 1000
     if (!this.client)
-      this.client = graphQL.initClient(meDriver, url || SERVICE_PROVIDERS[0].url)
+      this.client = graphQL.initClient(meDriver, url)
     let masterIdentity = await tryWithExponentialBackoff(async () => {
       try {
         let masterAuthor = await this.lookupAndSetMasterAuthor(pairingData)
