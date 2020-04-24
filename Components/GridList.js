@@ -685,7 +685,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
   selectResource({resource}) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    let { modelName, search, bankStyle, navigator, currency } = this.props
+    let { modelName, search, bankStyle, navigator, currency, locale } = this.props
     let isContact = modelName === PROFILE;
 
     let isMyProduct = utils.isSubclassOf(utils.getType(resource), MY_PRODUCT)
@@ -775,6 +775,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         modelName: MESSAGE,
         application: search  ? resource : null,
         currency: resource.currency,
+        locale,
         bankStyle: style,
       }
     }
@@ -804,7 +805,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     Actions.refreshApplication({resource})
   }
   selectMessage(resource) {
-    let { modelName, search, bankStyle, navigator, currency, prop,
+    let { modelName, search, bankStyle, navigator, currency, locale, prop,
           returnRoute, callback, application, isBacklink } = this.props
     if (callback) {
       debugger
@@ -862,6 +863,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       passProps: {
         resource,
         search,
+        locale,
         application: application,
         bankStyle: bankStyle || defaultBankStyle
       }
@@ -920,7 +922,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
   }
 
   _selectResource(resource) {
-    let { modelName, style, currency, prop, navigator, returnRoute, callback, bankStyle } = this.props
+    let { modelName, style, currency, locale, prop, navigator,
+          returnRoute, callback, bankStyle } = this.props
     let model = utils.getModel(modelName);
     let title
     let prefill = utils.getPrefillProperty(model)
@@ -949,9 +952,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
       // parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {
-        resource: resource,
+        resource,
         bankStyle: style || bankStyle,
-        currency: currency
+        currency,
+        locale
       },
     }
     // Edit resource
@@ -1006,8 +1010,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
       passProps: {
         modelName: model.id,
         resource: {},
-        bankStyle: bankStyle,
-        currency: currency,
+        bankStyle,
+        currency,
         limit: 20,
         exploreData,
         search: true
@@ -1082,7 +1086,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         return <View/>
     }
     let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application, bookmark,
-          currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
+          currency, locale, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
     let resType = utils.getType(resource)
@@ -1121,6 +1125,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
             modelName={modelName}
             navigator={navigator}
             currency={currency}
+            locale={locale}
             rowId={rowId}
             gridCols={viewCols}
             multiChooser={multiChooser}
@@ -1178,6 +1183,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 parentResource={this.props.resource}
                 multiChooser={multiChooser}
                 currency={currency}
+                locale={locale}
                 isChooser={isChooser}
                 searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 search={search}
@@ -1193,6 +1199,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       navigator={navigator}
       changeSharedWithList={chat ? this.changeSharedWithList.bind(this) : null}
       currency={currency}
+      locale={locale}
       multiChooser={multiChooser}
       isChooser={isChooser}
       parentComponent={GridList}

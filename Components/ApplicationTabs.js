@@ -91,7 +91,7 @@ class ApplicationTabs extends Component {
     }).start();
   }
   render() {
-    var { resource, bankStyle, children, navigator, lazy,
+    var { resource, bankStyle, children, navigator, lazy, locale,
           showDetails, currency, backlink, checksCategory, checkFilter } = this.props
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
@@ -217,6 +217,7 @@ class ApplicationTabs extends Component {
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     search={true}
+                    locale={locale}
                     backlinkList={backlinkList}
                     checksCategory={checksCategory}
                     checkFilter={checkFilter}
@@ -236,6 +237,7 @@ class ApplicationTabs extends Component {
                                     pieChart={pieChart}
                                     showRefResource={this.getRefResource.bind(this)}
                                     currency={currency}
+                                    locale={locale}
                                     bankStyle={bankStyle}
                                     excludedProperties={['photos', 'tree']}
                                     navigator={navigator} />

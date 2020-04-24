@@ -1,4 +1,3 @@
-/*global Intl*/
 import React, { Component } from 'react'
 import {
   // StyleSheet,
@@ -212,7 +211,7 @@ class ShowPropertiesView extends Component {
         }
       }
       else if (pMeta.type === 'number'  &&  locale)
-        val = new Intl.NumberFormat(locale).format(val)
+        val = utils.formatNumber(val, locale)
       else if (pMeta.ref) {
         ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
         if (!val)
@@ -381,10 +380,9 @@ class ShowPropertiesView extends Component {
     if (ref === MONEY) {
       let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
       let c = utils.normalizeCurrencySymbol(val.currency)
-      if (c  &&  locale) {
-        let currencyName = utils.getCurrencyName(c)
-        return {val: new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)}
-      }
+      if (c  &&  locale)
+        return {val: utils.formatCurrency(val, locale)}
+
       return {val: (c || CURRENCY_SYMBOL) + val.value}
     }
     if (ref === IDENTITY) {
