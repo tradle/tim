@@ -93,7 +93,14 @@ class MyProductMessageRow extends Component {
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
 
-    renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: bankStyle.productBgColor  ||  '#289427'}]}>{title}</Text>);
+    renderedRow.push(
+      <View style={{flexDirection: 'row'}}>
+        <View style={{opacity: 0.7, marginTop:5, marginRight: 5}}>
+        <Icon name='ios-ribbon' size={35} color={bankStyle.productBgColor  ||  '#289427'} />
+        </View>
+        <Text  key={this.getNextKey()} style={[chatStyles.formType, {color: bankStyle.productBgColor  ||  '#289427'}]}>{title}</Text>
+      </View>
+      )
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
     // let width = Math.floor(utils.dimensions().width * 0.7)
     let width = utils.getMessageWidth(MyProductMessageRow)
