@@ -432,7 +432,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this._talkToEmployee(params)
       return
     }
-    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
+    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
@@ -455,6 +455,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
         }
         else if (prop  &&  prop.allowToAdd)
           this.setState({isLoading: false, list: null})
+        else if (exploreData)
+          this.errorAlert('noResourcesForCriteria')
+
         return
       }
       if (params.isTest  !== isTest)
