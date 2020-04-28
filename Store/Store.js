@@ -8328,7 +8328,7 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: 'hasPartials', count: list.length})
   },
   async onHasBookmarks() {
-    let list = await this.searchMessages({modelName: BOOKMARK, to: me })
+    let list = await this.searchMessages({ modelName: BOOKMARK, to: me })
     if (list  &&  list.length) {
       let style
       if (me.isEmployee) {
@@ -10970,6 +10970,8 @@ if (!res[SIG]  &&  res._message)
     return { noTrigger, application, isRM }
 
     async function setupAgent() {
+      if (me.isEmployee)
+        return
       me.isEmployee = true
       me.organization = self.buildRef(org)
 
@@ -10991,11 +10993,13 @@ if (!res[SIG]  &&  res._message)
       disableBlockchainSync(meDriver)
     }
   },
-  async setupEmployee(val, org) {
+  async setupEmployee(myEmployeeBadge, org) {
+    if (me.isEmployee)
+      return
     me.isEmployee = true
     me.organization = this.buildRef(org)
     this.resetForEmployee(me, org)
-    me.employeePass = this.buildRef(val)
+    me.employeePass = this.buildRef(myEmployeeBadge)
     const bookmarks = storeUtils.getEmployeeBookmarks({
       me,
       botPermalink: this.getRepresentative(me.organization)[ROOT_HASH]
