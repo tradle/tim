@@ -398,103 +398,6 @@ const disableBlockchainSync = node => {
   }
 }
 
-const getEmployeeBookmarks = ({ me, botPermalink }) => {
-  const from = utils.buildRef(me)
-  const etype = 'tradle.ClientOnboardingTeam'
-  const amodel = utils.getModel(APPLICATION)
-  const aprops = amodel.properties
-  let teams = utils.getModel(etype).enum
-  let bookmarks = [
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        analyst: me.employeePass
-      },
-      message: `${translate('myCases')}`,
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        hasFailedChecks: true
-      },
-      message: `${translate('applications')} - ${translate(aprops.hasFailedChecks, amodel)}`,
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        hasCheckOverrides: true
-      },
-      message: `${translate('applications')} - ${translate(aprops.hasCheckOverrides, amodel)}`,
-    },
-  ]
-  teams.forEach(e => {
-    bookmarks.push({
-      type: APPLICATION,
-      message: `${translate('applications')} - ${translateEnum(e)}`,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        assignedToTeam: {
-          id: `${etype}_${e.id}`,
-          title: e.title
-        }
-      },
-    })
-  })
-
-  let moreBookmarks = [
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        status: 'started'
-      },
-      message: translate('applicationsStarted')
-    },
-    { type: APPLICATION,
-      bookmark: {
-        [TYPE]: APPLICATION,
-        _org: botPermalink,
-        analyst: 'NULL'
-      },
-      message: translate('applicationsNotAssigned')
-    },
-    {
-      type: APPLICATION,
-      message: translate('allApplications')
-    },
-    // { type: VERIFICATION },
-    // { type: SEAL },
-    // { type: 'tradle.SanctionsCheck' },
-    // { type: 'tradle.CorporationExistsCheck' },
-    // { type: MESSAGE,
-    //   bookmark: {
-    //     [TYPE]: MESSAGE,
-    //     _inbound: false,
-    //     _counterparty: ALL_MESSAGES,
-    //   },
-    // }
-  ]
-  moreBookmarks.forEach(b => bookmarks.push(b))
-
-  return bookmarks.map(b => {
-    const { type, bookmark, message } = b
-    const model = utils.getModel(type)
-    return {
-      [TYPE]: BOOKMARK,
-      message: message  ||  translate(model), // utils.makeModelTitle(model, true),
-      bookmark: bookmark  ||  {
-        [TYPE]: type,
-        _org: botPermalink
-      },
-      from
-    }
-  })
-}
-
 const getServiceProviderByUrl = url => (SERVICE_PROVIDERS || [])
   .find(sp => utils.urlsEqual(sp.url, url))
 
@@ -8594,7 +8497,7 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: 'hasPartials', count: list.length})
   },
   async onHasBookmarks() {
-    let list = await this.searchMessages({modelName: BOOKMARK, to: me })
+    let list = await this.searchMessages({ modelName: BOOKMARK, to: me })
     if (list  &&  list.length) {
       let style
       if (me.isEmployee) {
@@ -11316,11 +11219,13 @@ if (!res[SIG]  &&  res._message)
     }
   },
 
-  async setupEmployee(val, org) {
+  async setupEmployee(myEmployeeBadge, org) {
+    if (me.isEmployee)
+      return
     me.isEmployee = true
     me.organization = this.buildRef(org)
     this.resetForEmployee(me, org)
-    me.employeePass = this.buildRef(val)
+    me.employeePass = this.buildRef(myEmployeeBadge)
     const bookmarks = storeUtils.getEmployeeBookmarks({
       me,
       botPermalink: this.getRepresentative(me.organization)[ROOT_HASH]
