@@ -22,7 +22,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate, enumValue } from '../utils/utils'
+import utils, { translate, isWeb, enumValue } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -892,7 +892,16 @@ var NewResourceMixin = {
     let style = (resource && (typeof resource[prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
+    let isTroolean = prop.range === 'troolean' || search
     let label = translate(prop, model)
+
+    if (!isTroolean  &&  !isWeb()  && label.length > 30) {
+      label = label.slice(0, 27)
+      let idx = label.lastIndexOf(' ')
+      if (idx > 20)
+        label = label.slice(0, idx)
+       label += '...'
+    }
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
@@ -903,19 +912,17 @@ var NewResourceMixin = {
 
     let help = this.paintHelp(prop)
 
-    let isTroolean = prop.range === 'troolean' || search
     let switchView
     let switchC, booleanContentStyle, icon
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     if (prop.readOnly  &&  !search) {
-      switchC = <View style={{paddingVertical: 5}}>
-                  <Text style={[styles.dateText, fontF]}>{value + ''}</Text>
-                </View>
-      style = [style, {fontSize: 14}]
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+      switchC = <View style={{paddingVertical: 5}}>
+                  <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
+                  {icon}
+                </View>
     }
-
     else if (isTroolean) {
       const options = [
           { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
@@ -934,7 +941,7 @@ var NewResourceMixin = {
       switchView = { paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
       booleanContentStyle = {}
       switchC = <View style={switchView}>
-                 <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.changeValue(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
+                  <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.changeValue(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
                 </View>
     }
     else {
@@ -984,8 +991,8 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
-    // let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
-    let st = utils.isWeb() ? [styles.formInput, {minHeight: 60, borderColor: bcolor}] : {marginHorizontal: 15}
+    // let st = isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    let st = isWeb() ? [styles.formInput, {minHeight: 60, borderColor: bcolor}] : {marginHorizontal: 15}
 
     // convert from UTC date to local, so DatePicker displays it correctly
     // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
@@ -1066,7 +1073,7 @@ var NewResourceMixin = {
     let help = this.paintHelp(prop)
     return (
       <View key={this.getNextKey()} ref={prop.name} style={{paddingBottom: 10}}>
-        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}]}>
           {propLabel}
           {sign}
           {datePicker}
@@ -1787,7 +1794,7 @@ var styles= StyleSheet.create({
   photoIconEmpty: {
     position: 'absolute',
     right: 10,
-    marginTop: utils.isWeb() ? 20 : 12
+    marginTop: isWeb() ? 20 : 12
   },
   readOnly: {
     position: 'absolute',
