@@ -877,7 +877,16 @@ var NewResourceMixin = {
               ? textStyle
               : labelStyle
 
+    let isTroolean = prop.range === 'troolean' || search
     let label = translate(prop, model)
+    if (!isTroolean  &&  !isWeb()  && label.length > 30) {
+      label = label.slice(0, 27)
+      let idx = label.lastIndexOf(' ')
+      if (idx > 20)
+        label = label.slice(0, idx)
+       label += '...'
+    }
+
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
@@ -888,17 +897,16 @@ var NewResourceMixin = {
 
     let help = this.paintHelp(prop)
 
-    let isTroolean = prop.range === 'troolean' || search
     let switchView
-    let switchC, booleanContentStyle, icon
+    let switchC, icon
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     if (prop.readOnly  &&  !search) {
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
       switchC = <View style={{paddingVertical: 5}}>
                   <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
+                  {icon}
                 </View>
-      style = [style, {fontSize: 14}]
-      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
     }
     else if (isTroolean) {
       const options = [
@@ -916,9 +924,8 @@ var NewResourceMixin = {
         initial = 1
       let switchWidth = Math.floor(utils.dimensions(component).width / 2)
       switchView = { paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
-      booleanContentStyle = {}
       switchC = <TouchableOpacity onPress={() => this.changeValue(prop, isTroolean && value ||  !value)}>
-                  <View style={booleanContentStyle}>
+                  <View>
                     <Text style={[style, {color: lcolor}]}>{label}</Text>
                     <View style={switchView}>
                       <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.changeValue(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
@@ -928,15 +935,14 @@ var NewResourceMixin = {
 
     }
     else {
-      booleanContentStyle = styles.booleanContentStyle
-      switchC = <View style={booleanContentStyle}>
-                <Text style={[style, {color: lcolor}]}>{label}</Text>
+      switchC = <View style={styles.booleanContentStyle}>
+                  <Text style={[style, {color: lcolor}]}>{label}</Text>
                   <Switch onValueChange={(value) => {
                     let r = _.cloneDeep(resource)
                     r[prop.name] = value
                     this.setState({resource: r})
                     Actions.getRequestedProperties({resource: r})
-                  }} value={value} style={{alignSelf: 'center'}}/>
+                  }} style={{marginTop: -3}} value={value}/>
                </View>
     }
     return (
