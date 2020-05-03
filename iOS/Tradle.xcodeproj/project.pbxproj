@@ -39,8 +39,6 @@
 		7379F7CF1EDA14030093535C /* splash1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 7379F7CE1EDA14030093535C /* splash1536x2048.png */; };
 		7379F8281EDA17E10093535C /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379F8061EDA17D90093535C /* libRCTPushNotification.a */; };
 		7379F84E1EDA19630093535C /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7379F84B1EDA19630093535C /* Launch Screen.storyboard */; };
-		7379FAD21EDA5AEC0093535C /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379FAD01EDA5AEC0093535C /* Crashlytics.framework */; };
-		7379FAD31EDA5AEC0093535C /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379FAD11EDA5AEC0093535C /* Fabric.framework */; };
 		7379FC3A1EDA61410093535C /* libBVLinearGradient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64591ED9FF7C0056F4BF /* libBVLinearGradient.a */; };
 		7379FC3B1EDA614C0093535C /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64631ED9FF7C0056F4BF /* libRCTOrientation.a */; };
 		7379FC3C1EDA61560093535C /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64771ED9FF7C0056F4BF /* libRNVectorIcons.a */; };
@@ -52,7 +50,6 @@
 		7379FC431EDA617C0093535C /* libRNLocalAuth.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B645E1ED9FF7C0056F4BF /* libRNLocalAuth.a */; };
 		7379FC441EDA61830093535C /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64541ED9FF7C0056F4BF /* libRNKeychain.a */; };
 		7379FC451EDA618D0093535C /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B643A1ED9FF7C0056F4BF /* libRNImagePicker.a */; };
-		7379FC461EDA61930093535C /* libSMXCrashlytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B644A1ED9FF7C0056F4BF /* libSMXCrashlytics.a */; };
 		7379FC471EDA619A0093535C /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64451ED9FF7C0056F4BF /* libRNECC.a */; };
 		7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63E11ED9FF670056F4BF /* libCodePush.a */; };
 		7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63BD1ED9FF670056F4BF /* libRCTAsyncRocksDBStorage.a */; };
@@ -335,13 +332,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 7398B54B1C30326E00106C47;
 			remoteInfo = RNECC;
-		};
-		732B64491ED9FF7C0056F4BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FB3FA568ECEA411EA02FA34B /* SMXCrashlytics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D8D9DB831C6D03DB009FBC0E;
-			remoteInfo = SMXCrashlytics;
 		};
 		732B64531ED9FF7C0056F4BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -692,8 +682,6 @@
 		7379F7CE1EDA14030093535C /* splash1536x2048.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = splash1536x2048.png; path = ../img/splash1536x2048.png; sourceTree = "<group>"; };
 		7379F7F11EDA17D80093535C /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		7379F84B1EDA19630093535C /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
-		7379FAD01EDA5AEC0093535C /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
-		7379FAD11EDA5AEC0093535C /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		7380570321B3747A000A927F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/RegulaSDK.strings; sourceTree = "<group>"; };
 		7380570721B377D8000A927F /* bn-BD */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "bn-BD"; path = "bn-BD.lproj/RegulaSDK.strings"; sourceTree = "<group>"; };
 		73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = staging.xcconfig; sourceTree = "<group>"; };
@@ -738,7 +726,6 @@
 		EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
 		EEECD0C1934547049DA9F6AE /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		F6E750ACC045476CA7BFCB04 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
-		FB3FA568ECEA411EA02FA34B /* SMXCrashlytics.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = SMXCrashlytics.xcodeproj; path = "../node_modules/react-native-fabric/ios/SMXCrashlytics.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -764,7 +751,6 @@
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
-				7379FAD21EDA5AEC0093535C /* Crashlytics.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 				43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */,
@@ -772,7 +758,6 @@
 				73EF39BD20CC7077009EDE8B /* libRNDeviceInfo.a in Frameworks */,
 				732B67862060213F00B16D6F /* libRNCamera.a in Frameworks */,
 				7379FC471EDA619A0093535C /* libRNECC.a in Frameworks */,
-				7379FC461EDA61930093535C /* libSMXCrashlytics.a in Frameworks */,
 				7379FC451EDA618D0093535C /* libRNImagePicker.a in Frameworks */,
 				7379FC441EDA61830093535C /* libRNKeychain.a in Frameworks */,
 				7379F8281EDA17E10093535C /* libRCTPushNotification.a in Frameworks */,
@@ -782,7 +767,6 @@
 				7379FC3B1EDA614C0093535C /* libRCTOrientation.a in Frameworks */,
 				7379FC411EDA61700093535C /* libRNPasscodeStatus.a in Frameworks */,
 				7379FC401EDA616D0093535C /* libRNRandomBytes.a in Frameworks */,
-				7379FAD31EDA5AEC0093535C /* Fabric.framework in Frameworks */,
 				7379FC3E1EDA61620093535C /* libSplashScreen.a in Frameworks */,
 				7379FC3D1EDA615D0093535C /* libUdpSockets.a in Frameworks */,
 				9BA58D22225D3352006E05AF /* libRNCNetInfo.a in Frameworks */,
@@ -918,8 +902,6 @@
 				736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */,
 				736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */,
 				736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */,
-				7379FAD01EDA5AEC0093535C /* Crashlytics.framework */,
-				7379FAD11EDA5AEC0093535C /* Fabric.framework */,
 				732B9D4C1EDA8A4C00FF957D /* AssetsLibrary.framework */,
 				EEECD0C1934547049DA9F6AE /* libz.tbd */,
 				866225A0083F67269536F0F0 /* libPods-Tradle.a */,
@@ -999,14 +981,6 @@
 			isa = PBXGroup;
 			children = (
 				732B64451ED9FF7C0056F4BF /* libRNECC.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		732B64461ED9FF7C0056F4BF /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				732B644A1ED9FF7C0056F4BF /* libSMXCrashlytics.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1227,7 +1201,6 @@
 				B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */,
 				5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */,
 				025FE4A02ADE4DA2823A4C6D /* RNECC.xcodeproj */,
-				FB3FA568ECEA411EA02FA34B /* SMXCrashlytics.xcodeproj */,
 				4A77A9E59FA34C10B19D120B /* RNImagePicker.xcodeproj */,
 				97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */,
 				6B3FC1286FC44AFDBB86B8CD /* BVLinearGradient.xcodeproj */,
@@ -1388,7 +1361,6 @@
 				73D62BC422123D300082B2DE /* Embed Frameworks */,
 				735D53EF21472DE20084FEFB /* Get Local IP */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				7379F7D01EDA14430093535C /* Fabric / Crashlytics */,
 				785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */,
 				9BAF2EFA23CBE509009E03FE /* ShellScript */,
 			);
@@ -1608,10 +1580,6 @@
 				{
 					ProductGroup = 732B64731ED9FF7C0056F4BF /* Products */;
 					ProjectRef = 0FED7B4BD2E8432DAA500148 /* RNVectorIcons.xcodeproj */;
-				},
-				{
-					ProductGroup = 732B64461ED9FF7C0056F4BF /* Products */;
-					ProjectRef = FB3FA568ECEA411EA02FA34B /* SMXCrashlytics.xcodeproj */;
 				},
 				{
 					ProductGroup = 732B64691ED9FF7C0056F4BF /* Products */;
@@ -1884,13 +1852,6 @@
 			fileType = archive.ar;
 			path = libRNECC.a;
 			remoteRef = 732B64441ED9FF7C0056F4BF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		732B644A1ED9FF7C0056F4BF /* libSMXCrashlytics.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libSMXCrashlytics.a;
-			remoteRef = 732B64491ED9FF7C0056F4BF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		732B64541ED9FF7C0056F4BF /* libRNKeychain.a */ = {
@@ -2238,20 +2199,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "echo \"Script1: Get local IP\"\nif [ \"$CONFIGURATION\" == \"Debug\" ]; then\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi\n";
-		};
-		7379F7D01EDA14430093535C /* Fabric / Crashlytics */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Fabric / Crashlytics";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "echo \"Script1: Crashlytics\"\nif [[ \"$CONFIGURATION\" != \"Debug\" ]]; then\n  ../scripts/fabric-prod.sh\nfi\n";
 		};
 		785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

@@ -33,7 +33,6 @@ import com.oblador.vectoricons.VectorIconsPackage;
 import com.peel.react.TcpSocketsModule;
 import com.peel.react.rnos.RNOSModule;
 import com.rn.ecc.ECCPackage;
-import com.smixx.fabric.FabricPackage;
 import com.tradle.react.UdpSocketsModule;
 
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
@@ -92,7 +91,6 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
         new TcpSocketsModule(),
         new RNOSModule(),
         new ReactNativeExceptionHandlerPackage(),
-        new FabricPackage(),
         new RNAsyncSnappyStoragePackage(),
         // new AnylinePackage(),
         new ReactNativePushNotificationPackage(),

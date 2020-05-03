@@ -3174,11 +3174,6 @@
       "from": "error-ex@>=1.3.2 <2.0.0",
       "resolved": "https://registry.npmjs.org/error-ex/-/error-ex-1.3.2.tgz"
     },
-    "error-stack-parser": {
-      "version": "1.3.6",
-      "from": "error-stack-parser@>=1.3.6 <2.0.0",
-      "resolved": "https://registry.npmjs.org/error-stack-parser/-/error-stack-parser-1.3.6.tgz"
-    },
     "errorhandler": {
       "version": "1.5.0",
       "from": "errorhandler@>=1.5.0 <2.0.0",
@@ -5462,11 +5457,6 @@
       "resolved": "https://registry.npmjs.org/lodash._isiterateecall/-/lodash._isiterateecall-3.0.9.tgz",
       "dev": true
     },
-    "lodash.assign": {
-      "version": "4.2.0",
-      "from": "lodash.assign@>=4.2.0 <5.0.0",
-      "resolved": "https://registry.npmjs.org/lodash.assign/-/lodash.assign-4.2.0.tgz"
-    },
     "lodash.create": {
       "version": "3.1.1",
       "from": "lodash.create@3.1.1",
@@ -7331,16 +7321,6 @@
       "from": "react-native-exception-handler@2.2.0",
       "resolved": "https://registry.npmjs.org/react-native-exception-handler/-/react-native-exception-handler-2.2.0.tgz"
     },
-    "react-native-fabric": {
-      "version": "0.4.1",
-      "from": "tradle/react-native-fabric#dev",
-      "resolved": "git://github.com/tradle/react-native-fabric.git#90af8e9669facbcb3e92ea538dcd12c1bea16dd3"
-    },
-    "react-native-fabric-crashlytics": {
-      "version": "0.1.8",
-      "from": "react-native-fabric-crashlytics@0.1.8",
-      "resolved": "https://registry.npmjs.org/react-native-fabric-crashlytics/-/react-native-fabric-crashlytics-0.1.8.tgz"
-    },
     "react-native-facetec-zoom": {
       "version": "1.2.0",
       "from": "github:tradle/react-native-facetec-zoom#mv/sdk8.x",
@@ -8602,45 +8582,11 @@
       "from": "stable-stringify@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/stable-stringify/-/stable-stringify-1.0.0.tgz"
     },
-    "stack-generator": {
-      "version": "1.1.0",
-      "from": "stack-generator@>=1.0.7 <2.0.0",
-      "resolved": "https://registry.npmjs.org/stack-generator/-/stack-generator-1.1.0.tgz",
-      "dependencies": {
-        "stackframe": {
-          "version": "1.0.4",
-          "from": "stackframe@>=1.0.2 <2.0.0",
-          "resolved": "https://registry.npmjs.org/stackframe/-/stackframe-1.0.4.tgz"
-        }
-      }
-    },
     "stack-utils": {
       "version": "1.0.2",
       "from": "stack-utils@>=1.0.1 <2.0.0",
       "resolved": "http://registry.npmjs.org/stack-utils/-/stack-utils-1.0.2.tgz",
       "dev": true
-    },
-    "stackframe": {
-      "version": "0.3.1",
-      "from": "stackframe@>=0.3.1 <0.4.0",
-      "resolved": "https://registry.npmjs.org/stackframe/-/stackframe-0.3.1.tgz"
-    },
-    "stacktrace-gps": {
-      "version": "2.4.4",
-      "from": "stacktrace-gps@>=2.4.3 <3.0.0",
-      "resolved": "https://registry.npmjs.org/stacktrace-gps/-/stacktrace-gps-2.4.4.tgz",
-      "dependencies": {
-        "source-map": {
-          "version": "0.5.6",
-          "from": "source-map@0.5.6",
-          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.6.tgz"
-        }
-      }
-    },
-    "stacktrace-js": {
-      "version": "1.3.1",
-      "from": "stacktrace-js@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/stacktrace-js/-/stacktrace-js-1.3.1.tgz"
     },
     "stacktrace-parser": {
       "version": "0.1.5",

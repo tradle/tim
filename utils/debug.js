@@ -1,8 +1,6 @@
 import { EventEmitter } from 'events'
 import debug from 'debug'
 
-import './crashlytics'
-
 // const localDebug = debug('tradle:logger')
 const MAX_LENGTH = 5000
 
