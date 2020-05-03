@@ -365,6 +365,26 @@ var NavigationBarRouteMapper = {
                   {lbTitle}
                 </Text>
 
+    if (componentName === 'ApplicationView'  &&  route.refreshHandler) {
+      return (
+        <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity
+            hitSlop={HIT_SLOP}
+            onPress={passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
+            <View style={platformStyles.navBarLeftButton}>
+              {title}
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            hitSlop={HIT_SLOP}
+            onPress={() => route.refreshHandler()}>
+            <View style={platformStyles.navBarRightButton}>
+              <Icon name='ios-refresh' size={30} color={color} style={platformStyles.navBarIcon}/>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )
+    }
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
