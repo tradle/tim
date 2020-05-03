@@ -1206,9 +1206,16 @@ class ResourceList extends Component {
       ]
       if (!isWeb()) {
         buttons.push({
-          text: translate('scanQRcode'),
-          onPress: () => this.scanQRAndProcess()
+          text: translate('PairDevices'),
+          onPress: () => this.scanQRAndProcess('Pair')
         })
+        buttons.push({
+          text: translate('AddNewProvider'),
+          onPress: () => this.scanQRAndProcess('AddNewProvider')
+        })
+        buttons.push({
+          text: translate('ApplyForProduct'),
+          onPress: () => this.scanQRAndProcess('ApplyForProduct')        })
       }
     }
 
@@ -1222,9 +1229,13 @@ class ResourceList extends Component {
       />
     )
   }
-  async scanQRAndProcess(prop) {
-    const result = await this.scanFormsQRCode()
+  async scanQRAndProcess(action) {
+    const result = await this.scanFormsQRCode(action)
     const { schema, data } = result
+    if (schema !== action) {
+      Alert.alert(translate('wrongQR'), translate('youWantedTo', translate(action)))
+      return
+    }
     if (schema === 'ImportData') {
       Actions.importData(data)
       return
