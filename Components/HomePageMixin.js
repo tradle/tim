@@ -30,10 +30,12 @@ var HomePageMixin = {
   scanFormsQRCode(opts) {
     return new Promise((resolve, reject) => {
       this.setState({hideMode: false})
+      let title = translate('scanQRcode')
+      if (opts)
+        title = `${title} -- ${translate(opts)}`
       this.props.navigator.push({
-        title: translate('scanQRcode'),
+        title,
         componentName: 'QRCodeScanner',
-        titleTintColor: '#eeeeee',
         backButtonTitle: 'Cancel',
         // rightButtonTitle: 'ion|ios-reverse-camera',
         passProps: {
