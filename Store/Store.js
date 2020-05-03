@@ -11835,7 +11835,7 @@ debug(`deleteItemFromDB: ${itemId}`)
       return
     }
     try {
-      let result = await graphQL.getItem(id, this.client, backlink, noBacklinks, isChat, isThisVersion)
+      let result = await graphQL.getItem({id, client: this.client, backlink, noBacklinks, isChat, isThisVersion})
       if (result) {
         return this.convertToResource(result)
       }

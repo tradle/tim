@@ -772,7 +772,8 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink, noBacklinks, excludeProps, mapping, isChat, isThisVersion) {
+
+  async getItem({ id, client, backlink, noBacklinks, excludeProps, mapping, isChat, isThisVersion }) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
