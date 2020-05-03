@@ -1011,10 +1011,13 @@ var search = {
     if (useApollo)
       return this.executeApollo(params)
     var {query, table, versionId} = params
+
+    let variables = versionId  &&  {modelsVersionId: versionId} || undefined
     // debugger
-    const body = tradleUtils.stringify({
-      query
-    })
+    const rawBody = { query }
+    if (variables) rawBody.variables = variables
+    const body = tradleUtils.stringify(rawBody)
+
     let obj = {
         [TYPE]: 'tradle.GraphQLQuery',
         body,
@@ -1027,14 +1030,12 @@ var search = {
     const result = await this.meDriver.sign({
       object: obj
     })
-    // const result = await this.meDriver.sign({ object })
 
     const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
     }
     let client = new GraphQLClient(this.graphqlEndpoint, { headers })
 
-    let variables = versionId  &&  {modelsVersionId: versionId} || undefined
     try {
       let data = await client.rawRequest(query, variables)
       if (data.data) {
@@ -1045,7 +1046,8 @@ var search = {
       else
         return {error: JSON.stringify(data.errors  &&  data.errors || data)}
     } catch (error) {
-// debugger
+      console.log(error)
+debugger
       return { error }
     }
   }
