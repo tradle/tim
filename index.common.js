@@ -326,17 +326,19 @@ const goBack = debounce(function (nav) {
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
-    if (index === 0  ||  route.noLeftButton)
+    const { noLeftButton, passProps, componentName, backButtonTitle, tintColor } = route
+    if (index === 0  ||  noLeftButton)
       return <View/>
 
-    let bankStyle = route.passProps.bankStyle
+    let bankStyle = passProps.bankStyle
     let color = '#7AAAC3'
-    if (route.componentName === 'CameraView' ) // Camera view
+
+    if (!isWeb()  &&  (componentName === 'CameraView' || componentName === 'QRCodeScanner'))
       color = '#ffffff'
     else if (bankStyle)
       color = bankStyle.navBarColor ||  bankStyle.linkColor
     let previousRoute = navState.routeStack[index - 1];
-    let lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
+    let lbTitle = 'backButtonTitle' in route ? backButtonTitle : previousRoute.title;
     if (!lbTitle)
       return null;
     let iconIdx = lbTitle.indexOf('|')
@@ -349,8 +351,8 @@ var NavigationBarRouteMapper = {
       icon = 'ios-arrow-back'
 
     let style = [platformStyles.navBarText];
-    if (route.tintColor)
-      style.push({color: route.tintColor});
+    if (tintColor)
+      style.push({color: tintColor});
     else {
       style.push(styles.navBarButtonText);
       style.push({color: color});
@@ -366,7 +368,7 @@ var NavigationBarRouteMapper = {
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
-        onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
+        onPress={passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
         <View style={platformStyles.navBarLeftButton}>
           {title}
         </View>
@@ -505,10 +507,11 @@ var NavigationBarRouteMapper = {
   },
 
   Title: function(route, navigator, index, navState) {
-    if (!route.title)
+    const { passProps, componentName, title, titleTextColor } = route
+    if (!title)
       return <View/>
     let org;
-    let { modelName, resource, bankStyle, to } = route.passProps
+    let { modelName, resource, bankStyle, to } = passProps
     if (modelName                       &&
         modelName === 'tradle.Message'  &&
         resource                        &&
@@ -521,18 +524,18 @@ var NavigationBarRouteMapper = {
       photoObj = bankStyle.barLogo  ||  bankStyle.logo
 
     if (!photoObj)
-      photoObj = route.componentName === 'MessageList'  &&
+      photoObj = componentName === 'MessageList'  &&
                  resource.photos                        &&
                  resource.photos[0]
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
-    else if (route.componentName === 'RemediationItemsList') {
+    else if (componentName === 'RemediationItemsList') {
       photoObj = to.photos  &&  to.photos[0]
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
     let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
     if (!logoNeedsText) {
-      switch (route.componentName) {
+      switch (componentName) {
       case 'ArticleView':
         break
       case 'MessageList':
@@ -546,7 +549,7 @@ var NavigationBarRouteMapper = {
         logoNeedsText = true
       }
     }
-    let t = route.title.split(' -- ')
+    let t = title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
     if (uri) {
       let { width, height } = photoObj
@@ -572,7 +575,7 @@ var NavigationBarRouteMapper = {
     }
 
     let color
-    if (route.componentName === 'CameraView')  // Camera view
+    if (!isWeb()  &&  (componentName === 'CameraView' || componentName === 'QRCodeScanner'))
       st.color = color = '#ffffff'
     else if (bankStyle)
       st.color = color = bankStyle.navBarColor || bankStyle.linkColor
@@ -582,10 +585,10 @@ var NavigationBarRouteMapper = {
     let style = [platformStyles.navBarText, t.length === 1 && styles.navBarTitleText || styles.navBarTitleText1, st]
     let text, tArr
     if (logoNeedsText  ||  !uri) {
-      if (route.titleTextColor)
-        style.push({color: route.titleTextColor});
+      if (titleTextColor)
+        style.push({color: titleTextColor});
 
-      let width = navBarTitleWidth(components[route.componentName])
+      let width = navBarTitleWidth(components[componentName])
       for (let i=1; i<t.length; i++) {
         if (!tArr)
           tArr = []
