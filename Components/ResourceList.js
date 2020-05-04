@@ -1206,7 +1206,7 @@ class ResourceList extends Component {
       ]
       if (!isWeb()) {
         buttons.push({
-          text: translate('PairDevices'),
+          text: translate('Pair'),
           onPress: () => this.scanQRAndProcess('Pair')
         })
         buttons.push({

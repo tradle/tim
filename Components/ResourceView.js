@@ -136,7 +136,7 @@ class ResourceView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let { resource, action, error, pairingData, to } = params
+    let { resource, action, error, to } = params
 
     let isMe = utils.isMe(this.props.resource)
     if (resource  &&  utils.getId(resource) !== utils.getId(this.props.resource)) {
@@ -176,12 +176,6 @@ class ResourceView extends Component {
     case 'getForms':
       this.showChat(params)
       break
-    case 'genPairingData':
-      if (error)
-        Alert.alert(error)
-      else
-        this.setState({pairingData, isModalOpen: true})
-      break
     case 'newContact':
       this.closeModal()
       break
@@ -218,8 +212,7 @@ class ResourceView extends Component {
            this.state.resource     !== nextState.resource                 ||
            this.state.useGesturePassword !== nextState.useGesturePassword ||
            this.state.useTouchId !== nextState.useTouchId                 ||
-           this.state.backlink  !== nextState.backlink                    ||
-           this.state.pairingData !== nextState.pairingData
+           this.state.backlink  !== nextState.backlink
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
@@ -244,7 +237,7 @@ class ResourceView extends Component {
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: ResourceView})
 
-    let { backlink, backlinkList, pairingData, isModalOpen } = this.state
+    let { backlink, backlinkList, isModalOpen } = this.state
     if (!bankStyle)
       bankStyle = defaultBankStyle
     let styles = createStyles({bankStyle})
@@ -288,16 +281,10 @@ class ResourceView extends Component {
                                   showQR={this.openModal.bind(this)}
                                   backlinkList={backlinkList}/>
     }
-    let qr
     let w = Math.floor((utils.getContentWidth(ResourceView) / 3) * 2)
     w = Math.min(w, 300)
-    if (pairingData) {
-      qr = {
-        schema: 'PairDevices',
-        data: pairingData
-      }
-    }
-    else if (utils.isSubclassOf(model, MY_PRODUCT)) {
+    let qr
+    if (utils.isSubclassOf(model, MY_PRODUCT)) {
       qr = {
         schema: 'ProductAuthorization',
         data: {
@@ -483,12 +470,6 @@ class ResourceView extends Component {
     )
   }
 
-  openModal() {
-    this.setState({isModalOpen: true});
-  }
-  closeModal() {
-    this.setState({isModalOpen: false});
-  }
   getRefResource(resource, prop) {
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
@@ -514,9 +495,6 @@ class ResourceView extends Component {
       return this.updateAuthSettings(r, r.useGesturePassword)
     case CHANGE_GESTURE_PASSWORD:
       return this.updateAuthSettings(r, true)
-    // case PAIR_DEVICES:
-    //   Actions.genPairingData()
-    //   return
     case SCAN_QR_CODE:
       this.scanFormsQRCode({isView: true})
       return
