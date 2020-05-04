@@ -28,7 +28,8 @@ import {
   getStringPropertyValue,
   getEnumProperty,
   translateEnum,
-  translate
+  translate,
+  omitVirtual
 } from '../../utils/utils'
 
 const {
@@ -257,17 +258,17 @@ const storeUtils = {
     if (!permalink) permalink = storeUtils.getPermalink(identity)
 
     // defensive copy
-    identity = _.cloneDeep(identity)
+    let checkIdentity = omitVirtual(identity) //_.cloneDeep(identity)
 
     let match
     try {
       match = await node.addressBook.byPermalink(permalink)
-      if (_.isEqual(match.object, identity)) return
+      if (_.isEqual(match.object, checkIdentity)) return
     } catch (err) {
       // oh well, I guess we have to do things the long way
     }
 
-    return node.addContactIdentity(identity)
+    return node.addContactIdentity(checkIdentity)
   },
   rebuf,
   /**

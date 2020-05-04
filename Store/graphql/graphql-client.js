@@ -116,8 +116,11 @@ var search = {
             inClause.push(s)
             continue
           }
-          if (!val  ||  !val.trim().length)
+          if (!val  ||  !val.trim().length) {
+            if (val === null)
+              op.NULL += `\n ${p}: true`
             continue
+          }
           let len = val.length
           if (val.indexOf('*') === -1)
             op.EQ += `\n   ${p}: "${val}",`
@@ -925,7 +928,7 @@ var search = {
 
     const list = await search.searchServer({
       client,
-      filterResource: { pub },
+      filterResource: { pub, importedFrom: null },
       select: ['link'],
       modelName: 'tradle.PubKey',
       noTrigger: true,
