@@ -123,8 +123,11 @@ var search = {
             inClause.push(s)
             continue
           }
-          else if (!val  ||  !val.trim().length)
+          else if (!val  ||  !val.trim().length) {
+            if (val === null)
+              op.NULL += `\n ${p}: true`
             continue
+          }
           let len = val.length
           if (val.indexOf('*') === -1)
             op.EQ += `\n   ${p}: "${val}",`
@@ -949,16 +952,9 @@ var search = {
   getIdentity: async ({ client, _permalink, _link, pub }) => {
     if (_link) return search.getIdentityByLink({ client, link: _link })
     if (!pub) throw new Error('querying identities by _permalink is not supported at this time')
-
-    // if (_permalink) {
-    //   const id = _link ? utils.makeId('tradle.Identity', _permalink, _link) : utils.makePermId('tradle.Identity', _permalink)
-    //   const result = await search._getItem(id, client)
-    //   return neuter(result)
-    // }
-
     const list = await search.searchServer({
       client,
-      filterResource: { pub },
+      filterResource: { pub, importedFrom: null },
       select: ['link'],
       modelName: 'tradle.PubKey',
       noTrigger: true,
