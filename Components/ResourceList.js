@@ -1580,12 +1580,6 @@ class ResourceList extends Component {
       },
     })
   }
-  openModal() {
-    this.setState({isModalOpen: true});
-  }
-  closeModal() {
-    this.setState({isModalOpen: false});
-  }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceList.prototype, HomePageMixin)
