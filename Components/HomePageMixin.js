@@ -317,6 +317,12 @@ console.log('HomePageMixin: filterResource', resource)
         }}
       ]
     )
+  },
+  openModal() {
+    this.setState({isModalOpen: true});
+  },
+  closeModal() {
+    this.setState({isModalOpen: false});
   }
 }
 

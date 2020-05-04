@@ -1011,12 +1011,6 @@ class MessageList extends Component {
       </PageView>
     )
   }
-  openModal() {
-    this.setState({isModalOpen: true});
-  }
-  closeModal() {
-    this.setState({isModalOpen: false});
-  }
   hasMenuButton() {
     return !!this.getActionSheetItems()
   }

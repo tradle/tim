@@ -1198,7 +1198,7 @@ class ResourceList extends Component {
       ]
       if (!isWeb()) {
         buttons.push({
-          text: translate('PairDevices'),
+          text: translate('Pair'),
           onPress: () => this.scanQRAndProcess('Pair')
         })
         buttons.push({
@@ -1558,12 +1558,6 @@ class ResourceList extends Component {
         officialAccounts: true
       },
     })
-  }
-  openModal() {
-    this.setState({isModalOpen: true});
-  }
-  closeModal() {
-    this.setState({isModalOpen: false});
   }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
