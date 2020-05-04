@@ -110,9 +110,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.2.4.tgz"
     },
     "@tradle/engine": {
-      "version": "8.2.0",
+      "version": "8.3.0",
       "from": "@tradle/engine@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/engine/-/engine-8.2.0.tgz",
+      "resolved": "http://registry.npmjs.org/@tradle/engine/-/engine-8.3.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -5010,9 +5010,9 @@
       "dev": true
     },
     "mutexify": {
-      "version": "1.2.0",
+      "version": "1.3.0",
       "from": "mutexify@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/mutexify/-/mutexify-1.2.0.tgz"
+      "resolved": "http://registry.npmjs.org/mutexify/-/mutexify-1.3.0.tgz"
     },
     "my-local-ip": {
       "version": "1.0.0",
