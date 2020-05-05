@@ -39,7 +39,7 @@ module.exports = {
     "cancel": "Cancel",
     "details": "Details",
     "enterYourName": "Enter your name",
-    "addServerUrl": "Add server url",
+    "addServerUrl": "Add new provider via URL",
     "search": "Search",
     "searchSomething": "Search - {1}",
     "hello": "Hello {1}!",
