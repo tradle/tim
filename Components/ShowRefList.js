@@ -207,7 +207,7 @@ class ShowRefList extends Component {
       else if (utils.isSubclassOf(resource[TYPE], MY_PRODUCT))
         showQR = true
     }
-    if (showQR) {
+    if (showQR  &&  this.props.showQR) {
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
