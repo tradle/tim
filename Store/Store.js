@@ -5293,7 +5293,17 @@ if (!res[SIG]  &&  res._message)
       let org = this._getItem(myEmployeeBadge.from).organization
       await this.setupEmployee(myEmployeeBadge, org)
     }
+    var msg = {
+      message: 'Pairing devices',
+      [TYPE]: SELF_INTRODUCTION,
+      identity: meDriver.identity,
+      from: me,
+      to: this.getRepresentative(me.organization.id)
+    }
+    await this.onAddMessage({msg, disableAutoResponse: true})
+
     Actions.hideModal()
+    Alert.alert(translate('pairingRequestWasProcessed'))
   },
   async checkAndSetupIfEmployee(masterAuthor) {
     let { list } = await this.searchServer({
