@@ -2043,7 +2043,7 @@ var Store = Reflux.createStore({
     let { msg, from, isRetry, length } = opts
     const { identifierProp } = driverInfo
     const identifier = from
-
+    let org
     let progressUpdate
     let willAnnounceProgress = willShowProgressBar({ length })
     try {
@@ -2057,7 +2057,7 @@ var Store = Reflux.createStore({
       const originalMsg = isNested ? payload : msg
       debug(`receiving ${originalPayload[TYPE]}`)
       let pid = utils.makeId(PROFILE, from)
-      let org = this._getItem(pid).organization
+      org = this._getItem(pid).organization
       progressUpdate = willAnnounceProgress && {
         recipient: this._getItem(org)
       }
@@ -2117,6 +2117,8 @@ var Store = Reflux.createStore({
         // avoid emitting two progress updates in finally {}
         progressUpdate = null
         try {
+          if (!this.client)
+            this.client = graphQL.initClient(meDriver, this._getItem(org).url)
           await this.requestIdentity({
             [err.property]: err.value
           })
@@ -5353,10 +5355,9 @@ if (!res[SIG]  &&  res._message)
     if (!masterAuthor)
       throw new Error('not found')
 
-    debugger
+    Actions.showModal({title: translate('pleaseWait'), showIndicator: true})
     me._masterAuthor = masterAuthor
     await this.setMe(me)
-    Actions.showModal({title: translate('pleaseWait'), showIndicator: true})
     let { list } = await this.searchServer({
         modelName: MY_EMPLOYEE_PASS,
         noTrigger: true,
@@ -5364,13 +5365,18 @@ if (!res[SIG]  &&  res._message)
       })
 
     this.trigger({action: 'masterIdentity', me, isEmployee: list.length})
-    if (!list  ||  !list.length)
+    Actions.hideModal()
+    Alert.alert(translate('pairingRequestWasProcessed'))
+
+    let isEmployee = list  &&  list.length
+    if (!isEmployee) {
       await this.onUpdateMe(me)
-    else {
-      let myEmployeeBadge = list[0]
-      let org = this._getItem(myEmployeeBadge.from).organization
-      await this.setupEmployee(myEmployeeBadge, org)
+      return
     }
+    let myEmployeeBadge = list[0]
+    let org = this._getItem(myEmployeeBadge.from).organization
+    await this.setupEmployee(myEmployeeBadge, org)
+
     var msg = {
       message: 'Pairing devices',
       [TYPE]: SELF_INTRODUCTION,
@@ -5379,9 +5385,6 @@ if (!res[SIG]  &&  res._message)
       to: this.getRepresentative(me.organization.id)
     }
     await this.onAddMessage({msg, disableAutoResponse: true})
-
-    Actions.hideModal()
-    Alert.alert(translate('pairingRequestWasProcessed'))
   },
   async insurePublishingIdentity(org) {
     if (!me)
