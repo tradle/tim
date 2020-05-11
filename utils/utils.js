@@ -805,43 +805,43 @@ var utils = {
     if (toId === meId)
       return false
 
-    if (me.isEmployee) {
-      if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
-        return false
-      if (r._context) {
-        // check if the employee is the applicant
-        let cFrom = r._context.from
-        if (utils.getId(cFrom) === meId)
-          return true
-        if (cFrom.organization) {
-          if (cFrom.organization.id === me.organization.id)
-            return utils.getId(r._context.to) !== meId
-        }
+    if (!me.isEmployee)
+      return
+    if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
+      return false
+    if (r._context) {
+      // check if the employee is the applicant
+      let cFrom = r._context.from
+      if (utils.getId(cFrom) === meId)
+        return true
+      if (cFrom.organization) {
+        if (cFrom.organization.id === me.organization.id)
+          return utils.getId(r._context.to) !== meId
       }
-      let myOrgId = utils.getId(me.organization)
-      // bot -> bot
-      if (r.from.organization  &&
-          r.to.organization    &&
-          r.from.organization.id === r.to.organization.id  &&
-          r.from.organization.id === myOrgId) {
-        return false
-      }
+    }
+    let myOrgId = utils.getId(me.organization)
+    // bot -> bot
+    if (r.from.organization  &&
+        r.to.organization    &&
+        r.from.organization.id === r.to.organization.id  &&
+        r.from.organization.id === myOrgId) {
+      return false
+    }
 
-      if (r.from.organization) {
-        if (myOrgId === utils.getId(r.from.organization)) {
-          if (to  &&  utils.getId(to) === myOrgId)
-            return false
-          else
-            return true
-        }
+    if (r.from.organization) {
+      if (myOrgId === utils.getId(r.from.organization)) {
+        if (to  &&  utils.getId(to) === myOrgId)
+          return false
+        else
+          return true
       }
-      if (r._context) {
-        if (r._context.from) {
-          let fOrg = r._context.from.organization
-          let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
-          if (applier  &&  fOrg === utils.getId(r.from.organization))
-            return true
-        }
+    }
+    if (r._context) {
+      if (r._context.from) {
+        let fOrg = r._context.from.organization
+        let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
+        if (applier  &&  fOrg === utils.getId(r.from.organization))
+          return true
       }
     }
   },
