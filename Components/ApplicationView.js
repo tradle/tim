@@ -89,7 +89,7 @@ class ApplicationView extends Component {
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
 
-    this.openChat = this.openChat.bind(this)
+    // this.openChat = this.openChat.bind(this)
     this.approve = this.approve.bind(this)
     this.deny = this.deny.bind(this)
 
@@ -380,34 +380,6 @@ class ApplicationView extends Component {
       this.setState({checksCategory: null, checkFilter: filter})
   }
 
-  openChat() {
-    let { navigator, application } = this.props
-    let { bankStyle } = this.state
-    let resource = this.state.resource || this.props.resource
-    let me = utils.getMe()
-    let title
-    let name = resource.applicantName || resource.applicant.title
-    if (name)
-      title = name  + '  →  ' + me.organization.title
-    else
-      title = me.organization.title
-    let style = resource.style ? this.mergeStyle(resource.style) : bankStyle
-    let route = {
-      componentName: 'MessageList',
-      backButtonTitle: 'Back',
-      title: title,
-      passProps: {
-        resource: resource._context,
-        filter: '',
-        search: true,
-        modelName: MESSAGE,
-        application: resource,
-        currency: resource.currency,
-        bankStyle: style,
-      }
-    }
-    navigator.push(route)
-  }
   approve() {
     let resource = this.state.resource || this.props.resource
     console.log('Approve was chosen!')
