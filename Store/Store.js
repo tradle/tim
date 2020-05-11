@@ -5288,7 +5288,7 @@ if (!res[SIG]  &&  res._message)
         filterResource: {owner: {id: `${IDENTITY}_${masterAuthor}_${masterAuthor}`}}
       })
 
-    this.trigger({action: 'masterIdentity', me, isEmployee: list.length})
+    this.trigger({action: 'masterIdentity', me, isEmployee: list  &&  list.length})
 
     Actions.hideModal()
     Alert.alert(translate('pairingRequestWasProcessed'))
