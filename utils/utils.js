@@ -834,43 +834,43 @@ var utils = {
     if (toId === meId)
       return false
 
-    if (me.isEmployee) {
-      if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
-        return false
-      if (r._context) {
-        // check if the employee is the applicant
-        let cFrom = r._context.from
-        if (utils.getId(cFrom) === meId)
-          return true
-        if (cFrom.organization) {
-          if (cFrom.organization.id === me.organization.id)
-            return utils.getId(r._context.to) !== meId
-        }
+    if (!me.isEmployee)
+      return
+    if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
+      return false
+    if (r._context) {
+      // check if the employee is the applicant
+      let cFrom = r._context.from
+      if (utils.getId(cFrom) === meId)
+        return true
+      if (cFrom.organization) {
+        if (cFrom.organization.id === me.organization.id)
+          return utils.getId(r._context.to) !== meId
       }
-      let myOrgId = utils.getId(me.organization)
-      // bot -> bot
-      if (r.from.organization  &&
-          r.to.organization    &&
-          r.from.organization.id === r.to.organization.id  &&
-          r.from.organization.id === myOrgId) {
-        return false
-      }
+    }
+    let myOrgId = utils.getId(me.organization)
+    // bot -> bot
+    if (r.from.organization  &&
+        r.to.organization    &&
+        r.from.organization.id === r.to.organization.id  &&
+        r.from.organization.id === myOrgId) {
+      return false
+    }
 
-      if (r.from.organization) {
-        if (myOrgId === utils.getId(r.from.organization)) {
-          if (to  &&  utils.getId(to) === myOrgId)
-            return false
-          else
-            return true
-        }
+    if (r.from.organization) {
+      if (myOrgId === utils.getId(r.from.organization)) {
+        if (to  &&  utils.getId(to) === myOrgId)
+          return false
+        else
+          return true
       }
-      if (r._context) {
-        if (r._context.from) {
-          let fOrg = r._context.from.organization
-          let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
-          if (applier  &&  fOrg === utils.getId(r.from.organization))
-            return true
-        }
+    }
+    if (r._context) {
+      if (r._context.from) {
+        let fOrg = r._context.from.organization
+        let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
+        if (applier  &&  fOrg === utils.getId(r.from.organization))
+          return true
       }
     }
   },
@@ -3003,179 +3003,3 @@ function dateFromParts (parts) {
 }
 
 module.exports = utils;
-/*
-  fromMicroBlink: function (result) {
-    const { mrtd, usdl, eudl, image } = result
-    if (mrtd) {
-      return {
-        [TYPE]: 'tradle.Passport',
-        givenName: mrtd.secondaryId,
-        surname: mrtd.primaryId,
-        nationality: {
-          id: 'tradle.Country_abc',
-          title: mrtd.nationality.slice(0, 2)
-        },
-        issuingCountry: {
-          id: 'tradle.Country_abc',
-          title: mrtd.issuer.slice(0, 2)
-        },
-        passportNumber: mrtd.documentNumber,
-        sex: {
-          id: 'tradle.Sex_abc',
-          title: mrtd.sex === 'M' ? 'Male' : 'Female'
-        },
-        dateOfExpiry: mrtd.dateOfExpiry,
-        dateOfBirth: mrtd.dateOfBirth,
-        photos: [
-          {
-            url: image.base64,
-            // width: image.width,
-            // height: image.height,
-            // isVertical: image.width < image.height
-          }
-        ]
-      }
-    }
-  },
-  fromAnyline: function (result) {
-    const { scanMode, cutoutBase64, data } = result
-    // as produced by newtondev-mrz-parser
-    // {
-    //       documentCode: documentCode,
-    //       documentType: 'PASSPORT',
-    //       documentTypeCode: documentType,
-    //       issuer: issuerOrg,
-    //       names: names,
-    //       documentNumber: documentNumber,
-    //       nationality: nationality,
-    //       dob: dob,
-    //       sex: sex,
-    //       checkDigit: {
-    //         documentNumber: {value: checkDigit1, valid: checkDigitVerify1},
-    //         dob: {value: checkDigit2, valid: checkDigitVerify2},
-    //         expiry: {value: checkDigit3, valid: checkDigitVerify3},
-    //         personalNumber: {value: checkDigit4, valid: checkDigitVerify4},
-    //         finalCheck: {value: checkDigit5, valid: checkDigitVerify5},
-    //         valid: (checkDigitVerify1 && checkDigitVerify2 && checkDigitVerify3 && checkDigitVerify4 && checkDigitVerify5)
-    //       },
-    //       expiry: expiry,
-    //       personalNumber: personalNumber
-    //     }
-
-    // if (scanMode === 'MRZ') {
-    //   const { names, nationality, issuer, dob, expiry, sex, documentNumber, personalNumber } = data
-    //   return {
-    //     [TYPE]: 'tradle.Passport',
-    //     givenName: names[0],
-    //     surname: names.lastName,
-    //     passportNumber: documentNumber || personalNumber,
-    //     nationality: {
-    //       id: 'tradle.Country_abc',
-    //       title: nationality.abbr.slice(0, 2)
-    //     },
-    //     issuingCountry: {
-    //       id: 'tradle.Country_abc',
-    //       title: issuer.abbr.slice(0, 2)
-    //     },
-    //     sex: {
-    //       id: 'tradle.Sex_abc',
-    //       title: sex.full
-    //     },
-    //     // todo: set offset by country
-    //     dateOfExpiry: dateFromParts(expiry),
-    //     dateOfBirth: dateFromParts(dob),
-    //     photos: [
-    //       {
-    //         url: cutoutBase64
-    //       }
-    //     ]
-    //   }
-    // }
-
-    if (scanMode === 'MRZ') {
-      // as returned by the `mrz` package
-      // {
-      //   "isValid": true,
-      //   "format": "TD3",
-      //   "documentType": {
-      //     "code": "P",
-      //     "label": "Passport",
-      //     "type": "",
-      //     "isValid": true
-      //   },
-      //   "issuingCountry": {
-      //     "code": "UTO",
-      //     "isValid": false,
-      //     "error": "The country code \"UTO\" is unknown"
-      //   },
-      //   "lastname": "ERIKSSON",
-      //   "firstname": "ANNA MARIA",
-      //   "nationality": {
-      //     "code": "UTO",
-      //     "isValid": false,
-      //     "error": "The country code \"UTO\" is unknown"
-      //   },
-      //   "birthDate": {
-      //     "year": "69",
-      //     "month": "08",
-      //     "day": "06",
-      //     "isValid": true
-      //   },
-      //   "sex": {
-      //     "code": "F",
-      //     "label": "Féminin",
-      //     "isValid": true
-      //   },
-      //   "expirationDate": {
-      //     "year": "94",
-      //     "month": "06",
-      //     "day": "23",
-      //     "isValid": true
-      //   },
-      //   "personalNumber": {
-      //     "value": "ZE184226B",
-      //     "isValid": true
-      //   }
-      // }
-
-      const {
-        issuingCountry,
-        nationality,
-        lastname,
-        firstname,
-        birthDate,
-        sex,
-        expirationDate,
-        documentNumber,
-        personalNumber
-      } = data
-
-      return {
-        [TYPE]: 'tradle.Passport',
-        givenName: firstname.split(' ')[0],
-        surname: lastname,
-        passportNumber: documentNumber || personalNumber,
-        nationality: {
-          id: 'tradle.Country_abc',
-          title: nationality.code.slice(0, 2)
-        },
-        issuingCountry: {
-          id: 'tradle.Country_abc',
-          title: issuingCountry.code.slice(0, 2)
-        },
-        sex: {
-          id: 'tradle.Sex_abc',
-          title: sex.code === 'M' ? 'Male' : 'Female'
-        },
-        // todo: set offset by country
-        dateOfExpiry: dateFromParts(expirationDate),
-        dateOfBirth: dateFromParts(birthDate),
-        photos: [
-          {
-            url: cutoutBase64
-          }
-        ]
-      }
-    }
-  },
-*/
