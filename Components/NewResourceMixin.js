@@ -1289,6 +1289,8 @@ var NewResourceMixin = {
     if (prop  &&  prop.type === 'array') {
       if (isEnum)
         value = value.map(v => utils.buildRef(v))
+      else
+        value = Array.isArray(value) && value || [value]
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value
