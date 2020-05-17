@@ -949,8 +949,9 @@ var search = {
       debugger
     }
   },
-  getIdentity: async ({ client, _permalink, _link, pub }) => {
+  async getIdentity({ client, _permalink, _link, pub }) {
     if (_link) return search.getIdentityByLink({ client, link: _link })
+    if (_permalink) return search.getIdentityByPermalink({ client, permalink: _permalink })
     if (!pub) throw new Error('querying identities by _permalink is not supported at this time')
     const list = await search.searchServer({
       client,
@@ -969,6 +970,42 @@ var search = {
     }
 
     throw new Error(`identity not found with pub: ${pub}`)
+  },
+  async getIdentityByPermalink({permalink, client}) {
+    let table = 'rl_tradle_PubKey'
+
+    let query = `query {
+      ${table}(
+        limit:1
+        orderBy: {
+          property: _time,
+          desc: true
+        }
+        filter:{
+          EQ: {
+            permalink: "${permalink}"
+          },
+          NULL: {
+            importedFrom: true
+          }
+        }
+      ) {
+        edges {
+          node {
+            link
+          }
+        }
+      }
+    }`
+
+    try {
+      let data = await this.execute({query, table})
+      if (data.result  &&  data.result.edges.length)
+        return await this.getIdentity({clinet: this.clinet, _link: data.result.edges[0].node.link})
+    } catch (err) {
+      this.logger.debug('unknown identity', { permalink })
+      throw new Error(`identity with permalink: ${permalink}`)
+    }
   },
   getIdentityByLink: async ({ link, client }) => {
     const results = await search.getObjects([link], client)
