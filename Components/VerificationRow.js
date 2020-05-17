@@ -95,7 +95,11 @@ class VerificationRow extends Component {
     let isMyProduct = utils.isMyProduct(model)
     let isForm = utils.isForm(model)
     let isBookmark = model.id === BOOKMARK
-    let isAbstract = isChooser  &&  utils.getModel(prop.ref).abstract
+    let isAbstract
+    if (isChooser) {
+      let ref = prop.ref ||  prop.items.ref
+      isAbstract = utils.getModel(ref).abstract
+    }
     let isApplicationSubmission = model.id === APPLICATION_SUBMISSION
     let isVerification = model.id === VERIFICATION  &&  resource.document != null
     let r = isVerification ? resource.document : resource
