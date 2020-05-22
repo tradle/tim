@@ -1,5 +1,5 @@
 import {
-  Text,
+  // Text,
   TouchableHighlight,
   View,
   Platform,
@@ -22,6 +22,7 @@ import reactMixin from 'react-mixin'
 import chatStyles from '../styles/chatStyles'
 import ImageInput from './ImageInput'
 import { parseMessage } from '../utils/uiUtils'
+import { Text } from './Text'
 
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'

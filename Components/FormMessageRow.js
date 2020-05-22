@@ -155,7 +155,6 @@ class FormMessageRow extends Component {
 
     let isShared = this.isShared()
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
-    let noContent = !hasSentTo &&  !renderedRow.length
 
     const notSigned = !resource[SIG]
 
@@ -164,6 +163,7 @@ class FormMessageRow extends Component {
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     const model = utils.getModel(utils.getType(resource))
     const { properties } = model
+    let noContent = !hasSentTo &&  !renderedRow.length
     if (noContent) {
       let prop = properties._time
       if (prop  &&  resource[prop.name]) {
