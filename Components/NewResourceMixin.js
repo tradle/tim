@@ -311,7 +311,7 @@ var NewResourceMixin = {
                     errors: formErrors,
                     component,
                     doSet: eCols.length > 1,
-                    editable: !props[p].readOnly || search,
+                    editable,
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
@@ -614,7 +614,6 @@ var NewResourceMixin = {
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
     if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
-      // Actions.saveTemporary(r)
       Actions.getRequestedProperties({resource: r})
     }
 
@@ -1328,7 +1327,6 @@ var NewResourceMixin = {
         Actions.getRequestedProperties({resource, currentResource: resource})//currentR})
       if (!utils.isImplementing(r, INTERSECTION))
         Actions.saveTemporary(resource)
-        // Actions.saveTemporary(r)
     }
   },
   setArrayOrMultichooser(prop, value, resource) {

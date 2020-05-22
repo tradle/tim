@@ -469,7 +469,6 @@ class NewResource extends Component {
     if (model.softRequired  &&  this.refs.form) {
       // HACK a bit
       let formProps = this.refs.form.props  &&  this.refs.form.props.options.fields
-      let props = model.properties
       for (let p in formProps)
         if (props[p]  &&  model.softRequired.includes(p))
           required.push(p)
@@ -966,6 +965,8 @@ class NewResource extends Component {
     else
       Form.stylesheet = stylesheet
 
+    if (!options)
+      options = {}
     let { height } = utils.dimensions(NewResource)
     options.auto = 'placeholders';
     options.tintColor = 'red'
