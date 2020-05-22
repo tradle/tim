@@ -135,7 +135,14 @@ class ModificationRow extends Component {
             val = ''
           else if (pprop)
             val = this.getVal(pprop, val)
-
+          let pVal
+          if (Array.isArray(val)) {
+            pVal = <View key={this.getNextKey()}>
+                   {val.map(v => <Text  style={styles.sourceTitle} key={this.getNextKey()}>{v.title}</Text>)}
+                </View>
+          }
+          else
+            pVal = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
           let label = pprop && translate(pprop, model) || part
           cols.push(<View style={styles.row} key={this.getNextKey()}>
                      <View style={styles.label}>
@@ -143,7 +150,7 @@ class ModificationRow extends Component {
                        <Text  style={[styles.pTitle, {color: '#999'}]} key={this.getNextKey()}>{label}</Text>
                      </View>
                      <View style={styles.value}>
-                       <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
+                       {pVal}
                      </View>
                    </View>)
         }
@@ -340,6 +347,11 @@ class ModificationRow extends Component {
         val = dateformat(pair.new, 'mmm dS, yyyy h:MM TT')
         val = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
         break
+      case 'array':
+        val = <View>
+                 {val.map(v => <Text  style={styles.sourceTitle} key={this.getNextKey()}>{v.title}</Text>)}
+              </View>
+        break
       case 'object':
         if (prop.ref) {
           // HACK
@@ -426,7 +438,9 @@ var createStyles = styleFactory(ModificationRow, function ({ dimensions, hasRM, 
       paddingVertical: 5,
     },
     icon: {
-      padding: 10
+      paddingLeft: 5,
+      paddingTop: 3,
+      paddingRight: 1
     },
     modifications: {
       // paddingVertical: 5,
