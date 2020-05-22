@@ -971,9 +971,9 @@ class MessageList extends Component {
     let me = utils.getMe()
     if (pairingData  &&  !me._masterAuthor) {
       let w = 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
-      let qr = QR.toHex({
+      let qr = JSON.stringify({
         schema: 'Pair',
-        data: pairingData // {crypto: 'Hello world'}
+        data: pairingData
       })
       qrcode = <View style={{padding: 20}}>
                  <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
@@ -1164,6 +1164,12 @@ class MessageList extends Component {
         title: translate(title),
         callback: () => this.productChooser()
       })
+      // if (!isWeb()) {
+      //   push({
+      //     title: translate('Pair'),
+      //     callback: () => this.scanQRAndProcess('Pair')
+      //   })
+      // }
     }
 
     if (ENV.allowForgetMe && !application) {
