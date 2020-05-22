@@ -330,13 +330,12 @@ var RowMixin = {
   getProgress(resource) {
     let { status, forms, submittedFormTypesCount, maxFormTypesCount, requestFor } = resource
 
-    let progress = 0
     if (status === 'approved' || status === 'completed')
       return 1
     if (submittedFormTypesCount  &&  maxFormTypesCount)
       return submittedFormTypesCount / maxFormTypesCount
     if (!forms)
-      return
+      return 0
     let formTypes = uniqBy(forms.map(item => utils.getType(item)))
     let m = utils.getModel(requestFor)
     return formTypes.length / m.forms.length
