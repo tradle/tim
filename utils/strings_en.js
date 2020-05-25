@@ -304,7 +304,7 @@ module.exports = {
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
-     // Bookmarks
+    // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
     "applicationsHasCheckOverrides": "Applications with Check Overrides",
