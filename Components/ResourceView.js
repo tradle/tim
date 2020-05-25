@@ -56,7 +56,6 @@ const SCAN_QR_CODE = 0
 const USE_TOUCH_ID = 1
 const USE_GESTURE_PASSWORD = 2
 const CHANGE_GESTURE_PASSWORD = 3
-// const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const WIPE_DEVICE = 6
 const CONFIRMATION_PRODUCT_REQUEST = 'tradle.ConfirmPackageRequest'

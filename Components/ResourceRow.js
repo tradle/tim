@@ -374,11 +374,6 @@ class ResourceRow extends Component {
         )
 
     let onPress = this.action.bind(this, isReset)
-    // let onPress = this.state  &&  !this.state.resource
-    //             ? this.action.bind(this)
-    //             : this.props.onSelect
-
-
 
     let action
     if (isOfficialAccounts  &&  !hideMode  &&  resource._formsCount) {
@@ -435,7 +430,7 @@ class ResourceRow extends Component {
     this.props.navigator.push(route)
   }
   action(isReset) {
-    if (this.props.multiChooser && !isReset)
+    if (this.props.multiChooser  &&  !isReset)
       this.chooseToShare()
     else if (this.props.onCancel)
       this.props.onCancel()
