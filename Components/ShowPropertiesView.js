@@ -140,11 +140,6 @@ class ShowPropertiesView extends Component {
     let isPartial = model.id === PARTIAL
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
-    // HACK
-    // if (me.isEmployee  &&  !checkProperties  &&  resource._sourceOfData) {
-    //   vCols.push('_sourceOfData')
-    //   // vCols.push('_dataLineage')
-    // }
 
     const ObjectModel = utils.getModel(OBJECT)
 
