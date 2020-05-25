@@ -83,7 +83,7 @@ var ResourceMixin = {
     let {bankStyle, search, currency, country, navigator, application} = this.props
     if (isMessageView) {
       let r = this.props.resource
-      let isVerifier = utils.getModel(r[TYPE]).subClassOf === CHECK  &&  application &&  utils.isRM(application)
+      let isVerifier = utils.getModel(utils.getType(r)).subClassOf === CHECK  &&  application &&  utils.isRM(application)
       let route = {
         componentName: isCheck &&  CHECK_VIEW || MESSAGE_VIEW,
         backButtonTitle: 'Back',
@@ -185,14 +185,14 @@ var ResourceMixin = {
         let pVal = v[p]
         if (!pVal  &&  !displayAs)
           return
-        if (displayName) {
+        if (displayName &&  !editItem) {
           displayName = type === 'object' && pVal.title ||  pVal
           ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{displayName}</Text>
                      </View>
-                      {!isView  &&  <View style={{flex: 1}}/>}
+                     {!isView  &&  <View style={{flex: 1}}/>}
                    </View>)
           return
         }
