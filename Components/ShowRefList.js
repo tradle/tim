@@ -48,17 +48,17 @@ class ShowRefList extends Component {
     model = model || utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
-    var isProfile = model.id === PROFILE;
+    var isIdentity = model.id === PROFILE;
     var isOrg = model.id === ORGANIZATION;
     var me = utils.getMe()
-    var isMe = isProfile ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
+    var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
     let isEmployee = isMe  &&  me.isEmployee
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
     let currentBacklink = backlink
     let hasPropsToShow = hasPropertiesToShow(resource)
-    showDetails = !isProfile  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
+    showDetails = !isIdentity  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
 
     let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
@@ -70,7 +70,7 @@ class ShowRefList extends Component {
           continue
         if (!isEmployee  &&  itemProps[p].internalUse)
           continue
-        if (isProfile) {
+        if (isIdentity) {
           if (!isMe  &&  itemProps[p].allowRoles  &&  itemProps[p].allowRoles === 'me')
             continue;
           if (p === 'verifiedByMe'  &&  !me.organization)
@@ -111,7 +111,7 @@ class ShowRefList extends Component {
       if (!showDetails)
         return <View/>
     }
-    else if (!isOrg  &&  !isProfile  &&  hasPropsToShow) {
+    else if (!isOrg  &&  !isIdentity  &&  hasPropsToShow) {
       this.tabDetail.Details = {icon: 'ios-paper-outline', action: this.showDetails.bind(this)}
       let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel='Details' />
       if (refList.length)
