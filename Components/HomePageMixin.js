@@ -52,38 +52,6 @@ var HomePageMixin = {
       })
     })
   },
-  async scanQRAndProcess(action) {
-    const result = await this.scanFormsQRCode(action)
-    const { schema, data } = result
-    if (schema !== action) {
-      Alert.alert(translate('wrongQR'), translate('youWantedTo', translate(action)))
-      return
-    }
-    if (schema === 'ImportData') {
-      Actions.importData(data)
-      return
-    }
-    if (schema === 'ApplyForProduct') {
-      Actions.applyForProduct(data)
-      return
-    }
-    if (schema === 'AddProvider') {
-      const { host, provider } = data
-      // Actions.addApp({ url: host, permalink: provider })
-      Actions.addApp({ url: host, permalink: provider, addSettings: true })
-      return
-    }
-    if (schema === 'Pair') {
-      Actions.sendPairingRequest(data)
-      return
-    }
-    if (schema === 'ProductAuthorization') {
-      debugger
-      return
-    }
-
-    Alert.alert(translate('invalidQR'), translate('supportedQrCodes'))
-  },
 
   onUnknownQRCode() {
     Alert.alert(
