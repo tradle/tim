@@ -948,7 +948,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       backButtonTitle: 'Back',
       passProps: {
         resource,
-        bankStyle: style,
+        bankStyle: style || bankStyle,
         currency,
         locale
       },
