@@ -1,7 +1,6 @@
 'use strict'
 
 import omit from 'lodash/omit'
-import size from 'lodash/size'
 import isEmpty from 'lodash/isEmpty'
 import size from 'lodash/size'
 import extend from 'lodash/extend'
@@ -14,10 +13,11 @@ const {
   TYPE,
   SIG,
   ROOT_HASH,
+  PREV_HASH,
   CUR_HASH,
 } = constants
 
-const { MONEY, ORGANIZATION, MESSAGE, MODEL, FORM } = constants.TYPES
+const { MONEY, ORGANIZATION, MESSAGE, MODEL, FORM, IDENTITY } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -117,7 +117,7 @@ var search = {
             inClause.push(s)
             continue
           }
-          else if (!val  ||  !val.trim().length) {
+          if (!val  ||  !val.trim().length) {
             if (val === null)
               op.NULL += `\n ${p}: true`
             continue
@@ -928,7 +928,7 @@ var search = {
     const list = await search.searchServer({
       client,
       filterResource: { pub, importedFrom: null },
-      select: ['link'],
+      select: ['link', 'permalink'],
       modelName: 'tradle.PubKey',
       noTrigger: true,
       limit: 1
@@ -937,17 +937,20 @@ var search = {
     if (list) {
       const pubKeyMapping = getFirstNode(list.result)
       if (pubKeyMapping) {
-        return search.getIdentityByLink({ link: pubKeyMapping.link, client })
+        return search.getIdentityByPermalink({ permalink: pubKeyMapping.permalink, client })
+        // return search.getIdentityByLink({ link: pubKeyMapping.link, client })
       }
     }
 
     throw new Error(`identity not found with pub: ${pub}`)
   },
   async getIdentityByPermalink({permalink, client}) {
-    let table = 'rl_tradle_PubKey'
+    let table = 'rl_tradle_Identity'
+    let arr = ['_p', '_time', '_author', '_v', '_pv', '_ph', '_time', '_s']
+    let pubArr = ['type', 'purpose', 'pub', 'fingerprint', 'curve', 'importedFrom', 'networkName']
 
     let query = `query {
-      ${table}(
+      ${table} (
         limit:1
         orderBy: {
           property: _time,
@@ -955,27 +958,41 @@ var search = {
         }
         filter:{
           EQ: {
-            permalink: "${permalink}"
+            _permalink: "${permalink}"
           },
-          NULL: {
-            importedFrom: true
-          }
         }
       ) {
         edges {
           node {
-            link
+            ${arr}
+            pubkeys {
+              ${pubArr}
+            }
           }
         }
       }
     }`
-
     try {
       let data = await this.execute({query, table})
-      if (data.result  &&  data.result.edges.length)
-        return await this.getIdentity({clinet: this.clinet, _link: data.result.edges[0].node.link})
+      if (data.result  &&  data.result.edges.length) {
+        // let ret = omit(data.result.edges[0].node, ['_permalink'])
+        let ret = { ...data.result.edges[0].node }
+        for (let p in ret) {
+          if (!ret[p])
+            delete ret[p]
+        }
+        if (ret._v)
+          ret[ROOT_HASH] = permalink
+        ret[TYPE] = IDENTITY
+        ret.pubkeys.map(pub => {
+          for (let p in pub)
+            if (!pub[p]) delete pub[p]
+        })
+        // debugger
+        return ret
+      }
     } catch (err) {
-      this.logger.debug('unknown identity', { permalink })
+      console.log(`unknown identity ${permalink}`, err)
       throw new Error(`identity with permalink: ${permalink}`)
     }
   },
