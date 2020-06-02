@@ -203,6 +203,7 @@ function getPropsForControllingEntity(form) {
         {name: 'sourceOfWealth', required: isFund  &&  isLimitedPartner},
         {name: 'evidenceOfSourceOfWealth', required: isFund && isLimitedPartner},
         {name: 'inactive'},
+        {name: 'previousAddresses'}
       ]
     }
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
