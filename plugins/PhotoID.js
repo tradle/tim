@@ -207,7 +207,7 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
   let commonRP = [
     {name: 'documentType'},
     {name: 'scan'}
-  ]  // if (!scan) {
+  ]
   if (isLicence) {
     switch (countryId) {
       case 'NZ':
