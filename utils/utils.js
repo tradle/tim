@@ -493,6 +493,12 @@ var utils = {
       let enumVal = utils.getModel(rtype).enum.find(e => e.id === eid)
       title = enumVal && enumVal.title
     }
+    if (!dictionary  ||  lang === 'en') {
+      // resource[utils.getEnumProperty(utils.getModel(rtype))]
+      if (resource[TYPE])
+        return resource[utils.getEnumProperty(rtype)]
+      return title
+    }
 
     if (rtype === LANGUAGE)
       return resource.language
@@ -796,9 +802,13 @@ var utils = {
     let r = resource
     if (!r.from)
       return false
+    let me = utils.getMe()
+    if (r._paired)
+      return true //!me.isEmployee && r[TYPE] !== FORM_REQUEST  &&  r[TYPE] !== FORM_ERROR
+
     let fromId = utils.getId(r.from);
     let toId = utils.getId(r.to);
-    let me = utils.getMe()
+
     let meId = utils.getId(me)
     if (fromId === meId)
       return true;
@@ -947,9 +957,14 @@ var utils = {
       }
       model = utils.getModel(resource[TYPE])
     }
+    if (utils.isEnum(model)  &&  resource[TYPE]) {
+      let prop = utils.getEnumProperty(model)
+      return resource[prop]
+    }
+    let props = model.properties
     let rType = utils.getType(resource)
     let resourceModel = rType && utils.getModel(rType)
-    let props = resourceModel  &&  resourceModel.properties || model.properties
+    props = resourceModel  &&  resourceModel.properties || model.properties
 
     var displayName = '';
 
@@ -1013,6 +1028,8 @@ var utils = {
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let p =  vCols[i]
       let prop = props[p]
+      if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p] !== -1)
+        continue
       if (prop.markdown  ||  prop.signature  ||  prop.type === 'boolean')
         continue
       if (prop.type === 'array') {
@@ -1029,10 +1046,7 @@ var utils = {
 
       if (utils.isContainerProp(p, resourceModel))
         continue
-      if (!resource[p]  ||  excludeProps.indexOf(p) !== -1)
-      // if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p] !== -1)
-        continue
-       let dn = utils.getStringValueForProperty({resource, meta: props[p], locale})
+      displayName = utils.getStringValueForProperty({resource, meta: props[p], locale})
       if (propsUsed)
         propsUsed.push(prop)
     }
@@ -1103,7 +1117,9 @@ var utils = {
   },
   formatCurrency(resource, locale) {
     let currencyName = utils.getCurrencyName(resource.currency)
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
+    let val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
+    val = val.replace(currencyName, resource.currency)
+    return val
   },
   formatNumber(val, locale) {
     return new Intl.NumberFormat(locale).format(val)
