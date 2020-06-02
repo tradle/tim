@@ -188,7 +188,7 @@ var ResourceMixin = {
         if (displayName &&  !editItem) {
           displayName = type === 'object' && pVal.title ||  pVal
           ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
-                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                     <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{displayName}</Text>
                      </View>
@@ -217,7 +217,7 @@ var ResourceMixin = {
             if (utils.isEnum(iref)) {
               ret.push(
                    <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
-                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                     <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <View style={{flexDirection: 'column', alignItems: 'flex-end'}} key={this.getNextKey()}>
                          {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
@@ -259,7 +259,7 @@ var ResourceMixin = {
         if (!value)
           return
         let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
-                     <View style={{flex: 9, flexDirection: isWeb && 'row' || 'column', justifyContent: 'space-between'}}>
+                     <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
@@ -889,7 +889,11 @@ var styles = StyleSheet.create({
     // paddingRight: 7,
     borderBottomWidth: 1
   },
-
+  itemContent: {
+    flex: 9,
+    flexDirection: utils.isWeb() && 'row' || 'column',
+    justifyContent: 'space-between'
+  },
 })
 
 module.exports = ResourceMixin;
