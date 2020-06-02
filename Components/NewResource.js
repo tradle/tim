@@ -1518,8 +1518,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       ...formField,
       minHeight: 60,
       justifyContent: 'flex-end',
-      marginHorizontal: 15,
-      marginTop: 10
     },
     photoButton: {
       ...formField,
@@ -1638,7 +1636,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       backgroundColor: bankStyle.errorBgColor || '#990000',
       width: utils.getContentWidth(NewResource),
       alignItems: 'center',
-      paddingHorizontal: 15
+      paddingHorizontal: 7
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
