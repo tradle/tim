@@ -818,9 +818,12 @@ var utils = {
     let r = resource
     if (!r.from)
       return false
+    let me = utils.getMe()
+    if (r._paired)
+      return true //!me.isEmployee && r[TYPE] !== FORM_REQUEST  &&  r[TYPE] !== FORM_ERROR
+
     let fromId = utils.getId(r.from);
     let toId = utils.getId(r.to);
-    let me = utils.getMe()
     let meId = utils.getId(me)
     if (fromId === meId)
       return true;
