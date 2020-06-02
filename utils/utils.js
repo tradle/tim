@@ -964,7 +964,7 @@ var utils = {
     let props = model.properties
     let rType = utils.getType(resource)
     let resourceModel = rType && utils.getModel(rType)
-    props = resourceModel  &&  resourceModel.properties || model.properties
+    props = resourceModel  &&  resourceModel.properties || props
 
     var displayName = '';
 
