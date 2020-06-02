@@ -1,9 +1,6 @@
 import _ from 'lodash'
 import { fetchWithBackoff } from './utils'
 
-const dictionariesM = require('@tradle/models').dictionaries
-const dictionariesCM = require('@tradle/custom-models').dictionaries
-const dictionariesMCO = require('@tradle/models-corporate-onboarding').dictionaries
 const MODEL = 'model'
 const PROPERTY_NAME = 'propertyName'
 const URL = 'https://s3.eu-west-2.amazonaws.com/tradle.io/dictionaries/'
