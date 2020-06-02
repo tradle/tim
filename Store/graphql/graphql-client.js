@@ -13,10 +13,11 @@ const {
   TYPE,
   SIG,
   ROOT_HASH,
+  PREV_HASH,
   CUR_HASH,
 } = constants
 
-const { MONEY, ORGANIZATION, MESSAGE, MODEL, FORM } = constants.TYPES
+const { MONEY, ORGANIZATION, MESSAGE, MODEL, FORM, IDENTITY } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -139,7 +140,7 @@ var search = {
           if (val)
             op.EQ += `\n   ${p}: ${val},`
           else if (val === null) {
-            if (bookmark)
+            if (!bookmark)
               op.NULL += `\n ${p}: true`
           }
           else
@@ -150,13 +151,11 @@ var search = {
         else if (props[p].type === 'date')
           op.GTE = `\n   ${p}: "${typeof val === 'date' &&  val ||  new Date(val).getTime()}",`
 
-
         else if (props[p].type === 'object') {
           let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
           if (Array.isArray(val)) {
             if (!val.length)
               continue
-            let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
             if (isEnum) {
               if (val.length === 1) {
                 op.EQ += `\n   ${p}__id: "${val[0].id}",`
@@ -198,7 +197,7 @@ var search = {
               if (val.value)
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
-             else if (val  &&  (typeof val === 'string')  &&  val.indexOf('NULL') !== -1) {
+            else if (val  &&  (typeof val === 'string')  &&  val.indexOf('NULL') !== -1) {
               if (val === 'NULL')
                 op.NULL += `\n ${p}: true`
               else
@@ -215,12 +214,13 @@ var search = {
             if (!val.length)
               continue
             if (val.length === 1  &&  val[0].indexOf('NULL') !== -1) {
-              if (val[0].charAt(0) === '!')
-                op.NULL += `\n ${p}: false`
-              else
+              if (val[0] === 'NULL')
                 op.NULL += `\n ${p}: true`
+              else
+                op.NULL += `\n ${p}: false`
               continue
-            }            let s = `${p}___permalink: [`
+            }
+            let s = `${p}___permalink: [`
             val.forEach((r, i) => {
               if (i)
                 s += ', '
@@ -652,7 +652,7 @@ var search = {
       if (p === 'from' || p === 'to' ||  p.indexOf('_group') !== -1)
         continue
       let prop = props[p]
-      if (prop === currentProp)
+      if (prop.virtual  ||  prop === currentProp)
         continue
       if (prop.displayAs)
         continue
@@ -712,13 +712,13 @@ var search = {
         else
           props = arr
 
-          arr.push(`${p}${isSubmissions && '(limit: 100)' || ''} {
-           edges {
-             node {
+        arr.push(`${p}${isSubmissions && '(limit: 100)' || ''} {
+          edges {
+            node {
               ${props}
-             }
-           }
-         }`)
+            }
+          }
+        }`)
       }
       else if (prop.inlined  ||  isInlined) {
         if (currentProp  &&  currentProp === prop)
@@ -775,8 +775,7 @@ var search = {
       )
     }
   },
-
-  async getItem({ id, client, backlink, noBacklinks, excludeProps, mapping, isChat, isThisVersion }) {
+  async getItem({id, client, backlink, noBacklinks, excludeProps, mapping, isChat, isThisVersion}) {
     let [modelName, _permalink, _link] = id.split('_')
 
     let model = utils.getModel(modelName)
@@ -784,14 +783,13 @@ var search = {
       return
 
     let table = `r_${modelName.replace(/\./g, '_')}`
-
     let query
     if (isChat || isThisVersion)
       query = `query {\n${table} (_link: "${_link}")\n`
     else
       query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    if (backlink || noBacklinks) {
+    if (backlink  ||  noBacklinks) {
       if (!excludeProps)
         excludeProps = []
       let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
@@ -930,7 +928,7 @@ var search = {
     const list = await search.searchServer({
       client,
       filterResource: { pub, importedFrom: null },
-      select: ['link'],
+      select: ['link', 'permalink'],
       modelName: 'tradle.PubKey',
       noTrigger: true,
       limit: 1
@@ -939,17 +937,20 @@ var search = {
     if (list) {
       const pubKeyMapping = getFirstNode(list.result)
       if (pubKeyMapping) {
-        return search.getIdentityByLink({ link: pubKeyMapping.link, client })
+        return search.getIdentityByPermalink({ permalink: pubKeyMapping.permalink, client })
+        // return search.getIdentityByLink({ link: pubKeyMapping.link, client })
       }
     }
 
     throw new Error(`identity not found with pub: ${pub}`)
   },
   async getIdentityByPermalink({permalink, client}) {
-    let table = 'rl_tradle_PubKey'
+    let table = 'rl_tradle_Identity'
+    let arr = ['_p', '_time', '_author', '_v', '_pv', '_ph', '_time', '_s']
+    let pubArr = ['type', 'purpose', 'pub', 'fingerprint', 'curve', 'importedFrom', 'networkName']
 
     let query = `query {
-      ${table}(
+      ${table} (
         limit:1
         orderBy: {
           property: _time,
@@ -957,27 +958,41 @@ var search = {
         }
         filter:{
           EQ: {
-            permalink: "${permalink}"
+            _permalink: "${permalink}"
           },
-          NULL: {
-            importedFrom: true
-          }
         }
       ) {
         edges {
           node {
-            link
+            ${arr}
+            pubkeys {
+              ${pubArr}
+            }
           }
         }
       }
     }`
-
     try {
       let data = await this.execute({query, table})
-      if (data.result  &&  data.result.edges.length)
-        return await this.getIdentity({clinet: this.clinet, _link: data.result.edges[0].node.link})
+      if (data.result  &&  data.result.edges.length) {
+        // let ret = omit(data.result.edges[0].node, ['_permalink'])
+        let ret = { ...data.result.edges[0].node }
+        for (let p in ret) {
+          if (!ret[p])
+            delete ret[p]
+        }
+        if (ret._v)
+          ret[ROOT_HASH] = permalink
+        ret[TYPE] = IDENTITY
+        ret.pubkeys.map(pub => {
+          for (let p in pub)
+            if (!pub[p]) delete pub[p]
+        })
+        // debugger
+        return ret
+      }
     } catch (err) {
-      this.logger.debug('unknown identity', { permalink })
+      console.log(`unknown identity ${permalink}`, err)
       throw new Error(`identity with permalink: ${permalink}`)
     }
   },
@@ -1039,6 +1054,8 @@ var search = {
     const result = await this.meDriver.sign({
       object: obj
     })
+    // const result = await this.meDriver.sign({ object })
+
 
     const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
@@ -1047,7 +1064,6 @@ var search = {
 
     try {
       let data = await client.rawRequest(query, variables)
-      // debugger
       if (data.data) {
         // if (data.data[table].objects)
         //   data.data[table].objects = data.data[table].objects.filter(r => r !== null)
@@ -1057,7 +1073,7 @@ var search = {
         return {error: JSON.stringify(data.errors  &&  data.errors || data)}
     } catch (error) {
       console.log(error)
-debugger
+// debugger
       return { error }
     }
   }
