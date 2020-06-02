@@ -4275,8 +4275,8 @@ if (!res[SIG]  &&  res._message)
         if (!newResource[prop].title)
           newResource[prop].title = utils.getDisplayName({ resource: newResource })
       }
-   }
-   return newResource
+    }
+    return newResource
   },
   getDependencies(resultList) {
     let newResult = resultList.map((resource) => {
@@ -11153,7 +11153,6 @@ debugger
     let masterId = utils.makeId(IDENTITY, me._masterAuthor || me[ROOT_HASH])
     let masterIdentity = this._getItem(masterId)
     if (!masterIdentity) {
-      this.client = null
       if (!this.client) {
         let fr = this._getItem(utils.makeId(PROFILE, fromId)).organization
         this.client = graphQL.initClient(meDriver, this._getItem(fr).url)
