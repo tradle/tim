@@ -910,7 +910,7 @@ var NewResourceMixin = {
     let help = this.paintHelp(prop)
 
     let switchView
-    let switchC, icon
+    let switchC, icon, booleanContentStyle
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     if (prop.readOnly  &&  !search) {
