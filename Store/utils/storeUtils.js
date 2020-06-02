@@ -144,7 +144,7 @@ const storeUtils = {
     if (isEnum(m))
       storeUtils.createEnumResources(m, enums)
 
-    if (isForm(m)) {
+    else if (isForm(m)) {
       // storeUtils.addVerificationsToFormModel(m)
       storeUtils.addFromAndTo(m)
     }
@@ -152,7 +152,7 @@ const storeUtils = {
   addNameAndTitleProps(m, aprops) {
     let mprops = aprops  ||  m.properties
     for (let p in mprops) {
-       if (p.charAt(0) === '_'  &&  (!m  || (m.id !== MESSAGE && m.id !== ObjectModel.id)))
+      if (p.charAt(0) === '_'  &&  (!m  || (m.id !== MESSAGE && m.id !== ObjectModel.id)))
         continue
       if (!mprops[p].name)
         mprops[p].name = p
@@ -465,18 +465,6 @@ const storeUtils = {
     for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
       ret.push(enumList[i])
 
-    // if (!getModel(modelName).sortProperty)
-    //   return ret
-    // let me = getMe()
-    // if (!me.language  ||  me.languageCode === 'en')
-    //   return ret
-
-    // let propToRes = []
-    // ret.map(r => propToRes.push({[translateEnum(r)]:  r}))
-
-    // propToRes.sort((a, b) => Object.keys(a)[0] - Object.keys(b)[0])
-    // ret = propToRes.map(r => Object.values(r)[0])
-
     return ret
   },
   checkCriteria({r, query, prop, isChooser}) {
@@ -488,7 +476,7 @@ const storeUtils = {
       return (dn.toLowerCase().indexOf(query.toLowerCase()) !== -1) ? r : null
     }
     let rtype = r[TYPE]
-    let rModel = this.getModel(rtype)
+    let rModel = getModel(rtype)
     let props = rModel.properties
     if (prop  &&  r[prop]) {
       let val = getStringPropertyValue(r, prop, props)
@@ -629,9 +617,9 @@ const storeUtils = {
     moreBookmarks.forEach(b => bookmarks.push(b))
 
     return bookmarks.map(b => {
-      const { type, bookmark, message } = b
+      const { type, bookmark, message, grid, noInternalUse } = b
       const model = getModel(type)
-      return {
+      let bookmarkR = {
         [TYPE]: BOOKMARK,
         message: message  ||  translate(model), // makeModelTitle(model, true),
         bookmark: bookmark  ||  {
@@ -640,6 +628,11 @@ const storeUtils = {
         },
         from
       }
+      if (grid)
+        bookmarkR.grid = grid
+      if (noInternalUse)
+        bookmarkR.noInternalUse = noInternalUse
+      return bookmarkR
     })
   }
 }
