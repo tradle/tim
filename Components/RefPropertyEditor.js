@@ -242,7 +242,8 @@ class RefPropertyEditor extends Component {
   }
   onDocument(propName, item) {
     const { model, navigator } = this.props
-    if (item.type &&  item.type.indexOf('pdf') !== -1  || item.fileName.endsWith('.pdf')) {
+    const { type, fileName, url, isText } = item
+    if (type &&  type.indexOf('pdf') !== -1  || fileName.endsWith('.pdf')) {
       this.props.navigator.push({
         title: translate(model, model.properties[propName]),
         backButtonTitle: 'Back',
@@ -256,6 +257,7 @@ class RefPropertyEditor extends Component {
       })
     }
     else {
+      let photo = {url: `data:image/jpeg;base64,${url}`}
       this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
     }
   }
