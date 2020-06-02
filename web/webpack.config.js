@@ -321,7 +321,7 @@ function getBabelLoader() {
     // exclude node_modules, include react & tcomb
     // /node_modules\/(?!(.*)?(react|tcomb))/,
     loader.exclude.push(
-      /node_modules\/(?!react|tcomb|rn-markdown|\@tradle\/aws-client|\@tradle\/ethereum-adapter-etherscan|\@tradle\/promise-utils|\@tradle\/embed)/
+      /node_modules\/(?!react|tcomb|rn-markdown|\@tradle\/aws-client|\@tradle\/ethereum-adapter-etherscan|\@tradle\/promise-utils|\@tradle\/embed|\@tradle\/engine)/
     );
   }
 
