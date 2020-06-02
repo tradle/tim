@@ -157,7 +157,7 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale } = this.state
-    let { navigator, currency, bankStyle } = this.props
+    let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
 
@@ -256,7 +256,7 @@ class ApplicationView extends Component {
                             navigator={navigator}
                             currency={currency}
                             locale={locale}
-                            backlink={!showDetails  &&   backlink}
+                            backlink={!showDetails && backlink}
                             checksCategory={this.state.checksCategory}
                             showCategory={this.showCategory.bind(this)}
                             checkFilter={this.state.checkFilter}
@@ -375,7 +375,6 @@ class ApplicationView extends Component {
     else
       this.setState({checksCategory: null, checkFilter: filter})
   }
-
   approve() {
     let resource = this.state.resource || this.props.resource
     console.log('Approve was chosen!')

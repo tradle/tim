@@ -364,6 +364,7 @@ class ResourceRow extends Component {
         )
 
     let onPress = this.action.bind(this, isReset)
+
     let action
     if (isOfficialAccounts  &&  !hideMode  &&  resource._formsCount) {
       action = <View style={styles.actionView}>

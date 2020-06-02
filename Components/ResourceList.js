@@ -1217,6 +1217,14 @@ class ResourceList extends Component {
         })
         buttons.push({
           text: translate('ApplyForProduct'),
+          onPress: () => this.scanQRAndProcess('ApplyForProduct')
+        })
+        buttons.push({
+          text: translate('AddNewProvider'),
+          onPress: () => this.scanQRAndProcess('AddNewProvider')
+        })
+        buttons.push({
+          text: translate('ApplyForProduct'),
           onPress: () => this.scanQRAndProcess('ApplyForProduct')        })
       }
     }

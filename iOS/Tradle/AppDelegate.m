@@ -16,14 +16,14 @@
 #import <React/RCTLog.h>
 #import <React/RCTPushNotificationManager.h>
 #import <React/RCTEventEmitter.h>
-#import <Fabric/Fabric.h>
-#import <Crashlytics/Crashlytics.h>
-#import "QTouchposeApplication.h"
 #import "Orientation.h"
+#import "QTouchposeApplication.h"
 #import <asl.h>
 #import "RNSplashScreen.h"
 #import <react-native-branch/RNBranch.h>
+//#import <Crashlytics/Crashlytics.h>
 // #import <Firebase.h>
+//#import <Fabric/Fabric.h>
 
 #define SYSTEM_VERSION_GRATERTHAN_OR_EQUALTO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
@@ -95,7 +95,7 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
 #ifdef DEBUG
 #else
   [RNSplashScreen show]; //show splash screen
-  [Fabric with:@[[Crashlytics class]]];
+//  [Fabric with:@[[Crashlytics class]]];
   // RCTSetLogThreshold(RCTLogLevelInfo);
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
 #endif
@@ -191,47 +191,47 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
   return [Orientation getOrientation];
 }
 
-RCTLogFunction CrashlyticsReactLogFunction = ^(
-                                         RCTLogLevel level,
-                                         __unused RCTLogSource source,
-                                         NSString *fileName,
-                                         NSNumber *lineNumber,
-                                         NSString *message
-                                         )
-{
-    NSString *log = RCTFormatLog([NSDate date], level, fileName, lineNumber, message);
-
-    #ifdef DEBUG
-        fprintf(stderr, "%s\n", log.UTF8String);
-        fflush(stderr);
-    #else
-        fprintf(stderr, "%s\n", log.UTF8String);
-        fflush(stderr);
-        CLS_LOG(@"REACT LOG: %s", log.UTF8String);
-    #endif
-
-    int aslLevel;
-    switch(level) {
-        case RCTLogLevelTrace:
-            aslLevel = ASL_LEVEL_DEBUG;
-            break;
-        case RCTLogLevelInfo:
-            aslLevel = ASL_LEVEL_NOTICE;
-            break;
-        case RCTLogLevelWarning:
-            aslLevel = ASL_LEVEL_WARNING;
-            break;
-        case RCTLogLevelError:
-            aslLevel = ASL_LEVEL_ERR;
-            break;
-        case RCTLogLevelFatal:
-            aslLevel = ASL_LEVEL_CRIT;
-            break;
-    }
-    asl_log(NULL, NULL, aslLevel, "%s", message.UTF8String);
-
-
-};
+//RCTLogFunction CrashlyticsReactLogFunction = ^(
+//                                         RCTLogLevel level,
+//                                         __unused RCTLogSource source,
+//                                         NSString *fileName,
+//                                         NSNumber *lineNumber,
+//                                         NSString *message
+//                                         )
+//{
+//    NSString *log = RCTFormatLog([NSDate date], level, fileName, lineNumber, message);
+//
+//    #ifdef DEBUG
+//        fprintf(stderr, "%s\n", log.UTF8String);
+//        fflush(stderr);
+//    #else
+//        fprintf(stderr, "%s\n", log.UTF8String);
+//        fflush(stderr);
+//        CLS_LOG(@"REACT LOG: %s", log.UTF8String);
+//    #endif
+//
+//    int aslLevel;
+//    switch(level) {
+//        case RCTLogLevelTrace:
+//            aslLevel = ASL_LEVEL_DEBUG;
+//            break;
+//        case RCTLogLevelInfo:
+//            aslLevel = ASL_LEVEL_NOTICE;
+//            break;
+//        case RCTLogLevelWarning:
+//            aslLevel = ASL_LEVEL_WARNING;
+//            break;
+//        case RCTLogLevelError:
+//            aslLevel = ASL_LEVEL_ERR;
+//            break;
+//        case RCTLogLevelFatal:
+//            aslLevel = ASL_LEVEL_CRIT;
+//            break;
+//    }
+//    asl_log(NULL, NULL, aslLevel, "%s", message.UTF8String);
+//
+//
+//};
 
 // https://stackoverflow.com/questions/19792850/display-a-view-or-splash-screen-before-applicationdidenterbackground-to-avoid-a?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 

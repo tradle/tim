@@ -192,7 +192,7 @@ var ResourceMixin = {
         let pVal = v[p]
         if (!pVal  &&  !displayAs)
           return
-        if (displayName  &&  !editItem) {
+        if (displayName &&  !editItem) {
           displayName = type === 'object' && pVal.title ||  pVal
           ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={styles.itemContent}>
@@ -274,7 +274,7 @@ var ResourceMixin = {
           return
         let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={styles.itemContent}>
-                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
                      {!isView  &&  <View style={{flex: 1}}/>}

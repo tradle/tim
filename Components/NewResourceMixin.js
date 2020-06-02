@@ -888,9 +888,9 @@ var NewResourceMixin = {
     let style = (resource && (typeof resource[prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
+
     let isTroolean = prop.range === 'troolean' || search
     let label = translate(prop, model)
-
     if (!isTroolean  &&  !isWeb()  && label.length > 30) {
       label = label.slice(0, 27)
       let idx = label.lastIndexOf(' ')
@@ -898,6 +898,7 @@ var NewResourceMixin = {
         label = label.slice(0, idx)
        label += '...'
     }
+
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
@@ -909,12 +910,14 @@ var NewResourceMixin = {
     let help = this.paintHelp(prop)
 
     let switchView
-    let switchC, booleanContentStyle, icon
+    let switchC, icon
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     if (prop.readOnly  &&  !search) {
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
       switchC = <View style={{paddingVertical: 5}}>
                   <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
+                  {icon}
                 </View>
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
     }

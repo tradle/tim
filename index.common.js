@@ -348,6 +348,7 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = passProps.bankStyle
     let color = '#7AAAC3'
+
     if (!isWeb()  &&  (componentName === 'CameraView' || componentName === 'QRCodeScanner'))
       color = '#ffffff'
     else if (bankStyle)

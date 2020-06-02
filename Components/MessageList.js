@@ -1198,6 +1198,12 @@ class MessageList extends Component {
         title: translate(title),
         callback: () => this.productChooser()
       })
+      // if (!isWeb()) {
+      //   push({
+      //     title: translate('Pair'),
+      //     callback: () => this.scanQRAndProcess('Pair')
+      //   })
+      // }
     }
 
     if (ENV.allowForgetMe && !application) {

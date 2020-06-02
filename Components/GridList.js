@@ -456,7 +456,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
           this.setState({isLoading: false, list: null})
         else if (exploreData)
           this.errorAlert('noResourcesForCriteria')
-
         return
       }
       if (params.isTest  !== isTest)
@@ -857,7 +856,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         resource,
         search,
         locale,
-        application: application,
+        application,
         bankStyle: bankStyle || defaultBankStyle
       }
     }
@@ -915,7 +914,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
   }
 
   _selectResource(resource) {
-    let { modelName, style, currency, locale, prop, navigator,
+    let { modelName, style, currency, prop, locale, navigator,
           returnRoute, callback, bankStyle } = this.props
     let model = utils.getModel(modelName);
     let title

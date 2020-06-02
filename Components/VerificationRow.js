@@ -550,6 +550,7 @@ class VerificationRow extends Component {
       if (properties[p]  &&  p.charAt(0) !== '_')
         viewCols.push(p)
     }
+
     const { locale, currency } = this.props
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL

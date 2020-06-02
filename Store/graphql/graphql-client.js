@@ -1073,7 +1073,7 @@ var search = {
         return {error: JSON.stringify(data.errors  &&  data.errors || data)}
     } catch (error) {
       console.log(error)
-debugger
+// debugger
       return { error }
     }
   }

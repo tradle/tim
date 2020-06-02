@@ -143,6 +143,7 @@ const storeUtils = {
     storeUtils.addNameAndTitleProps(m)
     if (isEnum(m))
       storeUtils.createEnumResources(m, enums)
+
     else if (isForm(m)) {
       // storeUtils.addVerificationsToFormModel(m)
       storeUtils.addFromAndTo(m)
@@ -463,6 +464,7 @@ const storeUtils = {
 
     for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
       ret.push(enumList[i])
+
     return ret
   },
   checkCriteria({r, query, prop, isChooser}) {

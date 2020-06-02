@@ -824,6 +824,7 @@ var utils = {
 
     let fromId = utils.getId(r.from);
     let toId = utils.getId(r.to);
+
     let meId = utils.getId(me)
     if (fromId === meId)
       return true;

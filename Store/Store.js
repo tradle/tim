@@ -1446,7 +1446,7 @@ var Store = Reflux.createStore({
           let orgId = utils.getId(r.from.organization)
           this.addMessagesToChat(orgId, r, true)
         }
-        else if (utils.isReadOnlyChat(r))  //  &&  r._readOnly)
+        else if (utils.isReadOnlyChat(r))   //  &&  r._readOnly)
           this.addMessagesToChat(utils.getId(r.from), r, true)
         if (r.contextId)
           contextIdToResourceId[r.contextId] = r
@@ -1993,6 +1993,7 @@ var Store = Reflux.createStore({
     let { msg, from, isRetry, length } = opts
     const { identifierProp } = driverInfo
     const identifier = from
+
     let org
     let progressUpdate
     let willAnnounceProgress = willShowProgressBar({ length })
@@ -3409,8 +3410,8 @@ var Store = Reflux.createStore({
       return
     if (!r._time  &&  !timeShared)
       return
-    let rtype = r[TYPE]
     // Check if this is a shared context
+    let rtype = r[TYPE]
     if (rtype === SELF_INTRODUCTION  ||
         rtype === CUSTOMER_WAITING   ||
         rtype === DEVICE_SYNC        ||
@@ -4086,6 +4087,9 @@ if (!res[SIG]  &&  res._message)
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
+    let org = r.to.organization
+    if (org)
+      retParams.provider = this._getItem(org)
     this.trigger(retParams)
     return r
   },
@@ -4124,7 +4128,7 @@ if (!res[SIG]  &&  res._message)
       let { name } = prop
       let resourceWithBacklink = r
       if (resourceWithBacklink  &&  resourceWithBacklink[name]) {
-        r = !resource.id  && _.cloneDeep(resource) || r
+        r = !resource.id  &&  _.cloneDeep(resource) || r
         r[name] = resourceWithBacklink[name]
       }
       if (!resource[name])
@@ -4314,7 +4318,6 @@ if (!res[SIG]  &&  res._message)
     let newResource = {}
     _.extend(newResource, resource)
     for (let i=0; i<foundRefs.length; i++) {
-     // foundRefs.forEach(function(val) {
       let val = foundRefs[i]
       if (val.state === 'fulfilled') {
         let propValue = utils.getId(val.value)
@@ -5293,8 +5296,6 @@ debugger
     await this.dbPut(MY_IDENTITIES, myIdentities)
     const { wsClients } = driverInfo
 
-    // if (localMapping[url])
-    //   url = localMapping[url]
     let client = wsClients.byUrl[url]
     if (client)
       client.reset()
@@ -6447,7 +6448,6 @@ debugger
           let rep = this.getRepresentative(orgId)
           if (rep  &&  !rep.bot)
             retParams.isEmployee = true
-
           this.handleChatResult({result, orgId, modelName})
         }
       }
@@ -7522,32 +7522,31 @@ debugger
 
   async searchAllMessages(params) {
     // await this._loadedResourcesDefer.promise
-    var self = this
+    let self = this
 
-    var {resource, query, context, to, isForgetting, lastId, limit, prop, filterProps} = params
+    let {resource, query, context, to, isForgetting, lastId, limit, prop, filterProps} = params
     /////////
     if (isWeb()  &&  !me._masterAuthor) {
       this.onGenPairingData(to.url)
       return
     }
+    let foundResources = [];
 
-    var foundResources = [];
-
-    var meId = utils.getId(me)
-    var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
+    let meId = utils.getId(me)
+    let meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
     let filterOutForms = !isForgetting  &&  to  &&  to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
 
-    var chatTo = to
+    let chatTo = to
     if (chatTo  &&  chatTo.id)
       chatTo = this._getItem(utils.getId(chatTo))
-    var chatId = chatTo ? utils.getId(chatTo) : null;
-    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
-    var toOrgId
+    let chatId = chatTo ? utils.getId(chatTo) : null;
+    let isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
+    let toOrgId
     let thisChatMessages
 
     if (isChatWithOrg) {
-      var rep = this.getRepresentative(chatId)
+      let rep = this.getRepresentative(chatId)
       if (!rep)
         return
       chatTo = rep
@@ -7573,7 +7572,7 @@ debugger
     // if (isChatWithOrg  &&  !chatTo.name) {
     //   chatTo = list[chatId].value;
     // }
-    var testMe = chatTo ? chatTo.me : null;
+    let testMe = chatTo ? chatTo.me : null;
     if (testMe) {
       if (testMe === 'me') {
         if (!originalMe)
@@ -7581,16 +7580,16 @@ debugger
         testMe = originalMe[ROOT_HASH];
       }
 
-      var meId = utils.makeId(PROFILE, testMe)
+      let meId = utils.makeId(PROFILE, testMe)
       me = this._getItem(meId);
       await this.setMe(me);
-      var myIdentities = this._getItem(MY_IDENTITIES);
+      let myIdentities = this._getItem(MY_IDENTITIES);
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
-    // var lastPL
-    // var sharedWithTimePairs = []
-    var limit = limit + 1
+    // let lastPL
+    // let sharedWithTimePairs = []
+    limit = limit + 1
 
     let links = []
     let j
@@ -8867,12 +8866,12 @@ debugger
         if (r._sharedWith) {
           let sw = r._sharedWith.filter(rr => {
             if (reps.filter((rep) => {
-                if (utils.getId(rep) === rr.bankRepresentative) {
-                  if (rr.bankRepresentative !== r.from.id)
-                    return true
-                }
-              }).length)
-              return true
+              if (utils.getId(rep) === rr.bankRepresentative) {
+                if (rr.bankRepresentative !== r.from.id)
+                  return true
+              }
+            }).length)
+            return true
           })
           if (sw.length)
             return
@@ -11114,6 +11113,8 @@ debugger
     return { noTrigger, application, isRM }
 
     async function setupAgent() {
+      if (me.isEmployee)
+        return
       me.isEmployee = true
       me.organization = self.buildRef(org)
 
@@ -11241,7 +11242,6 @@ debugger
     let masterId = utils.makeId(IDENTITY, me._masterAuthor || me[ROOT_HASH])
     let masterIdentity = this._getItem(masterId)
     if (!masterIdentity) {
-      // this.client = null
       if (!this.client) {
         let fr = this._getItem(utils.makeId(PROFILE, fromId)).organization
         this.client = graphQL.initClient(meDriver, this._getItem(fr).url)

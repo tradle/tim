@@ -237,8 +237,8 @@ class ApplicationTabs extends Component {
       details = <ShowPropertiesView resource={resource}
                                     pieChart={pieChart}
                                     showRefResource={this.getRefResource.bind(this)}
-                                    currency={currency}
                                     locale={locale}
+                                    currency={currency}
                                     bankStyle={bankStyle}
                                     excludedProperties={['photos', 'tree']}
                                     navigator={navigator} />
