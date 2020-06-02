@@ -61,8 +61,6 @@ var RowMixin = {
           if (!val.currency)
             val = {...val, currency }
           val = utils.formatCurrency(val, locale)
-          // let currencyName = utils.getCurrencyName(currency)
-          // val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(val.value)
         }
         else {
           let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
