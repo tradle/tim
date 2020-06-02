@@ -9,9 +9,9 @@ import PropTypes from 'prop-types'
 
 import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
-import Icon from 'react-native-vector-icons/Ionicons';
-import {Column as Col, Row} from 'react-native-flexbox-grid'
 
+import Icon from 'react-native-vector-icons/Ionicons'
+import {Column as Col, Row} from 'react-native-flexbox-grid'
 import { getModel, translateForGrid } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 import { circled } from '../styles/utils'

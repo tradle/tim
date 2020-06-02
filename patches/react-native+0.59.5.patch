@@ -1,0 +1,413 @@
+diff --git a/node_modules/react-native/Libraries/WebSocket/RCTReconnectingWebSocket.m b/node_modules/react-native/Libraries/WebSocket/RCTReconnectingWebSocket.m
+index 9848083..789ed77 100644
+--- a/node_modules/react-native/Libraries/WebSocket/RCTReconnectingWebSocket.m
++++ b/node_modules/react-native/Libraries/WebSocket/RCTReconnectingWebSocket.m
+@@ -10,72 +10,10 @@
+ #import <React/RCTConvert.h>
+ #import <React/RCTDefines.h>
+ 
+-#if __has_include(<React/fishhook.h>)
+-#import <React/fishhook.h>
+-#else
+-#import <fishhook/fishhook.h>
+-#endif
+-
+-#if __has_include(<os/log.h>) && defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 100300 /* __IPHONE_10_3 */
+-#import <os/log.h>
+-#endif /* __IPHONE_10_3 */
+-
+ #import "RCTSRWebSocket.h"
+ 
+ #if RCT_DEV // Only supported in dev mode
+ 
+-#if __has_include(<os/log.h>) && defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 100300 /* __IPHONE_10_3 */
+-
+-// From https://github.com/apple/swift/blob/ad40c770bfe372f879b530443a3d94761fe258a6/stdlib/public/SDK/os/os_log.m
+-typedef struct os_log_pack_s {
+-  uint64_t olp_continuous_time;
+-  struct timespec olp_wall_time;
+-  const void *olp_mh;
+-  const void *olp_pc;
+-  const char *olp_format;
+-  uint8_t olp_data[0];
+-} os_log_pack_s, *os_log_pack_t;
+-
+-static void (*orig__nwlog_pack)(os_log_pack_t pack, os_log_type_t logType);
+-
+-static void my__nwlog_pack(os_log_pack_t pack, os_log_type_t logType)
+-{
+-  if (logType == OS_LOG_TYPE_ERROR && strstr(pack->olp_format, "Connection has no connected handler") == NULL) {
+-    orig__nwlog_pack(pack, logType);
+-  }
+-}
+-
+-#endif /* __IPHONE_10_3 */
+-
+-static void (*orig_nwlog_legacy_v)(int, char*, va_list);
+-
+-static void my_nwlog_legacy_v(int level, char *format, va_list args) {
+-  static const uint buffer_size = 256;
+-  static char buffer[buffer_size];
+-  va_list copy;
+-  va_copy(copy, args);
+-  vsnprintf(buffer, buffer_size, format, copy);
+-  va_end(copy);
+-
+-  if (strstr(buffer, "nw_connection_get_connected_socket_block_invoke") == NULL &&
+-      strstr(buffer, "Connection has no connected handler") == NULL) {
+-    orig_nwlog_legacy_v(level, format, args);
+-  }
+-}
+-
+-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+-
+-static void (*orig_os_log_error_impl)(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buf, uint32_t size);
+-
+-static void my_os_log_error_impl(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buf, uint32_t size)
+-{
+-  if (strstr(format, "TCP Conn %p Failed : error %ld:%d") == NULL) {
+-    orig_os_log_error_impl(dso, log, type, format, buf, size);
+-  }
+-}
+-
+-#endif /* __IPHONE_11_0 */
+-
+ @interface RCTReconnectingWebSocket () <RCTSRWebSocketDelegate>
+ @end
+ 
+@@ -84,26 +22,6 @@ @implementation RCTReconnectingWebSocket {
+   RCTSRWebSocket *_socket;
+ }
+ 
+-+ (void)load
+-{
+-  static dispatch_once_t onceToken;
+-  dispatch_once(&onceToken, ^{
+-    rebind_symbols((struct rebinding[1]){
+-      {"nwlog_legacy_v", my_nwlog_legacy_v, (void *)&orig_nwlog_legacy_v}
+-    }, 1);
+-#if __has_include(<os/log.h>) && defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 100300 /* __IPHONE_10_3 */
+-    rebind_symbols((struct rebinding[1]){
+-      {"__nwlog_pack", my__nwlog_pack, (void *)&orig__nwlog_pack}
+-    }, 1);
+-#endif /* __IPHONE_10_3 */
+-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+-    rebind_symbols((struct rebinding[1]){
+-      {"_os_log_error_impl", my_os_log_error_impl, (void *)&orig_os_log_error_impl}
+-    }, 1);
+-#endif /* __IPHONE_11_0 */
+-  });
+-}
+-
+ - (instancetype)initWithURL:(NSURL *)url queue:(dispatch_queue_t)queue
+ {
+   if (self = [super init]) {
+diff --git a/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj b/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj
+index 2fa1829..f44d7c8 100644
+--- a/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj
++++ b/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/project.pbxproj
+@@ -9,113 +9,31 @@
+ /* Begin PBXBuildFile section */
+ 		1338BBE01B04ACC80064A9C9 /* RCTSRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDD1B04ACC80064A9C9 /* RCTSRWebSocket.m */; };
+ 		1338BBE11B04ACC80064A9C9 /* RCTWebSocketExecutor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDF1B04ACC80064A9C9 /* RCTWebSocketExecutor.m */; };
+-		2D3ABDC220C7206E00DF56E9 /* libfishhook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBE0D001F3B181A0099AA32 /* libfishhook.a */; };
+ 		2D3B5F3D1D9B165B00451313 /* RCTSRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDD1B04ACC80064A9C9 /* RCTSRWebSocket.m */; };
+ 		2D3B5F3E1D9B165B00451313 /* RCTWebSocketExecutor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1338BBDF1B04ACC80064A9C9 /* RCTWebSocketExecutor.m */; };
+ 		2D3B5F401D9B165B00451313 /* RCTWebSocketModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C86DF7B1ADF695F0047B81A /* RCTWebSocketModule.m */; };
+ 		3C86DF7C1ADF695F0047B81A /* RCTWebSocketModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C86DF7B1ADF695F0047B81A /* RCTWebSocketModule.m */; };
+-		3DBE0D141F3B185A0099AA32 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DBE0D121F3B185A0099AA32 /* fishhook.c */; };
+-		3DBE0D151F3B185A0099AA32 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DBE0D121F3B185A0099AA32 /* fishhook.c */; };
+-		3DBE0D801F3B1AF00099AA32 /* fishhook.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3DBE0D131F3B185A0099AA32 /* fishhook.h */; };
+-		3DBE0D821F3B1B0C0099AA32 /* fishhook.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3DBE0D131F3B185A0099AA32 /* fishhook.h */; };
+ 		A12E9E2E1E5DEC4E0029001B /* RCTReconnectingWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = A12E9E2D1E5DEC4E0029001B /* RCTReconnectingWebSocket.m */; };
+ 		A12E9E2F1E5DEC550029001B /* RCTReconnectingWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = A12E9E2D1E5DEC4E0029001B /* RCTReconnectingWebSocket.m */; };
+-		ED297176215062BA00B7C4FE /* libfishhook-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBE0D0D1F3B181C0099AA32 /* libfishhook-tvOS.a */; };
+ /* End PBXBuildFile section */
+ 
+-/* Begin PBXContainerItemProxy section */
+-		3DBE0D0E1F3B18490099AA32 /* PBXContainerItemProxy */ = {
+-			isa = PBXContainerItemProxy;
+-			containerPortal = 3C86DF3E1ADF2C930047B81A /* Project object */;
+-			proxyType = 1;
+-			remoteGlobalIDString = 3DBE0CF41F3B181A0099AA32;
+-			remoteInfo = fishhook;
+-		};
+-		3DBE0D101F3B184D0099AA32 /* PBXContainerItemProxy */ = {
+-			isa = PBXContainerItemProxy;
+-			containerPortal = 3C86DF3E1ADF2C930047B81A /* Project object */;
+-			proxyType = 1;
+-			remoteGlobalIDString = 3DBE0D011F3B181C0099AA32;
+-			remoteInfo = "fishhook-tvOS";
+-		};
+-/* End PBXContainerItemProxy section */
+-
+-/* Begin PBXCopyFilesBuildPhase section */
+-		3DBE0D7F1F3B1AEC0099AA32 /* CopyFiles */ = {
+-			isa = PBXCopyFilesBuildPhase;
+-			buildActionMask = 2147483647;
+-			dstPath = include/fishhook;
+-			dstSubfolderSpec = 16;
+-			files = (
+-				3DBE0D801F3B1AF00099AA32 /* fishhook.h in CopyFiles */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-		3DBE0D811F3B1B010099AA32 /* CopyFiles */ = {
+-			isa = PBXCopyFilesBuildPhase;
+-			buildActionMask = 2147483647;
+-			dstPath = include/fishhook;
+-			dstSubfolderSpec = 16;
+-			files = (
+-				3DBE0D821F3B1B0C0099AA32 /* fishhook.h in CopyFiles */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-/* End PBXCopyFilesBuildPhase section */
+-
+ /* Begin PBXFileReference section */
+ 		1338BBDC1B04ACC80064A9C9 /* RCTSRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSRWebSocket.h; sourceTree = "<group>"; };
+ 		1338BBDD1B04ACC80064A9C9 /* RCTSRWebSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSRWebSocket.m; sourceTree = "<group>"; };
+ 		1338BBDE1B04ACC80064A9C9 /* RCTWebSocketExecutor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTWebSocketExecutor.h; sourceTree = "<group>"; };
+ 		1338BBDF1B04ACC80064A9C9 /* RCTWebSocketExecutor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTWebSocketExecutor.m; sourceTree = "<group>"; };
+-		13526A511F362F7F0008EF00 /* libfishhook.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libfishhook.a; sourceTree = "<group>"; };
+ 		2D2A28881D9B049200D4039D /* libRCTWebSocket-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libRCTWebSocket-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+-		2DC5E5271F3A6CFD000EE84B /* libfishhook-tvOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libfishhook-tvOS.a"; path = "../fishhook/build/Debug-appletvos/libfishhook-tvOS.a"; sourceTree = "<group>"; };
+ 		3C86DF461ADF2C930047B81A /* libRCTWebSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTWebSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		3C86DF7A1ADF695F0047B81A /* RCTWebSocketModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTWebSocketModule.h; sourceTree = "<group>"; };
+ 		3C86DF7B1ADF695F0047B81A /* RCTWebSocketModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.objc; path = RCTWebSocketModule.m; sourceTree = "<group>"; tabWidth = 2; };
+-		3DBE0D001F3B181A0099AA32 /* libfishhook.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libfishhook.a; sourceTree = BUILT_PRODUCTS_DIR; };
+-		3DBE0D0D1F3B181C0099AA32 /* libfishhook-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libfishhook-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+-		3DBE0D121F3B185A0099AA32 /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fishhook.c; path = ../fishhook/fishhook.c; sourceTree = "<group>"; };
+-		3DBE0D131F3B185A0099AA32 /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fishhook.h; path = ../fishhook/fishhook.h; sourceTree = "<group>"; };
+ 		A12E9E2C1E5DEC4E0029001B /* RCTReconnectingWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTReconnectingWebSocket.h; sourceTree = "<group>"; };
+ 		A12E9E2D1E5DEC4E0029001B /* RCTReconnectingWebSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTReconnectingWebSocket.m; sourceTree = "<group>"; };
+ /* End PBXFileReference section */
+ 
+-/* Begin PBXFrameworksBuildPhase section */
+-		13526A4F1F362F770008EF00 /* Frameworks */ = {
+-			isa = PBXFrameworksBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-				2D3ABDC220C7206E00DF56E9 /* libfishhook.a in Frameworks */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-		2DC5E5151F3A6C39000EE84B /* Frameworks */ = {
+-			isa = PBXFrameworksBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-				ED297176215062BA00B7C4FE /* libfishhook-tvOS.a in Frameworks */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-/* End PBXFrameworksBuildPhase section */
+-
+ /* Begin PBXGroup section */
+-		13526A501F362F7F0008EF00 /* Frameworks */ = {
+-			isa = PBXGroup;
+-			children = (
+-				2DC5E5271F3A6CFD000EE84B /* libfishhook-tvOS.a */,
+-				13526A511F362F7F0008EF00 /* libfishhook.a */,
+-			);
+-			name = Frameworks;
+-			sourceTree = "<group>";
+-		};
+ 		3C86DF3D1ADF2C930047B81A = {
+ 			isa = PBXGroup;
+ 			children = (
+-				3DBE0D121F3B185A0099AA32 /* fishhook.c */,
+-				3DBE0D131F3B185A0099AA32 /* fishhook.h */,
+ 				A12E9E2C1E5DEC4E0029001B /* RCTReconnectingWebSocket.h */,
+ 				A12E9E2D1E5DEC4E0029001B /* RCTReconnectingWebSocket.m */,
+ 				1338BBDC1B04ACC80064A9C9 /* RCTSRWebSocket.h */,
+@@ -137,8 +55,6 @@
+ 			children = (
+ 				3C86DF461ADF2C930047B81A /* libRCTWebSocket.a */,
+ 				2D2A28881D9B049200D4039D /* libRCTWebSocket-tvOS.a */,
+-				3DBE0D001F3B181A0099AA32 /* libfishhook.a */,
+-				3DBE0D0D1F3B181C0099AA32 /* libfishhook-tvOS.a */,
+ 			);
+ 			name = Products;
+ 			sourceTree = "<group>";
+@@ -180,38 +96,6 @@
+ 			productReference = 3C86DF461ADF2C930047B81A /* libRCTWebSocket.a */;
+ 			productType = "com.apple.product-type.library.static";
+ 		};
+-		3DBE0CF41F3B181A0099AA32 /* fishhook */ = {
+-			isa = PBXNativeTarget;
+-			buildConfigurationList = 3DBE0CFD1F3B181A0099AA32 /* Build configuration list for PBXNativeTarget "fishhook" */;
+-			buildPhases = (
+-				3DBE0D7F1F3B1AEC0099AA32 /* CopyFiles */,
+-				3DBE0CF51F3B181A0099AA32 /* Sources */,
+-			);
+-			buildRules = (
+-			);
+-			dependencies = (
+-			);
+-			name = fishhook;
+-			productName = WebSocket;
+-			productReference = 3DBE0D001F3B181A0099AA32 /* libfishhook.a */;
+-			productType = "com.apple.product-type.library.static";
+-		};
+-		3DBE0D011F3B181C0099AA32 /* fishhook-tvOS */ = {
+-			isa = PBXNativeTarget;
+-			buildConfigurationList = 3DBE0D0A1F3B181C0099AA32 /* Build configuration list for PBXNativeTarget "fishhook-tvOS" */;
+-			buildPhases = (
+-				3DBE0D811F3B1B010099AA32 /* CopyFiles */,
+-				3DBE0D021F3B181C0099AA32 /* Sources */,
+-			);
+-			buildRules = (
+-			);
+-			dependencies = (
+-			);
+-			name = "fishhook-tvOS";
+-			productName = "RCTWebSocket-tvOS";
+-			productReference = 3DBE0D0D1F3B181C0099AA32 /* libfishhook-tvOS.a */;
+-			productType = "com.apple.product-type.library.static";
+-		};
+ /* End PBXNativeTarget section */
+ 
+ /* Begin PBXProject section */
+@@ -244,8 +128,6 @@
+ 			targets = (
+ 				3C86DF451ADF2C930047B81A /* RCTWebSocket */,
+ 				2D2A28871D9B049200D4039D /* RCTWebSocket-tvOS */,
+-				3DBE0CF41F3B181A0099AA32 /* fishhook */,
+-				3DBE0D011F3B181C0099AA32 /* fishhook-tvOS */,
+ 			);
+ 		};
+ /* End PBXProject section */
+@@ -273,37 +155,8 @@
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+-		3DBE0CF51F3B181A0099AA32 /* Sources */ = {
+-			isa = PBXSourcesBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-				3DBE0D141F3B185A0099AA32 /* fishhook.c in Sources */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-		3DBE0D021F3B181C0099AA32 /* Sources */ = {
+-			isa = PBXSourcesBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-				3DBE0D151F3B185A0099AA32 /* fishhook.c in Sources */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+ /* End PBXSourcesBuildPhase section */
+ 
+-/* Begin PBXTargetDependency section */
+-		3DBE0D0F1F3B18490099AA32 /* PBXTargetDependency */ = {
+-			isa = PBXTargetDependency;
+-			target = 3DBE0CF41F3B181A0099AA32 /* fishhook */;
+-			targetProxy = 3DBE0D0E1F3B18490099AA32 /* PBXContainerItemProxy */;
+-		};
+-		3DBE0D111F3B184D0099AA32 /* PBXTargetDependency */ = {
+-			isa = PBXTargetDependency;
+-			target = 3DBE0D011F3B181C0099AA32 /* fishhook-tvOS */;
+-			targetProxy = 3DBE0D101F3B184D0099AA32 /* PBXContainerItemProxy */;
+-		};
+-/* End PBXTargetDependency section */
+-
+ /* Begin XCBuildConfiguration section */
+ 		2D2A288E1D9B049200D4039D /* Debug */ = {
+ 			isa = XCBuildConfiguration;
+@@ -554,24 +407,6 @@
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Release;
+ 		};
+-		3DBE0CFD1F3B181A0099AA32 /* Build configuration list for PBXNativeTarget "fishhook" */ = {
+-			isa = XCConfigurationList;
+-			buildConfigurations = (
+-				3DBE0CFE1F3B181A0099AA32 /* Debug */,
+-				3DBE0CFF1F3B181A0099AA32 /* Release */,
+-			);
+-			defaultConfigurationIsVisible = 0;
+-			defaultConfigurationName = Release;
+-		};
+-		3DBE0D0A1F3B181C0099AA32 /* Build configuration list for PBXNativeTarget "fishhook-tvOS" */ = {
+-			isa = XCConfigurationList;
+-			buildConfigurations = (
+-				3DBE0D0B1F3B181C0099AA32 /* Debug */,
+-				3DBE0D0C1F3B181C0099AA32 /* Release */,
+-			);
+-			defaultConfigurationIsVisible = 0;
+-			defaultConfigurationName = Release;
+-		};
+ /* End XCConfigurationList section */
+ 	};
+ 	rootObject = 3C86DF3E1ADF2C930047B81A /* Project object */;
+diff --git a/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/xcuserdata/mv.xcuserdatad/xcschemes/xcschememanagement.plist b/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/xcuserdata/mv.xcuserdatad/xcschemes/xcschememanagement.plist
+new file mode 100644
+index 0000000..32cd8f5
+--- /dev/null
++++ b/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj/xcuserdata/mv.xcuserdatad/xcschemes/xcschememanagement.plist
+@@ -0,0 +1,29 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++<dict>
++	<key>SchemeUserState</key>
++	<dict>
++		<key>RCTWebSocket-tvOS.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>34</integer>
++		</dict>
++		<key>RCTWebSocket.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>33</integer>
++		</dict>
++		<key>fishhook-tvOS.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>14</integer>
++		</dict>
++		<key>fishhook.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>13</integer>
++		</dict>
++	</dict>
++</dict>
++</plist>
+diff --git a/node_modules/react-native/Libraries/WebSocket/__tests__/WebSocket-test.js b/node_modules/react-native/Libraries/WebSocket/__tests__/WebSocket-test.js
+new file mode 100644
+index 0000000..62e6f14
+--- /dev/null
++++ b/node_modules/react-native/Libraries/WebSocket/__tests__/WebSocket-test.js
+@@ -0,0 +1,30 @@
++/**
++ * Copyright (c) Facebook, Inc. and its affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @format
++ * @emails oncall+react_native
++ */
++
++'use strict';
++
++jest.mock('NativeEventEmitter');
++jest.setMock('NativeModules', {
++  WebSocketModule: {
++    connect: () => {},
++  },
++});
++
++const WebSocket = require('WebSocket');
++
++describe('WebSocket', function() {
++  it('should have connection lifecycle constants defined on the class', () => {
++    expect(WebSocket.CONNECTING).toEqual(0);
++  });
++
++  it('should have connection lifecycle constants defined on the instance', () => {
++    expect(new WebSocket('wss://echo.websocket.org').CONNECTING).toEqual(0);
++  });
++});

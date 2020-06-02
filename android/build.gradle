@@ -12,8 +12,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-        classpath 'com.google.gms:google-services:4.0.1' // Needed for Firebase Analytics
+        // classpath 'com.android.tools.build:gradle:3.4.0'
+        classpath 'com.android.tools.build:gradle:3.3.1'
+        classpath 'com.google.gms:google-services:4.3.3' // Needed for Firebase Analytics
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -52,18 +53,26 @@ allprojects {
         }
     }
      configurations.all {
+         resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+              if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
+                details.useVersion "0.59.5"
+              }
+            }
+         }
          resolutionStrategy.force "com.android.support:support-v4:${supportLibVersion}"
          resolutionStrategy.force "com.android.support:appcompat-v7:${supportLibVersion}"
      }
 }
 
 ext {
-    compileSdkVersion           = 27
-    targetSdkVersion            = 26
-    buildToolsVersion           = "27.0.3"
-    supportLibVersion           = "27.1.1"
+    compileSdkVersion           = 28
+    targetSdkVersion            = 28
+    buildToolsVersion           = "28.0.3"
+    supportLibVersion           = "28.0.0"
     googlePlayServicesVersion   = "11.8.0"
     minSdkVersion               = 19
+    zoomSdkVersion              = '7.0.11'
 }
 
 task wrapper(type: Wrapper) {

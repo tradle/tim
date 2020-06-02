@@ -80,8 +80,9 @@ var NewResourceMixin = {
   getFormFields(params) {
     let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
     let CURRENCY_SYMBOL = this.getCurrency()
-    let { component, formErrors, model, data, validationErrors } = params
+    let { component, formErrors, model, data, validationErrors, editable } = params
 
+    // Case when clicked in the FormRequest and modelsPack changed
     let meta = this.props.model
     let isInlineArray
     if (!meta) {
@@ -90,7 +91,6 @@ var NewResourceMixin = {
     }
     let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
-
     let props, bl
     if (!meta.items)
       props = meta.properties;
@@ -165,7 +165,7 @@ var NewResourceMixin = {
         if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
           maybe = false
       }
-      let type = props[p].type;
+      let type = props[p].type
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       let isReadOnly = props[p].readOnly
@@ -211,27 +211,26 @@ var NewResourceMixin = {
       if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data[p]))
-        options.fields[p] = {'editable':  false };
+        options.fields[p] = {editable:  false };
 
       let pName = isInlineArray  &&  `${params.meta.name}_${p}`
       let val = isInlineArray && resource[pName] || data[p]
       if (formType) {
         if (props[p].keyboard)
           options.fields[p].keyboardType = props[p].keyboard
-
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (type == 'date') {
           model[p] = t.Str
           if (val)
             val = new Date(val)
           options.fields[p].template = this.myDateTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     required: !maybe,
                     model: meta,
                     errors: formErrors,
                     component,
-                    editable: !props[p].readOnly || search,
+                    editable,
                     value: val
                   })
 
@@ -249,7 +248,7 @@ var NewResourceMixin = {
           }
 
           options.fields[p].template = this.myBooleanTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: val,
@@ -284,25 +283,25 @@ var NewResourceMixin = {
 
         if (type === 'string'  &&  p.length > 6  &&  p.indexOf('_group') === p.length - 6) {
           options.fields[p].template = this.myTextTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                   })
         }
         else if (type === 'string'  &&  props[p].markdown) {
           options.fields[p].template = this.myMarkdownTextInputTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
-                    value: val,
+                    value: val || null,
                     required: !maybe,
                     errors: formErrors,
-                    editable: params.editable,
+                    editable,
                   })
         }
         else if (type === 'string'  &&  props[p].signature) {
           options.fields[p].template = this.mySignatureTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: val,
@@ -310,7 +309,7 @@ var NewResourceMixin = {
                     errors: formErrors,
                     component,
                     doSet: eCols.length > 1,
-                    editable: params.editable,
+                    editable,
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
@@ -319,9 +318,8 @@ var NewResourceMixin = {
             val += ''
           else
             val = null
-
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: val,
@@ -379,7 +377,7 @@ var NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable: params.editable,
+                    editable,
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -390,7 +388,7 @@ var NewResourceMixin = {
         else if (props[p].signature) {
           model[p] = maybe ? t.maybe(t.Str) : t.Str;
           options.fields[p].template = this.mySignatureTemplate.bind(this, {
-                    label: label,
+                    label,
                     prop:  props[p],
                     model: meta,
                     value: val,
@@ -398,7 +396,7 @@ var NewResourceMixin = {
                     errors: formErrors,
                     doSet: eCols.length > 1,
                     component,
-                    editable: params.editable,
+                    editable
                   })
           continue
         }
@@ -415,12 +413,12 @@ var NewResourceMixin = {
             let subModel = utils.getModel(vType)
             options.fields[p].value = utils.getId(val)
             if (!search  &&  !bookmark)
-              data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title;
+              data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title
           }
         }
         // options.fields[p].onFocus = chooser.bind(this, props[p], p)
         options.fields[p].template = this.myCustomTemplate.bind(this, {
-            label: label,
+            label,
             prop:  p,
             required: !maybe,
             errors: formErrors,
@@ -450,6 +448,7 @@ var NewResourceMixin = {
     }
     return options;
   },
+
   addRequestedProps({eCols, params={}, props}) {
     let {requestedProperties, excludeProperties, formErrors, model} = this.state.requestedProperties
     if (!formErrors) {
@@ -540,7 +539,6 @@ var NewResourceMixin = {
           !exclude.includes(p))
         eCols.push(p)
     }
-
     return eCols
   },
   addError(p, params) {
@@ -576,7 +574,6 @@ var NewResourceMixin = {
     }
     if (!this.floatingProps)
       this.floatingProps = {}
-
     if (pref == MONEY) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
@@ -613,9 +610,6 @@ var NewResourceMixin = {
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
     if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
-      // this.debugChanges(r, 'country')
-      // Actions.saveTemporary(r)
-// global.a = r
       Actions.getRequestedProperties({resource: r})
     }
 
@@ -715,7 +709,7 @@ var NewResourceMixin = {
     if (required)
       label += ' *'
 
-    let { bankStyle, search } = this.props
+    let { bankStyle } = this.props
     let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
     if (value)
       lcolor = '#555555'
@@ -860,10 +854,12 @@ var NewResourceMixin = {
       else
         return
     }
-    if (isRegistration)
-      return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+    if (isRegistration) {
+      let estyle = [styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]
+      return <View style={estyle} key={this.getNextKey()}>
                <Text style={styles.font14, {color: '#eeeeee'}}>{err}</Text>
              </View>
+    }
 
     let { bankStyle } = this.props
 
@@ -873,7 +869,7 @@ var NewResourceMixin = {
       backgroundColor: bankStyle.errorBgColor  ||  '#990000',
       paddingHorizontal: 10,
     }
-    return <View style={[styles.err]} key={this.getNextKey()}>
+    return <View style={styles.err} key={this.getNextKey()}>
              <View style={addStyle}>
                <Text style={styles.font14, {paddingLeft: 5, color: bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
              </View>
@@ -917,11 +913,10 @@ var NewResourceMixin = {
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     if (prop.readOnly  &&  !search) {
-      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
       switchC = <View style={{paddingVertical: 5}}>
                   <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
-                  {icon}
                 </View>
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
     }
     else if (isTroolean) {
       const options = [
@@ -960,10 +955,10 @@ var NewResourceMixin = {
         </View>
         {icon}
         {this.paintError(params)}
-        {help}
       </View>
     )
   },
+
   myDateTemplate(params) {
     let { prop, required, component, editable } = params
     let { search, bankStyle, bookmark } = this.props
@@ -991,7 +986,6 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
-    // let st = isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     let st = isWeb() ? [styles.formInput, {minHeight: 60, borderColor: bcolor}] : {marginHorizontal: 15}
 
     // convert from UTC date to local, so DatePicker displays it correctly
@@ -1005,23 +999,6 @@ var NewResourceMixin = {
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
 
     let sign
-    // if (bookmark) {
-    //   let signValue = this.floatingProps[prop.name + '_sign']
-    //   sign = this.myTextInputTemplate({
-    //                 label: '',
-    //                 prop:  prop,
-    //                 sign: true,
-    //                 value: signValue || '',
-    //                 required: required,
-    //                 model: model,
-    //                 noError: true,
-    //                 // errors: errors,
-    //                 editable,
-    //                 component,
-    //                 keyboard: search ? null : 'numeric',
-    //               })
-    //   sign = <View style={{width: 30}}>{sign}</View>
-    // }
     let format = 'LL'
     if (prop.format) {
       dateProps.format = prop.format
@@ -1080,6 +1057,7 @@ var NewResourceMixin = {
           {help}
           {icon}
         </View>
+        {help}
         {this.paintError(params)}
       </View>
      )
@@ -1089,7 +1067,7 @@ var NewResourceMixin = {
     let lcolor, bcolor
     if (this.state.isRegistration)
       lcolor = '#f3f3f3'
-    if (this.state.inFocus === prop)
+    else if (this.state.inFocus === prop)
       lcolor = bankStyle  &&  bankStyle.linkColor || '#757575'
     else {
       lcolor = '#888888'
@@ -1186,8 +1164,9 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata, bookmark } = this.props
+    let { model, metadata, isRefresh, bookmark } = this.props
     let { required, errors, component } = params
+    let { missedRequiredOrErrorValue, resource, inFocus } = this.state
     let props
     if (model)
       props = model.properties
@@ -1204,19 +1183,21 @@ var NewResourceMixin = {
       onChange = this.setState.bind(this)
     else
       onChange = this.setChosenValue.bind(this)
-    let error = this.state.missedRequiredOrErrorValue  &&  this.state.missedRequiredOrErrorValue[pName]
-    if (!error  &&  errors  &&  errors[pName])
-      error = errors[pName]
+    let error = missedRequiredOrErrorValue  &&  missedRequiredOrErrorValue[pName]
+    if (!error  &&  params.errors  &&  params.errors[pName])
+      error = params.errors[pName]
+
     return <RefPropertyEditor {...this.props}
                              resource={params.resource ||   this.state.resource}
                              onChange={onChange}
                              prop={prop}
                              bookmark={bookmark}
                              photo={this.state[pName + '_photo']}
-                             labelAndBorder={this.getLabelAndBorderColor.bind(this, pName)}
                              component={component}
+                             labelAndBorder={this.getLabelAndBorderColor.bind(this, pName)}
                              error={error}
-                             inFocus={this.state.inFocus}
+                             inFocus={inFocus}
+                             isRefresh={isRefresh}
                              required={required}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
@@ -1237,10 +1218,12 @@ var NewResourceMixin = {
       if (vals  &&  vals[p])
         value = vals[p]
     }
-    else if (!prop.ref)
-      value = prop.default
-    else if (prop.default)
-      value = enumValue({model: utils.getModel(prop.ref), value: prop.default})
+    if (prop.default) {
+      if (!prop.ref)
+        value = prop.default
+      else
+        value = enumValue({model: utils.getModel(prop.ref), value: prop.default})
+    }
     if (!value)
       return
     if (prop.type === 'date') {
@@ -1363,7 +1346,6 @@ var NewResourceMixin = {
         Actions.saveTemporary(resource)
     }
   },
-
   setArrayOrMultichooser(prop, value, resource) {
     let propName = prop.name
     let isArray = prop.type === 'array'
@@ -1439,14 +1421,16 @@ var NewResourceMixin = {
     }
     return {}
   },
+
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     let { label, required, model, value, prop, editable, errors, component } = params
     let { search } = this.props
     if (!search  &&  required)
       label += ' *'
-    let isMoney = prop.ref  &&  prop.ref === MONEY
     let CURRENCY_SYMBOL = this.getCurrency()
+    let isMoney = prop.ref  &&  prop.ref === MONEY
+
     label += isMoney
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
@@ -1556,8 +1540,8 @@ var NewResourceMixin = {
     // clause for the items properies - need to redesign
     // resource[propName][enumPropName] = value
     const { metadata, parentMeta } = this.props
-     let isItem = metadata && parentMeta
-     if (isItem)
+    let isItem = metadata && parentMeta
+    if (isItem)
       propName = `${metadata.name}_${propName}`
 
     if (resource[propName]) {
@@ -1766,7 +1750,7 @@ var styles= StyleSheet.create({
     borderRadius: 5
   },
   err: {
-    // paddingLeft: 10,
+    paddingHorizontal: 15,
     // backgroundColor: 'transparent'
   },
   element: {
@@ -1793,6 +1777,11 @@ var styles= StyleSheet.create({
     right: 10,
     bottom: 10
   },
+  lockIcon: {
+    position: 'absolute',
+    right: 0,
+    bottom: 5
+  },
   photoIconEmpty: {
     position: 'absolute',
     right: 10,
@@ -1804,7 +1793,8 @@ var styles= StyleSheet.create({
     top: 20
   },
   immutable: {
-    marginTop: 15
+    marginTop: 15,
+    paddingRight: 10
   },
   input: {
     backgroundColor: 'transparent',
@@ -1852,7 +1842,6 @@ var styles= StyleSheet.create({
     marginBottom: 5
   },
   dividerText: {
-    // marginTop: 15,
     marginBottom: 5,
     fontSize: 26,
     color: '#ffffff'

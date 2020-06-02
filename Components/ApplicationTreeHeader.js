@@ -77,8 +77,8 @@ class ApplicationTreeHeader extends Component {
         title = <View style={[textStyle, {marginTop: 3}]}>{this.paintIcon({icon, color: color || '#757575'})}</View>
       else if (label)
         title = <Text style={[styles.cell, textStyle]}>
-                    {label}
-                  </Text>
+                  {label}
+                </Text>
 
       if (description) {
         description = <Text style={[styles.cellD, textStyle]}>

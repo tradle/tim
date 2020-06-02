@@ -111,7 +111,7 @@ var RowMixin = {
     style = {flexDirection: 'column'}
 
     if (!prop.displayName  &&  !prop.displayAs)
-      title =  <Text style={[styles.descriptionG]}>{propTitle}</Text>
+      title =  <Text style={styles.descriptionG}>{propTitle}</Text>
     return (
       <View style={style} key={this.getNextKey()}>
         <Text>
@@ -125,6 +125,8 @@ var RowMixin = {
     let { to, resource, application, bankStyle } = this.props
     let toType = utils.getType(to)
     let isContext = utils.isContext(toType)
+    // if (application)
+    //   isMyMessage = utils.isMyMessage({resource, to})
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(to)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
       return <View/>
@@ -149,7 +151,7 @@ var RowMixin = {
       let uri = utils.getImageUri(to.photos[0].url);
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
-    if (!isMyMessage) {
+    if (!isMyMessage) { //  ||  application) {
       let title = resource.from.title  && resource.from.title.split(' ').map((s) => s.charAt(0) === '[' ? '' : s.charAt(0)).join('')
       if (!title)
         title = 'U'  // for UNKNOWN
@@ -351,7 +353,7 @@ var RowMixin = {
       this.setState({isChosen: true})
       this.props.chosen[id] = resource
     }
-  },
+  }
 }
 
 var styles = StyleSheet.create({
@@ -412,4 +414,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = RowMixin;
-

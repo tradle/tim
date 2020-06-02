@@ -135,6 +135,11 @@ android {
     // }
 
     compileSdkVersion project.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildToolsVersion project.buildToolsVersion
 
     def vmajor = project.property('VERSION_MAJOR').toInteger()
@@ -148,6 +153,9 @@ android {
         // KeyPairGenerator for EC is supported on APIs 23+
         // minSdkVersion 23
         // elliptic curve keys support
+        // minSdkVersion project.minSdkVersion
+        // targetSdkVersion project.targetSdkVersion
+        missingDimensionStrategy "RNN.reactNativeVersion", "reactNative59"
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
         versionCode vbuild
@@ -185,7 +193,8 @@ android {
             //
             // Before allowing 64-bit apks, see that react native supports it
             // https://github.com/facebook/react-native/issues/2814
-            include "armeabi-v7a", "x86"
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+            // include "armeabi-v7a", "x86"
         }
     }
     buildTypes {
@@ -267,6 +276,13 @@ configurations.all {
 }
 
 dependencies {
+    def multidex_version = "2.0.1"
+    implementation "androidx.multidex:multidex:$multidex_version"
+
+    implementation project(':react-native-webview')
+    implementation project(':@react-native-community_viewpager')
+    implementation project(':@react-native-community_netinfo')
+    // implementation 'com.facetec:zoom-authentication-hybrid:7.0.11'
     implementation project(':react-native-facetec-zoom')
     implementation project(':react-native-image-store')
     implementation project(':react-native-tradle-keeper')
@@ -274,7 +290,11 @@ dependencies {
     // implementation project(':blinkid-react-native')
     implementation project(':react-native-awesome-card-io')
     implementation 'com.android.support:multidex:1.0.1'
+
     implementation project(':react-native-branch')
+    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    implementation "com.facebook.react:react-native:+"  // From node_modules
+
     implementation project(':react-native-tcp')
     implementation project(':react-native-os')
     implementation project(':react-native-exception-handler')
@@ -303,6 +323,7 @@ dependencies {
     implementation(project(':react-native-device-info')) {
         exclude group: 'com.google.android.gms'
     }
+
     implementation "com.google.android.gms:play-services-base:${googlePlayServicesVersion}"
     implementation ("com.google.android.gms:play-services-gcm:${googlePlayServicesVersion}") {
         force = true;
@@ -351,6 +372,7 @@ android.applicationVariants.all { variant ->
   // Assigns a different version code for each output APK
   // other than the universal APK.
   variant.outputs.each { output ->
+    // def versionCodes = ["armeabi-v7a":1, "x86":2, "arm64-v8a": 3, "x86_pac64": 4]
 
     // Stores the value of ext.abiCodes that is associated with the ABI for this variant.
     def baseAbiVersionCode =

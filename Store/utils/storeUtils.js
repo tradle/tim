@@ -40,9 +40,10 @@ const {
 const STYLES_PACK = 'tradle.StylesPack'
 const BOOKMARK = 'tradle.Bookmark'
 const APPLICATION = 'tradle.Application'
+const LANGUAGE = 'tradle.Language'
 const MSG_LINK = '_msg'
 
-const { FORM, IDENTITY, VERIFICATION, MESSAGE, LANGUAGE } = constants.TYPES
+const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
 let dictionary
 
@@ -228,7 +229,7 @@ const storeUtils = {
     if (enumList.filter((e) => e[ROOT_HASH] === r[ROOT_HASH]).length)
       return
     enumList.push(r)
-    // // let id = utils.getId(r)
+    // // let id = getId(r)
     // let key = [r[TYPE], r[ROOT_HASH], r[CUR_HASH]].join('_')
     // if (saveInDB)
     //   batch.push({type: 'put', key, value: r})
@@ -521,7 +522,7 @@ const storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-          analyst: me.employeePass,
+          analyst: me.employeePass
         },
         message: 'myCases'
       },

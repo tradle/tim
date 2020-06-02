@@ -37,9 +37,9 @@ import uiUtils from '../utils/uiUtils'
 
 const RESOURCE_VIEW = 'ResourceView'
 const MESSAGE_VIEW = 'MessageView'
-const CHECK_VIEW = 'CheckView'
 const APPLICATION_VIEW = 'ApplicationView'
 const RESOURCE_LIST = 'ResourceList'
+const CHECK_VIEW = 'CheckView'
 
 const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
@@ -47,7 +47,7 @@ const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
 const MODIFICATION = 'tradle.Modification'
-var DEFAULT_CURRENCY_SYMBOL = '$'
+const DEFAULT_CURRENCY_SYMBOL = '$'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -72,7 +72,7 @@ var ResourceMixin = {
   showRefResource(resource, prop, isDataLineage) {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
-    let title = utils.getDisplayName({ resource });
+    let title = utils.getDisplayName({ resource })
     let modelTitle = translate(model)
     if (title  &&  title.length)
       title = title + ' -- ' + modelTitle
@@ -180,7 +180,6 @@ var ResourceMixin = {
     let cnt = value.length;
     let isView = component  &&  component.name === 'ShowPropertiesView'
     let isWeb = utils.isWeb()
-
     return value.map((v) => {
       let ret = [];
       counter++;
@@ -202,7 +201,6 @@ var ResourceMixin = {
                      </View>
                      {!isView  &&  <View style={{flex: 1}}/>}
                    </View>)
-
           return
         }
         let value;
@@ -213,6 +211,7 @@ var ResourceMixin = {
           value = utils.formatDate(pVal);
         else if (type === 'boolean')
           value = pVal ? 'Yes' : 'No'
+
         else if (type === 'array') {
           let iref = items.ref
           if (iref) {
@@ -280,7 +279,6 @@ var ResourceMixin = {
                      </View>
                      {!isView  &&  <View style={{flex: 1}}/>}
                    </View>
-
         if (editItem  &&  !hasEdit) {
           hasEdit = true
           let cancel
@@ -292,14 +290,14 @@ var ResourceMixin = {
                        </TouchableOpacity>
                      </View>
           }
-          item = <View style={[{width: utils.getContentWidth(component) - 40}]}>
+          let width = utils.getContentWidth(component)
+          item = <View style={[{width: width - 40}]}>
                    <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
                      {item}
                    </TouchableOpacity>
                    {cancel}
                  </View>
         }
-
         else if (cancelItem  &&  !hadCancel) {
           hadCancel = true
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
@@ -310,12 +308,6 @@ var ResourceMixin = {
                      </View>
                    </View>
                  </TouchableOpacity>
-          // item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-          //          <View style={[styles.row, {width: utils.getContentWidth(component) - 40}]}>
-          //            {item}
-          //            <Icon name='ios-close-circle-outline' size={24} color={linkColor} />
-          //          </View>
-          //        </TouchableOpacity>
         }
 
 
@@ -865,228 +857,7 @@ var ResourceMixin = {
       json[p] = jsonI
     }
     return json
-  },
-  cleanupJson1(json) {
-    json = utils.sanitize(json)
-    if (!Array.isArray(json)  ||  json.length !== 1)
-      return json
 
-    json = json[0]
-    if (_.size(json) !== 1)
-      return json
-    json = Object.values(json)[0]
-    for (let p in json) {
-      if (!Array.isArray(json[p]))
-        continue
-      let arr = json[p]
-      if (!arr.length) {
-        delete json[p]
-        continue
-      }
-      arr.forEach((elm, i) => {
-        if (_.size(elm) === 1)
-          json[p][i] = elm[Object.keys(elm)[0]]
-      })
-    }
-    return json
-  },
-  showJson1(params) {
-    let { json, indent, isView } = params
-    _.extend(params, {rawStyles: createStyles({bankStyle: this.props.bankStyle, indent, isView})})
-    if (!Array.isArray(json))
-      return this.showJsonPart(params)
-    return json.map((r) => {
-      let p = _.cloneDeep(params)
-      p.json = r
-      p.jsonRows = []
-      return this.showJsonPart(p)
-    })
-  },
-  showJsonPart(params) {
-    let {prop, json, isView, jsonRows, skipLabels, indent,
-         isOnfido, isBreakdown, rawStyles} = params
-    // let json = JSON.parse(jsonStr)
-    // let jsonRows = []
-    let { resource, bankStyle } = this.props
-    bankStyle = bankStyle || defaultBankStyle
-
-    let rType = resource[TYPE]
-
-    let hideGroup = prop  &&  hideGroupInJSON[rType]
-    let showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
-    skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
-
-    // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
-    let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
-    let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-    let backlinksBg = {backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
-    if (prop) {
-      let cols = []
-      let state
-      let icon
-      if (showCollapsed  &&  showCollapsed === prop.name)
-        icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
-      if (isOnfido) {
-        let color = json.result === 'clear' ? '#f1ffe7' : 'red'
-        cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor}} key={this.getNextKey()}>
-                    <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
-                    {icon}
-                  </Col>)
-      }
-      let style = {opacity: 0.7, ...backlinksBg}
-
-      let colSize = cols.length && 2 || 3
-
-      cols.push(<Col sm={colSize} md={colSize} lg={colSize} style={style} key={this.getNextKey()}>
-                 <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
-                 {!isOnfido  &&  icon}
-               </Col>)
-      jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
-                      {cols}
-                    </Row>)
-
-    }
-    if (!indent)
-      indent = 0
-    let textStyle = indent === 1 ||  !isBreakdown  ? styles.bigTitle : styles.title
-
-    if (prop  ||  !isBreakdown) {
-      for (let p in json) {
-        let jVal = json[p]
-        if (typeof jVal === 'object'  ||  p === 'result')
-          continue
-        let label
-        if (!skipLabels  ||  skipLabels.indexOf(p) === -1)
-          label = <Text style={[styles.title, {flex: 1, paddingLeft: 10}]}>{utils.makeLabel(p)}</Text>
-        let val
-        jVal += ''
-        if (jVal.indexOf('http://') === 0  ||  jVal.indexOf('https://') === 0)
-          val = <Text style={[styles.title, {flex: 1, color: bankStyle.linkColor}]} onPress={() => Linking.openURL(jVal)}>{jVal}</Text>
-        else
-          val = <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{jVal}</Text>
-        jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
-                        <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
-                          {label}
-                          </Col>
-                        <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
-                          {val}
-                        </Col>
-                      </Row>)
-      }
-    }
-    else if (isOnfido  &&  !indent) {
-      jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
-                      <Col sm={3} md={3} lg={3} style={styles.rowStyle} key={this.getNextKey()}>
-                        <Text  style={[styles.bigTitle, {color: color, paddingVertical: 10}]}>{translate('Breakdown')}</Text>
-                      </Col>
-                    </Row>)
-
-    }
-    for (let p in json) {
-      if (isOnfido) {
-        if  (isBreakdown  && p === 'result')
-          continue
-        if (p === 'properties')
-          continue
-      }
-      if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
-        continue
-      let jVal = json[p]
-      if (typeof jVal !== 'object')
-        continue
-      if (utils.isEmpty(jVal)  ||  this.checkIfJsonEmpty(jVal))
-        continue
-      if (Array.isArray(jVal)) {
-        let arrRows = []
-        jVal.forEach((js) => {
-          if (typeof js === 'object') {
-            this.showJson({json: js, isView, jsonRows: arrRows, indent: indent + 1})
-            jsonRows.push(<Row size={3} style={styles.rowStyle} key={this.getNextKey()}>
-                            <Col sm={3} md={3} lg={3} style={rawStyles.col} key={this.getNextKey()}>
-                              <Text style={[styles.bigTitle, {flex: 1, paddingLeft: 10}]}>{utils.makeLabel(p)}</Text>
-                            </Col>
-                          </Row>)
-
-            jsonRows.push(arrRows)
-          }
-          else {
-            jsonRows.push(<Row size={3} style={styles.rowStyle} key={this.getNextKey()}>
-                            <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
-                              <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
-                            </Col>
-                            <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
-                              <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{js + ''}</Text>
-                            </Col>
-                          </Row>)
-          }
-        })
-        continue
-      }
-      // HACK for Onfido
-      let arrow
-      if (showCollapsed  &&  showCollapsed === p)
-        arrow = <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
-
-      // HACK for Onfido
-      if (p !== 'breakdown') {
-        let result
-        if (isOnfido && isBreakdown) {
-          let color = isBreakdown  &&  jVal.properties ? {color: '#757575'} : {color: jVal.result === 'clear' ?  'green' : 'red'}
-          result = <Text style={[textStyle, color]}>{jVal.result}</Text>
-        }
-        if (result || arrow) {
-          jsonRows.push(<Row size={3} style={styles.row} key={this.getNextKey()}>
-                          <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
-                            <Text style={textStyle}>{utils.makeLabel(p)}</Text>
-                          </Col>
-                          <Col sm={2} md={2} lg={2} style={styles.col} key={this.getNextKey()}>
-                            {result}
-                            {arrow}
-                          </Col>
-                        </Row>)
-        }
-        else {
-          jsonRows.push(<Row size={3} style={styles.row} key={this.getNextKey()}>
-                          <Col sm={3} md={3} lg={3} style={rawStyles.col} key={this.getNextKey()}>
-                            <Text style={[textStyle, {paddingLeft: 10}]}>{utils.makeLabel(p)}</Text>
-                          </Col>
-                        </Row>)
-        }
-        if (isBreakdown  &&  jVal.properties)
-          continue
-      }
-      else if (isOnfido)
-        isBreakdown = true
-
-      let params = {json: jVal, isView, jsonRows, skipLabels, indent: indent + 1, isOnfido, isBreakdown}
-      this.showJson(params)
-    }
-    if (!prop)
-      return
-
-    if (showCollapsed  &&  showCollapsed == prop.name) {
-      let [header, ...content] = jsonRows
-      return <Accordion key={this.getNextKey()}
-               sections={[utils.makeLabel(showCollapsed)]}
-               header={
-                <View>{header}</View>
-               }
-               content={content}
-               underlayColor='transparent'
-               easing='easeOutQuad' />
-    }
-    return jsonRows
-  },
-  checkIfJsonEmpty(json) {
-    for (let p in json) {
-      if (!json[p])
-        continue
-      if (typeof json[p] !== 'object')
-        return false
-      if (!this.checkIfJsonEmpty(json[p]))
-        return false
-    }
-    return true
   },
   showLoading(params) {
     return uiUtils.showLoading(params)

@@ -7,7 +7,7 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  Platform
+  Platform,
 } from 'react-native'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
@@ -98,15 +98,6 @@ class TimHome extends Component {
     if (isLinkingSupported)
       Linking.addEventListener('url', this._handleOpenURL);
 
-    // var url = LinkingIOS.popInitialURL()
-    // if (url)
-    //   this._handleOpenURL({url});
-
-    // NetInfo.isConnected.addEventListener(
-    //   'change',
-    //   this._handleConnectivityChange
-    // );
-    // NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     Actions.start();
   }
   _handleConnectivityChange(isConnected) {
@@ -116,17 +107,8 @@ class TimHome extends Component {
   componentWillUnmount() {
     if (isLinkingSupported)
       Linking.removeEventListener('url', this._handleOpenURL);
-    // NetInfo.isConnected.removeEventListener(
-    //   'change',
-    //   this._handleConnectivityChange
-    // );
   }
   async componentDidMount() {
-    // this._checkConnectivity()
-
-    // if (!utils.getMe()) return
-
-    // Alert.alert('TRYING THE DEEP LINK')
     try {
       let url
       if (isLinkingSupported) {
@@ -157,7 +139,6 @@ class TimHome extends Component {
     if (!me) {
       if (ENV.autoRegister)
         this.showFirstPage()
-      // this.register(() => this.showFirstPage())
       return
     }
     this.signInAndContinue()
@@ -304,8 +285,6 @@ class TimHome extends Component {
       return
     }
 
-    // utils.setMe(params.me);
-    // utils.setModels(params.models);
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
 
@@ -373,10 +352,6 @@ class TimHome extends Component {
       break
     case 'getProvider':
       this.showChatPage({resource: provider, termsAccepted, showProfile: true})
-      // this.setState({
-      //   provider: params.provider,
-      //   action: 'chat'
-      // })
       return
     case 'getItemFromDeepLink':
       this.showResource(params)
@@ -469,7 +444,7 @@ class TimHome extends Component {
       rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: () => navigator.push({
-        title: profileTitle, //utils.getDisplayName(me) + (me.organization ? ' -- ' + me.organization.title : ''),
+        title: profileTitle,
         componentName: 'ResourceView',
         backButtonTitle: 'Back',
         passProps: {
@@ -1006,7 +981,6 @@ class TimHome extends Component {
       'Please restart TiM'
     )
   }
-
   _pressHandler() {
     if (utils.getMe())
       signIn(this.props.navigator)
@@ -1139,3 +1113,4 @@ function getIconSize (dimensions) {
 }
 
 module.exports = TimHome;
+

@@ -10,7 +10,7 @@ import {
   View
 } from 'react-native'
 import PropTypes from 'prop-types'
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons'
 
 import React, { Component } from 'react'
 import { Text } from './Text'
@@ -22,6 +22,8 @@ class StringRow extends Component {
   render() {
     let { title, bankStyle, description, forScan, icon } = this.props
     let styles = createStyles({bankStyle, description})
+    if (icon)
+      icon = <Icon name={icon} size={45} color={DEFAULT_PRODUCT_ROW_TEXT_COLOR} style={{paddingTop: 2, paddingBottom: 5, paddingLeft: 15}}/>
     let d
     if (icon)
       icon = <Icon name={icon} size={45} color={DEFAULT_PRODUCT_ROW_TEXT_COLOR} style={{paddingTop: 2, paddingBottom: 5, paddingLeft: 15}}/>

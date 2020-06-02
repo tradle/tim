@@ -54,7 +54,7 @@ class RefPropertyEditor extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]),
+      isRegistration: !utils.getMe()  && props.model.id === PROFILE  &&  (!props.resource || !props.resource[ROOT_HASH]),
     }
     this.regulaScan = !isSimulator() && !isWeb()  &&  debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
@@ -104,7 +104,8 @@ class RefPropertyEditor extends Component {
     }
     let val
     if (isInlineArray) {
-      if (resource[ipName]) val = resource[ipName]
+      if (resource[ipName])
+        val = resource[ipName]
     }
     else {
       val = resource && resource[pName]
@@ -135,7 +136,7 @@ class RefPropertyEditor extends Component {
     if (isRegistration)
       color = '#eeeeee'
     else if (val)
-      color = /*isImmutable  &&  linkColor ||*/ '#555555'
+      color = '#555555'
     else
       color = '#888888'
     let propView
@@ -145,20 +146,6 @@ class RefPropertyEditor extends Component {
       } else {
         propView = <Icon name='ios-paper-outline' size={40} color={linkColor} style={{paddingTop: 10}} />
       }
-// =======
-//       let isPdf = resource[pName]  &&  resource[pName].fileName  &&  resource[pName].fileName.toLowerCase().endsWith('.pdf')
-//       let source = {uri: isPdf  &&  PDF_ICON ||  photoR.url}
-//       let fileName
-//       if (isPdf) {
-//         let pieces = resource[pName].fileName.split('/')
-//         fileName = <Text style={styles.textAfterImage}>{pieces[pieces.length - 1]}</Text>
-//       }
-// debug(source.uri.substring(0, 100))
-//       propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0, flexDirection: 'row' }}>
-//                    <Image source={source} style={[styles.thumb, {marginBottom: 5}]} />
-//                    {fileName}
-//                  </View>
-// >>>>>>> origin/master
     }
     else {
       let img = photo
@@ -188,10 +175,9 @@ class RefPropertyEditor extends Component {
       iconColor = linkColor
 
     let isReadOnly = prop.readOnly
-
     let icon
     let isBookmarkSealed = bookmark  &&  bookmark.bookmark[pName]
-    if (!isImmutable  &&  !isReadOnly  && !isBookmarkSealed) {
+    if (!isImmutable  &&  !isBookmarkSealed  &&  !isReadOnly) {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
@@ -210,7 +196,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isBookmarkSealed || (!exploreData  && (isImmutable || isReadOnly)))
+    if (isBookmarkSealed || (!exploreData  &&  (isImmutable || isReadOnly)))
       actionItem = content
     else if (isIdentity && !isWeb())
       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
@@ -267,10 +253,9 @@ class RefPropertyEditor extends Component {
           onSubmit: () => this.onSetMediaProperty(propName, {...item, url: `data:pdf/jpeg;base64${item.url}`}),
           item: {isPdf: true, ...item}
         }
-      });
+      })
     }
     else {
-      let photo = {url: `data:image/jpeg;base64,${item.url}`}
       this.showCarousel({photo, title: translate('preview'), done: () => this.onSetMediaProperty(propName, photo)})
     }
   }
@@ -328,7 +313,6 @@ class RefPropertyEditor extends Component {
     // debugger
     if (!item)
       return;
-    let type
     if (item.file && item.file.constructor.name === 'File') {
       item.type = item.file.type
       item.name = item.file.name

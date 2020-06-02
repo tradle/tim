@@ -150,7 +150,8 @@ class ApplicationsGrid extends Component {
     let { action, list, application, endCursor, applicantName, allLoaded } = params
     switch(action) {
     case 'list':
-      if (!list  ||  !list.length  ||  list[0][TYPE] !== APPLICATION) return
+      if (!list  ||  !list.length  ||  list[0][TYPE] !== APPLICATION)
+        return
       let nodes = this.transformTree({list})
       let newNodes = this.state.nodes.slice().concat(nodes)
       let newList = this.state.list.slice().concat(list)

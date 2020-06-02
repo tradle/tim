@@ -201,7 +201,7 @@ class FormRequestRow extends Component {
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isProductBundle = resource.form === PRODUCT_BUNDLE
     let isAttestation = resource.form === ATTESTATION
-    if (isFormRequest  &&  !isProductBundle && !isAttestation)
+    if (isFormRequest  &&  !isProductBundle  &&  !isAttestation)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
       let linkColor
@@ -485,7 +485,8 @@ class FormRequestRow extends Component {
     // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
     if (verification  && (verification.organization || isItem)) {
-      let {verifiedBy, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
+      let oneLineTitle = displayName.indexOf('\n') === -1
+      let {verifiedBy, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles, oneLineTitle)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -530,7 +531,7 @@ class FormRequestRow extends Component {
              {content}
            </View>
   }
-  getParts(verification, isItem, styles) {
+  getParts(verification, isItem, styles, oneLineTitle) {
     let { resource, to, shareableResources } = this.props
     let document = verification.document
     let providers = shareableResources.providers
@@ -775,7 +776,6 @@ class FormRequestRow extends Component {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
 
-
     let me = utils.getMe()
     let { product } = resource
 
@@ -831,8 +831,7 @@ class FormRequestRow extends Component {
 
     let hasSharables = this.hasSharables()
 
-    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated && !resource.dataLineage// &&  !resource.prefill
-    // HACK
+    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated  && !resource.dataLineage // &&  !resource.prefill    // HACK
     if (isRequestForNext) {
       if (resource.message.startsWith(strings.reviewScannedProperties))
         isRequestForNext = false
@@ -994,7 +993,6 @@ class FormRequestRow extends Component {
     renderedRow.push(msg);
     return isReadOnly || isRefresh ? null : onPressCall
   }
-
   canEmployeePrefill(resource) {
     let { application } = this.props
     return !resource._documentCreated  &&  application  &&  utils.isRM(application)
@@ -1079,24 +1077,6 @@ class FormRequestRow extends Component {
            </TouchableOpacity>
 
   }
-  reviewFormsInDraft() {
-    const { navigator, bankStyle, resource, to, currency, list } = this.props
-    this.props.navigator.push({
-      title: translate("reviewData"),
-      backButtonTitle: 'Back',
-      componentName: 'ReviewPrefilledItemsList',
-      rightButtonTitle: 'Done',
-      passProps: {
-        modelName: PRODUCT_BUNDLE,
-        resource: resource,
-        bankStyle,
-        reviewed: {},
-        to,
-        list: resource.prefill.items,
-        currency
-      }
-    })
-  }
   reviewForAttestation() {
     const { navigator, bankStyle, resource, to, currency, list } = this.props
     this.props.navigator.push({
@@ -1116,10 +1096,29 @@ class FormRequestRow extends Component {
     })
   }
 
-  reviewFormsInContext({isRefresh}) {
+  reviewFormsInDraft() {
     const { navigator, bankStyle, resource, to, currency, list } = this.props
     this.props.navigator.push({
       title: translate("reviewData"),
+      backButtonTitle: 'Back',
+      componentName: 'ReviewPrefilledItemsList',
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: PRODUCT_BUNDLE,
+        resource: resource,
+        bankStyle,
+        reviewed: {},
+        to,
+        list: resource.prefill.items,
+        currency
+      }
+    })
+  }
+
+  reviewFormsInContext({isRefresh}) {
+    const { navigator, bankStyle, resource, to, currency, list } = this.props
+    this.props.navigator.push({
+      title: translate('reviewData'),
       backButtonTitle: 'Back',
       componentName: 'RemediationItemsList',
       rightButtonTitle: 'Done',
@@ -1135,7 +1134,6 @@ class FormRequestRow extends Component {
       }
     })
   }
-
   chooser(prop) {
     let oResource = this.props.resource
     let model = utils.getModel(oResource.form)
@@ -1219,7 +1217,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       marginRight: -4,
       marginLeft: -1,
       flexDirection: 'row',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     shareablesArea: {
       borderBottomLeftRadius: 0,
@@ -1365,7 +1363,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     docText: {
       fontSize: 16,
-      color: '#555555'
+      color: '#555555',
+      // paddingLeft: 5,
+      paddingRight: 10
     },
     multiEntryDocText: {
       marginRight: -4,

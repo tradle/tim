@@ -178,17 +178,25 @@ const wrapNativeKeeper = nativeKeeper => {
     cacheKeeperUri(keeperUri, imageTag)
     return keeperUri
   }
+  const getBase64ForKeeperUri = async keeperUri => {
+    const imageTag = await prefetchUri(keeperUri)
+    if (imageTag)
+      return await ImageStore.getBase64ForTag({ imageTag })
+  }
 
   const replaceDataUrls = async object => {
     if (!NativeKeeper) return object
 
     const dataUrlProps = []
     traverse(object).forEach(function (value) {
-      if (typeof value === 'string' && value.startsWith('data:image/')) {
+      if (typeof value === 'string' &&
+        (value.startsWith('data:image/') || value.startsWith('data:application/pdf;'))
+        ) {
         dataUrlProps.push({ path: this.path, value })
       }
     })
-
+    if (dataUrlProps.length)
+      debugger
     await Promise.all(dataUrlProps.map(async ({ path, value }) => {
       const imageTag = await ImageStore.addImageFromBase64({ base64: value })
       const keeperUri = await importFromImageStore(imageTag)
@@ -209,6 +217,7 @@ const wrapNativeKeeper = nativeKeeper => {
     uncacheUri,
     importFromImageStore,
     replaceDataUrls,
+    getBase64ForKeeperUri,
     close: asyncNoop,
   }
 

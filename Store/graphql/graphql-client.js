@@ -3,14 +3,12 @@
 import omit from 'lodash/omit'
 import size from 'lodash/size'
 import isEmpty from 'lodash/isEmpty'
-import getPropertyAtPath from 'lodash/get'
+import size from 'lodash/size'
 import extend from 'lodash/extend'
-// import gql from 'graphql-tag'
+import getPropertyAtPath from 'lodash/get'
 import { utils as tradleUtils } from '@tradle/engine'
-// import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import { GraphQLClient } from 'graphql-request'
 import constants from '@tradle/constants'
-// import { print as printQuery } from 'graphql/language/printer'
 import utils from '../../utils/utils'
 const {
   TYPE,
@@ -37,11 +35,7 @@ var messageMap = {
 const useApollo = false
 var search = {
   initClient(meDriver, url) {
-    // debugger
-    // if (useApollo)
-    //   return this.initClientApollo(meDriver, url)
-    // else
-      return this.initClientGraphQLRequest(meDriver, url)
+    return this.initClientGraphQLRequest(meDriver, url)
   },
 
   initClientGraphQLRequest(meDriver, url, headers) {
@@ -158,16 +152,6 @@ var search = {
           op.GTE = `\n   ${p}: "${typeof val === 'date' &&  val ||  new Date(val).getTime()}",`
 
         else if (props[p].type === 'object') {
-          // if (Array.isArray(val)) {
-          //   let s = `${p}: [`
-          //   val.forEach((r, i) => {
-          //     if (i)
-          //       s += ', '
-          //     s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
-          //   })
-          //   s += ']'
-          //   inClause.push(s)
-          // }
           let isEnum = props[p].ref  &&  utils.isEnum(props[p].ref)
           if (Array.isArray(val)) {
             if (!val.length)
@@ -324,7 +308,6 @@ var search = {
 
     console.log(error)
     return { error: messageMap[error] || error, retry }
-      // throw error
 
     function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
       let isMoney = prop.ref === MONEY
@@ -351,9 +334,6 @@ var search = {
 
     }
   },
-                // # _author: "3c67687a96fe59d8f98b1c90cc46f943b938d54cda852b12fb1d43396e28978a"
-                // # _inbound: false
-                // # _recipient: ${hash}
   async getChat(params) {
     let { author, client, context, filterResource, limit, endCursor, application } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
@@ -440,12 +420,6 @@ var search = {
 
     try {
       let result = await this.execute({client, query, table})
-      // let result = await client.query({
-      //     fetchPolicy: 'network-only',
-      //     errorPolicy: 'all',
-      //     query: gql(`${query}`),
-      //     variables: filterResource || context ? null : {context: context}
-      //   })
       return result  &&  result.result
     } catch (err) {
       debugger
@@ -713,6 +687,7 @@ var search = {
     let isApplication = model  &&  model.id === APPLICATION
     if (p === 'verifications')
       return
+
     let isSubmissions
     if (isApplication) {
       if (isList  &&  p !== 'relationshipManagers')
@@ -834,7 +809,7 @@ var search = {
       if (result.error  &&  !excludeProps) {
         let { excludeProps, error, mapping } = await this.checkError(result, model)
         if (excludeProps)
-          return await this.getItem({id, client, backlink, excludeProps, mapping, isThisVersion})
+          return await this.getItem({ id, client, backlink, excludeProps, mapping, isThisVersion })
       }
       return result.result
     }
@@ -861,52 +836,7 @@ var search = {
       }
     }
     if (graphQLErrors  &&  graphQLErrors.length) {
-      let excludeProps = []
-      let mapping = {}
-      let str = 'Cannot query field \"'
-      let len = str.length
-      let props = model.properties
-      graphQLErrors.forEach(err => {
-        if (err.path) {
-          if (err.path === 1)
-            return
-          let prop
-          for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
-            let p = err.path[i]
-            if (props[p])
-              prop = p
-          }
-          if (prop) {
-            excludeProps.push(prop)
-            return
-          }
-        }
-
-        let msg = err.message
-        let idx = msg.indexOf(str)
-        if (idx !== 0)
-          return
-        idx = msg.indexOf('\"', len)
-        let field = msg.substring(len, idx)
-        // check if this is the table itself that is not recognized
-        if (field.indexOf(`_${model.id.replace('.', '_')}`) === -1) {
-          excludeProps.push(field)
-          let idx = msg.indexOf(' on type "')
-          if (idx === -1)
-            return
-          let idx2 = msg.indexOf('"', idx + 10)
-          if (idx2 === -1)
-            return
-          let type = msg.slice(idx + 10, idx2).replace(/_/g, '.')
-          if (utils.getModel(type)) {
-            let mprops = mapping[type]
-            if (!mprops)
-              mapping[type] = []
-            mapping[type].push(field)
-          }
-        }
-      })
-
+      let { excludeProps, mapping } = this.getExcludeProps(graphQLErrors, model)
       if (excludeProps.length)
         return { excludeProps, mapping }
       return { error: message, retry: message === NETWORK_FAILURE }
@@ -919,7 +849,54 @@ var search = {
     await utils.submitLog(true)
     return { error: message, retry: false }
   },
+  getExcludeProps(graphQLErrors, model) {
+    let excludeProps = []
+    let mapping = {}
+    let str = 'Cannot query field \"'
+    let len = str.length
+    let props = model.properties
+    graphQLErrors.forEach(err => {
+      if (err.path) {
+        if (err.path === 1)
+          return
+        let prop
+        for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
+          let p = err.path[i]
+          if (props[p])
+            prop = p
+        }
+        if (prop) {
+          excludeProps.push(prop)
+          return
+        }
+      }
 
+      let msg = err.message
+      let idx = msg.indexOf(str)
+      if (idx !== 0)
+        return
+      idx = msg.indexOf('\"', len)
+      let field = msg.substring(len, idx)
+      // check if this is the table itself that is not recognized
+      if (field.indexOf(`_${model.id.replace('.', '_')}`) === -1) {
+        excludeProps.push(field)
+        let idx = msg.indexOf(' on type "')
+        if (idx === -1)
+          return
+        let idx2 = msg.indexOf('"', idx + 10)
+        if (idx2 === -1)
+          return
+        let type = msg.slice(idx + 10, idx2).replace(/_/g, '.')
+        if (utils.getModel(type)) {
+          let props = mapping[type]
+          if (!props)
+            mapping[type] = []
+          mapping[type].push(field)
+        }
+      }
+    })
+    return { excludeProps, mapping }
+  },
   // TODO: rename _getItem to getItem
   // getItem: (...args) => search._getItem(...args),
   async getObjects(links, client) {
@@ -936,12 +913,6 @@ var search = {
     try {
       let result = await this.execute({client, query, table})
       return result.result  &&  result.result.objects  || []
-      // let result = await client.query({
-      //   fetchPolicy: 'network-only',
-      //   errorPolicy: 'all',
-      //   query: gql(`${query}`)
-      // })
-      // return result.data[table]  &&  result.data[table].objects
     }
     catch(err) {
       console.log('graphQL._getItem', err)
@@ -953,6 +924,7 @@ var search = {
     if (_link) return search.getIdentityByLink({ client, link: _link })
     if (_permalink) return search.getIdentityByPermalink({ client, permalink: _permalink })
     if (!pub) throw new Error('querying identities by _permalink is not supported at this time')
+
     const list = await search.searchServer({
       client,
       filterResource: { pub, importedFrom: null },
@@ -1013,6 +985,7 @@ var search = {
 
     return results[0]
   },
+
   async getMasterAuthorKey({pub, importedFrom}) {
     let table = 'rl_tradle_PubKey'
     let query = `query {
@@ -1040,6 +1013,7 @@ var search = {
     if (data.result  &&  data.result.edges.length)
       return data.result.edges[0].node.permalink
   },
+
   async execute(params) {
     if (useApollo)
       return this.executeApollo(params)
@@ -1063,6 +1037,8 @@ var search = {
     const result = await this.meDriver.sign({
       object: obj
     })
+    // const result = await this.meDriver.sign({ object })
+
 
     const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))

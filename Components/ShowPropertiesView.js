@@ -38,7 +38,6 @@ const APPLICATION = 'tradle.Application'
 const {
   TYPE,
   ROOT_HASH,
-  // PREV_HASH
 } = constants
 const {
   IDENTITY,
@@ -76,15 +75,7 @@ class ShowPropertiesView extends Component {
         {viewCols}
       </View>
     );
-    // return (
-    //   <ScrollView ref={(scroll) => {this.scroll = scroll}} style={{paddingBottom: 100}} key={this.getNextKey}>
-    //     {viewCols}
-    //   </ScrollView>
-    // );
   }
-  // scrollToBottom() {
-  //   this.scroll.scrollToEnd()
-  // }
   shouldComponentUpdate(nextProps, nextState) {
     // Prompt for employee to write a correction message
     if (utils.resized(this.props, nextProps))
@@ -117,6 +108,7 @@ class ShowPropertiesView extends Component {
     vCols = model.viewCols
     if (vCols)
       vCols = utils.ungroup({model, viewCols: vCols})
+    // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
     if (!resource[ROOT_HASH]) {
       if (!vCols)
         vCols = []
@@ -151,6 +143,13 @@ class ShowPropertiesView extends Component {
     let isPartial = model.id === PARTIAL
     let isMethod = utils.isSubclassOf(model, METHOD)
     let me = utils.getMe()
+    // HACK
+    // if (me.isEmployee  &&  !checkProperties  &&  resource._sourceOfData) {
+    //   vCols.push('_sourceOfData')
+    //   // vCols.push('_dataLineage')
+    // }
+
+    const ObjectModel = utils.getModel(OBJECT)
 
     const ObjectModel = utils.getModel(OBJECT)
 
@@ -163,7 +162,6 @@ class ShowPropertiesView extends Component {
         return
       if (!pMeta)
         pMeta = ObjectModel.properties[p]
-
       var val = resource[p];
       if (pMeta.range === 'json') {
         this.renderJsonProp(val, model, pMeta, viewCols)
@@ -181,7 +179,7 @@ class ShowPropertiesView extends Component {
           val = <Text style={styles.title}>{val}</Text>
         }
         else if (checkProperties) {
-          if (p.indexOf('_group') === p.length - 6) {
+          if (p.endsWith('_group')) {
             viewCols.push(
               <View style={{padding: 15}} key={this.getNextKey()}>
                 <View style={styles.groupStyle}>
@@ -444,7 +442,6 @@ class ShowPropertiesView extends Component {
     }
     return {val}
   }
-
   showScoreDetails() {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle, resource } = this.props
@@ -486,7 +483,7 @@ class ShowPropertiesView extends Component {
         return
       labels.push(<View style={styles.row} key={this.getNextKey()}>
                      <Text style={[styles.title]}>{key}</Text>
-                     <Text style={[styles.title, {color: '#2e3b4e'}]}>{value}</Text>
+                     <Text style={[styles.title, {color: '#555555'}]}>{value}</Text>
                   </View>)
     })
     return <View style={{paddingLeft: 10}} key={this.getNextKey()}>
@@ -553,13 +550,13 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       color: '#555555',
       alignSelf: 'center'
     },
-    smallLetters: {
-      fontSize: 12,
-      color: '#aaaaaa',
-    },
     linkTitle: {
       fontSize: 18,
       color: bankStyle.linkColor
+    },
+    smallLetters: {
+      fontSize: 12,
+      color: '#aaaaaa',
     },
     description: {
       fontSize: 18,

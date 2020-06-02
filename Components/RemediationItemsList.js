@@ -108,6 +108,7 @@ class RemediationItemsList extends Component {
     })
     navigator.pop();
   }
+
   onAction(params) {
     let { to, action, list, products, resource, isRefresh, requestForRefresh } = params
     if (!isRefresh  &&  (!resource  ||  !resource._dataBundle))
@@ -186,7 +187,6 @@ class RemediationItemsList extends Component {
 
   submitAllForms() {
     let { reviewed, resource, to } = this.props
-
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.addAll({resource, to, reviewed: reviewed && Object.values(reviewed), message: translate('confirmedMyData')})
     });
@@ -219,14 +219,15 @@ class RemediationItemsList extends Component {
         rightButtonTitle: 'Confirm',
         // parentMeta: model,
         passProps: {
-          bankStyle: bankStyle,
-          resource: resource,
-          currency: currency,
+          bankStyle,
+          resource,
+          currency,
           isReview: true,
           action: () => {
             // let newList = utils.clone(this.state.list)
             Actions.addChatItem({resource: resource, isRefresh: true})
             reviewed[rowId] = resource
+
             this.setState({
               // list: newList,
               dataSource: this.state.dataSource.cloneWithRows(this.state.list)

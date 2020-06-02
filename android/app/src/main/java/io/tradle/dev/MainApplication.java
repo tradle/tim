@@ -2,7 +2,8 @@ package io.tradle.dev;
 
 import android.app.Application;
 import android.content.Context;
-import android.support.multidex.MultiDex;
+import androidx.multidex.MultiDex;
+import androidx.multidex.MultiDexApplication;
 
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.RNFetchBlob.RNFetchBlobPackage;
@@ -10,6 +11,10 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.reactnativecommunity.webview.RNCWebViewPackage;
+import com.reactnativecommunity.viewpager.RNCViewPagerPackage;
+// import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
+import com.reactnativecommunity.netinfo.NetInfoPackage;
 import com.reactlibrary.RNReactNativeZoomSdkPackage;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
 // import com.microblink.reactnative.MicroblinkReactPackage;
@@ -53,7 +58,8 @@ import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
 // import com.anyline.reactnative.AnylinePackage;
 // import com.peel.react.TcpSocketsModule;
 
-public class MainApplication extends Application implements ReactApplication {
+// public class MainApplication extends Application implements ReactApplication {
+public class MainApplication extends MultiDexApplication implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
@@ -70,6 +76,10 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new RNCWebViewPackage(),
+            new RNCViewPagerPackage(),
+            // new AsyncStoragePackage(),
+            new NetInfoPackage(),
         new RNReactNativeZoomSdkPackage(),
         new RNRegulaDocumentReaderPackage(),
         new ImageStorePackage(),

@@ -30,7 +30,6 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 const debug = Debug('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
-
 import Embed from '@tradle/embed'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
@@ -75,13 +74,12 @@ var strMap = {
   'Please review and correct the data below': 'reviewScannedProperties',
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
-  'Please take a **selfie** picture of your face': 'takeAPicture',
   'The company was not found. Please fill out the form': 'fillOutTheForm',
+  'Please take a **selfie** picture of your face': 'takeAPicture',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
   'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning',
   'Please overwrite if data can`t be reused': 'overwriteIfCantReuse',
   'FinCrime needs to review this application': 'finCrimeReview',
-
 }
 
 var {
@@ -175,7 +173,7 @@ var utils = {
     return true;
   },
   async setMe({meRes, dictionaryDomains, providerDictionaries}) {
-    me = meRes
+    me = meRes;
     if (!me)
       return
     if (!me.language)
@@ -205,7 +203,6 @@ var utils = {
     let me = utils.getMe()
     let type = utils.getType(resource)
     if (type !== PROFILE  &&  type !== IDENTITY) {
-      // debugger
       debug(`utils.isMe was called for the resource with the type ${type}`)
       return false
     }
@@ -407,7 +404,7 @@ var utils = {
         if (utils.isEmpty(pinMap))
           return list
         let enumM = utils.getModel(ref)
-        let newpin = [] //= pin.filter((id) => pinMap[id])
+         let newpin = [] //= pin.filter((id) => pinMap[id])
         let separator1 = {
           [TYPE]: ref,
           [ROOT_HASH]: '__separator1',
@@ -465,10 +462,6 @@ var utils = {
         return property.description
       return property.title || utils.makeLabel(property.name)
     }
-    // HACK for property that changes title in case it is upload or scan
-    // if (this.isWeb()  &&  property.title  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
-    //   return property.title
-
     let translations = dictionary.properties[property.name]
     let val
     if (translations) {
@@ -990,13 +983,13 @@ var utils = {
     let dnProps = utils.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
-        if (!resource[p]  &&  !props[p].displayAs)
+        let prop = props[p]
+        if (!resource[p]  &&  !prop.displayAs)
           continue
         let dn
-        let prop = props[p]
-        if (props[p].ref  &&  utils.isEnum(props[p].ref))
+        if (prop.ref  &&  utils.isEnum(prop.ref))
           dn = utils.translateEnum(resource[p])
-        else if (props[p].range === 'model')
+        else if (prop.range === 'model')
           dn = utils.translate(utils.getModel(resource[p]))
         else if (rType === BOOKMARK)
           dn = utils.translate(resource.message)
@@ -1084,27 +1077,26 @@ var utils = {
         let { items } = meta
         if (items.ref  &&  utils.isEnum(items.ref))
           return resource[p].map((v) => utils.translateEnum(v)).join(', ')
-        else if (meta.inlined) {
-          let mProps = items.properties
-          if (_.size(mProps) === 1)
-            return resource[p][Object.keys(mProps)][0]
+        else if (!meta.inlined)
+          return displayName
+        let mProps = items.properties
+        if (_.size(mProps) === 1)
+          return resource[p][Object.keys(mProps)][0]
 
-          let dnProps = []
-          for (let ip in mProps) {
-            if (mProps[ip].displayName)
-              dnProps.push(ip)
-          }
-          if (!dnProps.length)
-            return
-          let dn = ''
-          let val = resource[p]
-          val.forEach((v, i) => {
-            if (i)
-              dn += ', '
-            dnProps.forEach(pr => dn += `${utils.translate(v[pr])}`)
-          })
-          return dn
+        let dnProps = []
+        for (let ip in mProps) {
+          if (mProps[ip].displayName)
+            dnProps.push(ip)
         }
+        if (!dnProps.length)
+          return
+        let dn = ''
+        let val = resource[p]
+        val.forEach((v, i) => {
+          if (i)
+            dn += ', '
+          dnProps.forEach(pr => dn += `${utils.translate(v[pr])}`)
+        })
       }
       else if (meta.type !== 'object') {
         if (meta.range  ===  'model') {
@@ -1118,11 +1110,8 @@ var utils = {
         return resource[p].title;
       if (meta.ref) {
         if (meta.ref == MONEY) {
-          if (locale) {
+          if (locale)
             return utils.formatCurrency(resource[p], locale)
-            // let currencyName = utils.getCurrencyName(resource[p].currency)
-            // return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource[p].value)
-          }
           let c = utils.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
@@ -1224,7 +1213,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return utils.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || utils.getDisplayName({ resource: resource[p], model: utils.getModel(resource[p][TYPE]) });
+      return resource[p].title || utils.getDisplayName({ resource: resource[p], model: utils.getModel(resource[p][TYPE]) })
     else
       return resource[p] + '';
   },
@@ -1433,7 +1422,7 @@ var utils = {
     //   // val = moment(date).format('[yesterday], h:mA');
     //   break;
     default:
-      val = utils.getDateValue(date, noTime) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
+      val = utils.getDateValue(date, noTime) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));      // val = moment(date).format('LL');
       // val = moment(date).format('LL');
     }
 
@@ -1485,6 +1474,9 @@ var utils = {
     else
       return 'http://' + url;
   },
+  // async resolveEmbeds(object) {
+  //   return await Embed.resolveEmbeds({object})
+  // },
   sendSigned(driver, opts) {
     if (opts.msg[TYPE] == SELF_INTRODUCTION) {
       opts.public = true
@@ -2462,7 +2454,6 @@ var utils = {
     return model.interfaces  &&  model.interfaces.indexOf(DOCUMENT) !== -1
   },
   getEnumValueId,
-  enumValue,
   getEnumProperty(model) {
     if (typeof model === 'string')
       model = utils.getModel(model)

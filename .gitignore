@@ -108,7 +108,6 @@ Store/utils/
 version.json
 *.dSYM.zip
 *.sh1
-debug/
 *.license
 code-push.json
 android/src/main/assets/Regula/db.dat

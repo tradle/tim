@@ -71,9 +71,8 @@ class TourPage extends Component {
       activeDotColor: activeDotColor || '#ffffff',
       rightTextColor: rightTextColor || '#ffffff',
       leftTextColor: leftTextColor || '#ffffff',
-      customStyles: this.props.customStyles
+      customStyles: this.props.customStyles,
     }
-
     if (pageArray) {
       return <AppIntro {...props} pageArray={pageArray} />
     }

@@ -68,23 +68,40 @@ const normalizeResult = ({results, json}) => {
       address = json.ft_Address.replace('^', ' ')
       // address = json.ft_Address
   }
+  let country = json.ft_Country
+  if (country  &&  country.length === 1  &&  country === 'D')
+    country = 'DEU'
+  let docCountry = json.ft_Issuing_State_Code
+  if (docCountry  &&  docCountry.length === 1  &&  docCountry === 'D')
+    docCountry = 'DEU'
+  let nationality = json.ft_Nationality_Code
+  if (nationality  &&  nationality.length === 1  &&  nationality === 'D')
+    nationality = 'DEU'
+
+  let firstName = json.ft_Given_Names || json.ft_Surname_And_Given_Names
+  let lastName = json.ft_Surname || json.ft_Fathers_Name
+  if (firstName  &&  !lastName  &&  json.ft_Issuing_State_Code === 'MEX')
+    ([firstName, lastName] = firstName.split('^'))
+
   let result = {
     personal: {
-      firstName: json.ft_Given_Names || json.ft_Surname_And_Given_Names,
-      lastName: json.ft_Surname || json.ft_Fathers_Name,
+      firstName,
+      lastName,
+      lastNameAtBirth: json.ft_Surname_at_Birth,
       middleName: json.ft_Middle_Name,
       full: address,
       city,
-      country: json.ft_Country,
+      country,
       dateOfBirth: json.ft_Date_of_Birth,
-      nationality: json.ft_Nationality_Code,
+      placeOfBirth: json.ft_Place_of_Birth,
+      nationality,
       sex: json.ft_Sex
     },
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
       dateOfIssue: json.ft_Date_of_Issue || json.ft_Date_of_Registration,
       issuer: json.ft_Place_of_Issue || json.ft_Authority || json.ft_Issuing_State_Code,
-      country: json.ft_Issuing_State_Code,
+      country: docCountry,
       documentNumber: json.ft_Document_Number || json.ft_RegCert_RegNumber,
       documentVersion: json.ft_DL_Restriction_Code
     }
@@ -128,8 +145,8 @@ const normalizeResult = ({results, json}) => {
   }
   // let docTypeM = getModel('tradle.IDCardType')
   // let documentType = buildStubByEnumTitleOrId(docTypeM, docType)
-  let country, countryId
-  let countryCode = json.ft_Issuing_State_Code
+  let countryId
+  let countryCode = docCountry
   if (countryCode) {
     country = getModel(COUNTRY).enum.find(c => c.cca3 === countryCode)
     if (country) {

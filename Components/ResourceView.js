@@ -54,7 +54,6 @@ import { signIn } from '../utils/localAuth'
 // import debug from '../utils/debug'
 // import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
-import ArticleView from './ArticleView'
 
 const SCAN_QR_CODE = 0
 const USE_TOUCH_ID = 1
@@ -122,8 +121,6 @@ class ResourceView extends Component {
   componentWillMount() {
     let { resource, search, backlink } = this.props
 
-    // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
-    // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
     let m = utils.getModel(rtype)
     if (utils.isInlined(m)) {

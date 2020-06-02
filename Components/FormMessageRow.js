@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {
-  TouchableHighlight,
+  TouchableOpacity,
   View,
   Image
 } from 'react-native'
@@ -8,19 +8,19 @@ import PropTypes from 'prop-types'
 
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 
 import dateformat from 'dateformat'
-import PhotoList from './PhotoList'
+
 import constants from '@tradle/constants'
 const { IDENTITY } = constants.TYPES
 var { TYPE, SIG } = constants
 
 import utils, { translate } from '../utils/utils'
+import PhotoList from './PhotoList'
 import RowMixin from './RowMixin'
 import { makeStylish } from './makeStylish'
-
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
 import { Text } from './Text'
@@ -31,8 +31,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 const SELFIE = 'tradle.Selfie'
-// const SENT = 'Sent'
-const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png'
 
 class FormMessageRow extends Component {
   static displayName = 'FormMessageRow'
@@ -123,10 +122,10 @@ class FormMessageRow extends Component {
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (rtype !== PRODUCT_REQUEST  &&  resource[SIG])
-      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, {resource})} underlayColor='transparent'>
-               {stub}
-             </TouchableHighlight>
+    if  (rtype !== PRODUCT_REQUEST  &&  resource[SIG])
+      stub = <TouchableOpacity onPress={this.props.onSelect.bind(this, {resource})}>
+                {stub}
+             </TouchableOpacity>
 
     return  <View style={styles.pageView}>
               {date}
@@ -155,8 +154,6 @@ class FormMessageRow extends Component {
     let isMyMessage = this.isMyMessage()
 
     let isShared = this.isShared()
-    // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
-
     var width = utils.getMessageWidth(FormMessageRow)
 
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
@@ -184,22 +181,23 @@ class FormMessageRow extends Component {
                </View>
 
     let docProps = !noContent  &&   utils.getPropertiesWithAnnotation(model, 'range')
-    let pdf, pdfUrl
     let { bankStyle } = this.props
+    let pdf
 
     for (let p in docProps) {
       if (properties[p].range !== 'document')
         continue
-      if (resource[p]  &&  resource[p].url) { //.indexOf(':application/pdf') !== -1) {
+
+      if (resource[p]  &&  resource[p].url) {
         let isPdf = resource[p].url.indexOf(':application/pdf') !== -1
         let doc
         if (isPdf)
           doc = <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
         else
           doc = <Icon size={43} name='ios-paper-outline' color={bankStyle.linkColor} />
-        pdf = <TouchableHighlight underlayColor='transparent' onPress={this.showPDF.bind(this, {photo: resource[p]})}>
+        pdf = <TouchableOpacity underlayColor='transparent' onPress={this.showPDF.bind(this, {photo: resource[p]})}>
                  {doc}
-              </TouchableHighlight>
+              </TouchableOpacity>
         break
       }
     }
@@ -269,15 +267,9 @@ class FormMessageRow extends Component {
       viewCols = Object.keys(viewCols)
 
     let moreCols = model.gridCols || model.viewCols;
-    if (!moreCols) {
+    if (!moreCols)
       moreCols = model.required
-      // if (!viewCols) {
-      //   const dnProps = utils.getPropertiesWithAnnotation(model, 'displayName')
-      //   if (utils.isEmpty(dnProps))
-      //     return
-      //   viewCols = Object.keys(dnProps)
-      // }
-    }
+
     if (moreCols) {
       if (viewCols)
         viewCols = viewCols.concat(moreCols)
@@ -290,9 +282,8 @@ class FormMessageRow extends Component {
 
     let vCols = [];
     let isShared = this.isShared()
-    if (viewCols) {
+    if (viewCols)
       viewCols = utils.ungroup({model, viewCols})
-    }
     let isProductRequest = resource[TYPE] === PRODUCT_REQUEST
 
     viewCols.forEach((v) => {
@@ -386,9 +377,6 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   else
     moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 0,  }
 
-  // let moreHeader = isMyMessage || isShared
-  //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
-  //                : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
   let rgb = utils.hexToRgb(bg)
   rgb = Object.values(rgb).join(',')

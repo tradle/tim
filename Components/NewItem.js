@@ -1,3 +1,12 @@
+import {
+  StyleSheet,
+  View,
+  // Text,
+  ScrollView,
+} from 'react-native'
+import PropTypes from 'prop-types'
+
+import React, { Component } from 'react'
 import t from 'tcomb-form-native'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
@@ -10,6 +19,8 @@ import myStyles from '../styles/styles'
 import NewResourceMixin from './NewResourceMixin'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
+import { Text } from './Text'
+
 const {
   TYPE
 } = constants
@@ -19,16 +30,6 @@ const {
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
-
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-} from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
 
 class NewItem extends Component {
   static displayName = 'NewItem'
@@ -217,8 +218,8 @@ class NewItem extends Component {
     let data = {[TYPE]: metadata.items.ref}
     let params = {
         meta: metadata,
+        model,
         data,
-        model: model,
         editable: true,
         // onSubmitEditing: this.onSavePressed.bind(this),
         component: NewItem

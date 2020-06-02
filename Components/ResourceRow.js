@@ -228,7 +228,7 @@ class ResourceRow extends Component {
       else
         title = <Text style={styles.resourceTitle}>{title}</Text>
       return  <View style={[styles.content, borderStyle]} key={this.getNextKey()}>
-                <TouchableOpacity onPress={() => this.props.selectModel(resource)} underlayColor='transparent'>
+                <TouchableOpacity onPress={() => this.props.selectModel(resource)}>
                   <View style={[styles.row, { width: utils.dimensions(ResourceRow).width - 10}]}>
                     <View style={[styles.textContainer, {margin: 7}]}>
                       {title}
@@ -283,15 +283,6 @@ class ResourceRow extends Component {
               </View>
     }
 
-    // let rId = utils.getId(this.props.resource)
-    // let cancelResource = (this.props.onCancel ||  this.state)
-    //                    ? <TouchableOpacity onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
-    //                        <View>
-    //                          <Icon name={sharedWith[rId] ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={sharedWith[rId] ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
-    //                        </View>
-    //                      </TouchableOpacity>
-    //                    : <View />;
-
     let bg
     let isReset = resource[ROOT_HASH] === '__reset'
     if (isChosen) {
@@ -306,7 +297,6 @@ class ResourceRow extends Component {
       bg = {backgroundColor: 'aliceblue'}
     else if (style)
       bg = {backgroundColor: style.listBg}
-
     if (!bg)
       bg = {}
     let color = style ? {color: style.listColor} : {}
@@ -340,7 +330,6 @@ class ResourceRow extends Component {
     let dateRow
     if (!this.isOfficialAccounts  &&  !this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
       let val = utils.formatDate(new Date(resource[this.dateProp]), true)
-      // let dateBlock = this.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
@@ -357,9 +346,6 @@ class ResourceRow extends Component {
                   <Text style={styles.countText}>{count}</Text>
                 </View>
 
-    // Grey out if not loaded provider info yet
-            // <ActivityIndicator hidden='true' color='#629BCA'/>
-
     let isOpaque = rType === ORGANIZATION && !resource.contacts  &&  !isChooser
     if (isOpaque)
       return (
@@ -375,7 +361,7 @@ class ResourceRow extends Component {
             {hideModeComponent}
           </View>
         </View>
-      )
+        )
 
     let onPress = this.action.bind(this, isReset)
     let action
@@ -471,7 +457,7 @@ class ResourceRow extends Component {
           dn = dn.toUpperCase()
       }
       else
-        dn = utils.getDisplayName({ resource });
+        dn = utils.getDisplayName({ resource })
 
       if (dn && dn.length)
         return <Text style={isSeparator ? styles.sepTitle : styles.resourceTitle}>{dn}</Text>;
@@ -614,14 +600,14 @@ class ResourceRow extends Component {
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
-      let dn = utils.getDisplayName({ resource, model });
-      return <Text style={styles.resourceTitle}>{dn}</Text>;
+      let dn = utils.getDisplayName({ resource, model })
+      return <Text style={styles.resourceTitle}>{dn}</Text>
     }
     if (!backlink)
       return renderedViewCols
     const { showRefResources, parentComponent } = this.props
     return [
-      <TouchableOpacity key={this.getNextKey()} onPress={showRefResources.bind(this, {resource, prop: backlink, component: parentComponent})} underlayColor='transparent'>
+      <TouchableOpacity key={this.getNextKey()} onPress={showRefResources.bind(this, {resource, prop: backlink, component: parentComponent})}>
         <View key={this.getNextKey()}>
           {renderedViewCols}
         </View>
@@ -675,11 +661,6 @@ var styles = StyleSheet.create({
     flexWrap: 'nowrap',
     color: '#999999',
     fontSize: 14,
-  },
-  applicant: {
-    color: '#999999',
-    fontSize: 16,
-    paddingTop: 3
   },
   row: {
     // backgroundColor: '#ffffff',

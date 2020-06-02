@@ -10,7 +10,7 @@ import constants from '@tradle/constants'
 import extend from 'lodash/extend'
 
 var { TYPE } = constants
-import { translate, getModel, getContentSeparator, isMyProduct, ungroup,
+import { translate, getModel, isMyProduct, ungroup,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
@@ -36,7 +36,6 @@ var uiUtils = {
     let { resource, navigator, bankStyle, currency, searchFunction } = params
     let btype = resource.bookmark[TYPE]
     let bm = getModel(btype)
-
     let route = {
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
@@ -80,6 +79,7 @@ var uiUtils = {
         return true
     }
   },
+
   showLoading(params) {
     if (!params.component)
       return
@@ -135,9 +135,10 @@ var uiUtils = {
     let newParams = extend({}, params)
     newParams.idx = idx
     newParams.message = message2.trim()
+    let msg = ` ${uiUtils.parseMessage(newParams)}`
     return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{translate(message1) + ' '}
              <Text style={{color: linkColor}}>{formTitle}</Text>
-             <Text>{` ${uiUtils.parseMessage(newParams)}`}</Text>
+             <Text>{msg}</Text>
            </Text>
   },
   getMarkdownStyles(bankStyle, isItalic, isMyMessage, isChat) {

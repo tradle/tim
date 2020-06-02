@@ -447,8 +447,7 @@ var NavigationBarRouteMapper = {
         icon = 'ios-send'
         iconSize = 28
       }
-      if (isAndroid)
-        viewStyle = {paddingTop: 14}
+      viewStyle = isAndroid  &&  {paddingTop: 14}
       style = {marginTop: -2}
       break
     case 'Download':
@@ -468,7 +467,7 @@ var NavigationBarRouteMapper = {
       break
     case 'Profile':
       isProfile = true
-      style = {marginTop: isAndroid ? 10 : 0}
+      style = isAndroid &&  {marginTop: 10}
       iconSize = 28
       icon = 'md-person'
       break
@@ -602,8 +601,6 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />
       else
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
-
-
       let provider
       if (resource  &&  resource[TYPE] === ORGANIZATION)
         provider = resource
@@ -670,7 +667,6 @@ var NavigationBarRouteMapper = {
     navigator.push({
       title: provider.name ||  provider.title,
       componentName: 'ResourceView',
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       passProps: {
         bankStyle,
@@ -678,7 +674,6 @@ var NavigationBarRouteMapper = {
       }
     })
   }
-
 };
 
 var styles = StyleSheet.create({

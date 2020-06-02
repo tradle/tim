@@ -461,8 +461,8 @@ class MessageRow extends Component {
     // }
 
     if (resource[TYPE] === DATA_BUNDLE) {
-      let org = resource.from.organization
       let message = ''
+      let org = resource.from.organization
       if (org)
         message = translate('importedData', resource.items.length, org.title)
       let msg = <View key={this.getNextKey()}>
@@ -934,8 +934,8 @@ var createStyles = utils.styleFactory(MessageRow, function ({ dimensions, bankSt
     },
   })
 })
-reactMixin(MessageRow.prototype, RowMixin);
+reactMixin(MessageRow.prototype, RowMixin)
 reactMixin(MessageRow.prototype, ResourceMixin)
 MessageRow = makeResponsive(MessageRow)
 
-module.exports = MessageRow;
+module.exports = MessageRow

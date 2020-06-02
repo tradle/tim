@@ -18,8 +18,6 @@ const {
   ROOT_HASH
 } = constants
 const {
-  // PROFILE,
-  // IDENTITY,
   MESSAGE,
   VERIFICATION
 } = constants.TYPES
@@ -103,7 +101,7 @@ class ApplicationView extends Component {
     let m = utils.getModel(rtype)
     if (utils.isInlined(m))
       return
-    Actions.getItem( {resource, search, backlink: backlink ||  tab} )
+    Actions.getItem( {resource, search, backlink: backlink || tab} )
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
@@ -160,8 +158,6 @@ class ApplicationView extends Component {
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale } = this.state
     let { navigator, currency, bankStyle } = this.props
-
-    // hasRM = hasRM  ||  resource.relationshipManagers
 
     hasRM = hasRM  ||  resource.analyst
 
@@ -265,7 +261,7 @@ class ApplicationView extends Component {
                             showCategory={this.showCategory.bind(this)}
                             checkFilter={this.state.checkFilter}
                             filterChecks={this.filterChecks.bind(this)}
-                            showDetails={this.state.showDetails}
+                            showDetails={showDetails}
                             approve={this.approve}
                             deny={this.deny}
                             bankStyle={bankStyle}/>
@@ -409,8 +405,8 @@ class ApplicationView extends Component {
             from: me,
             to: applicant
           }
-          // Actions.addMessage({msg: msg})
           Actions.approveApplication({application: resource, msg: msg})
+          // Actions.addMessage({msg: msg})
         }}
       ]
     )
@@ -463,7 +459,6 @@ class ApplicationView extends Component {
       }
     })
   }
-
 }
 
 reactMixin(ApplicationView.prototype, Reflux.ListenerMixin);

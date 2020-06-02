@@ -4,9 +4,9 @@ import {
   Platform,
   PixelRatio,
   View,
-  Modal,
   // Text,
   StatusBar,
+  Modal,
   TouchableOpacity,
   Alert,
 } from 'react-native'
@@ -33,8 +33,8 @@ import VerificationMessageRow from './VerificationMessageRow'
 import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
 import FormErrorRow from './FormErrorRow'
-import TourRow from './TourRow'
 import QRCode from './QRCode'
+import TourRow from './TourRow'
 import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
 import HomePageMixin from './HomePageMixin'
@@ -91,8 +91,8 @@ class MessageList extends Component {
       limit: LIMIT,
       hasProducts: resource  &&  this.hasProducts(resource),
       allLoaded: false,
-      step: -1,
       isModalOpen: false,
+      step: -1,
       bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: utils.getMe()._showStepIndicator
     }
@@ -168,7 +168,6 @@ class MessageList extends Component {
       Actions.getProductList({ resource })
     // if (resource  &&  resource[TYPE] === ORGANIZATION)
     setFontFamily(bankStyle)
-
     // if (utils.isWeb() &&  !utils.getMe()._masterAuthor)
     //   Actions.genPairingData(resource.url)
   }
@@ -285,7 +284,6 @@ class MessageList extends Component {
     if (action === 'updateItem') {
       if (resource._dataBundle)
         return
-
       let resourceId = utils.getId(resource)
       let replaced
       let list = this.state.list.map((r) => {
@@ -558,13 +556,13 @@ class MessageList extends Component {
     // Eliminating repeated alerts when connection returns after ForgetMe action
     if (!this.state.list  &&  !nextState.list)
       return false
-    if (this.state.isModalOpen  !== nextState.isModalOpen)
-      return true
     if (!this.state.list || !nextState.list)
       return true
     if (this.state.list.length !== nextState.list.length)
       return true
     if (utils.resized(this.props, nextProps))
+      return true
+    if (this.state.isModalOpen  !== nextState.isModalOpen)
       return true
     if (this.state.application !== nextState.application)
       return true
@@ -640,7 +638,7 @@ class MessageList extends Component {
       return;
     let application = this.state.application || this.props.application
     let model = utils.getModel(rtype);
-    let title //utils.getDisplayName(resource, model.properties);
+    let title
 
     if (rtype === VERIFICATION) {
       let type = utils.getType(r.document)
@@ -660,7 +658,6 @@ class MessageList extends Component {
         else
           isVerifier = !verification && utils.isVerifier(r)
       }
-
     }
     let { resource, currency } = this.props
     let lensId = utils.getLensId(r, resource)
@@ -676,8 +673,8 @@ class MessageList extends Component {
       // parentMeta: model,
       passProps: {
         bankStyle,
-        isChat: true,
         resource: r,
+        isChat: true,
         lensId: lensId,
         application,
         currency: this.calcCurrency(),
@@ -891,6 +888,7 @@ class MessageList extends Component {
     }
     let stepIndicator = this.getStepIndicator(context)
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
+    // Move to a separate source: also from ApplicationView
     let assignRM
     if (application  &&  !isRM(application)) {
       let hasRM = application.analyst != null
@@ -915,6 +913,7 @@ class MessageList extends Component {
                   </View>
 
     }
+
     if (!content) {
       let h = utils.dimensions(MessageList).height
       let maxHeight = h - NAV_BAR_HEIGHT
@@ -940,6 +939,7 @@ class MessageList extends Component {
         maxHeight -= 12
       if (assignRM)
         maxHeight -= 30
+
       let textInputHeight = isIphone10orMore() ? 60 : 45
 
       content = <GiftedMessenger style={{ marginLeft, marginRight, width, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
@@ -1007,7 +1007,7 @@ class MessageList extends Component {
       debugger
       let qr = JSON.stringify({
         schema: 'Pair',
-        data: pairingData // {crypto: 'Hello world'}
+        data: pairingData
       })
       qrcode = <View style={{padding: 20}}>
                  <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>

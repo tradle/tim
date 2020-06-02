@@ -178,7 +178,7 @@ class CheckView extends Component {
                                 <Text style={styles.checkOverrideText}>{ dn}</Text>
                               </View>
                             </View>
-                           </TouchableOpacity>
+                          </TouchableOpacity>
     }
     else if (!this.state.isLoading) { //  &&  isRM(application)) {
       let checkOverrideProp = getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
@@ -221,6 +221,7 @@ class CheckView extends Component {
       }
     })
   }
+
   createCheckOverride(prop) {
     const { navigator, bankStyle, application } = this.props
     const { resource } = this.state
@@ -231,8 +232,9 @@ class CheckView extends Component {
     let status
     if (checkStatus === 'pass')
       status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'fail').id)
-    else // if (checkStatus.indexOf('fail') !== -1)
+    else // if (checkStatus.indexOf('_fail') !== -1)
       status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
+
     let r = {
       from: getMe(),
       to: application.to,
@@ -244,7 +246,6 @@ class CheckView extends Component {
     }
     const { top } = application
     r.top = top || application
-
     navigator.push({
       componentName: 'NewResource',
       title: translate(model),

@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react'
 import {
   TouchableOpacity,
@@ -77,17 +76,17 @@ class GridRow extends Component {
     }
   }
   onRowUpdate(params) {
-    let { action, application, online, resource } = params
+    let { action, application, online, resource, forceUpdate, isConnected } = params
     switch (action) {
     case 'onlineStatus':
-      if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
-        this.setState({serverOffline: !online})
+      if (resource  &&  utils.getRootHash(resource) === utils.getRootHash(this.props.resource))
+        this.setState({ serverOffline: !online })
       break
     case 'connectivity':
-      this.setState({isConnected: params.isConnected})
+      this.setState({ isConnected })
       break
     case 'assignRM_Confirmed':
-      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH])
+      if (utils.getRootHash(application) === utils.getRootHash(this.props.resource))
         this.setState({application, resource: application})
       break
     case 'updateRow':
@@ -96,7 +95,7 @@ class GridRow extends Component {
         if (params.forceUpdate)
           this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
         else
-          this.setState({unread: params.resource._unread})
+          this.setState({unread: resource._unread})
       }
 
       break

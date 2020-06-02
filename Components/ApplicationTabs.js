@@ -32,8 +32,8 @@ import ShowPropertiesView from './ShowPropertiesView'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
-
 import { circled } from '../styles/utils'
+
 const colors = [
   '#5AFE3D',
   'darkviolet',
@@ -132,7 +132,9 @@ class ApplicationTabs extends Component {
       propsToShow = vCols
     }
     let hasCounts
+
     let hasSubmissions = resource.submissions
+
     propsToShow.forEach((p) => {
       // HACK
       if (p === 'submissions')
@@ -209,7 +211,6 @@ class ApplicationTabs extends Component {
           })
         }
       }
-
       flinkRL = <GridList
                     lazy={lazy}
                     modelName={modelName}
@@ -246,7 +247,6 @@ class ApplicationTabs extends Component {
           /*!resource.draft  &&*/
           resource.status !== 'approved' &&
           resource.status !== 'denied') {
-
         details = <View style={styles.buttonsFooter}>
                    {details}
                    <View style={styles.buttons}>
@@ -445,9 +445,6 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       marginBottom: 10,
       paddingHorizontal: 10,
       justifyContent: 'flex-start',
-      // alignSelf: 'center',
-      // flexDirection: 'row',
-      // justifiedContent: 'space-between'
     },
     approve: {
       backgroundColor: buttonBg,
@@ -504,10 +501,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     noSubmissionsIcon: {
       ...circled(30),
       backgroundColor: '#ececec',
-      // shadowOpacity: 0.7,
       opacity: 1,
-      // shadowRadius: 5,
-      // shadowColor: '#afafaf',
     },
     noSubmissionsText: {
       backgroundColor: '#ececec',

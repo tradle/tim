@@ -1,22 +1,3 @@
-
-import utils from '../utils/utils'
-var translate = utils.translate
-import Icon from 'react-native-vector-icons/Ionicons';
-import constants from '@tradle/constants'
-import RowMixin from './RowMixin'
-import ResourceMixin from './ResourceMixin'
-import equal from 'lodash/isEqual'
-import { makeResponsive } from 'react-native-orient'
-import StyleSheet from '../StyleSheet'
-import reactMixin from 'react-mixin'
-import chatStyles from '../styles/chatStyles'
-import ImageInput from './ImageInput'
-
-const PHOTO = 'tradle.Photo'
-const IPROOV_SELFIE = 'tradle.IProovSelfie'
-
-const TYPE = constants.TYPE
-
 import {
   // Text,
   TouchableHighlight,
@@ -26,9 +7,27 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
-import ENV from '../utils/env'
+import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
+import equal from 'lodash/isEqual'
+
+import constants from '@tradle/constants'
+const { TYPE } = constants
+
+import utils, { translate } from '../utils/utils'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import StyleSheet from '../StyleSheet'
+import reactMixin from 'react-mixin'
+import chatStyles from '../styles/chatStyles'
+import ImageInput from './ImageInput'
 import { parseMessage } from '../utils/uiUtils'
+import ENV from '../utils/env'
 import { Text } from './Text'
+
+const PHOTO = 'tradle.Photo'
+const IPROOV_SELFIE = 'tradle.IProovSelfie'
+
 
 class FormErrorRow extends Component {
   static propTypes = {
@@ -49,14 +48,7 @@ class FormErrorRow extends Component {
         resource._sendStatus !== nextProps.resource._sendStatus)
       return true
     let rid = utils.getId(resource)
-    // if (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === rid) {
-    //   // HACK for when the form status that is fulfilling this request changes the rendering uses
-    //   // the old list for that
-    //   if (nextProps.addedItem._documentCreated  &&  !nextProps.resource._documentCreated)
-    //     return false
-    //   return true
-    // }
-    if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
+    if (rid !== utils.getId(nextProps.resource) ||
         !equal(to, nextProps.to)                ||
         utils.resized(this.props, nextProps))
       return true
@@ -79,7 +71,7 @@ class FormErrorRow extends Component {
     const bankStyle = this.props.bankStyle
 
     if (!renderedRow.length) {
-      var vCols = utils.getDisplayName({ resource });
+      var vCols = utils.getDisplayName({ resource })
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
@@ -287,7 +279,6 @@ class FormErrorRow extends Component {
       let rtype = resource.prefill[TYPE] || utils.getId(resource.prefill).split('_')[0]
       let iconName = resource._documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
       let iconSize = resource._documentCreated ? 30 : 20
-
       let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
       let params = { resource, message: resource.message, bankStyle, noLink }
 

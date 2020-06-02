@@ -25,7 +25,6 @@ var OnePropFormMixin = {
     if (!item)
       return;
 
-    // let { resource, isRefresh } = this.props
     let { isRefresh, resource } = this.props
     if (doSet)
      ({ resource } = this.state)
@@ -63,7 +62,7 @@ var OnePropFormMixin = {
     const { navigator, bankStyle, isRefresh, resource } = this.props
     let sigView
     navigator.push({
-      title: translate(prop, utils.getModel(resource[TYPE])), //m.title,
+      title: translate(prop, utils.getModel(resource[TYPE])),
       componentName: 'SignatureView',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',

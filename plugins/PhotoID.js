@@ -208,7 +208,6 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
     {name: 'documentType'},
     {name: 'scan'}
   ]
-  // if (!scan) {
   if (isLicence) {
     switch (countryId) {
       case 'NZ':

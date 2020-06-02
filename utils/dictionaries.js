@@ -53,19 +53,6 @@ async function dictionaries({lang, dictionaryDomains, providerDictionaries}) {
   })
   return d
 }
-function dictionaries1(lang) {
-  let d = {models: {}, properties: {}, enums: {}}
-  let dM = dictionariesM  &&  dictionariesM[lang]  &&  genDictionary(dictionariesM[lang], lang, d.enums)
-  if (dM)
-    _.extend(d, dM)
-// debugger
-  let dCM = dictionariesCM  &&  dictionariesCM[lang]  &&  genDictionary(dictionariesCM[lang], lang, d.enums)
-  _.merge(d, dCM)
-  let dMCO = dictionariesMCO  &&  dictionariesMCO[lang]  &&  genDictionary(dictionariesMCO[lang], lang, d.enums)
-  _.merge(d, dMCO)
-
-  return d
-}
 function genDictionary(dictionary, lang, enums) {
   let groups = _.groupBy(dictionary, 'type')
   let models = groups[MODEL]

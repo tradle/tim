@@ -17,8 +17,8 @@ var asyncActions = [
 
   'getItem',
   'getMe',
-  'getTo',
-  'getFrom',
+  // 'getTo',
+  // 'getFrom',
   // 'getEmployeeInfo',
   'getTemporary',
   'getProductList',

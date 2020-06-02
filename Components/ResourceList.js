@@ -91,14 +91,16 @@ class ResourceList extends Component {
       }
     })
 
+    let { prop, filter, serverOffline, navigator, bankStyle,
+          multiChooser, isRegistration, resource, chat, onDone } = this.props
     this.state = {
       isLoading: true,
       dataSource,
-      allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
-      filter: this.props.filter,
+      allowToAdd: prop  &&  prop.allowToAdd,
+      filter,
       hideMode: false,  // hide provider
-      serverOffline: this.props.serverOffline,
-      isConnected: this.props.navigator.isConnected,
+      serverOffline,
+      isConnected: navigator.isConnected,
       isModalOpen: false,
       userInput: '',
       sharedContextCount: 0,
@@ -106,29 +108,27 @@ class ResourceList extends Component {
       hasPartials: false,
       hasBookmarks: false,
       hasTestProviders: false,
-      bankStyle: props.bankStyle
+      bankStyle
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
     // }
     if (props.multiChooser) {
       this.state.chosen = {}
-      let resource = this.props.resource
-      let prop = this.props.prop
       if (prop  &&  resource[prop.name])
         resource[prop.name].forEach(r => this.state.chosen[utils.getId(r)] = r)
     }
-    let isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
+    isRegistration = isRegistration ||  (resource  &&  resource[TYPE] === PROFILE  &&  !resource[ROOT_HASH])
     if (isRegistration)
       this.state.isRegistration = isRegistration;
-    let routes = this.props.navigator.getCurrentRoutes()
-    if (this.props.chat) {
+    let routes = navigator.getCurrentRoutes()
+    if (chat) {
       this.state.sharedWith = {}
       routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
     }
-    else if (this.props.onDone) {
+    else if (onDone) {
       this.state.sharedWith = {}
-      routes[routes.length - 1].onRightButtonPress = this.props.onDone.bind(this, this.state.chosen)
+      routes[routes.length - 1].onRightButtonPress = onDone.bind(this, this.state.chosen)
     }
     else if (this.props.onDownload) {
       routes[routes.length - 1].onRightButtonPress = this.props.onDownload.bind(this)
@@ -665,7 +665,7 @@ class ResourceList extends Component {
       }
     }
     else
-      title = resource.name //utils.getDisplayName(resource, model.properties);
+      title = resource.name
     let style = this.mergeStyle(resource.style)
 
     if (officialAccounts) {
@@ -742,7 +742,7 @@ class ResourceList extends Component {
 
   _selectResource(resource) {
     let model = utils.getModel(this.props.modelName);
-    let title = utils.getDisplayName({ resource });
+    let title = utils.getDisplayName({ resource })
     let newTitle = title;
     if (title.length > 20) {
       let t = title.split(' ');
@@ -1143,21 +1143,24 @@ class ResourceList extends Component {
     let w = 350
     let bgStyle = {backgroundColor: '#eeeeee', justifyContent: 'center'}
     let separator = getContentSeparator(this.state.bankStyle)
-    let qrcode = <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-                 <TouchableOpacity style={[styles.splashLayout, {width, height}]} onPress={() => this.closeModal()}>
-                   <View style={[styles.modalBackgroundStyle, {width, height}]}>
-                     <View style={{padding: 20}}>
-                       <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                         <QRCode inline={true} content={JSON.stringify(qr)} dimension={w} />
-                       </View>
-                       <View style={[{alignItems: 'center', paddingTop: 30}]}>
-                         <Text style={{fontSize: 24, color: '#fff'}}>{translate('scanToLogInToTradle')}</Text>
-                       </View>
-                     </View>
-                   </View>
-                 </TouchableOpacity>
-               </Modal>
+    let qrcode = (
+       <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+         <TouchableOpacity style={[styles.splashLayout, {width, height}]} onPress={() => this.closeModal()}>
+           <View style={[styles.modalBackgroundStyle, {width, height}]}>
+             <View style={{padding: 20}}>
+               <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                 <QRCode inline={true} content={qr} dimension={w} />
+               </View>
+               <View style={[{alignItems: 'center', paddingTop: 30}]}>
+                 <Text style={{fontSize: 24, color: '#fff'}}>{translate('scanToLogInToTradle')}</Text>
+               </View>
+             </View>
+           </View>
+         </TouchableOpacity>
+       </Modal>
+      )
 
+    let style = {backgroundColor: '#fff'}
     return (
       // <PageView style={style} separator={contentSeparator}>
       <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
@@ -1372,7 +1375,7 @@ class ResourceList extends Component {
           </View>
         </TouchableOpacity>
       </View>
-    // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+      // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
 
     let partial
     if (this.state.hasPartials) {
@@ -1465,16 +1468,6 @@ class ResourceList extends Component {
 
   showProducts() {
     const { productList, bankStyle } = this.state
-    // let prModel = utils.getModel(PRODUCT_REQUEST)
-    // let prop = prModel.properties.requestFor
-    // let model = utils.getModel(productList.form)
-    // let resource = {
-    //   [TYPE]: model.id,
-    //   from: utils.getMe(),
-    //   to: productList.from
-    // }
-    // if (productList._context)
-    //   resource._context = productList._context
     this.props.navigator.push({
       title: translate('pleaseChoose'),
       componentName: 'StringChooser',
@@ -1543,13 +1536,15 @@ class ResourceList extends Component {
     })
   }
   showBookmarks() {
-    this.props.navigator.push({
+    let { navigator, locale, bankStyle } = this.props
+    navigator.push({
       title: translate('bookmarks'),
       componentName: 'GridList',
       backButtonTitle: 'Back',
       passProps: {
         modelName: BOOKMARK,
-        bankStyle: this.props.bankStyle || this.state.bankStyle
+        locale,
+        bankStyle: bankStyle || this.state.bankStyle
       },
     })
   }
@@ -1639,18 +1634,6 @@ var styles = StyleSheet.create({
   partialsRow: prettifyRow({
     backgroundColor: '#FBFFE5'
   }),
-  // container: {
-  //   flex: 1,
-  //   backgroundColor: '#f7f7f7',
-  //   // backgroundColor: 'white',
-  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
-  // },
-  // listViewStyle: {
-  //   alignSelf: 'flex-end',
-  //   borderWidth: 1,
-  //   borderColor: '#f7f7f7',
-  //   borderLeftColor: '#cccccc'
-  // },
   centerText: {
     alignItems: 'center',
   },
@@ -1658,11 +1641,6 @@ var styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#cccccc',
   },
-  // icon: {
-  //   marginLeft: -23,
-  //   marginTop: -25,
-  //   color: 'red'
-  // },
   image: {
     width: 25,
     height: 25,
@@ -1675,7 +1653,6 @@ var styles = StyleSheet.create({
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
-    // borderColor: '#eeeeee',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
   },

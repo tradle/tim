@@ -30,7 +30,7 @@ const createButton = ({ text, ...props }) => (
   </TouchableHighlight>
 )
 
-const prettify = obj => obj ? JSON.stringify(obj, null, 2) : ''
+const prettify = (obj) => (obj ? JSON.stringify(obj, null, 2) : '')
 
 class ZoomUI extends React.Component {
   constructor() {
@@ -40,6 +40,8 @@ class ZoomUI extends React.Component {
   }
   verifyLiveness = async () => {
     const { success, status } = await Zoom.initialize({
+      topMargin: 1,
+      sizeRatio: 1,
       appToken: Platform.select(ENV.ZoomSDK.token),
       facemapEncryptionKey: Platform.select(ENV.ZoomSDK.facemapEncryptionKey),
       showPreEnrollmentScreen: false,
@@ -65,18 +67,20 @@ class ZoomUI extends React.Component {
       onPress: async () => {
         try {
           this.setState({
-            result: await this.verifyLiveness()
+            result: await this.verifyLiveness(),
           })
         } catch (error) {
           this.setState({ error })
         }
-      }
+      },
     })
     let result = this.renderResult()
-    let error = this.state.error  &&  <View>
-                                        {bigText('Error:')}
-                                        {this.renderError()}
-                                      </View>
+    let error = this.state.error && (
+      <View>
+        {bigText('Error:')}
+        {this.renderError()}
+      </View>
+    )
 
     return (
       <View style={styles.container}>
@@ -91,10 +95,12 @@ class ZoomUI extends React.Component {
   renderResult = () => {
     const { result } = this.state
     if (!result) return
-debugger
-    const { faceMetrics={} } = result
-    const { facemap, auditTrail=[] } = faceMetrics
-    const images = auditTrail.map((uri, i) => <Image key={`image${i}`} style={styles.image} source={{uri}} />)
+    debugger
+    const { faceMetrics = {} } = result
+    const { facemap, auditTrail = [] } = faceMetrics
+    const images = auditTrail.map((uri, i) => (
+      <Image key={`image${i}`} style={styles.image} source={{ uri }} />
+    ))
     return (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {bigText(prettify(result))}
@@ -103,11 +109,11 @@ debugger
     )
   }
   renderError = () => {
-    return this.state.error  &&  <View key='error'>{bigText(prettify(this.state.error))}</View>
+    return this.state.error && <View key="error">{bigText(prettify(this.state.error))}</View>
   }
 }
 
-AppRegistry.registerComponent('Tradle', () => ZoomUI);
+AppRegistry.registerComponent('Tradle', () => ZoomUI)
 
 const styles = StyleSheet.create({
   scrollContainer: {},
@@ -126,10 +132,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   hugeText: {
-    fontSize: 30
+    fontSize: 30,
   },
   image: {
-    flex:1,
+    flex: 1,
     resizeMode: 'contain',
     minWidth: 300,
     minHeight: 300,

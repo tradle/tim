@@ -32,9 +32,9 @@ const {
   MONEY
 } = constants.TYPES
 
-import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
+import { Text } from './Text'
 import ResourceMixin from './ResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import ShowPropertiesView from './ShowPropertiesView'
@@ -98,6 +98,7 @@ class NewResource extends Component {
       r = utils.clone(resource) //extend(true, r, props.resource)
     else
       r[TYPE] = model.id
+
     let isRegistration = !utils.getMe()  &&  model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
     let isUploading = !isRegistration  &&  (!r[ROOT_HASH] || Object.keys(r).length === 2)
     this.state = {
@@ -388,7 +389,7 @@ class NewResource extends Component {
     }
 
     let self = this;
-    let title = utils.getDisplayName({ resource });
+    let title = utils.getDisplayName({ resource })
     let isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
@@ -498,20 +499,6 @@ class NewResource extends Component {
         if (required.indexOf(p) === -1)
           required.push(p)
       })
-      // for (let p in requestedProperties) {
-      //   if (p.indexOf('_group') !== -1) {
-      //     if (requestedProperties[p].required) {
-      //       props[p].list.forEach(p => {
-      //         if (!requestedProperties[p])
-      //           required.push(p)
-      //       })
-      //     }
-      //   }
-      //   else if (required.indexOf(p) === -1) {
-      //     if (requestedProperties[p].required)
-      //       required.push(p)
-      //   }
-      // }
     }
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
       Object.keys(errs).forEach(prop => {
@@ -556,7 +543,7 @@ class NewResource extends Component {
       this.setState(state)
       // HACK for REFRESH
       this.state.missedRequiredOrErrorValue = missedRequiredOrErrorValue
-      return;
+      return
     }
     if (!value)
       debugger
@@ -574,6 +561,7 @@ class NewResource extends Component {
       if (originatingMessage.prefill)
         json._sourceOfData = originatingMessage
     }
+
     delete r.url
     let params = {
       value: json,
@@ -584,11 +572,13 @@ class NewResource extends Component {
       isRefresh,
       doNotSend: isRefresh,
       chat
-    };
+    }
+
     if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
       params.lens = this.floatingProps._lens
 
     // HACK
+    //???? Actions.saveTemporary(r)
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
     else if (editFormRequestPrefill) {
@@ -615,6 +605,7 @@ class NewResource extends Component {
     }
     return json
   }
+
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
   checkEnums(json, resource) {
@@ -767,6 +758,7 @@ class NewResource extends Component {
           delete resource[`${prefix}${p}`]
       }
     }
+
     this.setState({
       resource,
       itemsChangesCounter,
@@ -813,6 +805,18 @@ class NewResource extends Component {
       }
     });
   }
+  editItem(pMeta, item) {
+    let resource = this.state.resource
+    let prefix = `${pMeta.name}_`
+
+    for (let p in item) {
+      if (p.charAt(0) !== '_')
+        resource[`${prefix}${p}`] = item[p]
+    }
+    resource._editItem = item
+    this.onNewPressed(pMeta)
+  }
+
   getSearchResult() {
     let value = this.refs.form.getValue();
     if (!value) {
@@ -886,9 +890,9 @@ class NewResource extends Component {
     else
       editable = true
     let params = {
-        meta: meta,
-        data: data,
-        model: model,
+        meta,
+        data,
+        model,
         items: arrays,
         onEndEditing: this.onEndEditing,
         component: NewResource,
@@ -1086,6 +1090,8 @@ class NewResource extends Component {
                      {arrayItems}
                    </View>
     }
+    let form = <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
+
     let content =
       <ScrollView style={contentStyle}
                   ref='scrollView' {...this.scrollviewProps}>
@@ -1093,7 +1099,7 @@ class NewResource extends Component {
           {photoView}
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             {guidanceMsg}
-            <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
+            {form}
             {formsToSign}
             {button}
             {arrayItems}
@@ -1287,18 +1293,6 @@ class NewResource extends Component {
     }
   }
 
-  editItem(pMeta, item) {
-    let resource = this.state.resource
-    let prefix = `${pMeta.name}_`
-
-    for (let p in item) {
-      if (p.charAt(0) !== '_')
-        resource[`${prefix}${p}`] = item[p]
-    }
-    resource._editItem = item
-    this.onNewPressed(pMeta)
-  }
-
   showItems(prop) {
     let resource = this.state.resource;
     let model = (this.props.model  ||  this.props.metadata)
@@ -1330,7 +1324,7 @@ class NewResource extends Component {
       return
     let meta = this.props.model
     let blmodel = meta
-    let lcolor = this.getLabelAndBorderColor(bl.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(bl.name)
 
     let actionableItem
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
@@ -1351,7 +1345,6 @@ class NewResource extends Component {
                          </TouchableOpacity>
                          {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem, editItem: bl.items.ref &&  this.editItem})}
                        </View>
-
     }
     else {
       actionableItem = <View style={{width}}>
@@ -1375,7 +1368,7 @@ class NewResource extends Component {
     else if (!count)
       istyle.push({paddingBottom: 0, minHeight: 70})
     else {
-      let height = 55 //resource[bl.name].photo ? 55 : 45
+      let height = 55
       istyle.push({paddingBottom: 0, minHeight: count * height + 35})
     }
     istyle = StyleSheet.flatten(istyle)
@@ -1396,7 +1389,7 @@ class NewResource extends Component {
     let blmodel = meta
     let counter
     let itemsArray = null
-    let lcolor = this.getLabelAndBorderColor(bl.name)
+    let { lcolor, bcolor } = this.getLabelAndBorderColor(bl.name)
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
@@ -1525,6 +1518,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       ...formField,
       minHeight: 60,
       justifyContent: 'flex-end',
+      marginHorizontal: 15,
+      marginTop: 10
     },
     photoButton: {
       ...formField,
@@ -1548,7 +1543,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       alignSelf: 'center'
     },
     getStarted: {
-      backgroundColor: '#467EAE', //'#2892C6',
+      backgroundColor: '#467EAE',
       paddingVertical: 10,
       marginLeft: 10,
       alignSelf: 'stretch',
@@ -1627,11 +1622,9 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       justifyContent: 'center',
       width: 340,
       marginTop: 20,
-      // marginBottom: 50,
       alignSelf: 'center',
       height: 40,
       borderRadius: 5,
-      // marginHorizontal: 20
     },
     submitText: {
       fontSize: 20,
@@ -1645,7 +1638,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       backgroundColor: bankStyle.errorBgColor || '#990000',
       width: utils.getContentWidth(NewResource),
       alignItems: 'center',
-      paddingHorizontal: 7
+      paddingHorizontal: 15
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
@@ -1679,8 +1672,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     addButton: {
       ...circled(25),
       backgroundColor: bankStyle.linkColor,
-      // shadowOpacity: 0.7,
-      // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
     message: {
