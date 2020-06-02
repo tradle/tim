@@ -1160,7 +1160,6 @@ class ResourceList extends Component {
        </Modal>
       )
 
-    let style = {backgroundColor: '#fff'}
     return (
       // <PageView style={style} separator={contentSeparator}>
       <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>

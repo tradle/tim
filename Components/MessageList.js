@@ -1004,7 +1004,7 @@ class MessageList extends Component {
     let me = utils.getMe()
     if (pairingData  &&  !me._masterAuthor) {
       let w = isWeb() ? 500 : 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
-      debugger
+      // debugger
       let qr = JSON.stringify({
         schema: 'Pair',
         data: pairingData
