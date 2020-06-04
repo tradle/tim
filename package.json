@@ -60,7 +60,7 @@
     "@tradle/constants": "^2.5.0",
     "@tradle/custom-models": "github:tradle/custom-models",
     "@tradle/embed": "^1.2.4",
-    "@tradle/engine": "^8.3.0",
+    "@tradle/engine": "github:tradle/engine",
     "@tradle/errors": "^1.1.1",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.4.0",

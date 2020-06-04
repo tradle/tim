@@ -862,8 +862,8 @@
     },
     "@tradle/engine": {
       "version": "8.3.0",
-      "from": "@tradle/engine@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/engine/-/engine-8.3.0.tgz",
+      "from": "tradle/engine",
+      "resolved": "git://github.com/tradle/engine.git#1113e4f6d768403454b0c3a0c9725c2befdb764b",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
