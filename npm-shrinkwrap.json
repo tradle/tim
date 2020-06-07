@@ -112,7 +112,7 @@
     "@tradle/engine": {
       "version": "8.3.0",
       "from": "tradle/engine",
-      "resolved": "git://github.com/tradle/engine.git#1113e4f6d768403454b0c3a0c9725c2befdb764b",
+      "resolved": "git://github.com/tradle/engine.git#334bf68b49d65d294711d069301683135e5c160b",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
