@@ -5301,7 +5301,6 @@ debugger
       client.reset()
   },
   async onGetMasterIdentity(pairingData, url) {
-    let delay = delay || 1000
     if (!this.client)
       this.client = graphQL.initClient(meDriver, url)
     let masterAuthor
@@ -5330,7 +5329,8 @@ debugger
     return masterAuthor
   },
   async setupUser(masterAuthor, url) {
-    Actions.showModal({title: translate('pleaseWait'), showIndicator: true})
+    let title = `${translate('pairingDevicesIsInProgress')}\n  `
+    Actions.showModal({title, showIndicator: true})
     me._masterAuthor = masterAuthor
     await this.setMe(me)
 
@@ -5345,8 +5345,8 @@ debugger
       debugger
     }
     this.trigger({action: 'masterIdentity', me, isEmployee: list  &&  list.length})
-    Actions.hideModal()
-    Alert.alert(translate('pairingRequestWasProcessed'))
+    // Actions.hideModal()
+    // Alert.alert(translate('pairingRequestWasProcessed'))
 
     let isEmployee = list  &&  list.length
 
@@ -5360,6 +5360,10 @@ debugger
     else
       await this.onUpdateMe(me)
 // debugger
+    // Actions.hideModal()
+    this.trigger({action: 'syncDevicesIsDone', to: org})
+
+    Actions.showModal({title: `${title}${translate('pairingDevicesSync')}`, showIndicator: true})
     var msg = {
       message: 'Pairing devices',
       [TYPE]: DEVICE_SYNC,
@@ -5367,6 +5371,7 @@ debugger
       to: this.getRepresentative(utils.getId(org))
     }
     await this.onAddChatItem({resource: msg, noTrigger: true})
+    setTimeout(() => Actions.hideModal(), 60000)
   },
   async insurePublishingIdentity(org) {
     if (!me)
@@ -11137,92 +11142,105 @@ debugger
     }
   },
   async deviceSync(val) {
-    let { items } = val.items
-    this.addVisualProps(val)
-    let { from } = val
-    let fromHash = utils.getRootHash(from)
-    let fromId = utils.getId(from)
-    let promises = []
-    let contextIdToContext = {}
-    let org = this._getItem(fromId).organization
-    let orgId = utils.getId(org)
-    if (!this.client) {
-      this.client = graphQL.initClient(meDriver, this._getItem(org).url)
-    }
-    let masterIdentity = await this.gql('getIdentity', {_permalink: me._masterAuthor || me[ROOT_HASH]})
-    let allMyIdentities = [masterIdentity[ROOT_HASH]].concat(masterIdentity.pubkeys.filter(pub => pub.importedFrom).map(pub => pub.importedFrom))
-    let meStub = this.buildRef(me)
-    let contextTypes = [FORM_REQUEST, FORM_ERROR, APPLICATION_SUBMITTED]
+    // let title1 = translate('pairingDevicesIsInProgress')
+    // let title2 = translate('pairingDevicesSync')
+    // Actions.showModal({title: `${title1}\n${title2}`, showIndicator: true})
+    try {
+      let { items } = val.items
+      this.addVisualProps(val)
+      let { from } = val
+      let fromHash = utils.getRootHash(from)
+      let fromId = utils.getId(from)
+      let promises = []
+      let contextIdToContext = {}
+      let org = this._getItem(fromId).organization
+      let orgId = utils.getId(org)
+      if (!this.client) {
+        this.client = graphQL.initClient(meDriver, this._getItem(org).url)
+      }
+      let masterIdentity = await this.gql('getIdentity', {_permalink: me._masterAuthor || me[ROOT_HASH]})
+      let allMyIdentities = [masterIdentity[ROOT_HASH]].concat(masterIdentity.pubkeys.filter(pub => pub.importedFrom).map(pub => pub.importedFrom))
+      let meStub = this.buildRef(me)
+      let contextTypes = [FORM_REQUEST, FORM_ERROR, APPLICATION_SUBMITTED]
 
-    let lastFrIdx
-    for (let i = items.length - 1; i>=0  &&  !lastFrIdx; i--) {
-      let itype = items[i][TYPE]
-      if (itype === FORM_REQUEST ||  itype === FORM_ERROR)
-        lastFrIdx = i
-    }
-    items.forEach((r, i) => {
-      const propNames = Object.keys(utils.getModel(r[TYPE]).properties)
-      const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
-      let rr = _.pick(r, toKeep)
-      let rtype = r[TYPE]
-      let keeperRR = { ...rr }
-      let paired
-      // check if valid author
-      if (r._author !== fromHash) {
-        if (!allMyIdentities.includes(r._author)) {
-          debugger
-          return
+      let lastFrIdx
+      for (let i = items.length - 1; i>=0  &&  !lastFrIdx; i--) {
+        let itype = items[i][TYPE]
+        if (itype === FORM_REQUEST ||  itype === FORM_ERROR)
+          lastFrIdx = i
+      }
+      items.forEach((r, i) => {
+        const propNames = Object.keys(utils.getModel(r[TYPE]).properties)
+        const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
+        let rr = _.pick(r, toKeep)
+        let rtype = r[TYPE]
+        let keeperRR = { ...rr }
+        let paired
+        // check if valid author
+        if (r._author !== fromHash) {
+          if (!allMyIdentities.includes(r._author)) {
+            debugger
+            return
+          }
+          paired = me[ROOT_HASH] !== r._author
         }
-        paired = me[ROOT_HASH] !== r._author
-      }
 
-      this.rewriteStubs(rr)
-      _.extend(rr, {
-        [ROOT_HASH]: r._permalink,
-        [CUR_HASH]: r._link,
-        [TYPE]: rtype,
-      })
+        this.rewriteStubs(rr)
+        _.extend(rr, {
+          [ROOT_HASH]: r._permalink,
+          [CUR_HASH]: r._link,
+          [TYPE]: rtype,
+        })
 
-      let item = this._getItem(utils.getId(rr))
-      if (item)
-        debugger
-      promises.push(this._keeper.put(rr[CUR_HASH], keeperRR))
-
-      rr.from = from
-      rr.to = meStub
-      if (paired)
-        rr._paired = r._author
-      let rId = utils.getId(rr)
-      let isContext = utils.isContext(rtype)
-      if (isContext) {
-        contextIdToContext[rr.contextId] = rr
-        rr._context = this.buildRef(rr)
-      }
-      else {
-        let context
-        if (r.context && contextTypes.includes(rtype))
-          context = contextIdToContext[r.context]
-
-        if (!context  &&  r._contextId)
-          context = contextIdToContext[r._contextId]
-        if (context)
-          rr._context = this.buildRef(context)
-        else
+        let item = this._getItem(utils.getId(rr))
+        if (item)
           debugger
-      }
-      rr._message = true
-      // should be done before FR or FE are disabled
-      this.addMessagesToChat(orgId, rr)
-      if (rtype === FORM_ERROR  ||  rtype === FORM_REQUEST) {
-        if (i !== lastFrIdx)
-          rr._documentCreated = true
-      }
-      else
-        rr._latest = true
-      promises.push(this.dbPut(rId, rr))
-      this._setItem(rId, rr)
-    })
-    await Promise.all(promises)
+        promises.push(this._keeper.put(rr[CUR_HASH], keeperRR))
+
+        rr.from = from
+        rr.to = meStub
+        if (paired)
+          rr._paired = r._author
+        let rId = utils.getId(rr)
+        let isContext = utils.isContext(rtype)
+        if (isContext) {
+          contextIdToContext[rr.contextId] = rr
+          rr._context = this.buildRef(rr)
+        }
+        else {
+          let context
+          if (r.context && contextTypes.includes(rtype))
+            context = contextIdToContext[r.context]
+
+          if (!context  &&  r._contextId)
+            context = contextIdToContext[r._contextId]
+          if (context)
+            rr._context = this.buildRef(context)
+          else
+            debugger
+        }
+        rr._message = true
+        // should be done before FR or FE are disabled
+        this.addMessagesToChat(orgId, rr)
+        if (rtype === FORM_ERROR  ||  rtype === FORM_REQUEST) {
+          if (i !== lastFrIdx)
+            rr._documentCreated = true
+        }
+        else
+          rr._latest = true
+        promises.push(this.dbPut(rId, rr))
+        this._setItem(rId, rr)
+      })
+      await Promise.all(promises)
+    } catch (err) {
+      debugger
+      Actions.hideModal()
+      debug('Device sync error', err)
+      Alert.alert(translate('syncError'))
+      return
+    }
+    Actions.hideModal()
+    Alert.alert(translate('syncDevicesIsDone'))
     debugger
   },
   async checkIfMyOtherIdentity({val, obj, fromId}) {
