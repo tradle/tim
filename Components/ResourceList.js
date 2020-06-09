@@ -692,7 +692,7 @@ class ResourceList extends Component {
     let route = {
       componentName: 'MessageList',
       backButtonTitle: 'Back',
-      title: title,
+      title: isWeb()  &&  !me._masterAuthor ? `${title} -- ${translate('Pair')}` : title,
       passProps: {
         resource,
         limit: LIMIT,
