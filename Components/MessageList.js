@@ -191,6 +191,11 @@ class MessageList extends Component {
     }
     let { application, modelName, navigator } = this.props
     let chatWith = this.props.resource
+    if (action === 'syncDevicesIsDone') {
+      if (to  &&  utils.getRootHash(to) === utils.getRootHash(chatWith))
+        this.props.navigator.pop()
+      return
+    }
     if (action === 'masterIdentity') {
       this.setState({ isModalOpen: false })
       if (utils.getMe().isEmployee || params.isEmployee) {
