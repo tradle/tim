@@ -128,6 +128,8 @@ module.exports = {
     // "deviceDoesNotHaveMyKeys": "Received identity does not have my keys",
     "pleaseWait": "Please wait",
     "pairingRequestWasProcessed": "Pairing request was processed",
+    "pairingDevicesIsInProgress": "Pairing devices is in progress",
+    "pairingDevicesSync": "Synchronizing the content",
     "youShared": "You shared from {1}",
     "asVerifiedBy": "As verified by {1}",
     "asSentTo": "As sent to {1}",
@@ -313,6 +315,8 @@ module.exports = {
     "overwriteIfCantReuse": "Please overwrite if data can`t be reused",
     "finCrimeReview": "FinCrime needs to review this application",
     "scanToLogInToTradle": "Scan QR code with your mobile device",
+    "toPairDevices": "to pair devices",
+    "syncDevicesIsDone": "Device syncronization finished",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
