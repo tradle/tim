@@ -94,11 +94,11 @@ class MyProductMessageRow extends Component {
       title = title.substring(0, 27) + '...'
 
     renderedRow.push(
-      <View style={{flexDirection: 'row'}}>
+      <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
         <View style={{opacity: 0.7, marginTop:5, marginRight: 5}}>
         <Icon name='ios-ribbon' size={35} color={bankStyle.productBgColor  ||  '#289427'} />
         </View>
-        <Text  key={this.getNextKey()} style={[chatStyles.formType, {color: bankStyle.productBgColor  ||  '#289427'}]}>{title}</Text>
+        <Text style={[chatStyles.formType, {color: bankStyle.productBgColor  ||  '#289427'}]}>{title}</Text>
       </View>
       )
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
