@@ -1117,11 +1117,15 @@ var utils = {
   },
   formatCurrency(resource, locale) {
     let currencyName = utils.getCurrencyName(resource.currency)
+    if (utils.isAndroid())
+      return (resource.currency || '') + ' ' + resource.value
+
     let val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
-    val = val.replace(currencyName, resource.currency)
-    return val
+    return val.replace(currencyName, resource.currency)
   },
   formatNumber(val, locale) {
+    if (utils.isAndroid())
+      return val
     return new Intl.NumberFormat(locale).format(val)
   },
   getCurrencyName(c) {
