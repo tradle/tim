@@ -593,11 +593,11 @@ class ResourceList extends Component {
           title = translate(m)
 
         navigator.push({
-          title: title,
+          title,
           componentName: 'MessageView',
           backButtonTitle: 'Back',
           passProps: {
-            resource: resource,
+            resource,
             bankStyle: bankStyle || defaultBankStyle
           }
         });
