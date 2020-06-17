@@ -1412,7 +1412,7 @@ var Store = Reflux.createStore({
 
     for (let p in list) {
       let rr = this._getItem(p)
-      if (!utils.isMessage(rr))
+      if (!rr  ||  !utils.isMessage(rr))
         continue
       if (rr[TYPE] === SELF_INTRODUCTION  ||  rr[TYPE] === SEAL)
         continue
@@ -5318,6 +5318,7 @@ debugger
       maxAttempts: Infinity,
     })
     debugger
+    await this.requestIdentity({_permalink: masterAuthor})
     await this.setupUser(masterAuthor, url)
   },
   async lookupAndSetMasterAuthor(pairingData) {
@@ -5360,11 +5361,11 @@ debugger
     else
       await this.onUpdateMe(me)
 // debugger
-    // Actions.hideModal()
+
     this.trigger({action: 'syncDevicesIsDone', to: org})
 
     Actions.showModal({title: `${title}${translate('pairingDevicesSync')}`, showIndicator: true})
-    var msg = {
+     var msg = {
       message: 'Pairing devices',
       [TYPE]: DEVICE_SYNC,
       from: me,
@@ -7339,23 +7340,23 @@ debugger
   searchNotMessages(params) {
     if (params.list)
       return params.list.map((r) => this._getItem(r))
-    var foundResources = {};
+    let foundResources = {};
     let {modelName, limit, to, start, notVerified, query, all, isTest, sortProperty, asc} = params
-    var meta = this.getModel(modelName)
+    let meta = this.getModel(modelName)
     if (utils.isEnum(meta))
       return storeUtils.getEnum(params, enums)
     if (params.search)
       all = true
     // Product chooser for example
-    var props = meta.properties;
-    var containerProp, resourceId;
-    var foundRecs = 0
+    let props = meta.properties;
+    let containerProp, resourceId;
+    let foundRecs = 0
 
     let isOrg = modelName == ORGANIZATION
 
     let sortProp = sortProperty || (isOrg ? LAST_MESSAGE_TIME : meta.sort)
 
-    var isProfile = modelName === PROFILE
+    let isProfile = modelName === PROFILE
     // to variable if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (to) {
@@ -7366,7 +7367,7 @@ debugger
         }
       }
     }
-    var searchProp
+    let searchProp
     if (query) {
       let pidx = query.indexOf(':')
       if (pidx !== -1) {
@@ -7378,9 +7379,9 @@ debugger
         }
       }
     }
-    var subclasses = utils.getAllSubclasses(modelName).map((r) => r.id)
-    for (var key in list) {
-      var r = this._getItem(key);
+    let subclasses = utils.getAllSubclasses(modelName).map((r) => r.id)
+    for (let key in list) {
+      let r = this._getItem(key);
       let rtype = r[TYPE]
       if (rtype !== modelName) {
         if (subclasses) {
@@ -7410,7 +7411,7 @@ debugger
           break
         continue;
       }
-      var fr = this.checkCriteria({r, query, prop: searchProp})
+      let fr = this.checkCriteria({r, query, prop: searchProp})
       if (fr) {
         if (start  &&  foundRecs < start) {
           foundRecs++
@@ -7424,7 +7425,7 @@ debugger
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isProfile) {
       if (!isTest) {
-        var myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
+        let myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
         myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
              delete foundResources[meId.id];
@@ -7433,7 +7434,7 @@ debugger
     }
     if (utils.isEmpty(foundResources))
       return []
-    var result = utils.objectToArray(foundResources);
+    let result = utils.objectToArray(foundResources);
     if (isProfile  &&  !all  &&  me.isEmployee) {
       let retPeople = []
       // Filter out the employees of other service providers from contact list
@@ -7472,8 +7473,8 @@ debugger
     asc = (typeof asc != 'undefined') ? asc : false;
     if (props[sortProp].type == 'date') {
       result.sort((a,b) => {
-        var aVal = a[sortProp] ? a[sortProp] : 0;
-        var bVal = b[sortProp] ? b[sortProp] : 0;
+        let aVal = a[sortProp] ? a[sortProp] : 0;
+        let bVal = b[sortProp] ? b[sortProp] : 0;
         if (asc)
           return aVal - bVal;
         else
@@ -11142,9 +11143,6 @@ debugger
     }
   },
   async deviceSync(val) {
-    // let title1 = translate('pairingDevicesIsInProgress')
-    // let title2 = translate('pairingDevicesSync')
-    // Actions.showModal({title: `${title1}\n${title2}`, showIndicator: true})
     try {
       let { items } = val.items
       this.addVisualProps(val)
@@ -11266,7 +11264,10 @@ debugger
       }
       masterIdentity = await this.gql('getIdentity', {_permalink: me._masterAuthor || me[ROOT_HASH]})
       this._setItem(masterId, masterIdentity)
-      this.dbPut(masterId, masterIdentity)
+      if (masterIdentity) {
+        this._setItem(masterId, masterIdentity)
+        this.dbPut(masterId, masterIdentity)
+      }
     }
     let paired = masterIdentity && masterIdentity.pubkeys.find(pub => pub.importedFrom === author)
     if (!paired) {
@@ -11278,6 +11279,10 @@ debugger
         this.client = graphQL.initClient(meDriver, this._getItem(fr).url)
       }
       let newMasterIdentity = await this.gql('getIdentity', pub)
+      if (!newMasterIdentity) {
+        debugger
+        newMasterIdentity = await this.gql('getIdentity', pub)
+      }
       let newMasterIdentityId = utils.getId(newMasterIdentity)
       if (masterIdentity.pubkeys.length !== newMasterIdentity.pubkeys.length) {
         paired = newMasterIdentity.pubkeys.find(pub => pub.importedFrom === author)
@@ -12083,6 +12088,12 @@ debugger
   _setItem(key, value) {
     if (!value[TYPE]  ||  value[TYPE] === SELF_INTRODUCTION)
       return
+    if (value[TYPE] === IDENTITY) {
+      if (!list[IDENTITY])
+        list[IDENTITY] = {}
+      list[IDENTITY][key] = value
+    }
+
     let isMessage = utils.isMessage(value)
 
     // list[key] = { key, value}
@@ -12125,6 +12136,14 @@ debug(`deleteItemFromDB: ${itemId}`)
         let eVal = eValues.filter((ev) => utils.getId(ev) === r)
         if (eVal.length)
           return eVal[0]
+      }
+      else if (rtype === IDENTITY) {
+        let rootHash = utils.getRootHash(r)
+        for (let p in list[IDENTITY]) {
+          let item = list[p].value
+          if (item[ROOT_HASH] === rootHash  &&  item[TYPE] === IDENTITY)
+            return item
+        }
       }
     }
     else if (r.value)

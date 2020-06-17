@@ -596,11 +596,11 @@ class ResourceList extends Component {
           title = translate(m)
 
         navigator.push({
-          title: title,
+          title,
           componentName: 'MessageView',
           backButtonTitle: 'Back',
           passProps: {
-            resource: resource,
+            resource,
             bankStyle: bankStyle || defaultBankStyle
           }
         });
@@ -710,7 +710,7 @@ class ResourceList extends Component {
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
-          title: title,
+          title,
           componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -726,13 +726,13 @@ class ResourceList extends Component {
     else if (isOrganization) { //  &&  !utils.getMe().isEmployee) {
       route.rightButtonTitle = 'View'
       route.onRightButtonPress = {
-        title: title,
+        title,
         componentName: 'ResourceView',
         backButtonTitle: 'Back',
         passProps: {
           bankStyle: style,
-          resource: resource,
-          currency: currency
+          resource,
+          currency
         }
       }
     }
@@ -760,7 +760,7 @@ class ResourceList extends Component {
       // parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {
-        resource: resource,
+        resource,
         bankStyle: this.props.style,
         currency: this.props.currency
       },
@@ -805,8 +805,8 @@ class ResourceList extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: model,
-          resource: resource,
+          model,
+          resource,
           search: true,
           bankStyle: this.state.bankStyle,
         }
@@ -825,10 +825,10 @@ class ResourceList extends Component {
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
       query: this.state.filter,
-      modelName: modelName,
+      modelName,
       to: resource,
-      prop: prop,
-      listView: listView
+      prop,
+      listView
     });
   }
 
@@ -892,7 +892,7 @@ class ResourceList extends Component {
       componentName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
-        resource: resource,
+        resource,
         context: resource,
         filter: '',
         modelName: MESSAGE,

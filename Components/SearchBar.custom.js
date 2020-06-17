@@ -17,7 +17,7 @@ class SearchBar extends Component {
           style={styles.searchBarInput}
           autoCapitalize='none'
           onChange={this.props.onChangeText.bind(this)}
-          autoFocus={true}
+          autoFocus={Platform.OS === 'android' ? false : true}
           placeholder={placeholder || 'Search'}
           placeholderTextColor='#bbbbbb'
           underlineColorAndroid='transparent'

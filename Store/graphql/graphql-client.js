@@ -25,12 +25,12 @@ const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const NETWORK_FAILURE = 'Failed to fetch'
 const INVALID_QUERY = 'Syntax Error GraphQL request'
-
+const INTERNAL_SERVER_ERROR = 'Internal Server Error'
 const MAX_ATTEMPTS = 3
 
 var messageMap = {
   [NETWORK_FAILURE]: 'networkFailure',
-  [INVALID_QUERY]: 'invalidQuery'
+  [INVALID_QUERY]: 'invalidQuery',
 }
 const useApollo = false
 var search = {
@@ -824,7 +824,11 @@ var search = {
       ({ message, graphQLErrors, networkError } = result.error)
     }
     else {
+      debugger
       if (result.error.response) {
+        debugger
+        if (result.error.response.error === INTERNAL_SERVER_ERROR)
+          return {error: result.error.response.error, retry: true}
         graphQLErrors = result.error.response.errors
         message = INVALID_QUERY
       }
@@ -841,6 +845,8 @@ var search = {
         return { excludeProps, mapping }
       return { error: message, retry: message === NETWORK_FAILURE }
     }
+    debugger
+
     if (networkError  &&  networkError.message === NETWORK_FAILURE)
       return { error: NETWORK_FAILURE }
 
