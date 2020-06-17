@@ -986,6 +986,7 @@ class MessageList extends Component {
                  </View>
                  <View style={[styles.qrcode, {alignItems: 'center', paddingTop: 30}]}>
                    <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
+                   <Text style={{fontSize: 28, fornWeight: '600'}}>{translate('toPairDevices')}</Text>
                  </View>
                </View>
       return (
