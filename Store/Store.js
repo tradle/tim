@@ -1392,7 +1392,7 @@ var Store = Reflux.createStore({
 
     for (let p in list) {
       let rr = this._getItem(p)
-      if (!utils.isMessage(rr))
+      if (!rr  ||  !utils.isMessage(rr))
         continue
       if (rr[TYPE] === SELF_INTRODUCTION  ||  rr[TYPE] === SEAL)
         continue
@@ -5255,7 +5255,6 @@ debugger
       client.reset()
   },
   async onGetMasterIdentity(pairingData, url) {
-    let delay = delay || 1000
     if (!this.client)
       this.client = graphQL.initClient(meDriver, url)
     let masterAuthor
@@ -5273,6 +5272,7 @@ debugger
       maxAttempts: Infinity,
     })
     debugger
+    await this.requestIdentity({_permalink: masterAuthor})
     await this.setupUser(masterAuthor, url)
   },
   async lookupAndSetMasterAuthor(pairingData) {
@@ -5284,7 +5284,8 @@ debugger
     return masterAuthor
   },
   async setupUser(masterAuthor, url) {
-    Actions.showModal({title: translate('pleaseWait'), showIndicator: true})
+    let title = `${translate('pairingDevicesIsInProgress')}\n  `
+    Actions.showModal({title, showIndicator: true})
     me._masterAuthor = masterAuthor
     await this.setMe(me)
 
@@ -5299,8 +5300,8 @@ debugger
       debugger
     }
     this.trigger({action: 'masterIdentity', me, isEmployee: list  &&  list.length})
-    Actions.hideModal()
-    Alert.alert(translate('pairingRequestWasProcessed'))
+    // Actions.hideModal()
+    // Alert.alert(translate('pairingRequestWasProcessed'))
 
     let isEmployee = list  &&  list.length
 
@@ -5314,13 +5315,18 @@ debugger
     else
       await this.onUpdateMe(me)
 // debugger
-    var msg = {
+
+    this.trigger({action: 'syncDevicesIsDone', to: org})
+
+    Actions.showModal({title: `${title}${translate('pairingDevicesSync')}`, showIndicator: true})
+     var msg = {
       message: 'Pairing devices',
       [TYPE]: DEVICE_SYNC,
       from: me,
       to: this.getRepresentative(utils.getId(org))
     }
     await this.onAddChatItem({resource: msg, noTrigger: true})
+    setTimeout(() => Actions.hideModal(), 60000)
   },
   async insurePublishingIdentity(org) {
     if (!me)
@@ -7259,23 +7265,23 @@ debugger
   searchNotMessages(params) {
     if (params.list)
       return params.list.map((r) => this._getItem(r))
-    var foundResources = {};
+    let foundResources = {};
     let {modelName, limit, to, start, notVerified, query, all, isTest, sortProperty, asc} = params
-    var meta = this.getModel(modelName)
+    let meta = this.getModel(modelName)
     if (utils.isEnum(meta))
       return storeUtils.getEnum(params, enums)
     if (params.search)
       all = true
     // Product chooser for example
-    var props = meta.properties;
-    var containerProp, resourceId;
-    var foundRecs = 0
+    let props = meta.properties;
+    let containerProp, resourceId;
+    let foundRecs = 0
 
     let isOrg = modelName == ORGANIZATION
 
     let sortProp = sortProperty || (isOrg ? LAST_MESSAGE_TIME : meta.sort)
 
-    var isProfile = modelName === PROFILE
+    let isProfile = modelName === PROFILE
     // to variable if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (to) {
@@ -7286,7 +7292,7 @@ debugger
         }
       }
     }
-    var searchProp
+    let searchProp
     if (query) {
       let pidx = query.indexOf(':')
       if (pidx !== -1) {
@@ -7298,9 +7304,9 @@ debugger
         }
       }
     }
-    var subclasses = utils.getAllSubclasses(modelName).map((r) => r.id)
-    for (var key in list) {
-      var r = this._getItem(key);
+    let subclasses = utils.getAllSubclasses(modelName).map((r) => r.id)
+    for (let key in list) {
+      let r = this._getItem(key);
       let rtype = r[TYPE]
       if (rtype !== modelName) {
         if (subclasses) {
@@ -7330,7 +7336,7 @@ debugger
           break
         continue;
       }
-      var fr = this.checkCriteria({r, query, prop: searchProp})
+      let fr = this.checkCriteria({r, query, prop: searchProp})
       if (fr) {
         if (start  &&  foundRecs < start) {
           foundRecs++
@@ -7344,7 +7350,7 @@ debugger
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isProfile) {
       if (!isTest) {
-        var myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
+        let myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
         myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
              delete foundResources[meId.id];
@@ -7353,7 +7359,7 @@ debugger
     }
     if (utils.isEmpty(foundResources))
       return []
-    var result = utils.objectToArray(foundResources);
+    let result = utils.objectToArray(foundResources);
     if (isProfile  &&  !all  &&  me.isEmployee) {
       let retPeople = []
       // Filter out the employees of other service providers from contact list
@@ -7392,8 +7398,8 @@ debugger
     asc = (typeof asc != 'undefined') ? asc : false;
     if (props[sortProp].type == 'date') {
       result.sort((a,b) => {
-        var aVal = a[sortProp] ? a[sortProp] : 0;
-        var bVal = b[sortProp] ? b[sortProp] : 0;
+        let aVal = a[sortProp] ? a[sortProp] : 0;
+        let bVal = b[sortProp] ? b[sortProp] : 0;
         if (asc)
           return aVal - bVal;
         else
@@ -11048,92 +11054,102 @@ debugger
     }
   },
   async deviceSync(val) {
-    let { items } = val.items
-    this.addVisualProps(val)
-    let { from } = val
-    let fromHash = utils.getRootHash(from)
-    let fromId = utils.getId(from)
-    let promises = []
-    let contextIdToContext = {}
-    let org = this._getItem(fromId).organization
-    let orgId = utils.getId(org)
-    if (!this.client) {
-      this.client = graphQL.initClient(meDriver, this._getItem(org).url)
-    }
-    let masterIdentity = await this.gql('getIdentity', {_permalink: me._masterAuthor || me[ROOT_HASH]})
-    let allMyIdentities = [masterIdentity[ROOT_HASH]].concat(masterIdentity.pubkeys.filter(pub => pub.importedFrom).map(pub => pub.importedFrom))
-    let meStub = this.buildRef(me)
-    let contextTypes = [FORM_REQUEST, FORM_ERROR, APPLICATION_SUBMITTED]
+    try {
+      let { items } = val.items
+      this.addVisualProps(val)
+      let { from } = val
+      let fromHash = utils.getRootHash(from)
+      let fromId = utils.getId(from)
+      let promises = []
+      let contextIdToContext = {}
+      let org = this._getItem(fromId).organization
+      let orgId = utils.getId(org)
+      if (!this.client) {
+        this.client = graphQL.initClient(meDriver, this._getItem(org).url)
+      }
+      let masterIdentity = await this.gql('getIdentity', {_permalink: me._masterAuthor || me[ROOT_HASH]})
+      let allMyIdentities = [masterIdentity[ROOT_HASH]].concat(masterIdentity.pubkeys.filter(pub => pub.importedFrom).map(pub => pub.importedFrom))
+      let meStub = this.buildRef(me)
+      let contextTypes = [FORM_REQUEST, FORM_ERROR, APPLICATION_SUBMITTED]
 
-    let lastFrIdx
-    for (let i = items.length - 1; i>=0  &&  !lastFrIdx; i--) {
-      let itype = items[i][TYPE]
-      if (itype === FORM_REQUEST ||  itype === FORM_ERROR)
-        lastFrIdx = i
-    }
-    items.forEach((r, i) => {
-      const propNames = Object.keys(utils.getModel(r[TYPE]).properties)
-      const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
-      let rr = _.pick(r, toKeep)
-      let rtype = r[TYPE]
-      let keeperRR = { ...rr }
-      let paired
-      // check if valid author
-      if (r._author !== fromHash) {
-        if (!allMyIdentities.includes(r._author)) {
-          debugger
-          return
+      let lastFrIdx
+      for (let i = items.length - 1; i>=0  &&  !lastFrIdx; i--) {
+        let itype = items[i][TYPE]
+        if (itype === FORM_REQUEST ||  itype === FORM_ERROR)
+          lastFrIdx = i
+      }
+      items.forEach((r, i) => {
+        const propNames = Object.keys(utils.getModel(r[TYPE]).properties)
+        const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
+        let rr = _.pick(r, toKeep)
+        let rtype = r[TYPE]
+        let keeperRR = { ...rr }
+        let paired
+        // check if valid author
+        if (r._author !== fromHash) {
+          if (!allMyIdentities.includes(r._author)) {
+            debugger
+            return
+          }
+          paired = me[ROOT_HASH] !== r._author
         }
-        paired = me[ROOT_HASH] !== r._author
-      }
 
-      this.rewriteStubs(rr)
-      _.extend(rr, {
-        [ROOT_HASH]: r._permalink,
-        [CUR_HASH]: r._link,
-        [TYPE]: rtype,
-      })
+        this.rewriteStubs(rr)
+        _.extend(rr, {
+          [ROOT_HASH]: r._permalink,
+          [CUR_HASH]: r._link,
+          [TYPE]: rtype,
+        })
 
-      let item = this._getItem(utils.getId(rr))
-      if (item)
-        debugger
-      promises.push(this._keeper.put(rr[CUR_HASH], keeperRR))
-
-      rr.from = from
-      rr.to = meStub
-      if (paired)
-        rr._paired = r._author
-      let rId = utils.getId(rr)
-      let isContext = utils.isContext(rtype)
-      if (isContext) {
-        contextIdToContext[rr.contextId] = rr
-        rr._context = this.buildRef(rr)
-      }
-      else {
-        let context
-        if (r.context && contextTypes.includes(rtype))
-          context = contextIdToContext[r.context]
-
-        if (!context  &&  r._contextId)
-          context = contextIdToContext[r._contextId]
-        if (context)
-          rr._context = this.buildRef(context)
-        else
+        let item = this._getItem(utils.getId(rr))
+        if (item)
           debugger
-      }
-      rr._message = true
-      // should be done before FR or FE are disabled
-      this.addMessagesToChat(orgId, rr)
-      if (rtype === FORM_ERROR  ||  rtype === FORM_REQUEST) {
-        if (i !== lastFrIdx)
-          rr._documentCreated = true
-      }
-      else
-        rr._latest = true
-      promises.push(this.dbPut(rId, rr))
-      this._setItem(rId, rr)
-    })
-    await Promise.all(promises)
+        promises.push(this._keeper.put(rr[CUR_HASH], keeperRR))
+
+        rr.from = from
+        rr.to = meStub
+        if (paired)
+          rr._paired = r._author
+        let rId = utils.getId(rr)
+        let isContext = utils.isContext(rtype)
+        if (isContext) {
+          contextIdToContext[rr.contextId] = rr
+          rr._context = this.buildRef(rr)
+        }
+        else {
+          let context
+          if (r.context && contextTypes.includes(rtype))
+            context = contextIdToContext[r.context]
+
+          if (!context  &&  r._contextId)
+            context = contextIdToContext[r._contextId]
+          if (context)
+            rr._context = this.buildRef(context)
+          else
+            debugger
+        }
+        rr._message = true
+        // should be done before FR or FE are disabled
+        this.addMessagesToChat(orgId, rr)
+        if (rtype === FORM_ERROR  ||  rtype === FORM_REQUEST) {
+          if (i !== lastFrIdx)
+            rr._documentCreated = true
+        }
+        else
+          rr._latest = true
+        promises.push(this.dbPut(rId, rr))
+        this._setItem(rId, rr)
+      })
+      await Promise.all(promises)
+    } catch (err) {
+      debugger
+      Actions.hideModal()
+      debug('Device sync error', err)
+      Alert.alert(translate('syncError'))
+      return
+    }
+    Actions.hideModal()
+    Alert.alert(translate('syncDevicesIsDone'))
     debugger
   },
   async checkIfMyOtherIdentity({val, obj, fromId}) {
@@ -11159,7 +11175,10 @@ debugger
       }
       masterIdentity = await this.gql('getIdentity', {_permalink: me._masterAuthor || me[ROOT_HASH]})
       this._setItem(masterId, masterIdentity)
-      this.dbPut(masterId, masterIdentity)
+      if (masterIdentity) {
+        this._setItem(masterId, masterIdentity)
+        this.dbPut(masterId, masterIdentity)
+      }
     }
     let paired = masterIdentity && masterIdentity.pubkeys.find(pub => pub.importedFrom === author)
     if (!paired) {
@@ -11171,6 +11190,10 @@ debugger
         this.client = graphQL.initClient(meDriver, this._getItem(fr).url)
       }
       let newMasterIdentity = await this.gql('getIdentity', pub)
+      if (!newMasterIdentity) {
+        debugger
+        newMasterIdentity = await this.gql('getIdentity', pub)
+      }
       let newMasterIdentityId = utils.getId(newMasterIdentity)
       if (masterIdentity.pubkeys.length !== newMasterIdentity.pubkeys.length) {
         paired = newMasterIdentity.pubkeys.find(pub => pub.importedFrom === author)
@@ -11975,6 +11998,12 @@ debugger
   _setItem(key, value) {
     if (!value[TYPE]  ||  value[TYPE] === SELF_INTRODUCTION)
       return
+    if (value[TYPE] === IDENTITY) {
+      if (!list[IDENTITY])
+        list[IDENTITY] = {}
+      list[IDENTITY][key] = value
+    }
+
     let isMessage = utils.isMessage(value)
 
     // list[key] = { key, value}
@@ -12017,6 +12046,14 @@ debug(`deleteItemFromDB: ${itemId}`)
         let eVal = eValues.filter((ev) => utils.getId(ev) === r)
         if (eVal.length)
           return eVal[0]
+      }
+      else if (rtype === IDENTITY) {
+        let rootHash = utils.getRootHash(r)
+        for (let p in list[IDENTITY]) {
+          let item = list[p].value
+          if (item[ROOT_HASH] === rootHash  &&  item[TYPE] === IDENTITY)
+            return item
+        }
       }
     }
     else if (r.value)
