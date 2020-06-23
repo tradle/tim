@@ -156,6 +156,7 @@ module.exports = {
     "pleaseCorrect": "Please correct",
     "applyForProduct": "Apply for a product",
     "verifyPrompt": "Verify?",
+    "selectPropertiesForCorrection": "Select properties you want recipient to correct",
     "fieldErrorMessagePrompt": "What's wrong with this field?",
     "thisValueIsInvalidPlaceholder": "this value is invalid because...",
     "sourcesBy": "Sources by {1}",
