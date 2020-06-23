@@ -212,13 +212,21 @@ class MessageView extends Component {
     let { resource } = this.state
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
-        translate('verifyPrompt'),
+        translate('selectPropertiesForCorrection'),
         null,
         [
-          {text: 'Cancel', onPress: () => console.log('Canceled!')},
-          {text: 'Ok', onPress: this.createVerification},
+          {text: 'Ok', onPress: () => {}},
         ]
       )
+
+      // Alert.alert(
+      //   translate('verifyPrompt'),
+      //   null,
+      //   [
+      //     {text: 'Cancel', onPress: () => console.log('Canceled!')},
+      //     {text: 'Ok', onPress: this.createVerification},
+      //   ]
+      // )
     }
     else {
       let properties = utils.getModel(this.state.resource[TYPE]).properties
