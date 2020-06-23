@@ -7307,6 +7307,8 @@ debugger
     let subclasses = utils.getAllSubclasses(modelName).map((r) => r.id)
     for (let key in list) {
       let r = this._getItem(key);
+      if (!r  &&  this.getModel(key))
+        continue
       let rtype = r[TYPE]
       if (rtype !== modelName) {
         if (subclasses) {
@@ -10998,13 +11000,18 @@ debugger
         if (!context)
           debugger
         let chat
-        if (me.isEmployee)
-          chat = utils.getId(context.to) === utils.getId(this.getRepresentative(me.organization)) ? context.from : context.to
+        if (me.isEmployee)  {
+          let repId = utils.getId(this.getRepresentative(me.organization))
+          chat = utils.getId(context.to) === repId ? context.from : context.to
+        }
         else
           chat = utils.getId(context.to) === meId ? context.from : context.to
-        let chatR = this._getItem(chat)
-        let id  = chatR && chatR.organization ? utils.getId(chatR.organization) : utils.getId(chatR)
-        this.addMessagesToChat(id, val)
+        let chatR = chat  &&  this._getItem(chat)
+        let id
+        if (chatR) {
+          id = chatR.organization ? utils.getId(chatR.organization) : utils.getId(chatR)
+          this.addMessagesToChat(id, val)
+        }
       }
       else {
         let oId = utils.getId(org ? org : from)
