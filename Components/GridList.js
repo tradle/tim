@@ -691,7 +691,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { modelName, search, bankStyle, navigator, currency, locale } = this.props
     let isContact = modelName === PROFILE;
 
-    let isMyProduct = utils.isSubclassOf(resource[TYPE], MY_PRODUCT)
+    let rType = utils.getType(resource)
+    let isMyProduct = utils.isSubclassOf(rType, MY_PRODUCT)
     let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
     if (!isApplication  &&  !isMyProduct && utils.isMessage(resource)  ||  utils.isStub(resource)) {
