@@ -590,3 +590,4 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
 })
 
 module.exports = ShowPropertiesView;
+

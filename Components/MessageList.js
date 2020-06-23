@@ -672,6 +672,7 @@ class MessageList extends Component {
       verification = resource
 
     let bankStyle = this.state.bankStyle
+
     let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
     let route = {
       title: newTitle,
