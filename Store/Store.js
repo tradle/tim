@@ -7381,7 +7381,9 @@ debugger
     }
     let subclasses = utils.getAllSubclasses(modelName).map((r) => r.id)
     for (let key in list) {
-      let r = this._getItem(key);
+      let r = this._getItem(key)
+      if (!r  &&  this.getModel(key))
+        continue
       let rtype = r[TYPE]
       if (rtype !== modelName) {
         if (subclasses) {
