@@ -33,6 +33,7 @@ const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
 const FILE = 'tradle.File'
 const CHECK = 'tradle.Check'
+const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
 
 const {
@@ -146,6 +147,8 @@ class ShowPropertiesView extends Component {
 
     const ObjectModel = utils.getModel(OBJECT)
 
+    let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
+
     var viewCols = []
     vCols.forEach((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
@@ -209,7 +212,7 @@ class ShowPropertiesView extends Component {
           return
       }
 
-      let checkForCorrection = !model.notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
+      let checkForCorrection = !notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           viewCols.push(this.addForPartial(val, styles))
@@ -488,6 +491,7 @@ class ShowPropertiesView extends Component {
     let { checkProperties, errorProps, bankStyle, navigator, resource } = this.props
     if (!checkProperties  ||  pMeta.immutable)
       return
+
     let p = pMeta.name
     let icon = errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'
     return (
