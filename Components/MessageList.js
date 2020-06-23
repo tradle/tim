@@ -66,6 +66,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
 const REFRESH = 'tradle.Refresh'
 const SELFIE = 'tradle.Selfie'
+const CHECK_OVERRIDE = 'tradle.CheckOverride'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 const MAX_STEPS = isWeb() ? 10 : 5
@@ -649,6 +650,7 @@ class MessageList extends Component {
 
     let bankStyle = this.state.bankStyle
 
+    let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
     let route = {
       title: newTitle,
       backButtonTitle: 'Back',
@@ -673,7 +675,7 @@ class MessageList extends Component {
       //   showEdit = true
     }
     else
-      showEdit = !model.notEditable  &&   r._latest  && !application  &&  !utils.isMyProduct(model)
+      showEdit = !notEditable  &&   r._latest  && !application  &&  !utils.isMyProduct(model)
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
@@ -711,7 +713,7 @@ class MessageList extends Component {
           passProps
         }
     }
-    if (isVerifier) {
+    if (isVerifier  &&  !notEditable) {
       route.rightButtonTitle = 'Done' //ribbon-b|ios-close'
       route.help = translate('verifierHelp')  // will show in alert when clicked on help icon in navbar
       route.application = application

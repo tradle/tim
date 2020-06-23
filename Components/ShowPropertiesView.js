@@ -33,6 +33,7 @@ const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
 const FILE = 'tradle.File'
 const CHECK = 'tradle.Check'
+const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
 
 const {
@@ -143,6 +144,8 @@ class ShowPropertiesView extends Component {
 
     const ObjectModel = utils.getModel(OBJECT)
 
+    let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
+
     var viewCols = []
     vCols.forEach((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
@@ -152,8 +155,6 @@ class ShowPropertiesView extends Component {
         return
       if (!pMeta)
         pMeta = ObjectModel.properties[p]
-      // if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
-      //   return
       var val = resource[p];
       if (pMeta.range === 'json') {
         this.renderJsonProp(val, model, pMeta, viewCols)
@@ -208,7 +209,7 @@ class ShowPropertiesView extends Component {
           return
       }
 
-      let checkForCorrection = !model.notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
+      let checkForCorrection = !notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           viewCols.push(this.addForPartial(val, styles))
@@ -587,32 +588,3 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
 
 module.exports = ShowPropertiesView;
 
-  // getCheckForCorrection(pMeta) {
-  //   let { checkProperties, errorProps, bankStyle } = this.props
-  //   if (!checkProperties)
-  //     return
-  //   let p = pMeta.name
-  //   let isPromptVisible = this.state.promptVisible !== null
-
-  //   return <View>
-  //             <TouchableOpacity underlayColor='transparent' onPress={() => {
-  //               if (errorProps  &&  errorProps[p]) {
-  //                 delete errorProps[p]
-  //                 this.setState({promptVisible: null, uncheck: p})
-  //               }
-  //               else
-  //                 this.setState({promptVisible: pMeta})
-  //             }}>
-  //               <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
-  //             </TouchableOpacity>
-  //             <Prompt
-  //               title={translate('fieldErrorMessagePrompt')}
-  //               placeholder={translate('thisValueIsInvalidPlaceholder')}
-  //               visible={isPromptVisible}
-  //               onCancel={() => this.setState({ promptVisible: null })}
-  //               onSubmit={(value) => {
-  //                 this.setState({ promptVisible: null})
-  //                 this.props.checkProperties(this.state.promptVisible, value)
-  //               }}/>
-  //          </View>
-  // }
