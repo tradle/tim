@@ -233,8 +233,10 @@ class FormErrorRow extends Component {
       isReadOnlyChat = true
     else if (context) {
       if (context.from) {
-        if (utils.getId(context.from) !== utils.getId(utils.getMe()))
-          isReadOnlyChat = true
+        if (utils.getId(context.from) !== utils.getId(utils.getMe())) {
+          if (!utils.isMyMessage({resource: context}))
+            isReadOnlyChat = true
+        }
       }
       else if (utils.isReadOnlyChat(resource, context))
         isReadOnlyChat = true
