@@ -5357,6 +5357,7 @@ debugger
       let myEmployeeBadge = list[0]
       // let org = this._getItem(myEmployeeBadge.from).organization
       await this.setupEmployee(myEmployeeBadge, org)
+      Actions.hideModal()
     }
     else
       await this.onUpdateMe(me)
@@ -9282,7 +9283,7 @@ debugger
     // Allow sharing only of resources that were filled out by me
     if (!isMyProduct) {
       let fromId = utils.getId(r.from)
-      if (fromId !== utils.getId(me)) {
+      if (!r._paired  &&  fromId !== utils.getId(me)) {
         if (!me.isEmployee)
           return
         else {
