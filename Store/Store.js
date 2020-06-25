@@ -5358,6 +5358,7 @@ debugger
       // let org = this._getItem(myEmployeeBadge.from).organization
       await this.setupEmployee(myEmployeeBadge, org)
       Actions.hideModal()
+      return
     }
     else
       await this.onUpdateMe(me)
