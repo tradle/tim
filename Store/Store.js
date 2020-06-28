@@ -1422,7 +1422,7 @@ var Store = Reflux.createStore({
       // Shared context
       else if (utils.isContext(m)) {
         if (r._paired) {
-          debugger
+          // debugger
           let orgId = utils.getId(r.from.organization)
           this.addMessagesToChat(orgId, r, true)
         }
@@ -5202,7 +5202,7 @@ if (!res[SIG]  &&  res._message)
       pubkeys: meDriver.identity.pubkeys.concat(newKey),
       _time: now
     }
-debugger
+// debugger
     if (localMapping[url])
       url = localMapping[url]
     var resource = {
@@ -5862,7 +5862,8 @@ debugger
   },
   async getSentTo(resource, batch) {
     if (!me.isEmployee  ||  utils.getId(resource.from) !== utils.getId(resource.to))
-      return resource.to
+      return resource._paired && resource.from || resource.to
+
     if (resource._sentTo)
       return this.getRepresentative(resource._sentTo.id)
     // let shareWith = await this.getSentTo(resource)
@@ -7860,13 +7861,14 @@ debugger
       if (!this.inContext(r, context))
         return
     }
+    // debugger
     if (r.message  &&  r.message.length)  {
       let meId = utils.getId(me)
       if (r[TYPE] === SELF_INTRODUCTION  &&  !isForgetting && (utils.getId(r.to) !== meId))
         return
       if (r.message === ALREADY_PUBLISHED_MESSAGE)
         return
-      if (chatTo.organization  &&  r[TYPE] === CUSTOMER_WAITING) {
+      if (chatTo  &&  chatTo.organization  &&  r[TYPE] === CUSTOMER_WAITING) {
         var rid = utils.getId(chatTo.organization);
         if (!utils.isEmployee(this._getItem(rid)))
           return
@@ -7882,7 +7884,6 @@ debugger
         return (org) ? utils.getId(org) === toOrgId : false
       })
     }
-
     if (chatTo) {
       // backlinks like myVerifications, myDocuments etc. on Profile
       var isForm = utils.isForm(m)
@@ -7901,7 +7902,6 @@ debugger
     }
     if (params.strict  &&  chatId !== utils.getId(r.to))
       return
-
     if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
       return
     if (isVerificationR) {
@@ -8873,10 +8873,11 @@ debugger
         if (filter  &&  utils.getDisplayName({ resource: r }).indexOf(filter) === -1)
           return
         if (!curContext  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
+          let rep = r._paired && r.from || r.to
           let rr = {
             [TYPE]: VERIFICATION,
             document: r,
-            organization: this._getItem(utils.getId(r.to)).organization
+            organization: this._getItem(rep).organization
           }
           this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
         }
@@ -9171,7 +9172,8 @@ debugger
   },
   checkIfWasShared(document, to, context) {
     if (context  &&  document._context) {
-      if (context.requestFor  &&  document._context.requestFor  &&  context.requestFor  !==  document._context.requestFor)
+      let docContext = this._getItem(document._context)
+      if (context.requestFor  &&  docContext.requestFor  &&  context.requestFor  !==  docContext.requestFor)
         return
     }
     let toId
@@ -9239,7 +9241,7 @@ debugger
     }
     // Check that this is not the resource that was send to me as to an employee
     let meId = utils.getId(me)
-    if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
+    if (r._paired  ||  utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
       // Don't add this verification if it's for a previous copy of the document
       // If the this is the newer copy remove the older and push this one
       if (shareableResources[docType].length) {
@@ -10278,7 +10280,7 @@ debugger
   async _putInDb(obj, onMessage) {
     // defensive copy
     var self = this
-    var val = _.clone(obj.parsed.data)
+    let val = _.clone(obj.parsed.data)
     if (val[TYPE] === INTRODUCTION)
       return
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
@@ -10290,6 +10292,7 @@ debugger
 
     let valId = utils.getId(val)
     let inDB = this._getItem(valId)
+
     if (inDB) {
       if (obj.txId) {
         inDB.txId = obj.txId
@@ -10297,6 +10300,37 @@ debugger
         inDB.blockchain = obj.blockchain
         inDB.networkName = obj.networkName
         await db.put(valId, inDB)
+        return
+      }
+      let msgContext = obj.object  &&  obj.object.context
+      let me = utils.getMe()
+      if (me.isEmployee  ||  !msgContext)
+        return
+      let context = utils.getId(inDB._context)
+      let toId = obj.from && utils.makeId(PROFILE, obj.from[ROOT_HASH])
+      let to = this._getItem(toId)
+      debugger
+
+      let toOrg = this._getItem(to.organization)
+      // was it shared?
+      if (utils.getRootHash(context) !== msgContext) {
+        let result = await this.searchMessages({ to, modelName: FORM_REQUEST, filterProps: {context: msgContext}, noTrigger: true })
+      debugger
+        let formRequests = result.filter(fr => fr.form === val[TYPE])
+        formRequests.sort((a, b) => b._time - a._time)
+        let fr = formRequests[0]
+        fr._documentCreated = true
+        let frId = utils.getId(fr)
+        await this.dbPut(frId, fr)
+        this._setItem(frId, fr)
+        let time = fr._time + 100
+        this.addSharedWith({resource: inDB, shareWith: to, shareBatchId: Date.now(), time, formRequest: fr})
+        let valId = utils.getId(inDB)
+        this._setItem(valId, inDB)
+        await this.dbPut(valId, inDB)
+        this.addMessagesToChat(utils.getId(to.organization), inDB, false, time)
+        let v = {...inDB, ...val}
+        this.trigger({action: 'addItem', sendStatus: SENT, resource: v, to: toOrg})
       }
       return
     }
@@ -10308,13 +10342,13 @@ debugger
       val._forward = forward
     val[IS_MESSAGE] = true
 
-    var fromId = obj.objectinfo  &&  obj.objectinfo.author
+    let fromId = obj.objectinfo  &&  obj.objectinfo.author
                ? obj.objectinfo.author
                : obj.from[ROOT_HASH]
     fromId = utils.makeId(PROFILE, fromId)
+    let from = this._getItem(fromId)
 
-    var from = this._getItem(fromId)
-    var me = utils.getMe()
+    let me = utils.getMe()
     if (utils.getId(me) === fromId)
       val._time = val._time || obj.timestamp
     else {
@@ -10322,7 +10356,7 @@ debugger
       if (!val._time)
         val._time = new Date().getTime()
     }
-    var type = val[TYPE]
+    let type = val[TYPE]
     if (type === FORGET_ME) {
       let to = this._getItem(obj.to)
       await this.forgetMe(to)
@@ -10332,8 +10366,8 @@ debugger
       await this.forgotYou(from)
       return
     }
-    var isConfirmation
-    var model = this.getModel(type)
+    let isConfirmation
+    let model = this.getModel(type)
     if (!model) {
       if (val.message  &&  val.message.indexOf('Congratulations! You were approved for: ') != -1) {
         isMessage = true
@@ -10346,10 +10380,10 @@ debugger
         return;
     }
     // val.permissionKey = obj.permissionKey
-    var key = utils.getId(val)
-    var batch = []
-    var representativeAddedTo, noTrigger, application //,isRM
-    // var isServiceMessage
+    let key = utils.getId(val)
+    let batch = []
+    let representativeAddedTo, noTrigger, application //,isRM
+    // let isServiceMessage
     let isMessage = true
     if (model.id === IDENTITY)
       representativeAddedTo = this.putIdentityInDB(val, batch)
@@ -10365,9 +10399,10 @@ debugger
     self._mergeItem(key, val)
 
     let isMyMessage
+    let toId
     if (isMessage) {
-      var toId = obj.to.id ||  utils.makeId(PROFILE, obj.to[ROOT_HASH])
-      var meId = utils.getId(me)
+      toId = obj.to.id ||  utils.makeId(PROFILE, obj.to[ROOT_HASH])
+      let meId = utils.getId(me)
       isMyMessage = isMessage ? (toId !== meId  &&  fromId !== meId) : false
     }
 
@@ -10380,9 +10415,9 @@ debugger
 
     let triggerForModel
     if (isConfirmation  &&  isMyMessage) {
-      var fOrg = from.organization
-      var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
-      var msg = {
+      let fOrg = from.organization
+      let org = fOrg ? this._getItem(utils.getId(fOrg)) : null
+      let msg = {
         message: me.firstName + ' is waiting for the response',
         [TYPE]: CUSTOMER_WAITING,
         from: me,
@@ -10468,7 +10503,7 @@ debugger
           }
         }
         else {
-          var fid = this._getItem(val.from)
+          let fid = this._getItem(val.from)
           let productToForms = await this.gatherForms(fid, val._context)
           if (val._context)
             val._context = this.findContext(val._context)
@@ -10522,7 +10557,7 @@ debugger
       }
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
-      var orgList = this.searchNotMessages({modelName: ORGANIZATION})
+      let orgList = this.searchNotMessages({modelName: ORGANIZATION})
       this.trigger({action: 'list', modelName: ORGANIZATION, list: orgList, forceUpdate: true})
     }
     else if (!isMessage  &&  val[TYPE] === PARTIAL)
@@ -10538,8 +10573,8 @@ debugger
   //   return utils.getId(fromOrg) === utils.getId(yukiConfig.org)
   // },
   putIdentityInDB(val, batch) {
-    var profile = {}
-    // var me = utils.getMe()
+    let profile = {}
+    // let me = utils.getMe()
     if (val.name) {
       for (let p in val.name) {
         profile[p] = val.name[p]
@@ -10556,17 +10591,17 @@ debugger
     delete profile.pubkeys
     delete profile.v
     let key = utils.getId(val)
-    var profileKey = utils.getId(profile)
+    let profileKey = utils.getId(profile)
     let v = list[key] ? this._getItem(profileKey) : null
     if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
       v = me
     if (v)  {
-      var vv = {}
+      let vv = {}
       _.extend(vv, v)
       _.extend(vv, profile)
       profile = vv
     }
-    var org
+    let org
     if (val.organization) {
       org = list[utils.getId(val.organization)]  &&  this._getItem(utils.getId(val.organization))
       if (org) {
@@ -10576,14 +10611,14 @@ debugger
     }
     batch.push({type: 'put', key: profileKey, value: profile})
     this._setItem(profileKey, profile)
-    var representativeAddedTo
+    let representativeAddedTo
     batch.push({type: 'put', key: key, value: val})
     if (org) {
-      var doAdd
+      let doAdd
       if (!org.contacts)
         doAdd = true
       else {
-        var i = 0
+        let i = 0
         for (; i<org.contacts.length; i++) {
           if (org.contacts[i][ROOT_HASH] === key)
             break
@@ -10591,16 +10626,16 @@ debugger
         doAdd = i !== org.contacts.length
       }
       if (doAdd)  {
-        var representative = {
+        let representative = {
           id: key,
           title: val.formatted || val.firstName
         }
-        var oo = {}
+        let oo = {}
         _.extend(oo, org)
         if (!oo.contacts)
           oo.contacts = []
         oo.contacts.push(representative)
-        var orgKey = utils.getId(org)
+        let orgKey = utils.getId(org)
         this._setItem(orgKey, oo)
         batch.push({type: 'put', key: orgKey, value: oo})
         representativeAddedTo = org[ROOT_HASH]
@@ -10619,9 +10654,9 @@ debugger
       fromId = obj.objectinfo  &&  obj.objectinfo.author
     let fromProfile = utils.makeId(PROFILE, fromId)
 
-    var from = this._getItem(fromProfile)
+    let from = this._getItem(fromProfile)
     let type = val[TYPE]
-    var model = this.getModel(type)
+    let model = this.getModel(type)
     let isContext = utils.isContext(model)
     if (!from) {
       if (type !== SELF_INTRODUCTION)
@@ -10635,10 +10670,10 @@ debugger
     }
     let key = utils.getId(val)
 
-    var toId = obj.to.id || utils.makeId(PROFILE, obj.to[ROOT_HASH])
-    var to = this._getItem(toId)
-    var meId = utils.getId(me)
-    var fOrg
+    let toId = obj.to.id || utils.makeId(PROFILE, obj.to[ROOT_HASH])
+    let to = this._getItem(toId)
+    let meId = utils.getId(me)
+    let fOrg
     if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
       fOrg = to.organization
     else if (me.isEmployee) {
@@ -10647,10 +10682,10 @@ debugger
     }
     if (!fOrg)
       fOrg = from.organization
-    var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
+    let org = fOrg ? this._getItem(utils.getId(fOrg)) : null
     let isFormRequest = type === FORM_REQUEST
 
-    var inDB
+    let inDB
     if (onMessage) {
       let fromId = utils.getId(from)
       val.from = {
@@ -10789,7 +10824,7 @@ debugger
        }
       if (prefill) val.prefill = prefill
     }
-    var noTrigger, isRM, application
+    let noTrigger, isRM, application
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST) {
       if (utils.isSimulator()) {
         ///=============== TEST VERIFIERS
@@ -10847,7 +10882,7 @@ debugger
       val[NOT_CHAT_ITEM] = true
     }
 
-    var isModelsPack = type === MODELS_PACK
+    let isModelsPack = type === MODELS_PACK
 
     if (isModelsPack) {
       noTrigger = true
@@ -10888,7 +10923,7 @@ debugger
 
       noTrigger = val.from.id === meId
     }
-    var isStylesPack = type === STYLES_PACK
+    let isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
       org.style = utils.clone(val) //utils.interpretStylesPack(val)
       let exclude = [ROOT_HASH, CUR_HASH, TYPE]
@@ -11087,6 +11122,7 @@ debugger
         if (itype === FORM_REQUEST ||  itype === FORM_ERROR)
           lastFrIdx = i
       }
+      let formRequests = []
       items.forEach((r, i) => {
         const propNames = Object.keys(utils.getModel(r[TYPE]).properties)
         const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
@@ -11146,8 +11182,16 @@ debugger
         }
         else
           rr._latest = true
+
+        if (rtype === FORM_REQUEST)
+          formRequests.push(rr)
+        if (rtype !== PRODUCT_REQUEST  &&  utils.isSubclassOf(rr, FORM)) {
+          let fr = formRequests.filter(r => r.form === rtype)
+  debugger
+          this.addSharedWith({resource: rr, shareWith: from, time: rr._time, shareBatchId: Date.now(), formRequest: fr[fr.length - 1]})
+        }
+         this._setItem(rId, rr)
         promises.push(this.dbPut(rId, rr))
-        this._setItem(rId, rr)
       })
       await Promise.all(promises)
     } catch (err) {
