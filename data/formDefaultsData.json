@@ -332,6 +332,10 @@
     "documentNumber": "MORGA753116SM9IJ 35",
     "issuer": "DVLA",
     "dateOfExpiry": 1674000000000,
+    "houseNumber": "122",
+    "street": "BURNS CRESCENT",
+    "city": "EDINBURGH",
+    "region": "EH1 9GP",
     "scanJson": {
       "personal": {
         "firstName": "SARAH MEREDYTH",
