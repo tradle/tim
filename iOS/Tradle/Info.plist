@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.4.0.29</string>
+	<string>1.4.0.30</string>
 	<key>CodePushDeploymentKey</key>
 	<string>$(CODE_PUSH_KEY)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

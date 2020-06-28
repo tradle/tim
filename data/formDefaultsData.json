@@ -332,8 +332,29 @@
     "dateOfBirth": 195368400000,
     "documentNumber": "MORGA753116SM9IJ 35",
     "issuer": "DVLA",
-    "full": "34 South Hill Road, Kent DA12 1JX, UK",
-    "dateOfExpiry": 1674000000000
+    "dateOfExpiry": 1674000000000,
+    "houseNumber": "122",
+    "street": "BURNS CRESCENT",
+    "city": "EDINBURGH",
+    "region": "EH1 9GP",
+    "scanJson": {
+      "personal": {
+        "firstName": "SARAH MEREDYTH",
+        "birthData": "03/11/1976 UNITED KINGOOM",
+        "lastName": "MORGAN"
+      },
+      "address": {
+        "full": "122 BURNS CRESCENT EDINBURGH EH1 9GP"
+      },
+      "document": {
+        "dateOfIssue": "01/19/2013",
+        "country": "GBR",
+        "documentNumber": "MORGA753116SM9IJ 35",
+        "personalNumber": null,
+        "issuer": "DVLA",
+        "dateOfExpiry": "01/18/2023"
+      }
+    }
   },
   "tradle.WealthCV": {
     "narrative": "Bought and sold shares of Tradle"
