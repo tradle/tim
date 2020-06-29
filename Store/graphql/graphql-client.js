@@ -656,6 +656,8 @@ var search = {
         continue
       if (prop.displayAs)
         continue
+      if (me.isEmployee  &&  prop.clientUse)
+        continue
       let ptype = prop.type
       if (ptype === 'array') {
         let excludePropsFor = mapping  &&  prop.items.ref  &&  mapping[prop.items.ref]
