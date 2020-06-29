@@ -5258,20 +5258,31 @@ if (!res[SIG]  &&  res._message)
     if (!this.client)
       this.client = graphQL.initClient(meDriver, url)
     let masterAuthor
-    let masterIdentity = await tryWithExponentialBackoff(async () => {
-      try {
-        masterAuthor = await this.lookupAndSetMasterAuthor(pairingData)
-      } catch (err) {
-        debug('key not found, will retry') //, err)
-        throw err
-      }
-    }, {
-      intialDelay: 2000,
-      maxDelay: 2000,
-      maxTime: Infinity,
-      maxAttempts: Infinity,
-    })
-    debugger
+    let attempts = 0
+    let maxAttempts = 30
+    let masterIdentity
+    try {
+      masterIdentity = await tryWithExponentialBackoff(async () => {
+        try {
+          masterAuthor = await this.lookupAndSetMasterAuthor(pairingData)
+        } catch (err) {
+          debug('key not found, will retry') //, err)
+          throw err
+        }
+      }, {
+        intialDelay: 2000,
+        maxDelay: 2000,
+        maxTime: 60000,
+        maxAttempts,
+      })
+    } catch (err) {
+      debugger
+    }
+    if (!masterAuthor) {
+      Alert.alert(translate('pleaseTryAgain'))
+      this.trigger({ action: 'goBack' })
+      return
+    }
     await this.requestIdentity({_permalink: masterAuthor})
     await this.setupUser(masterAuthor, url)
   },
