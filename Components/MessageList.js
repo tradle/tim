@@ -211,6 +211,10 @@ class MessageList extends Component {
       return
     }
     let { application, modelName, navigator } = this.props
+    if (action === 'goBack') {
+      navigator.pop()
+      return
+    }
     let chatWith = this.props.resource
     if (action === 'syncDevicesIsDone') {
       if (to  &&  utils.getRootHash(to) === utils.getRootHash(chatWith))
