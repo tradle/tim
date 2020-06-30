@@ -141,8 +141,18 @@ class ModificationRow extends Component {
                    {val.map(v => <Text  style={styles.sourceTitle} key={this.getNextKey()}>{v.title}</Text>)}
                 </View>
           }
-          else
-            pVal = <Text  style={styles.sourceTitle} key={this.getNextKey()}>{val}</Text>
+          else {
+            let valToShow = val
+            if (typeof val === 'object')   {
+              // if (pprop.range === 'json')
+              //   continue
+              // else
+                valToShow = JSON.stringify(val, null, 2)
+            }
+            pVal = <View key={this.getNextKey()}>
+                     <Text  style={styles.sourceTitle} key={this.getNextKey()}>{valToShow}</Text>
+                   </View>
+          }
           let label = pprop && translate(pprop, model) || part
           cols.push(<View style={styles.row} key={this.getNextKey()}>
                      <View style={styles.label}>

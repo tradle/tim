@@ -169,7 +169,7 @@ class ShowPropertiesView extends Component {
           val = utils.templateIt(pMeta, resource);
           if (!val)
             return
-          val = <Text style={styles.title}>{val}</Text>
+          val = <Text style={styles.link}>{val}</Text>
         }
         else if (checkProperties) {
           if (p.endsWith('_group')) {
@@ -189,7 +189,7 @@ class ShowPropertiesView extends Component {
           val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
         }
         else
-          return;
+          return
       }
       else if (pMeta.type === 'date') {
         if (pMeta.format)
@@ -201,7 +201,7 @@ class ShowPropertiesView extends Component {
           val = utils.formatDate(val)
         }
       }
-      else if (pMeta.type === 'number'  &&  locale)
+      else if (!pMeta.range  &&  pMeta.type === 'number'  &&  locale)
         val = utils.formatNumber(val, locale)
       else if (pMeta.ref) {
         ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
@@ -258,7 +258,7 @@ class ShowPropertiesView extends Component {
       if (isPromptVisible)
         console.log(this.state.promptVisible)
 
-      var isDirectionRow;
+      var isDirectionRow
       if (checkProperties)
         isDirectionRow = true
 
@@ -290,7 +290,7 @@ class ShowPropertiesView extends Component {
           </View>
         )
     }
-    return viewCols;
+    return viewCols
   }
   renderJsonProp(val, model, pMeta, viewCols) {
     if (!val  ||  utils.isEmpty(val))
@@ -520,8 +520,8 @@ class ShowPropertiesView extends Component {
       return 'invalidValue'
   }
 }
-reactMixin(ShowPropertiesView.prototype, RowMixin);
-reactMixin(ShowPropertiesView.prototype, ResourceMixin);
+reactMixin(ShowPropertiesView.prototype, RowMixin)
+reactMixin(ShowPropertiesView.prototype, ResourceMixin)
 
 var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
@@ -586,5 +586,5 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
   })
 })
 
-module.exports = ShowPropertiesView;
+module.exports = ShowPropertiesView
 
