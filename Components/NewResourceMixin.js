@@ -152,6 +152,7 @@ var NewResourceMixin = {
     const isMessage = meta.id === MESSAGE
     let options = {fields: {}}
     let resource = this.state.resource
+    let isNew = !data[ROOT_HASH]
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
@@ -208,10 +209,12 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
+      let propNotEditable = props[p].readOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
+
       if (props[p].description)
         options.fields[p].help = props[p].description;
-      if (props[p].readOnly  ||  (props[p].immutable  &&  data[p]))
-        options.fields[p] = {editable:  false };
+      if (propNotEditable)
+        options.fields[p] = { editable:  false }
 
       let pName = isInlineArray  &&  `${params.meta.name}_${p}`
       let val = isInlineArray && resource[pName] || data[p]
@@ -230,7 +233,7 @@ var NewResourceMixin = {
                     model: meta,
                     errors: formErrors,
                     component,
-                    editable,
+                    editable: !propNotEditable || search,
                     value: val
                   })
 
@@ -254,6 +257,7 @@ var NewResourceMixin = {
                     value: val,
                     required: !maybe,
                     component,
+                    editable: !propNotEditable || search,
                     errors: formErrors,
                   })
 
@@ -296,7 +300,7 @@ var NewResourceMixin = {
                     value: val || null,
                     required: !maybe,
                     errors: formErrors,
-                    editable,
+                    editable: editable && !propNotEditable || search,
                   })
         }
         else if (type === 'string'  &&  props[p].signature) {
@@ -309,11 +313,10 @@ var NewResourceMixin = {
                     errors: formErrors,
                     component,
                     doSet: eCols.length > 1,
-                    editable,
+                    editable: editable && !propNotEditable || search,
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
-          let editable = (params.editable && !props[p].readOnly) || search || false
           if (val)
             val += ''
           else
@@ -327,7 +330,7 @@ var NewResourceMixin = {
                     onSubmitEditing: onSubmitEditing.bind(this),
                     errors: formErrors,
                     component,
-                    editable,
+                    editable: editable && !propNotEditable || search || false,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -377,7 +380,7 @@ var NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable,
+                    editable: !propNotEditable
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -396,7 +399,7 @@ var NewResourceMixin = {
                     errors: formErrors,
                     doSet: eCols.length > 1,
                     component,
-                    editable
+                    editable: !propNotEditable
                   })
           continue
         }
@@ -1792,7 +1795,7 @@ var styles= StyleSheet.create({
   },
   readOnly: {
     position: 'absolute',
-    right: 10,
+    right: 25,
     top: 20
   },
   immutable: {
