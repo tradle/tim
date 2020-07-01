@@ -24,6 +24,8 @@ Q.onerror = function (err) {
   debug(err.stack)
   throw err
 }
+import JailMonkey from 'jail-monkey'
+import RNExitApp from 'react-native-exit-app';
 
 import plugins from '@tradle/biz-plugins'
 import { allSettled } from '@tradle/promise-utils'
@@ -425,6 +427,11 @@ var Store = Reflux.createStore({
   },
   async _init() {
     // Setup components:
+    if (!utils.isWeb()) {
+      let isJailBroken = JailMonkey.isJailBroken()
+      if (isJailBroken)
+        RNExitApp.exitApp();
+    }
     db = level('TiM.db', { valueEncoding: 'json' });
     this._emitter = new EventEmitter()
 

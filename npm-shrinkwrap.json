@@ -4811,6 +4811,11 @@
         }
       }
     },
+    "jail-monkey": {
+      "version": "2.3.2",
+      "from": "jail-monkey@latest",
+      "resolved": "http://registry.npmjs.org/jail-monkey/-/jail-monkey-2.3.2.tgz"
+    },
     "jest-haste-map": {
       "version": "24.0.0-alpha.6",
       "from": "jest-haste-map@24.0.0-alpha.6",
@@ -7320,6 +7325,11 @@
       "version": "2.2.0",
       "from": "react-native-exception-handler@2.2.0",
       "resolved": "https://registry.npmjs.org/react-native-exception-handler/-/react-native-exception-handler-2.2.0.tgz"
+    },
+    "react-native-exit-app": {
+      "version": "1.1.0",
+      "from": "react-native-exit-app@latest",
+      "resolved": "http://registry.npmjs.org/react-native-exit-app/-/react-native-exit-app-1.1.0.tgz"
     },
     "react-native-facetec-zoom": {
       "version": "1.2.0",
