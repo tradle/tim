@@ -11,6 +11,8 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.github.wumke.RNExitApp.RNExitAppPackage;
+import com.gantix.JailMonkey.JailMonkeyPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.reactnativecommunity.viewpager.RNCViewPagerPackage;
 // import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
@@ -75,6 +77,8 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new RNExitAppPackage(),
+            new JailMonkeyPackage(),
             new RNCWebViewPackage(),
             new RNCViewPagerPackage(),
             // new AsyncStoragePackage(),

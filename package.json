@@ -258,6 +258,8 @@
     "react-native-passcode-status": false,
     "react-native-blinkid": false,
     "blinkid-react-native": false,
+    "react-native-exit-app": false,
+    "jail-monkey": false,
     "anyline-ocr-react-native-module": false,
     "react-native-linear-gradient": "./web/shims/LinearGradient",
     "react-native-safe-async-storage": "./web/shims/AsyncStorage",
