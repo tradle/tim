@@ -985,8 +985,8 @@
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
-      "from": "github:tradle/models-cloud",
-      "resolved": "github:tradle/models-cloud#40ce2b0e001d213b3d6c2437ba1be102209bc9af"
+      "from": "tradle/models-cloud",
+      "resolved": "git://github.com/tradle/models-cloud.git#8d7c34279839a006094f593e6761740df0bd1870"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -7316,6 +7316,16 @@
       "from": "react-native-document-picker@^2.3.0",
       "resolved": "https://registry.npmjs.org/react-native-document-picker/-/react-native-document-picker-2.3.0.tgz"
     },
+    "react-native-document-reader-api": {
+      "version": "5.0.0",
+      "from": "react-native-document-reader-api@latest",
+      "resolved": "http://registry.npmjs.org/react-native-document-reader-api/-/react-native-document-reader-api-5.0.0.tgz"
+    },
+    "react-native-document-reader-core-fullrfid": {
+      "version": "5.0.0",
+      "from": "react-native-document-reader-core-fullrfid@latest",
+      "resolved": "http://registry.npmjs.org/react-native-document-reader-core-fullrfid/-/react-native-document-reader-core-fullrfid-5.0.0.tgz"
+    },
     "react-native-ecc": {
       "version": "2.2.0",
       "from": "react-native-ecc@latest",
@@ -7460,11 +7470,6 @@
       "version": "3.5.2",
       "from": "react-native-randombytes@>=3.5.1 <4.0.0",
       "resolved": "http://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.5.2.tgz"
-    },
-    "react-native-regula-document-reader": {
-      "version": "1.0.0",
-      "from": "tradle/react-native-regula-document-reader",
-      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#0df33190081dcb4edbd13a9f98558b0e0f2b2b57"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",

@@ -259,6 +259,8 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':react-native-document-reader-core-fullrfid')
+    implementation project(':react-native-document-reader-api')
     implementation project(':react-native-exit-app')
     implementation project(':jail-monkey')
     def multidex_version = "2.0.1"
@@ -323,7 +325,7 @@ dependencies {
     //   force = true;
     // }
 
-    implementation project(':react-native-regula-document-reader')
+    // implementation project(':react-native-regula-document-reader')
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation ("com.android.support:appcompat-v7:${supportLibVersion}") {

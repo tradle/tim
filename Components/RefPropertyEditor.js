@@ -446,11 +446,15 @@ class RefPropertyEditor extends Component {
     let bothSides = type !== 'passport'  &&  type !== 'other'
     let result
     try {
-      result = await this.regulaScan({bothSides}) //Regula.regulaScan({bothSides})
+      await this.regulaScan({bothSides, callback: this.handleRegulaResults.bind(this)}) //Regula.regulaScan({bothSides})
     } catch (err) {
       debug('regula scan failed:', err.message)
       debugger
     }
+  }
+  handleRegulaResults(result) {
+    let { resource, prop } = this.props
+    const type = getDocumentTypeFromTitle(resource.documentType.title)
     if (!result) {
       Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return

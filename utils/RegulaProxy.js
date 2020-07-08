@@ -1,9 +1,15 @@
 import promisify from 'pify'
 import get from 'lodash/get'
+import size from 'lodash/size'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 import { Platform } from 'react-native'
-import Regula from 'react-native-regula-document-reader'
+
+import Regula from 'react-native-document-reader-api'
+const RNRegulaDocumentReader = Regula.RNRegulaDocumentReader
+const DocumentReaderResults = Regula.DocumentReaderResults
+const Enum = Regula.Enum
+
 import once from 'once'
 
 import { importFromImageStore } from './image-utils'
@@ -15,20 +21,18 @@ import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 import {
   regula as regulaAuth
 } from './env'
-const { Scenario } = Regula
 const LANDSCAPE_RIGHT_IOS = 8
 const LANDSCAPE_ANDROID = 2
 // const DELAY_INTERVAL = 30000
 
-export { Scenario }
-
+export var Scenario = {}
 // export const setLicenseKey = async (licenseKey) => {
 //   initializeOpts.licenseKey = licenseKey
 // }
 
 const OptsTypeSpec = {
   processParams: {
-    scenario: types.oneOf(getValues(Scenario)),
+    scenario: types.oneOf(Scenario), //types.oneOf(getValues(Scenario)),
     multipageProcessing: types.bool,
     dateFormat: types.string,
     logs: types.bool,
@@ -61,14 +65,15 @@ const DEFAULTS = {
     showCloseButton: true,
     showCaptureButton: false,
     skipFocusingFrames: true,
-    orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
+    // orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
+    orientation: Platform.OS === 'ios' ? Enum.DocReaderOrientationIOS.LANDSCAPE : Enum.DocReaderOrientationAndroid.LANDSCAPE
   },
   customization: {
     showStatusMessages: true,
     showHelpAnimation: true,
   },
   processParams: {
-    scenario: Scenario.ocr,
+    // scenario: Scenario.ocr,
     dateFormat:'mm/dd/yyyy',
     logs: true,
     debugSaveImages: false,
@@ -94,23 +99,41 @@ class RegulaProxy {
 
   prepareDatabase = once(async (dbID) => {
     try {
-      await Regula.prepareDatabase({dbID})
-      this._prepareSucceeded()
+      RNRegulaDocumentReader.prepareDatabase(dbID, (respond) => {
+      debugger
+        this._prepareSucceeded()
+        this.initialize(respond)
+      })
     } catch (err) {
       debugger
       console.log('Prepare Regula DB failed', err)
       this._prepareFailed(err)
     }
+
     return this._prepared
   })
 
   initialize = once(async (prepared) => {
     if (!prepared)
       await this._prepared
-    // debugger
     try {
-      await Regula.initialize(this.initializeOpts)
-      this._initializeSucceeded()
+      await RNRegulaDocumentReader.initializeReader(this.initializeOpts, (respond) => {
+    debugger
+        this._initializeSucceeded()
+        if (size(Scenario))
+          return
+        try {
+          RNRegulaDocumentReader.getAvailableScenarios((jstring) => {
+            let availableScenarios = JSON.parse(jstring)
+            for (let i in availableScenarios) {
+              let name = Regula.Scenario.fromJson(typeof availableScenarios[i] === "string" ? JSON.parse(availableScenarios[i]) : availableScenarios[i]).name
+              Scenario[name] = name
+            }
+          })
+        } catch (err) {
+
+        }
+      })
       // this.initTime = new Date().getTime()
     } catch (err) {
       // debugger
@@ -120,14 +143,16 @@ class RegulaProxy {
     return this._initialized
   })
 
-  scan = async (opts={}) => {
-    // debugger
+  scan = async (opts={}, callback) => {
+    debugger
     await this._initialized
     // let delta = new Date().getTime() - this.initTime
     // if (delta < DELAY_INTERVAL)
     //   await Promise.delay(delta)
-
+debugger
     opts = defaultsDeep(opts, DEFAULTS)
+
+    // debugger
 
     validateType({
       input: opts,
@@ -135,10 +160,21 @@ class RegulaProxy {
       allowExtraProps: false,
     })
     // opts will be supported soon
-    const result = await Regula.scan(opts)
-
-    return normalizeResult(result)
+    RNRegulaDocumentReader.setConfig(opts, str => {
+      // debugger
+      console.log(str)
+    })
+    RNRegulaDocumentReader.showScanner(jstring => {
+      if (jstring.substring(0, 8) == "Success:") {
+        debugger
+        // return normalizeResult(JSON.parse(jstring.substring(8)))
+        callback(normalizeResult(JSON.parse(jstring.substring(8))))
+      }
+      else
+        callback({error: jstring})
+    })
   }
+
   setLicenseKey = async (licenseKey) => {
     this.initializeOpts.licenseKey = licenseKey
   }
@@ -149,6 +185,7 @@ const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side
+
   const imageFront = await importFromImageStore(result.imageFront)
   const imageBack = result.imageBack && await importFromImageStore(result.imageBack)
   const imageFace = result.imageFace && await importFromImageStore(result.imageFace)
@@ -156,7 +193,6 @@ const normalizeResult = async result => {
 
   const results = result.jsonResult.map(normalizeJSON)
   const json = processListVerifiedFields(results)
-  // see dummy response in data/sample-regula-result.json
   return { json, results, imageFront, imageBack, imageFace, imageSignature }
 }
 

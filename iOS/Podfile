@@ -5,8 +5,8 @@ target 'Tradle' do
   # use_frameworks!
 
 #  pod 'PPBlinkID', '4.5.0'
-  pod 'DocumentReader', '~> 4.2'
-  pod 'DocumentReaderFull', '~> 4.2'
+  pod 'DocumentReader', '~> 5.1'
+  pod 'DocumentReaderFull', '~> 5.1'
   pod 'Branch', '0.27.1'
 #  pod 'Firebase/Core', '4.13.0'
 #  pod 'FirebaseAnalytics', '4.2.0'

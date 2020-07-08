@@ -7,7 +7,7 @@ export const types = {
   string: 'string',
   num: 'number',
   number: 'number',
-  oneOf: vals => val => vals.includes(val),
+  oneOf: vals => val => vals[val],
 }
 
 export const validate = ({ input, spec, allowExtraProps }) => {

@@ -15,10 +15,10 @@ const regulaScan = (function () {
       throw new Error('user denied camera access')
     }
 
-    let { bothSides } = opts
+    let { bothSides, callback } = opts
     let scanOpts = {
       processParams: {
-        scenario: Scenario.ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
+        scenario: Scenario.Ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
         multipageProcessing: bothSides,
         // rfidScenario: true,
         // sessionLogFolder: '.'
@@ -36,21 +36,39 @@ const regulaScan = (function () {
     //     }
     //   }
     // }
-    let result
+    // let result
     try {
-      result = await RegulaProxy.scan(scanOpts)
+      // return RegulaProxy.scan(scanOpts)
+      // .then(result => {
+      //   debugger
+      //   let { error, imageFront, imageBack, imageFace, imageSignature, results, json } = result
+      //   if (error)
+      //     return
+      //   let { scanResult, country, documentType } = normalizeResult({results, json})
+      //   return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
+      // })
+      await RegulaProxy.scan(scanOpts, async (result) => {
+        if (!result)
+          return
+        debugger
+        return Promise.resolve(result)
+        .then(result => {
+          debugger
+          let { error, imageFront, imageBack, imageFace, imageSignature, results, json } = result
+          if (error)
+            return
+          let { scanResult, country, documentType } = normalizeResult({results, json})
+          // return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
+          return callback(postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType}))
+        })
+      })
     } catch (err) {
       // debugger
       console.log('regula scan failed: ' + JSON.stringify(scanOpts, 0, 2), err.stack)
       return { canceled: err.message === 'Cancelled by user' || err.message === 'Canceled by user'}
     }
-    if (!result)
-      return
-    let { imageFront, imageBack, imageFace, imageSignature, results, json } = result
-    let { scanResult, country, documentType } = normalizeResult({results, json})
-    return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
   }
-}());
+}())
 
 export default { regulaScan }
 
