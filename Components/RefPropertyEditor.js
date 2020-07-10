@@ -444,9 +444,10 @@ class RefPropertyEditor extends Component {
       label: `regula:${type}`
     })
     let bothSides = type !== 'passport'  &&  type !== 'other'
+    let doRfid = type === 'passport'
     let result
     try {
-      await this.regulaScan({bothSides, callback: this.handleRegulaResults.bind(this)}) //Regula.regulaScan({bothSides})
+      await this.regulaScan({bothSides, doRfid, callback: this.handleRegulaResults.bind(this)}) //Regula.regulaScan({bothSides})
     } catch (err) {
       debug('regula scan failed:', err.message)
       debugger

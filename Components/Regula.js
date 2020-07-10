@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
 import { isSimulator, sanitize, isEmpty, getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
-import RegulaProxy, { Scenario } from '../utils/RegulaProxy'  //'../utils/regula'
+import RegulaProxy, { Scenario, isRFIDAvailable } from '../utils/RegulaProxy'  //'../utils/regula'
 // import DeviceInfo from 'react-native-device-info'
 const COUNTRY = 'tradle.Country'
 
@@ -15,11 +15,12 @@ const regulaScan = (function () {
       throw new Error('user denied camera access')
     }
 
-    let { bothSides, callback } = opts
+    let { bothSides, doRfid, callback } = opts
     let scanOpts = {
       processParams: {
         scenario: Scenario.Ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
         multipageProcessing: bothSides,
+        doRfid: doRfid && isRFIDAvailable || false,
         // rfidScenario: true,
         // sessionLogFolder: '.'
       },
