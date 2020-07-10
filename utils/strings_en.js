@@ -1,5 +1,6 @@
 module.exports = {
     "officialAccounts": "Conversations",
+    "thePhoneIsJailBroken": "The Phone Is\nJail Broken",
     "back": "Back",
     "profile": "Profile",
     "done": "Done",
