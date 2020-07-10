@@ -5,17 +5,16 @@ import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 import { Platform } from 'react-native'
 
-import Regula from 'react-native-document-reader-api'
-const RNRegulaDocumentReader = Regula.RNRegulaDocumentReader
+import Regula from 'react-native-document-reader-api-beta'
+const DocumentReader = Regula.RNRegulaDocumentReader
 const DocumentReaderResults = Regula.DocumentReaderResults
 const Enum = Regula.Enum
 
 import once from 'once'
-
 import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import regulaVisualFieldTypes from './regulaVisualFieldTypes'
-import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
+// import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 // kind of a shame to have this here
 // would be better to just call setLicenseKey from the outside
 import {
@@ -26,6 +25,7 @@ const LANDSCAPE_ANDROID = 2
 // const DELAY_INTERVAL = 30000
 
 export var Scenario = {}
+export var isRFIDAvailable
 // export const setLicenseKey = async (licenseKey) => {
 //   initializeOpts.licenseKey = licenseKey
 // }
@@ -38,6 +38,7 @@ const OptsTypeSpec = {
     logs: types.bool,
     debugSaveImages: types.bool,
     debugSaveLogs: types.bool,
+    doRfid: types.bool,
   },
   // https://github.com/regulaforensics/DocumentReader-iOS/wiki/Customization
   customization: {
@@ -92,6 +93,15 @@ class RegulaProxy {
       this._initializeSucceeded = resolve
       this._initializeFailed = reject
     })
+
+    this._initializedRfid = new Promise((resolve, reject) => {
+      this._initializeRfidSucceeded = resolve
+      this._initializeRfidFailed = reject
+    })
+    this._initializedScenarios = new Promise((resolve, reject) => {
+      this._initializeScenariosSucceeded = resolve
+      this._initializeScenariosFailed = reject
+    })
     this.initializeOpts = {
       licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
     }
@@ -99,7 +109,7 @@ class RegulaProxy {
 
   prepareDatabase = once(async (dbID) => {
     try {
-      RNRegulaDocumentReader.prepareDatabase(dbID, (respond) => {
+      await DocumentReader.prepareDatabase(dbID, (respond) => {
       debugger
         this._prepareSucceeded()
         this.initialize(respond)
@@ -117,22 +127,31 @@ class RegulaProxy {
     if (!prepared)
       await this._prepared
     try {
-      await RNRegulaDocumentReader.initializeReader(this.initializeOpts, (respond) => {
+      await DocumentReader.initializeReader(this.initializeOpts, (respond) => {
     debugger
-        this._initializeSucceeded()
-        if (size(Scenario))
-          return
-        try {
-          RNRegulaDocumentReader.getAvailableScenarios((jstring) => {
+        if (!size(Scenario)) {
+          DocumentReader.getAvailableScenarios((jstring) => {
             let availableScenarios = JSON.parse(jstring)
             for (let i in availableScenarios) {
               let name = Regula.Scenario.fromJson(typeof availableScenarios[i] === "string" ? JSON.parse(availableScenarios[i]) : availableScenarios[i]).name
               Scenario[name] = name
             }
+            this._initializeScenariosSucceeded()
           })
-        } catch (err) {
-
         }
+        DocumentReader.getDocumentReaderIsReady(isReady => {
+          debugger
+          // if (isReady === true || isReady === "YES" || isReady == 1)
+          //   isReady = true
+          // else
+          //   isReady = false
+          this._initializeSucceeded()
+        })
+        DocumentReader.getCanRFID(canRFID => {
+          debugger
+          this._initializedRfidSucceeded()
+          isRFIDAvailable = canRFID
+        })
       })
       // this.initTime = new Date().getTime()
     } catch (err) {
@@ -144,8 +163,9 @@ class RegulaProxy {
   })
 
   scan = async (opts={}, callback) => {
-    debugger
     await this._initialized
+    // await this._initializedRfid
+    await this._initializedScenarios
     // let delta = new Date().getTime() - this.initTime
     // if (delta < DELAY_INTERVAL)
     //   await Promise.delay(delta)
@@ -160,18 +180,53 @@ debugger
       allowExtraProps: false,
     })
     // opts will be supported soon
-    RNRegulaDocumentReader.setConfig(opts, str => {
+    DocumentReader.setConfig(opts, str => {
       // debugger
       console.log(str)
     })
-    RNRegulaDocumentReader.showScanner(jstring => {
-      if (jstring.substring(0, 8) == "Success:") {
-        debugger
-        // return normalizeResult(JSON.parse(jstring.substring(8)))
-        callback(normalizeResult(JSON.parse(jstring.substring(8))))
-      }
-      else
+    DocumentReader.showScanner(jstring => {
+      if (jstring.substring(0, 8) != "Success:") {
         callback({error: jstring})
+        return
+      }
+      let result = JSON.parse(jstring.substring(8))
+      debugger
+      let results = DocumentReaderResults.fromJson(result);
+      // return normalizeResult(JSON.parse(jstring.substring(8)))
+      let accessKey
+      if (!opts.processParams.doRfid  ||  !results.chipPage) {
+        callback(normalizeResult(result))
+        return
+      }
+      debugger
+      accessKey = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_MRZ_STRINGS);
+      if (accessKey) {
+        DocumentReader.setRfidScenario({
+          mrz: accessKey,
+          pacePasswordType: Enum.eRFID_Password_Type.PPT_MRZ,
+        }, () => { });
+        debugger
+      }
+      else {
+        accessKey = results.getTextFieldValueByType(159);
+        if (accessKey != null && accessKey != "") {
+          DocumentReader.setRfidScenario({
+            password: accessKey,
+            pacePasswordType: Enum.eRFID_Password_Type.PPT_CAN,
+          }, () => { });
+        }
+      }
+
+      DocumentReader.startRFIDReader((jstring) => {
+        debugger
+        if (jstring.substring(0, 8) == "Success:") {
+          let result = DocumentReaderResults.fromJson(JSON.parse(jstring.substring(8)))
+          callback(normalizeResult(result))
+          this.displayResults(result)
+        }
+        else
+          callback(normalizeResult(result))
+      })
     })
   }
 
@@ -193,6 +248,7 @@ const normalizeResult = async result => {
 
   const results = result.jsonResult.map(normalizeJSON)
   const json = processListVerifiedFields(results)
+
   return { json, results, imageFront, imageBack, imageFace, imageSignature }
 }
 
