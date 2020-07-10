@@ -25,7 +25,6 @@ Q.onerror = function (err) {
   throw err
 }
 import JailMonkey from 'jail-monkey'
-import RNExitApp from 'react-native-exit-app';
 
 import plugins from '@tradle/biz-plugins'
 import { allSettled } from '@tradle/promise-utils'
@@ -426,12 +425,6 @@ var Store = Reflux.createStore({
     return this.ready = this._init()
   },
   async _init() {
-    // Setup components:
-    if (!utils.isWeb()) {
-      let isJailBroken = JailMonkey.isJailBroken()
-      if (isJailBroken)
-        RNExitApp.exitApp();
-    }
     db = level('TiM.db', { valueEncoding: 'json' });
     this._emitter = new EventEmitter()
 
@@ -498,8 +491,24 @@ var Store = Reflux.createStore({
     if (false) {
       return await this.wipe()
     }
-    if (!isWeb())
+    if (!isWeb()) {
+      let isJailBroken = JailMonkey.isJailBroken()
+      if (isJailBroken) {
+        Actions.showModal({title: translate('thePhoneIsJailBroken')})
+        return
+        // Alert.alert(
+        //   translate('thePhoneIsJailBroken'),
+        //   null,
+        //   [
+        //     {
+        //       text: translate('Ok'),
+        //       onPress: async () => RNExitApp.exitApp() // 'react-native-exit-app'
+        //     }
+        //   ]
+        // )
+      }
       this.initRegula()
+    }
 
     await this.getReady()
     // if (ENV.yukiOn) {
