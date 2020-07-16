@@ -2456,6 +2456,8 @@ var Store = Reflux.createStore({
     }
     if (sp.tour)
       org._tour = sp.tour
+    if (sp.optionalPairing)
+      org._optionalPairing = true
 
     await this.configProvider(config, sp, org)
     await this.resetForEmployee(me, org)
@@ -5169,7 +5171,23 @@ if (!res[SIG]  &&  res._message)
       id: utils.getId(r).replace(PROFILE, IDENTITY),
     }
   },
-  async onGenPairingData(url) {
+  async onNoPairing(to) {
+    if (to[TYPE] !== ORGANIZATION)
+      to = to.organization
+    if (!to)
+      debugger
+    to._noPairing = true
+    let toId = utils.getId(to)
+    this._setItem(toId, to)
+    this.trigger({action: 'updateRow', resource: to, forceUpdate: true})
+    await this.dbPut(toId, to)
+    Promise.delay(1000)
+    let r = await this.onList({to, modelName: MESSAGE})
+    Promise.delay(1000)
+    await this.onGetProductList({ resource: to })
+  },
+  getPairingData(to) {
+    let { url } = to
     let { pubkeys } = meDriver.identity
     let key = pubkeys.find(key => key.purpose === 'sign')
 
@@ -5182,8 +5200,12 @@ if (!res[SIG]  &&  res._message)
       // nonce: crypto.randomBytes(32).toString('base64')
       url
     }
-    this.trigger({action: 'genPairingData', pairingData})
-    await this.onGetMasterIdentity(pairingData, url)
+    return pairingData
+  },
+  async onGenPairingData(to) {
+    const pairingData = this.getPairingData(to)
+    // this.trigger({action: 'genPairingData', pairingData})
+    await this.onGetMasterIdentity(pairingData, to)
   },
   async onSendPairingRequest (pairingData) {
     let { key, url } = pairingData
@@ -5261,11 +5283,11 @@ if (!res[SIG]  &&  res._message)
     if (client)
       client.reset()
   },
-  async onGetMasterIdentity(pairingData, url) {
+  async onGetMasterIdentity(pairingData, to) {
+    let { url } = to
     if (!this.client)
       this.client = graphQL.initClient(meDriver, url)
     let masterAuthor
-    let attempts = 0
     let maxAttempts = 30
     let masterIdentity
     try {
@@ -5286,8 +5308,11 @@ if (!res[SIG]  &&  res._message)
       debugger
     }
     if (!masterAuthor) {
-      Alert.alert(translate('pleaseTryAgain'))
-      this.trigger({ action: 'goBack' })
+      let newTo = this._getItem(to)
+      if (!newTo._noPairing) {
+        Alert.alert(translate('pleaseTryAgain'))
+        this.trigger({ action: 'goBack' })
+      }
       return
     }
     await this.requestIdentity({_permalink: masterAuthor})
@@ -7478,13 +7503,6 @@ if (!res[SIG]  &&  res._message)
     let self = this
 
     let {resource, query, context, to, isForgetting, lastId, limit, prop, filterProps} = params
-    /////////
-    if (isWeb()  &&  !me._masterAuthor) {
-      this.onGenPairingData(to.url)
-      return
-    }
-
-    let foundResources = [];
 
     let meId = utils.getId(me)
     let meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
@@ -7499,7 +7517,15 @@ if (!res[SIG]  &&  res._message)
     let toOrgId
     let thisChatMessages
 
+    let needsPairing
     if (isChatWithOrg) {
+      needsPairing = isWeb()  &&  !me._masterAuthor  &&  !chatTo._noPairing
+      if (needsPairing) { //  &&  !chatTo._optionalPairing) {
+        let pairingData = this.getPairingData(chatTo)
+        this.onGenPairingData(chatTo)
+        this.trigger({action: 'genPairingData', pairingData})
+        return []
+      }
       let rep = this.getRepresentative(chatId)
       if (!rep)
         return
@@ -7515,10 +7541,8 @@ if (!res[SIG]  &&  res._message)
           toOrgId = utils.getId(chatTo.organization)
           thisChatMessages = chatMessages[toOrgId]
         }
-        else {
-          if (meId !== chatId)
-            thisChatMessages = chatMessages[chatId]
-        }
+        else if (meId !== chatId)
+          thisChatMessages = chatMessages[chatId]
       }
     }
     if (!thisChatMessages  ||  !thisChatMessages.length)
@@ -7602,6 +7626,7 @@ if (!res[SIG]  &&  res._message)
       allLinks = links
 
     let refsObj = {}
+    let foundResources = []
 
     try {
       let l = await Promise.all(allLinks.map(link => {
@@ -7613,13 +7638,6 @@ if (!res[SIG]  &&  res._message)
     if (!foundResources.length)
       return
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
-    if (isWeb()  &&  !me._masterAuthor) {
-      let isEmployeeOnboarding = foundResources.find(r => r[TYPE] === PRODUCT_REQUEST  &&  r.requestFor === EMPLOYEE_ONBOARDING)
-      if (isEmployeeOnboarding) {
-        this.onGenPairingData(to.url)
-        return
-      }
-    }
 
     foundResources.forEach((r) => {
       // Check if this message was shared, display the time when it was shared not when created
@@ -10509,15 +10527,25 @@ if (!res[SIG]  &&  res._message)
           if (dataClaim  &&  dataClaim.length  ||  utils.isAgent())
             this.deleteMessageFromChat(utils.getId(val.from.organization), val)
           else {
+            let pairingData
             if (!me.isEmployee  &&
                  val.form === PRODUCT_REQUEST  &&
                  val.chooser) {
               let rep = this._getItem(val.from)
+
+              let org = self._getItem(utils.getId(rep.organization))
+              let needsPairing = isWeb()  &&  !me._masterAuthor  &&  (!org  || !org._noPairing)
+              if (needsPairing) {
+                debugger
+                pairingData = this.getPairingData(org)
+                this.onGenPairingData(org)
+              }
+
               let pr = await this.searchMessages({modelName: PRODUCT_REQUEST, to: this._getItem(rep.organization)})
               if (pr  &&  pr.length)
                 return
             }
-            this.trigger({action: 'addItem', resource: val})
+            this.trigger({action: 'addItem', resource: val, pairingData})
           }
         }
         else {
