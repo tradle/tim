@@ -395,12 +395,14 @@ class MessageList extends Component {
         allLoaded: false, //list.length < this.state.limit ? true : false,
         allContexts: switchToContext ? false : this.state.allContexts,
         productToForms: productToForms || this.state.productToForms,
+        isModalOpen: pairingData != null,
+        pairingData
       })
     }
     this.setState(state)
   }
   add(params) {
-    let { action, resource, to, productToForms, shareableResources, timeShared } = params
+    let { action, resource, to, productToForms, shareableResources, timeShared, pairingData } = params
     if (!utils.isMessage(resource))
       return
     // HACK for Agent to not to receive messages from one customer in the chat for another
@@ -519,6 +521,7 @@ class MessageList extends Component {
       else
         state.verifiedByTrustedProvider = null
     }
+    state = {...state, pairingData, isModalOpen: pairingData != null}
     this.showAnotherEmployeeAlert(resource)
     this.setState(state)
   }
@@ -876,8 +879,9 @@ class MessageList extends Component {
     if (!modelName)
       modelName = MESSAGE
     let application = this.state.application ||  this.props.application
-    let { list, isLoading, context, isConnected, isForgetting, allLoaded, pairingData, isModalOpen,
-          onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
+    let { list, isLoading, context, isConnected, isForgetting, allLoaded, pairingData,
+          isModalOpen, onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
+
     if (currentContext)
       context = currentContext
     let styles = createStyles({ bankStyle })
@@ -1021,26 +1025,28 @@ class MessageList extends Component {
         schema: 'Pair',
         data: pairingData
       })
-      qrcode = <View style={{padding: 20}}>
-                 <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                   <QRCode inline={true} content={qr} dimension={w} />
-                 </View>
-                 <View style={[styles.qrcode, {alignItems: 'center', paddingTop: 30}]}>
-                   <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
-                   <Text style={{fontSize: 28, fornWeight: '600'}}>{translate('toPairDevices')}</Text>
-                 </View>
-               </View>
-      return (
-        <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
-          <TouchableOpacity style={styles.splashLayout} onPress={() => Actions.getMasterIdentity(pairingData, resource.url)}>
-            <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-              <View style={styles.modalBackgroundStyle}>
-                {qrcode}
+      let optionalPairingButton = resource._optionalPairing  &&
+           <View style={{alignSelf: 'center', justifyContent: 'center'}}>
+            <TouchableOpacity onPress={this.showChoiceAlert.bind(this)}>
+              <View style={styles.button}>
+                <Text style={styles.buttonText}>{translate('clickHereToCancelPairing')}</Text>
               </View>
-            </Modal>
-          </TouchableOpacity>
-        </PageView>
-      )
+            </TouchableOpacity>
+         </View>
+      qrcode = <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+                 <View style={styles.modalBackgroundStyle}>
+                   <View style={{justifyContent: 'center'}}>
+                     <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                       <QRCode inline={true} content={qr} dimension={w} />
+                     </View>
+                     <View style={[styles.qrcode, {alignItems: 'center', paddingTop: 30}]}>
+                       <Text style={{fontSize: 20}}>{translate('scanToLogInToTradle')}</Text>
+                       <Text style={{fontSize: 28, fornWeight: '600'}}>{translate('toPairDevices')}</Text>
+                     </View>
+                     {optionalPairingButton}
+                   </View>
+                 </View>
+               </Modal>
     }
 
     return (
@@ -1052,10 +1058,28 @@ class MessageList extends Component {
         {stepIndicator}
         <View style={ sepStyle } />
         {content}
+        {qrcode}
         {actionSheet}
         {alert}
         {assignRM}
       </PageView>
+    )
+  }
+  showChoiceAlert() {
+    const { navigator, resource } = this.props
+    Alert.alert(
+      translate('pleaseConfirm'),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => console.log('Cancel')},
+        {text: 'OK', onPress: () => {
+          // navigator.pop()
+          this.setState({isModalOpen: false})
+          Actions.noPairing(resource)
+          // setTimeout(() => Actions.list({to: resource, modelName: MESSAGE}), 1000)
+          // setTimeout(() => Actions.getProductList({ resource }), 1000)
+        }}
+      ]
     )
   }
   hasMenuButton() {
@@ -1554,6 +1578,8 @@ MessageList = makeStylish(MessageList)
 var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankStyle }) {
   let isAndroid = Platform.OS === 'android'
   let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
+  let buttonBg = bankStyle.buttonBgColor ||  bankStyle.linkColor
+  let buttonColor = bankStyle.buttonColor || '#ffffff'
   let { width, height } = utils.dimensions(MessageList)
   return StyleSheet.create({
     footer: {
@@ -1625,13 +1651,29 @@ var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankS
       alignSelf: 'center',
       justifyContent: 'center',
       backgroundColor: '#ffffff',
-      padding:10
+      padding: 10
     },
     splashLayout: {
       alignItems: 'center',
       justifyContent: 'center',
       width,
       height
+    },
+    button: {
+      backgroundColor: buttonBg,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 350,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 50,
+      borderRadius: 15,
+      marginRight: 20
+    },
+    buttonText: {
+      fontSize: 20,
+      color: buttonColor,
+      alignSelf: 'center'
     },
   })
 })

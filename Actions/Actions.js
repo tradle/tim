@@ -91,7 +91,8 @@ var asyncActions = [
   'stepIndicatorPress',
   'showStepIndicator',
   'showAllShareables',
-  'submitDraftApplication'
+  'submitDraftApplication',
+  'noPairing'
 ]
 
 var syncActions = [
