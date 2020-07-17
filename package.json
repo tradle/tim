@@ -270,7 +270,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.13",
     "dedupe-deps": "~1.0.0",
-    "eslint": "^3.19.0",
+    "eslint": "^4.18.2",
     "eslint-config-standard": "^5.3.1",
     "eslint-plugin-promise": "^1.3.2",
     "eslint-plugin-react": "6.9.0",
