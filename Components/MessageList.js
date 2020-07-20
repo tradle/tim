@@ -1029,7 +1029,7 @@ class MessageList extends Component {
            <View style={{alignSelf: 'center', justifyContent: 'center'}}>
             <TouchableOpacity onPress={this.showChoiceAlert.bind(this)}>
               <View style={styles.button}>
-                <Text style={styles.buttonText}>{translate('clickHereToCancelPairing')}</Text>
+                <Text style={styles.buttonText}>{translate('cancelPairing')}</Text>
               </View>
             </TouchableOpacity>
          </View>
