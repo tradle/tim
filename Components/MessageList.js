@@ -1249,11 +1249,13 @@ class MessageList extends Component {
         callback: () => this.forgetMe()
       })
     }
+
     if (isDraft) {
       let { list, context, currentContext } = this.state
-      if (context  &&  list  &&  list[list.length - 1][TYPE] !== PRODUCT_REQUEST) {
+      let ctx = currentContext || context
+      if (ctx  &&  list  &&  list[list.length - 1][TYPE] !== PRODUCT_REQUEST) {
         push({
-          title: translate('submitDraft', translate(utils.getModel(context.requestFor))),
+          title: translate('submitDraft', translate(utils.getModel(ctx.requestFor))),
           callback: () => {
             Alert.alert(
               translate('pleaseConfirm'),
@@ -1261,7 +1263,7 @@ class MessageList extends Component {
               [
                 {text: translate('cancel'), onPress: () => console.log('Cancel')},
                 {text: 'OK', onPress: () => {
-                  Actions.submitDraftApplication({context: currentContext || context})
+                  Actions.submitDraftApplication({context: ctx})
                   // this.props.navigator.pop()
                 }}
               ]
