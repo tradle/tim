@@ -77,9 +77,10 @@ var strMap = {
   'The company was not found. Please fill out the form': 'fillOutTheForm',
   'Please take a **selfie** picture of your face': 'takeAPicture',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
-  'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning',
+  'Is it your company? Please review and correct the data below for': 'reviewScannedPropertiesWarning',
   'Please overwrite if data can`t be reused': 'overwriteIfCantReuse',
   'FinCrime needs to review this application': 'finCrimeReview',
+  'Add another': 'addAnother',
 }
 
 var {

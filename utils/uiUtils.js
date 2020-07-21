@@ -136,6 +136,7 @@ var uiUtils = {
     newParams.idx = idx
     newParams.message = message2.trim()
     let msg = ` ${uiUtils.parseMessage(newParams)}`
+    let trMsg = translate(message1)
     return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{translate(message1) + ' '}
              <Text style={{color: linkColor}}>{formTitle}</Text>
              <Text>{msg}</Text>
