@@ -354,7 +354,7 @@ module.exports = {
     "Please review and correct the data below": "Please review and correct the data below",
     "Please correct the field": "Please correct the field",
     "Please correct the highlighted property": "Please correct the highlighted property",
-
+    "Please review and complete the application for": "Please review and complete the application for",
     "Please tap here and sign": "Please tap here and sign",
     "Give me a moment...": "Give me a moment...",
     "Please click to scan your": "Please click to scan your",
