@@ -207,6 +207,8 @@ module.exports = {
     "holdPhoneToPassportBackCover": "Hold the back of your phone against the back inside cover of your passport.",
     "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
     "addAnotherFormOrGetNext": "Add another {1} or move on to the next form",
+    "moveToTheNextForm": "Move to the next form",
+    "addAnother": "Add another",
     "switchToRepresentative": "Switching to representative mode is not yet implemented.",
     // end messages to delete
     "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
@@ -347,6 +349,8 @@ module.exports = {
     "Sending": "Sending",
 
     "Is it your company?": "Is it your company?",
+    "Is it your company? Please review and correct the data below for": "Is it your company? Please review and correct the data below for",
+    "Add another": "Add another",
     "Please review and correct the data below": "Please review and correct the data below",
     "Please correct the field": "Please correct the field",
     "Please correct the highlighted property": "Please correct the highlighted property",
