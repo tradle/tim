@@ -507,7 +507,7 @@ class RefPropertyEditor extends Component {
     }
     if (result.imageSignature  &&  signature  &&  signature.ref === PHOTO) {
       r.signature = {
-        url: result.signature
+        url: result.imageSignature
       }
     }
 

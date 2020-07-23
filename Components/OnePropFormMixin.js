@@ -1,7 +1,7 @@
 import { Alert, Platform } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 import _ from 'lodash'
-import Zoom from 'react-native-facetec-zoom'
+// import Zoom from 'react-native-facetec-zoom'
 
 import Errors from '@tradle/errors'
 import constants from '@tradle/constants'
@@ -143,7 +143,7 @@ var OnePropFormMixin = {
       return
     }
 
-
+/*
     let result
     try {
       if (!ENV.ZoomSDK.initialized) {
@@ -237,6 +237,7 @@ var OnePropFormMixin = {
     //     "externalImageSetVerificationResult": "CouldNotDetermineMatch"
     //   }
     // }
+*/
   },
 
   onTakePic(params, photo) {

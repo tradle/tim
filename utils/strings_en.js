@@ -208,6 +208,8 @@ module.exports = {
     "holdPhoneToPassportBackCover": "Hold the back of your phone against the back inside cover of your passport.",
     "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
     "addAnotherFormOrGetNext": "Add another {1} or move on to the next form",
+    "moveToTheNextForm": "Move to the next form",
+    "addAnother": "Add another",
     "switchToRepresentative": "Switching to representative mode is not yet implemented.",
     // end messages to delete
     "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
@@ -276,6 +278,7 @@ module.exports = {
     "cancelItem": "You are about to cancel {1}. Please tap OK to confirm",
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
+    "ourProducts": "Our products",
     "createManualMatchCheck": "Create manual match check",
     "supportedQrCodes": "Supported QR codes: \n1) add chat channel \n2) import data",
     "inProcess": "Processing...",
@@ -319,6 +322,7 @@ module.exports = {
     "scanToLogInToTradle": "Scan QR code with your mobile device",
     "toPairDevices": "to pair devices",
     "syncDevicesIsDone": "Device syncronization finished",
+    "cancelDevicePairing": "Cancel device pairing",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
@@ -346,10 +350,12 @@ module.exports = {
     "Sending": "Sending",
 
     "Is it your company?": "Is it your company?",
+    "Is it your company? Please review and correct the data below for": "Is it your company? Please review and correct the data below for",
+    "Add another": "Add another",
     "Please review and correct the data below": "Please review and correct the data below",
     "Please correct the field": "Please correct the field",
     "Please correct the highlighted property": "Please correct the highlighted property",
-
+    "Please review and complete the application for": "Please review and complete the application for",
     "Please tap here and sign": "Please tap here and sign",
     "Give me a moment...": "Give me a moment...",
     "Please click to scan your": "Please click to scan your",
