@@ -63,8 +63,6 @@ include ':react-native-awesome-card-io'
 project(':react-native-awesome-card-io').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-awesome-card-io/android')
 include ':react-native-async-storage-snappy'
 project(':react-native-async-storage-snappy').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-async-storage-snappy/android')
-include ':react-native-facetec-zoom'
-project(':react-native-facetec-zoom').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-facetec-zoom/android')
 include ':react-native-document-picker'
 project(':react-native-document-picker').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-document-picker/android')
 

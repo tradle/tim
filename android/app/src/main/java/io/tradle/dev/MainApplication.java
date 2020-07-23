@@ -11,6 +11,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+//import com.reactlibrary.RNReactNativeZoomSdkPackage;
 import com.regula.documentreader.core.RNDocumentReaderCorePackage;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
 import com.github.wumke.RNExitApp.RNExitAppPackage;
@@ -19,7 +20,6 @@ import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.reactnativecommunity.viewpager.RNCViewPagerPackage;
 // import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
-import com.reactlibrary.RNReactNativeZoomSdkPackage;
 // import com.microblink.reactnative.MicroblinkReactPackage;
 import com.cardio.RNCardIOPackage;
 import com.facebook.react.ReactNativeHost;
@@ -78,7 +78,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
-            new RNDocumentReaderCorePackage(),
+        new RNDocumentReaderCorePackage(),
         new RNRegulaDocumentReaderPackage(),
         new RNExitAppPackage(),
         new JailMonkeyPackage(),
@@ -86,7 +86,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
         new RNCViewPagerPackage(),
         // new AsyncStoragePackage(),
         new NetInfoPackage(),
-        new RNReactNativeZoomSdkPackage(),
+//        new RNReactNativeZoomSdkPackage(),
         new ImageStorePackage(),
         new RNFetchBlobPackage(),
         new RNTradleKeeperPackage(),

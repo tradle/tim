@@ -158,13 +158,21 @@ android {
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative59"
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode vbuild
-        versionName vmajor + "." + vminor + "." + vpatch
+        versionCode 1
+        versionName "1.0"
         // ndk {
         //     abiFilters "armeabi-v7a", "x86"
         // }
 
         multiDexEnabled true
+    }
+    applicationVariants.all { variant ->
+      if (variant.buildType.name == "release") {
+        variant.outputs.each { output ->
+          output.versionCodeOverride = vbuild;
+          output.versionNameOverride = vmajor + "." + vminor + "." + vpatch;
+        }
+      }
     }
     dexOptions {
         javaMaxHeapSize "4g"
@@ -200,9 +208,11 @@ android {
     buildTypes {
         debug {
             debuggable true
+            minifyEnabled false
             def codePushKey = getCodePushKey("Debug")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
             // applicationIdSuffix ".debug"
+            ext.alwaysUpdateBuildId = false
         }
         release {
             // setting to true breaks require()'d images in JS
@@ -270,7 +280,6 @@ dependencies {
     implementation project(':@react-native-community_viewpager')
     implementation project(':@react-native-community_netinfo')
     // implementation 'com.facetec:zoom-authentication-hybrid:7.0.11'
-    implementation project(':react-native-facetec-zoom')
     implementation project(':react-native-image-store')
     implementation project(':react-native-tradle-keeper')
     implementation project(':rn-fetch-blob')
