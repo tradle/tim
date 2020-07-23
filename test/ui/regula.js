@@ -5,10 +5,11 @@ import SplashScreen from 'react-native-splash-screen'
 if (SplashScreen && SplashScreen.hide) {
   SplashScreen.hide()
 }
-import RegulaProxy, { Scenario } from '../../utils/RegulaProxy'
+import RegulaProxy, { Scenario, isRFIDAvailable } from '../../utils/RegulaProxy'
 // import { scan, Scenario, prepareDatabase } from '../../utils/regula'
 import Image from '../../Components/Image'
 import dummyResult from '../../data/sample-regula-result.json'
+const lKey = ""
 
 class App extends Component {
   state = {
@@ -18,43 +19,59 @@ class App extends Component {
 
   async componentDidMount() {
     if (this.state.results) return
+
+    // if (bothSides)
+    //   scanOpts.processParams.multipageProcessing = true
+
+    RegulaProxy.setLicenseKey(lKey)
+    await RegulaProxy.prepareDatabase('Full')
+
     let scanOpts = {
       processParams: {
-        scenario: Scenario.fullProcess,
-        multipageProcessing: true,
+        scenario: 'Ocr', //Scenario.Ocr,
+        multipageProcessing: false,
+        doRfid: true, //isRFIDAvailable || false,
       },
       functionality: {
         showCaptureButton: true,
       },
     }
-
-    // if (bothSides)
-    //   scanOpts.processParams.multipageProcessing = true
-
-    await RegulaProxy.prepareDatabase('Full')
-    await RegulaProxy.initialize()
-    const result = await RegulaProxy.scan(scanOpts)
-    this.setState(result)
+    await RegulaProxy.scan(scanOpts, async (result) => {
+      if (!result)
+        return
+      debugger
+      return Promise.resolve(result)
+      .then(result => {
+        debugger
+        let { error, imageFront, imageBack, imageFace, imageSignature, results, json } = result
+        if (error)
+          return
+        this.setState({imageFront, imageBack, imageFace, imageSignature})
+        // let { scanResult, country, documentType } = normalizeResult({results, json})
+        // return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
+        // return callback(postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType}))
+      })
+    })
   }
 
   render() {
-    let { results, imageFront, imageBack, json } = this.state
-    if (!results) {
+    let { imageFront, imageBack, imageFace, json } = this.state
+    if (!imageFront) {
       return <View />
     }
-    if (imageFront.startsWith('/')) {
-      // data uri
-      imageFront = 'data:image/jpeg;base64,' + imageFront
-    }
-    if (imageBack) {
-      imageBack = 'data:image/jpeg;base64,' + imageBack
+    imageFront = <Image source={{ uri: imageFront }} style={styles.image} />
+    if (imageBack)
       imageBack = <Image source={{ uri: imageBack }} style={styles.image} />
-    }
+
+    if (imageFace)
+      imageFace = <Image source={{uri: imageFace}} style={styles.image} />
+        // <Text>{json  &&  JSON.stringify(json, null, 2) || ''}</Text>
+
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Image source={{ uri: imageFront }} style={styles.image} />
+        {imageFront}
+        {imageFace}
         {imageBack}
-        <Text>{JSON.stringify(json, null, 2)}</Text>
       </ScrollView>
     )
   }

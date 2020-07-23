@@ -5,7 +5,7 @@ import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 import { Platform } from 'react-native'
 
-import Regula from 'react-native-document-reader-api-beta'
+import Regula from 'react-native-document-reader-api'
 const DocumentReader = Regula.RNRegulaDocumentReader
 const DocumentReaderResults = Regula.DocumentReaderResults
 const Enum = Regula.Enum
@@ -109,8 +109,7 @@ class RegulaProxy {
 
   prepareDatabase = once(async (dbID) => {
     try {
-      await DocumentReader.prepareDatabase(dbID, (respond) => {
-      debugger
+      DocumentReader.prepareDatabase(dbID, (respond) => {
         this._prepareSucceeded()
         this.initialize(respond)
       })
@@ -126,50 +125,48 @@ class RegulaProxy {
   initialize = once(async (prepared) => {
     if (!prepared)
       await this._prepared
-    try {
-      await DocumentReader.initializeReader(this.initializeOpts, (respond) => {
-    debugger
-        if (!size(Scenario)) {
-          DocumentReader.getAvailableScenarios((jstring) => {
-            let availableScenarios = JSON.parse(jstring)
-            for (let i in availableScenarios) {
-              let name = Regula.Scenario.fromJson(typeof availableScenarios[i] === "string" ? JSON.parse(availableScenarios[i]) : availableScenarios[i]).name
-              Scenario[name] = name
-            }
-            this._initializeScenariosSucceeded()
-          })
+
+    DocumentReader.initializeReader(this.initializeOpts, (respond) => {
+      if (size(Scenario))
+        return
+      DocumentReader.getAvailableScenarios((jstring) => {
+       // debugger
+        let availableScenarios = JSON.parse(jstring)
+        if (!availableScenarios.length) {
+          this._initializeFailed(respond)
+          return
+        }
+
+        for (let i in availableScenarios) {
+          let name = Regula.Scenario.fromJson(typeof availableScenarios[i] === "string" ? JSON.parse(availableScenarios[i]) : availableScenarios[i]).name
+          Scenario[name] = name
         }
         DocumentReader.getDocumentReaderIsReady(isReady => {
-          debugger
-          // if (isReady === true || isReady === "YES" || isReady == 1)
-          //   isReady = true
-          // else
-          //   isReady = false
-          this._initializeSucceeded()
-        })
-        DocumentReader.getCanRFID(canRFID => {
-          debugger
-          this._initializedRfidSucceeded()
-          isRFIDAvailable = canRFID
+          // debugger
+          if (isReady === true || isReady === "YES" || isReady == 1)
+            this._initializeSucceeded()
+          else {
+            this._initializeFailed(respond)
+            console.log(respond)
+          }
         })
       })
-      // this.initTime = new Date().getTime()
-    } catch (err) {
-      // debugger
-      console.log('initialization Regula DB failed', err)
-      this._initializeFailed(err)
-    }
-    return this._initialized
+      DocumentReader.getCanRFID(canRFID => {
+        // debugger
+        this._initializeRfidSucceeded()
+        isRFIDAvailable = canRFID
+      })
+    })
   })
 
   scan = async (opts={}, callback) => {
     await this._initialized
     // await this._initializedRfid
-    await this._initializedScenarios
+    // await this._initializedScenarios
     // let delta = new Date().getTime() - this.initTime
     // if (delta < DELAY_INTERVAL)
     //   await Promise.delay(delta)
-debugger
+// debugger
     opts = defaultsDeep(opts, DEFAULTS)
 
     // debugger
@@ -190,22 +187,21 @@ debugger
         return
       }
       let result = JSON.parse(jstring.substring(8))
-      debugger
       let results = DocumentReaderResults.fromJson(result);
+      debugger
       // return normalizeResult(JSON.parse(jstring.substring(8)))
       let accessKey
       if (!opts.processParams.doRfid  ||  !results.chipPage) {
         callback(normalizeResult(result))
         return
       }
-      debugger
-      accessKey = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_MRZ_STRINGS);
+      accessKey = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_MRZ_STRINGS)
       if (accessKey) {
+        accessKey = accessKey.replace(/^/g, '').replace(/\n/g, '')
         DocumentReader.setRfidScenario({
           mrz: accessKey,
           pacePasswordType: Enum.eRFID_Password_Type.PPT_MRZ,
         }, () => { });
-        debugger
       }
       else {
         accessKey = results.getTextFieldValueByType(159);
@@ -219,10 +215,12 @@ debugger
 
       DocumentReader.startRFIDReader((jstring) => {
         debugger
-        if (jstring.substring(0, 8) == "Success:") {
-          let result = DocumentReaderResults.fromJson(JSON.parse(jstring.substring(8)))
-          callback(normalizeResult(result))
-          this.displayResults(result)
+        if (jstring.startsWith("Success:")) {
+          let json = JSON.parse(jstring.substring(8))
+          let rfidResult = DocumentReaderResults.fromJson(json)
+          debugger
+          callback(normalizeResult(json))
+          // callback(normalizeResult(rfidResult))
         }
         else
           callback(normalizeResult(result))
@@ -244,7 +242,7 @@ const normalizeResult = async result => {
   const imageFront = await importFromImageStore(result.imageFront)
   const imageBack = result.imageBack && await importFromImageStore(result.imageBack)
   const imageFace = result.imageFace && await importFromImageStore(result.imageFace)
-  const imageSignature = result.imageSig && await importFromImageStore(result.imageSig)
+  const imageSignature = result.imageSignature && await importFromImageStore(result.imageSignature)
 
   const results = result.jsonResult.map(normalizeJSON)
   const json = processListVerifiedFields(results)

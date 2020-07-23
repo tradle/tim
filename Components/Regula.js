@@ -51,11 +51,10 @@ const regulaScan = (function () {
       await RegulaProxy.scan(scanOpts, async (result) => {
         if (!result)
           return
-        debugger
         return Promise.resolve(result)
         .then(result => {
-          debugger
           let { error, imageFront, imageBack, imageFace, imageSignature, results, json } = result
+          debugger
           if (error)
             return
           let { scanResult, country, documentType } = normalizeResult({results, json})
