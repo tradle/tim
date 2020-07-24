@@ -186,13 +186,13 @@ class RegulaProxy {
         callback({error: jstring})
         return
       }
-      let result = JSON.parse(jstring.substring(8))
-      let results = DocumentReaderResults.fromJson(result);
+      let scan = JSON.parse(jstring.substring(8))
+      let results = DocumentReaderResults.fromJson(scan);
       debugger
       // return normalizeResult(JSON.parse(jstring.substring(8)))
       let accessKey
       if (!opts.processParams.doRfid  ||  !results.chipPage) {
-        callback(normalizeResult(result))
+        callback(normalizeResult(scan))
         return
       }
       accessKey = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_MRZ_STRINGS)
@@ -217,13 +217,18 @@ class RegulaProxy {
         debugger
         if (jstring.startsWith("Success:")) {
           let json = JSON.parse(jstring.substring(8))
+
+          if (json.imageFace) {
+            json.rfidImageFace = json.imageFace
+            json.imageFace = scan.imageFace
+          }
           let rfidResult = DocumentReaderResults.fromJson(json)
           debugger
           callback(normalizeResult(json))
           // callback(normalizeResult(rfidResult))
         }
         else
-          callback(normalizeResult(result))
+          callback(normalizeResult(scan))
       })
     })
   }
@@ -235,28 +240,29 @@ class RegulaProxy {
 export default new RegulaProxy()
 
 const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
-const normalizeResult = async result => {
-  result = normalizeJSON(result)
+const normalizeResult = async scan => {
+  scan = normalizeJSON(scan)
   // not necessary as long as imageStore changes are merged on the native side
 
-  const imageFront = await importFromImageStore(result.imageFront)
-  const imageBack = result.imageBack && await importFromImageStore(result.imageBack)
-  const imageFace = result.imageFace && await importFromImageStore(result.imageFace)
-  const imageSignature = result.imageSignature && await importFromImageStore(result.imageSignature)
+  const imageFront = await importFromImageStore(scan.imageFront)
+  const imageBack = scan.imageBack && await importFromImageStore(scan.imageBack)
+  const imageFace = scan.imageFace && await importFromImageStore(scan.imageFace)
+  const rfidImageFace = scan.rfidImageFace && await importFromImageStore(scan.rfidImageFace)
+  const imageSignature = scan.imageSignature && await importFromImageStore(scan.imageSignature)
 
-  const results = result.jsonResult.map(normalizeJSON)
+  const results = scan.jsonResult.map(normalizeJSON)
   const json = processListVerifiedFields(results)
 
-  return { json, results, imageFront, imageBack, imageFace, imageSignature }
+  return { json, results, imageFront, imageBack, imageFace, rfidImageFace, imageSignature }
 }
 
 const processListVerifiedFields = results => {
   let fields, fieldTypes
-  let result = results.find(r => r.ListVerifiedFields)
-  if (!result)
+  let scan = results.find(r => r.ListVerifiedFields)
+  if (!scan)
     return
 
-  fields = result.ListVerifiedFields.pFieldMaps
+  fields = scan.ListVerifiedFields.pFieldMaps
   if (!fields)
     return {}
   fieldTypes = regulaVisualFieldTypes

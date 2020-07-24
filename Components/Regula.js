@@ -53,13 +53,13 @@ const regulaScan = (function () {
           return
         return Promise.resolve(result)
         .then(result => {
-          let { error, imageFront, imageBack, imageFace, imageSignature, results, json } = result
+          let { error, imageFront, imageBack, imageFace, imageSignature, rfidImageFace, results, json } = result
           debugger
           if (error)
             return
           let { scanResult, country, documentType } = normalizeResult({results, json})
           // return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
-          return callback(postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType}))
+          return callback(postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, rfidImageFace, country, json, documentType}))
         })
       })
     } catch (err) {
@@ -183,7 +183,7 @@ const normalizeResult = ({results, json}) => {
   return { scanResult: result, country, documentType }
 }
 
-const postProcessResult = ({ result, imageFront, imageBack, imageFace, imageSignature, country, json, documentType }) => {
+const postProcessResult = ({ result, imageFront, imageBack, imageFace, rfidImageFace, imageSignature, country, json, documentType }) => {
   if (!result)
     return
   let ret = {
@@ -191,6 +191,7 @@ const postProcessResult = ({ result, imageFront, imageBack, imageFace, imageSign
     imageFront,
     imageBack,
     imageFace,
+    rfidImageFace,
     imageSignature,
     country,
     documentType //: json.ft_DL_Class && 'DL' || json.ft_Document_Class_Code

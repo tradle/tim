@@ -460,13 +460,14 @@ class RefPropertyEditor extends Component {
       Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return
     }
-    if (result.canceled)
+    let { canceled, documentType, scanJson, imageFront, imageFace, imageBack,
+          imageSignature, rfidImageFace, country } = result
+    if (canceled)
       return
 
-    if (result.documentType  &&  type !== 'other') {
+    if (documentType  &&  type !== 'other') {
       let docTypeModel = utils.getModel(ID_CARD)
-      let rDocumentType = result.documentType.charAt(0)
-      let documentType
+      let rDocumentType = documentType.charAt(0)
       if (rDocumentType === 'P')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'passport')
       else if (rDocumentType === 'I')
@@ -480,34 +481,39 @@ class RefPropertyEditor extends Component {
     }
 
     const r = _.cloneDeep(resource)
-    r.scanJson = result.scanJson
-    // r.documentType = result.documentType
-    r.country = result.country
+    r.scanJson = scanJson
+    // r.documentType = documentType
+    r.country = country
 
-    if (result.imageFront) {
+    if (imageFront) {
       r[prop.name] = {
-        url: result.imageFront,
+        url: imageFront,
       }
     }
     const rtype = utils.getType(resource)
     const props = utils.getModel(rtype).properties
-    const { otherSideScan, face, signature } = props
-    if (result.imageBack) {
+    const { otherSideScan, face, signature, rfidFace } = props
+    if (imageBack) {
       // HACK
       if (otherSideScan) {
         r.otherSideScan = {
-          url: result.imageBack,
+          url: imageBack,
         }
       }
     }
-    if (result.imageFace  &&  face  &&  face.ref === PHOTO) {
+    if (imageFace  &&  face  &&  face.ref === PHOTO) {
       r.face = {
-        url: result.imageFace
+        url: imageFace
       }
     }
-    if (result.imageSignature  &&  signature  &&  signature.ref === PHOTO) {
+    if (rfidImageFace  &&  rfidFace  &&  rfidFace.ref === PHOTO) {
+      r.rfidFace = {
+        url: rfidImageFace
+      }
+    }
+    if (imageSignature  &&  signature  &&  signature.ref === PHOTO) {
       r.signature = {
-        url: result.imageSignature
+        url: imageSignature
       }
     }
 
