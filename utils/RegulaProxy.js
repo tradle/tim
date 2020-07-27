@@ -5,6 +5,8 @@ import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 import { Platform } from 'react-native'
 
+import { translate } from '../utils/utils'
+
 import Regula from 'react-native-document-reader-api'
 const DocumentReader = Regula.RNRegulaDocumentReader
 const DocumentReaderResults = Regula.DocumentReaderResults
@@ -72,6 +74,9 @@ const DEFAULTS = {
   customization: {
     showStatusMessages: true,
     showHelpAnimation: true,
+    // status: translate('regulaStatus'),
+    // resultStatus: translate('regulaResultStatus'),
+    // customLabelStatus: translate(customLabelStatus)
   },
   processParams: {
     // scenario: Scenario.ocr,
@@ -168,7 +173,8 @@ class RegulaProxy {
     //   await Promise.delay(delta)
 // debugger
     opts = defaultsDeep(opts, DEFAULTS)
-
+    if (!opts.customization.status)
+      opts.customization.status = translate('regulaStatus')
     // debugger
 
     validateType({
@@ -188,13 +194,17 @@ class RegulaProxy {
       }
       let scan = JSON.parse(jstring.substring(8))
       let results = DocumentReaderResults.fromJson(scan);
-      debugger
       // return normalizeResult(JSON.parse(jstring.substring(8)))
       let accessKey
       if (!opts.processParams.doRfid  ||  !results.chipPage) {
         callback(normalizeResult(scan))
         return
       }
+      debugger
+let imageFocus = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_FOCUS);
+// Get status of images' glares
+let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_GLARES);
+
       accessKey = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_MRZ_STRINGS)
       if (accessKey) {
         accessKey = accessKey.replace(/^/g, '').replace(/\n/g, '')
@@ -223,6 +233,7 @@ class RegulaProxy {
             json.imageFace = scan.imageFace
           }
           let rfidResult = DocumentReaderResults.fromJson(json)
+          let status = rfidResult.getTextFieldStatusByType(Enum.eRFID_NotificationAndErrorCodes.RFID_NOTIFICATION_ERROR)
           debugger
           callback(normalizeResult(json))
           // callback(normalizeResult(rfidResult))
