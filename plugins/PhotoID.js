@@ -33,14 +33,20 @@ module.exports = function PhotoID ({ models }) {
       if (!documentType  ||  Array.isArray(documentType))
         return
       let isOther = form.documentType.id.indexOf('_other') !== -1
-      if (!isWeb()  &&  !isSimulator()  &&  !scanJson  &&  !isOther)
-        return
+      let scan = scanJson
+      const model = models[form[TYPE]]
+      let countryId = form.country  &&  form.country.id.split('_')[1]
+
+      if (!isWeb()  &&  !isSimulator()  &&  !scanJson  &&  !isOther) {
+        let requestedProperties = getRequestedProps({scan, model, form, countryId})
+        return {
+          requestedProperties
+        }
+      }
 
       if (isWeb()  ||  isOther)
         form.uploaded = true
-      let scan = scanJson
 
-      const model = models[form[TYPE]]
       // Check if there is a need to clean the form
       if (currentResource) {
         if ((currentResource.documentType  &&  currentResource.documentType.id !== form.documentType.id)  ||
@@ -62,7 +68,6 @@ module.exports = function PhotoID ({ models }) {
 
       let isLicence = documentType.title.indexOf('Licence') !== -1
       let isPassport = !isLicence  &&  documentType.title.indexOf('Passport') !== -1
-      let countryId = form.country  &&  form.country.id.split('_')[1]
       let cleanedup
       if (scan) {
         let { document } = scan
@@ -293,13 +298,13 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
-  let exclude = []
+  let exclude = ['documentType', 'country']
   for (let p in values) {
     if (exclude.includes(p))
       continue
     let val = values[p]
     if (typeof val === 'object')
-      cleanupValues(form, val, model, exclude)
+      cleanupValues(form, val, model)
     else if (!props[p]) {
       if (p === 'birthData') {
         delete form[p]
@@ -311,6 +316,7 @@ function cleanupValues(form, values, model) {
   }
   delete form.scan
   delete form.scanJson
+  delete form.otherSideScan
   let requestedProperties
   if (isWeb()  ||  isSimulator()  ||  form.documentType.id.indexOf('_other') !== -1) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
