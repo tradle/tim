@@ -354,10 +354,12 @@ class MessageView extends Component {
         photos = utils.getResourcePhotos(model, resource)
         mainPhoto = photos && photos[0]
       }
-      if (!mainPhoto  &&  photos)
+      if (!mainPhoto  &&  photos) {
         mainPhoto = photos[0]
+        photos = photos.splice(0, 1)
+      }
 
-      inRow = photos ? photos.length - 1 : 0
+      inRow = photos && photos.length || 0
       if (inRow  &&  inRow > 4)
         inRow = 5;
     }
@@ -376,15 +378,8 @@ class MessageView extends Component {
     if (!isVerification && isVerifier) /* && !utils.isReadOnlyChat(resource)*/
       checkProps = this.onCheck
     if (!checkProps) {
-      let photoList
-      if (!backlink && photos  &&  photos.length > 1) {
-        // Don't show the main photo in the strip
-        photoList = photos.slice()
-        photoList.splice(0, 1)
-      }
-
       photoStrip = <View style={styles.photoListStyle}>
-                    <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
+                    <PhotoList photos={photos} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
                    </View>
     }
     let content = <View style={styles.rowContainer}>
