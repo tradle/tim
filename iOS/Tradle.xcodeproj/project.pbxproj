@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302C01ABCB91800DB3ED1 /* libRCTImage.a */; };
@@ -21,8 +22,6 @@
 		1B9096F773F543A2A8892E52 /* libRNCViewpager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 247E7586ACB14159BE935F28 /* libRNCViewpager.a */; };
 		43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = EEECD0C1934547049DA9F6AE /* libz.tbd */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
-		730340E7221244EF00F3E0B5 /* ZoomHybrid.pub in Resources */ = {isa = PBXBuildFile; fileRef = 730340E6221244EF00F3E0B5 /* ZoomHybrid.pub */; };
-		730340E92212456B00F3E0B5 /* Zoom.strings in Resources */ = {isa = PBXBuildFile; fileRef = 730340E82212456B00F3E0B5 /* Zoom.strings */; };
 		73113FE5205F4AAF000C04F6 /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FE4205F4AA7000C04F6 /* libRNSearchBar.a */; };
 		73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FF8205F4B44000C04F6 /* libRCTBlob.a */; };
 		732B67862060213F00B16D6F /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B67852060213500B16D6F /* libRNCamera.a */; };
@@ -67,16 +66,15 @@
 		73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73F1D0941EDA10EE00D4AB5B /* tradle.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 09E311D0387D4764923D9B71 /* Ionicons.ttf */; };
+		9B0709DA24CF9084000BE1B6 /* libRNDocumentReaderCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BDEA3E124CF89B500D0E2FD /* libRNDocumentReaderCore.a */; };
+		9B070A2624CF908E000BE1B6 /* libRNRegulaDocumentReader.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BDEA3DB24CF899700D0E2FD /* libRNRegulaDocumentReader.a */; };
 		9B367214225AEFDB00EC7D06 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B3671C3225AEFDB00EC7D06 /* JavaScriptCore.framework */; };
 		9B5B4A8024AD30CA00F92F48 /* libJailMonkey.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5B4A3924AD308200F92F48 /* libJailMonkey.a */; };
-		9B71299223C9712B000D5FB2 /* ZoomAuthentication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9B71294423C9712B000D5FB2 /* ZoomAuthentication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9BA58D22225D3352006E05AF /* libRNCNetInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA58D0A225D334A006E05AF /* libRNCNetInfo.a */; };
 		9BA6555122776E2A0039160C /* libRNCWebView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA6553B22776E140039160C /* libRNCWebView.a */; };
 		9BDDE52222D2B1C4001A35FD /* libReactNativeViewPDF.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B472CE422CE920400C54D90 /* libReactNativeViewPDF.a */; };
 		9BDDE56F22D2B1CD001A35FD /* libRNDocumentPicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B0EE3E522CC01EB00B6A17A /* libRNDocumentPicker.a */; };
 		9BDFF5A924AD565000D92F83 /* libRNExitApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BDFF59724AD564800D92F83 /* libRNExitApp.a */; };
-		9BE2C10124AFB7AF00D59012 /* libRNDocumentReaderCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BE2C10024AFB7A800D59012 /* libRNDocumentReaderCore.a */; };
-		9BE2C10824AFB7CB00D59012 /* libRNRegulaDocumentReader.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BE2C10724AFB7C300D59012 /* libRNRegulaDocumentReader.a */; };
 		C8C7DC4BE45D05EEEEA0D6E9 /* libPods-Tradle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 866225A0083F67269536F0F0 /* libPods-Tradle.a */; };
 		DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 1447D734074D4C7BBD023C62 /* branch.json */; };
 /* End PBXBuildFile section */
@@ -607,26 +605,26 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNCWebView;
 		};
+		9BDEA3DA24CF899700D0E2FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BDEA3D624CF899700D0E2FD /* RNRegulaDocumentReader.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNRegulaDocumentReader;
+		};
+		9BDEA3E024CF89B500D0E2FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BDEA3DC24CF89B500D0E2FD /* RNDocumentReaderCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNDocumentReaderCore;
+		};
 		9BDFF59624AD564800D92F83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9BDFF55824AD564700D92F83 /* RNExitApp.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 15209BEF1D250F63000D0F44;
 			remoteInfo = RNExitApp;
-		};
-		9BE2C0FF24AFB7A800D59012 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9BE2C0FB24AFB7A800D59012 /* RNDocumentReaderCore.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNDocumentReaderCore;
-		};
-		9BE2C10624AFB7C300D59012 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9BE2C10224AFB7C300D59012 /* RNRegulaDocumentReader.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNRegulaDocumentReader;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -637,7 +635,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				9B71299223C9712B000D5FB2 /* ZoomAuthentication.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -680,10 +677,9 @@
 		4F0141B0C05A4BCE906F6CF6 /* RNLocalAuth.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNLocalAuth.xcodeproj; path = "../node_modules/react-native-local-auth/RNLocalAuth.xcodeproj"; sourceTree = "<group>"; };
 		51E28E47C0474F6991410832 /* ReactNativeExceptionHandler.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeExceptionHandler.xcodeproj; path = "../node_modules/react-native-exception-handler/ios/ReactNativeExceptionHandler.xcodeproj"; sourceTree = "<group>"; };
 		5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/ios/CodePush.xcodeproj"; sourceTree = "<group>"; };
+		5E2E5A7CD07CA5189926D49E /* Pods-Tradle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle/Pods-Tradle.release.xcconfig"; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		6B3FC1286FC44AFDBB86B8CD /* BVLinearGradient.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = BVLinearGradient.xcodeproj; path = "../node_modules/react-native-linear-gradient/BVLinearGradient.xcodeproj"; sourceTree = "<group>"; };
-		730340E6221244EF00F3E0B5 /* ZoomHybrid.pub */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ZoomHybrid.pub; sourceTree = "<group>"; };
-		730340E82212456B00F3E0B5 /* Zoom.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Zoom.strings; sourceTree = "<group>"; };
 		73113FDF205F4AA7000C04F6 /* RNSearchBar.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSearchBar.xcodeproj; path = "../node_modules/react-native-search-bar/ios/RNSearchBar.xcodeproj"; sourceTree = "<group>"; };
 		73113FF2205F4B43000C04F6 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		732B67802060213500B16D6F /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
@@ -723,20 +719,21 @@
 		9B3671C3225AEFDB00EC7D06 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		9B472CB122CE920200C54D90 /* ReactNativeViewPDF.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeViewPDF.xcodeproj; path = "../node_modules/react-native-view-pdf/ReactNativeViewPDF.xcodeproj"; sourceTree = "<group>"; };
 		9B5B4A3024AD308200F92F48 /* JailMonkey.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JailMonkey.xcodeproj; path = "../node_modules/jail-monkey/JailMonkey.xcodeproj"; sourceTree = "<group>"; };
-		9B71294423C9712B000D5FB2 /* ZoomAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ZoomAuthentication.framework; sourceTree = "<group>"; };
 		9BA58CD1225D334A006E05AF /* RNCNetInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCNetInfo.xcodeproj; path = "../node_modules/@react-native-community/netinfo/ios/RNCNetInfo.xcodeproj"; sourceTree = "<group>"; };
 		9BA6550122776E140039160C /* RNCWebView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCWebView.xcodeproj; path = "../node_modules/react-native-webview/ios/RNCWebView.xcodeproj"; sourceTree = "<group>"; };
 		9BCD8E87C35843E585CC6AE5 /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
+		9BDEA3D624CF899700D0E2FD /* RNRegulaDocumentReader.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRegulaDocumentReader.xcodeproj; path = "../node_modules/react-native-document-reader-api/ios/RNRegulaDocumentReader.xcodeproj"; sourceTree = "<group>"; };
+		9BDEA3DC24CF89B500D0E2FD /* RNDocumentReaderCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDocumentReaderCore.xcodeproj; path = "../node_modules/react-native-document-reader-core-fullrfid/ios/RNDocumentReaderCore.xcodeproj"; sourceTree = "<group>"; };
 		9BDFF55824AD564700D92F83 /* RNExitApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNExitApp.xcodeproj; path = "../node_modules/react-native-exit-app/ios/RNExitApp.xcodeproj"; sourceTree = "<group>"; };
-		9BE2C0FB24AFB7A800D59012 /* RNDocumentReaderCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDocumentReaderCore.xcodeproj; path = "../node_modules/react-native-document-reader-core-fullrfid/ios/RNDocumentReaderCore.xcodeproj"; sourceTree = "<group>"; };
-		9BE2C10224AFB7C300D59012 /* RNRegulaDocumentReader.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRegulaDocumentReader.xcodeproj; path = "../node_modules/react-native-document-reader-api/ios/RNRegulaDocumentReader.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
+		AE967B7D3A3339489A38C860 /* Pods-Tradle.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle.staging.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle/Pods-Tradle.staging.xcconfig"; sourceTree = "<group>"; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
 		D18E4FDA533141898788750C /* RNTradleKeeper.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNTradleKeeper.xcodeproj; path = "../node_modules/react-native-tradle-keeper/ios/RNTradleKeeper.xcodeproj"; sourceTree = "<group>"; };
 		D85145324C644855AB5F4C55 /* libRNRegulaDocumentReader.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNRegulaDocumentReader.a; sourceTree = "<group>"; };
 		E0957333521746DEB401A14A /* ReactNativeLocalization.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeLocalization.xcodeproj; path = "../node_modules/react-native-localization/ReactNativeLocalization.xcodeproj"; sourceTree = "<group>"; };
+		E0A74232AC02C1F5BC95EF2B /* Pods-Tradle.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle/Pods-Tradle.debug.xcconfig"; sourceTree = "<group>"; };
 		E512A7388D2D4884A7CD858B /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		E7C815980A204425819A0AD3 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
@@ -752,10 +749,10 @@
 				9B367214225AEFDB00EC7D06 /* JavaScriptCore.framework in Frameworks */,
 				736290B51EDE461F007E4DE1 /* iAd.framework in Frameworks */,
 				9BDDE52222D2B1C4001A35FD /* libReactNativeViewPDF.a in Frameworks */,
-				9BE2C10824AFB7CB00D59012 /* libRNRegulaDocumentReader.a in Frameworks */,
-				9BE2C10124AFB7AF00D59012 /* libRNDocumentReaderCore.a in Frameworks */,
 				9B5B4A8024AD30CA00F92F48 /* libJailMonkey.a in Frameworks */,
 				9BDFF5A924AD565000D92F83 /* libRNExitApp.a in Frameworks */,
+				9B0709DA24CF9084000BE1B6 /* libRNDocumentReaderCore.a in Frameworks */,
+				9B070A2624CF908E000BE1B6 /* libRNRegulaDocumentReader.a in Frameworks */,
 				9BDDE56F22D2B1CD001A35FD /* libRNDocumentPicker.a in Frameworks */,
 				736290B31EDE4619007E4DE1 /* MobileCoreServices.framework in Frameworks */,
 				736290B11EDE4614007E4DE1 /* CoreSpotlight.framework in Frameworks */,
@@ -864,7 +861,6 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
-				730340E6221244EF00F3E0B5 /* ZoomHybrid.pub */,
 				73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */,
 				73D62BBD22123C1F0082B2DE /* Dummy.swift */,
 				7379F84B1EDA19630093535C /* Launch Screen.storyboard */,
@@ -1186,8 +1182,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				9BE2C10224AFB7C300D59012 /* RNRegulaDocumentReader.xcodeproj */,
-				9BE2C0FB24AFB7A800D59012 /* RNDocumentReaderCore.xcodeproj */,
+				9BDEA3DC24CF89B500D0E2FD /* RNDocumentReaderCore.xcodeproj */,
+				9BDEA3D624CF899700D0E2FD /* RNRegulaDocumentReader.xcodeproj */,
 				9BDFF55824AD564700D92F83 /* RNExitApp.xcodeproj */,
 				9B5B4A3024AD308200F92F48 /* JailMonkey.xcodeproj */,
 				9B472CB122CE920200C54D90 /* ReactNativeViewPDF.xcodeproj */,
@@ -1250,7 +1246,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				9B71294423C9712B000D5FB2 /* ZoomAuthentication.framework */,
 				13B07FAE1A68108700A75B9A /* Tradle */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -1320,26 +1315,26 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		9BDEA3D724CF899700D0E2FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BDEA3DB24CF899700D0E2FD /* libRNRegulaDocumentReader.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9BDEA3DD24CF89B500D0E2FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BDEA3E124CF89B500D0E2FD /* libRNDocumentReaderCore.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		9BDFF55924AD564700D92F83 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				9BDFF59724AD564800D92F83 /* libRNExitApp.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		9BE2C0FC24AFB7A800D59012 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9BE2C10024AFB7A800D59012 /* libRNDocumentReaderCore.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		9BE2C10324AFB7C300D59012 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9BE2C10724AFB7C300D59012 /* libRNRegulaDocumentReader.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1350,7 +1345,6 @@
 				3A8D9F01FC2544259B6D0482 /* libRNImageStore.a */,
 				444B5C3BFA464382976B9C77 /* libRNTradleKeeper.a */,
 				D85145324C644855AB5F4C55 /* libRNRegulaDocumentReader.a */,
-				4435A84407C04B0395C535E6 /* libRNReactNativeZoomSdk.a */,
 				247E7586ACB14159BE935F28 /* libRNCViewpager.a */,
 			);
 			name = "Recovered References";
@@ -1359,6 +1353,9 @@
 		A228863577B3E688B7E7AC13 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
+				E0A74232AC02C1F5BC95EF2B /* Pods-Tradle.debug.xcconfig */,
+				5E2E5A7CD07CA5189926D49E /* Pods-Tradle.release.xcconfig */,
+				AE967B7D3A3339489A38C860 /* Pods-Tradle.staging.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -1366,7 +1363,6 @@
 		AB0700E270F64F0AB32A72E0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				730340E82212456B00F3E0B5 /* Zoom.strings */,
 				7380570421B3747A000A927F /* RegulaSDK.strings */,
 				4C80CE90233C4E8EAE48AFFF /* Entypo.ttf */,
 				266D99AA90E74766BFCEC86B /* EvilIcons.ttf */,
@@ -1398,7 +1394,6 @@
 				735D53EF21472DE20084FEFB /* Get Local IP */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */,
-				9BAF2EFA23CBE509009E03FE /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1566,8 +1561,8 @@
 					ProjectRef = 9B0EE3A822CC01EB00B6A17A /* RNDocumentPicker.xcodeproj */;
 				},
 				{
-					ProductGroup = 9BE2C0FC24AFB7A800D59012 /* Products */;
-					ProjectRef = 9BE2C0FB24AFB7A800D59012 /* RNDocumentReaderCore.xcodeproj */;
+					ProductGroup = 9BDEA3DD24CF89B500D0E2FD /* Products */;
+					ProjectRef = 9BDEA3DC24CF89B500D0E2FD /* RNDocumentReaderCore.xcodeproj */;
 				},
 				{
 					ProductGroup = 732B64411ED9FF7C0056F4BF /* Products */;
@@ -1610,8 +1605,8 @@
 					ProjectRef = A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */;
 				},
 				{
-					ProductGroup = 9BE2C10324AFB7C300D59012 /* Products */;
-					ProjectRef = 9BE2C10224AFB7C300D59012 /* RNRegulaDocumentReader.xcodeproj */;
+					ProductGroup = 9BDEA3D724CF899700D0E2FD /* Products */;
+					ProjectRef = 9BDEA3D624CF899700D0E2FD /* RNRegulaDocumentReader.xcodeproj */;
 				},
 				{
 					ProductGroup = 73113FE0205F4AA7000C04F6 /* Products */;
@@ -2164,25 +2159,25 @@
 			remoteRef = 9BA6553A22776E140039160C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		9BDEA3DB24CF899700D0E2FD /* libRNRegulaDocumentReader.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNRegulaDocumentReader.a;
+			remoteRef = 9BDEA3DA24CF899700D0E2FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BDEA3E124CF89B500D0E2FD /* libRNDocumentReaderCore.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNDocumentReaderCore.a;
+			remoteRef = 9BDEA3E024CF89B500D0E2FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		9BDFF59724AD564800D92F83 /* libRNExitApp.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRNExitApp.a;
 			remoteRef = 9BDFF59624AD564800D92F83 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		9BE2C10024AFB7A800D59012 /* libRNDocumentReaderCore.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNDocumentReaderCore.a;
-			remoteRef = 9BE2C0FF24AFB7A800D59012 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		9BE2C10724AFB7C300D59012 /* libRNRegulaDocumentReader.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNRegulaDocumentReader.a;
-			remoteRef = 9BE2C10624AFB7C300D59012 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2193,8 +2188,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */,
-				730340E92212456B00F3E0B5 /* Zoom.strings in Resources */,
-				730340E7221244EF00F3E0B5 /* ZoomHybrid.pub in Resources */,
 				73F1D0971EDA10EE00D4AB5B /* release.xcconfig in Resources */,
 				73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */,
 				7380570221B3747A000A927F /* RegulaSDK.strings in Resources */,
@@ -2264,7 +2257,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework.dSYM",
 				"${PODS_ROOT}/DocumentReaderFull/DocumentReaderCore.framework",
@@ -2277,25 +2270,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		9BAF2EFA23CBE509009E03FE /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "bash ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/ZoomAuthentication.framework/strip-unused-architectures-from-target.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2405,9 +2381,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2484,9 +2458,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2600,9 +2572,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
