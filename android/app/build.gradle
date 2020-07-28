@@ -158,22 +158,24 @@ android {
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative59"
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-        // ndk {
-        //     abiFilters "armeabi-v7a", "x86"
-        // }
+        versionCode vbuild
+        versionName vmajor + "." + vminor + "." + vpatch
+        // versionCode 1
+        // versionName "1.0"
+        // // ndk {
+        // //     abiFilters "armeabi-v7a", "x86"
+        // // }
 
         multiDexEnabled true
     }
-    applicationVariants.all { variant ->
-      if (variant.buildType.name == "release") {
-        variant.outputs.each { output ->
-          output.versionCodeOverride = vbuild;
-          output.versionNameOverride = vmajor + "." + vminor + "." + vpatch;
-        }
-      }
-    }
+    // applicationVariants.all { variant ->
+    //   if (variant.buildType.name == "release") {
+    //     variant.outputs.each { output ->
+    //       output.versionCodeOverride = vbuild;
+    //       output.versionNameOverride = vmajor + "." + vminor + "." + vpatch;
+    //     }
+    //   }
+    // }
     dexOptions {
         javaMaxHeapSize "4g"
     }
