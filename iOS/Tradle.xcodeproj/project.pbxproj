@@ -2257,7 +2257,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
+				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework.dSYM",
 				"${PODS_ROOT}/DocumentReaderFull/DocumentReaderCore.framework",
@@ -2270,7 +2270,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2338,7 +2338,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)",
 				);
@@ -2417,7 +2417,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)",
 				);
@@ -2530,7 +2530,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)",
 				);
