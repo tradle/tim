@@ -5,7 +5,6 @@ import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
 import { isSimulator, sanitize, isEmpty, getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
 import RegulaProxy, { Scenario, isRFIDAvailable } from '../utils/RegulaProxy'  //'../utils/regula'
-// import DeviceInfo from 'react-native-device-info'
 const COUNTRY = 'tradle.Country'
 
 const regulaScan = (function () {
@@ -21,33 +20,12 @@ const regulaScan = (function () {
         scenario: Scenario.Ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
         multipageProcessing: bothSides,
         doRfid: doRfid && isRFIDAvailable || false,
-        // rfidScenario: true,
-        // sessionLogFolder: '.'
       },
       // functionality: {
       //   showCaptureButton: true
       // }
     }
-    // if (isAndroid()) {
-    //   let totalMem = DeviceInfo.getTotalMemory() / 1000000000
-    //   if (totalMem < 2) {
-    //    if set then as soon as doc is located the picture is taken and processed as a single frame
-    //     scanOpts.functionality = {
-    //       pictureOnBoundsReady: true
-    //     }
-    //   }
-    // }
-    // let result
     try {
-      // return RegulaProxy.scan(scanOpts)
-      // .then(result => {
-      //   debugger
-      //   let { error, imageFront, imageBack, imageFace, imageSignature, results, json } = result
-      //   if (error)
-      //     return
-      //   let { scanResult, country, documentType } = normalizeResult({results, json})
-      //   return postProcessResult({result: scanResult, imageFront, imageBack, imageFace, imageSignature, country, json, documentType})
-      // })
       await RegulaProxy.scan(scanOpts, async (result) => {
         if (!result)
           return
