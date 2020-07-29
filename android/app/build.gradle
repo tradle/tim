@@ -208,27 +208,6 @@ android {
         }
     }
     buildTypes {
-        debug {
-            debuggable true
-            minifyEnabled false
-            def codePushKey = getCodePushKey("Debug")
-            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
-            // applicationIdSuffix ".debug"
-            ext.alwaysUpdateBuildId = false
-        }
-        release {
-            // setting to true breaks require()'d images in JS
-            // can probably set to true after figuring this out: https://developer.android.com/studio/build/shrink-code
-            shrinkResources false
-            zipAlignEnabled enableProguardInReleaseBuilds
-            minifyEnabled enableProguardInReleaseBuilds
-            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            setProguardFiles([getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'])
-
-            signingConfig signingConfigs.release
-            def codePushKey = getCodePushKey("Production")
-            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
-        }
         releaseStaging {
             // setting to true breaks require()'d images in JS
             // can probably set to true after figuring this out: https://developer.android.com/studio/build/shrink-code
@@ -242,6 +221,27 @@ android {
             def codePushKey = getCodePushKey("Staging")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
             matchingFallbacks = ['release']
+        }
+        debug {
+            debuggable true
+            // minifyEnabled false
+            def codePushKey = getCodePushKey("Debug")
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
+            // applicationIdSuffix ".debug"
+            // ext.alwaysUpdateBuildId = false
+        }
+        release {
+            // setting to true breaks require()'d images in JS
+            // can probably set to true after figuring this out: https://developer.android.com/studio/build/shrink-code
+            shrinkResources false
+            zipAlignEnabled enableProguardInReleaseBuilds
+            minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            setProguardFiles([getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'])
+
+            signingConfig signingConfigs.release
+            def codePushKey = getCodePushKey("Production")
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
         }
     }
 
