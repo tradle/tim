@@ -52,6 +52,7 @@ import io.tradle.reactkeeper.RNTradleKeeperPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
 import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
 
+import com.facebook.react.BuildConfig;
 // import com.instabug.reactlibrary.RNInstabugReactnativePackage;
 //import io.tradle.RNBlinkIDPackage;
 
