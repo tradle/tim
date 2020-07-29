@@ -11,7 +11,7 @@ import io.branch.rnbranch.RNBranchModule;
 public class MainActivity extends ReactActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-      SplashScreen.show(this, true);
+      SplashScreen.show(this);
       super.onCreate(savedInstanceState);
       // set database limit to 200MB
       ReactDatabaseSupplier.getInstance(getApplicationContext()).setMaximumSize(200000000L);
