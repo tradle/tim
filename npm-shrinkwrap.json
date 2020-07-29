@@ -981,7 +981,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#29924c37baa159c9db62a11e91bb2647f7a88284"
+      "resolved": "git://github.com/tradle/models.git#8d8fbaba03c7ed579a85f20d1d61569a9e890e1e"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -2733,7 +2733,7 @@
       "dependencies": {
         "core-js": {
           "version": "1.2.7",
-          "from": "core-js@^1.0.0",
+          "from": "core-js@>=1.0.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz"
         },
         "fbjs": {
@@ -7291,18 +7291,20 @@
       "dependencies": {
         "core-js": {
           "version": "1.2.7",
-          "from": "core-js@>=1.0.0 <2.0.0",
+          "from": "core-js@^1.0.0",
           "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz"
         },
         "create-react-class": {
           "version": "15.6.0",
           "from": "create-react-class@15.6.0",
-          "resolved": "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.0.tgz"
-        },
-        "fbjs": {
-          "version": "0.8.17",
-          "from": "fbjs@~0.8.17",
-          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
+          "resolved": "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.0.tgz",
+          "dependencies": {
+            "fbjs": {
+              "version": "0.8.17",
+              "from": "fbjs@^0.8.9",
+              "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
+            }
+          }
         }
       }
     },
@@ -7317,14 +7319,14 @@
       "resolved": "https://registry.npmjs.org/react-native-document-picker/-/react-native-document-picker-2.3.0.tgz"
     },
     "react-native-document-reader-api": {
-      "version": "5.0.0",
-      "from": "react-native-document-reader-api@latest",
-      "resolved": "http://registry.npmjs.org/react-native-document-reader-api/-/react-native-document-reader-api-5.0.0.tgz"
+      "version": "5.1.0",
+      "from": "react-native-document-reader-api@5.1.0",
+      "resolved": "http://registry.npmjs.org/react-native-document-reader-api/-/react-native-document-reader-api-5.1.0.tgz"
     },
     "react-native-document-reader-core-fullrfid": {
-      "version": "5.0.0",
+      "version": "5.1.0",
       "from": "react-native-document-reader-core-fullrfid@latest",
-      "resolved": "http://registry.npmjs.org/react-native-document-reader-core-fullrfid/-/react-native-document-reader-core-fullrfid-5.0.0.tgz"
+      "resolved": "http://registry.npmjs.org/react-native-document-reader-core-fullrfid/-/react-native-document-reader-core-fullrfid-5.1.0.tgz"
     },
     "react-native-ecc": {
       "version": "2.2.0",
@@ -7340,11 +7342,6 @@
       "version": "1.1.0",
       "from": "react-native-exit-app@latest",
       "resolved": "http://registry.npmjs.org/react-native-exit-app/-/react-native-exit-app-1.1.0.tgz"
-    },
-    "react-native-facetec-zoom": {
-      "version": "1.2.0",
-      "from": "github:tradle/react-native-facetec-zoom#mv/sdk8.x",
-      "resolved": "github:tradle/react-native-facetec-zoom#8af8d40f81b7d522a69df137a3d7fb66f6abc235"
     },
     "react-native-flexbox-grid": {
       "version": "0.3.2",
@@ -7489,7 +7486,7 @@
     "react-native-signature-pad": {
       "version": "0.1.0",
       "from": "github:tradle/react-native-signature-pad",
-      "resolved": "github:tradle/react-native-signature-pad#1b3ca3824da3842d9ad5d6932733a2557dfeff50"
+      "resolved": "git://github.com/tradle/react-native-signature-pad.git#1b3ca3824da3842d9ad5d6932733a2557dfeff50"
     },
     "react-native-splash-screen": {
       "version": "3.2.0",
@@ -8670,7 +8667,7 @@
         "readable-stream": {
           "version": "2.3.7",
           "from": "readable-stream@^2.0.2",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.7.tgz"
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.7.tgz"
         },
         "string_decoder": {
           "version": "1.1.1",

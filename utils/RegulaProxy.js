@@ -8,9 +8,9 @@ import { Platform } from 'react-native'
 import { translate } from '../utils/utils'
 
 import Regula from 'react-native-document-reader-api'
-const DocumentReader = Regula.RNRegulaDocumentReader
-const DocumentReaderResults = Regula.DocumentReaderResults
-const Enum = Regula.Enum
+const DocumentReader = Regula.DocumentReader // Regula.RNRegulaDocumentReader
+const DocumentReaderResults = DocumentReader.DocumentReaderResults
+const Enum = DocumentReader.Enum
 
 import once from 'once'
 import { importFromImageStore } from './image-utils'
@@ -69,7 +69,7 @@ const DEFAULTS = {
     showCaptureButton: false,
     skipFocusingFrames: true,
     // orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
-    orientation: Platform.OS === 'ios' ? Enum.DocReaderOrientationIOS.LANDSCAPE : Enum.DocReaderOrientationAndroid.LANDSCAPE
+    orientation: Platform.OS === 'ios' ? Enum.DocReaderOrientationIOS.LANDSCAPE : Enum.DocReaderOrientation.LANDSCAPE
   },
   customization: {
     showStatusMessages: true,
@@ -117,6 +117,9 @@ class RegulaProxy {
       DocumentReader.prepareDatabase(dbID, (respond) => {
         this._prepareSucceeded()
         this.initialize(respond)
+      },
+      (error) => {
+        console.log(error)
       })
     } catch (err) {
       debugger
@@ -131,7 +134,8 @@ class RegulaProxy {
     if (!prepared)
       await this._prepared
 
-    DocumentReader.initializeReader(this.initializeOpts, (respond) => {
+    DocumentReader.initializeReader(this.initializeOpts.licenseKey, (respond) => {
+      // debugger
       if (size(Scenario))
         return
       DocumentReader.getAvailableScenarios((jstring) => {
@@ -143,7 +147,7 @@ class RegulaProxy {
         }
 
         for (let i in availableScenarios) {
-          let name = Regula.Scenario.fromJson(typeof availableScenarios[i] === "string" ? JSON.parse(availableScenarios[i]) : availableScenarios[i]).name
+          let name = DocumentReader.Scenario.fromJson(typeof availableScenarios[i] === "string" ? JSON.parse(availableScenarios[i]) : availableScenarios[i]).name
           Scenario[name] = name
         }
         DocumentReader.getDocumentReaderIsReady(isReady => {
@@ -154,13 +158,20 @@ class RegulaProxy {
             this._initializeFailed(respond)
             console.log(respond)
           }
-        })
+        }, error => console.log(error))
+      }, error => {
+        console.log(error)
       })
-      DocumentReader.getCanRFID(canRFID => {
+      DocumentReader.isRFIDAvailableForUse(canRfid => {
         // debugger
-        this._initializeRfidSucceeded()
-        isRFIDAvailable = canRFID
-      })
+        if (canRfid === true || canRfid === "YES" || canRfid == 1) {
+          this._initializeRfidSucceeded()
+          isRFIDAvailable = true
+        }
+      }, error => console.log(error))
+    }, error => {
+      debugger
+      console.log(error)
     })
   })
 
@@ -186,13 +197,13 @@ class RegulaProxy {
     DocumentReader.setConfig(opts, str => {
       // debugger
       console.log(str)
-    })
+    }, error => console.log(error))
     DocumentReader.showScanner(jstring => {
-      if (jstring.substring(0, 8) != "Success:") {
-        callback({error: jstring})
-        return
-      }
-      let scan = JSON.parse(jstring.substring(8))
+      // if (jstring.substring(0, 8) != "Success:") {
+      //   callback({error: jstring})
+      //   return
+      // }
+      let scan = JSON.parse(jstring) //.substring(8))
       let results = DocumentReaderResults.fromJson(scan);
       // return normalizeResult(JSON.parse(jstring.substring(8)))
       let accessKey
@@ -200,7 +211,6 @@ class RegulaProxy {
         callback(normalizeResult(scan))
         return
       }
-      debugger
 let imageFocus = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_FOCUS);
 // Get status of images' glares
 let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_GLARES);
@@ -211,7 +221,7 @@ let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE
         DocumentReader.setRfidScenario({
           mrz: accessKey,
           pacePasswordType: Enum.eRFID_Password_Type.PPT_MRZ,
-        }, () => { });
+        }, (str) => { console.log(str) }, (error) => { console.log(error) });
       }
       else {
         accessKey = results.getTextFieldValueByType(159);
@@ -219,29 +229,29 @@ let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE
           DocumentReader.setRfidScenario({
             password: accessKey,
             pacePasswordType: Enum.eRFID_Password_Type.PPT_CAN,
-          }, () => { });
+          }, (str) => { console.log(str) }, (error) => { console.log(error) });
         }
       }
 
       DocumentReader.startRFIDReader((jstring) => {
         debugger
-        if (jstring.startsWith("Success:")) {
-          let json = JSON.parse(jstring.substring(8))
+        // if (jstring.startsWith("Success:")) {
+        let json = JSON.parse(jstring) //.substring(8))
 
-          if (json.imageFace) {
-            json.rfidImageFace = json.imageFace
-            json.imageFace = scan.imageFace
-          }
-          let rfidResult = DocumentReaderResults.fromJson(json)
-          let status = rfidResult.getTextFieldStatusByType(Enum.eRFID_NotificationAndErrorCodes.RFID_NOTIFICATION_ERROR)
-          debugger
-          callback(normalizeResult(json))
-          // callback(normalizeResult(rfidResult))
+        if (json.imageFace) {
+          json.rfidImageFace = json.imageFace
+          json.imageFace = scan.imageFace
         }
-        else
-          callback(normalizeResult(scan))
-      })
-    })
+        let rfidResult = DocumentReaderResults.fromJson(json)
+        let status = rfidResult.getTextFieldStatusByType(Enum.eRFID_NotificationAndErrorCodes.RFID_NOTIFICATION_ERROR)
+        debugger
+        callback(normalizeResult(json))
+          // callback(normalizeResult(rfidResult))
+        // }
+        // else
+        //   callback(normalizeResult(scan))
+      }, error => console.log(error))
+    }, error => console.log(error))
   }
 
   setLicenseKey = async (licenseKey) => {
