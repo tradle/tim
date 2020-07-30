@@ -13,8 +13,8 @@ buildscript {
         }
     }
     dependencies {
-        // classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:3.3.2'
+        // classpath 'com.android.tools.build:gradle:4.0.1'
         classpath 'com.google.gms:google-services:4.3.3' // Needed for Firebase Analytics
 //        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
