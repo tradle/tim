@@ -21,7 +21,7 @@ class App extends Component {
     let scanOpts = {
       processParams: {
         scenario: Scenario.fullProcess,
-        multipageProcessing: true,
+        multipageProcessing: false,
       },
       functionality: {
         showCaptureButton: true,
@@ -38,23 +38,23 @@ class App extends Component {
   }
 
   render() {
-    let { results, imageFront, imageBack, json } = this.state
-    if (!results) {
+    let { imageFront, imageBack, imageFace, json } = this.state
+    if (!imageFront) {
       return <View />
     }
-    if (imageFront.startsWith('/')) {
-      // data uri
-      imageFront = 'data:image/jpeg;base64,' + imageFront
-    }
-    if (imageBack) {
-      imageBack = 'data:image/jpeg;base64,' + imageBack
+    imageFront = <Image source={{ uri: imageFront }} style={styles.image} />
+    if (imageBack)
       imageBack = <Image source={{ uri: imageBack }} style={styles.image} />
-    }
+
+    if (imageFace)
+      imageBack = <Image source={{uri: imageFace}} style={styles.image} />
+
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Image source={{ uri: imageFront }} style={styles.image} />
+        {imageFront}
+        {imageFace}
         {imageBack}
-        <Text>{JSON.stringify(json, null, 2)}</Text>
+        <Text>{json  &&  JSON.stringify(json, null, 2) || ''}</Text>
       </ScrollView>
     )
   }
