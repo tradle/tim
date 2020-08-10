@@ -69,7 +69,7 @@ const DEFAULTS = {
     showCaptureButton: false,
     skipFocusingFrames: true,
     // orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
-    orientation: Platform.OS === 'ios' ? Enum.DocReaderOrientationIOS.LANDSCAPE : Enum.DocReaderOrientation.LANDSCAPE
+    orientation: /*Platform.OS === 'ios' ? Enum.DocReaderOrientationIOS.LANDSCAPE :*/ Enum.DocReaderOrientation.LANDSCAPE
   },
   customization: {
     showStatusMessages: true,
@@ -199,12 +199,21 @@ class RegulaProxy {
       console.log(str)
     }, error => console.log(error))
     DocumentReader.showScanner(jstring => {
-      // if (jstring.substring(0, 8) != "Success:") {
-      //   callback({error: jstring})
-      //   return
-      // }
-      let scan = JSON.parse(jstring) //.substring(8))
+debugger
+      let scan, wasJSON
+      if (typeof jstring === 'string')
+        scan = JSON.parse(jstring) //.substring(8))
+      else {
+        scan = jstring
+        wasJSON = true
+      }
       let results = DocumentReaderResults.fromJson(scan);
+      if (wasJSON) {
+        let jsonArr = []
+        scan.jsonResult.forEach(elm => jsonArr.push(JSON.parse(elm)))
+        scan.jsonResult = jsonArr
+      }
+
       // return normalizeResult(JSON.parse(jstring.substring(8)))
       let accessKey
       if (!opts.processParams.doRfid  ||  !results.chipPage) {
@@ -250,8 +259,14 @@ let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE
         // }
         // else
         //   callback(normalizeResult(scan))
-      }, error => console.log(error))
-    }, error => console.log(error))
+      }, error => {
+        debugger
+        console.log(error)
+      })
+    }, error => {
+      debugger
+      console.log(error)
+    })
   }
 
   setLicenseKey = async (licenseKey) => {
@@ -265,7 +280,7 @@ const normalizeResult = async scan => {
   scan = normalizeJSON(scan)
   // not necessary as long as imageStore changes are merged on the native side
 
-  const imageFront = await importFromImageStore(scan.imageFront)
+  const imageFront = scan.imageFront  &&  await importFromImageStore(scan.imageFront)
   const imageBack = scan.imageBack && await importFromImageStore(scan.imageBack)
   const imageFace = scan.imageFace && await importFromImageStore(scan.imageFace)
   const rfidImageFace = scan.rfidImageFace && await importFromImageStore(scan.rfidImageFace)

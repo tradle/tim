@@ -78,8 +78,10 @@ const merged = extend({
     // 'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
     // // r3.com
     // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
+    // ellenka
+    'https://4mv2ow0m97.execute-api.us-east-1.amazonaws.com/dev',
     // lenka
-    'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
     // svb
     // 'https://yfu6r9h8w0.execute-api.us-east-1.amazonaws.com/dev',
   ],

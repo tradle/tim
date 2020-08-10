@@ -719,6 +719,7 @@
 		9B3671C3225AEFDB00EC7D06 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		9B472CB122CE920200C54D90 /* ReactNativeViewPDF.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeViewPDF.xcodeproj; path = "../node_modules/react-native-view-pdf/ReactNativeViewPDF.xcodeproj"; sourceTree = "<group>"; };
 		9B5B4A3024AD308200F92F48 /* JailMonkey.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JailMonkey.xcodeproj; path = "../node_modules/jail-monkey/JailMonkey.xcodeproj"; sourceTree = "<group>"; };
+		9B89E56724DCC70D000A3464 /* TradleDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = TradleDebug.entitlements; path = Tradle/TradleDebug.entitlements; sourceTree = "<group>"; };
 		9BA58CD1225D334A006E05AF /* RNCNetInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCNetInfo.xcodeproj; path = "../node_modules/@react-native-community/netinfo/ios/RNCNetInfo.xcodeproj"; sourceTree = "<group>"; };
 		9BA6550122776E140039160C /* RNCWebView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCWebView.xcodeproj; path = "../node_modules/react-native-webview/ios/RNCWebView.xcodeproj"; sourceTree = "<group>"; };
 		9BCD8E87C35843E585CC6AE5 /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
@@ -861,6 +862,7 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				9B89E56724DCC70D000A3464 /* TradleDebug.entitlements */,
 				73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */,
 				73D62BBD22123C1F0082B2DE /* Dummy.swift */,
 				7379F84B1EDA19630093535C /* Launch Screen.storyboard */,
@@ -2257,7 +2259,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework.dSYM",
 				"${PODS_ROOT}/DocumentReaderFull/DocumentReaderCore.framework",
@@ -2270,7 +2272,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2329,8 +2331,8 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_PUSH_KEY = "";
-				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = Tradle/TradleDebug.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = NO;

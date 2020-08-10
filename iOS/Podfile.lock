@@ -2,8 +2,8 @@ PODS:
   - Branch (0.27.1):
     - Branch/Core (= 0.27.1)
   - Branch/Core (0.27.1)
-  - DocumentReader (5.1.1194)
-  - DocumentReaderFull (5.1.2749)
+  - DocumentReader (5.2.1315)
+  - DocumentReaderFull (5.2.3098)
 
 DEPENDENCIES:
   - Branch (= 0.27.1)
@@ -11,16 +11,16 @@ DEPENDENCIES:
   - DocumentReaderFull (~> 5.1)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - Branch
     - DocumentReader
     - DocumentReaderFull
 
 SPEC CHECKSUMS:
   Branch: 1ace77c04b6e3efbf982bf4364f0662bfac156a0
-  DocumentReader: 9424151f4912c1efe3276ecb495a44d871dd1d9b
-  DocumentReaderFull: 62b37217835dfcf9d81e0729bfd4dda111151cf5
+  DocumentReader: 4bf46e4fd4e15bccb835d0defdecb2efd8fcf27c
+  DocumentReaderFull: 8f83f45a11ccc60891db6f39264320368ff5a6a1
 
 PODFILE CHECKSUM: 53e2dd0a32c1c4287106b198b6cce8ae4ca31eac
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.9.3
