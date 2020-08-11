@@ -275,6 +275,7 @@ debugger
       }, error => {
         debugger
         console.log(error)
+        callback(normalizeResult(scan))
       })
     }, error => {
       debugger
