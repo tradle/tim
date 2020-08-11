@@ -199,7 +199,6 @@ class RegulaProxy {
       console.log(str)
     }, error => console.log(error))
     DocumentReader.showScanner(jstring => {
-debugger
       let scan, wasJSON
       if (typeof jstring === 'string')
         scan = JSON.parse(jstring) //.substring(8))
@@ -216,13 +215,27 @@ debugger
 
       // return normalizeResult(JSON.parse(jstring.substring(8)))
       let accessKey
-      if (!opts.processParams.doRfid  ||  !results.chipPage) {
+      let readChip
+debugger
+
+      // HACK
+      if (isRFIDAvailable  &&  !results.chipPage) {
+        let docType = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_DOCUMENT_CLASS_CODE)
+        let docName = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_DOCUMENT_CLASS_NAME)
+        if (docType === 'ID') {
+          let documentType = scan.documentType[0]
+          if (documentType.name ===  'Cambodia - Id Card #2')
+            readChip = true
+        }
+      }
+      // end HACK
+      if (!readChip  &&  (!isRFIDAvailable || !results.chipPage)) {
         callback(normalizeResult(scan))
         return
       }
-let imageFocus = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_FOCUS);
-// Get status of images' glares
-let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_GLARES);
+// let imageFocus = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_FOCUS);
+// // Get status of images' glares
+// let imageGlares = results.getQualityResult(Enum.eImageQualityCheckType.IQC_IMAGE_GLARES);
 
       accessKey = results.getTextFieldValueByType(Enum.eVisualFieldType.FT_MRZ_STRINGS)
       if (accessKey) {

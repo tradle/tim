@@ -14,12 +14,11 @@ const regulaScan = (function () {
       throw new Error('user denied camera access')
     }
 
-    let { bothSides, doRfid, callback } = opts
+    let { bothSides, callback } = opts
     let scanOpts = {
       processParams: {
         scenario: Scenario.Ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
-        multipageProcessing: bothSides,
-        doRfid: doRfid && isRFIDAvailable || false,
+        multipageProcessing: bothSides
       },
       // functionality: {
       //   showCaptureButton: true
