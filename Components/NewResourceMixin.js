@@ -897,8 +897,6 @@ var NewResourceMixin = {
     if (!search  &&  required)
       label += ' *'
 
-    let help = this.paintHelp(prop)
-
     let switchView
     let switchC, icon
 
@@ -953,7 +951,7 @@ var NewResourceMixin = {
           {switchC}
         </View>
         {this.paintError(params)}
-        {help}
+        {this.paintHelp(prop)}
       </View>
     )
   },
@@ -1153,7 +1151,7 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata, isRefresh, bookmark } = this.props
+    let { model, metadata, isRefresh, bookmark, allowedMimeTypes } = this.props
     let { required, errors, component } = params
     let { missedRequiredOrErrorValue, resource, inFocus } = this.state
     let props
@@ -1188,6 +1186,7 @@ var NewResourceMixin = {
                              inFocus={inFocus}
                              isRefresh={isRefresh}
                              required={required}
+                             allowedMimeTypes={allowedMimeTypes}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
