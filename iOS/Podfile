@@ -8,6 +8,10 @@ target 'Tradle' do
   pod 'DocumentReader', '~> 5.1'
   pod 'DocumentReaderFull', '~> 5.1'
   pod 'Branch', '0.27.1'
+
+# DocumentReader 5.1.1194
+# DocumentReaderFull 5.1.2749
+
 #  pod 'Firebase/Core', '4.13.0'
 #  pod 'FirebaseAnalytics', '4.2.0'
 #  pod 'iProov', :git => 'https://github.com/iProov/iproov-ios-pod.git'
