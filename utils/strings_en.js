@@ -311,6 +311,7 @@ module.exports = {
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
+    "notSupportedMimeTypes": "Not supported mime types {1}",
     // Regula
     "regulaStatus": "Searching for document",
     // Bookmarks
