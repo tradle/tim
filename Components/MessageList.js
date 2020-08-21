@@ -709,6 +709,8 @@ class MessageList extends Component {
           isReview
         }
       }
+      if (resource._allowedMimeTypes)
+        passProps.allowedMimeTypes = resource._allowedMimeTypes
 
       route.rightButtonTitle =  isReview  &&  'Review' || 'Edit'
       if (!route.onRightButtonPress)
@@ -766,7 +768,8 @@ class MessageList extends Component {
     }
     if (utils.isMyProduct(model))
       return  <MyProductMessageRow {...props} />
-
+    if (model.id === TOUR)
+      return <TourRow {...props} />
     let moreProps = {
       share: this.share,
       locale,
@@ -787,6 +790,8 @@ class MessageList extends Component {
       return  <VerificationMessageRow {...props} />
     }
 
+    if (this.props.resource._allowedMimeTypes)
+      props.allowedMimeTypes = this.props.resource._allowedMimeTypes
     if (utils.isForm(model) || utils.isItem(model))
       return <FormMessageRow {...props} />
 
@@ -799,14 +804,11 @@ class MessageList extends Component {
 
     if (model.id === FORM_ERROR)
       return <FormErrorRow {...props} />
-    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST || model.id === REFRESH) {
+    if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST || model.id === REFRESH) {
       _.extend(props, {productChooser: this.productChooser.bind(this)})
       return <FormRequestRow {...props} />
     }
-    else if (model.id === TOUR)
-      return <TourRow {...props} />
-    else
-      return <MessageRow {...props} />
+    return <MessageRow {...props} />
   }
   calcCurrency() {
     let { resource, currency } = this.props

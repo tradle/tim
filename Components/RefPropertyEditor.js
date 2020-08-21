@@ -80,7 +80,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, parentMeta, metadata, resource, error, styles, model, bankStyle, country, labelAndBorder, isRefresh,
-          search, photo, component, paintError, paintHelp, required, exploreData, bookmark } = this.props
+          search, photo, component, paintError, paintHelp, required, exploreData, bookmark, allowedMimeTypes } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -225,7 +225,15 @@ class RefPropertyEditor extends Component {
                          </TouchableOpacity>
           }
           else {
-            actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)}>
+          let mimeTypes
+          if (prop.allowedMimeTypes) {
+            let mt = allowedMimeTypes || []
+            mimeTypes = [...prop.allowedMimeTypes, ...mt]
+          }
+          else
+            mimeTypes = allowedMimeTypes
+
+            actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)} allowedMimeTypes={mimeTypes}>
                            {content}
                          </DocumentInput>
           }
@@ -235,6 +243,7 @@ class RefPropertyEditor extends Component {
                                    cameraType={prop.cameraType}
                                    allowPicturesFromLibrary={prop.allowPicturesFromLibrary}
                                    style={aiStyle}
+                                   allowedMimeTypes={allowedMimeTypes}
                                    onImage={item => this.onSetMediaProperty(pName, item)}>
                          {content}
                        </ImageInput>
@@ -319,7 +328,7 @@ class RefPropertyEditor extends Component {
     return label
   }
   createNew(prop) {
-    let { navigator, bankStyle, model, resource, currency } = this.props
+    let { navigator, bankStyle, model, resource, currency, allowedMimeTypes } = this.props
     let refModel = utils.getModel(prop.ref)
     navigator.push({
       title: translate('addNew', translate(refModel)), // Add new ' + bl.title,
@@ -332,7 +341,8 @@ class RefPropertyEditor extends Component {
         prop,
         parentResource: resource,
         parentMeta: model,
-        currency
+        currency,
+        allowedMimeTypes
       }
     });
   }
@@ -444,9 +454,11 @@ class RefPropertyEditor extends Component {
       label: `regula:${type}`
     })
     let bothSides = type !== 'passport'  &&  type !== 'other'
+    let isCC = type === 'credit'
+
     let result
     try {
-      await this.regulaScan({bothSides, callback: this.handleRegulaResults.bind(this)}) //Regula.regulaScan({bothSides})
+      await this.regulaScan({bothSides, isCC, callback: this.handleRegulaResults.bind(this)}) //Regula.regulaScan({bothSides})
     } catch (err) {
       debug('regula scan failed:', err.message)
       debugger
@@ -546,7 +558,7 @@ class RefPropertyEditor extends Component {
         keepStatusBarStyle: true,
         suppressScannedCardImage: true,
         scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
-        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
+        detectionMode: CardIOUtilities.AUTOMATIC
       })
       cardJson = utils.clone(card)
     } catch (err) {
@@ -654,7 +666,7 @@ function useImageInput({resource, prop, isFile}) {
 }
 function getDocumentTypeFromTitle (title='') {
   title = title.toLowerCase()
-  const match = title.match(/(licen[cs]e|passport|card|other)/)
+  const match = title.match(/(licen[cs]e|passport|credit|card|other)/)
   if (!match) return
   switch (match[1]) {
   case 'passport':
@@ -664,6 +676,8 @@ function getDocumentTypeFromTitle (title='') {
     return 'license'
   case 'card':
     return 'card'
+  case 'credit':
+    return 'credit'
   case 'other':
     return 'other'
   }

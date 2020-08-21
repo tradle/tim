@@ -5,11 +5,14 @@ import React, {
 
 import {
   TouchableOpacity,
-  Platform
+  Platform,
+  Alert
 } from 'react-native'
 import PropTypes from 'prop-types'
 import { DocumentPicker, DocumentPickerUtil } from 'react-native-document-picker';
+
 const debug = require('debug')('tradle:app:DocumentInput')
+
 
 import utils, { translate } from '../utils/utils'
 
@@ -52,8 +55,31 @@ class DocumentInput extends Component {
     }
   }
   async _doShowDocumentPicker () {
+    let allowedMimeTypes = this.props.allowedMimeTypes
+    let types = []
+    if (allowedMimeTypes) {
+      allowedMimeTypes.forEach(type => {
+        if (type.startsWith('image/'))
+          types.push(DocumentPickerUtil.images())
+        if (type === 'application/pdf')
+          types.push(DocumentPickerUtil.pdf())
+        if (type.startsWith('audio/'))
+          types.push(DocumentPickerUtil.audio())
+        if (type.startsWith('video/'))
+          types.push(DocumentPickerUtil.video())
+        if (type === 'text/plain')
+          types.push(DocumentPickerUtil.plainText())
+      })
+      if (!types.length) {
+        Alert.alert( `${translate('notSupportedMimeTypes', allowedMimeTypes.join(', '))}`)
+        return
+      }
+    }
+    else
+      types.push(DocumentPickerUtil.allFiles())
+
     DocumentPicker.show({
-          filetype: [DocumentPickerUtil.allFiles()],
+          filetype: types,
         }, async (error,res) => {
       let fileUri = res.uri
       let contents, isText

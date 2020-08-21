@@ -169,7 +169,7 @@ class FormErrorRow extends Component {
   showEditResource() {
     let errs = {}
     let requestedProperties = {}
-    let {resource} = this.props
+    let { resource, allowedMimeTypes, navigator, currency, bankStyle } = this.props
     let r = resource.prefill
     if (resource.errors  &&  resource.errors.length) {
       if (Array.isArray(resource.errors)) {
@@ -177,7 +177,7 @@ class FormErrorRow extends Component {
           errs[p.name] = p.error
       }
       else
-        errs = this.props.resource.errors
+        errs = resource.errors
     }
     else if (resource.requestedProperties) {
       for (let p of resource.requestedProperties) {
@@ -193,7 +193,7 @@ class FormErrorRow extends Component {
       id: utils.getId(me),
       title: utils.getDisplayName({ resource: me })
     }
-    r.to = this.props.resource.from
+    r.to = resource.from
 
     // Prefill for testing and demoing
     // var isPrefilled = model.id in formDefaults
@@ -201,7 +201,7 @@ class FormErrorRow extends Component {
     //   extend(true, resource, formDefaults[model.id])
     let type = utils.getType(r)
     let model = utils.getModel(type)
-    this.props.navigator.push({
+    navigator.push({
       title: translate(model),
       rightButtonTitle: 'Done',
       backButtonTitle: 'Back',
@@ -212,11 +212,12 @@ class FormErrorRow extends Component {
         lensId: resource.lens,
         resource: r,
         isPrefilled: true,
-        errs: errs,
-        requestedProperties: requestedProperties,
-        currency: this.props.currency,
-        bankStyle: this.props.bankStyle,
-        originatingMessage: this.props.resource
+        errs,
+        requestedProperties,
+        currency,
+        bankStyle,
+        originatingMessage: resource,
+        allowedMimeTypes
       }
     });
 

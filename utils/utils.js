@@ -2208,7 +2208,22 @@ var utils = {
     const mime = utils.getMimeType({ dataUrl })
     return /^image\//.test(mime)
   },
+  isMimeTypeAllowed(dataUrl, allowedMimeTypes) {
+    if (!dataUrl) return false
+    if (!allowedMimeTypes) return true
 
+    const mime = utils.getMimeType({ dataUrl })
+    for (let i=0; i<allowedMimeTypes.length; i++) {
+      let aType = allowedMimeTypes[i]
+      if (aType.indexOf('/*')) {
+        if (mime.startsWith(aType.split('/')[0]))
+          return true
+      }
+      else if (allowedMimeTypes.indexOf(mime) !== -1)
+        return true
+    }
+    return false
+  },
   getMimeType({ dataUrl }) {
     // data:image/jpeg;base64,...
     return dataUrl.slice(5, dataUrl.indexOf(';'))
