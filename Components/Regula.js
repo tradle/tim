@@ -14,10 +14,10 @@ const regulaScan = (function () {
       throw new Error('user denied camera access')
     }
 
-    let { bothSides, callback } = opts
+    let { bothSides, callback, isCC } = opts
     let scanOpts = {
       processParams: {
-        scenario: Scenario.Ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
+        scenario: isCC ? Scenario.CreditCard : Scenario.Ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
         multipageProcessing: bothSides
       },
       // functionality: {
