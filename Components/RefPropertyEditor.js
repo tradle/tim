@@ -79,7 +79,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, parentMeta, metadata, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark,
-          search, photo, component, paintError, paintHelp, required, exploreData } = this.props
+          search, photo, component, paintError, paintHelp, required, exploreData, allowedMimeTypes } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -206,7 +206,14 @@ class RefPropertyEditor extends Component {
       // HACK
       if (useImageInput({resource, prop, isFile})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+        let mimeTypes
+        if (prop.allowedMimeTypes) {
+          let mt = allowedMimeTypes || []
+          mimeTypes = [...prop.allowedMimeTypes, ...mt]
+        }
+        else
+          mimeTypes = allowedMimeTypes
+        actionItem = <ImageInput nonImageAllowed={isVideo ||  prop.range === 'document'} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)} allowedMimeTypes={mimeTypes}>
                        {content}
                      </ImageInput>
       }
@@ -282,7 +289,7 @@ class RefPropertyEditor extends Component {
     return label
   }
   createNew(prop) {
-    let { navigator, bankStyle, model, resource, currency } = this.props
+    let { navigator, bankStyle, model, resource, currency, allowedMimeTypes } = this.props
     let refModel = utils.getModel(prop.ref)
     navigator.push({
       title: translate('addNew', translate(refModel)), // Add new ' + bl.title,
@@ -295,7 +302,8 @@ class RefPropertyEditor extends Component {
         prop,
         parentResource: resource,
         parentMeta: model,
-        currency
+        currency,
+        allowedMimeTypes
       }
     });
   }

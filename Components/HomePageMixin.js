@@ -252,7 +252,7 @@ console.log('HomePageMixin: filterResource', resource)
     let backlinksTitle = propJson.title + ' - ' + resourceTitle
     backlinksTitle = utils.makeTitle(backlinksTitle)
     let modelName = propJson.items.ref
-    let { style, currency, navigator } = this.props
+    let { style, currency, navigator, allowedMimeTypes } = this.props
     navigator.push({
       title: backlinksTitle,
       component,
@@ -277,13 +277,14 @@ console.log('HomePageMixin: filterResource', resource)
           passProps: {
             model: utils.getModel(rType),
             bankStyle: style,
-            resource: resource
+            resource,
+            allowedMimeTypes
           }
         },
         passProps: {
           bankStyle: style,
-          resource: resource,
-          currency: currency
+          resource,
+          currency
         }
       }
     })

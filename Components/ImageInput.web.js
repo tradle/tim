@@ -15,7 +15,8 @@ import ReactDOM from 'react-dom'
 import {
   readImage,
   isImageDataURL,
-  translate
+  translate,
+  isMimeTypeAllowed
 } from '../utils/utils'
 
 import FileInput from 'react-file-input'
@@ -65,7 +66,7 @@ class ImageInput extends Component {
     )
   }
   renderImageFileInput() {
-    const { onImage, nonImageAllowed } = this.props
+    const { onImage, nonImageAllowed, allowedMimeTypes } = this.props
     // let isPhoto = prop.items  &&  prop.items.ref === PHOTO || prop.ref === PHOTO
     return (
       <View style={{ width: 0, height: 0, opacity: 0 }}>
@@ -76,14 +77,19 @@ class ImageInput extends Component {
               if (err) return Alert.alert(translate('unableToProcessFile'), err.message)
 
               if (!nonImageAllowed) {
-                if (isImageDataURL(item.url))  {
+                if (isImageDataURL(item.url, allowedMimeTypes))  {
                   onImage({...item, isVertical: true})
                   return
                 }
                 else
                   return Alert.alert(translate('unsupportedFormat'), translate('pleaseUploadImage'))
               }
-
+              if (allowedMimeTypes) {
+                if (!isMimeTypeAllowed(item.url, allowedMimeTypes)) {
+                  Alert.alert(translate('unsupportedFormat'), translate('pleaseUploadImage'))
+                  return
+                }
+              }
               onImage({
                 ...item,
                 isVertical: true,

@@ -249,14 +249,14 @@ class VerificationMessageRow extends Component {
     Actions.share(this.props.resource, this.props.shareWithRequestedParty.organization, this.props.originatingMessage) // forRequest - originating message
   }
   verify(event) {
-    var resource = this.props.resource;
+    const { resource, bankStyle, currency, onSelect, navigator, allowedMimeTypes } = this.props
     var isVerification = resource[TYPE] === VERIFICATION;
     var r = resource // isVerification &&  !resource.sources  &&  !resource.method  ? resource.document : resource
 
     var passProps = {
       resource: r,
-      bankStyle: this.props.bankStyle,
-      currency: this.props.currency
+      bankStyle,
+      currency
     }
     if (!isVerification)
       passProps.verify = true
@@ -275,25 +275,25 @@ class VerificationMessageRow extends Component {
     var route = {
       componentName: 'MessageView',
       backButtonTitle: 'Back',
-      passProps: passProps,
-      title: title
+      passProps,
+      title
     }
     if (this.isMyMessage()) {
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: 'Edit',
         componentName: 'NewResource',
-        // titleTextColor: '#7AAAC3',
         passProps: {
           resource: r,
           metadata: model,
-          bankStyle: this.props.bankStyle,
-          currency: this.props.currency,
-          callback: this.props.onSelect.bind(this, {resource: r})
+          bankStyle,
+          currency,
+          allowedMimeTypes,
+          callback: onSelect.bind(this, {resource: r})
         }
       };
     }
-    this.props.navigator.push(route);
+    navigator.push(route);
   }
   formatDocument(params) {
     const me = utils.getMe()

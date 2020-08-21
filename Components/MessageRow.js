@@ -346,9 +346,10 @@ class MessageRow extends Component {
     });
   }
   createNewResource(model, isMyMessage) {
+    let { to, from } = this.props.resource
     let resource = {
-      'from': this.props.resource.to,
-      'to': this.props.resource.from,
+      'from': to,
+      'to': from,
     }
     resource.message = this.props.resource.message;
     resource[TYPE] = model.id;
@@ -359,19 +360,20 @@ class MessageRow extends Component {
       extend(true, resource, formDefaults[model.id])
       // console.log(JSON.stringify(resource, 0, 2))
     }
-
-    this.props.navigator.push({
+    let { bankStyle, currency, allowedMimeTypes, navigator } = this.props
+    navigator.push({
       title: translate(model),
       rightButtonTitle: isMyMessage ? null : 'Done',
       backButtonTitle: 'Back',
       componentName: 'NewResource',
       // titleTextColor: '#7AAAC3',
       passProps:  {
-        model: model,
-        resource: resource,
-        isPrefilled: isPrefilled,
-        currency: this.props.currency,
-        bankStyle: this.props.bankStyle,
+        model,
+        resource,
+        isPrefilled,
+        currency,
+        bankStyle,
+        allowedMimeTypes,
         originatingMessage: this.props.resource
       }
     });

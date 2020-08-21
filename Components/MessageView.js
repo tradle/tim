@@ -164,7 +164,7 @@ class MessageView extends Component {
     this.setState({hideMode: false})
     let me = utils.getMe()
 
-    let { defaultPropertyValues, bankStyle, navigator, search } = this.props
+    let { defaultPropertyValues, bankStyle, navigator, search, allowedMimeTypes } = this.props
     let resource = this.state.resource
     let ref = itemBl.items.ref
     // resource if present is a container resource as for example subreddit for posts or post for comments
@@ -201,6 +201,7 @@ class MessageView extends Component {
         // containerResource: resource,
         // doNotSend: true,
         defaultPropertyValues,
+        allowedMimeTypes,
         currency: this.props.currency || this.state.currency,
         callback: (resource) => {
           navigator.pop()
