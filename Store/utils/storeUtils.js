@@ -29,7 +29,8 @@ import {
   getEnumProperty,
   translateEnum,
   translate,
-  omitVirtual
+  omitVirtual,
+  isStub
 } from '../../utils/utils'
 
 const {
@@ -41,6 +42,8 @@ const STYLES_PACK = 'tradle.StylesPack'
 const BOOKMARK = 'tradle.Bookmark'
 const APPLICATION = 'tradle.Application'
 const LANGUAGE = 'tradle.Language'
+const FORM_REQUEST = 'tradle.FormRequest'
+const FORM_ERROR = 'tradle.FormError'
 const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
@@ -513,6 +516,71 @@ const storeUtils = {
       return r
     return
   },
+  rewriteStubs(resource) {
+    let type = resource[TYPE]
+    let props = getModel(type).properties
+    let refProps = ['_sourceOfData']
+    for (let p in resource) {
+      let prop = props[p]
+      if (!prop)  {
+        if (refProps.includes(p)) {
+          prop = ObjectModel.properties[p]
+          if (!prop)
+           continue
+        }
+        else
+          continue
+      }
+      if (prop.type !== 'object'  &&  prop.type !== 'array')
+        continue
+      if (prop.range === 'json')
+        continue
+      if (typeof resource[p] !== 'object')
+        continue
+
+      let stub = resource[p]
+      if (Array.isArray(stub)) {
+        resource[p] = stub.map(s => {
+          if (s._link)
+            return storeUtils.makeStub(s)
+          else {
+            let itype = s[TYPE]
+            if (!itype)
+              return s
+            let iprops = getModel(itype).properties
+            for (let p in s) {
+              if (iprops[p]  &&  iprops[p].type === 'object'  &&  s[p]._link)
+                s[p] = storeUtils.makeStub(s[p])
+            }
+            return s
+          }
+        })
+        continue
+      }
+      if (!stub[TYPE])
+        continue
+      let m = getModel(stub[TYPE])
+      if (!m  ||  isEnum(m))  {
+        continue
+      }
+      if (!stub._link)
+        continue
+      resource[p] = storeUtils.makeStub(stub)
+    }
+    if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
+      if (resource.prefill  &&  (!isStub(resource.prefill) ||  !resource.prefill.id))
+        storeUtils.rewriteStubs(resource.prefill)
+    }
+  },
+  makeStub(sub) {
+    let stub = {
+      id: sub.id  ||  [sub[TYPE], sub._permalink, sub._link].join('_'),
+      title: sub.title || sub._displayName
+    }
+    if (sub._refId)
+      stub._refId = sub._refId
+    return stub
+  },
   getEmployeeBookmarks({ me, botPermalink }) {
     const from = buildRef(me)
     const etype = 'tradle.ClientOnboardingTeam'
@@ -526,33 +594,23 @@ const storeUtils = {
           _org: botPermalink,
           analyst: me.employeePass
         },
-        message: 'myCases'
+        message: translate('myCases')
       },
       {
         type: APPLICATION,
         message: 'applications',
         bookmark: {
           [TYPE]: APPLICATION,
-          _org: botPermalink,
-        },
+          _org: botPermalink
+        }
       },
       { type: APPLICATION,
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-           parent: 'NULL',
+          hasFailedChecks: true
         },
-        noInternalUse: true,
-        message: 'topLevelApplications',
-        grid: true
-      },
-      { type: APPLICATION,
-        bookmark: {
-          [TYPE]: APPLICATION,
-          _org: botPermalink,
-          hasFailedChecks: true,
-        },
-        message: 'applicationsHasFailedChecks',
+        message: translate('hasFailedChecks')
       },
       { type: APPLICATION,
         bookmark: {
@@ -560,13 +618,13 @@ const storeUtils = {
           _org: botPermalink,
           hasCheckOverrides: true
         },
-        message: 'applicationsHasCheckOverrides',
-      },
+        message: translate('hasCheckOverrides')
+      }
     ]
     teams.forEach(e => {
       bookmarks.push({
         type: APPLICATION,
-        message: `${translate('Applications')} - ${translateEnum(e)}`,
+        message: `${translate('applications')} - ${translateEnum(e)}`,
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -574,7 +632,7 @@ const storeUtils = {
             id: `${etype}_${e.id}`,
             title: e.title
           }
-        },
+        }
       })
     })
 
@@ -583,17 +641,27 @@ const storeUtils = {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-          status: 'started',
+          status: 'started'
         },
-        message: 'applicationsStarted'
+        message: translate('applicationsStarted')
       },
       { type: APPLICATION,
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
-           analyst: 'NULL',
+           analyst: 'NULL'
         },
-        message: 'applicationsNotAssigned'
+        message: translate('applicationsNotAssigned')
+      },
+      { type: APPLICATION,
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _org: botPermalink,
+           parent: 'NULL'
+        },
+        noInternalUse: true,
+        message: translate('topLevelApplications'),
+        grid: true
       },
       {
         type: APPLICATION,
@@ -602,8 +670,8 @@ const storeUtils = {
           [TYPE]: APPLICATION,
           _org: botPermalink,
            draft: true
-        },
-      },
+        }
+      }
       // { type: VERIFICATION },
       // { type: SEAL },
       // { type: 'tradle.SanctionsCheck' },
