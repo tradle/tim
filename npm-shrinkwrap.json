@@ -232,7 +232,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#29924c37baa159c9db62a11e91bb2647f7a88284"
+      "resolved": "git://github.com/tradle/models.git#29ad8442592f2233d5bd738856c5a9d5773db18a"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -307,9 +307,21 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.23",
+      "version": "7.1.24",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.23.tgz"
+      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.24.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.19",
+          "from": "lodash@>=4.17.19 <5.0.0",
+          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.19.tgz"
+        },
+        "mime": {
+          "version": "2.4.6",
+          "from": "mime@>=2.4.6 <3.0.0",
+          "resolved": "http://registry.npmjs.org/mime/-/mime-2.4.6.tgz"
+        }
+      }
     },
     "@tradle/validate-resource": {
       "version": "4.3.4",
