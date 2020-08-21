@@ -981,7 +981,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#8d8fbaba03c7ed579a85f20d1d61569a9e890e1e"
+      "resolved": "git://github.com/tradle/models.git#29ad8442592f2233d5bd738856c5a9d5773db18a"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -1070,9 +1070,21 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.23",
+      "version": "7.1.24",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.23.tgz"
+      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.24.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.19",
+          "from": "lodash@>=4.17.19 <5.0.0",
+          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.19.tgz"
+        },
+        "mime": {
+          "version": "2.4.6",
+          "from": "mime@>=2.4.6 <3.0.0",
+          "resolved": "http://registry.npmjs.org/mime/-/mime-2.4.6.tgz"
+        }
+      }
     },
     "@tradle/validate-resource": {
       "version": "4.3.4",
@@ -7320,7 +7332,7 @@
     },
     "react-native-document-reader-api": {
       "version": "5.1.0",
-      "from": "react-native-document-reader-api@5.1.0",
+      "from": "http://registry.npmjs.org/react-native-document-reader-api/-/react-native-document-reader-api-5.1.0.tgz",
       "resolved": "http://registry.npmjs.org/react-native-document-reader-api/-/react-native-document-reader-api-5.1.0.tgz"
     },
     "react-native-document-reader-core-fullrfid": {
@@ -7490,7 +7502,7 @@
     },
     "react-native-splash-screen": {
       "version": "3.2.0",
-      "from": "react-native-splash-screen@>=3.0.9 <4.0.0",
+      "from": "http://registry.npmjs.org/react-native-splash-screen/-/react-native-splash-screen-3.2.0.tgz",
       "resolved": "http://registry.npmjs.org/react-native-splash-screen/-/react-native-splash-screen-3.2.0.tgz"
     },
     "react-native-step-indicator": {
