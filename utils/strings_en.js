@@ -278,6 +278,7 @@ module.exports = {
     "cancelItem": "You are about to cancel {1}. Please tap OK to confirm",
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
+    "ourProducts": "Our products",
     "createManualMatchCheck": "Create manual match check",
     "supportedQrCodes": "Supported QR codes: \n1) add chat channel \n2) import data",
     "inProcess": "Processing...",
@@ -310,6 +311,7 @@ module.exports = {
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
+    "notSupportedMimeTypes": "Not supported mime types {1}",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
