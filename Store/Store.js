@@ -613,7 +613,7 @@ var Store = Reflux.createStore({
       let res = {}
       _.extend(res, rr)
       _.extend(res, r)
-      this.rewriteStubs(res)
+      storeUtils.rewriteStubs(res)
       this.addVisualProps(res)
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
       await this.dbPut(objId, r)
@@ -1279,7 +1279,7 @@ var Store = Reflux.createStore({
     }
     const getSharedVerification = async (message, doDelete) => {
       let ver = _.clone(message.object)
-      this.rewriteStubs(ver)
+      storeUtils.rewriteStubs(ver)
       let doc = this._getItem(ver.document)
       let contextId = message.context
       // let from = this._getItem(`${PROFILE}_${ver._author}_${ver._author}`)
@@ -2490,6 +2490,8 @@ var Store = Reflux.createStore({
       org._tour = sp.tour
     if (sp.optionalPairing)
       org._optionalPairing = true
+    if (sp.allowedMimeTypes)
+      org._allowedMimeTypes = sp.allowedMimeTypes
 
     await this.configProvider(config, sp, org)
     await this.resetForEmployee(me, org)
@@ -3195,7 +3197,7 @@ var Store = Reflux.createStore({
       model = this.getModel(resource[TYPE])
     let properties = model.properties
 
-    this.rewriteStubs(toChain)
+    storeUtils.rewriteStubs(toChain)
     let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time', '_sourceOfData'] //, '_dataLineage']
     let isNew = isPrefill  ||  !resource[ROOT_HASH]
     for (let p in toChain) {
@@ -3710,7 +3712,7 @@ var Store = Reflux.createStore({
 
     if (result) {
       r = utils.clone(result.object)
-      this.rewriteStubs(r)
+      storeUtils.rewriteStubs(r)
       r[ROOT_HASH] = result.permalink
       r[CUR_HASH] = result.link
       r.from = this.buildRef(me, dontSend)
@@ -3858,7 +3860,7 @@ var Store = Reflux.createStore({
       if (!varr)
         return
       varr.forEach((v) => {
-        self.rewriteStubs(v)
+        storeUtils.rewriteStubs(v)
         if (v.method) {
           if (utils.getId(v.document) !== rId)
             docs.push(v.document)
@@ -4015,7 +4017,7 @@ var Store = Reflux.createStore({
           else
             kres = resource
         }
-        this.rewriteStubs(kres)
+        storeUtils.rewriteStubs(kres)
       }
       catch (err) {
         if (me.isEmployee) {
@@ -4890,7 +4892,7 @@ if (!res[SIG]  &&  res._message)
         } catch(err) {
           prevRes = await self._getItemFromServer({idOrResource: utils.getId(returnVal)})
         }
-        self.rewriteStubs(prevRes)
+        storeUtils.rewriteStubs(prevRes)
         prevResCached = self._getItem(prevResId)
         _.extend(prevResCached, prevRes)
         if (!forceUpdate) {
@@ -7224,7 +7226,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     rr[IS_MESSAGE] = true
-    this.rewriteStubs(rr)
+    storeUtils.rewriteStubs(rr)
     if (m.id === APPLICATION) {
       if (rr.applicant  &&  !rr.applicantName) {
         let applicant = this._getItem(rr.applicant.id.replace(IDENTITY, PROFILE))
@@ -7252,7 +7254,7 @@ if (!res[SIG]  &&  res._message)
       let m = this.getModel(rr[p][TYPE])
       if (utils.isEnum(m)  ||  props[p].inlined)
         continue
-      rr[p] = this.makeStub(rr[p])
+      rr[p] = storeUtils.makeStub(rr[p])
     }
     if (rr._author) {
       let authorId = utils.makeId(PROFILE, rr._author)
@@ -7292,7 +7294,7 @@ if (!res[SIG]  &&  res._message)
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
       let type = m.subClassOf || m.id
-      let stub = this.makeStub(sub)
+      let stub = storeUtils.makeStub(sub)
       switch (type) {
       case VERIFICATION:
         if (!application.verifications)
@@ -7342,15 +7344,6 @@ if (!res[SIG]  &&  res._message)
     return application
   },
 
-  makeStub(sub) {
-    let stub = {
-      id: sub.id  ||  [sub[TYPE], sub._permalink, sub._link].join('_'),
-      title: sub.title || sub._displayName
-    }
-    if (sub._refId)
-      stub._refId = sub._refId
-    return stub
-  },
   onListSharedWith(resource, chat) {
     let sharedWith = resource._sharedWith
     if (!sharedWith)
@@ -7818,7 +7811,7 @@ if (!res[SIG]  &&  res._message)
         return
     }
     let obj = utils.clone(object)
-    this.rewriteStubs(obj)
+    storeUtils.rewriteStubs(obj)
     _.extend(r, obj)
     this._setItem(rId, r)
     if (r._context  &&  !utils.isContext(r[TYPE])) {
@@ -7893,62 +7886,6 @@ if (!res[SIG]  &&  res._message)
         return r
       }
     } catch (err) {
-    }
-  },
-  rewriteStubs(resource) {
-    let type = resource[TYPE]
-    let props = this.getModel(type).properties
-    let refProps = ['_sourceOfData']
-    for (let p in resource) {
-      let prop = props[p]
-      if (!prop)  {
-        if (refProps.includes(p)) {
-          prop = ObjectModel.properties[p]
-          if (!prop)
-           continue
-        }
-        else
-          continue
-      }
-      if (prop.type !== 'object'  &&  prop.type !== 'array')
-        continue
-      if (prop.range === 'json')
-        continue
-      if (typeof resource[p] !== 'object')
-        continue
-
-      let stub = resource[p]
-      if (Array.isArray(stub)) {
-        resource[p] = stub.map(s => {
-          if (s._link)
-            return this.makeStub(s)
-          else {
-            let itype = s[TYPE]
-            if (!itype)
-              return s
-            let iprops = utils.getModel(itype).properties
-            for (let p in s) {
-              if (iprops[p]  &&  iprops[p].type === 'object'  &&  s[p]._link)
-                s[p] = this.makeStub(s[p])
-            }
-            return s
-          }
-        })
-        continue
-      }
-      if (!stub[TYPE])
-        continue
-      let m = utils.getModel(stub[TYPE])
-      if (!m  ||  utils.isEnum(m))  {
-        continue
-      }
-      if (!stub._link)
-        continue
-      resource[p] = this.makeStub(stub)
-    }
-    if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
-      if (resource.prefill  &&  (!utils.isStub(resource.prefill) ||  !resource.prefill.id))
-        this.rewriteStubs(resource.prefill)
     }
   },
   addLink(links, r) {
@@ -10411,7 +10348,7 @@ if (!res[SIG]  &&  res._message)
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
 
-    this.rewriteStubs(val)
+    storeUtils.rewriteStubs(val)
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
 
@@ -10668,7 +10605,7 @@ if (!res[SIG]  &&  res._message)
               prefill = await this._getItemFromServer({idOrResource: val.prefill.id})
             }
             if (prefill)
-              this.rewriteStubs(prefill)
+              storeUtils.rewriteStubs(prefill)
             let p = {}
             if (memPrefill)
               _.extend(p, memPrefill)
@@ -11002,7 +10939,7 @@ if (!res[SIG]  &&  res._message)
       if (val.prefill  &&  val.form === PRODUCT_BUNDLE) {
         // debugger
         val.prefill.items.forEach(item => {
-          this.rewriteStubs(item)
+          storeUtils.rewriteStubs(item)
           item.from = val.to
           item.to = val.from
         })
@@ -11271,12 +11208,13 @@ if (!res[SIG]  &&  res._message)
         if (r._author !== fromHash) {
           if (!allMyIdentities.includes(r._author)) {
             debugger
-            return
+            // return
           }
-          paired = me[ROOT_HASH] !== r._author
+          else
+            paired = me[ROOT_HASH] !== r._author
         }
 
-        this.rewriteStubs(rr)
+        storeUtils.rewriteStubs(rr)
         _.extend(rr, {
           [ROOT_HASH]: r._permalink,
           [CUR_HASH]: r._link,
