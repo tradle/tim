@@ -1003,7 +1003,6 @@ var NewResourceMixin = {
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
 
-    let sign
     let format = 'LL'
     if (prop.format) {
       dateProps.format = prop.format
@@ -1057,9 +1056,7 @@ var NewResourceMixin = {
       <View key={this.getNextKey()} ref={prop.name} style={{paddingBottom: 10}}>
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}]}>
           {propLabel}
-          {sign}
           {datePicker}
-          {help}
           {icon}
         </View>
         {help}
