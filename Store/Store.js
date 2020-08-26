@@ -548,6 +548,8 @@ var Store = Reflux.createStore({
     await this._loadedResourcesDefer.promise
     if (me) {
       await this.getDriver(me)
+      if (!isWeb())
+        await this.requireDeviceLocalAuth(me)
       if (doMonitor)
         this.monitorTim()
     }
@@ -555,6 +557,13 @@ var Store = Reflux.createStore({
     if (me && me.registeredForPushNotifications) {
       Push.resetBadgeNumber()
     }
+  },
+  async requireDeviceLocalAuth(me) {
+    if (me.hasOwnProperty('useTouchId'))
+      return
+    let orgs = this.searchNotMessages({modelName: ORGANIZATION, all: true})
+    if (orgs.some(org => org._requireDeviceLocalAuth))
+      await this.onUpdateMe({useTouchId: true})
   },
   monitorLog() {
     let self = this
@@ -2470,6 +2479,8 @@ var Store = Reflux.createStore({
       org._optionalPairing = true
     if (sp.allowedMimeTypes)
       org._allowedMimeTypes = sp.allowedMimeTypes
+    if (sp.requireDeviceLocalAuth)
+      org._requireDeviceLocalAuth = sp.requireDeviceLocalAuth
 
     await this.configProvider(config, sp, org)
     await this.resetForEmployee(me, org)
@@ -6158,7 +6169,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     if (me)
-      return
+      return me
 
     let r = { [TYPE]: PROFILE, firstName: FRIEND }
     let coverPhoto = getCoverPhotoForRegion()
@@ -6173,6 +6184,12 @@ if (!res[SIG]  &&  res._message)
       r.languageCode = languageCode
     }
     await this.onAddItem({resource: r, isRegistration: true})
+    try {
+      return await this.getMe()
+    } catch(err)  {
+      debugger
+      debug('Store.init', err.message)
+    }
   },
   async onGetRepresentative(resource) {
     if (!resource)
@@ -9790,6 +9807,9 @@ if (!res[SIG]  &&  res._message)
       let addHash
       if (settings.urls.indexOf(v) === -1) {
         self._mergeItem(key, { urls: [...settings.urls, v] })
+        let sp = SERVICE_PROVIDERS.filter((sp) => sp.url === v)
+        if (sp.requireDeviceLocalAuth)
+          yield this.onUpdateMe({userTouchId: true})
         addHash = true
       }
       else if (value.hash) {
