@@ -1672,13 +1672,6 @@ var styles = StyleSheet.create({
   textContainer: {
     alignSelf: 'center',
   },
-  resourceTitle: {
-    fontSize: 20,
-    fontWeight: '400',
-    color: '#757575',
-    marginBottom: 2,
-    paddingLeft: 5
-  },
   cellImage: {
     height: 50,
     marginRight: 10,
