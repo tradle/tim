@@ -779,6 +779,11 @@
         }
       }
     },
+    "@react-native-community/clipboard": {
+      "version": "1.2.3",
+      "from": "http://registry.npmjs.org/@react-native-community/clipboard/-/clipboard-1.2.3.tgz",
+      "resolved": "http://registry.npmjs.org/@react-native-community/clipboard/-/clipboard-1.2.3.tgz"
+    },
     "@react-native-community/netinfo": {
       "version": "2.0.0",
       "from": "@react-native-community/netinfo@2.0.0",
@@ -1139,6 +1144,11 @@
           "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.3.tgz"
         }
       }
+    },
+    "@twotalltotems/react-native-otp-input": {
+      "version": "1.3.11",
+      "from": "@twotalltotems/react-native-otp-input@latest",
+      "resolved": "http://registry.npmjs.org/@twotalltotems/react-native-otp-input/-/react-native-otp-input-1.3.11.tgz"
     },
     "@types/babel__core": {
       "version": "7.1.1",
@@ -7146,6 +7156,11 @@
       "version": "0.6.1",
       "from": "react-native-animatable@>=0.6.1 <0.7.0",
       "resolved": "https://registry.npmjs.org/react-native-animatable/-/react-native-animatable-0.6.1.tgz"
+    },
+    "react-native-app-auth": {
+      "version": "4.4.0",
+      "from": "react-native-app-auth@4.4.0",
+      "resolved": "http://registry.npmjs.org/react-native-app-auth/-/react-native-app-auth-4.4.0.tgz"
     },
     "react-native-app-intro": {
       "version": "1.1.5",

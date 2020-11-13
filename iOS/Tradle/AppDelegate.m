@@ -150,6 +150,10 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
   return [RNBranch continueUserActivity:userActivity];
 }
 
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *, id> *)options {
+ return [self.authorizationFlowManagerDelegate resumeExternalUserAgentFlowWithURL:url];
+}
+
 // Required to register for notifications
 - (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
 {

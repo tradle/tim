@@ -9,6 +9,7 @@ target 'Tradle' do
   pod 'DocumentReaderFull', '~> 5.1'
   pod 'Branch', '0.27.1'
 
+  pod 'AppAuth', '>= 0.94'
 # DocumentReader 5.1.1194
 # DocumentReaderFull 5.1.2749
 

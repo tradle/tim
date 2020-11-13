@@ -271,6 +271,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':react-native-app-auth')
     implementation project(':react-native-document-reader-core-fullrfid')
     implementation project(':react-native-document-reader-api')
     implementation project(':react-native-exit-app')

@@ -9,10 +9,12 @@
 #import <React/RCTBridgeDelegate.h>
 #import <UIKit/UIKit.h>
 #import <UserNotifications/UserNotifications.h>
+#import "RNAppAuthAuthorizationFlowManager.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate, RCTBridgeDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate, RCTBridgeDelegate, RNAppAuthAuthorizationFlowManager>
 
 @property (nonatomic, strong) UIWindow *window;
+@property(nonatomic, weak)id<RNAppAuthAuthorizationFlowManagerDelegate>authorizationFlowManagerDelegate;
 
 // Indicate the application should not use the snapshot on next launch, even if there is a valid state restoration archive.
 // This should only be called from methods invoked from State Preservation, else it is ignored.

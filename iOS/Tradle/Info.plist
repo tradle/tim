@@ -26,6 +26,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>tradle</string>
+				<string>com.googleusercontent.apps.GOOGLE_OAUTH_APP_GUID</string>
 			</array>
 		</dict>
 		<dict>

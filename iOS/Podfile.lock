@@ -1,4 +1,9 @@
 PODS:
+  - AppAuth (1.4.0):
+    - AppAuth/Core (= 1.4.0)
+    - AppAuth/ExternalUserAgent (= 1.4.0)
+  - AppAuth/Core (1.4.0)
+  - AppAuth/ExternalUserAgent (1.4.0)
   - Branch (0.27.1):
     - Branch/Core (= 0.27.1)
   - Branch/Core (0.27.1)
@@ -6,21 +11,24 @@ PODS:
   - DocumentReaderFull (5.1.2749)
 
 DEPENDENCIES:
+  - AppAuth (>= 0.94)
   - Branch (= 0.27.1)
-  - DocumentReader (= 5.1.1194)
-  - DocumentReaderFull (= 5.1.2749)
+  - DocumentReader (~> 5.1)
+  - DocumentReaderFull (~> 5.1)
 
 SPEC REPOS:
   trunk:
+    - AppAuth
     - Branch
     - DocumentReader
     - DocumentReaderFull
 
 SPEC CHECKSUMS:
+  AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   Branch: 1ace77c04b6e3efbf982bf4364f0662bfac156a0
   DocumentReader: 9424151f4912c1efe3276ecb495a44d871dd1d9b
   DocumentReaderFull: 62b37217835dfcf9d81e0729bfd4dda111151cf5
 
-PODFILE CHECKSUM: 3f4a6e346ef22302f3a45a10c8dcff6e50d8116d
+PODFILE CHECKSUM: 96945cf1a68aa3c1177583ca2c60ae0dffb4f1c3
 
 COCOAPODS: 1.9.3
