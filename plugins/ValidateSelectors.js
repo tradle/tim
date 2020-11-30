@@ -52,8 +52,11 @@ module.exports = function ValidateSelector ({ models }) {
             if (!inCols)
               editCols.push(prop.name)
           }
-          else
+          else {
+            // cleanup if was previously set
+            delete form[prop.name]
             exclude.push(prop.name)
+          }
         } catch (err) {
           // debugger
           if (err.message.endsWith(' is not defined'))
