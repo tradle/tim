@@ -377,7 +377,7 @@ class ShowPropertiesView extends Component {
       if (c  &&  locale)
         return {val: utils.formatCurrency(val, locale)}
 
-      return {val: (c || CURRENCY_SYMBOL) + val.value}
+      return {val: (c || CURRENCY_SYMBOL) + utils.formatNumber(val.value, locale)}
     }
     if (ref === IDENTITY) {
       let title = val.title
