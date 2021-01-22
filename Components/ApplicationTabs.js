@@ -305,18 +305,19 @@ class ApplicationTabs extends Component {
       if (interfaces)
         interfaces.forEach(inf => !impl.includes(inf)  &&  impl.push(inf))
     })
-
-    impl = impl.length  &&  impl.map(inf => {
-      let m = utils.getModel(inf)
-      let identifier
-      if (m.icon)
-        identifier = <Icon name={m.icon} size={30} color={'#757575'} />
-      else
-        identifier = <Text style={{fontSize: 20, color: '#757575'}}>{translate(m)}</Text>
-      return <TouchableOpacity onPress={() => {this.props.showCategory(m)}} style={styles.checkCategory} key={this.getNextKey()}>
-               {identifier}
-             </TouchableOpacity>
-    })
+    if (impl.length) {
+      impl = impl.map(inf => {
+        let m = utils.getModel(inf)
+        let identifier
+        if (m.icon)
+          identifier = <Icon name={m.icon} size={30} color={'#757575'} />
+        else
+          identifier = <Text style={{fontSize: 20, color: '#757575'}}>{translate(m)}</Text>
+        return <TouchableOpacity onPress={() => {this.props.showCategory(m)}} style={styles.checkCategory} key={this.getNextKey()}>
+                 {identifier}
+               </TouchableOpacity>
+      })
+    }
     if (resource.checks  &&  resource.checks.length  &&  resource.checks[0].status) {
       let statusM = utils.getModel(STATUS).enum.find(r => r.id === 'fail')
       let { icon, color } = statusM
