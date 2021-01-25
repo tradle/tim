@@ -1142,8 +1142,15 @@ var utils = {
     let val = new Intl.NumberFormat(locale, { style: 'currency', currency: currencyName }).format(resource.value)
     return val.replace(currencyName, resource.currency)
   },
-  formatNumber(val, locale) {
-    if (utils.isAndroid())
+  formatNumber(pMeta, val, locale) {
+    if (pMeta.numberFormat) {
+      const { maximumFractionDigits } = pMeta.numberFormat
+      if (maximumFractionDigits) {
+        let coef = Math.pow(10, maximumFractionDigits)
+        val = Math.round(val * coef)/coef
+      }
+    }
+    if (!locale  ||  utils.isAndroid())
       return val
     return new Intl.NumberFormat(locale).format(val)
   },

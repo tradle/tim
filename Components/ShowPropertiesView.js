@@ -204,8 +204,8 @@ class ShowPropertiesView extends Component {
           val = utils.formatDate(val)
         }
       }
-      else if (!pMeta.range  &&  pMeta.type === 'number'  &&  locale)
-        val = utils.formatNumber(val, locale)
+      else if (!pMeta.range  &&  pMeta.type === 'number')
+        val = utils.formatNumber(pMeta, val, locale)
       else if (pMeta.ref) {
         ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
         if (!val)
@@ -377,7 +377,7 @@ class ShowPropertiesView extends Component {
       if (c  &&  locale)
         return {val: utils.formatCurrency(val, locale)}
 
-      return {val: (c || CURRENCY_SYMBOL) + utils.formatNumber(val.value, locale)}
+      return {val: (c || CURRENCY_SYMBOL) + utils.formatNumber(pMeta, val.value, locale)}
     }
     if (ref === IDENTITY) {
       let title = val.title
