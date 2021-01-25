@@ -991,7 +991,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#51666a0f23fea76b7b46003c0bf06f23ba151422"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#10b5a561716fe1605c1144d6e65fc229d5a4edc2"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -1070,19 +1070,19 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.24",
+      "version": "7.1.25",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.24.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.25.tgz",
       "dependencies": {
         "lodash": {
-          "version": "4.17.19",
+          "version": "4.17.20",
           "from": "lodash@>=4.17.19 <5.0.0",
-          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.19.tgz"
+          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.20.tgz"
         },
         "mime": {
-          "version": "2.4.6",
+          "version": "2.5.0",
           "from": "mime@>=2.4.6 <3.0.0",
-          "resolved": "http://registry.npmjs.org/mime/-/mime-2.4.6.tgz"
+          "resolved": "http://registry.npmjs.org/mime/-/mime-2.5.0.tgz"
         }
       }
     },

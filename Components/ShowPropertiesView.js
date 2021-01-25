@@ -201,8 +201,8 @@ class ShowPropertiesView extends Component {
           val = utils.formatDate(val)
         }
       }
-      else if (!pMeta.range  &&  pMeta.type === 'number'  &&  locale)
-        val = utils.formatNumber(val, locale)
+      else if (!pMeta.range  &&  pMeta.type === 'number')
+        val = utils.formatNumber(pMeta, val, locale)
       else if (pMeta.ref) {
         ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
         if (!val)
