@@ -316,7 +316,7 @@ class ShowPropertiesView extends Component {
     let isMethod = utils.isSubclassOf(model, METHOD)
     let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
 
-    let params = {prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
+    let params = {showTree: true, prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
     // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
     let jVal
     if (pMeta.name === 'scoreDetails') {
