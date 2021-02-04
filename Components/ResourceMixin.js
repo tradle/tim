@@ -32,7 +32,7 @@ import platformStyles from '../styles/platform'
 import Image from './Image'
 import { Text } from './Text'
 import uiUtils from '../utils/uiUtils'
-// import { VictorySunburst } from './victory-sunburst'
+import { VictorySunburst } from './victory-sunburst'
 // import { VictoryContainer } from 'victory'
 
 const RESOURCE_VIEW = 'ResourceView'
@@ -194,6 +194,8 @@ var ResourceMixin = {
           return
         if (displayName &&  !editItem) {
           displayName = type === 'object' && pVal.title ||  pVal
+          if (typeof displayName === 'object')
+            displayName = JSON.stringify(displayName, null, 2)
           ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
@@ -624,7 +626,7 @@ var ResourceMixin = {
         />
       </View>
     )
-    /*
+
     if (resource.submissions) {
       if (isTree  &&  params.showTree) {
         let tree = this.paintTree(json, resource)
@@ -649,7 +651,7 @@ var ResourceMixin = {
                   </View>
       }
     }
-    */
+
     return <View>
               {header}
               {content}
