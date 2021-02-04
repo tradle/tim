@@ -240,7 +240,7 @@ class ApplicationTabs extends Component {
                                     locale={locale}
                                     currency={currency}
                                     bankStyle={bankStyle}
-                                    excludedProperties={['photos', 'tree']}
+                                    excludedProperties={['photos' ]}//, 'tree']}
                                     navigator={navigator} />
       if (utils.isRM(resource)           &&
           resource.submissions           &&
