@@ -110,8 +110,13 @@ class PhotoView extends Component {
     //   width,
     //   height,
     // }
-    if (currentPhoto.width  &&  currentPhoto.height)
+    if (currentPhoto.width  &&  currentPhoto.height) {
       width = currentPhoto.width * height/currentPhoto.height
+      if (width > screenWidth) {
+        width = screenWidth
+        // height = Math.round(height * currentPhoto.height / currentPhoto.width)
+      }
+    }
     // else
     //   width = width * height/screenHeight
 
