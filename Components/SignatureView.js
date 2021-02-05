@@ -20,7 +20,8 @@ import SignaturePad from 'react-native-signature-pad'
 class SignatureView extends Component {
   static displayName = 'SignatureView';
   static propTypes = {
-    onSignature: PropTypes.func
+    onSignature: PropTypes.func,
+    prop: PropTypes.object
   };
   static displayName = 'SignatureView';
 
@@ -44,13 +45,14 @@ class SignatureView extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let { sigViewStyle } = this.props
+    let { sigViewStyle, prop } = this.props
     const { width } = utils.dimensions(SignatureView)
     let separator = getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
+    let title = translate(prop.description || 'pleaseSign')
     return (
       <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
-        <Text style={styles.instructions}>{translate('pleaseSign')}</Text>
+        <Text style={styles.instructions}>{title}</Text>
         <View style={{
           flex: 1,
           maxHeight: Math.min(width / 2, 200),
