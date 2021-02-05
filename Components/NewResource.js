@@ -849,7 +849,7 @@ class NewResource extends Component {
       let eProp = editProps[0]
       if (eProp.signature) {
         return  <View style={{flex: 1}}>
-                   <SignatureView ref={ref => {this.sigView = ref}} bankStyle={bankStyle}  sigViewStyle={bankStyle} onSignature={() => {
+                   <SignatureView ref={ref => {this.sigView = ref}} bankStyle={bankStyle} prop={eProp} sigViewStyle={bankStyle} onSignature={() => {
                       // this.props.navigator.pop()
                       this.onSetSignatureProperty(eProp, this.sigView.getSignature())
                     }} />
