@@ -79,8 +79,13 @@ class PhotoView extends Component {
     let maxHeight = screenHeight / 2.5
     height = maxHeight
     let resizeMode = 'contain'
-    if (currentPhoto.width  &&  currentPhoto.height)
+    if (currentPhoto.width  &&  currentPhoto.height) {
       width = currentPhoto.width * height/currentPhoto.height
+      if (width > screenWidth) {
+        width = screenWidth
+        // height = Math.round(height * currentPhoto.height / currentPhoto.width)
+      }
+    }
     // else
     //   width = width * height/screenHeight
 
