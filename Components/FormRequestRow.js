@@ -803,6 +803,7 @@ class FormRequestRow extends Component {
     let sameFormRequestForm
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let isMyProduct = utils.isMyProduct(resource.form)
+    let multientryMinimumNotExceeded
     if (!resource._documentCreated  &&  product) {
       let multiEntryForms = utils.getModel(product).multiEntryForms
       let hasMultiEntry = multiEntryForms  &&  productToForms
@@ -816,8 +817,18 @@ class FormRequestRow extends Component {
                 sameFormRequestForm = true
             }
           }
-          if (formsArray)
+          if (formsArray) {
+            let formL = utils.getLensedModel(resource)
+            let minCardinalityProps = utils.getPropertiesWithAnnotation(formL, 'minCardinality')
+            if (_.size(minCardinalityProps)) {
+              let minCardinality = Object.values(minCardinalityProps)[0].minCardinality
+              debugger
+              let vals = _.uniq(formsArray.map(v => v.split('_').slice(0, -1).join('_')))
+              if (vals.length < minCardinality)
+                multientryMinimumNotExceeded = true
+            }
             sameFormRequestForm = true
+          }
         }
       }
       if (!sameFormRequestForm  &&  !isMyProduct)
@@ -832,7 +843,7 @@ class FormRequestRow extends Component {
 
     let hasSharables = this.hasSharables()
 
-    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated  && !resource.dataLineage // &&  !resource.prefill    // HACK
+    let isRequestForNext = sameFormRequestForm  &&  !multientryMinimumNotExceeded  &&  !resource._documentCreated  && !resource.dataLineage // &&  !resource.prefill    // HACK
     if (isRequestForNext) {
       if (resource.message.startsWith(strings.reviewScannedProperties))
         isRequestForNext = false
