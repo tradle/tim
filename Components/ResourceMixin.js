@@ -187,6 +187,8 @@ var ResourceMixin = {
           return
         if (displayName &&  !editItem) {
           displayName = type === 'object' && pVal.title ||  pVal
+          if (typeof displayName === 'object')
+            displayName = JSON.stringify(displayName, null, 2)
           ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
