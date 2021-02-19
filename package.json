@@ -76,7 +76,7 @@
     "@tradle/protocol": "^5.0.1",
     "@tradle/qr-schema": "^2.0.5",
     "@tradle/restore": "github:tradle/restore",
-    "@tradle/validate-model": "^7.1.25",
+    "@tradle/validate-model": "^7.1.26",
     "@tradle/validate-resource": "^4.3.4",
     "@tradle/yuki": "^1.5.0",
     "any-promise": "1.3.0",

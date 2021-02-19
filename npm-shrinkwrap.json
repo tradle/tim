@@ -981,7 +981,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ae572efc7b91b6ceb2eb253e72fa9e11f71c827c"
+      "resolved": "git://github.com/tradle/models.git#fe7c248017940e47468f179ebd3003525372f802"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -1070,9 +1070,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.25",
+      "version": "7.1.26",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.25.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.26.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.17.20",
