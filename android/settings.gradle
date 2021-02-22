@@ -1,4 +1,6 @@
 include ':app'
+include ':react-native-branch'
+project(':react-native-branch').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-branch/android')
 include ':react-native-document-reader-core-fullrfid'
 project(':react-native-document-reader-core-fullrfid').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-document-reader-core-fullrfid/android')
 include ':react-native-document-reader-api'
@@ -57,8 +59,6 @@ include ':react-native-code-push'
 project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
 include ':react-native-camera'
 project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-camera/android')
-include ':react-native-branch'
-project(':react-native-branch').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-branch/android')
 include ':react-native-awesome-card-io'
 project(':react-native-awesome-card-io').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-awesome-card-io/android')
 include ':react-native-async-storage-snappy'

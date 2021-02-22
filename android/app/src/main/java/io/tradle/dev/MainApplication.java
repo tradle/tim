@@ -11,6 +11,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import io.branch.rnbranch.RNBranchPackage;
 //import com.reactlibrary.RNReactNativeZoomSdkPackage;
 import com.regula.documentreader.core.RNDocumentReaderCorePackage;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
@@ -45,7 +46,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.branch.referral.Branch;
-import io.branch.rnbranch.RNBranchPackage;
 import io.tradle.reactlocalauth.LocalAuthPackage;
 import io.tradle.reactimagestore.ImageStorePackage;
 import io.tradle.reactkeeper.RNTradleKeeperPackage;
