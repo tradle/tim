@@ -7321,9 +7321,9 @@
       }
     },
     "react-native-device-info": {
-      "version": "8.0.1",
-      "from": "react-native-device-info@latest",
-      "resolved": "http://registry.npmjs.org/react-native-device-info/-/react-native-device-info-8.0.1.tgz"
+      "version": "5.6.5",
+      "from": "react-native-device-info@5.6.5",
+      "resolved": "http://registry.npmjs.org/react-native-device-info/-/react-native-device-info-5.6.5.tgz"
     },
     "react-native-document-picker": {
       "version": "2.3.0",
