@@ -42,6 +42,7 @@ class TourPage extends Component {
       children = withUrls.map((page, i) => {
         return <WebView style={{width, height}} key={'tour_' + i}
                source={{uri: page.url}}
+               useWebKit={true}
                startInLoadingState={true}
                automaticallyAdjustContentInsets={false} />
       })

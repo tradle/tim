@@ -52,6 +52,7 @@ class ArticleView extends Component {
     let isWeb = utils.isWeb()
     let wView = <WebView style={isWeb && {flex: 1} || styles.webView}
                   source={href ? {uri: href} : url}
+                  useWebKit={true}
                   startInLoadingState={true}
                   renderError={this.renderError.bind(this)}
                   automaticallyAdjustContentInsets={false}

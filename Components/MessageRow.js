@@ -608,9 +608,10 @@ class MessageRow extends Component {
         if (resource[v].trim().indexOf(' ') === -1) {
           let { width } = utils.dimensions(MessageRow)
           vCols.push(<WebView key={this.getNextKey()} style={{width, height: 150}}
-             source={{uri: resource[v]}}
-             startInLoadingState={true}
-             automaticallyAdjustContentInsets={false} />)
+            source={{uri: resource[v]}}
+            useWebKit={true}
+            startInLoadingState={true}
+            automaticallyAdjustContentInsets={false} />)
         }
         else {
           onPressCall = this.onPress.bind(this, resource.message);
@@ -753,10 +754,12 @@ class MessageRow extends Component {
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
               let {width} = utils.dimensions(MessageRow)
-              vCols.push(<WebView key={this.getNextKey()} style={{width, height: 150}}
-                 source={{uri: resource[v]}}
-                 startInLoadingState={true}
-                 automaticallyAdjustContentInsets={false} />)
+              vCols.push(<WebView key={this.getNextKey()}
+                style={{width, height: 150}}
+                source={{uri: resource[v]}}
+                startInLoadingState={true}
+                useWebKit={true}
+                automaticallyAdjustContentInsets={false} />)
             }
             else
               vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>)

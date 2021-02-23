@@ -7321,9 +7321,9 @@
       }
     },
     "react-native-device-info": {
-      "version": "0.21.5",
-      "from": "react-native-device-info@>=0.21.2 <0.22.0",
-      "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.21.5.tgz"
+      "version": "8.0.1",
+      "from": "react-native-device-info@latest",
+      "resolved": "http://registry.npmjs.org/react-native-device-info/-/react-native-device-info-8.0.1.tgz"
     },
     "react-native-document-picker": {
       "version": "2.3.0",
@@ -7592,7 +7592,7 @@
     },
     "react-native-webview": {
       "version": "5.12.1",
-      "from": "react-native-webview@^5.7.2",
+      "from": "react-native-webview@5.12.1",
       "resolved": "https://registry.npmjs.org/react-native-webview/-/react-native-webview-5.12.1.tgz"
     },
     "react-proxy": {

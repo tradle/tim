@@ -38,6 +38,7 @@ class SplashPage extends Component {
     if (typeof splashscreen === 'string') {
       return <WebView style={{width, height}}
                    source={{uri: this.props.splashscreen}}
+                   useWebKit={true}
                    startInLoadingState={true}
                    automaticallyAdjustContentInsets={false} />
     }
