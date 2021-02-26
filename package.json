@@ -180,6 +180,7 @@
     "react-native-linear-gradient": "^2.0.0",
     "react-native-local-auth": "github:tradle/react-native-local-auth",
     "react-native-localization": "^0.1.12",
+    "react-native-localize": "^1.4.3",
     "react-native-orient": "1.3.2",
     "react-native-orientation": "^3.1.3",
     "react-native-os": "github:tradle/react-native-os",

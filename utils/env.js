@@ -1,20 +1,20 @@
 import {
-  Platform
+  Platform,
+  NativeModules
 } from 'react-native'
 
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment-cloud.json'
 
+const isEmulator = DeviceInfo.isEmulatorSync()
 const LOCAL_IP = (function () {
   if (Platform.OS === 'web') {
     return 'localhost'
   }
-
-  if (DeviceInfo.isEmulator()) {
+// debugger
+  if (isEmulator)
     return Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
-  }
-
 
   return require('./localIP')
 })()
@@ -53,6 +53,16 @@ const APP_URL = Platform.select({
   android: `https://play.google.com/store/apps/details?id=${bundleId}`,
   web: 'https://app.tradle.io'
 })
+
+let lang
+if (Platform.OS === 'android')
+  lang = NativeModules.I18nManager.localeIdentifier;
+else
+  lang = NativeModules.SettingsManager.settings.AppleLocale;
+
+let language='en', country='US'
+if (lang)
+  ([language, country] = lang.split('_'))
 
 const merged = extend({
   GCM_SENDER_ID: '633104277721',
@@ -120,9 +130,10 @@ const merged = extend({
   autoRegister: false,
   requireSoftPIN: false,
   locale: {
-    language: DeviceInfo.getDeviceLocale(),
-    country: DeviceInfo.getDeviceCountry()
+    language,
+    country
   },
+  isEmulator,
   // documentScanner: 'blinkid',
   // timeout after partial scan results have been processed
   blinkIDScanTimeoutInternal: 10000,

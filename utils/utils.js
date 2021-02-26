@@ -1978,7 +1978,10 @@ var utils = {
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
   },
   isSimulator() {
-    return DeviceInfo.getModel() === 'Simulator' || DeviceInfo.isEmulator()
+    return DeviceInfo.getModel() === 'Simulator' || utils.isEmulator()
+  },
+  isEmulator() {
+    return DeviceInfo.isEmulatorSync()
   },
 
   buildId ({ model, resource, type, link, permalink }) {

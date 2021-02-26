@@ -1,8 +1,7 @@
 import { Platform } from 'react-native'
-import { isEmulator } from 'react-native-device-info'
 import withDefaults from 'lodash/defaults'
 import ImagePicker from 'react-native-image-picker'
-import { translate, pickNonNull } from './utils'
+import { translate, pickNonNull, isEmulator } from './utils'
 import { normalizeImageCaptureData } from './image-utils'
 import CameraDefaults from './camera-defaults'
 

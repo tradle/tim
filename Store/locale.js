@@ -1,4 +1,5 @@
-import DeviceInfo from 'react-native-device-info'
+// import DeviceInfo from 'react-native-device-info'
+import * as RNLocalize from 'react-native-localize'
 const INFO_PER_REGION = {
   "Africa": {
     "coverPhoto": {
@@ -93,18 +94,26 @@ function getCoverPhotoForRegion() {
 }
 function getLanguage() {
   // debugger
-  let lang = DeviceInfo.getDeviceLocale()
+  let lang
+  let locales = RNLocalize.getLocales()
+  if (locales)
+    lang = locales[0].languageCode
+  // if (Platform.OS === 'android')
+  //   lang = NativeModules.I18nManager.localeIdentifier;
+  // else
+  //   lang = NativeModules.SettingsManager.settings.AppleLocale;
+
   if (!lang)
     lang = navigator.language
   return lang.split('-')[0]
 }
 function getInfoForRegion() {
-  let tz = DeviceInfo.getTimezone()
+  let tz = RNLocalize.getTimeZone()
   if (tz)
     return INFO_PER_REGION[tz]  ||  INFO_PER_REGION[tz.split('/')[0]]
-  let lang = DeviceInfo.getDeviceLocale()
-  if (!lang)
-    lang = navigator.language
+  let lang = getLanguage() //DeviceInfo.getDeviceLocale()
+  // if (!lang)
+  //   lang = navigator.language
   if (!lang)
     return
   lang = lang.toLowerCase()
