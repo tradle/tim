@@ -7,7 +7,8 @@ target 'Tradle' do
 #  pod 'PPBlinkID', '4.5.0'
   # pod 'DocumentReader', '~> 5.1'
   # pod 'DocumentReaderFull', '~> 5.1'
-  pod 'Branch', '0.27.1'
+  # pod 'Branch', '0.27.1'
+  pod 'Branch', '0.32.0'
   pod 'DocumentReader', '5.1.1194'
   pod 'DocumentReaderFull', '5.1.2749'
 
