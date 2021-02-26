@@ -11,6 +11,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.reactcommunity.rnlocalize.RNLocalizePackage;
 import io.branch.rnbranch.RNBranchPackage;
 //import com.reactlibrary.RNReactNativeZoomSdkPackage;
 import com.regula.documentreader.core.RNDocumentReaderCorePackage;
@@ -78,6 +79,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+        new RNLocalizePackage(),
         new RNDocumentReaderCorePackage(),
         new RNRegulaDocumentReaderPackage(),
         new RNExitAppPackage(),

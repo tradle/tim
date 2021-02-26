@@ -71,6 +71,7 @@
 		9B15793A25E418F300D9A75F /* libreact-native-branch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B15791C25E418D300D9A75F /* libreact-native-branch.a */; };
 		9B367214225AEFDB00EC7D06 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B3671C3225AEFDB00EC7D06 /* JavaScriptCore.framework */; };
 		9B5B4A8024AD30CA00F92F48 /* libJailMonkey.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5B4A3924AD308200F92F48 /* libJailMonkey.a */; };
+		9BA5373F25E878680046FB86 /* libRNLocalize.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA5373125E878460046FB86 /* libRNLocalize.a */; };
 		9BA58D22225D3352006E05AF /* libRNCNetInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA58D0A225D334A006E05AF /* libRNCNetInfo.a */; };
 		9BA6555122776E2A0039160C /* libRNCWebView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA6553B22776E140039160C /* libRNCWebView.a */; };
 		9BDDE52222D2B1C4001A35FD /* libReactNativeViewPDF.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B472CE422CE920400C54D90 /* libReactNativeViewPDF.a */; };
@@ -584,6 +585,20 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNCViewpager;
 		};
+		9BA5373025E878460046FB86 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BA536EA25E878400046FB86 /* RNLocalize.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNLocalize;
+		};
+		9BA5373225E878460046FB86 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BA536EA25E878400046FB86 /* RNLocalize.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2D2A28471D9B043800D4039D;
+			remoteInfo = "RNLocalize-tvOS";
+		};
 		9BA58D09225D334A006E05AF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9BA58CD1225D334A006E05AF /* RNCNetInfo.xcodeproj */;
@@ -721,6 +736,7 @@
 		9B472CB122CE920200C54D90 /* ReactNativeViewPDF.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeViewPDF.xcodeproj; path = "../node_modules/react-native-view-pdf/ReactNativeViewPDF.xcodeproj"; sourceTree = "<group>"; };
 		9B5B4A3024AD308200F92F48 /* JailMonkey.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JailMonkey.xcodeproj; path = "../node_modules/jail-monkey/JailMonkey.xcodeproj"; sourceTree = "<group>"; };
 		9B89E56724DCC70D000A3464 /* TradleDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = TradleDebug.entitlements; path = Tradle/TradleDebug.entitlements; sourceTree = "<group>"; };
+		9BA536EA25E878400046FB86 /* RNLocalize.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNLocalize.xcodeproj; path = "../node_modules/react-native-localize/ios/RNLocalize.xcodeproj"; sourceTree = "<group>"; };
 		9BA58CD1225D334A006E05AF /* RNCNetInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCNetInfo.xcodeproj; path = "../node_modules/@react-native-community/netinfo/ios/RNCNetInfo.xcodeproj"; sourceTree = "<group>"; };
 		9BA6550122776E140039160C /* RNCWebView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCWebView.xcodeproj; path = "../node_modules/react-native-webview/ios/RNCWebView.xcodeproj"; sourceTree = "<group>"; };
 		9BCD8E87C35843E585CC6AE5 /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
@@ -749,6 +765,7 @@
 			files = (
 				9B367214225AEFDB00EC7D06 /* JavaScriptCore.framework in Frameworks */,
 				736290B51EDE461F007E4DE1 /* iAd.framework in Frameworks */,
+				9BA5373F25E878680046FB86 /* libRNLocalize.a in Frameworks */,
 				9BDDE52222D2B1C4001A35FD /* libReactNativeViewPDF.a in Frameworks */,
 				9B5B4A8024AD30CA00F92F48 /* libJailMonkey.a in Frameworks */,
 				9BDFF5A924AD565000D92F83 /* libRNExitApp.a in Frameworks */,
@@ -1176,6 +1193,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9BA536EA25E878400046FB86 /* RNLocalize.xcodeproj */,
 				9B1578E925E418D300D9A75F /* RNBranch.xcodeproj */,
 				9BDEA3DC24CF89B500D0E2FD /* RNDocumentReaderCore.xcodeproj */,
 				9BDEA3D624CF899700D0E2FD /* RNRegulaDocumentReader.xcodeproj */,
@@ -1296,6 +1314,15 @@
 			isa = PBXGroup;
 			children = (
 				9B97EF05225F822000DD3691 /* libRNCViewpager.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9BA536EB25E878410046FB86 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BA5373125E878460046FB86 /* libRNLocalize.a */,
+				9BA5373325E878460046FB86 /* libRNLocalize-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1593,6 +1620,10 @@
 				{
 					ProductGroup = 732B645A1ED9FF7C0056F4BF /* Products */;
 					ProjectRef = 4F0141B0C05A4BCE906F6CF6 /* RNLocalAuth.xcodeproj */;
+				},
+				{
+					ProductGroup = 9BA536EB25E878410046FB86 /* Products */;
+					ProjectRef = 9BA536EA25E878400046FB86 /* RNLocalize.xcodeproj */;
 				},
 				{
 					ProductGroup = 734DE32D1F6B8542009152AD /* Products */;
@@ -2140,6 +2171,20 @@
 			remoteRef = 9B97EF04225F822000DD3691 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		9BA5373125E878460046FB86 /* libRNLocalize.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNLocalize.a;
+			remoteRef = 9BA5373025E878460046FB86 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BA5373325E878460046FB86 /* libRNLocalize-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libRNLocalize-tvOS.a";
+			remoteRef = 9BA5373225E878460046FB86 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		9BA58D0A225D334A006E05AF /* libRNCNetInfo.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -2340,7 +2385,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)",
 				);
@@ -2419,7 +2464,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)",
 				);
@@ -2532,7 +2577,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)",
 				);

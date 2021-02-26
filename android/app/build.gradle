@@ -271,6 +271,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':react-native-localize')
     implementation project(':react-native-branch')
     implementation project(':react-native-document-reader-core-fullrfid')
     implementation project(':react-native-document-reader-api')
