@@ -1,21 +1,21 @@
 import {
   Platform,
-  NativeModules
+  NativeModules,
 } from 'react-native'
 
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment-cloud.json'
+// import { isEmulator } from './utils'
 
 const isEmulator = DeviceInfo.isEmulatorSync()
+
 const LOCAL_IP = (function () {
   if (Platform.OS === 'web') {
     return 'localhost'
   }
-// debugger
   if (isEmulator)
     return Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
-
   return require('./localIP')
 })()
 
