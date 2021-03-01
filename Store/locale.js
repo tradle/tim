@@ -1,5 +1,6 @@
-// import DeviceInfo from 'react-native-device-info'
+import { NativeModules, Platform } from 'react-native'
 import * as RNLocalize from 'react-native-localize'
+
 const INFO_PER_REGION = {
   "Africa": {
     "coverPhoto": {
