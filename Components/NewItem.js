@@ -20,6 +20,7 @@ import NewResourceMixin from './NewResourceMixin'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
 import { Text } from './Text'
+import { getContentSeparator } from '../utils/uiUtils'
 
 const {
   TYPE
@@ -208,7 +209,7 @@ class NewItem extends Component {
     return !hasError;
   }
   render() {
-    let {err, metadata} = this.props;
+    let {err, metadata, bankStyle} = this.props;
     let error
     err = err || this.state.err
     if (err)
@@ -245,9 +246,11 @@ class NewItem extends Component {
         }
       }
     }
+    let contentSeparator = getContentSeparator(bankStyle)
+
     return (
-      <PageView style={[platformStyles.container]}>
-        <ScrollView style={{backgroundColor: 'transparent'}}
+      <PageView style={[platformStyles.container]}  separator={contentSeparator} bankStyle={bankStyle}>
+        <ScrollView style={{backgroundColor: 'transparent', paddingVertical: 10}}
                     ref='scrollView' {...this.scrollviewProps}
                     keyboardShouldPersistTaps="always"
                     keyboardDismissMode={'on-drag'}>

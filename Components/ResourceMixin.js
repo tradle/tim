@@ -23,7 +23,7 @@ import Accordion from './Accordion'
 import Actions from '../Actions/Actions'
 import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, formatNumber } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import Image from './Image'
 import uiUtils from '../utils/uiUtils'
@@ -150,7 +150,7 @@ var ResourceMixin = {
   },
 
   renderItems({value, prop, cancelItem, editItem, component}) {
-    let { bankStyle, navigator, resource } = this.props
+    let { bankStyle, navigator, resource, currency, locale } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = prop.items.properties;
     let pModel
@@ -249,9 +249,16 @@ var ResourceMixin = {
         }
         else if (ref) {
           if (ref === MONEY) {
-            let symbol = pVal.currency
-            let c = utils.normalizeCurrencySymbol(pVal.currency)
-            value = (c || symbol) + pVal.value
+            let pCurrency = pVal.currency
+            if (!pCurrency) {
+              pCurrency = currency  &&  currency.symbol
+              if (!pCurrency)
+                pCurrency = DEFAULT_CURRENCY_SYMBOL
+            }
+
+            let c = utils.normalizeCurrencySymbol(pCurrency)
+            // value = (c || pCurrency) + pVal.value
+            value = (c || pCurrency) + formatNumber(itemMeta, pVal.value, locale)
           }
           else
             value = pVal.title  ||  utils.getDisplayName({ resource: pVal, model: utils.getModel(ref) })        }

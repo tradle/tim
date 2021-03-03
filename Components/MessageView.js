@@ -357,7 +357,7 @@ class MessageView extends Component {
       }
       if (!mainPhoto  &&  photos) {
         mainPhoto = photos[0]
-        photos = photos.splice(0, 1)
+        photos.splice(0, 1)
       }
 
       inRow = photos && photos.length || 0
