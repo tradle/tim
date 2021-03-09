@@ -3235,7 +3235,7 @@ var Store = Reflux.createStore({
         if (!isPrefill  &&  url  &&  url.indexOf('data:application/pdf;') === 0)
           await this._keeper.replaceDataUrls(toChain[p])
       }
-      if (refM.inlined)
+      if (refM.inlined  ||  prop.inlined)
         continue
 
       let isObject = prop.type === 'object'
