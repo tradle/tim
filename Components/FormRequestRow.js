@@ -701,7 +701,8 @@ class FormRequestRow extends Component {
   }
 
   createNewResource({model, isMyMessage, resource, editFormRequestPrefill}) {
-    let { currency, country, bankStyle, defaultPropertyValues, navigator, application, allowedMimeTypes } = this.props
+    let { currency, locale, country, bankStyle, defaultPropertyValues,
+          navigator, application, allowedMimeTypes } = this.props
     if (!model)
       model = utils.getModel(resource[TYPE])
     if (model.abstract) {
@@ -763,6 +764,7 @@ class FormRequestRow extends Component {
         isPrefilled,
         currency,
         country,
+        locale,
         bankStyle,
         originatingMessage: formRequest,
         defaultPropertyValues,
