@@ -19,7 +19,6 @@ module.exports = function CheckOverride ({ models }) {
       } catch (e) {
         return
       }
-      let { properties } = m
 
       let requestedProperties
       if (!form.term) {
@@ -28,6 +27,7 @@ module.exports = function CheckOverride ({ models }) {
       }
 
       let terms = form.terms
+      if (!terms) return []
 
       let termId = form.term.id
       let term = terms.find(t => t.term.id === termId)
