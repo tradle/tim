@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
 var debug = Debug('tradle:app:dataBundle')
+import storeUtils from '../utils/storeUtils'
 
 import constants from '@tradle/constants'
 const {
@@ -152,7 +153,7 @@ class DataBundle {
     for (let i=0; i<result.length; i++) {
       let item = result[i]
       let r = item.object
-      this.Store.rewriteStubs(r)
+      storeUtils.rewriteStubs(r)
       r[ROOT_HASH] = item.permalink
       r[CUR_HASH] = item.link
       let m = this.Store.getModel(r[TYPE])
