@@ -3203,7 +3203,7 @@ var Store = Reflux.createStore({
         if (!isPrefill  &&  url  &&  url.indexOf('data:application/pdf;') === 0)
           await this._keeper.replaceDataUrls(toChain[p])
       }
-      if (refM.inlined)
+      if (refM.inlined  ||  prop.inlined)
         continue
 
       let isObject = prop.type === 'object'
@@ -6273,13 +6273,16 @@ if (!res[SIG]  &&  res._message)
   },
 
   async getList(params) {
-    let {modelName, first, prop, isAggregation, isChat, isRefresh, exploreData} = params
+    let {modelName, first, prop, isAggregation, isChat, isRefresh, exploreData, isChooser} = params
     var meta = this.getModel(modelName)
     let isMessage = modelName === MESSAGE || isChat || utils.isItem(meta) // utils.isMessage(meta)
     // HACK for now
     if (!isMessage)
       isMessage = isRefresh  || utils.isForm(meta)  ||  modelName === VERIFICATION
-    if (params.search &&  me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION  &&  !utils.isEnum(meta)) {
+
+    let isChooserOnServer = me  &&  me.isEmployee  &&  isChooser && !meta.inlined
+    let isSearchServer = (isChooserOnServer || params.search) &&  me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION  &&  !utils.isEnum(meta)
+    if (isSearchServer) {
       if (exploreData)
         Actions.showModal({title: translate('searching'), showIndicator: true})
       try {
