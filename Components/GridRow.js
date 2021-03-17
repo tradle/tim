@@ -210,7 +210,7 @@ class GridRow extends Component {
     //   return row
   }
   formatCol(pName) {
-    let { resource, isModel, search } = this.props
+    let { resource, isModel, search, locale } = this.props
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype || resource.id);
     let properties = model.properties;
@@ -255,7 +255,9 @@ class GridRow extends Component {
       let refM = utils.getModel(ref)
       if (ref === MONEY) {
         style.push({alignSelf: 'flex-end', paddingRight: 10})
-        row = <Text style={style} key={this.getNextKey(resource)}>{resource[pName].currency + resource[pName].value}</Text>
+        let val = utils.formatCurrency(resource[pName], locale)
+
+        row = <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
       }
       else if (ref === PHOTO)
         row = <Image source={{uri: resource[pName].url}} style={styles.thumb} />
