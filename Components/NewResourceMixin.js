@@ -107,7 +107,10 @@ var NewResourceMixin = {
 
     let showReadOnly = true
     eCols.forEach(p => {
-      if (!props[p].readOnly)
+      let prop = props[p]
+      // prop is readOnly if explicitely has readOnly on it or
+      // it is a _group property with 'list' of props annotation
+      if (prop  &&  !prop.readOnly  &&  !p.endsWith('_group')  && !prop.list)
         showReadOnly = false
     })
     let requestedProperties, excludeProperties
@@ -345,14 +348,17 @@ var NewResourceMixin = {
       }
       else {
         let ref = props[p].ref;
+        let iref = props[p].items  &&  props[p].items.ref
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
             ref = MONEY
           else if (props[p].range === 'json')
             continue
-          ref = props[p].items  &&  props[p].items.ref
-          if (!ref  ||  !utils.isEnum(ref))
+          if (!iref)
             continue;
+          if (!utils.isEnum(iref) && !utils.getModel(iref).inlined  && !isReadOnly)
+            continue
+          ref = iref
         }
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -421,19 +427,32 @@ var NewResourceMixin = {
               data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title
           }
         }
+        if (iref) {
+          options.fields[p].template = this.myInlinedResourcesTemplate.bind(this, {
+                    label,
+                    prop:  props[p],
+                    value: val,
+                    model: meta,
+                    component,
+                    required: !maybe,
+                    errors: formErrors,
+                    editable: !propNotEditable
+                  })
+        }
+        else {
+          // options.fields[p].onFocus = chooser.bind(this, props[p], p)
+          options.fields[p].template = this.myCustomTemplate.bind(this, {
+              label,
+              prop:  p,
+              required: !maybe,
+              errors: formErrors,
+              resource: bookmark && search &&  data,
+              component,
+              chooser: options.fields[p].onFocus,
+            })
 
-        // options.fields[p].onFocus = chooser.bind(this, props[p], p)
-        options.fields[p].template = this.myCustomTemplate.bind(this, {
-            label,
-            prop:  p,
-            required: !maybe,
-            errors: formErrors,
-            resource: bookmark && search &&  data,
-            component,
-            chooser: options.fields[p].onFocus,
-          })
-
-        options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
+          options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
+        }
       }
     }
 
@@ -573,11 +592,19 @@ var NewResourceMixin = {
 
     if(ptype === 'number'  &&  !search) {
       let val = Number(value)
-      if (value.endsWith('.'))
-        return
-        // value = val + .00
-      // else
-        value = val
+      let idx = value.indexOf('.')
+      if (idx !== -1) {
+        // Some strange HACK
+        debugger
+        const len = value.length
+        if (++idx === len)
+          return
+        while(value.charAt(idx) === '0') idx++
+
+        if (idx === len)
+          return
+      }
+      value = val
     }
     if (!this.floatingProps)
       this.floatingProps = {}
@@ -1136,16 +1163,22 @@ var NewResourceMixin = {
   inputFocused(prop) {
     if (prop.readOnly)
       return
+
+    let { metadata, parentMeta } = this.props
+    let pname = prop.name
+    if (parentMeta)
+      pname = `${metadata.name}_${pname}`
+
     if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
          this.refs.scrollView        &&
          this.props.model            &&
          Object.keys(this.props.model.properties).length > 5) {
-      utils.scrollComponentIntoView(this, this.refs.form.getComponent(prop.name))
-      this.setState({inFocus: prop.name})
+      utils.scrollComponentIntoView(this, this.refs.form.getComponent(pname))
+      this.setState({inFocus: pname})
     }
-    else if (this.state.inFocus !== prop.name)
-      this.setState({inFocus: prop.name})
+    else if (this.state.inFocus !== pname)
+      this.setState({inFocus: pname})
   },
 
   myCustomTemplate(params) {
@@ -1454,6 +1487,13 @@ var NewResourceMixin = {
       {this.paintHelp(prop)}
       </View>
     );
+  },
+  myInlinedResourcesTemplate(params) {
+    let { value, editable, prop, component } = params
+    if (editable) return  <View />
+    if (prop.grid)
+      return this.renderSimpleGrid(value, prop, component)
+    this.renderSimpleProp(value, prop, prop.items.ref, component)
   },
 
   myEnumTemplate(params) {
