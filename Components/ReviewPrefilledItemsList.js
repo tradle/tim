@@ -85,7 +85,6 @@ class ReviewPrefilledItemsList extends Component {
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
         {text: translate('OK'), onPress: this.submitAllForms.bind(this)}
-        // {text: translate('OK'), onPress: this.processReviewed.bind(this)}
       ]
     )
   }
@@ -98,16 +97,6 @@ class ReviewPrefilledItemsList extends Component {
     // if (!isRefresh)
     //   return
     Actions.list({modelName: FORM, to, isRefresh: true, originalResource: this.props.resource, resource})
-  }
-  processReviewed() {
-    let { reviewed, resource, navigator } = this.props
-    Actions.addChatItem({
-      value: {_documentCreated: true},
-      resource,
-      meta: utils.getModel(resource[TYPE]),
-      reviewed
-    })
-    navigator.pop();
   }
   onAction(params) {
     let { to, action, list, products, resource, isRefresh, requestForRefresh } = params
