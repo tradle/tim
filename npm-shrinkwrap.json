@@ -307,19 +307,19 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.26",
+      "version": "7.1.27",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.26.tgz",
+      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.27.tgz",
       "dependencies": {
         "lodash": {
-          "version": "4.17.20",
+          "version": "4.17.21",
           "from": "lodash@>=4.17.19 <5.0.0",
-          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.20.tgz"
+          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
         },
         "mime": {
-          "version": "2.5.0",
+          "version": "2.5.2",
           "from": "mime@>=2.4.6 <3.0.0",
-          "resolved": "http://registry.npmjs.org/mime/-/mime-2.5.0.tgz"
+          "resolved": "http://registry.npmjs.org/mime/-/mime-2.5.2.tgz"
         }
       }
     },

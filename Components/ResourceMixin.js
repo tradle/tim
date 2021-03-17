@@ -33,6 +33,8 @@ import Image from './Image'
 import { Text } from './Text'
 import uiUtils from '../utils/uiUtils'
 import { VictorySunburst } from './victory-sunburst'
+import GridHeader from './GridHeader'
+import GridRow from './GridRow'
 // import { VictoryContainer } from 'victory'
 
 const RESOURCE_VIEW = 'ResourceView'
@@ -410,6 +412,8 @@ var ResourceMixin = {
   renderSimpleArrayProp(val, pMeta, modelName, component) {
     if (pMeta.items.backlink)
       return <View  key={this.getNextKey()} />
+    if (pMeta.grid)
+      return this.renderSimpleGrid(val, pMeta, component)
 
     let vCols = pMeta.viewCols;
     if (!vCols)
@@ -443,6 +447,40 @@ var ResourceMixin = {
                {val}
              </View>
   },
+
+  renderSimpleGrid(value, prop, component) {
+    if (prop.items.backlink)
+      return <View  key={this.getNextKey()} />
+
+    let { navigator, locale, currency, bankStyle } = this.props
+    const modelName = prop.items.ref
+
+    let gridCols = uiUtils.getGridCols(modelName)
+    if (!gridCols)
+      return
+    let header = <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator}/>
+
+    let rows = []
+    for (let i=0; i<value.length; i++) {
+      rows.push(
+          <GridRow
+            key={'_' + prop.name}
+            isSmallScreen={false}
+            modelName={modelName}
+            navigator={navigator}
+            currency={currency}
+            locale={locale}
+            gridCols={gridCols}
+            resource={value[i]}
+            bankStyle={bankStyle} />
+          );
+    }
+    return <View>
+       {header}
+       {rows}
+     </View>
+  },
+
   changeResourceTree(tree, newTree) {
     let isNodes = !tree._displayName
     if (!isNodes) {

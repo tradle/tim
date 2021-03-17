@@ -119,6 +119,7 @@ var NewResourceMixin = {
       if (props[p]  &&  !props[p].readOnly)
         showReadOnly = false
     })
+    // showReadOnly = true
     let requestedProperties, excludeProperties
     if (this.state.requestedProperties)
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
@@ -343,14 +344,17 @@ var NewResourceMixin = {
       }
       else {
         let ref = props[p].ref;
+        let iref = props[p].items  &&  props[p].items.ref
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
             ref = MONEY
           else if (props[p].range === 'json')
             continue
-          ref = props[p].items  &&  props[p].items.ref
-          if (!ref  ||  !utils.isEnum(ref))
+          if (!iref)
             continue;
+          if (!utils.isEnum(iref) && !utils.getModel(iref).inlined  && !isReadOnly)
+            continue
+          ref = iref
         }
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -419,6 +423,20 @@ var NewResourceMixin = {
               data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title
           }
         }
+        if (iref) {
+          options.fields[p].template = this.myInlinedResourcesTemplate.bind(this, {
+                    label,
+                    prop:  props[p],
+                    value: val,
+                    model: meta,
+                    component,
+                    required: !maybe,
+                    errors: formErrors,
+                    editable: !propNotEditable
+                  })
+
+        }
+        else {
         // options.fields[p].onFocus = chooser.bind(this, props[p], p)
         options.fields[p].template = this.myCustomTemplate.bind(this, {
             label,
@@ -429,7 +447,7 @@ var NewResourceMixin = {
             component,
             chooser: options.fields[p].onFocus,
           })
-
+        }
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
     }
@@ -569,11 +587,18 @@ var NewResourceMixin = {
 
     if(ptype === 'number'  &&  !search) {
       let val = Number(value)
-      if (value.endsWith('.'))
-        return
-        // value = val + .00
-      // else
-        value = val
+      let idx = value.indexOf('.')
+      if (idx !== -1) {
+        debugger
+        const len = value.length
+        if (++idx === len)
+          return
+        while(value.charAt(idx) === '0') idx++
+
+        if (idx === len)
+          return
+      }
+      value = val
     }
     if (!this.floatingProps)
       this.floatingProps = {}
@@ -1151,16 +1176,22 @@ var NewResourceMixin = {
   inputFocused(prop) {
     if (prop.readOnly)
       return
+
+    let { metadata, parentMeta } = this.props
+    let pname = prop.name
+    if (parentMeta)
+      pname = `${metadata.name}_${pname}`
+
     if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
          this.refs.scrollView        &&
          this.props.model            &&
          Object.keys(this.props.model.properties).length > 5) {
-      utils.scrollComponentIntoView(this, this.refs.form.getComponent(prop.name))
-      this.setState({inFocus: prop.name})
+      utils.scrollComponentIntoView(this, this.refs.form.getComponent(pname))
+      this.setState({inFocus: pname})
     }
-    else if (this.state.inFocus !== prop.name)
-      this.setState({inFocus: prop.name})
+    else if (this.state.inFocus !== pname)
+      this.setState({inFocus: pname})
   },
 
   myCustomTemplate(params) {
@@ -1480,6 +1511,14 @@ var NewResourceMixin = {
     if (typeof currency === 'string')
       return currency
     return currency.symbol
+  },
+  myInlinedResourcesTemplate(params) {
+    let { value, editable, prop, component } = params
+    if (editable) return  <View />
+    if (prop.grid)
+      this.renderSimpleGrid(value, prop, component)
+    else
+      this.renderSimpleProp(value, prop, prop.items.ref, component)
   },
   myEnumTemplate(params) {
     let { prop, enumProp, errors } = params
