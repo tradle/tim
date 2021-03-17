@@ -116,7 +116,10 @@ var NewResourceMixin = {
 
     let showReadOnly = true
     eCols.forEach(p => {
-      if (props[p]  &&  !props[p].readOnly)
+      let prop = props[p]
+      // prop is readOnly if explicitely has readOnly on it or
+      // it is a _group property with 'list' of props annotation
+      if (prop  &&  !prop.readOnly  &&  !p.endsWith('_group')  && !prop.list)
         showReadOnly = false
     })
     // showReadOnly = true
@@ -1516,9 +1519,8 @@ var NewResourceMixin = {
     let { value, editable, prop, component } = params
     if (editable) return  <View />
     if (prop.grid)
-      this.renderSimpleGrid(value, prop, component)
-    else
-      this.renderSimpleProp(value, prop, prop.items.ref, component)
+      return this.renderSimpleGrid(value, prop, component)
+    return this.renderSimpleProp(value, prop, prop.items.ref, component)
   },
   myEnumTemplate(params) {
     let { prop, enumProp, errors } = params
