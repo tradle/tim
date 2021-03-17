@@ -81,7 +81,6 @@ class AttestationItemsList extends Component {
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
         {text: translate('OK'), onPress: this.writeNotes.bind(this)}
-        // {text: translate('OK'), onPress: this.processReviewed.bind(this)}
       ]
     )
   }
@@ -89,24 +88,10 @@ class AttestationItemsList extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
-  processReviewed() {
-    let { reviewed, resource, navigator } = this.props
-    Actions.addChatItem({
-      value: {_documentCreated: true},
-      resource,
-      meta: utils.getModel(resource[TYPE]),
-      reviewed
-    })
-    navigator.pop();
-  }
   onAction(params) {
     let { to, action, list, products, resource, requestForRefresh } = params
     if (!resource || resource[TYPE] !== ATTESTATION_ITEM)
       return
-    // if (!to)
-    //   to = resource.to  &&  resource.to.organization
-    // if (utils.getId(to) !== utils.getId(this.props.to))
-    //   return
     if (!list)
       list = this.state.list
     if (!products)
