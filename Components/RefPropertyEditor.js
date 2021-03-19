@@ -175,7 +175,7 @@ class RefPropertyEditor extends Component {
       iconColor = linkColor
 
     let isReadOnly = prop.readOnly
-    let icon
+    let icon, hasLock
     let isBookmarkSealed = bookmark  &&  bookmark.bookmark[pName]
     if (!isImmutable  &&  !isBookmarkSealed  &&  !isReadOnly) {
       if (isVideo)
@@ -187,8 +187,10 @@ class RefPropertyEditor extends Component {
       else
         icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor} style={styles.customIcon} />
     }
-    else
-      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.immutable} />
+    else {
+      hasLock = true
+      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.customIcon} />
+    }
     let content = <View  style={styles.chooserContainer}>
                     {propView}
                     {icon}
@@ -236,9 +238,11 @@ class RefPropertyEditor extends Component {
                      </TouchableOpacity>
       }
     }
+    let addStyle = hasLock ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'} : {}
+
     return (
       <View key={pName} style={{margin: 0, marginBottom: 10}} ref={pName}>
-        <View style={[styles.formInput, {borderColor: bcolor}]}>
+        <View style={[styles.formInput, addStyle, {borderColor: bcolor}]}>
           {propLabel}
           {actionItem}
         </View>
