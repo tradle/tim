@@ -727,6 +727,7 @@ class MessageList extends Component {
           resource: r,
           currency: this.calcCurrency(),
           country: resource.country,
+          locale: resource.locale,
           chat: resource,
           lensId,
           bankStyle,
