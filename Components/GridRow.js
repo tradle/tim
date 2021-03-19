@@ -202,12 +202,12 @@ class GridRow extends Component {
     let row = <Row size={size} style={styles.gridRow, {backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
                 {cols}
               </Row>
-    // if (search || multiChooser)
-    return  <TouchableOpacity  onPress={() => this.props.onSelect({resource})}>
-              {row}
-            </TouchableOpacity>
-    // else
-    //   return row
+    if (this.props.onSelect)
+      return  <TouchableOpacity  onPress={() => this.props.onSelect({resource})}>
+                {row}
+              </TouchableOpacity>
+    else
+      return row
   }
   formatCol(pName) {
     let { resource, isModel, search, locale } = this.props
