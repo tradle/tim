@@ -187,29 +187,27 @@ class NewResource extends Component {
       else
         Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
     }
-    else {
-     if (resource.id) {
-        let type = utils.getType(resource.id)
-        if (!utils.getModel(type).inlined)
-          Actions.getItem({resource: resource})
-      }
-      else if (isUploading) {
-        if (containerResource)
-          this.state.isUploading = false
-        else {
-          let type = resource[TYPE]
-          let m = utils.getModel(type)
-          let exclude
-          while (!exclude  &&  type) {
-            exclude = excludeTemporaryFor.includes(type)
-            if (!exclude)
-              type = utils.getModel(type).subClassOf
-          }
-          if (!exclude  &&  prop  &&  m.properties[prop].inlined)
-            exclude = true
-          Actions.getTemporary(resource[TYPE], exclude)
-          Actions.getRequestedProperties({resource})
+    else if (resource.id) {
+      let type = utils.getType(resource.id)
+      if (!utils.getModel(type).inlined)
+        Actions.getItem({resource: resource})
+    }
+    else if (isUploading) {
+      if (containerResource)
+        this.state.isUploading = false
+      else {
+        let type = resource[TYPE]
+        let m = utils.getModel(type)
+        let exclude
+        while (!exclude  &&  type) {
+          exclude = excludeTemporaryFor.includes(type)
+          if (!exclude)
+            type = utils.getModel(type).subClassOf
         }
+        if (!exclude  &&  prop  &&  m.properties[prop].inlined)
+          exclude = true
+        Actions.getTemporary(resource[TYPE], exclude)
+        Actions.getRequestedProperties({resource})
       }
     }
     if (!this.props.exploreData  &&  Platform.OS === 'ios') {
@@ -857,7 +855,7 @@ class NewResource extends Component {
       }
     }
 
-    let meta =  this.props.model;
+    let meta =  this.props.model
     let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
@@ -866,13 +864,13 @@ class NewResource extends Component {
     let data = {};
     let model = {};
     let arrays = [];
-    _.extend(data, resource);
+    _.extend(data, resource)
+     const { properties } = meta
     if (bookmark  &&  bookmark.bookmark) {
-      let props = meta.properties
       for (let p in bookmark.bookmark) {
-        if (props[p]) {
+        if (properties[p]) {
           let bPropVal = bookmark.bookmark[p]
-          if (props[p].ref  &&  utils.isEnum(props[p].ref)  &&  !Array.isArray(bPropVal))
+          if (properties[p].ref  &&  utils.isEnum(properties[p].ref)  &&  !Array.isArray(bPropVal))
             data[p] = [bPropVal]
           else
             data[p] = bPropVal
@@ -907,9 +905,11 @@ class NewResource extends Component {
     else if (validationErrors)
       params.validationErrors = validationErrors
 
-    let options = this.getFormFields(params);
+    let options = this.getFormFields(params)
+    let submitTitle = this.getSubmitTitle(meta)
+    let contentSeparator = getContentSeparator(bankStyle)
+
     if (!options) {
-      let contentSeparator = getContentSeparator(bankStyle)
       let height = utils.dimensions(NewResource).height - 80
 
       return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle}>
@@ -920,7 +920,7 @@ class NewResource extends Component {
                 <TouchableOpacity onPress={this.onSavePressed} style={{paddingBottom: 30}}>
                   <View style={styles.submitButton}>
                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
-                    <Text style={styles.submitText}>{translate('Submit')}</Text>
+                    <Text style={styles.submitText}>{submitTitle}</Text>
                   </View>
                 </TouchableOpacity>
              </PageView>
@@ -931,8 +931,8 @@ class NewResource extends Component {
     if (editCols) {
       itemsMeta = []
       editCols.forEach((p) => {
-        if (meta.properties[p].type === 'array')
-          itemsMeta.push(meta.properties[p])
+        if (properties[p].type === 'array')
+          itemsMeta.push(properties[p])
       })
     }
     else
@@ -1049,7 +1049,7 @@ class NewResource extends Component {
         submit = <TouchableOpacity onPress={onPress} style={{paddingBottom: 30}}>
                    <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
-                     <Text style={styles.submitText}>{translate('Submit')}</Text>
+                     <Text style={styles.submitText}>{submitTitle}</Text>
                    </View>
                  </TouchableOpacity>
 
@@ -1113,7 +1113,6 @@ class NewResource extends Component {
                  </View>
       }
 
-      let contentSeparator = getContentSeparator(bankStyle)
       return <PageView style={[platformStyles.container, {backgroundColor: '#f3f3f3'}]} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}
@@ -1136,6 +1135,19 @@ class NewResource extends Component {
 
       </View>
     )
+  }
+  // If this is a confirmation resource i.e. not props to enter only to review
+  // then use OK instead of Submit
+  getSubmitTitle(meta) {
+    let hasNotReadOnly = false
+    const { properties } = meta
+    for (let p in properties) {
+      if (p.charAt(0) !== '_' && !properties[p].readOnly) {
+        hasNotReadOnly = true
+        break
+      }
+    }
+    return hasNotReadOnly ? translate('Submit') : translate('ok')
   }
   checkRequestedProperties(prop) {
     let { requestedProperties } = this.state
