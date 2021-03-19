@@ -1461,36 +1461,35 @@ var NewResourceMixin = {
 
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
-    let { label, required, model, value, prop, editable, errors, component } = params
-    let { search } = this.props
-    if (!search  &&  required)
-      label += ' *'
-    let CURRENCY_SYMBOL = this.getCurrency()
-    let isMoney = prop.ref  &&  prop.ref === MONEY
+    let { required, model, value, prop, editable, errors, component } = params
+    let { search, locale } = this.props
 
-    label += isMoney
-           ?  ' (' + CURRENCY_SYMBOL + ')'
-           : ''
-    return (
-      <View>
-      <View style={styles.moneyInput}>
-          {
-             this.myTextInputTemplate({
-                    label,
-                    prop,
-                    value: value.value ? value.value + '' : '',
-                    required,
-                    model,
-                    onSubmitEditing: params.onSubmitEditing.bind(this),
-                    noError: true,
-                    // errors: errors,
-                    editable,
-                    component,
-                    keyboard: search ? null : 'numeric',
-                  })
-          }
-          {
-             this.myEnumTemplate({
+    let v
+    if (!value.value)
+      v = ''
+    else if (prop.readOnly)
+      v = utils.formatCurrency(value, locale)
+    else
+      v = value.value + ''
+
+    let keyboard = prop.readOnly || search ? null : 'numeric'
+
+    let val = this.myTextInputTemplate({
+                  prop,
+                  value: v,
+                  required,
+                  model,
+                  onSubmitEditing: params.onSubmitEditing.bind(this),
+                  noError: true,
+                  // errors: errors,
+                  editable,
+                  component,
+                  keyboard,
+                })
+
+    let currency
+    if (!prop.readOnly) {
+      currency = this.myEnumTemplate({
                     prop,
                     enumProp: utils.getModel(MONEY).properties.currency,
                     required,
@@ -1500,7 +1499,12 @@ var NewResourceMixin = {
                     // noError:  errors && errors[prop],
                     noError: true
                   })
-        }
+    }
+    return (
+      <View>
+      <View style={styles.moneyInput}>
+          {val}
+          {currency}
       </View>
       {this.paintError({prop, errors})}
       {this.paintHelp(prop)}
