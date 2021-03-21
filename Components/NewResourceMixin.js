@@ -824,6 +824,7 @@ var NewResourceMixin = {
     // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
+    let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'} : {}
     return (
       <View style={st}>
         <FloatLabel
@@ -835,7 +836,7 @@ var NewResourceMixin = {
           autoCapitalize={autoCapitalize}
           onFocus={this.inputFocused.bind(this, prop)}
           inputStyle={this.state.isRegistration ? styles.regInput : [styles.textInput, fontF]}
-          style={[styles.formInput, {borderColor: bcolor, paddingRight: 5}]}
+          style={[styles.formInput, addStyle, {borderColor: bcolor, paddingRight: 5 }]}
           value={value}
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
           keyboardShouldPersistTaps='always'
