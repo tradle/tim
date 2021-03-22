@@ -10946,8 +10946,8 @@ if (!res[SIG]  &&  res._message)
           item.to = val.from
         })
         this.dataBundle = new DataBundle(this, val)
-        this.getDataBundle().createProductBundle(val)
-        await utils.promiseDelay(3000)
+        await this.getDataBundle().createProductBundle(val)
+        // await utils.promiseDelay(3000)
       }
       await this.disableFormRequests({form:val.form, batch, org})
     }
