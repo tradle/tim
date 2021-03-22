@@ -824,7 +824,7 @@ var NewResourceMixin = {
     // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
-    let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'} : {}
+    let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7', color: bankStyle.textColor || '#666666'} : {}
     return (
       <View style={st}>
         <FloatLabel
