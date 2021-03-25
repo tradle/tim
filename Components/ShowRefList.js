@@ -33,7 +33,6 @@ const {
   ORGANIZATION,
   PROFILE,
   FORM,
-  ENUM
 } = constants.TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
 
@@ -320,7 +319,7 @@ function hasPropertiesToShow(resource) {
        continue
     if (props[p].type === 'array') {
       const pref = props[p].items.ref
-      if (!pref  ||  utils.getModel(pref).subClassOf !== ENUM)
+      if (!pref  ||  (!utils.isEnum(pref) && !props[p].inlined))
         continue
     }
     if (vCols  &&  vCols.includes(p))
