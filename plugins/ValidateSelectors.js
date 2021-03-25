@@ -16,7 +16,9 @@ module.exports = function ValidateSelector ({ models }) {
       const show = getPropertiesWithAnnotation(m, 'showIf')
 
       const hide = getPropertiesWithAnnotation(m, 'hideIf')
-      if (isEmpty(show)  &&  isEmpty(hide))
+
+      const set = getPropertiesWithAnnotation(m, 'set')
+      if (isEmpty(show)  &&  isEmpty(hide)  &&  isEmpty(set))
         return
       let editCols = m.editCols
       if (!editCols)
@@ -89,6 +91,65 @@ module.exports = function ValidateSelector ({ models }) {
           continue
         }
       }
+
+      for (let p in set) {
+        let prop = set[p]
+        let formula = normalizeFormula({ formula: prop.set })
+        let setF = new Function(...keys, `return ${formula}`);
+        let val
+        try {
+          val = setF(...values)
+        } catch (err) {
+          val = null
+        }
+        if (!val) {
+          if (val !== false || prop.type !== 'boolean') {
+            if (!form[p]  &&  prop.readOnly) {
+              let idx = editCols.indexOf(prop.name)
+              if (idx !== -1)
+                editCols.splice(idx, 1)
+              else
+                exclude.push(prop.name)
+              continue
+            }
+          }
+        }
+        if (props[p].type !== 'object') {
+          form[p] = val
+          continue
+        }
+        if (typeof val !== 'string') {
+          form[p] = val
+          continue
+        }
+        let { ref } = props[p]
+        let m = getModel(ref)
+        if (!m.enum) {
+          console.log(`formula could be assigned to primitive types or enums for now`)
+          continue
+        }
+        let v = m.enum.find(e => e.id === val)
+        if (!v) {
+          console.log(`formula ${formula} is incorrect`)
+          continue
+        }
+        let id = `${ref}_${v.id}`
+        let oldVal = form[p]
+        if (oldVal  &&  oldVal.id == id)
+          continue
+
+        val = {
+          id,
+          title: v.title
+        }
+        form[p] = val
+        let idx = editCols.indexOf(prop.name)
+        if (idx !== -1)
+          editCols.splice(idx, 1)
+        else
+          exclude.push(prop.name)
+      }
+
       if (exclude.length) {
         let props = m.properties
         editCols.forEach(p => {
