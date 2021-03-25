@@ -15,7 +15,6 @@ import moment from 'moment'
 import Prompt from 'react-native-prompt'
 
 import constants from '@tradle/constants'
-import validateModel from '@tradle/validate-model'
 
 import utils, { translate, translateEnum, isEnum, isStub, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
