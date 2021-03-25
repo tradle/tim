@@ -27,6 +27,8 @@ import utils, { translate, formatNumber } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import Image from './Image'
 import uiUtils from '../utils/uiUtils'
+import GridHeader from './GridHeader'
+import GridRow from './GridRow'
 
 const RESOURCE_VIEW = 'ResourceView'
 const MESSAGE_VIEW = 'MessageView'
@@ -405,7 +407,8 @@ var ResourceMixin = {
   renderSimpleArrayProp(val, pMeta, modelName, component) {
     if (pMeta.items.backlink)
       return <View  key={this.getNextKey()} />
-
+    if (pMeta.grid)
+      return this.renderSimpleGrid(val, pMeta, component)
     let vCols = pMeta.viewCols;
     if (!vCols)
       vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
@@ -439,6 +442,39 @@ var ResourceMixin = {
              </View>
 
   },
+  renderSimpleGrid(value, prop, component) {
+    if (prop.items.backlink)
+      return <View  key={this.getNextKey()} />
+
+    let { navigator, locale, currency, bankStyle } = this.props
+    const modelName = prop.items.ref
+
+    let gridCols = uiUtils.getGridCols(modelName)
+    if (!gridCols)
+      return
+    let header = <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator}/>
+
+    let rows = []
+    for (let i=0; i<value.length; i++) {
+      rows.push(
+          <GridRow
+            key={'_' + prop.name}
+            isSmallScreen={false}
+            modelName={modelName}
+            navigator={navigator}
+            currency={currency}
+            locale={locale}
+            gridCols={gridCols}
+            resource={value[i]}
+            bankStyle={bankStyle} />
+          );
+    }
+    return <View>
+       {header}
+       {rows}
+     </View>
+  },
+
   showJson(params) {
     let { json, indent, isView } = params
     _.extend(params, {rawStyles: createStyles({bankStyle: this.props.bankStyle, indent, isView})})
