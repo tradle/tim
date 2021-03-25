@@ -608,10 +608,11 @@ var NewResourceMixin = {
     if (pref == MONEY) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
-      this.floatingProps[pname].value = value
+      let val = Number(value)
+      this.floatingProps[pname].value = val
       if (!r[pname])
         r[pname] = {}
-      r[pname].value = value
+      r[pname].value = val
     }
     else if (ptype === 'boolean')  {
       if (value === 'null') {
@@ -824,7 +825,8 @@ var NewResourceMixin = {
     // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
-    let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7', color: bankStyle.textColor || '#666666'} : {}
+    let addStyle = prop.readOnly ? {backgroundColor: '#f7f7f7'} : {}
+    // let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7', color: bankStyle.textColor || '#666666'} : {}
     return (
       <View style={st}>
         <FloatLabel
