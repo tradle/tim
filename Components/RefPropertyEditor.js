@@ -75,6 +75,8 @@ class RefPropertyEditor extends Component {
     // in case document type was changed a different scanning could be replaced by taking a photo and vice versa
     if (prop.scanner  &&  !this.props.resource[pName])
       return true
+    if (prop.set)
+      return true
     return false
   }
   render() {

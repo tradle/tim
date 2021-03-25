@@ -307,9 +307,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.27",
+      "version": "7.1.31",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.27.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.31.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.17.21",
