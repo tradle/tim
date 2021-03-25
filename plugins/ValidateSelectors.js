@@ -100,11 +100,20 @@ module.exports = function ValidateSelector ({ models }) {
         try {
           val = setF(...values)
         } catch (err) {
-          debugger
-          continue
+          val = null
         }
-        if (!val  &&  prop.type !== 'boolean')
-          continue
+        if (!val) {
+          if (val !== false || prop.type !== 'boolean') {
+            if (!form[p]  &&  prop.readOnly) {
+              let idx = editCols.indexOf(prop.name)
+              if (idx !== -1)
+                editCols.splice(idx, 1)
+              else
+                exclude.push(prop.name)
+              continue
+            }
+          }
+        }
         if (props[p].type !== 'object') {
           form[p] = val
           continue
