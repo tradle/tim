@@ -39,7 +39,7 @@
       "title": "Netherlands"
     },
     "houseValue": {
-      "value": "350000",
+      "value": 350000,
       "currency": "€"
     },
     "kindOfConstruction": {
@@ -51,17 +51,17 @@
       "title": "Semi-Detached"
     },
     "restructuringCosts": {
-      "value": "50000",
+      "value": 50000,
       "currency": "€"
     },
     "yearTheHouseWasBuilt": 1990,
     "rented": false,
     "purchasePrice": {
-      "value": "350000",
+      "value": 350000,
       "currency": "€"
     },
     "valuedPrice": {
-      "value": "400000",
+      "value": 400000,
       "currency": "€"
     },
     "energyLabel": {
@@ -84,12 +84,12 @@
     "startDate": 1428710400000,
     "yearsOfInsurance": 40,
     "amountToTransfer": {
-      "value": "200000",
+      "value": 200000,
       "currency": "€"
     },
     "policyNumber": "123WEI7H",
     "insuredAmount": {
-      "value": "300000",
+      "value": 300000,
       "currency": "€"
     },
     "endDate": 2217715200000
@@ -101,7 +101,7 @@
       "title": "Personal Loan"
     },
     "creditLimit": {
-      "value": "200000",
+      "value": 200000,
       "currency": "€"
     },
     "paymentPeriod": {
@@ -113,7 +113,7 @@
   "tradle.LoanPart": {
     "_t": "tradle.LoanPart",
     "amount": {
-      "value": "200000",
+      "value": 200000,
       "currency": "€"
     },
     "interestType": {
@@ -122,11 +122,11 @@
     },
     "interestPercentage": 5,
     "monthlyPayment": {
-      "value": "5000",
+      "value": 5000,
       "currency": "€"
     },
     "monthlyPremium": {
-      "value": "2000",
+      "value": 2000,
       "currency": "€"
     },
     "repaymentType": {
@@ -149,7 +149,7 @@
     },
     "startDate": 1397174400000,
     "grossYearlyIncome": {
-      "value": "200000",
+      "value": 200000,
       "currency": "€"
     }
   },
@@ -169,7 +169,7 @@
       "title": "No"
     },
     "totalAmount": {
-      "value": "250000",
+      "value": 250000,
       "currency": "€"
     },
     "intermediary": "intermediary",
@@ -181,7 +181,7 @@
     "startDate": 1397174400000,
     "endDate": 2343945600000,
     "insuredAmount": {
-      "value": "1000000"
+      "value": 1000000
     },
     "typeOfCoverage": {
       "id": "tradle.TypeOfCoverage_yearly",
@@ -329,6 +329,7 @@
     "firstName": "SARAH MEREDYTH",
     "lastName": "MORGAN",
     "dateOfIssue": 1358553600000,
+    "dateOfBirth": 195368400000,
     "documentNumber": "MORGA753116SM9IJ 35",
     "issuer": "DVLA",
     "dateOfExpiry": 1674000000000,
@@ -361,7 +362,7 @@
   "tradle.CVItem": {
     "amount": {
       "currency": "€",
-      "value": "45454"
+      "value": 45454
     },
     "date": 1421625600000,
     "itemType": {
