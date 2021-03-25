@@ -1,6 +1,5 @@
 
 module.exports = [
-  require('./EvalFormulas'),
   require('./PhotoID'),
   require('./BusinessAccount'),
   require('./PaymentCard'),
