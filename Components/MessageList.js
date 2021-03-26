@@ -1003,7 +1003,6 @@ class MessageList extends Component {
        network = <NetworkInfoProvider connected={isConnected} resource={resource} online={onlineStatus} />
     if (!context  &&  isContext)
       context = resource
-    let separator = getContentSeparator(bankStyle)
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
     let hash = utils.getRootHash(progressInfoR)
@@ -1054,6 +1053,7 @@ class MessageList extends Component {
                </Modal>
     }
 
+    let separator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
         {backgroundImage}
