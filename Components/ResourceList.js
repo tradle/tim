@@ -1131,10 +1131,11 @@ class ResourceList extends Component {
         }
       }
     }
-    let network
-    if (!isChooser && officialAccounts && modelName === ORGANIZATION)
-       network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-    let contentSeparator = getContentSeparator(this.state.bankStyle)
+    let network, hasNetworkRow
+    if (!isChooser && officialAccounts && modelName === ORGANIZATION) {
+      network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+      hasNetworkRow = this.state.isConnected && !this.state.serverOffline
+    }
     let style
     if (this.props.isBacklink)
       style = {height: utils.dimensions().height, backgroundColor: '#fff'}
@@ -1143,7 +1144,6 @@ class ResourceList extends Component {
     let { width, height } = utils.dimensions(ResourceList)
     let w = 350
     let bgStyle = {backgroundColor: '#eeeeee', justifyContent: 'center'}
-    let separator = getContentSeparator(this.state.bankStyle)
     let qrcode = (
        <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
          <TouchableOpacity style={[styles.splashLayout, {width, height}]} onPress={() => this.closeModal()}>
@@ -1161,12 +1161,13 @@ class ResourceList extends Component {
        </Modal>
       )
 
+    let contentSeparator = getContentSeparator(this.state.bankStyle)
     return (
       // <PageView style={style} separator={contentSeparator}>
       <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
         {network}
         {searchBar}
-        <View style={styles.separator} />
+        <View style={(searchBar || !hasNetworkRow) &&  styles.separator} />
         {content}
         {qrcode}
         {footer}
