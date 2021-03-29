@@ -426,7 +426,7 @@ var NewResourceMixin = {
               data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title
           }
         }
-        if (iref) {
+        if (iref && !utils.isEnum(iref)) {
           options.fields[p].template = this.myInlinedResourcesTemplate.bind(this, {
                     label,
                     prop:  props[p],
@@ -440,16 +440,16 @@ var NewResourceMixin = {
 
         }
         else {
-        // options.fields[p].onFocus = chooser.bind(this, props[p], p)
-        options.fields[p].template = this.myCustomTemplate.bind(this, {
-            label,
-            prop:  p,
-            required: !maybe,
-            errors: formErrors,
-            resource: bookmark && search &&  data,
-            component,
-            chooser: options.fields[p].onFocus,
-          })
+          // options.fields[p].onFocus = chooser.bind(this, props[p], p)
+          options.fields[p].template = this.myCustomTemplate.bind(this, {
+              label,
+              prop:  p,
+              required: !maybe,
+              errors: formErrors,
+              resource: bookmark && search &&  data,
+              component,
+              chooser: options.fields[p].onFocus,
+            })
         }
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
