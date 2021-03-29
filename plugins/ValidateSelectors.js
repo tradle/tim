@@ -134,7 +134,7 @@ module.exports = function ValidateSelector ({ models }) {
           for (let i=0; i<vars.length; i++) {
             let pName = vars[i]
             let prop = props[pName]
-            if (!form[pName] || prop.ref === MONEY)
+            if (!form[pName] || prop.ref !== MONEY)
               continue
             form[p] = {
               value: val,
