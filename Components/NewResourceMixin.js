@@ -614,8 +614,7 @@ var NewResourceMixin = {
         r[pname] = {}
       r[pname].value = val
       if (!this.floatingProps[pname].currency)
-        this.floatingProps[pname].currency = r[pname].currency || resource[pname].currency
-
+        this.floatingProps[pname].currency = r[pname].currency || (resource[pname] && resource[pname].currency)
     }
     else if (ptype === 'boolean')  {
       if (value === 'null') {
