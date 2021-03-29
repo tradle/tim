@@ -2,6 +2,8 @@ import { cloneDeep } from 'lodash'
 import { TYPE } from '@tradle/constants'
 import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum } from '../utils/utils'
 
+const MONEY = 'tradle.Money'
+
 module.exports = function ValidateSelector ({ models }) {
   return {
     validateForm: function validateForm ({
@@ -119,10 +121,29 @@ module.exports = function ValidateSelector ({ models }) {
           continue
         }
         if (typeof val !== 'string') {
-          form[p] = val
-          continue
+          let ptype = prop.type
+          if (typeof val === 'object'  ||  ptype !== 'object') {
+            form[p] = val
+            // newValues.push(p)
+            continue
+          }
         }
         let { ref } = props[p]
+        if (ref === MONEY) {
+          const vars = getVariables(formula, props)
+          for (let i=0; i<vars.length; i++) {
+            let pName = vars[i]
+            let prop = props[pName]
+            if (!form[pName] || prop.ref === MONEY)
+              continue
+            form[p] = {
+              value: val,
+              currency: form[pName].currency
+            }
+            // newValues.push(p)
+          }
+          continue
+        }
         let m = getModel(ref)
         if (!m.enum) {
           console.log(`formula could be assigned to primitive types or enums for now`)
@@ -202,4 +223,9 @@ function normalizeEnums({ form }) {
 
 function normalizeFormula({ formula }) {
   return formula.replace(/\s=\s/g, ' === ').replace(/\s!=\s/g, ' !== ')
+}
+function getVariables(formula, props) {
+  const re = /[a-z_]\w*(?!\w*\s*\()/ig
+  let vars = formula.match(re)
+  return vars.filter(v => props[v])
 }
