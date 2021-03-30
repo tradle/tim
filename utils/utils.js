@@ -1135,7 +1135,7 @@ var utils = {
     return displayName
   },
   formatCurrency(resource, locale) {
-    let currencyName = utils.getCurrencyName(resource.currency)
+    let currencyName = utils.getCurrencyName(resource.currency) || resource.currency
     if (utils.isAndroid())
       return (resource.currency || '') + ' ' + resource.value
 

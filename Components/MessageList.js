@@ -840,8 +840,8 @@ class MessageList extends Component {
     let { resource, currency } = this.props
     let rcurrency = resource.currency
     if (rcurrency)
-      rcurrency = rcurrency.symbol
-    return rcurrency || currency
+      rcurrency = rcurrency.id
+    return rcurrency || (currency && currency.id)
   }
   addedMessage(text) {
     Actions.list({
