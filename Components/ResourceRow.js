@@ -528,9 +528,20 @@ class ResourceRow extends Component {
         if (resource[v]) {
           let row;
           if (ref == MONEY) {
-            let { currency } = this.props
-            let currencySymbol = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
-            row = <Text style={style} key={this.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
+            let { currency, locale } = this.props
+            let val
+            debugger
+            if (currency  &&  locale) {
+              let val = resource[v]
+              if (!val.currency)
+                val = {...val, currency }
+              val = utils.formatCurrency(val, locale)
+            }
+            else {
+              let currencySymbol = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
+              val = (resource[v].currency || currencySymbol) + resource[v].value
+            }
+            row = <Text style={style} key={this.getNextKey()}>{val}</Text>
           }
           else
             row = <Text style={style} key={this.getNextKey()}>{resource[v].title}</Text>

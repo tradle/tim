@@ -28,7 +28,7 @@ import RefPropertyEditor from './RefPropertyEditor'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
-const DEFAULT_CURRENCY_SYMBOL = '$';
+const DEFAULT_CURRENCY = 'USD';
 
 const {
   MONEY,
@@ -363,19 +363,20 @@ var NewResourceMixin = {
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
           let value = val
+          let currency = this.props.currency || CURRENCY_SYMBOL
           if (value) {
             if (typeof value !== 'object') {
               value = {
                 value,
-                currency: CURRENCY_SYMBOL
+                currency
               }
             }
             else if (!value.currency)
-              value.currency = CURRENCY_SYMBOL
+              value.currency = currency
           }
           else {
             value = {
-              currency: CURRENCY_SYMBOL
+              currency
             }
           }
           options.fields[p].template = this.myMoneyInputTemplate.bind(this, {
@@ -427,7 +428,7 @@ var NewResourceMixin = {
               data[p] = utils.getDisplayName({ resource: val, model: subModel }) || val.title
           }
         }
-        if (iref) {
+        if (iref && !utils.isEnum(iref)) {
           options.fields[p].template = this.myInlinedResourcesTemplate.bind(this, {
                     label,
                     prop:  props[p],
@@ -617,6 +618,8 @@ var NewResourceMixin = {
       if (!r[pname])
         r[pname] = {}
       r[pname].value = val
+      if (!this.floatingProps[pname].currency)
+        this.floatingProps[pname].currency = r[pname].currency || (resource[pname] && resource[pname].currency)
     }
     else if (ptype === 'boolean')  {
       if (value === 'null') {
@@ -1474,11 +1477,14 @@ var NewResourceMixin = {
 
     let currency
     if (!prop.readOnly) {
+      let cur = utils.normalizeCurrencySymbol(value.currency)
+      let symbol = utils.getModel(MONEY).properties.currency.oneOf.find(c => c[cur])
+      symbol = symbol && symbol[cur] || cur
       currency = this.myEnumTemplate({
                     prop,
                     enumProp: utils.getModel(MONEY).properties.currency,
                     required,
-                    value:    utils.normalizeCurrencySymbol(value.currency),
+                    value:    symbol,
                     // errors:   errors,
                     component,
                     // noError:  errors && errors[prop],
@@ -1540,7 +1546,7 @@ var NewResourceMixin = {
   getCurrency() {
     let { currency } = this.props
     if (!currency)
-      return DEFAULT_CURRENCY_SYMBOL
+      return DEFAULT_CURRENCY
     if (typeof currency === 'string')
       return currency
     return currency.symbol
@@ -1578,25 +1584,26 @@ var NewResourceMixin = {
     if (isItem)
       propName = `${metadata.name}_${propName}`
 
+    let key = Object.keys(value)[0]
     if (resource[propName]) {
       if (typeof resource[propName] === 'object')
-        resource[propName][enumPropName] = value[Object.keys(value)[0]]
+        resource[propName][enumPropName] = key
       else {
         resource[propName] = {
           value: resource[propName],
-          [enumPropName]: value[Object.keys(value)[0]]
+          [enumPropName]: key
         }
       }
     }
     // if no value set only currency
     else {
       resource[propName] = {}
-      resource[propName][enumPropName] = value[Object.keys(value)[0]]
+      resource[propName][enumPropName] = key
       if (!this.floatingProps)
         this.floatingProps = {}
       if (!this.floatingProps[propName])
         this.floatingProps[propName] = {}
-      this.floatingProps[propName][enumPropName] = value[Object.keys(value)[0]]
+      this.floatingProps[propName][enumPropName] = key
     }
 
     let data = this.refs.form.refs.input.state.value;
@@ -1673,7 +1680,7 @@ var NewResourceMixin = {
     let p = prop.name
     let error
     if (typeof v !== 'number') {
-      if (prop.ref === MONEY)
+      if (prop.ref === MONEY  &&  typeof v === 'object')
         v = v.value
     }
     if (isNaN(v))
