@@ -25,7 +25,10 @@ const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const NETWORK_FAILURE = 'Failed to fetch'
 const INVALID_QUERY = 'Syntax Error GraphQL request'
-const INTERNAL_SERVER_ERROR = 'Internal Server Error'
+const WRONG_VERSION_ID  = 'expected models with versionId: '
+const INTERNAL_SERVER_ERROR_MSG = 'Internal Server Error'
+
+const INTERNAL_SERVER_ERROR = 500
 const MAX_ATTEMPTS = 3
 
 var messageMap = {
@@ -58,7 +61,7 @@ var search = {
 
     let table = `rl_${modelName.replace(/\./g, '_')}`
     let model = utils.getModel(modelName)
-    let versionId = model._versionId
+    let versionId = params.versionId || model._versionId
     let version = versionId ? '($modelsVersionId: String!)' : ''
     let query = `query ${version} {\n${table}\n`
     let props = model.properties
@@ -296,10 +299,14 @@ var search = {
       if (data.result) {
         return { result:  data.result }
       }
-      ({ error='',  excludeProps={}, retry=true, mapping={} } = await this.checkError(data, model))
+      ({ error='',  excludeProps={}, retry=true, mapping={}, versionId='' } = await this.checkError(data, model))
       if (excludeProps.length) {
         params.excludeProps = excludeProps
         params.mapping = mapping
+        return await this.searchServer(params)
+      }
+      if (versionId  &&  versionId !== this.versionId) {
+        params.versionId = versionId
         return await this.searchServer(params)
       }
       if (error  &&  error === NETWORK_FAILURE  ||  !retry)
@@ -827,8 +834,14 @@ var search = {
       debugger
       if (result.error.response) {
         debugger
-        if (result.error.response.error === INTERNAL_SERVER_ERROR)
-          return {error: result.error.response.error, retry: true}
+        const { errors, status, error } = result.error.response
+        if (status === INTERNAL_SERVER_ERROR || error === INTERNAL_SERVER_ERROR_MSG) {
+          if (errors  &&  errors.length === 1) {
+            if (errors[0].message.indexOf(WRONG_VERSION_ID) === 0)
+              return {error, retry: true, versionId: errors[0].message.split(': ')[1]}
+          }
+          return {error, retry: true}
+        }
         graphQLErrors = result.error.response.errors
         message = INVALID_QUERY
       }
