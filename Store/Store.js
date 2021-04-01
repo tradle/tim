@@ -2963,8 +2963,8 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (!noCustomerWaiting)
         await sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse})
-      if (!editFormRequestPrefill  &&  me.isEmployee)
-        await this.getModelsPack(to)
+      // if (!editFormRequestPrefill  &&  me.isEmployee)
+      //   await this.getModelsPack(to)
     } catch(err) {
       debug('Something went wrong', err.stack)
       debugger
