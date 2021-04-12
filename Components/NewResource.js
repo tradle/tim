@@ -71,6 +71,8 @@ const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
 const FILE = 'tradle.File'
 const HAND_SIGNATURE = 'tradle.HandSignature'
+const DURATION = 'tradle.Duration'
+
 var Form = t.form.Form;
 const excludeTemporaryFor = [
   'tradle.CheckOverride'
@@ -474,7 +476,8 @@ class NewResource extends Component {
       }
     }
     let { model, originatingMessage, lensId, chat, editFormRequestPrefill,
-          doNotSend, prop, containerResource, isRefresh, application, errs } = this.props
+          doNotSend, prop, containerResource, isRefresh, application, errs,
+          navigator } = this.props
     let required = utils.ungroup({model, viewCols: model.required, edit: true})
     if (!required)
       required = []
@@ -552,15 +555,18 @@ class NewResource extends Component {
 
     let r = {}
     _.extend(r, resource)
-    json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
+    let context = r._context ||  (originatingMessage  &&  originatingMessage._context)
+    if (context)
+      json._context = context
     if (originatingMessage) {
       if (originatingMessage.lens)
         json._lens = originatingMessage.lens
       if (originatingMessage.prefill)
         json._sourceOfData = originatingMessage
     }
-
-    delete r.url
+if (r.url)
+  debugger
+    // delete r.url
     let params = {
       value: json,
       resource: r,
@@ -594,7 +600,7 @@ class NewResource extends Component {
         // context: application.context
       }
       Actions.addMessage({msg, editFormRequestPrefill, originatingMessage, application})
-      this.props.navigator.pop()
+      navigator.pop()
     }
     else {
       if (originatingMessage)
@@ -673,17 +679,9 @@ class NewResource extends Component {
     if (utils.isEnum(rModel))
       return
     let resource = this.state.resource
-    if (ref === MONEY) {
-      if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
-        missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-        return
-      }
-      if (v.currency)
-        return
-      if (resource[p].currency)
-        v.currency = resource[p].currency
-      else
-        missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+
+    if (ref === MONEY || ref === DURATION) {
+      this.checkInlinedRef(prop, v)
       return
     }
     let units = prop.units
@@ -694,6 +692,26 @@ class NewResource extends Component {
         v = null
       delete json[p]
     }
+  }
+  checkInlinedRef(prop, v) {
+    const rModel = utils.getModel(prop.ref)
+    let p = prop.name
+    const { missedRequiredOrErrorValue, resource } = this.state
+    let oneOfProp = rModel.inlined  &&  utils.getPropertiesWithAnnotation(rModel, 'oneOf')
+    if (!oneOfProp)
+      return
+    debugger
+    if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
+      missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+      return
+    }
+    let oname = Object.keys(oneOfProp)[0]
+    if (v[oname])
+      return
+    if (resource[p][oname])
+      v[oname] = resource[p][oname]
+    else
+      missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
   }
   addFormValues() {
     let value = this.refs.form.getValue();
