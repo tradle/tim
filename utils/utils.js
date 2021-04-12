@@ -1594,7 +1594,10 @@ var utils = {
   isStub(resource) {
     if (!resource[ROOT_HASH]  &&  resource.id)
       return true
-    let m = utils.getModel(utils.getType(resource))
+    const type = utils.getType(resource)
+    if (!type)
+      return
+    const m = utils.getModel(type)
     return m.required  &&  !resource[m.required[0]]
   },
   hasSupportLine(resource) {
