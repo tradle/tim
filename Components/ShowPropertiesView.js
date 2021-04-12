@@ -34,6 +34,7 @@ const FILE = 'tradle.File'
 const CHECK = 'tradle.Check'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
+const DURATION = 'tradle.Duration'
 
 const {
   TYPE,
@@ -378,6 +379,9 @@ class ShowPropertiesView extends Component {
 
       return {val: (c || CURRENCY_SYMBOL) + utils.formatNumber(pMeta, val.value, locale)}
     }
+    if (ref === DURATION)
+      return {val: utils.formatNumber(pMeta, val.value, locale) + ' ' + translate(val.durationType)}
+
     if (ref === IDENTITY) {
       let title = val.title
       let me = utils.getMe()
