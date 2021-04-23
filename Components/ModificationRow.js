@@ -166,11 +166,11 @@ class ModificationRow extends Component {
         }
       }
       else {
-        let label = prop && translate(prop, model) || p
+        let label = prop && translate(prop, model) || translate(p)
         let val = v
         if (prop)
           val = this.getVal(prop, val)
-        let isUrl = prop.range === 'url'
+        let isUrl = prop  &&  prop.range === 'url'
         if (isUrl && val.length > 55)
           val = `${val.slice(0, 55)}...`
 
