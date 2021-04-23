@@ -85,6 +85,11 @@ var search = {
         if (exclude.indexOf(p) !== -1)
           continue
         let val = filterResource[p]
+        let neq
+        if (p.endsWith('!')) {
+          neq = true
+          p = p.slice(0, -1)
+        }
         if (!props[p]  &&  val) {
           if (p.charAt(0) === '_') {
             if (Array.isArray(val)) {
@@ -98,11 +103,11 @@ var search = {
               inClause.push(s)
             }
             else
-              op.EQ += `\n   ${p}: "${val}",`
+              this.addTo(op, neq, `\n   ${p}: "${val}",`)
           }
           else if (p.indexOf('.') !== -1  &&  props[p.split('.')[0]]) {
             p = p.replace('.', '__')
-            op.EQ += `\n   ${p}: "${val}",`
+            this.addTo(op, neq, `\n   ${p}: "${val}",`)
           }
           continue
         }
@@ -127,7 +132,7 @@ var search = {
           }
           let len = val.length
           if (val.indexOf('*') === -1)
-            op.EQ += `\n   ${p}: "${val}",`
+            this.addTo(op, neq, `\n   ${p}: "${val}",`)
           else if (len > 1) {
             if (val.charAt(0) === '*') {
               if (val.charAt(val.length - 1) === '*')
@@ -161,7 +166,7 @@ var search = {
               continue
             if (isEnum) {
               if (val.length === 1) {
-                op.EQ += `\n   ${p}__id: "${val[0].id}",`
+                this.addTo(op, `\n   ${p}__id: "${val[0].id}",`)
               }
               else {
                 let s = `${p}__id: [`
@@ -176,7 +181,7 @@ var search = {
             }
             else {
               if (val.length === 1) {
-                op.EQ += `\n   ${p}___permalink: "${utils.getRootHash(val[0])}",`
+                this.addTo(op, neq, `\n   ${p}___permalink: "${utils.getRootHash(val[0])}",`)
               }
               else {
                 let s = `${p}___permalink: [`
@@ -192,11 +197,11 @@ var search = {
           }
           else {
             if (isEnum) {
-              op.EQ += `\n   ${p}__id: "${val.id}",`
+              this.addTo(op, neq, `\n   ${p}__id: "${val.id}",`)
             }
             else if (props[p].ref === MONEY) {
               let {value, currency} = val
-              op.EQ += `\n  ${p}__currency: "${currency}",`
+              this.addTo(op, neq, `\n  ${p}__currency: "${currency}",`)
               if (val.value)
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
@@ -208,7 +213,7 @@ var search = {
               continue
             }
             else {
-              op.EQ += `\n   ${p}___permalink: "${utils.getRootHash(val)}",`
+              this.addTo(op, neq, `\n   ${p}___permalink: "${utils.getRootHash(val)}",`)
             }
           }
         }
@@ -340,6 +345,12 @@ var search = {
       }
 
     }
+  },
+  addTo(op, neq, condition) {
+    if (neq)
+      op.NEQ += condition
+    else
+      op.EQ += condition
   },
   async getChat(params) {
     let { author, client, context, filterResource, limit, endCursor, application } = params
