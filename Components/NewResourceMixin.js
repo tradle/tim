@@ -44,6 +44,7 @@ const {
 } = constants
 
 const INTERSECTION = 'tradle.Intersection'
+const DURATION = 'tradle.Duration'
 
 const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
@@ -152,6 +153,7 @@ var NewResourceMixin = {
     let options = {fields: {}}
     let resource = this.state.resource
     let isNew = !data[ROOT_HASH]
+    let me = utils.getMe()
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
@@ -160,6 +162,8 @@ var NewResourceMixin = {
       if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
+      if (!me.isEmployee  &&  props[p].internalUse)
+        continue
       let maybe = !required  ||  !required.includes(p)
       if (maybe) {
         if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
@@ -397,6 +401,43 @@ var NewResourceMixin = {
             options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
+        else if (ref === DURATION) {
+          model[p] = maybe ? t.maybe(t.Num) : t.Num;
+          let value = val
+          let durationType
+          if (value) {
+            if (typeof value !== 'object') {
+              value = {
+                value,
+                durationType
+              }
+            }
+            else if (!value.durationType)
+              value.durationType = durationType
+          }
+          else {
+            value = {
+              durationType
+            }
+          }
+          options.fields[p].template = this.myDurationInputTemplate.bind(this, {
+                    label,
+                    prop:  props[p],
+                    value,
+                    model: meta,
+                    onSubmitEditing: onSubmitEditing.bind(this),
+                    keyboard: 'numeric',
+                    component,
+                    required: !maybe,
+                    errors: formErrors,
+                    editable: !propNotEditable
+                  })
+
+          options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+          continue;
+        }
         else if (props[p].signature) {
           model[p] = maybe ? t.maybe(t.Str) : t.Str;
           options.fields[p].template = this.mySignatureTemplate.bind(this, {
@@ -588,7 +629,7 @@ var NewResourceMixin = {
     let search = this.props.search
     let r = _.cloneDeep(resource)
     let { metadata, parentMeta } = this.props
-    if (parentMeta)
+    if (metadata  &&  parentMeta)
       pname = `${metadata.name}_${pname}`
 
     if(ptype === 'number'  &&  !search) {
@@ -620,6 +661,17 @@ var NewResourceMixin = {
       r[pname].value = val
       if (!this.floatingProps[pname].currency)
         this.floatingProps[pname].currency = r[pname].currency || (resource[pname] && resource[pname].currency)
+    }
+    else if (pref == DURATION) {
+      if (!this.floatingProps[pname])
+        this.floatingProps[pname] = {}
+      let val = Number(value)
+      this.floatingProps[pname].value = val
+      if (!r[pname])
+        r[pname] = {}
+      r[pname].value = val
+      if (!this.floatingProps[pname].durationType)
+        this.floatingProps[pname].durationType = r[pname].durationType || (resource[pname] && resource[pname].durationType)
     }
     else if (ptype === 'boolean')  {
       if (value === 'null') {
@@ -810,7 +862,7 @@ var NewResourceMixin = {
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
-    let help = prop.ref !== MONEY  && this.paintHelp(prop)
+    let help = prop.ref !== MONEY  &&  prop.ref !== DURATION  && this.paintHelp(prop)
     let st = { paddingBottom: 10 }
     // Especially for money type props
     if (!help)
@@ -1173,7 +1225,7 @@ var NewResourceMixin = {
 
     let { metadata, parentMeta } = this.props
     let pname = prop.name
-    if (parentMeta)
+    if (metadata &&  parentMeta)
       pname = `${metadata.name}_${pname}`
 
     if (/*!this.state.isRegistration   &&*/
@@ -1543,6 +1595,57 @@ var NewResourceMixin = {
       </View>
     );
   },
+  myDurationInputTemplate(params) {
+    let { required, model, value, prop, editable, errors, component } = params
+    let { search, locale } = this.props
+
+    let v
+    if (!value.value)
+      v = ''
+    else if (prop.readOnly)
+      v = utils.formatCurrency(value, locale)
+    else
+      v = value.value + ''
+
+    let keyboard = prop.readOnly || search ? null : 'numeric'
+
+    let val = this.myTextInputTemplate({
+                  prop,
+                  value: v,
+                  required,
+                  model,
+                  onSubmitEditing: params.onSubmitEditing.bind(this),
+                  noError: true,
+                  // errors: errors,
+                  editable,
+                  component,
+                  keyboard,
+                })
+
+    let durationType
+    if (!prop.readOnly) {
+      durationType = this.myEnumTemplate({
+                    prop,
+                    enumProp: utils.getModel(DURATION).properties.durationType,
+                    required,
+                    value:    value && value.durationType,
+                    // errors:   errors,
+                    component,
+                    // noError:  errors && errors[prop],
+                    noError: true
+                  })
+    }
+    return (
+      <View>
+      <View style={styles.moneyInput}>
+          {val}
+          {durationType}
+      </View>
+      {this.paintError({prop, errors})}
+      {this.paintHelp(prop)}
+      </View>
+    );
+  },
   getCurrency() {
     let { currency } = this.props
     if (!currency)
@@ -1585,6 +1688,8 @@ var NewResourceMixin = {
       propName = `${metadata.name}_${propName}`
 
     let key = Object.keys(value)[0]
+    if (!isNaN(key))
+      key = value
     if (resource[propName]) {
       if (typeof resource[propName] === 'object')
         resource[propName][enumPropName] = key
