@@ -1013,6 +1013,7 @@ var styles = (function () {
     },
     thumbButton: {
       alignSelf: 'center',
+      marginTop: -20,
       justifyContent: 'flex-end',
     },
     thumb: {
