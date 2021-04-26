@@ -158,6 +158,7 @@ var NewResourceMixin = {
     let options = {fields: {}}
     let resource = this.state.resource
     let isNew = !data[ROOT_HASH]
+    let me = utils.getMe()
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
@@ -166,6 +167,8 @@ var NewResourceMixin = {
       if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
+      if (!me.isEmployee  &&  props[p].internalUse)
+        continue
       let maybe = !required  ||  !required.includes(p)
       if (maybe) {
         if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
