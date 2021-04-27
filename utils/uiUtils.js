@@ -21,6 +21,7 @@ import NetworkInfoProvider from '../Components/NetworkInfoProvider'
 import PageView from '../Components/PageView'
 import chatStyles from '../styles/chatStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+import Actions from '../Actions/Actions'
 
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
@@ -81,29 +82,33 @@ var uiUtils = {
   },
 
   showLoading(params) {
-    if (!params.component)
-      return
-    let { component, style, message, bankStyle, isConnected, resource } = params
-    if (!style)
-      style = {}
-    let contentSeparator = uiUtils.getContentSeparator(bankStyle)
+    let { message } = params
+    Actions.showModal({title: message || translate('inProgress'), showIndicator: true})
+    setTimeout(() => Actions.hideModal(), 1000)
+    return
+    // if (!params.component)
+    //   return
+    // let { component, style, message, bankStyle, isConnected, resource } = params
+    // if (!style)
+    //   style = {}
+    // let contentSeparator = uiUtils.getContentSeparator(bankStyle)
 
-    let styles = createStyles({bankStyle})
+    // let styles = createStyles({bankStyle})
 
-    let network
-    if (resource  &&  params.hasOwnProperty('isConnected'))
-       network = <NetworkInfoProvider connected={isConnected} resource={resource} />
-    return (
-      <PageView style={[styles.container, style, styles.centerContent]} separator={contentSeparator} bankStyle={bankStyle} >
-        <View style={styles.loadingIndicator}>
-          <View style={styles.loadingContent}>
-            {network}
-            <Text style={styles.loading}>{message || translate('inProgress')}</Text>
-            <ActivityIndicator size='large' style={styles.indicator} />
-          </View>
-        </View>
-      </PageView>
-    )
+    // let network
+    // if (resource  &&  params.hasOwnProperty('isConnected'))
+    //    network = <NetworkInfoProvider connected={isConnected} resource={resource} />
+    // return (
+    //   <PageView style={[styles.container, style, styles.centerContent]} separator={contentSeparator} bankStyle={bankStyle} >
+    //     <View style={styles.loadingIndicator}>
+    //       <View style={styles.loadingContent}>
+    //         {network}
+    //         <Text style={styles.loading}>{message || translate('inProgress')}</Text>
+    //         <ActivityIndicator size='large' style={styles.indicator} />
+    //       </View>
+    //     </View>
+    //   </PageView>
+    // )
   },
   parseMessage(params) {
     let { resource, message, bankStyle, noLink, idx } = params
