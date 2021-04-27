@@ -4608,6 +4608,9 @@ if (!res[SIG]  &&  res._message)
         json[p] = resource[p];
       if (!json[p]  &&  props[p].readOnly)
         json[p] = resource[p];
+      if (me  &&  !me.isEmployee  &&  props[p].internalUse)
+        json[p] = resource[p]
+
       let ref = props[p].ref
       // Check if valid enum value
       if (!ref)
