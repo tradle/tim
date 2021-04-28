@@ -96,7 +96,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency, locale } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency, locale, isItem } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
@@ -113,8 +113,8 @@ class ShowPropertiesView extends Component {
       if (!vCols)
         vCols = []
       for (let p in resource) {
-        if (p.charAt(0) !== '_'  && props[p]  &&  vCols.indexOf(p) === -1)
-          vCols.push(p)
+        if (p.charAt(0) !== '_'  && props[p]  &&  vCols.findIndex(pr => pr.name !== p) === -1)
+          vCols.push(props[p])
       }
     }
 
@@ -131,10 +131,10 @@ class ShowPropertiesView extends Component {
     // if (!vCols)
     //   vCols = utils.getViewCols(model)
     var isMessage = utils.isMessage(this.props.resource)
-    if (!isMessage) {
+    if (!isMessage  &&  !isItem) {
       var len = vCols.length;
       for (var i=0; i<len; i++) {
-        if (props[vCols[i]].displayName) {
+        if (vCols[i].displayName) {
           vCols.splice(i, 1);
           len--;
         }
