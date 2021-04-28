@@ -14,12 +14,10 @@ import JSONTree from 'react-native-json-tree'
 
 import constants from '@tradle/constants'
 
-var {
-  TYPE,
-  // PREV_HASH
-} = constants
-var { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
+const { TYPE } = constants
+const { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
 
+import ShowPropertiesView from './ShowPropertiesView'
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -35,6 +33,8 @@ import uiUtils from '../utils/uiUtils'
 import { VictorySunburst } from './victory-sunburst'
 import GridHeader from './GridHeader'
 import GridRow from './GridRow'
+import Markdown from './Markdown'
+
 // import { VictoryContainer } from 'victory'
 
 const RESOURCE_VIEW = 'ResourceView'
@@ -67,7 +67,6 @@ const showCollapsedMap = {
   'tradle.documentChecker.Check': 'rawData'
 }
 
-import Markdown from './Markdown'
 var component
 
 var ResourceMixin = {
@@ -195,16 +194,33 @@ var ResourceMixin = {
         if (!pVal  &&  !displayAs)
           return
         if (displayName &&  !editItem) {
-          displayName = type === 'object' && pVal.title ||  pVal
-          if (typeof displayName === 'object')
-            displayName = JSON.stringify(displayName, null, 2)
-          ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
-                     <View style={styles.itemContent}>
-                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-                       <Text style={styles.itemText}>{displayName}</Text>
-                     </View>
-                     {!isView  &&  <View style={{flex: 1}}/>}
-                   </View>)
+          let displayingPart = type === 'object' && pVal.title ||  pVal
+          if (typeof displayingPart === 'object') {
+            if (itemMeta.ref  &&  displayingPart[TYPE]) {
+              // displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
+              ret.push(
+                <View style={{paddingVertical: 3}}>
+                  <View style={{paddingVertical: 3, alignItems: 'center', backgroundColor: 'aliceblue'}}>
+                    <Text style={[{fontWeight: 600}, styles.itemText]}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
+                  </View>
+                  <ShowPropertiesView resource={displayingPart}
+                                      currency={currency}
+                                      bankStyle={bankStyle}
+                                      navigator={navigator} />
+                </View>
+                )
+              return
+            }
+            else
+              displayingPart = JSON.stringify(displayingPart, null, 2)
+            ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                       <View style={styles.itemContent}>
+                         <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                         <Text style={styles.itemText}>{displayingPart}</Text>
+                       </View>
+                       {!isView  &&  <View style={{flex: 1}}/>}
+                     </View>)
+          }
           return
         }
         let value;
