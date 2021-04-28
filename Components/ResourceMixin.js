@@ -200,8 +200,8 @@ var ResourceMixin = {
               // displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
               ret.push(
                 <View style={{paddingVertical: 3}}>
-                  <View style={{paddingVertical: 3, alignItems: 'center', backgroundColor: 'aliceblue'}}>
-                    <Text style={[{fontWeight: 600}, styles.itemText]}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
+                  <View style={styles.itemBackground}>
+                    <Text style={styles.itemTitle}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
                   </View>
                   <ShowPropertiesView resource={displayingPart}
                                       currency={currency}
@@ -1039,6 +1039,14 @@ var styles = StyleSheet.create({
     color: '#555555',
     // color: '#757575',
   },
+  itemTitle: {
+    fontSize: 16,
+    marginBottom: 0,
+    paddingVertical: 3,
+    marginHorizontal: 10,
+    fontWeight: 600,
+    color: '#757575',
+  },
   itemSeparator: {
     height: 1,
     marginTop: 7,
@@ -1127,6 +1135,12 @@ var styles = StyleSheet.create({
     flex: 9,
     flexDirection: utils.isWeb() && 'row' || 'column',
     justifyContent: 'space-between'
+  },
+  itemBackground: {
+    paddingVertical: 3,
+    marginHorizontal: -10,
+    // alignItems: 'center',
+    backgroundColor: 'aliceblue'
   },
 })
 
