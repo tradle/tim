@@ -191,8 +191,10 @@ var ResourceMixin = {
         let itemMeta = itemsMeta[p];
         let { type, displayAs, displayName, range, ref, skipLabel, items } = itemMeta
         let pVal = v[p]
-        if (!pVal  &&  !displayAs)
-          return
+        if (!pVal  &&  !displayAs) {
+          if (type !== 'boolean'  ||  pVal !== false)
+            return
+        }
         if (displayName &&  !editItem) {
           let displayingPart = type === 'object' && pVal.title ||  pVal
           if (typeof displayingPart === 'object') {
@@ -206,6 +208,7 @@ var ResourceMixin = {
                   <ShowPropertiesView resource={displayingPart}
                                       currency={currency}
                                       bankStyle={bankStyle}
+                                      isItem={true}
                                       navigator={navigator} />
                 </View>
                 )
