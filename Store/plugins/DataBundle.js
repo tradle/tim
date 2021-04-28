@@ -224,7 +224,7 @@ class DataBundle {
     if (!result.length)
       return { result }
 
-    result.sort((a, b) => b._time - a._time)
+    // result.sort((a, b) => b._time - a._time)
     let myProducts = await this.Store.searchMessages({modelName: MY_PRODUCT, to})
     if (myProducts) {
       if (!refreshProducts)
