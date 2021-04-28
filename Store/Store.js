@@ -212,8 +212,8 @@ const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const REFRESH             = 'tradle.Refresh'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
-const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
-const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
+// const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
+// const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
@@ -5440,7 +5440,8 @@ if (!res[SIG]  &&  res._message)
     }
   },
   async onApplyForProduct(params) {
-    const { host, provider, product, contextId, bundleId } = params
+    const { host, provider, product, contextId, bundleId,
+            associatedResource, parentApplication } = params
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
@@ -5470,8 +5471,9 @@ if (!res[SIG]  &&  res._message)
       }
       else if (bundleId)
         _.extend(resource, { bundleId })
-      else if (product === CP_ONBOARDING ||
-               product === CE_ONBOARDING) {
+      // else if (product === CP_ONBOARDING ||
+      //          product === CE_ONBOARDING) {
+      else if (associatedResource  &&  parentApplication) {
         resource.associatedResource = params.associatedResource
         resource.parentApplication = params.parentApplication
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
