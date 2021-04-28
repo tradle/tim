@@ -100,7 +100,22 @@ module.exports = function ValidateSelector ({ models }) {
         let setF = new Function(...keys, `return ${formula}`);
         let val
         try {
-          val = setF(...values)
+          let v = values.slice()
+          for (let i=0; i<v.length; i++) {
+            let key = keys[i]
+            if (key.charAt(0) === '_')
+              continue
+            let pr = props[key]
+            if (!pr)
+              continue
+            if (v[i] === null  &&  pr.ref === MONEY)
+              v[i] = { value: 0 }
+            else if (pr.type === 'number')
+              v[i] = 0
+            else if (pr.type === 'string')
+              v[i] = ''
+          }
+          val = setF(...v)
         } catch (err) {
           val = null
         }
