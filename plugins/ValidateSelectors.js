@@ -106,9 +106,9 @@ module.exports = function ValidateSelector ({ models }) {
             if (key.charAt(0) === '_')
               continue
             let pr = props[key]
-            if (!pr)
+            if (!pr  ||  v[i])
               continue
-            if (v[i] === null  &&  pr.ref === MONEY)
+            if (pr.ref === MONEY)
               v[i] = { value: 0 }
             else if (pr.type === 'number')
               v[i] = 0
