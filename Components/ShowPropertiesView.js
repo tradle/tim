@@ -102,14 +102,13 @@ class ShowPropertiesView extends Component {
       model = this.props.model  ||  utils.getModel(modelName)
     if (model.id !== modelName  &&  !utils.isSubclassOf(modelName, model.id))
       model = utils.getModel(modelName)
-    var vCols
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
-    vCols = model.viewCols
-    if (vCols)
-      vCols = utils.ungroup({model, viewCols: vCols})
-    // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
+    let vCols = utils.getPaintViewCols(model)
+    // if (vCols)
+    //   vCols = utils.ungroup({model, viewCols: vCols})
+    // // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
     if (!resource[ROOT_HASH]) {
       if (!vCols)
         vCols = []
@@ -129,8 +128,8 @@ class ShowPropertiesView extends Component {
       excludedProperties = mapped;
     }
 
-    if (!vCols)
-      vCols = utils.getViewCols(model)
+    // if (!vCols)
+    //   vCols = utils.getViewCols(model)
     var isMessage = utils.isMessage(this.props.resource)
     if (!isMessage) {
       var len = vCols.length;
@@ -150,10 +149,12 @@ class ShowPropertiesView extends Component {
     let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
 
     var viewCols = []
-    vCols.forEach((p) => {
+    vCols.forEach(pMeta => {
+      let p = pMeta.name
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-      var pMeta = props[p];
+
+      // var pMeta = props[p];
       if (pMeta  &&  utils.isHidden(p, resource))
         return
       if (!pMeta)
@@ -177,18 +178,18 @@ class ShowPropertiesView extends Component {
             return
           val = <Text style={styles.link}>{val}</Text>
         }
-        else if (checkProperties) {
-          if (p.endsWith('_group')) {
-            viewCols.push(
-              <View style={{padding: 15}} key={this.getNextKey()}>
-                <View style={styles.groupStyle}>
-                  <Text style={styles.groupStyleText}>{translate(pMeta, model)}</Text>
-                </View>
+        else if (p.endsWith('_group')) {
+          viewCols.push(
+            <View style={{padding: 15}} key={this.getNextKey()}>
+              <View style={styles.groupStyle}>
+                <Text style={styles.groupStyleText}>{translate(pMeta, model)}</Text>
               </View>
-            )
-            return
-          }
-          else if (pMeta.items) {
+            </View>
+          )
+          return
+        }
+        else if (checkProperties) {
+          if (pMeta.items) {
             if (pMeta.items.ref  &&  !utils.isEnum(pMeta.items.ref))
               return
           }

@@ -1247,7 +1247,35 @@ var utils = {
       }
       return eCols
     }
-    editCols.forEach((p) => {
+    return utils.getColsWithUngroupList(editCols, properties)
+    // editCols.forEach((p) => {
+    //   if (properties[p].readOnly)
+    //     return
+    //   if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
+    //     return
+    //   let idx = p.indexOf('_group')
+    //   if (idx === -1                          ||
+    //       !properties[p].list                 ||
+    //       properties[p].title.toLowerCase() !== p)
+    //     eCols.push(properties[p])
+
+    //   if (idx !== -1  &&  properties[p].list) {
+    //     let eColsCnt = eCols.length
+    //     let isLastPropGroup = eCols[eColsCnt - 1].name.indexOf('_group') !== -1
+    //     properties[p].list.forEach((p) => {
+    //       if (eCols.indexOf(properties[p]) === -1)
+    //         eCols.push(properties[p])
+    //     })
+    //     if (eColsCnt === eCols.length  &&  isLastPropGroup)
+    //       eCols.pop()
+    //   }
+    // })
+    // return eCols
+  },
+  getColsWithUngroupList(cols, properties) {
+    let isWeb = utils.isWeb()
+    let rCols = []
+    cols.forEach((p) => {
       if (properties[p].readOnly)
         return
       if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
@@ -1256,30 +1284,31 @@ var utils = {
       if (idx === -1                          ||
           !properties[p].list                 ||
           properties[p].title.toLowerCase() !== p)
-        eCols.push(properties[p])
+        rCols.push(properties[p])
 
       if (idx !== -1  &&  properties[p].list) {
-        let eColsCnt = eCols.length
-        let isLastPropGroup = eCols[eColsCnt - 1].name.indexOf('_group') !== -1
+        let rColsCnt = rCols.length
+        let isLastPropGroup = rCols[rColsCnt - 1].name.indexOf('_group') !== -1
         properties[p].list.forEach((p) => {
-          if (eCols.indexOf(properties[p]) === -1)
-            eCols.push(properties[p])
+          if (rCols.indexOf(properties[p]) === -1)
+            rCols.push(properties[p])
         })
-        if (eColsCnt === eCols.length  &&  isLastPropGroup)
-          eCols.pop()
+        if (rColsCnt === rCols.length  &&  isLastPropGroup)
+          rCols.pop()
       }
     })
-    return eCols
+    return rCols
   },
-  hasPaymentCardScannerProperty(type) {
-    let m = utils.getModel(type)
-    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
-    if (scannedProps)  {
-      let p = Object.keys(scannedProps)
-      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
-        return m.properties[p[0]]
-    }
-    return null
+  getPaintViewCols(model) {
+    let { viewCols, properties } = model
+    let vCols = []
+    if (viewCols)
+      return utils.getColsWithUngroupList(viewCols, properties)
+    let cols = utils.getAllCols({properties, isView: true})
+    if (cols  && cols.length)
+      return cols.map(p => properties[p])
+    else
+      return []
   },
   getViewCols(model) {
     let { viewCols, properties } = model
@@ -1296,6 +1325,10 @@ var utils = {
         // eCols[p] = props[p]
       })
     }
+    return utils.getAllCols({properties})
+  },
+  getAllCols({properties, isView}) {
+    let vCols = []
     let onePropView = []
     for (let p in properties) {
       if (p.charAt(0) === '_') continue
@@ -1307,7 +1340,18 @@ var utils = {
     }
     if (vCols.length)
       vCols = onePropView.concat(vCols)
+
     return vCols
+  },
+  hasPaymentCardScannerProperty(type) {
+    let m = utils.getModel(type)
+    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+    if (scannedProps)  {
+      let p = Object.keys(scannedProps)
+      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+        return m.properties[p[0]]
+    }
+    return null
   },
   template (t, o) {
     return t.replace(/{([^{}]*)}/g,
