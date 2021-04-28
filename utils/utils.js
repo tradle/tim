@@ -1247,7 +1247,7 @@ var utils = {
       }
       return eCols
     }
-    return utils.getColsWithUngroupList(editCols, properties)
+    return utils.getColsWithUngroupList({cols: editCols, properties})
     // editCols.forEach((p) => {
     //   if (properties[p].readOnly)
     //     return
@@ -1272,14 +1272,16 @@ var utils = {
     // })
     // return eCols
   },
-  getColsWithUngroupList(cols, properties) {
+  getColsWithUngroupList({cols, properties, isView}) {
     let isWeb = utils.isWeb()
     let rCols = []
     cols.forEach((p) => {
-      if (properties[p].readOnly)
-        return
-      if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
-        return
+      if (!isView) {
+        if (properties[p].readOnly)
+          return
+        if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
+          return
+      }
       let idx = p.indexOf('_group')
       if (idx === -1                          ||
           !properties[p].list                 ||
@@ -1303,7 +1305,7 @@ var utils = {
     let { viewCols, properties } = model
     let vCols = []
     if (viewCols)
-      return utils.getColsWithUngroupList(viewCols, properties)
+      return utils.getColsWithUngroupList({cols: viewCols, properties, isView: true})
     let cols = utils.getAllCols({properties, isView: true})
     if (cols  && cols.length)
       return cols.map(p => properties[p])
