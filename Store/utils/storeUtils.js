@@ -516,6 +516,34 @@ const storeUtils = {
       return r
     return
   },
+  rewriteAttestation(resource) {
+    if (!resource[TYPE])
+      return
+    if (resource._permalink)
+      resource[ROOT_HASH] = resource._permalink
+    if (resource._link)
+      resource[CUR_HASH] = resource._link
+    if (resource._displayName)
+      resource.title = resource._displayName
+
+    delete resource._permalink
+    delete resource._link
+    delete resource._displayName
+    let { properties } = getModel(resource[TYPE])
+    for (let p in resource) {
+      let val = resource[p]
+      if (typeof val === 'object'  &&  val._displayName) {
+        resource[p] = storeUtils.makeStub(val)
+        continue
+      }
+      if (typeof val === 'object') {
+        if (Array.isArray(val))
+          val.forEach(v => storeUtils.rewriteHashes(v))
+        else
+          storeUtils.rewriteHashes(val)
+      }
+    }
+  },
   rewriteStubs(resource) {
     let type = resource[TYPE]
     let props = getModel(type).properties

@@ -358,6 +358,8 @@ class ShowPropertiesView extends Component {
   renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}) {
     let { showRefResource, currency, bankStyle, checkProperties, locale } = this.props
     let { ref } = pMeta
+    if (!ref)
+      ref = pMeta.items  &&  pMeta.items.ref
     if (ref === PHOTO) {
       if (vCols.length === 1  &&  resource._time)
         viewCols.push(
@@ -391,7 +393,7 @@ class ShowPropertiesView extends Component {
       let me = utils.getMe()
       if (!title)
         title = getRootHash(val) === me[ROOT_HASH] ? 'Me' : 'Not me'
-      return {val: <Text style={[styles.title, styles.linkTitle]}>{title}</Text>}
+      return {val: <Text style={[styles.title, styles.linkTitle]}>{title}</Text>, isRef: true}
     }
     if (pMeta.inlined  ||  utils.getModel(ref).inlined) {
       if (isStub(val)) {
@@ -406,7 +408,7 @@ class ShowPropertiesView extends Component {
         val[TYPE] = ref
       let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
       if (pViewCols.length) {
-        pViewCols.forEach((v) => viewCols.push(v))
+        pViewCols.forEach((v, i) => viewCols.push(v))
         return {}
       }
       val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
@@ -443,7 +445,9 @@ class ShowPropertiesView extends Component {
 
       return { val, isRef: true }
     }
-    return {val}
+    if (isStub(val)  &&  val.title)
+      val = <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
+    return { val }
   }
   showScoreDetails() {
     let m = utils.getModel(APPLICATION)

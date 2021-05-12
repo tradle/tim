@@ -223,6 +223,7 @@ const STATUS              = 'tradle.Status'
 const OVERRIDE_STATUS     = 'tradle.OverrideStatus'
 const DEVICE_SYNC         = 'tradle.DeviceSync'
 const DEVICE_SYNC_DATA_BUNDLE = 'tradle.DeviceSyncDataBundle'
+const ATTESTATION         = 'tradle.Attestation'
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -4508,6 +4509,11 @@ if (!res[SIG]  &&  res._message)
       // debugger
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
+    if (meta.id === ATTESTATION) {
+      debugger
+      storeUtils.rewriteAttestation(value)
+      storeUtils.rewriteAttestation(resource)
+    }
     if (meta.id === BOOKMARK)
       resource.to = this.buildRef(resource.from)
     // Check if the recipient is not one if the creators of this context.
@@ -7259,8 +7265,19 @@ if (!res[SIG]  &&  res._message)
       if (!props[p]  ||  !rr[p][TYPE])
         continue
       let m = this.getModel(rr[p][TYPE])
-      if (utils.isEnum(m)  ||  props[p].inlined)
+      if (utils.isEnum(m))
         continue
+      if (props[p].inlined) {
+        if (rr[p]._permalink) {
+          rr[p][ROOT_HASH] = rr[p]._permalink
+          if (rr[p]._link)
+            rr[p][CUR_HASH] = rr[p]._link
+          delete rr[p]._permalink
+          delete rr[p]._link
+          storeUtils.rewriteStubs(rr[p])
+        }
+        continue
+      }
       rr[p] = storeUtils.makeStub(rr[p])
     }
     if (rr._author) {
