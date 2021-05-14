@@ -35,7 +35,6 @@ var DEFAULT_CURRENCY_SYMBOL = '$'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_PREFILL = 'tradle.FormPrefill'
-const BOOKMARK = 'tradle.Bookmark'
 
 const { TYPE } = constants
 const {
@@ -94,7 +93,6 @@ class VerificationRow extends Component {
     let model = utils.getModel(rType);
     let isMyProduct = utils.isMyProduct(model)
     let isForm = utils.isForm(model)
-    let isBookmark = model.id === BOOKMARK
     let isAbstract
     if (isChooser) {
       let ref = prop.ref ||  prop.items.ref
@@ -169,7 +167,7 @@ class VerificationRow extends Component {
 
     let date
     let isStub = utils.isStub(resource)
-    if (!isStub  &&  !isBookmark  &&  r) {
+    if (!isStub  &&  r) {
       let dateP
       if (resource.dateVerified)
         dateP = 'dateVerified'
@@ -203,8 +201,6 @@ class VerificationRow extends Component {
     if (!title || !title.length) {
       if (listModel.id === FORM_REQUEST)
         title = translate(utils.getModel(resource.form))
-      else if (isBookmark)
-        title = resource.message  ||  translate(utils.getModel(resource.bookmark[TYPE]))
       else if (isApplicationSubmission)
         title = translate(utils.getModel(utils.getType(resource.submission)))
       else if (isVerification) {
@@ -293,8 +289,6 @@ class VerificationRow extends Component {
           titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
     }
-    else if (isBookmark  &&  resource.message)
-      titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
     else if (rType === MESSAGE) {
       let context = ''
       if (resource._context)
@@ -336,8 +330,6 @@ class VerificationRow extends Component {
     let renderedRows = []
     if (search  &&  searchCriteria)
       this.formatFilteredResource(model, resource, renderedRows)
-    else if (isBookmark  &&  !resource.message)
-      this.formatBookmark(utils.getModel(resource.bookmark[TYPE]), resource.bookmark, renderedRows)
     let multiChooserIcon
     if (multiChooser) {
       multiChooserIcon = <View style={styles.multiChooser}>
@@ -369,34 +361,32 @@ class VerificationRow extends Component {
                     </View>
                   </View>
 
-    let row
     if (isChooser)
-      row = <View>
+      return <View>
               <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
                {header}
               </TouchableOpacity>
             </View>
-    else if (notAccordion) {
-      let renderedRows = []
-      if (search  &&  searchCriteria)
-        this.formatFilteredResource(model, resource, renderedRows)
+    if (!notAccordion)
+      return
 
-      // let content
-      // if (isInactive)
-      //   content = header
-      // else
-      let content = <TouchableOpacity onPress={onSelect.bind(this)}>
-                   {header}
-                 </TouchableOpacity>
-      if (!isVerification)
-        content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
-                    {content}
-                  </Swipeout>
-      row = <View host={lazy} style={{marginTop: 8}}>
-              {content}
-            </View>
-    }
-    return row
+    // if (search  &&  searchCriteria)
+    //   this.formatFilteredResource(model, resource, renderedRows)
+
+    // let content
+    // if (isInactive)
+    //   content = header
+    // else
+    let content = <TouchableOpacity onPress={onSelect.bind(this)}>
+                    {header}
+                  </TouchableOpacity>
+    if (!isVerification)
+      content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+                  {content}
+                </Swipeout>
+    return <View host={lazy} style={{marginTop: 8}}>
+            {content}
+           </View>
   }
   revokeDocument() {
     let resource = this.props.resource
@@ -543,112 +533,6 @@ class VerificationRow extends Component {
       });
     }
   }
-  formatBookmark(model, resource, renderedRow) {
-    let properties = model.properties;
-    let viewCols = [];
-    for (let p in resource) {
-      if (properties[p]  &&  p.charAt(0) !== '_')
-        viewCols.push(p)
-    }
-
-    const { locale, currency } = this.props
-    let style = styles.resourceTitle
-    let labelStyle = styles.resourceTitleL
-    let vCols = []
-    viewCols.forEach((v) => {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
-        return;
-      if (!resource[v]  &&  !properties[v].displayAs)
-        return
-
-      let units = properties[v].units && properties[v].units.charAt(0) !== '['
-                ? ' (' + properties[v].units + ')'
-                : ''
-      let ref = properties[v].ref
-      if (ref) {
-        if (resource[v]) {
-          let val
-          if (ref === MONEY) {
-            if (locale)
-              val = utils.formatCurrency(resource[v], locale)
-            else {
-              let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
-              val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
-            }
-          }
-          else if (resource[v].title)
-            val = resource[v].title
-          else if (utils.isEnum(ref)) {
-            val = ''
-            resource[v].forEach((r, i) => {
-              if (i)
-                val += ', '
-              val += r.title
-            })
-          }
-          else
-            return
-
-          vCols.push(
-            <View style={styles.refPropertyRow} key={this.getNextKey()}>
-              <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
-              <Text style={style}>{val}</Text>
-            </View>
-          );
-        }
-
-        return;
-      }
-      let row
-      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-        row = <Text style={style} key={this.getNextKey()}>{resource[v]}</Text>;
-      else if (!model.autoCreate) {
-        let val = (properties[v].displayAs)
-                ? utils.templateIt(properties[v], resource)
-                : properties[v].type === 'object' ? null : resource[v];
-        if (!val)
-          return
-        let row = <Text style={style} key={this.getNextKey()}>{val}</Text>
-        vCols.push(
-          <View style={styles.refPropertyRow} key={this.getNextKey()}>
-            <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
-            {row}
-          </View>
-        )
-        return
-      }
-      else {
-        if (!resource[v]  ||  !resource[v].length)
-          return;
-        let msgParts = utils.splitMessage(resource[v]);
-        // Case when the needed form was sent along with the message
-        if (msgParts.length === 2) {
-          let msgModel = utils.getModel(msgParts[1]);
-          if (msgModel) {
-            vCols.push(<View key={this.getNextKey()} style={styles.msgParts}>
-                         <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.title}</Text>
-                       </View>);
-            return;
-          }
-        }
-        row = <Text style={style} key={this.getNextKey()}>{resource[v]}</Text>;
-      }
-      vCols.push(
-        <View style={styles.refPropertyRow} key={this.getNextKey()}>
-          <Text style={labelStyle}>{translate(properties[v], model) + units}</Text>
-          {row}
-        </View>
-      );
-    });
-
-    if (vCols  &&  vCols.length) {
-      vCols.forEach((v) => {
-        renderedRow.push(v);
-      });
-    }
-  }
-
 }
 
 reactMixin(VerificationRow.prototype, RowMixin);

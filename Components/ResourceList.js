@@ -48,6 +48,7 @@ import ConversationsIcon from './ConversationsIcon'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
 const BOOKMARK = 'tradle.Bookmark'
+const BOOKMARKS_FOLDER = 'tradle.BookmarksFolder'
 const MY_PRODUCT =  'tradle.MyProduct'
 
 const LIMIT = 10
@@ -1551,7 +1552,7 @@ class ResourceList extends Component {
       componentName: 'GridList',
       backButtonTitle: 'Back',
       passProps: {
-        modelName: BOOKMARK,
+        modelName: BOOKMARKS_FOLDER,
         locale,
         bankStyle: bankStyle || this.state.bankStyle
       },

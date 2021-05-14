@@ -23,6 +23,7 @@ const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
 const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
+const BOOKMARKS_FOLDER = 'tradle.BookmarksFolder'
 const NETWORK_FAILURE = 'Failed to fetch'
 const INVALID_QUERY = 'Syntax Error GraphQL request'
 const WRONG_VERSION_ID  = 'expected models with versionId: '
@@ -703,6 +704,7 @@ var search = {
   addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps}) {
     let p = prop.name
     let isApplication = model  &&  model.id === APPLICATION
+    let isBookmarksFolder = model  &&  model.id === BOOKMARKS_FOLDER
     if (p === 'verifications')
       return
 
@@ -719,7 +721,7 @@ var search = {
       let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
 
       if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-        if (isList  &&  !isApplication)
+        if (isList  &&  !isApplication  &&  !isBookmarksFolder)
           return
         let props
         if (iref !== model.id)
