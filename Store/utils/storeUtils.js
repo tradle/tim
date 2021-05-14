@@ -38,6 +38,8 @@ const {
   ROOT_HASH,
   CUR_HASH
 } = constants
+const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
+
 const STYLES_PACK = 'tradle.StylesPack'
 const BOOKMARK = 'tradle.Bookmark'
 const APPLICATION = 'tradle.Application'
@@ -46,12 +48,24 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const MSG_LINK = '_msg'
 
-const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
+
 let dictionary
+
+const FORM_BACKLINKS = (function () {
+  // debugger
+  let formBacklinks = []
+  let formProps = voc[FORM].properties
+  for (let p in formProps) {
+    let prop = formProps[p]
+    if (prop.items && prop.items.backlink) formBacklinks.push({ [p]: prop })
+  }
+  return formBacklinks
+})()
 
 const storeUtils = {
   addModels({models, enums}) {
+    // debugger
     for (let id in voc) {
       let m = voc[id]
       // if (!m[ROOT_HASH])
@@ -59,8 +73,35 @@ const storeUtils = {
       storeUtils.parseOneModel(m, models, enums)
     }
     dictionary = storeUtils.makeDictionary(models)
+    // this.addFormBacklinks({ models })
     this.addNameAndTitleProps(ObjectModel.id)
   },
+
+  addFormBacklinks({ models }) {
+    let modelsObj = {}
+    if (Array.isArray(models)) {
+      models.forEach(m => modelsObj[m.id] = m)
+    }
+    else
+      modelsObj = models
+    for (let model in modelsObj) {
+      let m = modelsObj[model]
+      if (m.abstract || !m.subClassOf) return
+      let sub = m
+      while (sub && sub.subClassOf && sub.subClassOf !== FORM) sub = models[sub.subClassOf]
+
+      if (sub && sub.subClassOf) {
+        FORM_BACKLINKS.forEach(bl => {
+          let p = Object.keys(bl)[0]
+          if (!m.properties[p])
+            _.extend(m.properties, {
+              [p]: bl[p]
+            })
+        })
+      }
+    }
+  },
+
   getDictionary() {
     return dictionary
   },
@@ -538,9 +579,9 @@ const storeUtils = {
       }
       if (typeof val === 'object') {
         if (Array.isArray(val))
-          val.forEach(v => storeUtils.rewriteHashes(v))
+          val.forEach(v => storeUtils.rewriteAttestation(v))
         else
-          storeUtils.rewriteHashes(val)
+          storeUtils.rewriteAttestation(val)
       }
     }
   },
@@ -616,7 +657,7 @@ const storeUtils = {
     const aprops = amodel.properties
     let teams = getModel(etype).enum
     let bookmarks = [
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -625,14 +666,13 @@ const storeUtils = {
         message: translate('myCases')
       },
       {
-        type: APPLICATION,
         message: 'applications',
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink
         }
       },
-      { type: APPLICATION,
+     {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -640,7 +680,7 @@ const storeUtils = {
         },
         message: translate('hasFailedChecks')
       },
-      { type: APPLICATION,
+     {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -649,23 +689,22 @@ const storeUtils = {
         message: translate('hasCheckOverrides')
       }
     ]
-    teams.forEach(e => {
-      bookmarks.push({
-        type: APPLICATION,
-        message: `${translate('applications')} - ${translateEnum(e)}`,
-        bookmark: {
-          [TYPE]: APPLICATION,
-          _org: botPermalink,
-          assignedToTeam: {
-            id: `${etype}_${e.id}`,
-            title: e.title
-          }
-        }
-      })
-    })
+    // teams.forEach(e => {
+    //   bookmarks.push({
+    //     message: `${translate('applications')} - ${translateEnum(e)}`,
+    //     bookmark: {
+    //       [TYPE]: APPLICATION,
+    //       _org: botPermalink,
+    //       assignedToTeam: {
+    //         id: `${etype}_${e.id}`,
+    //         title: e.title
+    //       }
+    //     }
+    //   })
+    // })
 
     let moreBookmarks = [
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -673,7 +712,7 @@ const storeUtils = {
         },
         message: translate('applicationsStarted')
       },
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -681,7 +720,7 @@ const storeUtils = {
         },
         message: translate('applicationsNotAssigned')
       },
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -692,7 +731,6 @@ const storeUtils = {
         grid: true
       },
       {
-        type: APPLICATION,
         message: 'applicationDrafts',
         bookmark: {
           [TYPE]: APPLICATION,
@@ -716,12 +754,13 @@ const storeUtils = {
 
     return bookmarks.map(b => {
       const { type, bookmark, message, grid, noInternalUse } = b
-      const model = getModel(type)
+      let bookmarkType = type || bookmark[TYPE]
+      const model = getModel(bookmarkType)
       let bookmarkR = {
         [TYPE]: BOOKMARK,
         message: message  ||  translate(model), // makeModelTitle(model, true),
         bookmark: bookmark  ||  {
-          [TYPE]: type,
+          [TYPE]: bookmarkType,
           _org: botPermalink
         },
         from
