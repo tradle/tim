@@ -312,6 +312,8 @@ module.exports = {
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
     "notSupportedMimeTypes": "Not supported mime types {1}",
+    "bookmarkWasCreated": "Bookmark was created",
+    "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
