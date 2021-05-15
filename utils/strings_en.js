@@ -325,7 +325,7 @@ module.exports = {
     "scanToLogInToTradle": "Scan QR code with your mobile device",
     "toPairDevices": "to pair devices",
     "syncDevicesIsDone": "Device syncronization finished",
-    "cancelPairing": "Cancel pairing",
+    "cancelDevicePairing": "Cancel device pairing",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
