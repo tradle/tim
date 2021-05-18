@@ -232,7 +232,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#c77525474e9c0f655421857a6698911cb2dacffe"
+      "resolved": "git://github.com/tradle/models.git#fadfdbd7439eb8d7411af27ca5a089b6e6977de6"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -242,7 +242,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#425cffbf761a0ba468f6d1d7b09cfe42e2cdd5af"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#e822350777d203996a7594ad29f038f60623e0b1"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
