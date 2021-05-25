@@ -18,7 +18,19 @@ import { Text } from './Text'
 import Actions from '../Actions/Actions'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
-import { translate, getEnumValueId, isEnum, getType, makeModelTitle, getModel, templateIt, getDisplayName, splitMessage } from '../utils/utils'
+import {
+  translate,
+  getEnumValueId,
+  isEnum,
+  getType,
+  makeModelTitle,
+  getModel,
+  templateIt,
+  getDisplayName,
+  splitMessage,
+  formatCurrency
+} from '../utils/utils'
+
 import { circled } from '../styles/utils'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
@@ -229,6 +241,7 @@ class ApplicationTreeRow extends Component {
     if (!node[pName])
       return
 
+    const { locale } = this.props
     let style = [styles.description]
     let refM = getModel(ref)
     let model = getModel(APPLICATION);
@@ -236,7 +249,13 @@ class ApplicationTreeRow extends Component {
     let row
     if (ref === MONEY) {
       style.push({alignSelf: 'flex-end', paddingRight: 10})
-      row = <Text style={style} key={this.getNextKey(node)}>{node[pName].currency + node[pName].value}</Text>
+      let val
+      if (locale)
+        val = formatCurrency(node[pName], locale)
+      else
+        val = node[pName].currency + node[pName].value
+      row = <Text style={style} key={this.getNextKey(node)}>{val}</Text>
+      // row = <Text style={style} key={this.getNextKey(node)}>{node[pName].currency + node[pName].value}</Text>
     }
     else if (ref === PHOTO)
       row = <Image source={{uri: node[pName].url}} style={styles.thumb} />

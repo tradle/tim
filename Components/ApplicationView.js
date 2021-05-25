@@ -439,7 +439,7 @@ class ApplicationView extends Component {
     )
   }
   showTree() {
-    let { bankStyle, navigator } = this.props
+    let { bankStyle, navigator, currency, locale } = this.props
     let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
     let title
@@ -455,6 +455,8 @@ class ApplicationView extends Component {
       passProps: {
         resource,
         bankStyle,
+        locale,
+        currency
       }
     })
   }
