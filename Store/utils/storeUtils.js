@@ -25,8 +25,10 @@ import {
   buildRef,
   makeModelTitle,
   getDisplayName,
+  getPropertiesWithAnnotation,
   getStringPropertyValue,
   getEnumProperty,
+  getEnumValueId,
   translateEnum,
   translate,
   omitVirtual,
@@ -47,6 +49,8 @@ const LANGUAGE = 'tradle.Language'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const MSG_LINK = '_msg'
+const JURISDICTION = 'tradle.Jurisdiction'
+const COUNTRY = 'tradle.Country'
 
 const ObjectModel = voc['tradle.Object']
 
@@ -476,8 +480,8 @@ const storeUtils = {
       })
     }
     let reset
+    let rmodel = getModel(resource[TYPE])
     if (!hasReset  &&  isChooser  &&  resource[prop.name]) {
-      let rmodel = getModel(resource[TYPE])
       reset = {
         [TYPE]: modelName,
         [ROOT_HASH]: '__reset',
@@ -494,6 +498,19 @@ const storeUtils = {
         if (!hasReset  &&  reset)
           ret.splice(0, 0, reset)
         return ret
+      }
+      if (prop.ref === JURISDICTION) {
+        let refProps = getPropertiesWithAnnotation(rmodel, 'ref')
+        let countryProp = Object.keys(refProps).find(p => refProps[p].ref === COUNTRY  &&  resource[p])
+        if (countryProp) {
+          let country = getEnumValueId({model: getModel(COUNTRY), value: resource[countryProp]})
+          let enumL = getModel(JURISDICTION).enum
+          let list = enumL.filter(r => r.country === country)
+          return list  &&  enumList.filter(r => {
+            let item = list.find(item => r.region === item.title)
+            return item
+          })
+        }
       }
     }
     let lim = limit || 20

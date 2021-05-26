@@ -109,7 +109,15 @@ function getPropsForLegalDocument(form) {
 }
 function getPropsForLegalEntity(form) {
   let { streetAddress, city, postalCode, country } = form
-  let addRegion = country  &&  country.id.split('_')[1] === 'US'
+  let countryCode = country  &&  country.id.split('_')[1]
+
+  let props = getModel(form[TYPE]).properties
+  let addRegion
+  if (props.region.showIf) {
+    if (props.region.showIf.indexOf (` == '${countryCode}'`) !== -1)
+      addRegion = true
+  }
+  // let addRegion = countryCode && country.id.split('_')[1] === 'US'
 
   if (isNew(form)) {
     let requestedProperties = [
