@@ -3,6 +3,7 @@ import { TYPE } from '@tradle/constants'
 import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum } from '../utils/utils'
 
 const MONEY = 'tradle.Money'
+const BOOKMARK = 'tradle.Bookmark'
 
 module.exports = function ValidateSelector ({ models }) {
   return {
@@ -10,7 +11,7 @@ module.exports = function ValidateSelector ({ models }) {
       application,
       form
     }) {
-      if (!application)
+      if (!application  &&  form[TYPE] !== BOOKMARK)
         return
       const m = getModel(form[TYPE])
       if (!m)
