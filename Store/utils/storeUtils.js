@@ -25,8 +25,10 @@ import {
   buildRef,
   makeModelTitle,
   getDisplayName,
+  getPropertiesWithAnnotation,
   getStringPropertyValue,
   getEnumProperty,
+  getEnumValueId,
   translateEnum,
   translate,
   omitVirtual,
@@ -45,6 +47,8 @@ const LANGUAGE = 'tradle.Language'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const MSG_LINK = '_msg'
+const JURISDICTION = 'tradle.Jurisdiction'
+const COUNTRY = 'tradle.Country'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
@@ -435,6 +439,7 @@ const storeUtils = {
       })
     }
     let reset
+    let rmodel = getModel(resource[TYPE])
     if (!hasReset  &&  isChooser  &&  resource[prop.name]) {
       let rmodel = getModel(resource[TYPE])
       reset = {
@@ -453,6 +458,19 @@ const storeUtils = {
         if (!hasReset  &&  reset)
           ret.splice(0, 0, reset)
         return ret
+      }
+      if (prop.ref === JURISDICTION) {
+        let refProps = getPropertiesWithAnnotation(rmodel, 'ref')
+        let countryProp = Object.keys(refProps).find(p => refProps[p].ref === COUNTRY  &&  resource[p])
+        if (countryProp) {
+          let country = getEnumValueId({model: getModel(COUNTRY), value: resource[countryProp]})
+          let enumL = getModel(JURISDICTION).enum
+          let list = enumL.filter(r => r.country === country)
+          return list  &&  enumList.filter(r => {
+            let item = list.find(item => r.region === item.title)
+            return item
+          })
+        }
       }
     }
     let lim = limit || 20
@@ -515,6 +533,34 @@ const storeUtils = {
     if (combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1)
       return r
     return
+  },
+  rewriteAttestation(resource) {
+    if (!resource[TYPE])
+      return
+    if (resource._permalink)
+      resource[ROOT_HASH] = resource._permalink
+    if (resource._link)
+      resource[CUR_HASH] = resource._link
+    if (resource._displayName)
+      resource.title = resource._displayName
+
+    delete resource._permalink
+    delete resource._link
+    delete resource._displayName
+    let { properties } = getModel(resource[TYPE])
+    for (let p in resource) {
+      let val = resource[p]
+      if (typeof val === 'object'  &&  val._displayName) {
+        resource[p] = storeUtils.makeStub(val)
+        continue
+      }
+      if (typeof val === 'object') {
+        if (Array.isArray(val))
+          val.forEach(v => storeUtils.rewriteAttestation(v))
+        else
+          storeUtils.rewriteAttestation(val)
+      }
+    }
   },
   rewriteStubs(resource) {
     let type = resource[TYPE]
@@ -589,7 +635,7 @@ const storeUtils = {
     const aprops = amodel.properties
     let teams = getModel(etype).enum
     let bookmarks = [
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -598,14 +644,13 @@ const storeUtils = {
         message: translate('myCases')
       },
       {
-        type: APPLICATION,
         message: 'applications',
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink
         }
       },
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -613,7 +658,7 @@ const storeUtils = {
         },
         message: translate('hasFailedChecks')
       },
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -622,23 +667,23 @@ const storeUtils = {
         message: translate('hasCheckOverrides')
       }
     ]
-    teams.forEach(e => {
-      bookmarks.push({
-        type: APPLICATION,
-        message: `${translate('applications')} - ${translateEnum(e)}`,
-        bookmark: {
-          [TYPE]: APPLICATION,
-          _org: botPermalink,
-          assignedToTeam: {
-            id: `${etype}_${e.id}`,
-            title: e.title
-          }
-        }
-      })
-    })
+    // teams.forEach(e => {
+    //   bookmarks.push({
+    //     type: APPLICATION,
+    //     message: `${translate('applications')} - ${translateEnum(e)}`,
+    //     bookmark: {
+    //       [TYPE]: APPLICATION,
+    //       _org: botPermalink,
+    //       assignedToTeam: {
+    //         id: `${etype}_${e.id}`,
+    //         title: e.title
+    //       }
+    //     }
+    //   })
+    // })
 
     let moreBookmarks = [
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -646,7 +691,7 @@ const storeUtils = {
         },
         message: translate('applicationsStarted')
       },
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
@@ -654,16 +699,17 @@ const storeUtils = {
         },
         message: translate('applicationsNotAssigned')
       },
-      { type: APPLICATION,
+      {
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
            parent: 'NULL'
         },
-        message: translate('topLevelApplications')
+        noInternalUse: true,
+        message: translate('topLevelApplications'),
+        grid: true
       },
       {
-        type: APPLICATION,
         message: 'applicationDrafts',
         bookmark: {
           [TYPE]: APPLICATION,
@@ -687,12 +733,13 @@ const storeUtils = {
 
     return bookmarks.map(b => {
       const { type, bookmark, message, grid, noInternalUse } = b
-      const model = getModel(type)
+      let bookmarkType = type || bookmark[TYPE]
+      const model = getModel(bookmarkType)
       let bookmarkR = {
         [TYPE]: BOOKMARK,
         message: message  ||  translate(model), // makeModelTitle(model, true),
         bookmark: bookmark  ||  {
-          [TYPE]: type,
+          [TYPE]: bookmarkType,
           _org: botPermalink
         },
         from
