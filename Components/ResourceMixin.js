@@ -88,7 +88,7 @@ var ResourceMixin = {
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
 
     const isCheck = model.subClassOf === CHECK
-    let {bankStyle, search, currency, country, navigator, application} = this.props
+    let {bankStyle, search, currency, locale, country, navigator, application} = this.props
     if (isMessageView) {
       let r = this.props.resource
       let isVerifier = utils.getModel(utils.getType(r)).subClassOf === CHECK  &&  application &&  utils.isRM(application)
@@ -97,11 +97,11 @@ var ResourceMixin = {
         backButtonTitle: 'Back',
         title,
         passProps: {
-          bankStyle: bankStyle,
-          resource: resource,
-          search: search,
-          currency: currency,
-          country: country,
+          bankStyle,
+          resource,
+          search,
+          currency,
+          country,
           isThisVersion: isDataLineage
         }
       }
@@ -133,15 +133,17 @@ var ResourceMixin = {
         componentName: RESOURCE_VIEW,
         backButtonTitle: 'Back',
         passProps: {
-          resource: resource,
-          prop: prop,
+          resource,
+          prop,
           bankStyle: bankStyle || defaultBankStyle,
-          currency: this.props.currency
+          currency: this.props.currency,
+          locale
         }
       })
     }
   },
   showResources(resource, prop) {
+    const { navigator, currency, locale, bankStyle } = this.props
     this.props.navigator.push({
       title: translate(prop, utils.getModel(resource[TYPE])),
       backButtonTitle: 'Back',
@@ -149,16 +151,17 @@ var ResourceMixin = {
       passProps: {
         modelName: prop.items.ref,
         filter: '',
-        resource: resource,
-        prop: prop,
-        bankStyle: this.props.bankStyle || defaultBankStyle,
-        currency: this.props.currency
+        resource,
+        prop,
+        bankStyle: bankStyle || defaultBankStyle,
+        currency,
+        locale
       }
     });
   },
 
   renderItems({value, prop, cancelItem, editItem, component}) {
-    let { bankStyle, navigator, resource, currency } = this.props
+    let { bankStyle, navigator, resource, currency, locale } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = prop.items.properties;
     let pModel
@@ -221,7 +224,7 @@ var ResourceMixin = {
                          <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                          <Text style={styles.itemText}>{displayingPart}</Text>
                        </View>
-                       {!isView  &&  <View style={{flex: 1}}/>}
+                       {!isView  &&  <View style={styles.textContainer}/>}
                      </View>)
           }
           return
@@ -253,7 +256,7 @@ var ResourceMixin = {
                          {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
                        </View>
                      </View>
-                     {!isView  &&  <View style={{flex: 1}}/>}
+                     {!isView  &&  <View style={styles.textContainer}/>}
                    </View>
               )
               return
@@ -300,7 +303,7 @@ var ResourceMixin = {
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
-                     {!isView  &&  <View style={{flex: 1}}/>}
+                     {!isView  &&  <View style={styles.textContainer}/>}
                    </View>
         if (editItem  &&  !hasEdit) {
           hasEdit = true
@@ -368,6 +371,8 @@ var ResourceMixin = {
                     navigator.push({
                      title: vTitle,
                      componentName,
+                     locale,
+                     currency,
                      backButtonTitle: 'Back',
                      bankStyle,
                      passProps: {resource: v}
@@ -610,7 +615,7 @@ var ResourceMixin = {
                    {icon}
                 </TouchableOpacity>
     let content = (
-      <View ref='json' style={{flex: 1}}>
+      <View ref='json' style={styles.textContainer}>
         <JSONTree data={json} invertTheme={false} hideRoot={true} theme={{
             extend: theme,
             nestedNodeItemString: ({ style }, nodeType, expanded) => ({
@@ -704,7 +709,7 @@ var ResourceMixin = {
         //           </View>
         content = <View>
                    {pieChart}
-                   <View style={{flex: 1}}>{content}</View>
+                   <View style={styles.textContainer}>{content}</View>
                   </View>
       }
     }
@@ -829,7 +834,7 @@ var ResourceMixin = {
   showTreeNode({stub, prop, openChat}) {
     let {id, title} = stub
     debugger
-    const { bankStyle, navigator, resource } = this.props
+    const { bankStyle, navigator, resource, currency, locale } = this.props
     let type = utils.getType(id)
     let isApplication = type === APPLICATION
     if (isApplication) {
@@ -853,12 +858,14 @@ var ResourceMixin = {
       title,
       passProps: {
         bankStyle,
-        resource: r
+        resource: r,
+        currency,
+        locale
       }
     })
   },
   openApplicationChat(resource) {
-    let { navigator, bankStyle } = this.props
+    let { navigator, bankStyle, locale } = this.props
     // let { bankStyle } = this.state
     // let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
@@ -880,6 +887,7 @@ var ResourceMixin = {
         modelName: MESSAGE,
         application: resource,
         currency: resource.currency,
+        locale,
         bankStyle: style,
       }
     }
