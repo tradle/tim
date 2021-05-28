@@ -13,9 +13,10 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 
 import constants from '@tradle/constants'
 
-var { TYPE } = constants
-var { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
+const { TYPE } = constants
+const { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
 
+import ShowPropertiesView from './ShowPropertiesView'
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -29,6 +30,7 @@ import Image from './Image'
 import uiUtils from '../utils/uiUtils'
 import GridHeader from './GridHeader'
 import GridRow from './GridRow'
+import Markdown from './Markdown'
 
 const RESOURCE_VIEW = 'ResourceView'
 const MESSAGE_VIEW = 'MessageView'
@@ -60,7 +62,6 @@ const showCollapsedMap = {
   'tradle.documentChecker.Check': 'rawData'
 }
 
-import Markdown from './Markdown'
 var component
 
 var ResourceMixin = {
@@ -82,7 +83,7 @@ var ResourceMixin = {
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
 
     const isCheck = model.subClassOf === CHECK
-    let {bankStyle, search, currency, country, navigator, application} = this.props
+    let {bankStyle, search, currency, locale, country, navigator, application} = this.props
     if (isMessageView) {
       let r = this.props.resource
       let isVerifier = utils.getModel(utils.getType(r)).subClassOf === CHECK  &&  application &&  utils.isRM(application)
@@ -91,11 +92,12 @@ var ResourceMixin = {
         backButtonTitle: 'Back',
         title,
         passProps: {
-          bankStyle: bankStyle,
-          resource: resource,
-          search: search,
-          currency: currency,
-          country: country,
+          bankStyle,
+          resource,
+          search,
+          currency,
+          locale,
+          country,
           isThisVersion: isDataLineage
         }
       }
@@ -117,6 +119,8 @@ var ResourceMixin = {
           resource,
           search,
           bankStyle,
+          currency,
+          locale,
           application: resource
         }
       })
@@ -127,26 +131,29 @@ var ResourceMixin = {
         componentName: RESOURCE_VIEW,
         backButtonTitle: 'Back',
         passProps: {
-          resource: resource,
-          prop: prop,
+          resource,
+          prop,
           bankStyle: bankStyle || defaultBankStyle,
-          currency: this.props.currency
+          currency: this.props.currency,
+          locale
         }
       })
     }
   },
   showResources(resource, prop) {
-    this.props.navigator.push({
+    const { navigator, currency, locale, bankStyle } = this.props
+    navigator.push({
       title: translate(prop, utils.getModel(resource[TYPE])),
       backButtonTitle: 'Back',
       componentName: RESOURCE_LIST,
       passProps: {
         modelName: prop.items.ref,
         filter: '',
-        resource: resource,
-        prop: prop,
-        bankStyle: this.props.bankStyle || defaultBankStyle,
-        currency: this.props.currency
+        resource,
+        prop,
+        bankStyle: bankStyle || defaultBankStyle,
+        currency,
+        locale
       }
     });
   },
@@ -185,19 +192,39 @@ var ResourceMixin = {
         let itemMeta = itemsMeta[p];
         let { type, displayAs, displayName, range, ref, skipLabel, items } = itemMeta
         let pVal = v[p]
-        if (!pVal  &&  !displayAs)
-          return
+        if (!pVal  &&  !displayAs) {
+          if (type !== 'boolean'  ||  pVal !== false)
+            return
+        }
         if (displayName &&  !editItem) {
-          displayName = type === 'object' && pVal.title ||  pVal
-          if (typeof displayName === 'object')
-            displayName = JSON.stringify(displayName, null, 2)
-          ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
-                     <View style={styles.itemContent}>
-                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-                       <Text style={styles.itemText}>{displayName}</Text>
-                     </View>
-                     {!isView  &&  <View style={{flex: 1}}/>}
-                   </View>)
+          let displayingPart = type === 'object' && pVal.title ||  pVal
+          if (typeof displayingPart === 'object') {
+            if (itemMeta.ref  &&  displayingPart[TYPE]) {
+              // displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
+              ret.push(
+                <View style={{paddingVertical: 3}}>
+                  <View style={styles.itemBackground}>
+                    <Text style={styles.itemTitle}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
+                  </View>
+                  <ShowPropertiesView resource={displayingPart}
+                                      currency={currency}
+                                      bankStyle={bankStyle}
+                                      isItem={true}
+                                      navigator={navigator} />
+                </View>
+                )
+              return
+            }
+            else
+              displayingPart = JSON.stringify(displayingPart, null, 2)
+            ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                       <View style={styles.itemContent}>
+                         <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                         <Text style={styles.itemText}>{displayingPart}</Text>
+                       </View>
+                       {!isView  &&  <View style={styles.textContainer}/>}
+                     </View>)
+          }
           return
         }
         let value;
@@ -227,7 +254,7 @@ var ResourceMixin = {
                          {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
                        </View>
                      </View>
-                     {!isView  &&  <View style={{flex: 1}}/>}
+                     {!isView  &&  <View style={styles.textContainer}/>}
                    </View>
               )
               return
@@ -274,7 +301,7 @@ var ResourceMixin = {
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
-                     {!isView  &&  <View style={{flex: 1}}/>}
+                     {!isView  &&  <View style={styles.textContainer}/>}
                    </View>
         if (editItem  &&  !hasEdit) {
           hasEdit = true
@@ -342,6 +369,8 @@ var ResourceMixin = {
                     navigator.push({
                      title: vTitle,
                      componentName,
+                     locale,
+                     currency,
                      backButtonTitle: 'Back',
                      bankStyle,
                      passProps: {resource: v}
@@ -594,7 +623,7 @@ var ResourceMixin = {
           else {
             jsonRows.push(<Row size={3} style={styles.rowStyle} key={this.getNextKey()}>
                             <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
-                              <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                              <Text style={[styles.title, styles.textContainer]}>{utils.makeLabel(p)}</Text>
                             </Col>
                             <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
                               <Text style={[styles.title, {flex: 1, color: '#555555'}]}>{js + ''}</Text>
@@ -749,7 +778,7 @@ var ResourceMixin = {
   showTreeNode({stub, prop, openChat}) {
     let {id, title} = stub
     debugger
-    const { bankStyle, navigator, resource } = this.props
+    const { bankStyle, navigator, resource, currency, locale } = this.props
     let type = utils.getType(id)
     let isApplication = type === APPLICATION
     if (isApplication) {
@@ -773,12 +802,14 @@ var ResourceMixin = {
       title,
       passProps: {
         bankStyle,
-        resource: r
+        resource: r,
+        currency,
+        locale
       }
     })
   },
   openApplicationChat(resource) {
-    let { navigator, bankStyle } = this.props
+    let { navigator, bankStyle, locale } = this.props
     // let { bankStyle } = this.state
     // let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
@@ -800,6 +831,7 @@ var ResourceMixin = {
         modelName: MESSAGE,
         application: resource,
         currency: resource.currency,
+        locale,
         bankStyle: style,
       }
     }
@@ -843,6 +875,12 @@ var styles = StyleSheet.create({
     height: 25,
     marginRight: 2,
     borderRadius: 5
+  },
+  itemTitle: {
+    fontSize: 16,
+    marginBottom: 0,
+    fontWeight: 600,
+    color: '#757575',
   },
   itemText: {
     fontSize: 16,
@@ -938,6 +976,11 @@ var styles = StyleSheet.create({
     flex: 9,
     flexDirection: utils.isWeb() && 'row' || 'column',
     justifyContent: 'space-between'
+  },
+  itemBackground: {
+    paddingVertical: 3,
+    // alignItems: 'center',
+    backgroundColor: 'aliceblue'
   },
 })
 
