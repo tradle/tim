@@ -981,7 +981,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#fe7c248017940e47468f179ebd3003525372f802"
+      "resolved": "git://github.com/tradle/models.git#eab455c32a3cfd5a53c237caec9ebe468db08dd6"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -991,7 +991,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#7a59d56b07c2f38c7d16ed8730d8789d807098ad"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#50029721debcc80205046af4ca19de2bd0e94a4c"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -1047,6 +1047,11 @@
         }
       }
     },
+    "@tradle/react-native-webview": {
+      "version": "5.12.1",
+      "from": "@tradle/react-native-webview@5.12.1",
+      "resolved": "https://registry.npmjs.org/@tradle/react-native-webview/-/react-native-webview-5.12.1.tgz"
+    },
     "@tradle/restore": {
       "version": "1.0.0",
       "from": "tradle/restore",
@@ -1070,19 +1075,19 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.26",
+      "version": "7.1.31",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.26.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.31.tgz",
       "dependencies": {
         "lodash": {
-          "version": "4.17.20",
+          "version": "4.17.21",
           "from": "lodash@>=4.17.19 <5.0.0",
-          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.20.tgz"
+          "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
         },
         "mime": {
-          "version": "2.5.0",
+          "version": "2.5.2",
           "from": "mime@>=2.4.6 <3.0.0",
-          "resolved": "http://registry.npmjs.org/mime/-/mime-2.5.0.tgz"
+          "resolved": "http://registry.npmjs.org/mime/-/mime-2.5.2.tgz"
         }
       }
     },
@@ -7322,8 +7327,8 @@
     },
     "react-native-device-info": {
       "version": "5.6.5",
-      "from": "react-native-device-info@5.6.5",
-      "resolved": "http://registry.npmjs.org/react-native-device-info/-/react-native-device-info-5.6.5.tgz"
+      "from": "tradle/react-native-device-info",
+      "resolved": "git://github.com/tradle/react-native-device-info.git#a20017bc04126656851a0de35b430b9ce586a3ab"
     },
     "react-native-document-picker": {
       "version": "2.3.0",
@@ -7502,8 +7507,8 @@
     },
     "react-native-signature-pad": {
       "version": "0.1.0",
-      "from": "github:tradle/react-native-signature-pad",
-      "resolved": "git://github.com/tradle/react-native-signature-pad.git#1b3ca3824da3842d9ad5d6932733a2557dfeff50"
+      "from": "tradle/react-native-signature-pad",
+      "resolved": "git://github.com/tradle/react-native-signature-pad.git#35886b1198e2482f273a0b34fad20c0255061342"
     },
     "react-native-splash-screen": {
       "version": "3.2.0",
@@ -7594,11 +7599,6 @@
       "version": "0.8.6",
       "from": "react-native-view-pdf@^0.8.6",
       "resolved": "https://registry.npmjs.org/react-native-view-pdf/-/react-native-view-pdf-0.8.6.tgz"
-    },
-    "react-native-webview": {
-      "version": "5.12.1",
-      "from": "react-native-webview@5.12.1",
-      "resolved": "https://registry.npmjs.org/react-native-webview/-/react-native-webview-5.12.1.tgz"
     },
     "react-proxy": {
       "version": "1.1.8",
