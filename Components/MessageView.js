@@ -162,7 +162,7 @@ class MessageView extends Component {
     this.setState({hideMode: false})
     let me = utils.getMe()
 
-    let { defaultPropertyValues, bankStyle, navigator, search, allowedMimeTypes } = this.props
+    let { defaultPropertyValues, bankStyle, navigator, search, allowedMimeTypes, currency, locale } = this.props
     let resource = this.state.resource
     let ref = itemBl.items.ref
     // resource if present is a container resource as for example subreddit for posts or post for comments
@@ -200,7 +200,8 @@ class MessageView extends Component {
         // doNotSend: true,
         defaultPropertyValues,
         allowedMimeTypes,
-        currency: this.props.currency || this.state.currency,
+        currency: currency || this.state.currency,
+        locale,
         callback: (resource) => {
           navigator.pop()
         }
@@ -301,20 +302,22 @@ class MessageView extends Component {
     let newTitle = title
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !resource && utils.isVerifier(document)
+    const { navigator, locale, currency, bankStyle } = this.props
     let route = {
       title: newTitle,
       backButtonTitle: 'Back',
       componentName: 'MessageView',
       // parentMeta: model,
       passProps: {
-        bankStyle: this.state.bankStyle || this.props.bankStyle,
+        bankStyle: this.state.bankStyle || bankStyle,
         resource,
-        currency: this.props.currency,
+        currency,
+        locale,
         document,
         isVerifier
       }
     }
-    this.props.navigator.push(route)
+    navigator.push(route)
   }
   render() {
     let { backlink, bankStyle, resource } = this.state
