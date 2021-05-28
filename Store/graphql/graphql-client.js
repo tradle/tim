@@ -23,9 +23,13 @@ const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
 const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
+const BOOKMARKS_FOLDER = 'tradle.BookmarksFolder'
 const NETWORK_FAILURE = 'Failed to fetch'
 const INVALID_QUERY = 'Syntax Error GraphQL request'
-const INTERNAL_SERVER_ERROR = 'Internal Server Error'
+const WRONG_VERSION_ID  = 'expected models with versionId: '
+const INTERNAL_SERVER_ERROR_MSG = 'Internal Server Error'
+
+const INTERNAL_SERVER_ERROR = 500
 const MAX_ATTEMPTS = 3
 
 var messageMap = {
@@ -58,7 +62,7 @@ var search = {
 
     let table = `rl_${modelName.replace(/\./g, '_')}`
     let model = utils.getModel(modelName)
-    let versionId = model._versionId
+    let versionId = params.versionId || model._versionId
     let version = versionId ? '($modelsVersionId: String!)' : ''
     let query = `query ${version} {\n${table}\n`
     let props = model.properties
@@ -82,6 +86,11 @@ var search = {
         if (exclude.indexOf(p) !== -1)
           continue
         let val = filterResource[p]
+        let neq
+        if (p.endsWith('!')) {
+          neq = true
+          p = p.slice(0, -1)
+        }
         if (!props[p]  &&  val) {
           if (p.charAt(0) === '_') {
             if (Array.isArray(val)) {
@@ -95,11 +104,11 @@ var search = {
               inClause.push(s)
             }
             else
-              op.EQ += `\n   ${p}: "${val}",`
+              this.addTo(op, neq, `\n   ${p}: "${val}",`)
           }
           else if (p.indexOf('.') !== -1  &&  props[p.split('.')[0]]) {
             p = p.replace('.', '__')
-            op.EQ += `\n   ${p}: "${val}",`
+             this.addTo(op, neq, `\n   ${p}: "${val}",`)
           }
           continue
         }
@@ -124,7 +133,7 @@ var search = {
           }
           let len = val.length
           if (val.indexOf('*') === -1)
-            op.EQ += `\n   ${p}: "${val}",`
+            this.addTo(op, neq, `\n   ${p}: "${val}",`)
           else if (len > 1) {
             if (val.charAt(0) === '*') {
               if (val.charAt(val.length - 1) === '*')
@@ -158,7 +167,7 @@ var search = {
               continue
             if (isEnum) {
               if (val.length === 1) {
-                op.EQ += `\n   ${p}__id: "${val[0].id}",`
+                 this.addTo(op, `\n   ${p}__id: "${val[0].id}",`)
               }
               else {
                 let s = `${p}__id: [`
@@ -173,7 +182,7 @@ var search = {
             }
             else {
               if (val.length === 1) {
-                op.EQ += `\n   ${p}___permalink: "${utils.getRootHash(val[0])}",`
+               this.addTo(op, neq, `\n   ${p}___permalink: "${utils.getRootHash(val[0])}",`)
               }
               else {
                 let s = `${p}___permalink: [`
@@ -189,11 +198,11 @@ var search = {
           }
           else {
             if (isEnum) {
-              op.EQ += `\n   ${p}__id: "${val.id}",`
+              this.addTo(op, neq, `\n   ${p}__id: "${val.id}",`)
             }
             else if (props[p].ref === MONEY) {
               let {value, currency} = val
-              op.EQ += `\n  ${p}__currency: "${currency}",`
+              this.addTo(op, neq, `\n  ${p}__currency: "${currency}",`)
               if (val.value)
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
@@ -205,7 +214,7 @@ var search = {
               continue
             }
             else {
-              op.EQ += `\n   ${p}___permalink: "${utils.getRootHash(val)}",`
+              this.addTo(op, neq, `\n   ${p}___permalink: "${utils.getRootHash(val)}",`)
             }
           }
         }
@@ -296,10 +305,14 @@ var search = {
       if (data.result) {
         return { result:  data.result }
       }
-      ({ error='',  excludeProps={}, retry=true, mapping={} } = await this.checkError(data, model))
+      ({ error='',  excludeProps={}, retry=true, mapping={}, versionId='' } = await this.checkError(data, model))
       if (excludeProps.length) {
         params.excludeProps = excludeProps
         params.mapping = mapping
+        return await this.searchServer(params)
+      }
+      if (versionId  &&  versionId !== this.versionId) {
+        params.versionId = versionId
         return await this.searchServer(params)
       }
       if (error  &&  error === NETWORK_FAILURE  ||  !retry)
@@ -333,6 +346,12 @@ var search = {
       }
 
     }
+  },
+  addTo(op, neq, condition) {
+    if (neq)
+      op.NEQ += condition
+    else
+      op.EQ += condition
   },
   async getChat(params) {
     let { author, client, context, filterResource, limit, endCursor, application } = params
@@ -696,12 +715,13 @@ var search = {
       if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  !isSubmissions)
         return
     }
+    let isBookmarksFolder = model  &&  model.id === BOOKMARKS_FOLDER
     let iref = prop.items.ref
     if (iref) {
       let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
 
       if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-        if (isList  &&  !isApplication)
+        if (isList  &&  !isApplication  &&  !isBookmarksFolder)
           return
         let props
         if (iref !== model.id)
@@ -827,8 +847,16 @@ var search = {
       debugger
       if (result.error.response) {
         debugger
-        if (result.error.response.error === INTERNAL_SERVER_ERROR)
-          return {error: result.error.response.error, retry: true}
+        // if (result.error.response.error === INTERNAL_SERVER_ERROR)
+        //   return {error: result.error.response.error, retry: true}
+        const { errors, status, error } = result.error.response
+        if (status === INTERNAL_SERVER_ERROR || error === INTERNAL_SERVER_ERROR_MSG) {
+          if (errors  &&  errors.length === 1) {
+            if (errors[0].message.indexOf(WRONG_VERSION_ID) === 0)
+              return {error, retry: true, versionId: errors[0].message.split(': ')[1]}
+          }
+          return {error, retry: true}
+        }
         graphQLErrors = result.error.response.errors
         message = INVALID_QUERY
       }

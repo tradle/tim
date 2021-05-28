@@ -208,6 +208,7 @@ const APPLICATION_APPROVAL= 'tradle.ApplicationApproval'
 const COUNTRY             = 'tradle.Country'
 const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
+const BOOKMARKS_FOLDER    = 'tradle.BookmarksFolder'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
 const APPLICATION         = 'tradle.Application'
 // const DRAFT_APPLICATION   = 'tradle.DraftApplication'
@@ -220,8 +221,8 @@ const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const REFRESH             = 'tradle.Refresh'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
-const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
-const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
+// const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
+// const CE_ONBOARDING       = 'tradle.legal.LegalEntityProduct'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const REQUEST_ERROR       = 'tradle.RequestError'
 const CHECK_OVERRIDE      = 'tradle.CheckOverride'
@@ -231,6 +232,7 @@ const STATUS              = 'tradle.Status'
 const OVERRIDE_STATUS     = 'tradle.OverrideStatus'
 const DEVICE_SYNC         = 'tradle.DeviceSync'
 const DEVICE_SYNC_DATA_BUNDLE = 'tradle.DeviceSyncDataBundle'
+const ATTESTATION         = 'tradle.Attestation'
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -2322,7 +2324,7 @@ var Store = Reflux.createStore({
       let list = this.searchNotMessages({modelName: ORGANIZATION})
       this.trigger({
         action: 'list',
-        list: list,
+        list,
         modelName: ORGANIZATION
       })
     }
@@ -2932,8 +2934,8 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (!noCustomerWaiting)
         await sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse})
-      if (!editFormRequestPrefill  &&  me.isEmployee)
-        await this.getModelsPack(to)
+      // if (!editFormRequestPrefill  &&  me.isEmployee)
+      //   await this.getModelsPack(to)
     } catch(err) {
       debug('Something went wrong', err.stack)
       debugger
@@ -4009,7 +4011,9 @@ if (!res[SIG]  &&  res._message)
         continue;
       var items = props[p].items;
       if (!items  ||  !items.backlink)
-        continue;
+        continue
+      if (type === BOOKMARKS_FOLDER)
+        continue
       let blList = await this.getBacklinkResources(props[p], res)
       if (blList)
         res[p] = blList
@@ -4065,6 +4069,8 @@ if (!res[SIG]  &&  res._message)
       r._context = resource._context
     }
 
+    if (resource._sourceOfData)
+      r._sourceOfData = resource._sourceOfData
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
@@ -4268,27 +4274,27 @@ if (!res[SIG]  &&  res._message)
   onExploreBacklink(resource, prop, backlinkAdded) {
     this.trigger({
       action: 'exploreBacklink',
-      resource: resource,
+      resource,
       backlink: prop,
       // list: list,
-      backlinkAdded: backlinkAdded
+      backlinkAdded
     })
   },
   onExploreForwardlink(resource, prop, forwardlinkAdded) {
     this.trigger({
       action: 'exploreForwardlink',
-      resource: resource,
+      resource,
       forwardlink: prop,
       // list: list,
-      forwardlinkAdded: forwardlinkAdded
+      forwardlinkAdded
     })
   },
   onGetDetails(resource) {
-    this.trigger({action: 'showDetails', resource: resource})
+    this.trigger({action: 'showDetails', resource})
   },
   onGetDocuments(resource, docs) {
     let list = docs.map((r) => this._getItem(utils.getId(r)))
-    this.trigger({action: 'showDocuments', list: list, resource: resource})
+    this.trigger({action: 'showDocuments', list, resource})
   },
   getItem(resource) {
     let modelName = resource[TYPE]
@@ -4406,7 +4412,7 @@ if (!res[SIG]  &&  res._message)
   async onGetTemporary(type, noFetch) {
     var r = !noFetch &&  temporaryResources[type]
     let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
-    this.trigger({action: 'getTemporary', resource: r, requestedProperties})
+    this.trigger({action: 'getTemporary', resource: r || {}, requestedProperties})
   },
 
   async onAddAll(resource, to, message) {
@@ -4455,8 +4461,8 @@ if (!res[SIG]  &&  res._message)
   },
   async onAddItem(params) {
     var self = this
-    var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry,
-         value, chat, cb, meta, isRegistration, noTrigger, forceUpdate, lens, doNotSend, isRefresh} = params
+    var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry, currentFolder,
+         value, chat, cb, meta, isRegistration, noTrigger, forceUpdate, lens, doNotSend, isRefresh, employeeSetup} = params
     if (!value)
       value = resource
 
@@ -4464,9 +4470,14 @@ if (!res[SIG]  &&  res._message)
     if (!meta)
       meta = this.getModel(resource[TYPE])
 
-    // let isMessage = utils.isMessage(resource)
-    if (isMessage)
-      resource[IS_MESSAGE] = true
+    // // let isMessage = utils.isMessage(resource)
+    // if (isMessage)
+    //   resource[IS_MESSAGE] = true
+    const isBookmark = meta.id === BOOKMARK
+    if (isBookmark  && currentFolder) {
+      await this.moveBookmark(params)
+      return
+    }
 
     // Check if there are references to other resources
     var refProps = {};
@@ -4477,7 +4488,11 @@ if (!res[SIG]  &&  res._message)
       // debugger
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
-    if (meta.id === BOOKMARK)
+    if (meta.id === ATTESTATION) {
+      storeUtils.rewriteAttestation(value)
+      storeUtils.rewriteAttestation(resource)
+    }
+    if (isBookmark)
       resource.to = this.buildRef(resource.from)
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
@@ -4574,9 +4589,11 @@ if (!res[SIG]  &&  res._message)
       if (!props[p])
         continue
       if (props[p].type === 'array')
-        json[p] = resource[p];
+        json[p] = resource[p]
       if (!json[p]  &&  props[p].readOnly)
-        json[p] = resource[p];
+        json[p] = resource[p]
+      if (me  &&  !me.isEmployee  &&  props[p].internalUse)
+        json[p] = resource[p]
       let ref = props[p].ref
       // Check if valid enum value
       if (!ref)
@@ -4618,7 +4635,7 @@ if (!res[SIG]  &&  res._message)
         // list: list,
         resource: json,
         isRefresh,
-        error: error
+        error
       });
       return;
     }
@@ -4684,7 +4701,7 @@ if (!res[SIG]  &&  res._message)
     }
     // case for Remediation WealthCV -> CVItems. Linking items to container
     var readOnlyBacklinks = []
-    if (!isRegistration) {
+    if (!isRegistration  &&  !isBookmark) {
       for (let pr in props) {
         let prop = props[pr]
         if (utils.isContainerProp(prop, meta))
@@ -4744,7 +4761,7 @@ if (!res[SIG]  &&  res._message)
     if (isRegistration)
       await handleRegistration()
     else if (isMessage  &&  (!returnVal[NOT_CHAT_ITEM] || isRefresh))
-      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend})
+      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, employeeSetup})
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
@@ -4803,7 +4820,7 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal)
     }
 
-    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest}) {
+    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest, employeeSetup}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -4874,6 +4891,16 @@ if (!res[SIG]  &&  res._message)
         if (isForm  &&  !isRefresh)
           await deactivateFormRequests()
       }
+      let isBookmark = rtype === BOOKMARK
+      // if (isBookmark) {
+      //   await handleBookmark({ returnVal, noTrigger, prevResCached, employeeSetup })
+      //   return
+      // }
+      let bookmarksFolder
+      if (isBookmark) {
+        bookmarksFolder = returnVal.folder
+        delete returnVal.folder
+      }
 
       let { toChain, error } = await self.prepareToSend({resource: returnVal})
 
@@ -4926,7 +4953,6 @@ if (!res[SIG]  &&  res._message)
 
         let params
 
-        let isBookmark = rtype === BOOKMARK
         let sendStatus = self.isConnected ? SENDING : QUEUED
         let origNoTrigger = noTrigger
         if (rtype === DATA_CLAIM) {
@@ -4935,8 +4961,12 @@ if (!res[SIG]  &&  res._message)
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
+        else if (isBookmark) {
+          returnVal._sendStatus = sendStatus
+          params = { action: 'addItem', resource: returnVal }
+        }
         // Bookmark is not sent
-        else if (!isBookmark) {
+        else { // if (!isBookmark) {
           returnVal._sendStatus = sendStatus
           // if (isNew)
           self.addVisualProps(returnVal)
@@ -4948,18 +4978,12 @@ if (!res[SIG]  &&  res._message)
         }
 
         try {
-          if (!noTrigger  &&  !isBookmark)
-            self.trigger(params);
+          if (!noTrigger) //  &&  !isBookmark)
+            self.trigger(params)
         } catch (err) {
           debugger
         }
-
-        if (!isSavedItem  &&  !isBookmark) {
-          if (!doNotSend) {
-            let sendParams = await self.packMessage(returnVal)
-            await self.meDriverSend(sendParams)
-          }
-        }
+        let isSharedBookmark = isBookmark  &&  resource.shared
         if (isBookmark) {
           let bookmark = returnVal.bookmark
           let bm = self.getModel(bookmark[TYPE])
@@ -4973,6 +4997,44 @@ if (!res[SIG]  &&  res._message)
             bookmark[p] = bookmark[p].map((r) => self.buildRef(r))
           }
           self.onHasBookmarks()
+
+          // debugger
+          if (!employeeSetup) {
+            if (bookmarksFolder) {
+              bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: bookmarksFolder.title}, noTrigger: true})
+              bookmarksFolder = bookmarksFolder[0]
+              bookmarksFolder = await self.onGetItem({resource: bookmarksFolder, noTrigger: true})
+
+              if (!isSharedBookmark && bookmarksFolder.shared) {
+                Alert.alert(translate('personalBookmarkInSharedFolder'))
+                return
+              }
+            }
+
+            else {
+              let folderName
+              if (returnVal.shared)
+                folderName = translate('sharedBookmarks')
+              else
+                folderName = translate('personalBookmarks')
+              bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: folderName}, noTrigger: true})
+              bookmarksFolder = bookmarksFolder[0]
+            }
+            if (bookmarksFolder) {
+              if (!bookmarksFolder.list)
+                bookmarksFolder.list = []
+              bookmarksFolder.list.push(self.buildRef(returnVal))
+              let bf = await self.onAddChatItem({resource: bookmarksFolder, noTrigger: true, origNoTrigger: true})
+              if (!noTrigger)
+                self.trigger({action: 'updateItem', resource: bf})
+            }
+          }
+        }
+        if (!isSavedItem) { // &&  (!isBookmark  ||  isSharedBookmark)) {
+          if (!doNotSend) {
+            let sendParams = await self.packMessage(returnVal)
+            await self.meDriverSend(sendParams)
+          }
         }
         if (readOnlyBacklinks.length) {
           readOnlyBacklinks.forEach((prop) => {
@@ -5015,8 +5077,16 @@ if (!res[SIG]  &&  res._message)
           await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
         }
-        if (!isNew  ||  !utils.isForm(rtype))
+        if (!isNew  ||  !utils.isForm(rtype)) {
+          if (isBookmark) {
+            if (isNew)
+              self.trigger({ action: 'addItem', resource: returnVal })
+          //   else
+          //     self.trigger({ action: 'updateItem', resource: returnVal })
+          }
           return
+        }
+
         let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: to})
         let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
           if (r.document === returnVal[NONCE])
@@ -5413,7 +5483,8 @@ if (!res[SIG]  &&  res._message)
     }
   },
   async onApplyForProduct(params) {
-    const { host, provider, product, contextId, bundleId } = params
+    const { host, provider, product, contextId, bundleId,
+            associatedResource, parentApplication } = params
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
@@ -5441,10 +5512,11 @@ if (!res[SIG]  &&  res._message)
       }
       else if (bundleId)
         _.extend(resource, { bundleId })
-      else if (product === CP_ONBOARDING ||
-               product === CE_ONBOARDING) {
-        resource.associatedResource = params.associatedResource
-        resource.parentApplication = params.parentApplication
+      // else if (product === CP_ONBOARDING ||
+      //          product === CE_ONBOARDING) {
+      else if (associatedResource  &&  parentApplication) {
+        resource.associatedResource = associatedResource
+        resource.parentApplication = parentApplication
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
         if (_.size(notes))
           resource.notes = notes
@@ -5641,7 +5713,7 @@ if (!res[SIG]  &&  res._message)
     _.extend(resource, kr)
 
     this.addVisualProps(resource)
-    this.trigger({action: 'addItem', context: formResource.context, resource: resource})
+    this.trigger({action: 'addItem', context: formResource.context, resource})
     if (documentCreated)
       return
 
@@ -7208,8 +7280,19 @@ if (!res[SIG]  &&  res._message)
       if (!props[p]  ||  !rr[p][TYPE])
         continue
       let m = this.getModel(rr[p][TYPE])
-      if (utils.isEnum(m)  ||  props[p].inlined)
+      if (utils.isEnum(m))
         continue
+      if (props[p].inlined) {
+        if (rr[p]._permalink) {
+          rr[p][ROOT_HASH] = rr[p]._permalink
+          if (rr[p]._link)
+            rr[p][CUR_HASH] = rr[p]._link
+          delete rr[p]._permalink
+          delete rr[p]._link
+          storeUtils.rewriteStubs(rr[p])
+        }
+        continue
+      }
       rr[p] = storeUtils.makeStub(rr[p])
     }
     if (rr._author) {
@@ -7407,7 +7490,7 @@ if (!res[SIG]  &&  res._message)
           break
         continue;
       }
-      let fr = this.checkCriteria({r, query, prop: searchProp})
+      let fr = storeUtils.checkCriteria({r, query, prop: searchProp})
       if (fr) {
         if (start  &&  foundRecs < start) {
           foundRecs++
@@ -7660,6 +7743,7 @@ if (!res[SIG]  &&  res._message)
     }
     if (!foundResources.length)
       return
+
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
 
     foundResources.forEach((r) => {
@@ -8274,6 +8358,8 @@ if (!res[SIG]  &&  res._message)
     if (!foundResources.length)
       return
 
+    if (!utils.isSubclassOf(model, FORM))
+      foundResources = foundResources.filter(r => r._latest)
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
     // Minor hack before we intro sort property here
     foundResources.sort((a, b) => a._time - b._time)
@@ -8314,6 +8400,7 @@ if (!res[SIG]  &&  res._message)
               return !filterProps[p]
             return false
           }
+          return true
         }
       }
       let rtype = r[TYPE]
@@ -8385,15 +8472,87 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: 'hasPartials', count: list.length})
   },
   async onHasBookmarks() {
-    let list = await this.searchMessages({ modelName: BOOKMARK, to: me })
-    if (list  &&  list.length) {
-      let style
-      if (me.isEmployee) {
-        let id = utils.getId(me.organization)
-        style = this._getItem(id).style
-      }
-      this.trigger({action: 'hasBookmarks', count: list.length, bankStyle: style})
+    let list = await this.searchMessages({ modelName: BOOKMARKS_FOLDER}) //, to: me})
+    if (!list  ||  !list.length)
+      return
+    let style
+    if (me.isEmployee) {
+      let id = utils.getId(me.organization)
+      style = this._getItem(id).style
     }
+    // let count = 0
+    // list.forEach(r => count += (r.list  && r.list.length || 0))
+    this.trigger({action: 'hasBookmarks', count: list.length, bankStyle: style})
+  },
+  async onGetBookmarks({ modelName, resource, isChooser }) {
+    let org = this.getRepresentative(me.organization)
+    if (modelName === BOOKMARKS_FOLDER) {
+      // let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], '_author': me[ROOT_HASH]}, modelName: BOOKMARKS_FOLDER, search: true, noTrigger: true })
+      let list = await this._searchMessages({ modelName: BOOKMARKS_FOLDER, isChat: true, noTrigger: true, isChooser })
+      if (isChooser) {
+        let idx = list.findIndex(r => r.message === translate('initialBookmarks'))
+        list.splice(idx, 1)
+      }
+
+      this.trigger({list, action: 'list', isChooser, first: true})
+      return
+    }
+    const isShared = resource.shared
+    if (isShared) {
+      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true}, modelName: BOOKMARK, search: true, noTrigger: true })
+      this.trigger({list, action: 'list', isChooser, first: true, noMove})
+      return
+    }
+    if (!resource.list  ||  !resource.list.length)
+      return
+
+    let list = []
+    let { list:l } = resource
+    for (let i=0; i<l.length; i++) {
+      let r = l[i]
+      if (utils.isStub(r))
+        list.push(await this.onGetItem({resource: r, noTrigger: true, search: resource.message !== translate('initialBookmarks')}))
+      else
+        list.push(r)
+    }
+    let noMove = resource.message === translate('initialBookmarks')
+    this.trigger({list, action: 'list', isChooser, first: true, noMove})
+  },
+  async moveBookmark(params) {
+    let { currentFolder, resource } = params
+    let curFolder = currentFolder
+    if (utils.getDisplayName({resource: resource.folder}) === utils.getDisplayName({ resource: currentFolder }))
+      return
+    let prevRef = this.buildRef(resource)
+    debugger
+    let folder = await this.onGetItem({resource: resource.folder, noTrigger: true})
+    // if (resource.shared) {
+    //   if (folder.message !== translate('sharedBookmarks')) {
+    //     Alert.alert('Can not put shared bookmark in personal folder')
+    //     return
+    //   }
+    // }
+    // else
+    let isShared = resource.shared
+    if (!isShared  &&  folder.shared) {
+      this.trigger({action: 'addItem', error: 'personalBookmarkInSharedFolder', resource} )
+      return
+    }
+
+    if (!currentFolder.shared) {
+      let idx = curFolder.list.findIndex(r => r.id === prevRef.id)
+      curFolder.list.splice(idx, 1)
+      let cf = await this.onAddChatItem({resource: curFolder, noTrigger: true})
+    }
+    if (!folder.list)
+      folder.list = []
+    folder.list.push(prevRef)
+    let f = await this.onAddChatItem({resource: folder, noTrigger: true})
+      // this.trigger({action: 'updateItem', resource: f})
+    let list = await this.onGetBookmarks({ modelName: BOOKMARK, resource: currentFolder })
+    this.trigger({action: 'moveBookmark', resource: folder })
+
+    this.onGetBookmarks({ modelName: BOOKMARKS_FOLDER })
   },
   onHasTestProviders() {
     const list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true}) || []
@@ -8893,7 +9052,7 @@ if (!res[SIG]  &&  res._message)
       var docType = utils.getType(doc) //(doc.id && doc.id.split('_')[0]) || doc[TYPE];
       if (shareType  !== docType)
         return;
-      var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
+      var document = doc.id ? self._getItem(utils.getId(doc)) : doc;
       if (!document  ||  document._inactive)
         return;
 
@@ -9340,8 +9499,14 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
-    else if (isNew)
+    else if (isNew) {
+      if (!dhtKey) {
+        let data = await this.createObject(value)
+        dhtKey = data.link
+        value[ROOT_HASH] = dhtKey
+      }
       value[CUR_HASH] = dhtKey //isNew ? dhtKey : value[ROOT_HASH]
+    }
 
     let isInMyData = isMessage &&  utils.isSavedItem(value)
     var batch = [];
@@ -9691,7 +9856,7 @@ if (!res[SIG]  &&  res._message)
     else
       await this.dbPut(rId, resource)
     if (!isProfile)
-      this.trigger({action: 'updateRow', resource: resource, forceUpdate: true})
+      this.trigger({action: 'updateRow', resource, forceUpdate: true})
   },
   async registration(value) {
     isLoaded = true;
@@ -11299,15 +11464,43 @@ if (!res[SIG]  &&  res._message)
     me.organization = this.buildRef(org)
     this.resetForEmployee(me, org)
     me.employeePass = this.buildRef(myEmployeeBadge)
+    let rep = this.getRepresentative(me.organization)
     const bookmarks = storeUtils.getEmployeeBookmarks({
       me,
-      botPermalink: this.getRepresentative(me.organization)[ROOT_HASH]
+      botPermalink: rep[ROOT_HASH]
     })
-
+    let bookmarksList = []
+    const from = this.buildRef(me)
+    let folder = {
+      [TYPE]: BOOKMARKS_FOLDER,
+      message: translate('initialBookmarks'),
+      // list: bookmarksList.map(b => this.buildRef(b)),
+      from,
+      to: rep
+    }
+    let f = await this.onAddChatItem({resource: folder, noTrigger: true, doNotSend: true})
+    let folderStub = this.buildRef(f)
     for (const bookmark of bookmarks) {
       // can we do this in parallel?
-      await this.onAddChatItem({resource: bookmark, noTrigger: true})
+      bookmark.folder = folderStub
+      bookmark.to = rep
+      let b = await this.onAddChatItem({resource: bookmark, noTrigger: true, employeeSetup: true})
+      bookmarksList.push(b)
     }
+    f = await this.onGetItem({resource: f})
+    f.list = bookmarksList
+
+    await this.onAddChatItem({resource: f, noTrigger: true, doNotSend: true})
+    // debugger
+    // delete folder.list
+    let folders = ['personalBookmarks', 'sharedBookmarks']
+    for (let i=0; i<folders.length; i++) {
+      folder.message = translate(folders[i])
+      if (i === 1)
+        folder.shared = true
+      await this.onAddChatItem({resource: folder, noTrigger: true})
+    }
+
     let meId = utils.getId(me)
     if (me.firstName === FRIEND) {
       let result = []
@@ -11356,8 +11549,12 @@ if (!res[SIG]  &&  res._message)
       m._versionId = val.versionId
 
       storeUtils.parseOneModel(m, models, enums)
-      batch.push({type: 'put', key: m.id, value: m})
+      // batch.push({type: 'put', key: m.id, value: m})
     })
+    debugger
+    storeUtils.addFormBacklinks({ models: pList })
+    pList.forEach(m => batch.push({type: 'put', key: m.id, value: m}))
+
     utils.setModels(this.getModels())
     // utils.setModels(models)
     let idx = oldVersionIds.indexOf(val._versionId)
