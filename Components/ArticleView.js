@@ -7,7 +7,7 @@ import {
   // StyleSheet,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import { WebView } from 'react-native-webview'
+import { WebView } from '@tradle/react-native-webview'
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'

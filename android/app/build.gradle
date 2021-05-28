@@ -271,6 +271,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':@tradle_react-native-webview')
     implementation project(':react-native-localize')
     implementation project(':react-native-branch')
     implementation project(':react-native-document-reader-core-fullrfid')
@@ -280,7 +281,6 @@ dependencies {
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"
 
-    implementation project(':react-native-webview')
     implementation project(':@react-native-community_viewpager')
     implementation project(':@react-native-community_netinfo')
     // implementation 'com.facetec:zoom-authentication-hybrid:7.0.11'

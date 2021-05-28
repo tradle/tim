@@ -5,7 +5,7 @@ import {
   StatusBar,
   // WebView
 } from 'react-native'
-import { WebView } from 'react-native-webview'
+import { WebView } from '@tradle/react-native-webview'
 import PropTypes from 'prop-types'
 import AppIntro from 'react-native-app-intro'
 import ViewPager from '@react-native-community/viewpager'
