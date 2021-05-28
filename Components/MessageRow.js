@@ -9,7 +9,7 @@ import {
   // WebView,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import { WebView } from 'react-native-webview'
+import { WebView } from '@tradle/react-native-webview'
 import React, { Component } from 'react'
 
 import utils, {
@@ -556,7 +556,7 @@ class MessageRow extends Component {
     }
     if (model.id === BOOKMARK) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('Bookmark was created')}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('bookmarkWasCreated')}</Text>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || translate(model)}</Text>
                 </View>
       renderedRow.push(msg);
