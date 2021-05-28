@@ -338,6 +338,10 @@ class NewResource extends Component {
       )
       return
     }
+    if (action === 'moveBookmark') {
+      navigator.pop()
+      return
+    }
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
     }
@@ -459,7 +463,7 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let { model, originatingMessage, lensId, chat, editFormRequestPrefill,
+    let { model, originatingMessage, lensId, chat, editFormRequestPrefill, currentFolder,
           doNotSend, prop, containerResource, isRefresh, application, errs,
           navigator } = this.props
     let required = utils.ungroup({model, viewCols: model.required, edit: true})
@@ -573,7 +577,8 @@ if (r.url)
       isRegistration: this.state.isRegistration,
       isRefresh,
       doNotSend: isRefresh,
-      chat
+      chat,
+      currentFolder
     }
 
     if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
@@ -697,7 +702,7 @@ if (r.url)
     let oneOfProp = rModel.inlined  &&  utils.getPropertiesWithAnnotation(rModel, 'oneOf')
     if (!oneOfProp)
       return
-    debugger
+    // debugger
     if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
       missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       return
