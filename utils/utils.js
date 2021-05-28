@@ -1140,15 +1140,16 @@ var utils = {
   getCurrencyName(c) {
     let currencyName
     let mm = utils.getModel(MONEY)
-    let formattedCurrency = mm.properties.currency.oneOf.find(r => {
-      let cName = Object.keys(r)[0]
-      if (r[cName] === c) {
-        currencyName = cName
-        return true
-      }
-    })
-    return currencyName
+    const { currency } = mm.properties
+    let foundCurrency = currency.oneOf.find(r => Object.keys(r)[0] === c)
+    return foundCurrency  &&  Object.keys(foundCurrency)[0]
   },
+  // getCurrencySymbol(currencyCode) {
+  //   let mm = utils.getModel(MONEY)
+  //   const { currency } = mm.properties
+  //   let foundCurrency = currency.oneOf.find(r => Object.keys(r)[0] === currencyCode)
+  //   return foundCurrency  &&  Object.values(foundCurrency)[0]
+  // },
   getPropByTitle(props, propTitle) {
     let propTitleLC = propTitle.toLowerCase()
     for (let p in props) {
@@ -1230,39 +1231,47 @@ var utils = {
       }
       return eCols
     }
-    editCols.forEach((p) => {
-      if (properties[p].readOnly)
-        return
-      if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
-        return
+    return utils.getColsWithUngroupList({cols: editCols, properties})
+  },
+  getColsWithUngroupList({cols, properties, isView}) {
+    let isWeb = utils.isWeb()
+    let rCols = []
+    cols.forEach((p) => {
+      if (!isView) {
+        if (properties[p].readOnly)
+          return
+        if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
+          return
+      }
       let idx = p.indexOf('_group')
       if (idx === -1                          ||
           !properties[p].list                 ||
           properties[p].title.toLowerCase() !== p)
-        eCols.push(properties[p])
+        rCols.push(properties[p])
 
       if (idx !== -1  &&  properties[p].list) {
-        let eColsCnt = eCols.length
-        let isLastPropGroup = eCols[eColsCnt - 1].name.indexOf('_group') !== -1
+        let rColsCnt = rCols.length
+        let isLastPropGroup = rCols[rColsCnt - 1].name.indexOf('_group') !== -1
         properties[p].list.forEach((p) => {
-          if (eCols.indexOf(properties[p]) === -1)
-            eCols.push(properties[p])
+          if (rCols.indexOf(properties[p]) === -1)
+            rCols.push(properties[p])
         })
-        if (eColsCnt === eCols.length  &&  isLastPropGroup)
-          eCols.pop()
+        if (rColsCnt === rCols.length  &&  isLastPropGroup)
+          rCols.pop()
       }
     })
-    return eCols
+    return rCols
   },
-  hasPaymentCardScannerProperty(type) {
-    let m = utils.getModel(type)
-    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
-    if (scannedProps)  {
-      let p = Object.keys(scannedProps)
-      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
-        return m.properties[p[0]]
-    }
-    return null
+  getPaintViewCols(model) {
+    let { viewCols, properties } = model
+    let vCols = []
+    if (viewCols)
+      return utils.getColsWithUngroupList({cols: viewCols, properties, isView:true})
+    let cols = utils.getAllCols({properties, isView: true})
+    if (cols  &&  cols.length)
+      return cols.map(p => properties[p])
+    else
+      return []
   },
   getViewCols(model) {
     let { viewCols, properties } = model
@@ -1279,6 +1288,10 @@ var utils = {
         // eCols[p] = props[p]
       })
     }
+    return utils.getAllCols({properties})
+  },
+  getAllCols({properties, isView}) {
+    let vCols = []
     let onePropView = []
     for (let p in properties) {
       if (p.charAt(0) === '_') continue
@@ -1290,7 +1303,18 @@ var utils = {
     }
     if (vCols.length)
       vCols = onePropView.concat(vCols)
+
     return vCols
+  },
+  hasPaymentCardScannerProperty(type) {
+    let m = utils.getModel(type)
+    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+    if (scannedProps)  {
+      let p = Object.keys(scannedProps)
+      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+        return m.properties[p[0]]
+    }
+    return null
   },
   template (t, o) {
     return t.replace(/{([^{}]*)}/g,
@@ -1578,7 +1602,10 @@ var utils = {
   isStub(resource) {
     if (!resource[ROOT_HASH]  &&  resource.id)
       return true
-    let m = utils.getModel(utils.getType(resource))
+    const type = utils.getType(resource)
+    if (!type)
+      return
+    const m = utils.getModel(type)
     return m.required  &&  !resource[m.required[0]]
   },
   hasSupportLine(resource) {
