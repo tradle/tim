@@ -94,26 +94,26 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency, locale } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency, locale, isItem } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
     if (model.id !== modelName  &&  !utils.isSubclassOf(modelName, model.id))
       model = utils.getModel(modelName)
-    var vCols
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
-    vCols = model.viewCols
-    if (vCols)
-      vCols = utils.ungroup({model, viewCols: vCols})
+    let vCols = utils.getPaintViewCols(model)
+    // if (vCols)
+    //   vCols = utils.ungroup({model, viewCols: vCols})
+
     // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
     if (!resource[ROOT_HASH]) {
       if (!vCols)
         vCols = []
       for (let p in resource) {
-        if (p.charAt(0) !== '_'  && props[p]  &&  vCols.indexOf(p) === -1)
-          vCols.push(p)
+        if (p.charAt(0) !== '_'  && props[p]  &&  vCols.findIndex(pr => pr.name !== p) === -1)
+          vCols.push(props[p])
       }
     }
 
@@ -127,13 +127,13 @@ class ShowPropertiesView extends Component {
       excludedProperties = mapped;
     }
 
-    if (!vCols)
-      vCols = utils.getViewCols(model)
+    // if (!vCols)
+    //   vCols = utils.getViewCols(model)
     var isMessage = utils.isMessage(this.props.resource)
-    if (!isMessage) {
+    if (!isMessage  &&  !isItem) {
       var len = vCols.length;
       for (var i=0; i<len; i++) {
-        if (props[vCols[i]].displayName) {
+        if (vCols[i].displayName) {
           vCols.splice(i, 1);
           len--;
         }
@@ -148,10 +148,12 @@ class ShowPropertiesView extends Component {
     let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
 
     var viewCols = []
-    vCols.forEach((p) => {
+    vCols.forEach((pMeta) => {
+      let p = pMeta.name
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-      var pMeta = props[p];
+
+      // var pMeta = props[p];
       if (pMeta  &&  utils.isHidden(p, resource))
         return
       if (!pMeta)
@@ -174,18 +176,18 @@ class ShowPropertiesView extends Component {
             return
           val = <Text style={styles.link}>{val}</Text>
         }
-        else if (checkProperties) {
-          if (p.endsWith('_group')) {
-            viewCols.push(
-              <View style={{padding: 15}} key={this.getNextKey()}>
-                <View style={styles.groupStyle}>
-                  <Text style={styles.groupStyleText}>{translate(pMeta, model)}</Text>
-                </View>
+        else if (p.endsWith('_group')) {
+          viewCols.push(
+            <View style={{padding: 15}} key={this.getNextKey()}>
+              <View style={styles.groupStyle}>
+                <Text style={styles.groupStyleText}>{translate(pMeta, model)}</Text>
               </View>
-            )
-            return
-          }
-          else if (pMeta.items) {
+            </View>
+          )
+          return
+        }
+        else if (checkProperties) {
+          if (pMeta.items) {
             if (pMeta.items.ref  &&  !utils.isEnum(pMeta.items.ref))
               return
           }
@@ -355,6 +357,8 @@ class ShowPropertiesView extends Component {
     // debugger
     let { showRefResource, currency, bankStyle, checkProperties, locale } = this.props
     let { ref } = pMeta
+    if (!ref)
+      ref = pMeta.items  &&  pMeta.items.ref
     if (ref === PHOTO) {
       if (vCols.length === 1  &&  resource._time)
         viewCols.push(
@@ -387,7 +391,7 @@ class ShowPropertiesView extends Component {
       let me = utils.getMe()
       if (!title)
         title = getRootHash(val) === me[ROOT_HASH] ? 'Me' : 'Not me'
-      return {val: <Text style={[styles.title, styles.linkTitle]}>{title}</Text>}
+      return {val: <Text style={[styles.title, styles.linkTitle]}>{title}</Text>, isRef: true}
     }
     if (pMeta.inlined  ||  utils.getModel(ref).inlined) {
       if (isStub(val)) {
@@ -402,7 +406,7 @@ class ShowPropertiesView extends Component {
         val[TYPE] = ref
       let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
       if (pViewCols.length) {
-        pViewCols.forEach((v) => viewCols.push(v))
+        pViewCols.forEach((v, i) => viewCols.push(v))
         return {}
       }
       val = <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
@@ -439,6 +443,8 @@ class ShowPropertiesView extends Component {
 
       return { val, isRef: true }
     }
+    if (isStub(val)  &&  val.title)
+      val = <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
     return {val}
   }
   showScoreDetails() {
