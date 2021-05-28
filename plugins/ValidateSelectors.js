@@ -3,6 +3,7 @@ import { TYPE } from '@tradle/constants'
 import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum } from '../utils/utils'
 
 const MONEY = 'tradle.Money'
+const BOOKMARK = 'tradle.Bookmark'
 
 module.exports = function ValidateSelector ({ models }) {
   return {
@@ -10,7 +11,7 @@ module.exports = function ValidateSelector ({ models }) {
       application,
       form
     }) {
-      if (!application)
+      if (!application  &&  form[TYPE] !== BOOKMARK)
         return
       const m = getModel(form[TYPE])
       if (!m)
@@ -99,6 +100,26 @@ module.exports = function ValidateSelector ({ models }) {
         let formula = normalizeFormula({ formula: prop.set })
         let setF = new Function(...keys, `return ${formula}`);
         let val
+        try {
+          let v = values.slice()
+          for (let i=0; i<v.length; i++) {
+            let key = keys[i]
+            if (key.charAt(0) === '_')
+              continue
+            let pr = props[key]
+            if (!pr  ||  v[i])
+              continue
+            if (pr.ref === MONEY)
+              v[i] = { value: 0 }
+            else if (pr.type === 'number')
+              v[i] = 0
+            else if (pr.type === 'string')
+              v[i] = ''
+          }
+          val = setF(...v)
+        } catch (err) {
+          val = null
+        }
         try {
           val = setF(...values)
         } catch (err) {
