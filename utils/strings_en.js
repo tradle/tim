@@ -261,6 +261,7 @@ module.exports = {
     "reviewScannedProperties": "Please review and correct the data below",
     "reviewAndConfirm": "Please review and confirm",
     "reviewScannedPropertiesAndSecondSideSnapshot": "Please review the data below, and take a snapshot of the {1} side of the document",
+    "reviewScannedPropertiesWarning": "Is it your company? Please review and correct the data below",
     "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
     "validationErrors": "Please correct failed validation fields",
     "createNew": "Fill out form \"{1}\"",
@@ -312,6 +313,8 @@ module.exports = {
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
     "notSupportedMimeTypes": "Not supported mime types {1}",
+    "bookmarkWasCreated": "Bookmark was created",
+    "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
     // Regula
     "regulaStatus": "Searching for document",
     // Bookmarks
