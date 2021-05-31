@@ -4995,7 +4995,7 @@ if (!res[SIG]  &&  res._message)
         // Bookmark is not sent
         else { // if (!isBookmark) {
           returnVal._sendStatus = sendStatus
-          // if (isNew)
+          // if (if (!noTrigger) //  &&  !isBookmark)isNew)
           self.addVisualProps(returnVal)
           if (!params) {
             if (!isNew  &&  isRefresh)
@@ -9913,7 +9913,7 @@ if (!res[SIG]  &&  res._message)
     else
       await this.dbPut(rId, resource)
     if (!isProfile)
-      this.trigger({action: 'updateRow', resource: resource, forceUpdate: true})
+      this.trigger({action: 'updateRow', resource, forceUpdate: true})
   },
   async registration(value) {
     isLoaded = true;
