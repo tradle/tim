@@ -94,7 +94,6 @@ module.exports = function ValidateSelector ({ models }) {
           continue
         }
       }
-
       for (let p in set) {
         let prop = set[p]
         let formula = normalizeFormula({ formula: prop.set })
@@ -120,13 +119,10 @@ module.exports = function ValidateSelector ({ models }) {
         } catch (err) {
           val = null
         }
-        try {
-          val = setF(...values)
-        } catch (err) {
-          val = null
-        }
+        let vidx = keys.indexOf(p)
         if (!val) {
           if (val !== false || prop.type !== 'boolean') {
+            values[vidx] = null
             if (!form[p]  &&  prop.readOnly) {
               let idx = editCols.indexOf(prop.name)
               if (idx !== -1)
@@ -139,12 +135,14 @@ module.exports = function ValidateSelector ({ models }) {
         }
         if (props[p].type !== 'object') {
           form[p] = val
+          values[vidx] = val
           continue
         }
         if (typeof val !== 'string') {
           let ptype = prop.type
           if (typeof val === 'object'  ||  ptype !== 'object') {
             form[p] = val
+            values[vidx] = val
             // newValues.push(p)
             continue
           }
@@ -161,6 +159,7 @@ module.exports = function ValidateSelector ({ models }) {
               value: val,
               currency: form[pName].currency
             }
+            values[vidx] = form[p]
             // newValues.push(p)
           }
           continue
@@ -185,6 +184,7 @@ module.exports = function ValidateSelector ({ models }) {
           title: v.title
         }
         form[p] = val
+        values[vidx] = val
         let idx = editCols.indexOf(prop.name)
         if (idx !== -1)
           editCols.splice(idx, 1)
