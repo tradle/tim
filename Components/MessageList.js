@@ -539,7 +539,7 @@ class MessageList extends Component {
     if (utils.getId(rcontext.from) === utils.getId(utils.getMe()))
       return
     let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
-    if (!meApplying)
+    if (!meApplying || me.isEmployee)
       return
     let m = utils.getModel(resource.product)
     Alert.alert(
