@@ -1,5 +1,5 @@
 
-import utils, { translate } from '../utils/utils'
+import utils, { translate, translateModelDescription } from '../utils/utils'
 import PageView from './PageView'
 
 import StyleSheet from '../StyleSheet'
@@ -45,21 +45,21 @@ class SignatureView extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let { sigViewStyle, prop } = this.props
+    let { sigViewStyle, prop, model, bankStyle } = this.props
     const { width } = utils.dimensions(SignatureView)
     let separator = getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
-    let title = translate(prop.description || 'pleaseSign')
+    let description
+    if (model && model.description) {
+      description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                      <Text style={styles.description}>{translateModelDescription(model)}</Text>
+                    </View>
+    }
+    let title = !description && translate(prop.description || 'pleaseSign')
     return (
       <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
-        <Text style={styles.instructions}>{title}</Text>
-        <View style={{
-          flex: 1,
-          maxHeight: Math.min(width / 2, 200),
-          borderColor: '#ddd',
-          borderWidth: 10,
-          margin: 5
-        }}>
+        {description ||  <Text style={styles.instructions}>{title}</Text>}       
+        <View style={styles.sig}>
           <SignaturePad ref='sigpad'
                         onError={this._signaturePadError}
                         lockToLandscape={false}
@@ -92,6 +92,19 @@ class SignatureView extends Component {
 var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sigViewStyle  }) {
   let bgcolor = sigViewStyle.buttonBgColor || sigViewStyle.linkColor
   return StyleSheet.create({
+    sig: {
+      flex: 1,
+      maxHeight: Math.min(dimensions.width / 2, 200),
+      borderColor: '#ddd',
+      borderWidth: 10,
+      margin: 5
+    },
+    description: {
+      fontSize: 18,
+      padding: 10,
+      alignSelf: 'center',
+      color: '#757575'
+    },
     instructions: {
       fontSize: 20,
       padding: 10,

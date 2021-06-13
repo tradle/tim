@@ -467,7 +467,7 @@ var utils = {
     let val
     if (translations) {
       if (needDescription)
-        val = translations[model.id + '_d'] || translations.Default_d
+        val = translations[model.id + '_d'] || translations.Default
       else
         val = translations[model.id] || translations.Default
     }
@@ -485,6 +485,15 @@ var utils = {
       return model.title ? model.title : utils.makeModelTitle(model, isPlural)
 
     return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
+  },
+  translateModelDescription(model) {
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    let desc = dictionary && dictionary.descriptions && dictionary.descriptions[model.id]
+    if (lang === 'en' ||  !desc)
+      return model.description
+
+    return desc
   },
   translateForGrid({model, isPlural, property}) {
     if (property) {

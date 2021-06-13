@@ -1049,6 +1049,14 @@ if (r.url)
                     </View>
 
     }
+    if (!guidanceMsg  &&  meta.description) {
+      guidanceMsg = <View style={{paddingBottom: 10}}>
+                      <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                        <Text style={{fontSize: 18}}>{translate(meta.description)}</Text>
+                      </View>
+                    </View>
+    }
+
     // add server url sometimes takes a while
     let wait
     if (disableEditing)

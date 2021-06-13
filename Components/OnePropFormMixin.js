@@ -61,8 +61,13 @@ var OnePropFormMixin = {
   showSignatureView({prop, doSet, onSet}) {
     const { navigator, bankStyle, isRefresh, resource } = this.props
     let sigView
+    const model = utils.getModel(resource[TYPE])
+    let rmodel = model
+    if (model.id === FORM_REQUEST  ||  model.id === FORM_ERROR)
+      rmodel = utils.getModel(resource.form)
+
     navigator.push({
-      title: translate(prop, utils.getModel(resource[TYPE])),
+      title: translate(prop, model),
       componentName: 'SignatureView',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
@@ -78,6 +83,7 @@ var OnePropFormMixin = {
         doSet,
         prop,
         bankStyle,
+        model: rmodel,
         onSignature: this.onSetSignatureProperty.bind(this, prop, doSet),
         sigViewStyle: bankStyle
       }

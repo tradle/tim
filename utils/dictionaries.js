@@ -59,6 +59,8 @@ function genDictionary(dictionary, lang, enums) {
     dmodels[m.name] = m[lang]
     if (m.enum)
       enums[m.name] = _.clone(m.enum)
+    if (m.description)
+      descriptions[m.name] = m.description
   })
   let dprops = {}
   properties.forEach(p => {
