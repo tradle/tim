@@ -55,10 +55,13 @@ function genDictionary(dictionary, lang, enums) {
   let models = groups[MODEL]
   let properties = groups[PROPERTY_NAME]
   let dmodels = {}
+  let descriptions = {}
   models.forEach(m => {
     dmodels[m.name] = m[lang]
     if (m.enum)
       enums[m.name] = _.clone(m.enum)
+    if (m.description)
+      descriptions[m.name] = m.description
   })
   let dprops = {}
   properties.forEach(p => {
