@@ -148,7 +148,7 @@ class ShowPropertiesView extends Component {
     let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
 
     var viewCols = []
-    vCols.forEach((pMeta) => {
+    vCols.forEach(pMeta => {
       let p = pMeta.name
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
@@ -321,7 +321,9 @@ class ShowPropertiesView extends Component {
     let params = {showTree: true, prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
     // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
     let jVal
-    if (pMeta.name === 'scoreDetails') {
+    if (model.id !== APPLICATION)
+      jVal = this.showJson(params)
+    else if (pMeta.name === 'scoreDetails') {
       jVal = <View style={{backgroundColor:'#f7f7f7'}}>
                <View style={{flex: 1}}>
                  <TouchableOpacity onPress={this.showScoreDetails.bind(this)}>
@@ -329,6 +331,16 @@ class ShowPropertiesView extends Component {
                  </TouchableOpacity>
                </View>
               </View>
+    }
+    else if (pMeta.name === 'creditScoreDetails') {
+      jVal = <View style={{backgroundColor:'#f7f7f7'}}>
+               <View style={{flex: 1}}>
+                 <TouchableOpacity onPress={this.showCreditScoreDetails.bind(this)}>
+                   <Text style={{padding: 17, color: bankStyle.linkColor, fontWeight: '600', fontSize: 18}}>{translate(pMeta, model).toUpperCase()}</Text>
+                 </TouchableOpacity>
+               </View>
+              </View>
+      // jVal = <View />
     }
     else
       jVal = this.showJson(params)
@@ -457,6 +469,21 @@ class ShowPropertiesView extends Component {
       passProps: {
         bankStyle,
         resource
+      }
+    })
+  }
+  showCreditScoreDetails() {
+    let m = utils.getModel(APPLICATION)
+    let { navigator, bankStyle, resource, locale, currency } = this.props
+    navigator.push({
+      componentName: 'CreditScoreDetails',
+      backButtonTitle: 'Back',
+      title: `${resource.applicantName}  →  ${translate(m.properties.creditScoreDetails, m)}`,
+      passProps: {
+        bankStyle,
+        resource,
+        locale,
+        currency
       }
     })
   }
