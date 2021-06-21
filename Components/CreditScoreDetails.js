@@ -232,10 +232,6 @@ var styles = StyleSheet.create({
   col: {
     paddingVertical: 5,
   },
-  titleCol: {
-    paddingVertical: 5,
-    backgroundColor: 'aliceblue'
-  },
   text: {
     fontSize: 16,
     fontWeight: '400',
