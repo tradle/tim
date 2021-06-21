@@ -342,7 +342,6 @@ class ShowPropertiesView extends Component {
                  </TouchableOpacity>
                </View>
               </View>
-      // jVal = <View />
     }
     else
       jVal = this.showJson(params)
