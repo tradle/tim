@@ -4,12 +4,14 @@ import PageView from './PageView'
 
 import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
-import { getContentSeparator } from '../utils/uiUtils'
+import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
+import Markdown from './Markdown'
 
 import {
   View,
   // Text,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView
 } from 'react-native'
 import PropTypes from 'prop-types';
 import { Text } from './Text'
@@ -45,20 +47,25 @@ class SignatureView extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let { sigViewStyle, prop, model, bankStyle } = this.props
-    const { width } = utils.dimensions(SignatureView)
+    let { sigViewStyle, prop, model, bankStyle, navigator } = this.props
+    let { width } = utils.dimensions(SignatureView)
     let separator = getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
     let description
     if (model && model.description) {
-      description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
-                      <Text style={styles.description}>{translateModelDescription(model)}</Text>
-                    </View>
+      description = <ScrollView  ref='this' style={{width, alignSelf: 'center'}} name={this._lazyId}>
+                      <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                        <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                          {translate(model.description)}
+                        </Markdown>
+                      </View>
+                    </ScrollView>
+
     }
     let title = !description && translate(prop.description || 'pleaseSign')
     return (
-      <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
-        {description ||  <Text style={styles.instructions}>{title}</Text>}       
+      <PageView style={[platformStyles.container, {width}]} separator={separator} bankStyle={sigViewStyle}>
+        {description ||  <Text style={styles.instructions}>{title}</Text>}
         <View style={styles.sig}>
           <SignaturePad ref='sigpad'
                         onError={this._signaturePadError}

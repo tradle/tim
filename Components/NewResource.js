@@ -33,7 +33,8 @@ const {
 } = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
-import { getContentSeparator } from '../utils/uiUtils'
+import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
+import Markdown from './Markdown'
 import { Text } from './Text'
 import ResourceMixin from './ResourceMixin'
 import HomePageMixin from './HomePageMixin'
@@ -1050,10 +1051,15 @@ if (r.url)
 
     }
     if (!guidanceMsg  &&  meta.description) {
+      // guidanceMsg = <View style={{paddingBottom: 10}}>
+      //                 <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+      //                   <Text style={{fontSize: 18}}>{translate(meta.description)}</Text>
+      //                 </View>
+      //               </View>
       guidanceMsg = <View style={{paddingBottom: 10}}>
-                      <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
-                        <Text style={{fontSize: 18}}>{translate(meta.description)}</Text>
-                      </View>
+                      <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                        {translate(meta.description)}
+                      </Markdown>
                     </View>
     }
 
