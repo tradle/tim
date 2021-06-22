@@ -150,7 +150,10 @@ class CreditScoreDetails extends Component {
           let rgb = utils.hexToRgb(bankStyle.linkColor)
           color = `rgba(${Object.values(rgb).join(',')}, 0.5)`
         }
-        value = <ProgressBar progress={resource.score/this.state.totalScore} width={150} color={color} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
+        let group = resource.group
+        let groupTotal = this.props.resource.creditScoreDetails.find(r => r.group === group && r.total)
+        let max =  groupTotal && groupTotal.max ? groupTotal.max : this.state.totalScore
+        value = <ProgressBar progress={resource.score/max} width={150} color={color} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
       }
       else
         value = <Text> </Text>
