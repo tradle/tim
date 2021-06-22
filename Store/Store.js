@@ -4205,10 +4205,7 @@ if (!res[SIG]  &&  res._message)
     }
     if (r.creditScoreDetails) {
       debugger
-      r.creditScoreDetails.forEach(cd => {
-        if (cd.form)
-          cd.form = storeUtils.makeStub(cd.form)
-      })
+      this.convertCreditScore(r)
     }
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
@@ -4220,7 +4217,15 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
     return r
   },
-
+  convertCreditScore(r) {
+    r.creditScoreDetails.forEach(cd => {
+      if (!cd.form) return
+      if (Array.isArray(cd.form))
+        cd.form = cd.form.map(f => storeUtils.makeStub(f))
+      else
+        cd.form = storeUtils.makeStub(cd.form)
+    })
+  },
   async getMessage(params) {
     var { resource } = params
     let result = await this.getObjects([resource._payloadLink])
@@ -7281,12 +7286,8 @@ if (!res[SIG]  &&  res._message)
       rr.to = {id: authorId, title: authorTitle}
       break
     case APPLICATION:
-      if (rr.creditScoreDetails  &&  Array.isArray(rr.creditScoreDetails)) {
-        rr.creditScoreDetails.forEach(cd => {
-          if (cd.form)
-            cd.form = storeUtils.makeStub(cd.form)
-        })
-      }
+      if (rr.creditScoreDetails  &&  Array.isArray(rr.creditScoreDetails))
+        this.convertCreditScore(rr)
       // this.organizeSubmissions(rr)
     default:
       rr.from = {id: authorId, title: authorTitle}

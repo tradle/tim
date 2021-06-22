@@ -79,7 +79,7 @@ class CreditScoreDetails extends Component {
     this.state = {
       dataSource: dataSource.cloneWithRows(crc),
       resource,
-      totalScore: totalScore.score
+      totalScore: totalScore && totalScore.score
     }
   }
   renderRow(resource, sectionId, rowId) {
@@ -102,16 +102,21 @@ class CreditScoreDetails extends Component {
       let value = resource[p]
       if (value  ||  value === 0) {
         if (typeof value === 'object') {
-          let title = value.title
-          if (!title) {
-            let type = utils.getType(value)
-            let m = utils.getModel(type)
-            if (m)
-              title = translate(m)
-          }
-          value = <TouchableOpacity onPress={this.showResource.bind(this, value)}>
-                    <Text style={[isTotal && styles.total || styles.text, {color: bankStyle.linkColor}]}>{title}</Text>
-                  </TouchableOpacity>
+          if (!Array.isArray(value))
+            value = [value]
+
+          value = value.map(v => {
+            let title = v.title
+            if (!title) {
+              let type = utils.getType(v)
+              let m = utils.getModel(type)
+              if (m)
+                title = translate(m)
+            }
+            return <TouchableOpacity onPress={this.showResource.bind(this, v)}>
+                      <Text style={[isTotal && styles.total || styles.text, {color: bankStyle.linkColor}]}>{title}</Text>
+                    </TouchableOpacity>
+          })
         }
         else {
           if (typeof value === 'string')
