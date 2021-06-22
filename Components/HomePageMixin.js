@@ -1,18 +1,23 @@
 
 import React from 'react'
 import _ from 'lodash'
+import Icon from 'react-native-vector-icons/Ionicons'
+import {
+  Alert,
+  StatusBar,
+  TouchableOpacity,
+  View,
+  Platform
+} from 'react-native'
+
+import constants from '@tradle/constants'
 
 import utils, { translate } from '../utils/utils'
 import { getGridCols } from '../utils/uiUtils'
-import constants from '@tradle/constants'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
-
-import {
-  Alert,
-  StatusBar
-} from 'react-native'
+import buttonStyles from '../styles/buttonStyles'
 
 const {
   TYPE
@@ -324,6 +329,17 @@ console.log('HomePageMixin: filterResource', resource)
   },
   closeModal() {
     this.setState({isModalOpen: false});
+  },
+  addHomeButton() {
+    let { bankStyle, navigator } = this.props
+    if (!__DEV__ || !bankStyle) return
+    let routes = navigator.getCurrentRoutes()
+    let style = {alignSelf: 'flex-start', paddingRight: Platform.OS === 'android' ? 0 : 10, paddingBottom: 15, paddingLeft: 10}
+    return <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={style}>
+             <View style={buttonStyles.homeButton}>
+               <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
+             </View>
+           </TouchableOpacity>
   }
 }
 
