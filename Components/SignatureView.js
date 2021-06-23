@@ -11,7 +11,6 @@ import {
   View,
   // Text,
   TouchableOpacity,
-  ScrollView
 } from 'react-native'
 import PropTypes from 'prop-types';
 import { Text } from './Text'
@@ -31,11 +30,6 @@ class SignatureView extends Component {
     super(props);
     const { value } = props
     this.state = { value }
-    this.scrollviewProps = {
-      automaticallyAdjustContentInsets:true,
-      scrollEventThrottle: 50,
-      onScroll: this.onScroll.bind(this)
-    };
   }
   done() {
     const { onSignature, doSet } = this.props
@@ -53,18 +47,16 @@ class SignatureView extends Component {
     let styles = createStyles({sigViewStyle})
     let description
     if (model && model.description) {
-      description = <ScrollView  ref='this' style={{width, alignSelf: 'center'}} name={this._lazyId}>
-                      <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
-                        <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
-                          {translate(model.description)}
-                        </Markdown>
-                      </View>
-                    </ScrollView>
+      description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                      <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                        {translate(model.description)}
+                      </Markdown>
+                    </View>
 
     }
     let title = !description && translate(prop.description || 'pleaseSign')
     return (
-      <PageView style={[platformStyles.container, {width}]} separator={separator} bankStyle={sigViewStyle}>
+      <PageView style={[platformStyles.container, {width, paddingBottom: 10}]} separator={separator} bankStyle={sigViewStyle}>
         {description ||  <Text style={styles.instructions}>{title}</Text>}
         <View style={styles.sig}>
           <SignaturePad ref='sigpad'
