@@ -1055,7 +1055,7 @@ var styles = StyleSheet.create({
     marginBottom: 0,
     paddingVertical: 3,
     marginHorizontal: 10,
-    fontWeight: 600,
+    fontWeight: '600',
     color: '#757575',
   },
   itemSeparator: {
