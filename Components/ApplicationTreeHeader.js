@@ -31,7 +31,7 @@ class ApplicationTreeHeader extends Component {
     this.getIcon = this.getIcon.bind(this)
   }
   render() {
-    let { gridCols, depth } = this.props
+    let { gridCols, depth, sizes, offset } = this.props
     if (!gridCols)
       return <View />
     const model = utils.getModel(APPLICATION)
@@ -88,7 +88,11 @@ class ApplicationTreeHeader extends Component {
       }
       else
         description = <View/>
-      let size = i === 0 && depth + 1 || 1
+      let size
+      if (sizes)
+        size = sizes[i]
+      else
+        size = i === 0 && depth + 1 || 1
       descriptionHeader.push(
              <Col sm={size} md={size} lg={size} style={styles.colD} key={p}>
                {description}
@@ -98,20 +102,42 @@ class ApplicationTreeHeader extends Component {
                {title}
              </Col>
     })
+    if (offset) {
+      descriptionHeader.splice(0, 0,
+             <Col sm={offset} md={offset} lg={offset} style={styles.colD} key='_offsetHeader'>
+               <View/>
+             </Col>
+            )
+      cols.splice(0, 0,
+        <Col sm={offset} md={offset} lg={offset} style={styles.col} key='_offsetHeader'>
+          <View/>
+        </Col>
+      )
+    }
 
-    let size = depth + gCols.length
+    let size
+    if (sizes) {
+      size = depth
+      sizes.forEach(s => size += s)
+    }
+    else
+      size = depth + gCols.length
+    if (offset)
+      size += offset
     let description
     if (hasDescription)
       description = <Row size={size} style={styles.dHeaderRow} key='Datagrid_h3' nowrap>
                       {descriptionHeader}
                     </Row>
 
-    return <View key='Datagrid_h1'>
-            {description}
-            <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
-              {cols}
-            </Row>
-          </View>
+    return (
+      <View key='Datagrid_h1'>
+        {description}
+        <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
+          {cols}
+        </Row>
+      </View>
+    )
 
   }
   getIcon(val) {
