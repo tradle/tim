@@ -149,7 +149,7 @@ class ResourceView extends Component {
       }
       if (action !== 'getItem')
         return
-      if (resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+      if (resource[ROOT_HASH] !== utils.getRootHash(this.props.resource))
         return
     }
 
@@ -465,9 +465,22 @@ class ResourceView extends Component {
   }
 
   getRefResource(resource, prop) {
-    this.state.prop = prop;
-    this.state.propValue = utils.getId(resource.id);
-    Actions.getItem({resource: resource});
+    // this.state.prop = prop;
+    // this.state.propValue = utils.getId(resource.id);
+
+    // Actions.getItem({resource, search: utils.getMe().isEmployee});
+    const { navigator, bankStyle, currency, locale } = this.props
+    navigator.push({
+      title: resource.title || utils.makeModelTitle(utils.getModel(resource)),
+      componentName: 'ResourceView',
+      backButtonTitle: 'Back',
+      passProps: {
+        resource,
+        bankStyle,
+        currency,
+        locale
+      }
+    })
   }
 
   changePreferences(action) {
