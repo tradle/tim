@@ -419,12 +419,19 @@ class TimHome extends Component {
     _.extend(bankStyle, defaultBankStyle)
     if (me.isEmployee  &&  me.organization.style)
       _.extend(bankStyle, me.organization.style)
+    let locale, currency
+    if (me.isEmployee) {
+      locale = utils.getCompanyLocale()
+      currency = utils.getCompanyCurrency()
+    }
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
         sortProperty: 'lastMessageTime',
         officialAccounts: true,
-        bankStyle
+        bankStyle,
+        locale,
+        currency
       };
     Actions.getAllSharedContexts()
     Actions.hasPartials()
@@ -442,7 +449,7 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       componentName: 'ResourceList',
       rightButtonTitle: 'Profile',
-      passProps: passProps,
+      passProps,
       onRightButtonPress: () => navigator.push({
         title: profileTitle,
         componentName: 'ResourceView',
@@ -450,7 +457,9 @@ class TimHome extends Component {
         passProps: {
           bankStyle,
           backlink: utils.getModel(me[TYPE]).properties.myForms,
-          resource: me
+          resource: me,
+          locale,
+          currency
         },
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -461,7 +470,9 @@ class TimHome extends Component {
           passProps: {
             model: utils.getModel(me[TYPE]),
             resource: me,
-            bankStyle
+            bankStyle,
+            locale,
+            currency
           }
         },
       })
