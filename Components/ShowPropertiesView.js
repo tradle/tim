@@ -476,10 +476,14 @@ class ShowPropertiesView extends Component {
   showCreditScoreDetails() {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle, resource, locale, currency } = this.props
+    let title = ''
+    if (resource.applicantName)
+       title = `${resource.applicantName}  →  `
+    title += translate(m.properties.creditScoreDetails, m)
     navigator.push({
       componentName: 'CreditScoreDetails',
       backButtonTitle: 'Back',
-      title: `${resource.applicantName}  →  ${translate(m.properties.creditScoreDetails, m)}`,
+      title,
       passProps: {
         bankStyle,
         resource,
