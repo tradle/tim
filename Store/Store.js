@@ -942,6 +942,7 @@ var Store = Reflux.createStore({
         if (o  &&  o.url)
           me.organization.url = o.url
       }
+      utils.setCompanyLocaleAndCurrency(org)
     }
     let dictionaryDomains = this.getDictionaryDomains()
     await utils.setMe({meRes: me, dictionaryDomains, providerDictionaries})
