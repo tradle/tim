@@ -46,7 +46,16 @@ class SignatureView extends Component {
     let separator = getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
     let description
-    if (model && model.description) {
+    if (prop) {
+      if (prop.description) {
+        description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                        <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                          {translate(prop, model, true)}
+                        </Markdown>
+                      </View>
+      }
+    }
+    else if (model && model.description) {
       description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
                       <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
                         {translate(model.description)}
