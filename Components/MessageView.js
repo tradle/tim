@@ -25,8 +25,9 @@ const {
   MESSAGE
 } = constants.TYPES
 
-import utils, { translate } from '../utils/utils'
-import { getContentSeparator } from '../utils/uiUtils'
+import utils, { translate, translateModelDescription } from '../utils/utils'
+import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
+import Markdown from './Markdown'
 import ArticleView from './ArticleView'
 import PhotoList from './PhotoList'
 import PhotoView from './PhotoView'
@@ -467,12 +468,21 @@ class MessageView extends Component {
                   <Text style={{fontSize: 18, color: bankStyle.errorColor}}>{translate('olderResourceVersion')}</Text>
                 </View>
     }
+    let description
+    if (rModel.description) {
+      description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                      <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                        {translateModelDescription(model)}
+                      </Markdown>
+                    </View>
+    }
     return (
       <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle} >
       <ScrollView
         ref='messageView'
         keyboardShouldPersistTaps="always">
         {dateView}
+        {description}
         {warning}
         {bigPhoto}
         {photoStrip}
