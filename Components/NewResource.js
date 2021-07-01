@@ -35,7 +35,8 @@ const {
 } = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
-import { getContentSeparator } from '../utils/uiUtils'
+import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
+import Markdown from './Markdown'
 import { Text } from './Text'
 import ResourceMixin from './ResourceMixin'
 import HomePageMixin from './HomePageMixin'
@@ -1025,6 +1026,14 @@ if (r.url)
     //   })
     // }
     // add server url sometimes takes a while
+    let description
+    if (meta.description) {
+      description = <View style={{paddingBottom: 10}}>
+                      <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                        {translate(meta.description)}
+                      </Markdown>
+                    </View>
+    }
     let wait
     if (disableEditing)
       wait = <View style={styles.indicator}>
@@ -1104,6 +1113,7 @@ if (r.url)
           }}>
 
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 0}}>
+            {description}
             {form}
             {formsToSign}
             {button}
