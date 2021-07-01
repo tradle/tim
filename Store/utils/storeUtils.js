@@ -428,7 +428,10 @@ const storeUtils = {
     let enumList = enums[modelName]
     let property = getEnumProperty(getModel(modelName))
     let hasReset = enumList.find(e => e[ROOT_HASH] === '__reset')
+    let isJurisdiction = prop  &&  prop.ref === JURISDICTION
     if (query) {
+      if (isJurisdiction)
+        return storeUtils.getJurisdictions(params, enums)
       let q = query.toLowerCase()
       return enumList.filter((r) => {
         let val = modelName === LANGUAGE ? r.language : translateEnum(r)
@@ -459,18 +462,10 @@ const storeUtils = {
           ret.splice(0, 0, reset)
         return ret
       }
-      if (prop.ref === JURISDICTION) {
-        let refProps = getPropertiesWithAnnotation(rmodel, 'ref')
-        let countryProp = Object.keys(refProps).find(p => refProps[p].ref === COUNTRY  &&  resource[p])
-        if (countryProp) {
-          let country = getEnumValueId({model: getModel(COUNTRY), value: resource[countryProp]})
-          let enumL = getModel(JURISDICTION).enum
-          let list = enumL.filter(r => r.country === country)
-          return list  &&  enumList.filter(r => {
-            let item = list.find(item => r.region === item.title)
-            return item
-          })
-        }
+      if (isJurisdiction) {
+        let list = storeUtils.getJurisdictions(params, enums)
+        if (list)
+          return list
       }
     }
     let lim = limit || 20
@@ -487,6 +482,30 @@ const storeUtils = {
       ret.push(enumList[i])
 
     return ret
+  },
+  getJurisdictions(params, enums) {
+    let {modelName, resource, query, prop} = params
+    let rmodel = getModel(resource[TYPE])
+    let q = query  &&  query.toLowerCase()
+    let refProps = getPropertiesWithAnnotation(rmodel, 'ref')
+    let countryProp = Object.keys(refProps).find(p => refProps[p].ref === COUNTRY  &&  resource[p])
+    if (!countryProp) return
+    let country = getEnumValueId({model: getModel(COUNTRY), value: resource[countryProp]})
+    let enumL = getModel(JURISDICTION).enum
+    let list = enumL.filter(r => r.country === country)
+    if (!list) return
+
+    let enumList = enums[modelName]
+    let filteredList = enumList.filter(r => {
+      let item = list.find(item => r.region === item.title)
+      return item
+    })
+    if (!q) return filteredList
+
+    return filteredList.filter(r => {
+      let val = translateEnum(r)
+      return val.toLowerCase().indexOf(q) !== -1
+    })
   },
   checkCriteria({r, query, prop, isChooser}) {
     debugger
