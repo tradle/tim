@@ -473,7 +473,7 @@ var ResourceMixin = {
   },
 
   renderSimpleGrid(value, prop, component) {
-    if (prop.items.backlink)
+    if (!value || prop.items.backlink)
       return <View  key={this.getNextKey()} />
 
     let { navigator, locale, currency, bankStyle } = this.props
