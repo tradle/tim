@@ -131,7 +131,7 @@ const LANGUAGE = 'tradle.Language'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
-var models, me
+var models, me, companyLocale, companyCurrency
 var DEFAULT_FETCH_TIMEOUT = 5000
 // var stylesCache = {}
 
@@ -225,6 +225,18 @@ var utils = {
     let mm = Object.values(models)
     let idx = _.findIndex(mm, (m) => m.title === title)
     return idx && mm[idx]
+  },
+  setCompanyLocaleAndCurrency({locale, currency}) {
+    if (locale)
+      companyLocale = locale
+    if (currency)
+      companyCurrency = currency.id
+  },
+  getCompanyLocale() {
+    return companyLocale
+  },
+  getCompanyCurrency() {
+    return companyCurrency
   },
   // getModelsForStub() {
   //   return modelsForStub
@@ -1998,8 +2010,15 @@ var utils = {
 
   normalizeCurrencySymbol(symbol) {
     // TODO: remove this after fixing encoding bug
-    if (!symbol  ||  typeof symbol === 'string')
+    if (!symbol  ||  typeof symbol === 'string') {
+      if (symbol.length === 3  &&  /[A-Z]/.test(symbol)) {
+        let m = utils.getModel(MONEY)
+        let cur = m.properties.currency.oneOf.find(elm => elm[symbol])
+        symbol = cur  &&  cur[symbol] || symbol
+      }
+
       return symbol
+    }
     else
       return symbol.symbol
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
