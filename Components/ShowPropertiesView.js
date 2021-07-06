@@ -16,7 +16,7 @@ import Prompt from 'react-native-prompt'
 
 import constants from '@tradle/constants'
 
-import utils, { translate, translateEnum, isEnum, isStub, getRootHash } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub, isForm, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import { Text } from './Text'
@@ -372,7 +372,7 @@ class ShowPropertiesView extends Component {
     if (!ref)
       ref = pMeta.items  &&  pMeta.items.ref
     if (ref === PHOTO) {
-      if (vCols.length === 1  &&  resource._time)
+      if (vCols.length === 1  &&  resource._time  &&  !isForm(utils.getModel(resource[TYPE])))
         viewCols.push(
           <View  key={this.getNextKey()} style={{padding: 10}}>
             <Text style={styles.title}>{translate('Date')}</Text>
