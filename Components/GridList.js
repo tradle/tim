@@ -403,6 +403,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         list = Object.values(utils.getModels())
         list = this.filterModels(list)
       }
+      // this.state.list = list
       this.state.dataSource = this.state.dataSource.cloneWithRows(list)
       Actions.getModels(utils.getId(me.organization))
     }
@@ -1235,6 +1236,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 modelName={rtype}
                 application={application}
+                navigator={navigator}
                 bankStyle={bankStyle}
                 parentResource={this.props.resource}
                 resource={resource} />
@@ -1420,11 +1422,17 @@ console.log('GridList.componentWillMount: filterResource', resource)
     else
       menuBtn = <View/>
 
+    let homeButton
+    if (__DEV__  &&  bookmark)
+      homeButton = this.addHomeButton()
     return (
         <View style={styles.footer}>
           <View/>
           {employee}
-          {menuBtn}
+          <View style={{flexDirection: 'row'}}>
+            {homeButton}
+            {menuBtn}
+          </View>
         </View>
      )
   }
