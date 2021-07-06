@@ -2966,8 +2966,8 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (!noCustomerWaiting)
         await sendCustomerWaiting({isReadOnlyContext, toChain, context, toId, r, disableAutoResponse})
-      // if (!editFormRequestPrefill  &&  me.isEmployee)
-      //   await this.getModelsPack(to)
+      if (!editFormRequestPrefill  &&  me.isEmployee)
+        await this.getModelsPack(to)
     } catch(err) {
       debug('Something went wrong', err.stack)
       debugger
@@ -6179,7 +6179,13 @@ if (!res[SIG]  &&  res._message)
     await LocalAuth.signIn()
   },
   async onGetModels(providerId) {
-    let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
+    let modelPacks = await this.getLatestModelPacks()
+    // let modelPacks
+    // try {
+    //   modelPacks = await this.searchMessages({modelName: MODELS_PACK})
+    // } catch (err) {
+    //   debugger
+    // }
     if (!modelPacks) {
       let retModels = []
       for (let m in models)
@@ -6225,7 +6231,21 @@ if (!res[SIG]  &&  res._message)
     })
     this.trigger({action: 'models', list: retModels})
   },
-
+  async getLatestModelPacks() {
+    let allMessages = chatMessages[ALL_MESSAGES]
+    if (!allMessages)
+      return
+    let foundResources = []
+    allMessages.forEach(res => {
+      if (utils.getType(res) !== MODELS_PACK) return
+      foundResources.push(this._getItem(res.id))
+    })
+    if (!foundResources.length) return null
+    foundResources.sort((a, b) => {
+      return b._time - a._time
+    })
+    return await Promise.all(_.uniqBy(foundResources, 'from.id').map(r => this.onGetItem({resource: r, noTrigger: true})))
+  },
   wipe(opts) {
     if (isWeb(opts)) {
       return this.wipeWeb(opts)
@@ -7916,7 +7936,8 @@ if (!res[SIG]  &&  res._message)
         let rcontextId = utils.getId(r._context)
         rcontext = refsObj[rcontextId]
         if (!rcontextId) {
-          rcontext = this._getItemFromServer({idOrResource: rcontextId})
+          debugger
+          rcontext = await this._getItemFromServer({idOrResource: rcontextId})
           refsObj[rcontextId] = rcontext
         }
       }
@@ -7997,7 +8018,7 @@ if (!res[SIG]  &&  res._message)
       return
     if (r[TYPE] === BOOKMARK) {
       if (query)
-        this.checkAndFilter(params)
+        await this.checkAndFilter(params)
       else
         foundResources.push(this.fillMessage(r))
       return
@@ -8401,6 +8422,15 @@ if (!res[SIG]  &&  res._message)
     } catch (err) {
       debugger
     }
+    // for (let i=0; i<allLinks.length; i++) {
+    //   let link = allLinks[i]
+    //   try {
+    //     await this.handleOne({ link, links, all, filterProps, isForgetting, isRefresh, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
+    //   } catch (err) {
+    //     debugger
+    //   }
+    // }
+    // debugger
     if (isBacklinkProp) {
       let l = list.filter((r) => {
         if (r.hasOwnProperty('_latest')  &&  !r._latest)
@@ -8422,7 +8452,9 @@ if (!res[SIG]  &&  res._message)
       return
 
     if (!utils.isSubclassOf(model, FORM))
-      foundResources = foundResources.filter(r => r._latest)
+      // foundResources = foundResources.filter(r => r._latest)
+      foundResources = foundResources.filter(r => !r.hasOwnProperty('_latest') || r._latest)
+
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
     // Minor hack before we intro sort property here
     foundResources.sort((a, b) => a._time - b._time)
