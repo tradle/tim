@@ -948,6 +948,7 @@ var Store = Reflux.createStore({
         if (o  &&  o.url)
           me.organization.url = o.url
       }
+      utils.setCompanyLocaleAndCurrency(org)
     }
     let dictionaryDomains = this.getDictionaryDomains()
     await utils.setMe({meRes: me, dictionaryDomains, providerDictionaries})
@@ -4175,6 +4176,10 @@ if (!res[SIG]  &&  res._message)
       style = this._getItem(applicant.organization).style
     }
 
+    if (r.creditScoreDetails) {
+      debugger
+      this.convertCreditScore(r)
+    }
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
@@ -4185,7 +4190,15 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
     return r
   },
-
+  convertCreditScore(r) {
+    r.creditScoreDetails.forEach(cd => {
+      if (!cd.form) return
+      if (Array.isArray(cd.form))
+        cd.form = cd.form.map(f => storeUtils.makeStub(f))
+      else
+        cd.form = storeUtils.makeStub(cd.form)
+    })
+  },
   async getMessage(params) {
     var { resource } = params
     let result = await this.getObjects([resource._payloadLink])
@@ -6145,7 +6158,8 @@ if (!res[SIG]  &&  res._message)
     await LocalAuth.signIn()
   },
   async onGetModels(providerId) {
-    let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
+    let modelPacks = await this.getLatestModelPacks()
+    // let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
     if (!modelPacks) {
       let retModels = []
       for (let m in models)
@@ -6191,7 +6205,21 @@ if (!res[SIG]  &&  res._message)
     })
     this.trigger({action: 'models', list: retModels})
   },
-
+  async getLatestModelPacks() {
+    let allMessages = chatMessages[ALL_MESSAGES]
+    if (!allMessages)
+      return
+    let foundResources = []
+    allMessages.forEach(res => {
+      if (utils.getType(res) !== MODELS_PACK) return
+      foundResources.push(this._getItem(res.id))
+    })
+    if (!foundResources.length) return null
+    foundResources.sort((a, b) => {
+      return b._time - a._time
+    })
+    return await Promise.all(_.uniqBy(foundResources, 'from.id').map(r => this.onGetItem({resource: r, noTrigger: true})))
+  },
   wipe(opts) {
     return Q.all([
       AsyncStorage.clear(),
@@ -7232,6 +7260,8 @@ if (!res[SIG]  &&  res._message)
       rr.to = {id: authorId, title: authorTitle}
       break
     case APPLICATION:
+      if (rr.creditScoreDetails  &&  Array.isArray(rr.creditScoreDetails))
+        this.convertCreditScore(rr)
       // this.organizeSubmissions(rr)
     default:
       rr.from = {id: authorId, title: authorTitle}
@@ -7854,7 +7884,7 @@ if (!res[SIG]  &&  res._message)
         let rcontextId = utils.getId(r._context)
         rcontext = refsObj[rcontextId]
         if (!rcontextId) {
-          rcontext = this._getItemFromServer({idOrResource: rcontextId})
+          rcontext = await this._getItemFromServer({idOrResource: rcontextId})
           refsObj[rcontextId] = rcontext
         }
       }
@@ -7935,7 +7965,7 @@ if (!res[SIG]  &&  res._message)
       return
     if (r[TYPE] === BOOKMARK) {
       if (query)
-        this.checkAndFilter(params)
+        await this.checkAndFilter(params)
       else
         foundResources.push(this.fillMessage(r))
       return
@@ -8359,7 +8389,8 @@ if (!res[SIG]  &&  res._message)
       return
 
     if (!utils.isSubclassOf(model, FORM))
-      foundResources = foundResources.filter(r => r._latest)
+      foundResources = foundResources.filter(r => !r.hasOwnProperty('_latest') || r._latest)
+      // foundResources = foundResources.filter(r => r._latest)
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
     // Minor hack before we intro sort property here
     foundResources.sort((a, b) => a._time - b._time)
