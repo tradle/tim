@@ -334,7 +334,11 @@ class MessageView extends Component {
     let model = isWrapper ? rModel : utils.getLensedModel(resource, lensId);
     // let model = search ? rModel : utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
-    let isVerificationTree = isVerification &&  (resource.method || (resource.sources  &&  resource.sources.length))
+    let isVerificationTree
+    if (isVerification &&  (resource.method || (resource.sources  &&  resource.sources.length))) {
+      if (utils.isEmployee(resource.organization))
+        isVerificationTree = true
+    }
     let isForm = utils.isForm(model)
     let t = resource.dateVerified ? resource.dateVerified : resource._time
     let date
