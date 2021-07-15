@@ -120,8 +120,10 @@ var NewResourceMixin = {
       let prop = props[p]
       // prop is readOnly if explicitely has readOnly on it or
       // it is a _group property with 'list' of props annotation
-      if (prop  &&  !prop.readOnly  &&  !p.endsWith('_group')  && !prop.list)
-        showReadOnly = false
+      if (prop  &&  !prop.readOnly  &&  !p.endsWith('_group')  && !prop.list) {
+        if (!originatingMessage || !originatingMessage.prefill)
+          showReadOnly = false
+      }
     })
     // showReadOnly = true
     let requestedProperties, excludeProperties
@@ -880,7 +882,7 @@ var NewResourceMixin = {
     // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
-    let addStyle = prop.readOnly ? {backgroundColor: '#f7f7f7'} : {}
+    let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'} : {}
     // let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7', color: bankStyle.textColor || '#666666'} : {}
     return (
       <View style={st}>
@@ -1133,14 +1135,16 @@ var NewResourceMixin = {
             {...dateProps}
           />
     }
-    let icon
-    if (!editable)
+    let icon, addStyle
+    if (!editable) {
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+      addStyle = {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
+    }
 
     let help = this.paintHelp(prop)
     return (
       <View key={this.getNextKey()} ref={prop.name} style={{paddingBottom: 10}}>
-        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}]}>
+        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}, addStyle || {}]}>
           {propLabel}
           {datePicker}
           {icon}
