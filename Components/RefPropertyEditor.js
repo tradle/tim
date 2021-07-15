@@ -191,7 +191,7 @@ class RefPropertyEditor extends Component {
     }
     else {
       hasLock = true
-      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.customIcon} />
+      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.readOnly} />
     }
     let content = <View  style={styles.chooserContainer}>
                     {propView}
