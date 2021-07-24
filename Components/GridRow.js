@@ -182,10 +182,13 @@ class GridRow extends Component {
       if (rModel.id !== m.id  &&  utils.isSubclassOf(rModel, m.id))
         typeTitle = <Text style={styles.type}>{translate(rModel)}</Text>
       let cellStyle = {paddingVertical: 5, paddingLeft: 7}
+      let title = utils.getDisplayName({ resource })
+      if (!title)
+        title = translate(m)
       cols = [<View style={cellStyle}>
                {typeTitle}
                <Col sm={1} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + rowId}>
-                 <Text style={styles.description}>{utils.getDisplayName({ resource })}</Text>
+                 <Text style={styles.description}>{title}</Text>
                </Col>
              </View>]
     }
