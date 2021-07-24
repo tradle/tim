@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+// import ReactDOM from 'react-dom'
 import {
   // StyleSheet,
   ScrollView,
@@ -26,7 +27,7 @@ const {
   MESSAGE
 } = constants.TYPES
 
-import utils, { translate, translateModelDescription } from '../utils/utils'
+import utils, { translate, translateModelDescription, hexToRgb } from '../utils/utils'
 import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
 import Markdown from './Markdown'
 import ArticleView from './ArticleView'
@@ -42,9 +43,12 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
+import ApplicantLegalEntityConsent from './ApplicantLegalEntityConsent'
 
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
+const PRINTABLE = 'tradle.Printable'
+const FORM_ERROR = 'tradle.FormError'
 
 class MessageView extends Component {
   static displayName = 'MessageView';
@@ -267,7 +271,7 @@ class MessageView extends Component {
       context = resource._context
     }
     let formError = {
-      _t: 'tradle.FormError',
+      _t: FORM_ERROR,
       errors,
       prefill: resource,
       from: utils.getMe(),// resource.to,
@@ -395,6 +399,22 @@ class MessageView extends Component {
                     <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
                    </View>
     }
+    let print
+    if (utils.isImplementing(resource, PRINTABLE)) {
+      let componentName = resource[TYPE].split('.').slice(-1)
+      try {
+        if (require(`./${componentName}`)) {
+          print = <TouchableOpacity onPress={this.print.bind(this, resource, componentName)} style={styles.printView}>
+                    <View style={[buttonStyles.menuButton, styles.printButton]}>
+                      <Icon name='ios-print-outline' color={bankStyle.linkColor} size={30}/>
+                    </View>
+                  </TouchableOpacity>
+        }
+      } catch (err) {
+
+      }
+    }
+
     let content = <View style={styles.rowContainer}>
                     {msg}
                     {propertySheet}
@@ -508,8 +528,19 @@ class MessageView extends Component {
         </ScrollView>
         {title}
         {footer}
+        {print}
       </PageView>
     );
+  }
+  print(resource, componentName) {
+    const { navigator, bankStyle } = this.props
+    navigator.push({
+      backButtonTitle: 'Back',
+      componentName,
+      passProps: {
+        resource
+      }
+    })
   }
   showPDF({photo}) {
     let route = {
@@ -607,6 +638,9 @@ reactMixin(MessageView.prototype, ResourceMixin);
 MessageView = makeResponsive(MessageView)
 
 var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {
+  let rgb = hexToRgb(bankStyle.linkColor)
+  let printBC = `rgba(${Object.values(rgb).join(',')}, 0.3)`
+
   return StyleSheet.create({
     itemTitle: {
       fontSize: 18,
@@ -702,6 +736,15 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
       borderTopWidth: StyleSheet.hairlineWidth,
       height: 45,
       justifyContent: 'center'
+    },
+    printButton: {
+      backgroundColor: '#ffffff',
+      borderColor: printBC,
+      borderWidth: 1,
+    },
+    printView: {
+      padding: 20,
+      alignSelf: 'flex-end'
     },
     viewTitleText: {
       fontSize: 24,
