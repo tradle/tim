@@ -121,7 +121,10 @@ module.exports = {
   },
   get TimHome() {
     return require('./TimHome')
-  }
+  },
+  get ApplicantLegalEntityConsent() {
+    return require('./ApplicantLegalEntityConsent')
+  },
 }
 
 // module.exports = new Proxy(components, {
