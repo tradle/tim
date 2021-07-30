@@ -3986,6 +3986,7 @@ var Store = Reflux.createStore({
   async onGetItem(params) {
     let {resource, action, noTrigger, search, backlink, backlinks, isChat} = params
     // await this._loadedResourcesDefer.promise
+    if (!resource) debugger
     let type = utils.getType(resource)
     const resModel = this.getModel(type)
     if (!resModel) {
@@ -5966,7 +5967,10 @@ if (!res[SIG]  &&  res._message)
       [TYPE]: SHARE_REQUEST,
       links: hashes,
       with:  [{
-        id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+        [TYPE]: IDENTITY,
+        _permalink: to[ROOT_HASH],
+        _link: to[CUR_HASH]
+        // id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
       }]
     }
     let msg = await this.packMessage(sr, me, to)
@@ -6244,7 +6248,8 @@ if (!res[SIG]  &&  res._message)
     foundResources.sort((a, b) => {
       return b._time - a._time
     })
-    return await Promise.all(_.uniqBy(foundResources, 'from.id').map(r => this.onGetItem({resource: r, noTrigger: true})))
+    let fr = _.uniqBy(foundResources, 'from.id')
+    return await Promise.all(fr.map(r => this.onGetItem({resource: r, noTrigger: true})))
   },
   wipe(opts) {
     if (isWeb(opts)) {
@@ -9013,6 +9018,8 @@ if (!res[SIG]  &&  res._message)
       // and we don't want to create it again from this same notification
       if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated  ||  r.form === PRODUCT_REQUEST)
         continue;
+      if (r.prefill)
+        continue
       if (utils.getId(r.to)  !==  meId)
         continue
       let rr = simpleLinkMessages[r.form]
@@ -9223,6 +9230,8 @@ if (!res[SIG]  &&  res._message)
 
       if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated  ||  r.form === PRODUCT_REQUEST)
         continue;
+      if (r.prefill)
+        continue
       let rr = simpleLinkMessages[r.form]
       if (rr) {
         rr._documentCreated = true
