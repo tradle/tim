@@ -743,6 +743,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this.selectMessage(resource)
       return;
     }
+    if (isMyProduct) {
+      this._selectResource(resource);
+      return
+    }
     let { prop } = this.props
     if (prop  &&  !isApplication) {
       if (me) {
