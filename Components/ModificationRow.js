@@ -46,16 +46,18 @@ class ModificationRow extends Component {
     let model = getModel(MODIFICATION);
 
     let { modifications } = resource
-    let { dataLineage, initialSubmission } = modifications
+    let { dataLineage, initialSubmission, shared } = modifications
 
     let json = dataLineage &&  dataLineage || modifications
     let title
     if (!dataLineage) {
-      title = translate('clientEdit')
+      title = shared  ?  translate('shared') : translate('clientEdit')
       if (initialSubmission) {
         title = `${title} - ${translate('initialSubmission')}`
         json = initialSubmission
       }
+      else if (shared)
+        json = shared
     }
     else {
       title = translate('prefill')
