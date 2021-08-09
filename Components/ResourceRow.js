@@ -1,4 +1,4 @@
-
+/*global Intl*/
 import {
   Alert,
   Platform,
@@ -451,11 +451,25 @@ class ResourceRow extends Component {
       }
       let dn
       let isSeparator
-      if (utils.isEnum(model)  &&  model.id !== LANGUAGE) {
-        dn = translateEnum(resource)
-        isSeparator = this.isSeparator(model, resource)
-        if (isSeparator)
-          dn = dn.toUpperCase()
+      let me = utils.getMe()
+      let myLanguage = me.languageCode || 'en'
+      const regionNamesInMyLanguage = new Intl.DisplayNames(myLanguage, { type: 'language' });
+      if (utils.isEnum(model)) {
+        if (model.id === LANGUAGE) {
+          dn = utils.getDisplayName({ resource })
+          let lang = resource[ROOT_HASH]
+          if (lang !== '__reset'  &&  lang !== myLanguage) {
+            let langTitle = regionNamesInMyLanguage.of(lang)
+            langTitle = langTitle.charAt(0).toUpperCase() + langTitle.slice(1)
+            dn += ` (${langTitle})`
+          }
+        }
+        else {
+          dn = translateEnum(resource)
+          isSeparator = this.isSeparator(model, resource)
+          if (isSeparator)
+            dn = dn.toUpperCase()
+        }
       }
       else
         dn = utils.getDisplayName({ resource })

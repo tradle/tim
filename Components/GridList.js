@@ -79,6 +79,7 @@ const BOOKMARKS_FOLDER = 'tradle.BookmarksFolder'
 const FORM_ERROR = 'tradle.FormError'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const MODIFICATION = 'tradle.Modification'
+const LANGUAGE = 'tradle.Language'
 
 var excludeFromBrowsing = [
   FORM,
@@ -1611,9 +1612,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
           hasSearch = (dataSource && dataSource.getRowCount() > SEARCH_LIMIT) || (filter  &&  filter.length)
       }
       if (hasSearch) {
+        let placeholder
+        if (model.id === LANGUAGE)
+          placeholder = `${translate('typeInLanguage')} Русский, Française...`
+        else
+          placeholder = translate('search')
         searchBar = <SearchBar
                       onChangeText={this.onSearchChange.bind(this)}
-                      placeholder={translate('search')}
+                      placeholder={placeholder}
                       showsCancelButtonWhileEditing={false}
                       showsCancelButton={false}
                       hideBackground={true}
