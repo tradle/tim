@@ -1496,7 +1496,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (prop  &&  utils.isForm(model)) {
+    if (prop  && !model.inlined && !model.enum) { // utils.isForm(model)) {
       if (!r)
         r = {}
       let pRef = prop.ref || prop.items.ref;
