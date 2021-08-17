@@ -29,6 +29,8 @@ import StringChooser from './StringChooser'
 
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
+// import customFormDefaults from '../data/customFormDefaults.json'
+
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
@@ -673,8 +675,9 @@ class FormRequestRow extends Component {
            </View>
   }
   showDocumentsToShare(shareableResources) {
-    const { navigator, resource, to } = this.props
     let { verifications } = shareableResources
+    if (!verifications.length) return
+    const { resource, to } = this.props
     verifications = verifications[resource.form]
     let documents = verifications.map((v) => v.document)
     this.showDocuments({documents, verifications, verifiedBy: to.name || to.title, multiChooser: false})
@@ -736,11 +739,16 @@ class FormRequestRow extends Component {
       }
 
       // Prefill for testing and demoing
-      if (ENV.prefillForms  &&  model.id in formDefaults) {
-        _.extend(r, formDefaults[model.id])
-        isPrefilled = true
+      if (ENV.prefillForms) {
+        if (model.id in formDefaults) {
+          _.extend(r, formDefaults[model.id])
+          isPrefilled = true
+        }
+        // else if (model.id in customFormDefaults) {
+        //   _.extend(r, customFormDefaults[model.id])
+        //   isPrefilled = true
+        // }
       }
-
       if (formRequest.prefill) {
         _.defaults(r, formRequest.prefill)
         isPrefilled = true
