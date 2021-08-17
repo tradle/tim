@@ -5987,11 +5987,22 @@ if (!res[SIG]  &&  res._message)
   },
 
   async shareResources(resources, to, formRequest, shareBatchId) {
-    let hashes = resources.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    let hashes = resources.map(d => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    let stubs = resources.map(d => ({
+        [TYPE]: utils.getType(d),
+        _link: d[CUR_HASH] || this._getItem(d)[CUR_HASH],
+        _permalink: utils.getRootHash(d),
+        _displayName: utils.getDisplayName({resource: d})
+      })
+    )
+    debugger
     let r = this._getItem(utils.makeId(PROFILE, to[ROOT_HASH], to[CUR_HASH]))
+    let isVerification = resources[0][TYPE] === VERIFICATION
+    let propName = isVerification ? 'verificationStubs' : 'formStubs'
     let sr = {
       [TYPE]: SHARE_REQUEST,
       links: hashes,
+      [propName]: stubs,
       with:  [{
         [TYPE]: IDENTITY,
         _permalink: to[ROOT_HASH],
@@ -7079,8 +7090,17 @@ if (!res[SIG]  &&  res._message)
       if (!context[TYPE])
         context = null
     }
-    else if (!filterResource)
-      return
+    else if (!filterResource) {
+      if (me.isEmployee) {
+        if (utils.getRootHash(me.organization) !== utils.getRootHash(to)) {
+          filterResource = {
+            _counterparty: this.getRepresentative(to)[ROOT_HASH]
+          }
+        }
+      }
+      if (!filterResource)
+        return
+    }
     if (!context  &&  contextId) {
       context = await this.searchServer({
         modelName: PRODUCT_REQUEST,
@@ -7135,9 +7155,14 @@ if (!res[SIG]  &&  res._message)
       let list = response.edges
       // HACK
       let filteredList = list.filter(r =>
-        r.node.object[TYPE] !== MODELS_PACK  &&
-        r.node.object[TYPE] !== STYLES_PACK  &&
-        r.node.object[TYPE] !== MESSAGE      &&
+        r.node.object[TYPE] !== MODELS_PACK   &&
+        r.node.object[TYPE] !== STYLES_PACK   &&
+        r.node.object[TYPE] !== MESSAGE       &&
+        r.node.object[TYPE] !== SHARE_REQUEST &&
+        r.node.object[TYPE] !== CUSTOMER_WAITING &&
+        r.node.object[TYPE] !== IDENTITY_PUBLISHING_REQUEST &&
+        r.node.object[TYPE] !== INTRODUCTION &&
+        r.node.object[TYPE] !== SELF_INTRODUCTION &&
         r.node.object[TYPE] !== CHECK_OVERRIDE
         )
       list = filteredList
@@ -7857,22 +7882,22 @@ if (!res[SIG]  &&  res._message)
     let refsObj = {}
     let foundResources = []
 
-    try {
-      let l = await Promise.all(allLinks.map(link => {
-        return this.handleOne({ link, links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
-      }))
-    } catch(err) {
-      debugger
-    }
-    // let l = []
-    // for (let i=0; i<links.length; i++) {
-    //   try {
-    //     let r1 = await this.handleOne({ link: links[i], links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
-    //     l.push(r1)
-    //   } catch (err) {
-    //     debugger
-    //   }
+    // try {
+    //   let l = await Promise.all(allLinks.map(link => {
+    //     return this.handleOne({ link, links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
+    //   }))
+    // } catch(err) {
+    //   debugger
     // }
+    let l = []
+    for (let i=0; i<links.length; i++) {
+      try {
+        let r1 = await this.handleOne({ link: links[i], links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
+        l.push(r1)
+      } catch (err) {
+        debugger
+      }
+    }
     if (!foundResources.length)
       return
     foundResources = this.filterFound({foundResources, filterProps, refsObj})
@@ -9264,7 +9289,7 @@ if (!res[SIG]  &&  res._message)
     let toR = (to.organization  &&  this._getItem(to.organization)) || to
     let myBot = this.getRepresentative(me.organization)
     let myBotId = utils.getId(myBot)
-    for (let i=foundResources.length-1; i>=0; i--) {
+    for (let i=foundResources.length-1; i>=0 && !shareType; i--) {
       let r = foundResources[i]
       if (utils.getId(r.to) !== meId     &&
           utils.getId(r.from) !== meId   &&
