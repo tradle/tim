@@ -204,6 +204,7 @@ module.exports = {
     "enableCameraAccess": "{appName} currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled.",
     "noScanningOnAndroid": "Document scanning on Android is coming soon.",
     "pleaseTapOnMenu": "Please tap on the red button and",
+    "typeInLanguage": "Search in native language like",
     // messages to delete
     "holdPhoneToPassportBackCover": "Hold the back of your phone against the back inside cover of your passport.",
     "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
