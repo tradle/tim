@@ -32,6 +32,9 @@ module.exports = {
   get ScoreDetails() {
     return require('./ScoreDetails')
   },
+  get CreditScoreDetails() {
+    return require('./CreditScoreDetails')
+  },
   get SignatureView() {
     return require('./SignatureView')
   },
