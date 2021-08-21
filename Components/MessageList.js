@@ -1389,9 +1389,14 @@ class MessageList extends Component {
   generateMenu(show) {
     if (!show || !this.ActionSheet)
       return <View/>
-    return  <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-              {this.paintMenuButton()}
-            </TouchableOpacity>
+    let home = utils.getMe().isEmployee  &&  this.addHomeButton()
+
+    return  <View style={{flexDirection: 'row'}}>
+              {home}
+              <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+                {this.paintMenuButton()}
+              </TouchableOpacity>
+            </View>
   }
 
   paintMenuButton() {
