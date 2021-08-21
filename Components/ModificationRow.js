@@ -51,13 +51,18 @@ class ModificationRow extends Component {
     let json = dataLineage &&  dataLineage || modifications
     let title
     if (!dataLineage) {
-      title = shared  ?  translate('shared') : translate('clientEdit')
+      if (shared)
+        title = shared.isVerification ? translate('sharedVerification') : translate('shared')
+      else
+        title = translate('clientEdit')
       if (initialSubmission) {
         title = `${title} - ${translate('initialSubmission')}`
         json = initialSubmission
       }
-      else if (shared)
-        json = shared
+      else if (shared) {
+        json = _.clone(shared)
+        delete json.isVerification
+      }
     }
     else {
       title = translate('prefill')
