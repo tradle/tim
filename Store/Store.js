@@ -3898,6 +3898,14 @@ var Store = Reflux.createStore({
       if (!contextId  &&  formRequest._context)
         contextId = formRequest._context.contextId  ||  this._getItem(formRequest._context).contextId
       lens = formRequest.lens
+      // if the resource is a shared backlink resource the 'lens' will incorrect for this model
+      if (lens) {
+        let idx = lens.indexOf('.lens.')
+        let type = `${lens.slice(0, idx)}${lens.slice(idx + 5)}`
+        debugger
+        if (type !== resource[TYPE])
+          lens = null
+      }
     }
     let hasThisShare
     if (resource._sharedWith) {
@@ -4072,6 +4080,20 @@ if (!res[SIG]  &&  res._message)
 
     if (resource._sourceOfData)
       r._sourceOfData = resource._sourceOfData
+    if (r.modificationHistory) {
+      r.modificationHistory.forEach(mod => {
+        let shared = mod.modifications.shared
+        if (!shared)
+          return
+        for (let p in shared) {
+          if (p === 'isVerification') continue
+          let val = shared[p]
+          val = this._getItem(utils.makeId(PROFILE, val, val))
+          if (val)
+            mod.modifications.shared[p] = val.organization.title
+        }
+      })
+    }
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
     if (list)
       retParams.list = list
@@ -5877,7 +5899,7 @@ if (!res[SIG]  &&  res._message)
     let document = resource.document
     if (document  &&  document[TYPE] === LEGAL_ENTITY) {
       let links = { [document[ROOT_HASH]]: document }
-      await this.getAllLinkedResources(document, links)
+      await this.getAllShareableLinkedResources(document, links)
       if (links) {
         await this.shareAll(Object.values(links), shareWithList, originatingResource)
         return
@@ -5887,7 +5909,7 @@ if (!res[SIG]  &&  res._message)
     await this.shareAll([resource.document || resource], shareWithList, originatingResource)
   },
 
-  async getAllLinkedResources(resource, links) {
+  async getAllShareableLinkedResources(resource, links) {
     let model = utils.getModel(resource[TYPE])
 
     if (utils.isImplementing(model, INTERSECTION)) {
@@ -5899,13 +5921,13 @@ if (!res[SIG]  &&  res._message)
         if (!value)
           continue
 
-        if (!links[this.getRootHash(value)]) {
+        if (links[this.getRootHash(value)]) {
           if (!value[TYPE])
             value = await this.onGetItem({resource: value, noTrigger: true})
           links[this.getRootHash(value)] = value
           let vType = utils.getType(value)
           if (vType === LEGAL_ENTITY)
-            await this.getAllLinkedResources(value, links)
+            await this.this.getAllShareableLinkedResources(value, links)
         }
       }
       return
@@ -5917,8 +5939,12 @@ if (!res[SIG]  &&  res._message)
       return
     let backlinksList = {}
     for (let p in backlinks) {
-      if (backlinks[p].items.backlink)
-        backlinksList[p] = backlinks[p]
+      if (backlinks[p].items.backlink) {
+        let ref = utils.getModel(backlinks[p].items.ref)
+        if (utils.isSubclassOf(ref, FORM) ||
+            utils.isSubclassOf(ref, VERIFICATION))
+          backlinksList[p] = backlinks[p]
+      }
     }
     if (utils.isEmpty(backlinksList))
       return
@@ -5934,18 +5960,34 @@ if (!res[SIG]  &&  res._message)
         if (links[r[ROOT_HASH]])
           continue
         links[r[ROOT_HASH]] = r
-        await this.getAllLinkedResources(r, links)
+        await this.this.getAllShareableLinkedResources(r, links)
       }
     }
   },
 
   async shareResources(resources, to, formRequest, shareBatchId) {
-    let hashes = resources.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    let hashes = resources.map(d => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    let stubs = resources.map(d => ({
+        [TYPE]: utils.getType(d),
+        _link: d[CUR_HASH] || this._getItem(d)[CUR_HASH],
+        _permalink: utils.getRootHash(d),
+        _displayName: utils.getDisplayName({resource: d})
+      })
+    )
+    debugger
+    let r = this._getItem(utils.makeId(PROFILE, to[ROOT_HASH], to[CUR_HASH]))
+    let isVerification = resources[0][TYPE] === VERIFICATION
+    let propName = isVerification ? 'verificationStubs' : 'formStubs'
     let sr = {
       [TYPE]: SHARE_REQUEST,
       links: hashes,
+      [propName]: stubs,
       with:  [{
-        id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+        [TYPE]: IDENTITY,
+        _permalink: to[ROOT_HASH],
+        _link: to[CUR_HASH],
+        _displayName: r.organization && r.organization.title || r.formatted
+         // id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
       }]
     }
     let msg = await this.packMessage(sr, me, to)
@@ -6218,7 +6260,15 @@ if (!res[SIG]  &&  res._message)
     foundResources.sort((a, b) => {
       return b._time - a._time
     })
-    return await Promise.all(_.uniqBy(foundResources, 'from.id').map(r => this.onGetItem({resource: r, noTrigger: true})))
+    let fr = _.uniqBy(foundResources, 'from.id')
+    let ret = []
+    for (let i=0; i<fr.length; i++) {
+      let mp = await this.onGetItem({resource: fr[i], noTrigger: true})
+      if (mp)
+        ret.push(mp)
+    }
+    return ret
+    // return await Promise.all(_.uniqBy(foundResources, 'from.id').map(r => this.onGetItem({resource: r, noTrigger: true})))
   },
   wipe(opts) {
     return Q.all([
@@ -6993,8 +7043,17 @@ if (!res[SIG]  &&  res._message)
       if (!context[TYPE])
         context = null
     }
-    else if (!filterResource)
-      return
+    else if (!filterResource) {
+      if (me.isEmployee) {
+        if (utils.getRootHash(me.organization) !== utils.getRootHash(to)) {
+          filterResource = {
+            _counterparty: this.getRepresentative(to)[ROOT_HASH]
+          }
+        }
+      }
+      if (!filterResource)
+        return
+    }
     if (!context  &&  contextId) {
       context = await this.searchServer({
         modelName: PRODUCT_REQUEST,
@@ -7049,9 +7108,14 @@ if (!res[SIG]  &&  res._message)
       let list = response.edges
       // HACK
       let filteredList = list.filter(r =>
-        r.node.object[TYPE] !== MODELS_PACK  &&
-        r.node.object[TYPE] !== STYLES_PACK  &&
-        r.node.object[TYPE] !== MESSAGE      &&
+        r.node.object[TYPE] !== MODELS_PACK   &&
+        r.node.object[TYPE] !== STYLES_PACK   &&
+        r.node.object[TYPE] !== MESSAGE       &&
+        r.node.object[TYPE] !== SHARE_REQUEST &&
+        r.node.object[TYPE] !== CUSTOMER_WAITING &&
+        r.node.object[TYPE] !== IDENTITY_PUBLISHING_REQUEST &&
+        r.node.object[TYPE] !== INTRODUCTION &&
+        r.node.object[TYPE] !== SELF_INTRODUCTION &&
         r.node.object[TYPE] !== CHECK_OVERRIDE
         )
       list = filteredList
@@ -7144,7 +7208,8 @@ if (!res[SIG]  &&  res._message)
         let applicant = this._getItem(applicantId)
         if (applicant  &&  applicant.organization) {
           let applicantOrgId = utils.getId(applicant.organization)
-          style = SERVICE_PROVIDERS.filter((sp) => sp.org === applicantOrgId)[0].style
+          let provider = SERVICE_PROVIDERS.filter((sp) => sp.org === applicantOrgId)
+          style = provider.length  &&  provider[0].style
         }
       }
       let shareables
@@ -9144,7 +9209,7 @@ if (!res[SIG]  &&  res._message)
     let toR = (to.organization  &&  this._getItem(to.organization)) || to
     let myBot = this.getRepresentative(me.organization)
     let myBotId = utils.getId(myBot)
-    for (let i=foundResources.length-1; i>=0; i--) {
+    for (let i=foundResources.length-1; i>=0  &&  !shareType; i--) {
       let r = foundResources[i]
       if (utils.getId(r.to) !== meId     &&
           utils.getId(r.from) !== meId   &&
@@ -9247,6 +9312,7 @@ if (!res[SIG]  &&  res._message)
       let result = await Promise.all(promises)
       let l = {}
       result.forEach(r => {
+        if (!r) return
         if (!r.ownersOfThisEntity  ||  !r.ownersOfThisEntity.length)
           l[r[ROOT_HASH]] = r
       })
