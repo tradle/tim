@@ -54,22 +54,20 @@ class FormErrorRow extends Component {
   }
 
   render() {
-    var resource = this.props.resource;
+    let { resource, bankStyle } = this.props
 
-    var isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
+    let isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
 
-    var renderedRow = [];
-    var ret = this.formatRow(isMyMessage, renderedRow);
+    let renderedRow = [];
+    let ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    var addStyle
+    let addStyle
 
     let message = resource.message
 
-    const bankStyle = this.props.bankStyle
-
     if (!renderedRow.length) {
-      var vCols = utils.getDisplayName({ resource })
+      let vCols = utils.getDisplayName({ resource })
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
@@ -81,9 +79,9 @@ class FormErrorRow extends Component {
 
       addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.formErrorBg, borderColor: resource._documentCreated ? bankStyle.fixErrorColor : bankStyle.formErrorBorder}]; //model.style];
     }
-    var rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
-    var val = this.getTime(resource);
-    var date = val
+    let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
+    let val = this.getTime(resource);
+    let date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
@@ -97,7 +95,7 @@ class FormErrorRow extends Component {
       width -= 43
     let viewStyle = { width }
     let sendStatus = this.getSendStatus()
-    var sealedStatus = (resource.txId)
+    let sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
                          <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                        </View>
@@ -108,7 +106,7 @@ class FormErrorRow extends Component {
       cellStyle = addStyle
     else
       cellStyle = chatStyles.textContainer
-    var messageBody
+    let messageBody
     if (prop) {
       if (prop.ref == PHOTO) {
         messageBody = <View style={[rowStyle, viewStyle]}>
@@ -156,7 +154,7 @@ class FormErrorRow extends Component {
                       </View>
       }
     }
-    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
+    let bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
       <View style={[styles.viewStyle, {backgroundColor: bg, width: width, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
         {date}
@@ -196,7 +194,7 @@ class FormErrorRow extends Component {
     r.to = resource.from
 
     // Prefill for testing and demoing
-    // var isPrefilled = model.id in formDefaults
+    // let isPrefilled = model.id in formDefaults
     // if (isPrefilled)
     //   extend(true, resource, formDefaults[model.id])
     let type = utils.getType(r)
@@ -224,7 +222,7 @@ class FormErrorRow extends Component {
   }
   formatRow(isMyMessage, renderedRow) {
     let {resource, to, application, bankStyle } = this.props
-    var model = utils.getModel(resource[TYPE] || resource.id)
+    let model = utils.getModel(resource[TYPE] || resource.id)
 
     let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
     let context = isContext ? to : resource._context
@@ -243,13 +241,13 @@ class FormErrorRow extends Component {
         isReadOnlyChat = true
     }
 
-    var viewCols = model.gridCols || model.viewCols;
+    let viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
 
-    var properties = model.properties;
+    let properties = model.properties;
 
-    var vCols = [];
+    let vCols = [];
 
     viewCols.forEach((v) => {
       if (properties[v].type === 'array'  ||
@@ -263,7 +261,7 @@ class FormErrorRow extends Component {
           vCols.push(this.getPropRow(properties[v], resource, resource[v].title || resource[v]))
         return;
       }
-      var style = chatStyles.resourceTitle
+      let style = chatStyles.resourceTitle
       if (isMyMessage)
         style = [style, styles.myMessage];
 
@@ -311,12 +309,12 @@ class FormErrorRow extends Component {
       return {onPressCall: this.showEditResource.bind(this)}
   }
   canEmployeePrefill(resource) {
-    let { application } = this.props
+    const { application } = this.props
     return !resource._documentCreated  &&  application  &&  utils.isRM(application)
   }
 }
 
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1
   },
