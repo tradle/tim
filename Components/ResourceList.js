@@ -722,6 +722,12 @@ class ResourceList extends Component {
       }
     }
     else if (isOrganization) { //  &&  !utils.getMe().isEmployee) {
+      // if(me.isEmployee) {
+      //   // debugger
+      //   if (utils.getRootHash(me.organization) !== utils.getRootHash(resource)) {
+      //     route.passProps.search = true
+      //   }
+      // }
       route.rightButtonTitle = 'View'
       route.onRightButtonPress = {
         title,
