@@ -9,13 +9,16 @@ import { getContentSeparator } from '../utils/uiUtils'
 import {
   View,
   // Text,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView
 } from 'react-native'
 import PropTypes from 'prop-types';
 import { Text } from './Text'
 import React, { Component } from 'react'
 // import { makeResponsive } from 'react-native-orient'
 import SignaturePad from 'react-native-signature-pad'
+import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
+import Markdown from './Markdown'
 
 class SignatureView extends Component {
   static displayName = 'SignatureView';
@@ -44,14 +47,31 @@ class SignatureView extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let { sigViewStyle, prop } = this.props
-    const { width } = utils.dimensions(SignatureView)
+    let { sigViewStyle, prop, model, bankStyle, navigator } = this.props
+    let { width } = utils.dimensions(SignatureView)
     let separator = getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
-    let title = translate(prop.description || 'pleaseSign')
+    let description
+    if (prop) {
+      if (prop.description) {
+        description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                        <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                          {translate(prop, model, true)}
+                        </Markdown>
+                      </View>
+      }
+    }
+    else if (model && model.description) {
+      description = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                      <Markdown markdownStyles={getMarkdownStyles(bankStyle, false, false, true)} passThroughProps={{navigator, bankStyle}}>
+                        {translate(model.description)}
+                      </Markdown>
+                    </View>
+    }
+    let title = !description && translate(prop.description || 'pleaseSign')
     return (
       <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
-        <Text style={styles.instructions}>{title}</Text>
+        {description ||  <Text style={styles.instructions}>{title}</Text>}
         <View style={{
           flex: 1,
           maxHeight: Math.min(width / 2, 200),
