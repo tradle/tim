@@ -672,8 +672,9 @@ class FormRequestRow extends Component {
            </View>
   }
   showDocumentsToShare(shareableResources) {
-    const { navigator, resource, to } = this.props
     let { verifications } = shareableResources
+    if (!verifications.length) return
+    const { resource, to } = this.props
     verifications = verifications[resource.form]
     let documents = verifications.map((v) => v.document)
     this.showDocuments({documents, verifications, verifiedBy: to.name || to.title, multiChooser: false})
