@@ -4116,6 +4116,7 @@ if (!res[SIG]  &&  res._message)
         if (!shared)
           return
         for (let p in shared) {
+          if (p === 'isVerification') continue
           let val = shared[p]
           val = this._getItem(utils.makeId(PROFILE, val, val))
           if (val)
