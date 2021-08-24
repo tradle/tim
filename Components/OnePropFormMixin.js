@@ -43,8 +43,8 @@ var OnePropFormMixin = {
           to: formRequest.from
         }
       )
-    if (!resource[prop.name])
-      this.props.navigator.pop()
+    // if (!resource[prop.name])
+    this.props.navigator.pop()
 
     if (doSet) {
       let r = _.cloneDeep(resource)
@@ -74,7 +74,7 @@ var OnePropFormMixin = {
       onRightButtonPress: () => {
         const sig = sigView.getSignature()
         navigator.pop()
-        onSet(prop, sig.url)
+        onSet(prop, sig)
       },
       passProps: {
         ref: ref => {
