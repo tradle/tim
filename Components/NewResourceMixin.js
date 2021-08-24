@@ -810,7 +810,8 @@ var NewResourceMixin = {
     let title, sig
     if (value) {
       let vStyle = { height: 100, justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
-      let lStyle = [styles.labelStyle, { paddingBottom: 10, color: lcolor, fontSize: 12}]
+      // let lStyle = [styles.labelStyle, { paddingBottom: 10, color: lcolor, fontSize: 12}]
+      let lStyle = { paddingBottom: 10, color: lcolor, fontSize: 12}
       title = utils.translate('Please click here to change signature')
       let { width, height } = value
       let h = 70
@@ -825,8 +826,9 @@ var NewResourceMixin = {
             </View>
     }
     else {
-      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 15, borderBottomColor: '#cccccc', borderBottomWidth: 1}
-      let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
+      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
+      // let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
+      let lStyle = { color: lcolor, fontSize: 20}
       title = utils.translate('Please click here to sign')
       sig = <View style={vStyle}>
               <Text style={lStyle}>{title}</Text>
@@ -838,7 +840,7 @@ var NewResourceMixin = {
     }
     else {
       return <View style={st}>
-               <TouchableOpacity onPress={this.showSignatureView.bind(this, { prop, doSet, onSet: this.changeValue.bind(this, prop) })}>
+               <TouchableOpacity onPress={this.showSignatureView.bind(this, { prop, doSet, onSet: this.changeValue.bind(this) })}>
                  {sig}
                </TouchableOpacity>
             </View>
@@ -2039,7 +2041,7 @@ var styles= StyleSheet.create({
   },
   markdown: {
     backgroundColor: '#f7f7f7',
-    paddingVertical: 10,
+    padding: 10,
   },
   container: {
     flex: 1
