@@ -2435,7 +2435,7 @@
 					"-lc++",
 					"-all_load",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.lablz;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = Tradle;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2512,7 +2512,7 @@
 					"-lc++",
 					"-all_load",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.lablz;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = Tradle;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2627,7 +2627,7 @@
 					"-all_load",
 				);
 				PODS_CONFIGURATION_BUILD_DIR = "${PODS_BUILD_DIR}/Release$(EFFECTIVE_PLATFORM_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.lablz;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = Tradle;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
