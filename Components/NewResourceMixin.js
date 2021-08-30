@@ -1561,7 +1561,8 @@ var NewResourceMixin = {
     if (editable) return  <View />
     if (prop.grid)
       return this.renderSimpleGrid(value, prop, component)
-    this.renderSimpleProp(value, prop, prop.items.ref, component)
+
+    this.renderSimpleProp({val: value, pMeta: prop, modelName: prop.items.ref, component})
   },
 
   myEnumTemplate(params) {
