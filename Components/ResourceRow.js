@@ -463,13 +463,13 @@ class ResourceRow extends Component {
       let isSeparator
       let me = utils.getMe()
       let myLanguage = me.languageCode || 'en'
-      const regionNamesInMyLanguage = new Intl.DisplayNames(myLanguage, { type: 'language' });
       if (utils.isEnum(model)) {
         if (model.id === LANGUAGE) {
           dn = utils.getDisplayName({ resource })
           let lang = resource[ROOT_HASH]
           if (lang !== '__reset'  &&  lang !== myLanguage) {
-            let langTitle = regionNamesInMyLanguage.of(lang)
+            const regionNamesInMyLanguage = Intl.DisplayNames && new Intl.DisplayNames(myLanguage, { type: 'language' })
+            let langTitle = regionNamesInMyLanguage ? regionNamesInMyLanguage.of(lang) : ''
             langTitle = langTitle.charAt(0).toUpperCase() + langTitle.slice(1)
             dn += ` (${langTitle})`
           }
