@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StatusBar,
   View,
+  SafeAreaView,
   Modal
   // Text,
 } from 'react-native'
@@ -1161,11 +1162,13 @@ class ResourceList extends Component {
     let contentSeparator = getContentSeparator(this.state.bankStyle)
     return (
       <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
+      <SafeAreaView style={styles.container}>
         {network}
         {searchBar}
         <View style={(searchBar  ||  hasNetworkRow) && styles.separator} />
         {content}
         {qrcode}
+      </SafeAreaView>
         {footer}
         {actionSheet}
       </PageView>
@@ -1598,6 +1601,9 @@ var prettifyRow = style => {
 }
 
 var styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
   header: {
     padding: 20
   },

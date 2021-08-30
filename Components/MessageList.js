@@ -8,6 +8,7 @@ import {
   StatusBar,
   Modal,
   TouchableOpacity,
+  SafeAreaView,
   Alert,
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -1019,6 +1020,7 @@ class MessageList extends Component {
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
+      <SafeAreaView style={styles.container}>
         {backgroundImage}
         {network}
         <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
@@ -1030,6 +1032,7 @@ class MessageList extends Component {
         {actionSheet}
         {alert}
         {assignRM}
+      </SafeAreaView>
       </PageView>
     )
   }
@@ -1579,16 +1582,13 @@ var createStyles = utils.styleFactory(MessageList, function ({ dimensions, bankS
       paddingLeft: 10,
       paddingRight: 10,
     },
-    container: {
-      alignItems: 'center'
-    },
     mainWrap: {
       flex: 1,
       alignItems: 'stretch',
       justifyContent: 'flex-start',
     },
-    flex1: {
-      flex: 1,
+    container: {
+      flex: 1
     },
     bottom: {
       position: 'absolute',

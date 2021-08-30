@@ -4,6 +4,7 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  SafeAreaView
 } from 'react-native'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
@@ -248,6 +249,7 @@ class ApplicationView extends Component {
                 </View>
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
+        <SafeAreaView style={styles.container}>
         {network}
         {loading}
         <ScrollView  ref='this' name={this._lazyId}>
@@ -266,6 +268,7 @@ class ApplicationView extends Component {
                             deny={this.deny}
                             bankStyle={bankStyle}/>
         </ScrollView>
+       </SafeAreaView>
        {footer}
       </PageView>
      );
@@ -472,6 +475,9 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
   let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
   let paddingRight = Platform.OS === 'android' ? 0 : 10
   return StyleSheet.create({
+    container: {
+      flex: 1
+    },
     row: {
       flex: 1,
       paddingHorizontal: 10,

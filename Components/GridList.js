@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   StatusBar,
   View,
+  SafeAreaView,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -1646,11 +1647,13 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={(this.state.allowToAdd  || (!isBacklink && !isForwardlink && !isEmptyItemsTab)) && contentSeparator} bankStyle={bankStyle}>
+        <SafeAreaView style={styles.container}>
         {network}
         {searchBar}
         <View style={styles.separator} />
         {content}
         {loading}
+        </SafeAreaView>
         {footer}
         {actionSheet}
       </PageView>
@@ -1799,6 +1802,9 @@ GridList = makeResponsive(GridList)
 GridList = makeStylish(GridList)
 
 var styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
   separator: {
     height: 1,
     backgroundColor: '#eeeeee',

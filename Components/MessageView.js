@@ -6,6 +6,7 @@ import {
   View,
   Text,
   Alert,
+  SafeAreaView,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -481,7 +482,8 @@ class MessageView extends Component {
                     </View>
     }
     return (
-      <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle} >
+      <PageView style={[platformStyles.container]} separator={contentSeparator} bankStyle={bankStyle} >
+      <SafeAreaView style={styles.container}>
       <ScrollView
         ref='messageView'
         keyboardShouldPersistTaps="always">
@@ -494,6 +496,7 @@ class MessageView extends Component {
       </ScrollView>
         {title}
         {footer}
+      </SafeAreaView>
       </PageView>
     );
   }
@@ -582,6 +585,9 @@ MessageView = makeResponsive(MessageView)
 
 var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
+    container: {
+      flex: 1
+    },
     itemTitle: {
       fontSize: 18,
       margin: 5,

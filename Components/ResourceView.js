@@ -10,6 +10,7 @@ import {
   Modal,
   Alert,
   TouchableOpacity,
+  SafeAreaView
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -361,6 +362,7 @@ class ResourceView extends Component {
     let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={platformStyles.container} bankStyle={bankStyle} separator={contentSeparator}>
+        <SafeAreaView style={styles.container}>
         <ScrollView  ref='this' name={this._lazyId} style={{backgroundColor: '#fff'}}>
           <View style={styles.photoBG}>
             {photoView}
@@ -378,6 +380,7 @@ class ResourceView extends Component {
           {propertySheet}
           {menu}
         </ScrollView>
+      </SafeAreaView>
        {footer}
       </PageView>
      );
@@ -520,6 +523,9 @@ ResourceView = makeResponsive(ResourceView)
 
 var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
+    container: {
+      flex: 1
+    },
     modalBackgroundStyle: {
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
       justifyContent: 'center',
