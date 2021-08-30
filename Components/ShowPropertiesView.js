@@ -147,7 +147,7 @@ class ShowPropertiesView extends Component {
 
     let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
 
-    var viewCols = []
+    let viewCols = []
     vCols.forEach(pMeta => {
       let p = pMeta.name
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
@@ -253,7 +253,7 @@ class ShowPropertiesView extends Component {
           if (pMeta.items.backlink)
             return
         }
-        val = this.renderSimpleProp(val, pMeta, modelName, ShowPropertiesView)
+        val = this.renderSimpleProp({val, pMeta, modelName, component: ShowPropertiesView, showResourceProperty: this.showResourceProperty.bind(this)})
       }
       var title
       if (!pMeta.skipLabel  &&  !isItems)
@@ -296,6 +296,20 @@ class ShowPropertiesView extends Component {
         )
     }
     return viewCols
+  }
+  showResourceProperty(displayingPart) {
+    let { bankStyle, currency } = this.props
+    let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
+    return <View style={{paddingVertical: 3}}>
+        <View style={styles.itemBackground}>
+          <Text style={styles.itemTitle}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
+        </View>
+        <ShowPropertiesView resource={displayingPart}
+                            currency={currency}
+                            bankStyle={bankStyle}
+                            isItem={true}
+                            navigator={navigator} />
+      </View>
   }
   renderJsonProp(val, model, pMeta, viewCols) {
     if (!val  ||  utils.isEmpty(val))
@@ -624,7 +638,21 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
     thumb: {
       width: 40,
       height: 40
-    }
+    },
+    itemBackground: {
+      paddingVertical: 3,
+      marginHorizontal: -10,
+      // alignItems: 'center',
+      backgroundColor: 'aliceblue'
+    },
+    itemTitle: {
+      fontSize: 16,
+      marginBottom: 0,
+      paddingVertical: 3,
+      marginHorizontal: 10,
+      fontWeight: '600',
+      color: '#757575',
+    },
   })
 })
 

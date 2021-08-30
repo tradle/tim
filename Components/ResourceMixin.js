@@ -16,10 +16,8 @@ import constants from '@tradle/constants'
 const { TYPE } = constants
 const { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
 
-import ShowPropertiesView from './ShowPropertiesView'
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
-import NetworkInfoProvider from './NetworkInfoProvider'
 import Accordion from './Accordion'
 import Actions from '../Actions/Actions'
 import PageView from './PageView'
@@ -158,7 +156,7 @@ var ResourceMixin = {
     });
   },
 
-  renderItems({value, prop, cancelItem, editItem, component}) {
+  renderItems({value, prop, cancelItem, editItem, component, showResourceProperty}) {
     let { bankStyle, navigator, resource, currency, locale } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = prop.items.properties;
@@ -200,19 +198,8 @@ var ResourceMixin = {
           let displayingPart = type === 'object' && pVal.title ||  pVal
           if (typeof displayingPart === 'object') {
             if (itemMeta.ref  &&  displayingPart[TYPE]) {
-              // displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
-              ret.push(
-                <View style={{paddingVertical: 3}}>
-                  <View style={styles.itemBackground}>
-                    <Text style={styles.itemTitle}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
-                  </View>
-                  <ShowPropertiesView resource={displayingPart}
-                                      currency={currency}
-                                      bankStyle={bankStyle}
-                                      isItem={true}
-                                      navigator={navigator} />
-                </View>
-                )
+              displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
+              ret.push(showResourceProperty(displayingPart))
               return
             }
             else
@@ -391,10 +378,10 @@ var ResourceMixin = {
       )
     });
   },
-  renderSimpleProp(val, pMeta, modelName, component) {
+  renderSimpleProp({val, pMeta, modelName, component, showResourceProperty}) {
     let { bankStyle } = this.props
     if (Array.isArray(val))
-      return this.renderSimpleArrayProp(val, pMeta, modelName, component)
+      return this.renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty})
 
     let { units } = pMeta
     if (units === '%')
@@ -433,7 +420,7 @@ var ResourceMixin = {
       val = '*********'
     return <Text style={[styles.description]}>{val}</Text>;
   },
-  renderSimpleArrayProp(val, pMeta, modelName, component) {
+  renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty}) {
     if (pMeta.items.backlink)
       return <View  key={this.getNextKey()} />
     if (pMeta.grid)
@@ -441,7 +428,7 @@ var ResourceMixin = {
     let vCols = pMeta.viewCols;
     if (!vCols)
       vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-    val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
+    val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component, showResourceProperty})}</View>
     let title = pMeta.title || utils.makeLabel(pMeta.name)
     const titleEl = <Text style={styles.title}>{title}</Text>
     let icon
@@ -876,12 +863,6 @@ var styles = StyleSheet.create({
     marginRight: 2,
     borderRadius: 5
   },
-  itemTitle: {
-    fontSize: 16,
-    marginBottom: 0,
-    fontWeight: 600,
-    color: '#757575',
-  },
   itemText: {
     fontSize: 16,
     marginBottom: 0,
@@ -976,11 +957,6 @@ var styles = StyleSheet.create({
     flex: 9,
     flexDirection: utils.isWeb() && 'row' || 'column',
     justifyContent: 'space-between'
-  },
-  itemBackground: {
-    paddingVertical: 3,
-    // alignItems: 'center',
-    backgroundColor: 'aliceblue'
   },
 })
 
