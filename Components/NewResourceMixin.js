@@ -735,7 +735,7 @@ var NewResourceMixin = {
 
     let lStyle = { color: lcolor, fontSize: 20}
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
-    let help = prop.ref !== MONEY  && this.paintHelp(prop)
+    let help = this.paintHelp(prop)
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5

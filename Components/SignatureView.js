@@ -4,7 +4,6 @@ import PageView from './PageView'
 
 import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
-import { getContentSeparator } from '../utils/uiUtils'
 
 import {
   View,

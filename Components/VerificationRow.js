@@ -362,7 +362,6 @@ class VerificationRow extends Component {
             </View>
     if (!notAccordion)
       return
-    let renderedRows = []
     if (search  &&  searchCriteria)
       this.formatFilteredResource(model, resource, renderedRows)
 
