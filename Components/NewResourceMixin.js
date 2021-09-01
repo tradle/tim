@@ -722,7 +722,8 @@ var NewResourceMixin = {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     return (
       <View style={{paddingVertical: 10}}>
-      <View style={[styles.divider, {borderBottomColor: linkColor, paddingVertical: 5}]}>
+      <View style={{flexDirection: 'row', paddingVertical: 5}}>
+        <View style={[styles.accent, {borderLeftColor: bankStyle.accentColor || 'orange'}]}/>
         <Text style={[styles.dividerText, {color: linkColor, fontFamily: bankStyle.headerFont}]}>{label}</Text>
       </View>
       </View>
@@ -743,7 +744,7 @@ var NewResourceMixin = {
 
     let lStyle = { color: lcolor, fontSize: 20}
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
-    let help = prop.ref !== MONEY  && this.paintHelp(prop)
+    let help = this.paintHelp(prop)
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -1646,7 +1647,7 @@ var NewResourceMixin = {
     if (editable) return  <View />
     if (prop.grid)
       return this.renderSimpleGrid(value, prop, component)
-    return this.renderSimpleProp(value, prop, prop.items.ref, component)
+    return this.renderSimpleProp({val: value, pMeta: prop, modelName: prop.items.ref, component})
   },
   myEnumTemplate(params) {
     let { prop, enumProp, errors } = params
@@ -2017,6 +2018,7 @@ var styles= StyleSheet.create({
   dividerText: {
     marginBottom: 5,
     fontSize: 26,
+    fontWeight: '500',
     color: '#ffffff'
   },
   font14: {
@@ -2066,6 +2068,10 @@ var styles= StyleSheet.create({
   moneyInput: {
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  accent: {
+    width: 12,
+    borderLeftWidth: 5,
   }
 })
 
