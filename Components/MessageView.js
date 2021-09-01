@@ -473,7 +473,7 @@ class MessageView extends Component {
     // let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     // borderBottomColor: bankStyle.productRowBgColor
     let dateView
-    if (isVerificationTree || isForm) {
+    if (isVerificationTree || (isForm  &&  (!rModel.viewCols || !rModel.viewCols.find(col => col.endsWith('_group'))))) {
       dateView = <View style={styles.band}>
                   <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('submissionDate')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
@@ -517,7 +517,7 @@ class MessageView extends Component {
         <ScrollView
           ref='messageView'
           keyboardShouldPersistTaps="always"
-          style={{width: width}}>
+          style={{width}}>
           {dateView}
           {description}
           {warning}
