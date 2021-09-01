@@ -15,9 +15,8 @@ import JSONTree from 'react-native-json-tree'
 import constants from '@tradle/constants'
 
 const { TYPE } = constants
-const { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
+const { PROFILE, ORGANIZATION, MONEY, MESSAGE, FORM } = constants.TYPES
 
-import ShowPropertiesView from './ShowPropertiesView'
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -160,7 +159,7 @@ var ResourceMixin = {
     });
   },
 
-  renderItems({value, prop, cancelItem, editItem, component}) {
+  renderItems({value, prop, cancelItem, editItem, component, showResourceProperty}) {
     let { bankStyle, navigator, resource, currency, locale } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = prop.items.properties;
@@ -201,24 +200,12 @@ var ResourceMixin = {
         if (displayName &&  !editItem) {
           let displayingPart = type === 'object' && pVal.title ||  pVal
           if (typeof displayingPart === 'object') {
-            if (itemMeta.ref  &&  displayingPart[TYPE]) {
+            if (itemMeta.ref  &&  displayingPart[TYPE] && showResourceProperty) {
               // displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
-              ret.push(
-                <View style={{paddingVertical: 3}}>
-                  <View style={styles.itemBackground}>
-                    <Text style={styles.itemTitle}>{translate(utils.getModel(displayingPart[TYPE]))}</Text>
-                  </View>
-                  <ShowPropertiesView resource={displayingPart}
-                                      currency={currency}
-                                      bankStyle={bankStyle}
-                                      isItem={true}
-                                      navigator={navigator} />
-                </View>
-                )
+              ret.push(showResourceProperty(displayingPart))
               return
             }
-            else
-              displayingPart = JSON.stringify(displayingPart, null, 2)
+            displayingPart = JSON.stringify(displayingPart, null, 2)
             ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                        <View style={styles.itemContent}>
                          <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
@@ -227,6 +214,13 @@ var ResourceMixin = {
                        {!isView  &&  <View style={styles.textContainer}/>}
                      </View>)
           }
+          else {
+            ret.push(<View style={styles.itemContent}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999', fontSize: 18}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={styles.itemHighlight}>{displayingPart}</Text>
+                     </View>)
+          }
+
           return
         }
         let value;
@@ -252,7 +246,7 @@ var ResourceMixin = {
                    <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-                       <View style={{flexDirection: 'column', alignItems: 'flex-end'}} key={this.getNextKey()}>
+                       <View style={styles.enumValue} key={this.getNextKey()}>
                          {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
                        </View>
                      </View>
@@ -305,19 +299,19 @@ var ResourceMixin = {
                      </View>
                      {!isView  &&  <View style={styles.textContainer}/>}
                    </View>
+        let width = utils.getContentWidth(component)
         if (editItem  &&  !hasEdit) {
           hasEdit = true
           let cancel
           if (cancelItem  &&  !hadCancel)  {
             hadCancel = true
-            cancel = <View style={{position: 'absolute', top: 0, right: 10}}>
+            cancel = <View style={styles.cancelIcon}>
                        <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                         <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                        </TouchableOpacity>
                      </View>
           }
-          let width = utils.getContentWidth(component)
-          item = <View style={[{width: width - 40}]}>
+          item = <View>
                    <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
                      {item}
                    </TouchableOpacity>
@@ -327,9 +321,9 @@ var ResourceMixin = {
         else if (cancelItem  &&  !hadCancel) {
           hadCancel = true
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                   <View style={[{width: utils.getContentWidth(component) - 40}]}>
+                   <View style={{width: width - 30}}>
                      {item}
-                     <View style={{position: 'absolute', top: 0, right: 10}}>
+                     <View style={styles.cancelIcon}>
                        <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                      </View>
                    </View>
@@ -367,7 +361,7 @@ var ResourceMixin = {
           else
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
           let componentName = isMessageView && MESSAGE_VIEW || RESOURCE_VIEW
-          item =  <TouchableOpacity underlayColor='transparent' style={styles.rowStyle} key={this.getNextKey()} onPress={() => {
+          item =  <TouchableOpacity underlayColor='transparent' key={this.getNextKey()} onPress={() => {
                     navigator.push({
                      title: vTitle,
                      componentName,
@@ -393,10 +387,10 @@ var ResourceMixin = {
       )
     });
   },
-  renderSimpleProp(val, pMeta, modelName, component) {
+  renderSimpleProp({val, pMeta, modelName, component, hasGroups, showResourceProperty}) {
     let { bankStyle } = this.props
     if (Array.isArray(val))
-      return this.renderSimpleArrayProp(val, pMeta, modelName, component)
+      return this.renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty})
 
     let { units } = pMeta
     if (units === '%')
@@ -404,12 +398,13 @@ var ResourceMixin = {
     else if (units  &&  units.charAt(0) != '[')
       val += ' ' + units
 
+    let descStyle = hasGroups ? styles.descriptionGroup : styles.description
     if (val === NOT_SPECIFIED)
-      return <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
+      return <Text style={[descStyle, {color: bankStyle.linkColor}]}>{val}</Text>
     if (typeof val === 'number')
-      return <Text style={styles.description}>{val}</Text>;
+      return <Text style={descStyle}>{val}</Text>;
     if (typeof val === 'boolean')
-      return <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
+      return <Text style={descStyle}>{val ? 'Yes' : 'No'}</Text>;
     if (pMeta.signature) {
       let { width } = utils.dimensions(component)
       let h = 200
@@ -431,9 +426,9 @@ var ResourceMixin = {
       val = translate(utils.getModel(val))
     else if (pMeta.range === 'password')
       val = '*********'
-    return <Text style={[styles.description]}>{val}</Text>;
+    return <Text style={descStyle}>{val}</Text>;
   },
-  renderSimpleArrayProp(val, pMeta, modelName, component) {
+  renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty}) {
     if (pMeta.items.backlink)
       return <View  key={this.getNextKey()} />
     if (pMeta.grid)
@@ -442,14 +437,24 @@ var ResourceMixin = {
     let vCols = pMeta.viewCols;
     if (!vCols)
       vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-    val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
+    let items = this.renderItems({value: val, prop: pMeta, component, showResourceProperty})
+
+    const model = utils.getModel(modelName)
+    let hasFormItems = this.hasItemsWithFormRefs(model)
+
+    val = hasFormItems ? items : this.renderItemsGroups({groups: items, component})
+    val = <View style={{marginHorizontal: 7}}>{val}</View>
     let title = pMeta.title || utils.makeLabel(pMeta.name)
-    const titleEl = <Text style={styles.title}>{title}</Text>
+
+    let titleEl
+    if (!pMeta.skipLabel)
+      titleEl = <Text style={styles.titleEl}>{title}</Text>
+
     let icon
     let cnt = val.length;
     if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
       icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-    let header = <View style={{flexDirection: 'row'}}>
+    let header = <View style={styles.justRow}>
                   {titleEl}
                   {icon}
                 </View>
@@ -470,6 +475,57 @@ var ResourceMixin = {
                {titleEl}
                {val}
              </View>
+  },
+  hasItemsWithFormRefs(model) {
+    const itemProps = utils.getPropertiesWithAnnotation(model, 'items')
+    for (let p in itemProps) {
+      const prop = itemProps[p]
+      if (!prop.items.ref || !prop.inlined)
+        continue
+      const m = utils.getModel(prop.items.ref)
+      if (utils.isSubclassOf(m, FORM))
+        return true
+      const { properties:mProps } = m
+      for (let p in mProps) {
+        const mProp = mProps[p]
+        if (mProp.inlined  &&  mProp.ref  &&  utils.isSubclassOf(utils.getModel(mProp.ref)))
+          return true
+      }
+    }
+    return false
+  },
+  renderItemsGroups({groups, component}) {
+    const { bankStyle } = this.props
+    let prettyGroups = []
+    let isSmallScreen = utils.getContentWidth(component) < 800
+    if (isSmallScreen) {
+      for (let i=0; i<groups.length; i++) {
+        prettyGroups.push(<View style={styles.prettyGroup}>
+                            <View style={{padding: 5, flex: 1}}>
+                              {groups[i]}
+                            </View>
+                          </View>)
+
+      }
+      return prettyGroups
+    }
+    for (let i=0; i<groups.length; i+=2) {
+      let group1 = groups[i]
+      let group2 = (i === groups.length-1) ? <View/> : groups[i + 1]
+
+      prettyGroups.push(<View style={styles.prettyGroup}>
+                        <View style={styles.row}>
+                          <View style={styles.leftGroup}>
+                            {group1}
+                          </View>
+                          <View style={styles.rightGroup}>
+                            {group2}
+                          </View>
+                        </View>
+                      </View>)
+
+    }
+    return prettyGroups
   },
 
   renderSimpleGrid(value, prop, component) {
@@ -692,7 +748,7 @@ var ResourceMixin = {
     if (resource.submissions) {
       if (isTree  &&  params.showTree) {
         let tree = this.paintTree(json, resource)
-        content = <View style={{flexDirection: 'row'}}>
+        content = <View style={styles.justRow}>
                    {content}
                    <View style={{flex: 1, alignItems: 'flex-end'}}>
                      {tree}
@@ -951,7 +1007,7 @@ var ResourceMixin = {
                    <Text style={styles.dsTitle}>Blockchain: </Text>
                    <Text style={styles.dsValue}>{blockchain}</Text>
                  </View>
-                 <View style={{flexDirection: 'row'}}>
+                 <View style={styles.justRow}>
                    <Text style={styles.dsTitle}>Network: </Text>
                    <Text style={styles.dsValue}>{networkName}</Text>
                  </View>
@@ -1030,8 +1086,12 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
 })
 
 var styles = StyleSheet.create({
+  justRow: {
+    flexDirection: 'row'
+  },
   textContainer: {
-    flex: 1
+    width: 30
+    // flex: 1
   },
   container: {
     margin: 10,
@@ -1046,9 +1106,18 @@ var styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
     marginBottom: 0,
+    marginRight: 5,
     // marginHorizontal: 7,
     color: '#555555',
     // color: '#757575',
+  },
+  itemHighlight: {
+    fontSize: 16,
+    marginBottom: 0,
+    marginRight: 5,
+    // marginHorizontal: 7,
+    fontWeight: '600',
+    color: '#555555',
   },
   itemTitle: {
     fontSize: 16,
@@ -1061,7 +1130,7 @@ var styles = StyleSheet.create({
   itemSeparator: {
     height: 1,
     marginTop: 7,
-    backgroundColor: '#eeeeee',
+    // backgroundColor: '#eeeeee',
     // marginHorizontal: 15
   },
   separator: {
@@ -1080,11 +1149,15 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     // marginRight: 3
   },
-  rowStyle: {
-    // paddingVertical: 5
-  },
   title: {
     fontSize: 16,
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#9b9b9b'
+  },
+  titleEl: {
+    fontSize: 20,
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7,
@@ -1097,6 +1170,13 @@ var styles = StyleSheet.create({
   },
   description: {
     fontSize: 18,
+    marginVertical: 3,
+    marginHorizontal: 7,
+    color: '#555555',
+  },
+  descriptionGroup: {
+    fontSize: 18,
+    width: '45%',
     marginVertical: 3,
     marginHorizontal: 7,
     color: '#555555',
@@ -1143,42 +1223,39 @@ var styles = StyleSheet.create({
     borderBottomWidth: 1
   },
   itemContent: {
-    flex: 9,
+    flex: 1,
     flexDirection: utils.isWeb() && 'row' || 'column',
     justifyContent: 'space-between'
   },
-  itemBackground: {
-    paddingVertical: 3,
-    marginHorizontal: -10,
-    // alignItems: 'center',
-    backgroundColor: 'aliceblue'
+  enumValue: {
+    flexDirection: 'column',
+    alignItems: 'flex-end'
+  },
+  cancelIcon: {
+    position: 'absolute',
+    top: 0,
+    right: 0
+  },
+  prettyGroup: {
+    marginVertical: 10,
+    marginRight: 10,
+    backgroundColor: '#ffffff',
+    borderColor: '#eeeeee',
+    borderRadius: 15,
+    borderWidth: 1,
+    paddingVertical: 10
+  },
+  leftGroup: {
+    padding: 5,
+    flex: 1,
+    borderRightColor:'#cccccc',
+    borderRightWidth: 1
+  },
+  rightGroup: {
+    padding: 5,
+    flex: 1,
+    width:'50%'
   },
 })
 
 module.exports = ResourceMixin;
-    // let data = {
-    //   name: "CE",
-    //   children: [
-    //     { name: "CE-Oct", size: 5 },
-    //     {
-    //       name: "CP-Chris\nHulatt",
-    //       children: [
-    //         { name: "PhotoID" },
-    //         {
-    //           name: "Info",
-    //           children: [
-    //             { name: "Selfie", size: 4 },
-    //             { name: "Sig", size: 4 }
-    //           ]
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       name: "CE",
-    //       children: [
-    //         { name: "CP1", size: 3 },
-    //         { name: "CP2", size: 5 }
-    //       ]
-    //     }
-    //   ]
-    // }
