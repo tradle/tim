@@ -1639,14 +1639,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
 
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
-    let style
-    if (this.props.isBacklink)
-      style = {}
-    else {
-      style = [platformStyles.container]
-      if (isModel)
-        style.push({width: utils.getContentWidth(GridList), alignSelf: 'center'})
-    }
     let loading
     if (isLoading  &&  !isModel) {
       let showLoadingIndicator = true
