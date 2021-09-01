@@ -767,7 +767,7 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       height: 40
     },
     accent: {
-      width: 14,
+      width: 12,
       borderLeftColor: bankStyle.accentColor || 'orange',
       borderLeftWidth: 5,
     },
