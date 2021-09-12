@@ -3,6 +3,7 @@ import path from 'path'
 import { parse as parseURL } from 'url'
 import {
   Alert,
+  Clipboard,
   NetInfo,
   Platform,
   InteractionManager
@@ -34,6 +35,8 @@ import RNExitApp from 'react-native-exit-app';
 
 import plugins from '@tradle/biz-plugins'
 import { allSettled } from '@tradle/promise-utils'
+import qrSchema from '@tradle/qr-schema'
+const links = qrSchema.links
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
@@ -3992,13 +3995,13 @@ var Store = Reflux.createStore({
     }
   },
   async onGetItem(params) {
-    let {resource, action, noTrigger, search, backlink, backlinks, isChat} = params
+    let {resource, action, noTrigger, search, backlink, backlinks, isChat, isDeepLink} = params
     // await this._loadedResourcesDefer.promise
     if (!resource) debugger
     let type = utils.getType(resource)
     const resModel = this.getModel(type)
     if (!resModel) {
-      throw new Error(`missing model for ${res[TYPE]}`)
+      throw new Error(`missing model for ${type}`)
     }
 
     if (search)
@@ -4006,14 +4009,25 @@ var Store = Reflux.createStore({
 
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
-
     let res = {}
     if (!r) {
       if (me.isEmployee) {
+        if (isDeepLink) {
+          if (!this.client  &&  SERVICE_PROVIDERS)
+            this.client = graphQL.initClient(meDriver, me.organization.url)
+        }
         return await this.onGetItemFromServer(params)
         // res = await this._getItemFromServer(rIdOrResource)
         // r = pick(res, TYPE)
       }
+      if (isDeepLink)
+        this.trigger({
+          action: 'getItem',
+          // list: list,
+          resource,
+          error: translate('cantFindResource', utils.getDisplayName({resource}))
+        });
+      return
     }
     if (utils.isMessage(r)) {
       let kres
@@ -4133,7 +4147,20 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
     return r
   },
+  async onGetResourceLink({ resource }) {
+    let toR = this._getItem(resource.to)
+    let org = this._getItem(toR.organization)
 
+    const { [TYPE]:type, [ROOT_HASH]: permalink, [CUR_HASH]: link} = toR
+    let baseUrl
+    if (utils.isWeb())
+      baseUrl = __DEV__ ? 'http://localhost:3001' : ENV.APP_URL
+    else
+      baseUrl = `https://${ENV.deepLinkHost}`
+    let stub = JSON.stringify(this.buildRef(resource))
+    let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, stub, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
+    Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(utils.getDisplayName({resource}))}`)
+  },
   async getApplication(params) {
     let {resource, action, backlink, forwardlink} = params
     let blProp = backlink ||  forwardlink
@@ -5534,7 +5561,8 @@ if (!res[SIG]  &&  res._message)
       publishRequestSent[orgId] = true
       if (!status.watches.link  &&  !status.link) {
         let orgRep = this.getRepresentative(orgId)
-        await this.publishMyIdentity(orgRep)
+        if (!me.isEmployee)
+          await this.publishMyIdentity(orgRep)
       }
     }
   },
@@ -6703,6 +6731,21 @@ if (!res[SIG]  &&  res._message)
   },
   async handleNotMessageRL(params) {
     let result = await this._searchNotMessages(params)
+    result = result &&  await Promise.all(result.map(async r => {
+      if (!r._message) return r
+      try {
+        // object = await this.getObject(link)
+        let object = await this._keeper.get(r[CUR_HASH])
+        return {...object, ...r}
+      } catch(err) {
+        debugger
+        console.log(err)
+        return r
+        // if (me.isEmployee)
+        //   object = await this._getItemFromServer({idOrResource: rId})
+      }
+    }))
+
     let {isTest, spinner, sponsorName, list, search, first,
          isAggregation, prop, modelName} = params
     let isOrg = modelName === ORGANIZATION

@@ -101,7 +101,6 @@ class MessageRow extends Component {
     let isSimpleMessage = rtype === SIMPLE_MESSAGE
 
     let photoUrls = [];
-    let photoListStyle = {height: 3};
     let addStyle
 
     let model = utils.getModel(rtype);
@@ -113,7 +112,8 @@ class MessageRow extends Component {
 
     let isCheck = utils.isSubclassOf(model, CHECK)
 
-    let noBg = isCheck  ||  (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
+    let isDeepLink = isSimpleMessage && this.isDeepLink(resource.message)
+    let noBg = isCheck || (isSimpleMessage  && !isDeepLink && resource.message.toLowerCase().indexOf('http') === 0)
 
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     let isDataBundle = rtype === DATA_BUNDLE
@@ -157,11 +157,10 @@ class MessageRow extends Component {
       }
     }
     let properties = model.properties
-    let inRow
+    let photoListStyle = {height: 3};
     if (properties.photos) {
       if (resource.photos) {
         let len = resource.photos.length;
-        inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
         resource.photos.forEach((p) => {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
@@ -216,7 +215,7 @@ class MessageRow extends Component {
       // let viewStyle = isSimpleMessage ? {} : {flexDirection: 'row'}
       // viewStyle.alignSelf = isMyMessage ? 'flex-end' : 'flex-start'
       if (message) {
-        if (/*message.charAt(0) === '['  || */ longMessage)
+        if (/*message.charAt(0) === '['  || */ longMessage  &&  !isDeepLink)
           viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
 
         if (!isSimpleMessage  &&  model.id !== constants.TYPES.PRODUCT_LIST) {
@@ -271,28 +270,34 @@ class MessageRow extends Component {
       messageBody = <View style={{height: 5}}/>
 
     let len = photoUrls.length;
-    inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    let photoStyle = {};
-    // let height;
-
-    if (inRow > 0) {
-      if (inRow === 1) {
-        let ww = Math.max(240, msgWidth / 2)
-        let hh = ww * 280 / 240
-        photoStyle = [styles.bigImage, {
-          width:  ww,
-          height: hh
-        }]
+    let photoList, separator
+    if (len) {
+      let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
+      let photoStyle = {};
+      if (inRow > 0) {
+        if (inRow === 1) {
+          let ww = Math.max(240, msgWidth / 2)
+          let hh = ww * 280 / 240
+          photoStyle = [styles.bigImage, {
+            width:  ww,
+            height: hh
+          }]
+        }
+        else if (inRow === 2)
+          photoStyle = styles.mediumImage;
+        else
+          photoStyle = chatStyles.image;
       }
-      else if (inRow === 2)
-        photoStyle = styles.mediumImage;
-      else
-        photoStyle = chatStyles.image;
+      let isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
+      photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
+      photoList = <View style={photoListStyle}>
+                    <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={navigator} numberInRow={inRow} />
+                  </View>
     }
-    photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
+    else
+      separator = <View style={{height: 3}} />
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7', whiteSpace: 'pre-wrap' }
-    let isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
 
     let bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
@@ -301,23 +306,11 @@ class MessageRow extends Component {
         {this.getChatDate(resource)}
         {messageBody}
         {contextId}
-        <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={navigator} numberInRow={inRow} />
-        </View>
+        {photoList}
+        {separator}
         {sendStatus}
       </View>
     )
-    // return (
-    //   <View style={[viewStyle, {backgroundColor: bankStyle.BACKGROUND_COLOR}]}>
-    //     {date}
-    //     {messageBody}
-    //     <View style={photoListStyle}>
-    //       <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={navigator} numberInRow={inRow} />
-    //     </View>
-    //     {sendStatus}
-    //     {shareables}
-    //   </View>
-    // )
   }
 
   editVerificationRequest() {
@@ -393,10 +386,10 @@ class MessageRow extends Component {
       let color = isMyMessage ? bankStyle.contextTextColor : '#757575'
       let msg = !navigator.isConnected  &&  isLast
               ? <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color}]}>{str}</Text>
                 </View>
               : <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'center'}}>
-                  <Text style={[chatStyles.resourceTitle, {color: color, marginTop: 3, paddingRight: 20}]}>{str}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color, marginTop: 3, paddingRight: 20}]}>{str}</Text>
                   <Icon name='ios-folder-open-outline' size={25} color={color}/>
                 </View>
       renderedRow.push(msg);
@@ -584,6 +577,8 @@ class MessageRow extends Component {
     let isConfirmation = model.id === CONFIRMATION
 
     let vCols = [];
+    let isDeepLink = isSimpleMessage && this.isDeepLink(resource.message)
+    let msgWidth = utils.getMessageWidth(MessageRow)
 
     viewCols.forEach((v) => {
       if (properties[v].type === 'array'  ||
@@ -604,10 +599,10 @@ class MessageRow extends Component {
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
+          !isDeepLink                      &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         if (resource[v].trim().indexOf(' ') === -1) {
-          let {width} = utils.dimensions(MessageRow)
-          vCols.push(<WebView key={this.getNextKey()} style={{width: utils.getMessageWidth(MessageRow), height: 150, borderWidth: 0}}
+          vCols.push(<WebView key={this.getNextKey()} style={{width: msgWidth, height: 150, borderWidth: 0}}
              source={{uri: resource[v]}}
              startInLoadingState={true}
              automaticallyAdjustContentInsets={false} />)
@@ -618,7 +613,7 @@ class MessageRow extends Component {
         }
       }
       else if (isConfirmation) {
-        style = [style, {color: this.props.bankStyle.confirmationColor}, chatStyles.resourceTitle]
+        style = [style, {color: bankStyle.confirmationColor}, chatStyles.resourceTitle]
         vCols.push(
           <View key={this.getNextKey()}>
             <Text style={[style]}>{resource[v]}</Text>
@@ -644,18 +639,20 @@ class MessageRow extends Component {
       else {
         if (!resource[v]  ||  !resource[v].length)
           return
-        let msgParts = utils.splitMessage(resource[v]);
+        let pVal = resource[v]
+        let msgParts = utils.splitMessage(pVal);
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
+          debugger
           if (resource.welcome) {
             let bg  = isMyMessage
-                      ? this.props.bankStyle.myMessageBackgroundColor
+                      ? bankStyle.myMessageBackgroundColor
                       : '#ffffff'
-            let color = isMyMessage ? this.props.bankStyle.myMessageLinkColor : bankStyle.linkColor
+            let color = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
             let msg = <View key={this.getNextKey()}>
                         <Text style={style}>{msgParts[0]}</Text>
                         <View style={chatStyles.rowContainer}>
-                          <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
+                          <Text style={[style, {backgroundColor: bg, color}]}>{msgParts[1]} </Text>
                           <Icon style={{color: bankStyle.linkColor, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
                         </View>
                       </View>
@@ -684,14 +681,14 @@ class MessageRow extends Component {
                 onPressCall = this.createNewResource.bind(this, msgModel, isMyMessage);
 
               color = isMyMessage
-                    ? {color: this.props.bankStyle.myMessageLinkColor}
+                    ? {color: bankStyle.myMessageLinkColor}
                     : {color: '#2892C6'}
               if (isMyMessage)
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
                 link = <View style={chatStyles.rowContainer}>
                            <Text style={[style, {color: resource._documentCreated ?  '#757575' : bankStyle.linkColor}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.myMessageLinkColor : bankStyle.linkColor}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -709,7 +706,6 @@ class MessageRow extends Component {
         // else
         //   isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
-        let pVal = resource[v]
         let linkIdx = pVal.indexOf('<http')
         if (linkIdx !== -1) {
           let endLink = pVal.indexOf('>', linkIdx)
@@ -736,24 +732,31 @@ class MessageRow extends Component {
           //               <Text style={style}>{pVal.substring(endLink + 1)}</Text>
           //             </Text>
             )
-          return null
+          return
         }
         else if (isSimpleMessage) {
           let params = { resource, message: resource[v], bankStyle, noLink: true }
           let row
-          if  (this.messageHasLink(resource[v]))
+          if (isDeepLink) {
+            style.push({width: msgWidth})
+            vCols.push(<Text style={[style, {fontSize: 22}]} key={this.getNextKey()}>{`${this.getDeepLinkTitle(resource[v])}`}
+                         <Text style={style}>{`\n\n${resource[v]}`}</Text>
+                       </Text>)
+            return
+          }
+          if  (this.messageHasLink(resource[v])) {
             row = <View style={{maxWidth: width}}  key={this.getNextKey()}>
                     <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
                       {resource[v]}
                     </Markdown>
                   </View>
+          }
           else
             row = uiUtils.parseMessage(params)
 
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
-              let {width} = utils.dimensions(MessageRow)
-              vCols.push(<WebView key={this.getNextKey()} style={{width: width * 0.8, height: 150, borderWidth: 0}}
+              vCols.push(<WebView key={this.getNextKey()} style={{width: msgWidth * 0.8, height: 150, borderWidth: 0}}
                  source={{uri: resource[v]}}
                  startInLoadingState={true}
                  automaticallyAdjustContentInsets={false} />)
@@ -785,7 +788,7 @@ class MessageRow extends Component {
     if (isReadOnlyChat)
       return null
     if (onPressCall)
-      return {onPressCall: onPressCall}
+      return {onPressCall}
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, {resource})}
@@ -837,6 +840,14 @@ class MessageRow extends Component {
         message: message
       }
     })
+  }
+  isDeepLink(message) {
+    return message  &&  message.indexOf('&-deepLink') !== -1
+  }
+  getDeepLinkTitle(message) {
+    if (!message) return ''
+    let idx = message.indexOf('&-linkText=')
+    return message.indexOf('&-linkText=') === -1 ? '' : decodeURIComponent(message.slice(idx)).split('=')[1]
   }
 }
 
@@ -941,3 +952,68 @@ reactMixin(MessageRow.prototype, ResourceMixin)
 MessageRow = makeResponsive(MessageRow)
 
 module.exports = MessageRow
+/*
+  simpleMessage(msgParts, resource, isMyMessage) {
+    // Case when the needed form was sent along with the message
+    const { bankStyle } = this.props
+    if (resource.welcome) {
+      let bg  = isMyMessage
+                ? bankStyle.myMessageBackgroundColor
+                : '#ffffff'
+      let color = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
+      let msg = <View key={this.getNextKey()}>
+                  <Text style={style}>{msgParts[0]}</Text>
+                  <View style={chatStyles.rowContainer}>
+                    <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
+                    <Icon style={{color: bankStyle.linkColor, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+                  </View>
+                </View>
+      vCols.push(msg);
+      onPressCall = this.onChooseProduct.bind(this, true)
+      return;
+    }
+    let s = msgParts[1].split('_')
+    let msgModel = utils.getModel(s[0]);
+    if (!msgModel) return false
+
+    let color, link
+    // if (this.props.shareableResources  &&  !isSimpleMessage)
+    //   style = chatStyles.description;
+    let shareMyProduct = utils.isMyProduct(msgModel)
+    if (shareMyProduct) {
+      color = {color: '#aaaaaa'}
+      onPressCall = null
+      link = <Text style={[style, color]}>{translate(msgModel)}</Text>
+    }
+    else {
+      if (!msgParts[0].length)
+        msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
+      if (s.length === 2)
+        onPressCall = this.editForm.bind(this, msgParts[1], msgParts[0])
+      else if (!isMyMessage  &&  !resource._documentCreated)
+        onPressCall = this.createNewResource.bind(this, msgModel, isMyMessage);
+
+      color = isMyMessage
+            ? {color: bankStyle.myMessageLinkColor}
+            : {color: '#2892C6'}
+      if (isMyMessage)
+        link = <Text style={[style, color]}>{translate(msgModel)}</Text>
+      else
+        link = <View style={chatStyles.rowContainer}>
+                   <Text style={[style, {color: resource._documentCreated ?  '#757575' : bankStyle.linkColor}]}>{translate(msgModel)}</Text>
+                   <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor}]} size={20} name={'ios-arrow-forward'} />
+               </View>
+    }
+    let strName = isMyProduct
+                ? translate('shareProduct', translate(msgModel))
+                : utils.getStringName(msgParts[0])
+    let str = strName ? utils.translate(strName) : msgParts[0]
+    let msg = <View key={this.getNextKey()}>
+               <Text style={style}>{str}</Text>
+               {link}
+             </View>
+    vCols.push(msg);
+    return true
+  }
+
+ */

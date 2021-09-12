@@ -315,6 +315,8 @@ module.exports = {
     "notSupportedMimeTypes": "Not supported mime types {1}",
     "bookmarkWasCreated": "Bookmark was created",
     "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
+    "cantFindResource": "Can't find resource {1}",
+    "createResourceLink": "Copy link to this page",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",

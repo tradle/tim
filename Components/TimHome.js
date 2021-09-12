@@ -351,7 +351,14 @@ class TimHome extends Component {
       Actions.openURL(url)
       break
     case 'getProvider':
-      this.showChatPage({resource: provider, termsAccepted, showProfile: true})
+      let formStub
+      const { qs } = this.state
+      if (qs  &&  qs.stub) {
+        formStub = JSON.parse(qs.stub)
+        // debugger
+      }
+
+      this.showChatPage({resource: provider, formStub, termsAccepted, showProfile: true})
       return
     case 'getItemFromDeepLink':
       this.showResource(params)
@@ -579,7 +586,7 @@ class TimHome extends Component {
     // this.props.navigator.pop()
     let me = utils.getMe()
     if (me  &&  me._termsAccepted)
-      this.showChatPage({provider, termsAccepted: true})
+      this.showChatPage({resource: provider, termsAccepted: true})
     else
       Actions.acceptTermsAndChat({
         bot: this.state.permalink,
@@ -587,7 +594,7 @@ class TimHome extends Component {
       })
   }
 
-  showChatPage({resource, termsAccepted, action, showProfile}) {
+  showChatPage({resource, formStub, termsAccepted, action, showProfile}) {
     if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(resource, ENV.landingPage)
       return
@@ -606,30 +613,48 @@ class TimHome extends Component {
       extend(style, resource.style)
 
 
-    if (this.showTourOrSplash({resource, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
+    if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
       return
 
-    let route = {
-      title: resource.name,
-      componentName: 'MessageList',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Profile',
-      onRightButtonPress: {
+    let route
+    if (formStub) {
+      route = {
         title: resource.name,
-        componentName: 'ResourceView',
-        titleTextColor: '#7AAAC3',
+        componentName: 'MessageView',
         backButtonTitle: 'Back',
+        rightButtonTitle: 'Profile',
         passProps: {
-          bankStyle: style,
-          resource: resource,
-          currency: currency
+          resource: formStub,
+          isDeepLink: true,
+          to: resource,
+          currency: currency,
+          bankStyle:  style
         }
-      },
-      passProps: {
-        resource: resource,
-        modelName: MESSAGE,
-        currency: currency,
-        bankStyle:  style
+      }
+    }
+    else {
+      route = {
+        title: resource.name,
+        componentName: 'MessageList',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Profile',
+        onRightButtonPress: {
+          title: resource.name,
+          componentName: 'ResourceView',
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          passProps: {
+            bankStyle: style,
+            resource: resource,
+            currency: currency
+          }
+        },
+        passProps: {
+          resource: resource,
+          modelName: MESSAGE,
+          currency: currency,
+          bankStyle:  style
+        }
       }
     }
     if (showProfile)
@@ -692,33 +717,35 @@ class TimHome extends Component {
   showOfficialAccounts(action) {
     const me = utils.getMe()
     Actions.hasPartials()
-    let title = me.firstName;
+    const title = me.firstName;
+    const { wasDeepLink, isConnected, qs } = this.state
+    const profileModel = utils.getModel(me[TYPE])
     let route = {
       title: translate('officialAccounts'),
       componentName: 'ResourceList',
       backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
-        isDeepLink: this.state.wasDeepLink,
-        isConnected: this.state.isConnected,
+        isDeepLink: wasDeepLink  &&  !qs.stub,
+        isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
       },
       rightButtonTitle: 'Profile',
       onRightButtonPress: {
-        title: title,
+        title,
         componentName: 'ResourceView',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
-          title: title,
+          title,
           componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(me[TYPE]),
+            model: profileModel,
             resource: me,
-            backlink: utils.getModel(me[TYPE]).properties.myForms,
+            backlink: profileModel.properties.myForms,
             bankStyle: defaultBankStyle
           }
         },

@@ -26,6 +26,7 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate, cleanJson } from '../utils/utils'
 import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import Image from './Image'
 import { Text } from './Text'
 import uiUtils from '../utils/uiUtils'
@@ -33,6 +34,7 @@ import { VictorySunburst } from './victory-sunburst'
 import GridHeader from './GridHeader'
 import GridRow from './GridRow'
 import Markdown from './Markdown'
+import ActionSheet from './ActionSheet'
 
 // import { VictoryContainer } from 'victory'
 
@@ -428,6 +430,70 @@ var ResourceMixin = {
       val = '*********'
     return <Text style={descStyle}>{val}</Text>;
   },
+  generateCopyLinkButton(resource) {
+    const { linkColor } = this.props.bankStyle
+    // if (params && params.isIcon) {
+    let paddingRight = utils.isAndroid() ? 0 : 10
+    let style = {
+      borderColor: linkColor,
+      borderWidth: 1,
+      opacity: 0.5
+    }
+    return <TouchableOpacity onPress={this.copy.bind(this, resource)} style={{paddingRight}}>
+             <View style={[buttonStyles.treeButton, style]}>
+               <Icon name='ios-copy-outline' size={30} color={linkColor} style={styles.conversationsIcon} />
+             </View>
+           </TouchableOpacity>
+    // }
+
+    // return <TouchableOpacity onPress={this.copy.bind(this)} style={styles.copyView}>
+    //          <View style={[styles.copyButton, {borderColor: linkColor}]}>
+    //            <View style={styles.copyIcon}>
+    //            <Icon name='ios-copy-outline' color={linkColor} size={30}/>
+    //            </View>
+    //            <Text style={[styles.copyText, {color: linkColor}]}>{translate('createResourceLink')}</Text>
+    //          </View>
+    //        </TouchableOpacity>
+  },
+  copy(resource) {
+    Actions.getResourceLink({resource})
+  },
+  renderCopyLinkActionSheet(resource) {
+    let buttons = [{
+        text: translate('createResourceLink'),
+        onPress: () => this.copy(resource)
+      },
+      { text: translate('cancel') }
+    ]
+
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+      />
+    )
+  },
+  renderMenu(component) {
+    let { modelName, bankStyle } = this.props
+
+    let isAndroid = utils.isAndroid()
+    const icon = isAndroid ?  'md-menu' : 'md-more'
+    const color = isAndroid ? bankStyle.menuBgColor : bankStyle.menuColor
+    const backgroundColor = isAndroid ? '#ffffff' : bankStyle.menuBgColor
+    let width = utils.dimensions(component).width
+    return (
+        <View style={[styles.footer, {width}]}>
+          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+            <View style={[buttonStyles.menuButton, {opacity: 0.4, backgroundColor}]}>
+              <Icon name={icon}  size={33}  color={color}/>
+            </View>
+          </TouchableOpacity>
+        </View>
+     )
+  },
+
   renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty}) {
     if (pMeta.items.backlink)
       return <View  key={this.getNextKey()} />
@@ -1255,6 +1321,42 @@ var styles = StyleSheet.create({
     padding: 5,
     flex: 1,
     width:'50%'
+  },
+  copyView: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+  },
+  copyButton: {
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    // width: 350,
+    marginTop: 20,
+    // alignSelf: 'center',
+    paddingHorizontal: 20,
+    height: 50,
+    borderRadius: 15,
+    borderWidth: 1,
+  },
+  // copyText: {
+  //   fontSize: 20,
+  //   alignSelf: 'center'
+  // },
+  // copyIcon: {
+  //   justifyContent: 'center',
+  //   paddingRight: 5
+  // },
+  footer: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    justifyContent: 'flex-end',
+    height: 45,
+    paddingHorizontal: 10,
+    backgroundColor: 'transparent',
+    // borderColor: '#eeeeee',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#cccccc',
   },
 })
 

@@ -20,6 +20,8 @@ import { makeResponsive } from 'react-native-orient'
 import constants from '@tradle/constants'
 const {
   TYPE,
+  ROOT_HASH,
+  CUR_HASH
 } = constants
 const {
   VERIFICATION,
@@ -88,15 +90,15 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message, isChat, tab} = this.props
+    let {resource, isReview, search, application, message, isChat, tab, isDeepLink} = this.props
     if (isReview)
       return
     if (message) {
-      Actions.getItem({resource: message, search, application, isChat})
+      Actions.getItem({resource: message, search, application, isChat, isDeepLink})
       return
     }
     if (resource.id) {
-      Actions.getItem({resource, search, application, backlink: tab, isChat})
+      Actions.getItem({resource, search, application, backlink: tab, isChat, isDeepLink})
       return
     }
 
@@ -111,7 +113,7 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let { action, currency, style, country, backlink, isConnected } = params
+    let { action, currency, style, country, backlink, isConnected, error } = params
     if (action == 'connectivity') {
       this.setState({isConnected})
       return
@@ -127,7 +129,12 @@ class MessageView extends Component {
       this.verifyOrCreateError()
       return
     }
-     if (action === 'getItem') {
+    if (action === 'getItem') {
+      if (error) {
+        Alert.alert(error)
+        this.setState({isLoading: false, error, resource})
+        return
+      }
       let newResource
       if (utils.isStub(this.state.resource))
         newResource = params.resource
@@ -324,10 +331,11 @@ class MessageView extends Component {
     this.props.navigator.push(route)
   }
   render() {
-    let { backlink, bankStyle, resource } = this.state
-    if (this.state.isLoading)
+    let { backlink, bankStyle, resource, isLoading, error } = this.state
+    if (isLoading)
       return this.showLoading({bankStyle, component: MessageView})
-    let { lensId, style, navigator, currency, isVerifier,
+
+    let { lensId, style, navigator, currency, isVerifier, isDeepLink,
           defaultPropertyValues, verification, application, isReview } = this.props
 
     if (resource[TYPE] === MESSAGE)
@@ -400,6 +408,7 @@ class MessageView extends Component {
                    </View>
     }
     let print
+
     if (utils.isImplementing(resource, PRINTABLE)) {
       let componentName = resource[TYPE].split('.').slice(-1)
       try {
@@ -480,7 +489,10 @@ class MessageView extends Component {
                 </View>
     }
     let title = isVerification  ? this.makeViewTitle(model, styles) : null
+
+    let actionSheet = this.renderCopyLinkActionSheet(resource)
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
+
     let contentSeparator = getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto  &&  !checkProps) {
@@ -499,7 +511,7 @@ class MessageView extends Component {
     }
     let me = utils.getMe()
     let warning
-    if (!me.isEmployee  &&  !resource._latest  &&  !isReview) {
+    if (!me.isEmployee  &&  !resource._latest  &&  !isReview  &&  !error) {
       warning = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.errorBgColor, alignItems: 'center'}}>
                   <Text style={{fontSize: 18, color: bankStyle.errorColor}}>{translate('olderResourceVersion')}</Text>
                 </View>
@@ -512,6 +524,7 @@ class MessageView extends Component {
                       </Markdown>
                     </View>
     }
+
     return (
       <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
         <ScrollView
@@ -529,6 +542,7 @@ class MessageView extends Component {
         {title}
         {footer}
         {print}
+        {actionSheet}
       </PageView>
     );
   }
@@ -574,6 +588,9 @@ class MessageView extends Component {
   }
 
   renderFooter(backlink, styles) {
+    if (!backlink)
+      return this.renderMenu(MessageView)
+
     if (!backlink  ||  !backlink.allowToAdd)
       return
     let me = utils.getMe()
@@ -749,7 +766,7 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
     viewTitleText: {
       fontSize: 24,
       color:  bankStyle.contextBackgroundColor
-    }
+    },
   })
 })
 

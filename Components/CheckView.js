@@ -193,6 +193,9 @@ class CheckView extends Component {
                               </View>
       }
     }
+    // let copyButton = this.generateCopyLinkButton()
+    let actionSheet = this.renderCopyLinkActionSheet(resource)
+    let footer = this.renderMenu(CheckView)
 
     let height = dimensions(CheckView).height
     let width = getContentWidth()
@@ -206,6 +209,8 @@ class CheckView extends Component {
           {propertySheet}
           {checkOverrideButton}
         </ScrollView>
+        {footer}
+        {actionSheet}
       </PageView>
     );
   }
