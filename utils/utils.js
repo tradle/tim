@@ -161,7 +161,10 @@ const getVersionInAppStore = Platform.select({
   }
 })
 const parseEnumValue = validateResource.utils.parseEnumValue
-const getEnumValueId = opts => parseEnumValue(opts).id
+const getEnumValueId = opts => {
+  const val = parseEnumValue(opts)
+  return val && val.id
+}
 
 var utils = {
   ...promiseUtils,
@@ -323,18 +326,19 @@ var utils = {
     } : null;
   },
   getRequestedFormType(resource) {
-    if (resource[TYPE] === FORM_REQUEST) {
+    let rType = utils.getType(resource)
+    if (rType === FORM_REQUEST) {
       return resource.form
     }
 
-    if (resource[TYPE] === FORM_ERROR) {
+    if (rType === FORM_ERROR) {
       const type = resource.prefill && resource.prefill[TYPE]
       if (type) return type
 
       return utils._parseStub(resource.prefill).type
     }
 
-    return resource[TYPE]
+    return rType
 
     // throw new Error('expected tradle.FormRequest or tradle.FormError')
   },
@@ -872,11 +876,13 @@ var utils = {
         r.to.organization    &&
         r.from.organization.id === r.to.organization.id  &&
         r.from.organization.id === myOrgId) {
+      // return true
       return false
     }
 
+    let fromOrgId = utils.getId(r.from.organization)
     if (r.from.organization) {
-      if (myOrgId === utils.getId(r.from.organization)) {
+      if (myOrgId === fromOrgId) {
         if (to  &&  utils.getId(to) === myOrgId)
           return false
         else
@@ -887,7 +893,7 @@ var utils = {
       if (r._context.from) {
         let fOrg = r._context.from.organization
         let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
-        if (applier  &&  fOrg === utils.getId(r.from.organization))
+        if (applier  &&  fOrg === fromOrgId)
           return true
       }
     }
