@@ -90,7 +90,8 @@ var asyncActions = [
   'showStepIndicator',
   'showAllShareables',
   'submitDraftApplication',
-  'noPairing'
+  'noPairing',
+  'getResourceLink'
 ]
 
 var syncActions = [
