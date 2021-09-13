@@ -316,6 +316,8 @@ module.exports = {
     "notSupportedMimeTypes": "Not supported mime types {1}",
     "bookmarkWasCreated": "Bookmark was created",
     "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
+    "cantFindResource": "Can't find resource {1}",
+    "createResourceLink": "Copy link to this page",
     // Regula
     "regulaStatus": "Searching for document",
     // Bookmarks
