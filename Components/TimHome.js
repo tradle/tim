@@ -188,7 +188,15 @@ class TimHome extends Component {
     let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
 
     let firstPage = qs.schema && qs.schema || pathname
-    let state = {firstPage, qs, isDeepLink: true}
+    let linkText
+    if (qs.rId) {
+      let idx = query.indexOf('-linkText=')
+      if (idx !== -1) {
+        let idx1 = query.indexOf('&', idx)
+        linkText = decodeURIComponent(idx1 === -1 ? query.slice(idx + 10) : query.slice(idx + 10, idx1))
+      }
+    }
+    let state = {firstPage, qs, isDeepLink: true, linkText}
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -352,9 +360,11 @@ class TimHome extends Component {
       break
     case 'getProvider':
       let formStub
-      const { qs } = this.state
-      if (qs  &&  qs.stub) {
-        formStub = JSON.parse(qs.stub)
+      const { qs, linkText } = this.state
+      if (qs) {
+        const { rId } = qs
+        if (rId)
+          formStub = { id: rId, title: linkText || ''}
         // debugger
       }
 
@@ -618,8 +628,9 @@ class TimHome extends Component {
 
     let route
     if (formStub) {
+      let fModel = utils.getModel(utils.getType(formStub))
       route = {
-        title: resource.name,
+        title: `${formStub.title} -- ${translate(fModel)}`,
         componentName: 'MessageView',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Profile',

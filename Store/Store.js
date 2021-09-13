@@ -4157,8 +4157,8 @@ if (!res[SIG]  &&  res._message)
       baseUrl = __DEV__ ? 'http://localhost:3001' : ENV.APP_URL
     else
       baseUrl = `https://${ENV.deepLinkHost}`
-    let stub = JSON.stringify(this.buildRef(resource))
-    let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, stub, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
+    let { id: rId, title } = this.buildRef(resource)
+    let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
     Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(utils.getDisplayName({resource}))}`)
   },
   async getApplication(params) {
