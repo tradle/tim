@@ -44,7 +44,8 @@ class ShowRefList extends Component {
   render() {
     var { resource, model, backlink, backlinkList, showDocuments, showDetails, bankStyle,
           children, navigator, lazy, currency, application, search } = this.props
-    model = model || utils.getModel(resource[TYPE]);
+    let rtype = utils.getType(resource)
+    model = model || utils.getModel(rtype)
     var props = model.properties;
     var refList = [];
     var isIdentity = model.id === PROFILE;
@@ -153,7 +154,7 @@ class ShowRefList extends Component {
     if (ENV.showMyQRCode) {
       if (utils.getId(me) === utils.getId(resource)  &&  !isEmployee)
         showQR = true
-      else if (utils.isSubclassOf(resource[TYPE], MY_PRODUCT))
+      else if (utils.isSubclassOf(rtype, MY_PRODUCT))
         showQR = true
     }
     if (showQR  &&  this.props.showQR) {
@@ -300,7 +301,8 @@ function getDocs(varr, rId, docs) {
   })
 }
 function hasPropertiesToShow(resource) {
-  let m = utils.getModel(resource[TYPE])
+  let rtype = utils.getType(resource)
+  let m = utils.getModel(rtype)
   let viewCols = m.viewCols
   if (!viewCols)
     viewCols = utils.getViewCols(m)
