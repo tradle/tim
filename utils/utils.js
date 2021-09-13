@@ -116,6 +116,8 @@ const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
+const MAX_WIDTH = 800
+
 const STYLES_PACK = 'tradle.StylesPack'
 const CONTEXT = 'tradle.Context'
 const MSG_LINK = '_msg'
@@ -161,7 +163,10 @@ const getVersionInAppStore = Platform.select({
 })
 
 const parseEnumValue = validateResource.utils.parseEnumValue
-const getEnumValueId = opts => parseEnumValue(opts).id
+const getEnumValueId = opts => {
+  const val = parseEnumValue(opts)
+  return val && val.id
+}
 
 var utils = {
   ...promiseUtils,
@@ -308,18 +313,19 @@ var utils = {
     } : null;
   },
   getRequestedFormType(resource) {
-    if (resource[TYPE] === FORM_REQUEST) {
+    let rType = utils.getType(resource)
+    if (rType === FORM_REQUEST) {
       return resource.form
     }
 
-    if (resource[TYPE] === FORM_ERROR) {
+    if (rType === FORM_ERROR) {
       const type = resource.prefill && resource.prefill[TYPE]
       if (type) return type
 
       return utils._parseStub(resource.prefill).type
     }
 
-    return resource[TYPE]
+    return rType
 
     // throw new Error('expected tradle.FormRequest or tradle.FormError')
   },
@@ -851,9 +857,9 @@ var utils = {
         r.from.organization.id === myOrgId) {
       return false
     }
-
+    let fromOrgId = utils.getId(r.from.organization)
     if (r.from.organization) {
-      if (myOrgId === utils.getId(r.from.organization)) {
+      if (myOrgId === fromOrgId) {
         if (to  &&  utils.getId(to) === myOrgId)
           return false
         else
@@ -864,7 +870,7 @@ var utils = {
       if (r._context.from) {
         let fOrg = r._context.from.organization
         let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
-        if (applier  &&  fOrg === utils.getId(r.from.organization))
+        if (applier  &&  fOrg === fromOrgId)
           return true
       }
     }
@@ -2844,6 +2850,13 @@ debugger
     else
       return true
   },
+  isSmallScreen(component) {
+    // return false
+    if (!component) return false
+    const {width} = utils.dimensions(component)
+    return width < MAX_WIDTH
+  },
+
   getMessageWidth(component) {
     let width = component ? utils.dimensions(component).width : utils.dimensions().width
     return Math.floor(width * 0.8)
