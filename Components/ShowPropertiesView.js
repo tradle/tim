@@ -394,16 +394,16 @@ class ShowPropertiesView extends Component {
  */
       }
       else {
-        let size1 = Math.round(size / 2)
+        let colSize = Math.round(size / 2)
         let groupBody = <View styles={{flex: 1}}>
                           {i === 0  &&  this.getDateView({resource, styles})}
                           {cols.slice(0, 1)}
                           <View style={{flexDirection: 'row', paddingBottom: 10}}>
                             <View style={{padding: 5, flex: 1, borderRightColor:'#ccc', borderRightWidth: 1}}>
-                              {cols.slice(1, size1)}
+                              {cols.slice(1, colSize + 1)}
                             </View>
                             <View style={{padding: 5, flex: 1, width: isSmall ? '50%' : '100%'}}>
-                              {cols.slice(size1 + 1)}
+                              {cols.slice(colSize + 1)}
                             </View>
                           </View>
                         </View>

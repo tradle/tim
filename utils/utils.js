@@ -880,7 +880,7 @@ var utils = {
       return false
     }
 
-    let fromOrgId = utils.getId(r.from.organization)
+    let fromOrgId = r.from.organization && utils.getId(r.from.organization)
     if (r.from.organization) {
       if (myOrgId === fromOrgId) {
         if (to  &&  utils.getId(to) === myOrgId)
