@@ -470,8 +470,9 @@ class ResourceView extends Component {
 
     // Actions.getItem({resource, search: utils.getMe().isEmployee});
     const { navigator, bankStyle, currency, locale } = this.props
+    const rtype = utils.getType(resource)
     navigator.push({
-      title: resource.title || utils.makeModelTitle(utils.getModel(resource)),
+      title: resource.title || utils.makeModelTitle(utils.getModel(rtype)),
       componentName: 'ResourceView',
       backButtonTitle: 'Back',
       passProps: {
