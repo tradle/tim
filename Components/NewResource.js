@@ -1186,9 +1186,12 @@ if (r.url)
     let { requestedProperties } = this.state
     if (!requestedProperties)
       return true
-    ;({ requestedProperties } = requestedProperties)
+    let excludeProperties
+    ({requestedProperties, excludeProperties} = requestedProperties)
     if (!requestedProperties  ||  requestedProperties[prop])
       return true
+    if (excludeProperties  &&  excludeProperties.indexOf(prop) !== -1)
+      return false
     let props = this.props.model.properties
     for (let p in requestedProperties) {
       if (p.endsWith('_group')  &&  props[p].list.includes(prop))
