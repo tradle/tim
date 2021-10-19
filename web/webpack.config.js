@@ -50,6 +50,7 @@ let templateFile = (function() {
 var common = {
   resolve: {
     alias: {
+      core: path.join(__dirname, 'core'),
       q: "bluebird-q",
       "react-native": "react-web",
       "victory-native": "victory",
