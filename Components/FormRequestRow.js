@@ -29,7 +29,11 @@ import StringChooser from './StringChooser'
 
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
-// import customFormDefaults from '../data/customFormDefaults.json'
+var customFormDefaults
+if (__DEV__)
+  customFormDefaults = require('../data/customFormDefaults.json')
+else
+  customFormDefaults = {}
 
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
@@ -167,7 +171,7 @@ class FormRequestRow extends Component {
     return false
   }
   render() {
-    const { resource, to, bankStyle, application } = this.props
+    const { resource, to, bankStyle, application, list } = this.props
 
     var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -202,7 +206,7 @@ class FormRequestRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isProductBundle = resource.form === PRODUCT_BUNDLE
-    let isAttestation = resource.form === ATTESTATION
+    let isAttestation = resource.form === ATTESTATION  && (resource.prefill || list)
     if (isFormRequest  &&  !isProductBundle  &&  !isAttestation)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
@@ -744,10 +748,10 @@ class FormRequestRow extends Component {
           _.extend(r, formDefaults[model.id])
           isPrefilled = true
         }
-        // else if (model.id in customFormDefaults) {
-        //   _.extend(r, customFormDefaults[model.id])
-        //   isPrefilled = true
-        // }
+        else if (model.id in customFormDefaults) {
+          _.extend(r, customFormDefaults[model.id])
+          isPrefilled = true
+        }
       }
       if (formRequest.prefill) {
         _.defaults(r, formRequest.prefill)
@@ -1112,7 +1116,7 @@ class FormRequestRow extends Component {
         bankStyle,
         reviewed: {},
         to,
-        list: resource.prefill.items || list,
+        list: resource.prefill && resource.prefill.items || list,
         currency
       }
     })
