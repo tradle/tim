@@ -4503,9 +4503,10 @@ if (!res[SIG]  &&  res._message)
     temporaryResources[resource[TYPE]] = utils.sanitize(resource)
   },
   async onGetTemporary(type, noFetch) {
-    if (!__DEV__) return
-    var r = !noFetch &&  temporaryResources[type]
-    let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
+    let r, requestedProperties
+    if (__DEV__)
+      r = !noFetch &&  temporaryResources[type]
+    requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
     this.trigger({action: 'getTemporary', resource: r || {}, requestedProperties})
   },
 

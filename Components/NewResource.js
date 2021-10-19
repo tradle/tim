@@ -96,7 +96,7 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     let r = {};
-    let { resource, originatingMessage, model } = props
+    let { resource, originatingMessage, model, isPrefilled } = props
     if (resource)
       r = utils.clone(resource) //extend(true, r, props.resource)
     else
@@ -109,7 +109,7 @@ class NewResource extends Component {
       isUploading,
       isRegistration,
       isLoadingVideo: false,
-      isPrefilled: props.isPrefilled,
+      isPrefilled,
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
