@@ -211,7 +211,11 @@ function getPropsForControllingEntity(form) {
         {name: 'sourceOfWealth', required: isFund  &&  isLimitedPartner},
         {name: 'evidenceOfSourceOfWealth', required: isFund && isLimitedPartner},
         {name: 'inactive'},
-        {name: 'previousAddresses'}
+        {name: 'previousAddresses'},
+        {name: 'controllingEntityStreetAddress'},
+        {name: 'controllingEntityRegion'},
+        {name: 'controllingEntityPostalCode'},
+        {name: 'controllingEntityCountry', required: true},
       ]
     }
     retProps.requestedProperties.push({name: 'emailAddress', required: true})
