@@ -18,6 +18,7 @@ import {
   makeLabel,
   isEnum,
   getModel,
+  getType,
   isForm,
   applyLens,
   getId,
@@ -49,6 +50,7 @@ const FORM_ERROR = 'tradle.FormError'
 const MSG_LINK = '_msg'
 const JURISDICTION = 'tradle.Jurisdiction'
 const COUNTRY = 'tradle.Country'
+const DATA_BUNDLE = 'tradle.DataBundle'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
@@ -426,7 +428,8 @@ const storeUtils = {
   getEnum(params, enums) {
     const { modelName, limit, query, lastId, prop, pin, isChooser, resource } = params
     let enumList = enums[modelName]
-    let property = getEnumProperty(getModel(modelName))
+    let m = getModel(modelName)
+    let property = getEnumProperty(m)
     let hasReset = enumList.find(e => e[ROOT_HASH] === '__reset')
     let isJurisdiction = prop  &&  prop.ref === JURISDICTION
     if (query) {
@@ -442,8 +445,8 @@ const storeUtils = {
       })
     }
     let reset
-    let rmodel = getModel(resource[TYPE])
-    if (!hasReset  &&  isChooser  &&  resource[prop.name]) {
+    let rmodel = resource ? getModel(getType(resource)) : m
+    if (resource  &&  !hasReset  &&  isChooser  &&  resource[prop.name]) {
       let rmodel = getModel(resource[TYPE])
       reset = {
         [TYPE]: modelName,
@@ -582,9 +585,10 @@ const storeUtils = {
     }
   },
   rewriteStubs(resource) {
-    let type = resource[TYPE]
+    let type = getType(resource)
     let props = getModel(type).properties
     let refProps = ['_sourceOfData']
+    let isDataBundle = type === DATA_BUNDLE
     for (let p in resource) {
       let prop = props[p]
       if (!prop)  {
@@ -604,7 +608,7 @@ const storeUtils = {
         continue
 
       let stub = resource[p]
-      if (Array.isArray(stub)) {
+      if (!isDataBundle  &&  Array.isArray(stub)) {
         resource[p] = stub.map(s => {
           if (s._link)
             return storeUtils.makeStub(s)
