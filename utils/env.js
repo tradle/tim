@@ -71,11 +71,11 @@ const merged = extend({
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVERS: [
     `http://${LOCAL_IP}:21012`,
-    // // silly
-    // 'https://4uxjw2j0cc.execute-api.ap-southeast-2.amazonaws.com/dev',
+    // banco
+    'https://v9zv1gedx2.execute-api.us-east-2.amazonaws.com/dev',
     // // `http://${LOCAL_IP}:21013`,
-    // hats
-    // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
+    // alpha
+    'https://1e1og8zxp1.execute-api.us-east-1.amazonaws.com/dev',
     // friendly.io
     // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
