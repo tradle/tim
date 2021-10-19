@@ -1,0 +1,623 @@
+{
+  "io.lenka.Assets": {
+     "_t": "io.lenka.Assets",
+     "title": "Medical or surgical equipment or implant rental",
+     "assetType": {
+       "id": "io.lenka.AssetType_portable",
+       "title": "portable"
+     },
+     "productKey": "85161505",
+     "assetGroup": {
+       "id": "io.lenka.AssetGroup_ophthalmic",
+       "title": "Ophthalmic"
+     },
+     "model": "Compass",
+     "brand": "Centervue",
+     "condition": {
+       "id": "io.lenka.AssetCondition_new",
+       "title": "New"
+     },
+     "warranty": "1 year",
+     "usefulLife": {
+       "id": "io.lenka.AssetUsefulLife_eight",
+       "title": "8 years"
+     },
+     "secondaryMarket": {
+       "id": "io.lenka.AssetSecondaryMarket_good",
+       "title": "Good"
+     },
+     "relocationTime": {
+       "id": "io.lenka.AssetRelocationTime_lessThan90",
+       "title": "Up to 90 days"
+     }
+  },
+  "io.lenka.ApplicantInformation": {
+    "_t": "io.lenka.ApplicantInformation",
+    "paternalName": "ROBERTS",
+    "maternalName": "COSIO",
+    "firstName": "EDISON",
+    "secondName": "MIGUEL",
+    "applicant": {
+      "id": "io.lenka.ApplicantType_individual",
+      "title": "Individual"
+    },
+    "rfc": "EOCG471015"
+  },
+  "io.lenka.ApplicantAddress": {
+    "_t": "io.lenka.ApplicantAddress",
+    "housing": {
+      "id": "io.lenka.TypeOfHousing_owned",
+      "title": "Owned"
+    },
+    "street": "PA VIA ACDTO 1916",
+    "number": "COLINAS DE SN JAVIER",
+    "city": "GUADALAJARA",
+    "state": {
+      "id": "io.lenka.mexicanStates_JAL",
+      "title": "Jalisco"
+    },
+    "zip": "44560"
+  },
+  "io.lenka.QuotationConfiguration": {
+    "_t": "io.lenka.QuotationConfiguration",
+    "configuration": "Echo",
+    "items": [
+      {
+        "term": {
+          "id": "io.lenka.TermOfLease_t1",
+          "title": "12"
+        },
+        "dt1": 0,
+        "dt2": 0.027,
+        "dt3": 0.054,
+        "dt4": 0.083,
+        "insurancePercentage": 1,
+        "residualValue": 30,
+        "vatRate": 0.16,
+        "commissionFee": 0.02,
+        "factorVPdelVR": 0.35,
+        "lowDeposit": 0.099,
+        "lowDepositPercent": 0.005
+      },
+      {
+        "term": {
+          "id": "io.lenka.TermOfLease_t2",
+          "title": "18"
+        },
+        "dt1": 0,
+        "dt2": 0.021,
+        "dt3": 0.05,
+        "dt4": 0.08,
+        "insurancePercentage": 1,
+        "residualValue": 25,
+        "vatRate": 0.16,
+        "commissionFee": 0.02,
+        "factorVPdelVR": 0.525,
+        "lowDeposit": 0.099,
+        "lowDepositPercent": 0.005
+      },
+      {
+        "term": {
+          "id": "io.lenka.TermOfLease_t3",
+          "title": "24"
+        },
+        "dt1": 0,
+        "dt2": 0.018,
+        "dt3": 0.05,
+        "dt4": 0.081,
+        "insurancePercentage": 1,
+        "residualValue": 20,
+        "vatRate": 0.16,
+        "commissionFee": 0.02,
+        "factorVPdelVR": 0.7,
+        "lowDeposit": 0.099,
+        "lowDepositPercent": 0.005
+      },
+      {
+        "term": {
+          "id": "io.lenka.TermOfLease_t4",
+          "title": "36"
+        },
+        "dt1": 0,
+        "dt2": 0.021,
+        "dt3": 0.06,
+        "dt4": 0.092,
+        "insurancePercentage": 1,
+        "residualValue": 15,
+        "vatRate": 0.16,
+        "commissionFee": 0.02,
+        "factorVPdelVR": 1.05,
+        "lowDeposit": 0.099,
+        "lowDepositPercent": 0.005
+      },
+      {
+        "term": {
+          "id": "io.lenka.TermOfLease_t5",
+          "title": "48"
+        },
+        "dt1": 0,
+        "dt2": 0.037,
+        "dt3": 0.08,
+        "dt4": 0.12,
+        "insurancePercentage": 1,
+        "residualValue": 10,
+        "vatRate": 0.16,
+        "commissionFee": 0.02,
+        "factorVPdelVR": 1.4,
+        "lowDeposit": 0.099,
+        "lowDepositPercent": 0.005
+      }
+    ]
+  },
+  "io.lenka.QuotationInformation": {
+    "_t": "io.lenka.QuotationInformation",
+    "paternalName": "ROBERTS",
+    "maternalName": "COSIO",
+    "firstName": "EDISON",
+    "secondName": "MIGUEL",
+    "email": "e@e.com",
+    "leaseType": {
+      "id": "io.lenka.LeaseType_financial",
+      "title": "Financial"
+    },
+    "netPrice": {
+      "value": 1000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "exchangeRate": 10,
+    "vatRate": 0.16,
+    "insurancePercentage": 1,
+    "depositPercentage": 10,
+    "factor": 10,
+    "deliveryTime": {
+      "id": "io.lenka.DeliveryTime_dt1",
+      "title": "Immediately"
+    },
+    "netPriceMx": {
+      "value": 10000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "vat": {
+      "value": 1600,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "priceMx": {
+      "value": 11600,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "depositValue": {
+      "value": 1160,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "annualInsurance": {
+      "value": 100,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "fundedInsurance": {
+      "value": 9.166666666666668,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    }
+  },
+  "io.lenka.PersonalCashflow": {
+    "_t": "io.lenka.PersonalCashflow",
+    "salaryIncome": {
+      "value": 4001,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "cashIncome": {
+      "value": 1000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "extraIncome": {
+      "value": 2000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "monthlyDependentExpenses": {
+      "value": 500,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "expensesInBureau": {
+      "value": 200,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "rentExpenses": {
+      "value": 1000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "monthlyPayment": {
+      "value": 1000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "depositsLastMonth": {
+      "value": 4000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "withdrawalsLastMonth": {
+      "value": 2000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "balanceLastMonth": {
+      "value": 2000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "depositsTwoMonthsAgo": {
+      "value": 4500,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "withdrawalsTwoMonthsAgo": {
+      "value": 1800,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "balanceTwoMonthsAgo": {
+      "value": 2500,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "depositsThreeMonthsAgo": {
+      "value": 4200,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "withdrawalsThreeMonthsAgo": {
+      "value": 1750,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "balanceThreeMonthsAgo": {
+      "value": 3000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "averageDeposits": {
+      "value": 4233.33,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "averageWithdrawals": {
+      "value": 1850,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "averageBalance": {
+      "value": 2500,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "verifiableIncome": {
+      "value": 8234.33,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "verifiableExpenses": {
+      "value": 1700,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "verifiableFactor": 36.69,
+    "cash": {
+      "value": 5233.33,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "cashExpenses": {
+      "value": 2700,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "cashFactor": 30.57,
+    "extraEquipmentIncome": {
+      "value": 9833.33,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "extraEquipmentExpenses": {
+      "value": 3700,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "extraEquipmentFactor": 37.63,
+    "rentalFactor": 6.13,
+    "debtFactor": 34
+  },
+  "io.lenka.CompanyCashflow": {
+    "_t": "io.lenka.CompanyCashflow",
+    "cashIncome": {
+      "value": 50000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "extraIncome": {
+      "value": 10000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "monthlyPayment": {
+      "value": 1000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "depositsLastMonth": {
+      "value": 75000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "withdrawalsLastMonth": {
+      "value": 30000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "balanceLastMonth": {
+      "value": 25000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "depositsTwoMonthsAgo": {
+      "value": 45000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "averageDeposits": {
+      "value": 40000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "averageWithdrawals": {
+      "value": 10000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "averageBalance": {
+      "value": 8333.33,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "rentalFactor": 30,
+    "verifiable": {
+      "value": 40000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "cash": {
+      "value": 70000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "extraEquipment": {
+      "value": 61500,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "extraEquipmentRatio": 1.66
+  },
+  "io.lenka.CompanyFinancialDetails": {
+    "_t": "io.lenka.CompanyFinancialDetails",
+    "year": {
+      "id": "io.lenka.FinancialYear_currentYear",
+      "title": "current year"
+    },
+    "cash": {
+      "value": 3081000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "bank": {
+      "value": 10844000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "inventory": {
+      "value": 15795000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "tradeReceivables": {
+      "value": 3032000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "incomeTaxReceivable": {
+      "value": 3317000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "variousDebtors": {
+      "value": 5795000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "totalCurrentAssets": {
+      "value": 41864000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "other": {
+      "value": 1423000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "totalFixedAssets": {
+      "value": 1423000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "otherAssets": {
+      "value": 44514000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "totalAssets": {
+      "value": 87801000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "suppliers": {
+      "value": 5142000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "creditors": {
+      "value": 1235000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "taxesToPay": {
+      "value": 1596000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "otherAccounts": {
+      "value": 26403000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "provisions": {
+      "value": 3000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "totalCurrentLiabilities": {
+      "value": 34379000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "otherLiabilities": {
+      "value": 51622000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "totalLiabilities": {
+      "value": 86001000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "paidInCapital": {
+      "value": 20293000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "retainedEarnings": {
+      "value": 23232000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "currentYearPL": {
+      "value": 10275000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "stockholderEquity": {
+      "value": 53800000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "liabilitiesPlusCapital": {
+      "value": 139801000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "sales": {
+      "value": 146298000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "costOfSales": {
+      "value": 112582000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "grossProfit": {
+      "value": 33716000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "operatingCosts": {
+      "value": 19058000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "operatingProfit": {
+      "value": 14658000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "financialExpenses": {
+      "value": 2038000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "profitBeforeTaxes": {
+      "value": 12620000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "tax": {
+      "value": 2345000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "netProfit": {
+      "value": 10275000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "grossProfitP": 23.05,
+    "operatingProfitP": 10.02,
+    "netProfitP": 8.47,
+    "workingCapital": {
+      "value": 7485000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "shortTerm": 1.22,
+    "acidTest": 0.76,
+    "returnOnAssets": 14,
+    "returnOnEquity": 23,
+    "technicalBankrupcy": 15,
+    "indebtedness": 98,
+    "leverage": 61,
+    "interestCoverage": 619,
+    "cashHedging": 0.4,
+    "inventoryTurnover": 38.87,
+    "supplierRotation": 12.65,
+    "financialCycle": 26.22,
+    "assets": {
+      "value": 139801000,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "ebit": {
+      "value": 14730500,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "ebitda": {
+      "value": 12831050,
+      "currency": "MXN",
+      "_t": "tradle.Money"
+    },
+    "x1": 0.35,
+    "x2": 0.54,
+    "x3": 0.62,
+    "x4": 0.66,
+    "zScore": 5.41
+  }
+}
