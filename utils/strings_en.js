@@ -259,6 +259,7 @@ module.exports = {
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the data below",
+    "scannedQRCodeToImportData": "Scanned QR code to import data from {1}",
     "reviewAndConfirm": "Please review and confirm",
     "reviewScannedPropertiesAndSecondSideSnapshot": "Please review the data below, and take a snapshot of the {1} side of the document",
     "reviewScannedPropertiesWarning": "Is it your company? Please review and correct the data below",
