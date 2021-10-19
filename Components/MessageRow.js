@@ -260,9 +260,9 @@ class MessageRow extends Component {
                           </View>
                         </View>
 
-      messageBody = isSimpleMessage || isContext || isConfirmation
+      messageBody = isSimpleMessage || isContext || isConfirmation || !onPressCall
                   ? msgContent
-                  : <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+                  : <TouchableOpacity onPress={onPressCall} underlayColor='transparent'>
                       {msgContent}
                     </TouchableOpacity>
     }
@@ -516,9 +516,8 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === DATA_CLAIM) {
-      let w = Math.floor(0.8 * utils.dimensions().width) - 40
-      let message = 'Scanned QR code to import data from ' + resource.to.organization.title
-      let msg = <View style={[chatStyles.rowContainer, {width:w}]}  key={this.getNextKey()}>
+      let message = translate('scannedQRCodeToImportData', resource.to.organization.title)
+      let msg = <View style={[chatStyles.rowContainer, {alignItems:'center'}]}  key={this.getNextKey()}>
                   <Icon size={50} name='ios-qr-scanner' color='#ffffff' style={styles.qrIcon} />
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff', justifyContent: 'center'}]}>{resource.message || message}</Text>
                 </View>
