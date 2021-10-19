@@ -14,7 +14,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import constants from '@tradle/constants'
 
 const { TYPE } = constants
-const { PROFILE, ORGANIZATION, MONEY, MESSAGE } = constants.TYPES
+const { PROFILE, ORGANIZATION, MONEY, MESSAGE, FORM } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
@@ -197,13 +197,12 @@ var ResourceMixin = {
         if (displayName &&  !editItem) {
           let displayingPart = type === 'object' && pVal.title ||  pVal
           if (typeof displayingPart === 'object') {
-            if (itemMeta.ref  &&  displayingPart[TYPE]) {
-              displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
+            if (itemMeta.ref  &&  displayingPart[TYPE] && showResourceProperty) {
+              // displayingPart = JSON.stringify(utils.getDisplayName({resource: displayingPart}), null, 2)
               ret.push(showResourceProperty(displayingPart))
               return
             }
-            else
-              displayingPart = JSON.stringify(displayingPart, null, 2)
+            displayingPart = JSON.stringify(displayingPart, null, 2)
             ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                        <View style={styles.itemContent}>
                          <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
@@ -212,6 +211,13 @@ var ResourceMixin = {
                        {!isView  &&  <View style={styles.textContainer}/>}
                      </View>)
           }
+          else {
+            ret.push(<View style={styles.itemContent}>
+                       <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999', fontSize: 18}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                       <Text style={styles.itemHighlight}>{displayingPart}</Text>
+                     </View>)
+          }
+
           return
         }
         let value;
@@ -237,7 +243,7 @@ var ResourceMixin = {
                    <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
                      <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-                       <View style={{flexDirection: 'column', alignItems: 'flex-end'}} key={this.getNextKey()}>
+                       <View  style={styles.enumValue} key={this.getNextKey()}>
                          {pVal.map((v, i) => <Text style={styles.itemText}>{v.title}</Text>)}
                        </View>
                      </View>
@@ -295,7 +301,7 @@ var ResourceMixin = {
           let cancel
           if (cancelItem  &&  !hadCancel)  {
             hadCancel = true
-            cancel = <View style={{position: 'absolute', top: 0, right: 10}}>
+            cancel = <View style={styles.cancelIcon}>
                        <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                         <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                        </TouchableOpacity>
@@ -352,7 +358,7 @@ var ResourceMixin = {
           else
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
           let componentName = isMessageView && MESSAGE_VIEW || RESOURCE_VIEW
-          item =  <TouchableOpacity underlayColor='transparent' style={styles.rowStyle} key={this.getNextKey()} onPress={() => {
+          item =  <TouchableOpacity underlayColor='transparent' key={this.getNextKey()} onPress={() => {
                     navigator.push({
                      title: vTitle,
                      componentName,
@@ -378,7 +384,7 @@ var ResourceMixin = {
       )
     });
   },
-  renderSimpleProp({val, pMeta, modelName, component, showResourceProperty}) {
+  renderSimpleProp({val, pMeta, modelName, component, hasGroups, showResourceProperty}) {
     let { bankStyle } = this.props
     if (Array.isArray(val))
       return this.renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty})
@@ -389,12 +395,13 @@ var ResourceMixin = {
     else if (units  &&  units.charAt(0) != '[')
       val += ' ' + units
 
+    let descStyle = hasGroups ? styles.descriptionGroup : styles.description
     if (val === NOT_SPECIFIED)
-      return <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
+      return <Text style={[descStyle, {color: bankStyle.linkColor}]}>{val}</Text>
     if (typeof val === 'number')
-      return <Text style={styles.description}>{val}</Text>;
+      return <Text style={descStyle}>{val}</Text>;
     if (typeof val === 'boolean')
-      val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
+      val = <Text style={descStyle}>{val ? 'Yes' : 'No'}</Text>;
     if (pMeta.signature) {
       let { width } = utils.dimensions(component)
       let h = 200
@@ -418,7 +425,7 @@ var ResourceMixin = {
       val = translate(utils.getModel(val))
     else if (pMeta.range === 'password')
       val = '*********'
-    return <Text style={[styles.description]}>{val}</Text>;
+    return <Text style={descStyle}>{val}</Text>;
   },
   renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty}) {
     if (pMeta.items.backlink)
@@ -428,14 +435,26 @@ var ResourceMixin = {
     let vCols = pMeta.viewCols;
     if (!vCols)
       vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-    val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component, showResourceProperty})}</View>
+
+    let items = this.renderItems({value: val, prop: pMeta, component, showResourceProperty})
+
+    const model = utils.getModel(modelName)
+    let hasFormItems = this.hasItemsWithFormRefs(model)
+
+    val = hasFormItems ? items : this.renderItemsGroups({groups: items, component})
+    val = <View style={{marginHorizontal: 7}}>{val}</View>
+
     let title = pMeta.title || utils.makeLabel(pMeta.name)
-    const titleEl = <Text style={styles.title}>{title}</Text>
+
+    let titleEl
+    if (!pMeta.skipLabel)
+      titleEl = <Text style={styles.titleEl}>{title}</Text>
+
     let icon
     let cnt = val.length;
     if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
       icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-    let header = <View style={{flexDirection: 'row'}}>
+    let header = <View style={styles.justRow}>
                   {titleEl}
                   {icon}
                 </View>
@@ -458,6 +477,58 @@ var ResourceMixin = {
              </View>
 
   },
+  hasItemsWithFormRefs(model) {
+    const itemProps = utils.getPropertiesWithAnnotation(model, 'items')
+    for (let p in itemProps) {
+      const prop = itemProps[p]
+      if (!prop.items.ref || !prop.inlined)
+        continue
+      const m = utils.getModel(prop.items.ref)
+      if (utils.isSubclassOf(m, FORM))
+        return true
+      const { properties:mProps } = m
+      for (let p in mProps) {
+        const mProp = mProps[p]
+        if (mProp.inlined  &&  mProp.ref  &&  utils.isSubclassOf(utils.getModel(mProp.ref)))
+          return true
+      }
+    }
+    return false
+  },
+  renderItemsGroups({groups, component}) {
+    const { bankStyle } = this.props
+    let prettyGroups = []
+    let isSmallScreen = utils.getContentWidth(component) < 800
+    if (isSmallScreen) {
+      for (let i=0; i<groups.length; i++) {
+        prettyGroups.push(<View style={styles.prettyGroup}>
+                            <View style={{padding: 5, flex: 1}}>
+                              {groups[i]}
+                            </View>
+                          </View>)
+
+      }
+      return prettyGroups
+    }
+    for (let i=0; i<groups.length; i+=2) {
+      let group1 = groups[i]
+      let group2 = (i === groups.length-1) ? <View/> : groups[i + 1]
+
+      prettyGroups.push(<View style={styles.prettyGroup}>
+                        <View style={styles.row}>
+                          <View style={styles.leftGroup}>
+                            {group1}
+                          </View>
+                          <View style={styles.rightGroup}>
+                            {group2}
+                          </View>
+                        </View>
+                      </View>)
+
+    }
+    return prettyGroups
+  },
+
   renderSimpleGrid(value, prop, component) {
     if (!value || prop.items.backlink)
       return <View  key={this.getNextKey()} />
@@ -709,7 +780,7 @@ var ResourceMixin = {
                    <Text style={styles.dsTitle}>Blockchain: </Text>
                    <Text style={styles.dsValue}>{blockchain}</Text>
                  </View>
-                 <View style={{flexDirection: 'row'}}>
+                 <View style={styles.justRow}>
                    <Text style={styles.dsTitle}>Network: </Text>
                    <Text style={styles.dsValue}>{networkName}</Text>
                  </View>
@@ -850,8 +921,12 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
 })
 
 var styles = StyleSheet.create({
+  justRow: {
+    flexDirection: 'row'
+  },
   textContainer: {
-    flex: 1
+    width: 30
+    // flex: 1
   },
   container: {
     margin: 10,
@@ -869,10 +944,18 @@ var styles = StyleSheet.create({
     // marginHorizontal: 7,
     color: '#757575',
   },
+  itemHighlight: {
+    fontSize: 16,
+    marginBottom: 0,
+    marginRight: 5,
+    // marginHorizontal: 7,
+    fontWeight: '600',
+    color: '#555555',
+  },
   itemSeparator: {
     height: 1,
     marginTop: 5,
-    backgroundColor: '#eeeeee',
+    // backgroundColor: '#eeeeee',
     // marginHorizontal: 15
   },
   separator: {
@@ -891,9 +974,6 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     // marginRight: 3
   },
-  rowStyle: {
-    // paddingVertical: 5
-  },
   title: {
     fontSize: 16,
     marginTop: 3,
@@ -901,13 +981,27 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#9b9b9b'
   },
-  arrow: {
+  titleEl: {
+    fontSize: 20,
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#9b9b9b'
+  },
+   arrow: {
     position: 'absolute',
     top: 15,
     right: 20
   },
   description: {
     fontSize: 18,
+    marginVertical: 3,
+    marginHorizontal: 7,
+    color: '#555555',
+  },
+  descriptionGroup: {
+    fontSize: 18,
+    width: '45%',
     marginVertical: 3,
     marginHorizontal: 7,
     color: '#555555',
@@ -954,9 +1048,39 @@ var styles = StyleSheet.create({
     borderBottomWidth: 1
   },
   itemContent: {
-    flex: 9,
+    // flex: 9,
+    flex: 1,
     flexDirection: utils.isWeb() && 'row' || 'column',
     justifyContent: 'space-between'
+  },
+  enumValue: {
+    flexDirection: 'column',
+    alignItems: 'flex-end'
+  },
+  cancelIcon: {
+    position: 'absolute',
+    top: 0,
+    right: 0
+  },
+  prettyGroup: {
+    marginVertical: 10,
+    marginRight: 10,
+    backgroundColor: '#ffffff',
+    borderColor: '#eeeeee',
+    borderRadius: 15,
+    borderWidth: 1,
+    paddingVertical: 10
+  },
+  leftGroup: {
+    padding: 5,
+    flex: 1,
+    borderRightColor:'#cccccc',
+    borderRightWidth: 1
+  },
+  rightGroup: {
+    padding: 5,
+    flex: 1,
+    width:'50%'
   },
 })
 

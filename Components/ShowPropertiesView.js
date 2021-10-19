@@ -14,11 +14,11 @@ import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
 import moment from 'moment'
 import Prompt from 'react-native-prompt'
+import LinearGradient from 'react-native-linear-gradient'
 
 import constants from '@tradle/constants'
-import validateModel from '@tradle/validate-model'
 
-import utils, { translate, translateEnum, isEnum, isStub, getRootHash } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub, isForm, getRootHash } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -148,6 +148,11 @@ class ShowPropertiesView extends Component {
     let notEditable = model.notEditable || utils.isSubclassOf(model, CHECK_OVERRIDE)
 
     let viewCols = []
+    let groups = []
+    let propIn = []
+
+    let hasGroups
+    let propsDisplayed
     vCols.forEach(pMeta => {
       let p = pMeta.name
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
@@ -160,14 +165,15 @@ class ShowPropertiesView extends Component {
         pMeta = ObjectModel.properties[p]
       if (!me.isEmployee  &&  pMeta.internalUse)
         return
-      var val = resource[p];
+      let val = resource[p]
+      propIn.push(p)
       if (pMeta.range === 'json') {
         this.renderJsonProp(val, model, pMeta, viewCols)
         return
       }
-      var isRef;
-      var isItems
-      // var isEmail
+      let isRef;
+      let isItems
+      // let isEmail
       let isUndefined = !val  &&  (typeof val === 'undefined')
       if (isUndefined) {
         if (pMeta.displayAs) {
@@ -178,12 +184,15 @@ class ShowPropertiesView extends Component {
         }
         else if (p.endsWith('_group')) {
           viewCols.push(
-            <View style={{padding: 15}} key={this.getNextKey()}>
-              <View style={styles.groupStyle}>
+            <View style={{paddingHorizontal: 15, paddingTop: 15}} key={this.getNextKey()}>
+              <View style={{flexDirection: 'row', paddingVertical: 5}}>
+                <View style={styles.accent}/>
                 <Text style={styles.groupStyleText}>{translate(pMeta, model)}</Text>
               </View>
             </View>
           )
+          hasGroups = true
+          groups.push(viewCols.length - 1)
           return
         }
         else if (checkProperties) {
@@ -209,7 +218,7 @@ class ShowPropertiesView extends Component {
       else if (!pMeta.range  &&  pMeta.type === 'number')
         val = utils.formatNumber(pMeta, val, locale)
       else if (pMeta.ref) {
-        ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}))
+        ({val, isRef} = this.renderRefProperty({val, pMeta, viewCols, vCols, styles, resource, hasGroups}))
         if (!val)
           return
       }
@@ -253,7 +262,7 @@ class ShowPropertiesView extends Component {
           if (pMeta.items.backlink)
             return
         }
-        val = this.renderSimpleProp({val, pMeta, modelName, component: ShowPropertiesView, showResourceProperty: this.showResourceProperty.bind(this)})
+        val = this.renderSimpleProp({val, pMeta, modelName, component: ShowPropertiesView, hasGroups, showResourceProperty: this.showResourceProperty.bind(this)})
       }
       var title
       if (!pMeta.skipLabel  &&  !isItems)
@@ -276,9 +285,11 @@ class ShowPropertiesView extends Component {
       else
         style.push({flexDirection: 'column'})
 
+      if (hasGroups)
+        style.push({flex: 1})
       viewCols.push(
         <View key={this.getNextKey()}>
-           <View style={{flexDirection: isDirectionRow && 'row' || 'column'}}>
+           <View style={isItem ? {} : {width: utils.getContentWidth(ShowPropertiesView), flexDirection: isDirectionRow ? 'row' : 'column'}}>
              <View style={[style, {flexDirection: 'column'}]}>
                {title}
                {val}
@@ -288,6 +299,9 @@ class ShowPropertiesView extends Component {
          </View>
       )
     })
+    if (groups.length)
+      this.renderGroups(resource, viewCols, groups, propIn, styles)
+
     if (resource.txId) { // || utils.isSealableModel(model)) {
       viewCols.push(
           <View key={this.getNextKey()} ref='propertySheet'>
@@ -310,6 +324,107 @@ class ShowPropertiesView extends Component {
                             isItem={true}
                             navigator={navigator} />
       </View>
+  }
+  renderGroups(resource, viewCols, groups, propsIn, styles) {
+    let groupEnd = viewCols.length
+    const { bankStyle } = this.props
+    let props = utils.getModel(resource[TYPE]).properties
+    let isSmall = utils.getContentWidth(ShowPropertiesView) < 800
+    let cardGradient = bankStyle.cardGradient || '#dcf8ef,#fee2f8'// '#d7e1ec, #ffffff'
+    const colors = cardGradient.split(',').map(c => c.trim())
+    for (let i=groups.length - 1, j=1; i>=0; i--, j++) {
+      let groupStart = groups[i]
+      let size = groupEnd - groupStart - 1
+      let groupView
+      let hasMarkdown, hasItems
+      for (let ii=groupStart; ii<groupEnd && !hasMarkdown && !hasItems; ii++) {
+        const prop = props[propsIn[ii]]
+        if (prop.markdown)
+          hasMarkdown = true
+        if (prop.inlined && prop.type === 'array')
+          hasItems = true
+      }
+      let cols = viewCols.slice(groupStart, groupEnd)
+      if (isSmall  ||  size < 4  ||  hasMarkdown || hasItems) {
+        if (hasMarkdown  ||  hasItems  ||  i > 0) {
+          groupView = <View style={{padding: 5, marginVertical: 10}}>
+                        <View style={{backgroundColor: '#fafafa', borderColor: '#eeeeee', borderRadius: 15, borderWidth: 1}}>
+                          {i === 0  &&  this.getDateView({resource, styles, noGradient: true})}
+                          {cols}
+                        </View>
+                      </View>
+        }
+        else {
+          let groupBody = <View style={{flex: 1}}>
+                              {i === 0  &&  this.getDateView({resource, styles})}
+                              {cols.slice(0, 1)}
+                              <View style={styles.oneGroup}>
+                                {cols.slice(1, cols.length)}
+                              </View>
+                          </View>
+          if (hasMarkdown  ||  hasItems) {
+            groupView = <View style={{margin: 10 }}>
+                          {groupBody}
+                        </View>
+          }
+          else if (i === 0 ){
+            groupView = <View style={{margin: 10 }}>
+                          <LinearGradient colors={colors} style={styles.linearGradient}>
+                            {groupBody}
+                          </LinearGradient>
+                        </View>
+          }
+        }
+/*
+        let groupBody = <View style={{flex: 1}}>
+                            {i === 0  &&  this.getDateView({resource, styles})}
+                            {cols.slice(0, 1)}
+                            <View style={{padding: 5, flex: 1}}>
+                              {cols.slice(1, cols.length)}
+                            </View>
+                        </View>
+        if (hasMarkdown  ||  hasItems) {
+          groupView = <View style={{margin: 10 }}>
+                      {groupBody}
+                    </View>
+        }
+
+ */
+      }
+      else {
+        let size1 = Math.round(size / 2)
+        let groupBody = <View styles={{flex: 1}}>
+                          {i === 0  &&  this.getDateView({resource, styles})}
+                          {cols.slice(0, 1)}
+                          <View style={{flexDirection: 'row', paddingBottom: 10}}>
+                            <View style={{padding: 5, flex: 1, borderRightColor:'#ccc', borderRightWidth: 1}}>
+                              {cols.slice(1, size1)}
+                            </View>
+                            <View style={{padding: 5, flex: 1, width: isSmall ? '50%' : '100%'}}>
+                              {cols.slice(size1 + 1)}
+                            </View>
+                          </View>
+                        </View>
+
+        if (i === 0) {
+          groupBody = <LinearGradient colors={colors} style={styles.linearGradient}>
+                        {groupBody}
+                      </LinearGradient>
+          groupView = <View style={{marginVertical: 10 }}>
+                        {groupBody}
+                      </View>
+        }
+        else
+          groupView = <View style={{marginVertical: 10, backgroundColor: i===0 ? 'transparent' : '#fafafa', borderColor: '#eeeeee', borderRadius: 15, borderWidth: 1, paddingBottom: 10 }}>
+                        {groupBody}
+                      </View>
+      }
+
+      viewCols.splice(groupStart, groupEnd - groupStart, groupView)
+      // propIn.splice(groupStart, groupEnd - groupStart,  `${i}`)
+
+      groupEnd = viewCols.length - j
+    }
   }
   renderJsonProp(val, model, pMeta, viewCols) {
     if (!val  ||  utils.isEmpty(val))
@@ -379,14 +494,26 @@ class ShowPropertiesView extends Component {
          )
     }
   }
-  renderRefProperty({val, pMeta, viewCols, vCols, styles, resource}) {
+  getDateView({resource, styles, noGradient}) {
+    let dateView
+
+    if (resource._time) {
+      let date = utils.formatDate(new Date(resource._time))
+      dateView = <View style={[styles.band, {marginHorizontal: noGradient ? 0 : -15}]}>
+                  <Text style={styles.dateLabel}>{translate('submissionDate')}</Text>
+                  <Text style={styles.dateValue}>{date}</Text>
+                </View>
+    }
+    return dateView
+  }
+  renderRefProperty({val, pMeta, viewCols, vCols, styles, resource, hasGroups}) {
     // debugger
     let { showRefResource, currency, bankStyle, checkProperties, locale } = this.props
     let { ref } = pMeta
     if (!ref)
       ref = pMeta.items  &&  pMeta.items.ref
     if (ref === PHOTO) {
-      if (vCols.length === 1  &&  resource._time)
+      if (vCols.length === 1  &&  resource._time  &&  !isForm(utils.getModel(resource[TYPE])))
         viewCols.push(
           <View  key={this.getNextKey()} style={{padding: 10}}>
             <Text style={styles.title}>{translate('Date')}</Text>
@@ -456,8 +583,8 @@ class ShowPropertiesView extends Component {
       let type = utils.getType(val)
       let m = utils.getModel(type)
       let typeRow
-      if (pMeta.title.toLowerCase() !== m.title.toLowerCase())
-        typeRow = <Text style={[styles.title, styles.smallLetters]}>{translate(m)}</Text>
+      // if (pMeta.title.toLowerCase() !== m.title.toLowerCase())
+      //   typeRow = <Text style={[styles.title, styles.smallLetters]}>{translate(m)}</Text>
 
       val = <View>
              <TouchableOpacity style={{flexDirection: 'row'}} onPress={showRefResource.bind(this, val, pMeta)}>
@@ -598,7 +725,8 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
     },
     link: {
       color: '#555555',
-      alignSelf: 'center'
+      alignSelf: 'center',
+      marginTop: 2
     },
     linkTitle: {
       fontSize: 18,
@@ -618,14 +746,11 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       width: 40,
       height: 40
     },
-    groupStyle: {
-      borderBottomColor: bankStyle.linkColor,
-      borderBottomWidth: 1,
-      paddingBottom: 5
-    },
     groupStyleText: {
-      fontSize: 22,
-      color: bankStyle.linkColor
+      fontSize: 26,
+      fontWeight: '500',
+      color: bankStyle.linkColor,
+      fontFamily: bankStyle.headerFont
     },
     bigTitle: {
       fontSize: 20,
@@ -638,6 +763,52 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
     thumb: {
       width: 40,
       height: 40
+    },
+    accent: {
+      width: 14,
+      borderLeftColor: bankStyle.accentColor || 'orange',
+      borderLeftWidth: 5,
+    },
+    band: {
+      paddingTop: 3,
+      paddingBottom: 5,
+      // marginHorizontal: -15,
+      // flex: 1,
+      backgroundColor: bankStyle.linkColor,
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+    },
+    date: {
+      fontSize: 14,
+      marginTop: 5,
+      marginRight: 10,
+      alignSelf: 'flex-end',
+      color: '#2E3B4E'
+      // color: '#b4c3cb'
+    },
+    dateLabel: {
+      fontSize: 14,
+      marginTop: 5,
+      marginRight: 10,
+      color: '#EEE'
+      // color: '#b4c3cb'
+    },
+    dateValue: {
+      fontSize: 14,
+      marginTop: 5,
+      marginRight: 10,
+      color: '#FFF'
+      // color: '#b4c3cb'
+    },
+    linearGradient: {
+      flex: 1,
+      paddingLeft: 15,
+      paddingRight: 15,
+      borderRadius: 15
+    },
+    oneGroup: {
+      padding: 5,
+      flex: 1
     },
     itemBackground: {
       paddingVertical: 3,
