@@ -4499,9 +4499,11 @@ if (!res[SIG]  &&  res._message)
     }
   },
   onSaveTemporary(resource) {
+    if (!__DEV__) return
     temporaryResources[resource[TYPE]] = utils.sanitize(resource)
   },
   async onGetTemporary(type, noFetch) {
+    if (!__DEV__) return
     var r = !noFetch &&  temporaryResources[type]
     let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
     this.trigger({action: 'getTemporary', resource: r || {}, requestedProperties})
@@ -7613,7 +7615,7 @@ if (!res[SIG]  &&  res._message)
     // Product chooser for example
     let props = meta.properties;
     let containerProp, resourceId;
-    let foundRecs = 0
+  let foundRecs = 0
 
     let isOrg = modelName == ORGANIZATION
 
