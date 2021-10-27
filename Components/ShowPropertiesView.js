@@ -804,8 +804,8 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
     },
     linearGradient: {
       flex: 1,
-      paddingLeft: 15,
-      paddingRight: 15,
+      // paddingLeft: 15,
+      // paddingRight: 15,
       borderRadius: 15
     },
     oneGroup: {
