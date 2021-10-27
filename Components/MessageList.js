@@ -678,7 +678,7 @@ class MessageList extends Component {
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
 
-    let bankStyle = this.state.bankStyle
+    let bankStyle = this.props.bankStyle || this.state.bankStyle
 
     let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
     let route = {
@@ -770,10 +770,12 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, originatingMessage, currency, locale, navigator, isModalOpen } = this.props
+    let { application, isAggregation, originatingMessage, currency, locale, navigator, isModalOpen, bankStyle } = this.props
+    if (!bankStyle)
+      bankStyle = this.state.bankStyle
 
-    let bankStyle = this.state.bankStyle
-
+    // if (resource[TYPE] === 'tradle.legal.LegalEntity' && resource.name === 'OCTOPUS')
+    //   return
     let model = utils.getModel(utils.getType(resource))
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
