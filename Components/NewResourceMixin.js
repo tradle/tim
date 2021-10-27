@@ -1353,7 +1353,7 @@ var NewResourceMixin = {
 
 // debugger
     let setItemCount
-    let { metadata, model, search } = this.props
+    let { metadata, model, search, originatingMessage:originatingResource } = this.props
     let isItem = metadata != null
 
     if (!model  &&  isItem)
@@ -1446,7 +1446,7 @@ var NewResourceMixin = {
     this.setState(state);
     if (!search) {
       if (utils.isForm(model))
-        Actions.getRequestedProperties({resource, currentResource: resource})//currentR})
+        Actions.getRequestedProperties({resource, currentResource: resource, originatingResource})//currentR})
       if (!utils.isImplementing(r, INTERSECTION))
         Actions.saveTemporary(resource)
     }
@@ -1773,7 +1773,7 @@ var NewResourceMixin = {
       else if (prop.ref === MONEY) {
         coerceNumber(value[p], 'value')
         let error = this.checkNumber(value[p].value, prop, err)
-        if (error  &&  m.required.indexOf(p) === -1)
+        if (error  &&  m.required  &&  m.required.indexOf(p) === -1)
           deleteProps.push(p)
         else if (!value[p].currency  &&  this.props.currency)
           value[p].currency = this.props.currency
@@ -1813,6 +1813,7 @@ var NewResourceMixin = {
     return err
   },
   checkNumber(v, prop, err) {
+    if (!v) return
     let p = prop.name
     let error
     if (typeof v !== 'number') {
@@ -1924,7 +1925,7 @@ var styles= StyleSheet.create({
     borderRadius: 5
   },
   err: {
-    paddingHorizontal: 15,
+    // paddingHorizontal: 15,
     // backgroundColor: 'transparent'
   },
   element: {
