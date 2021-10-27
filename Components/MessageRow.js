@@ -516,9 +516,9 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === DATA_CLAIM) {
-      let message = translate('scannedQRCodeToImportData', resource.to.organization.title)
+      let message = translate('requestedDataImport', resource.to.organization.title)
       let msg = <View style={[chatStyles.rowContainer, {alignItems:'center'}]}  key={this.getNextKey()}>
-                  <Icon size={50} name='ios-qr-scanner' color='#ffffff' style={styles.qrIcon} />
+                  <Icon size={25} name='ios-download-outline' color='#ffffff' style={styles.qrIcon} />
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff', justifyContent: 'center'}]}>{resource.message || message}</Text>
                 </View>
       renderedRow.push(msg);
