@@ -293,7 +293,8 @@ module.exports = {
     "requestMyData": "Requesting my data",
     "startedByAnotherEmployee": "The application for {1} was started by another employee",
     "doYouWantToContinue": "Do you want to switch to it and continue from there?",
-    "afterRefresh": "You are cleared to use our services without interruption",
+    // "afterRefresh": "You are cleared to use our services without interruption",
+    "afterRefresh": "Thank you for reviewing the documents!",
     "newCustomer": "New customer",
     "areYouSureYouAreDone": "Are you sure you want to finish this session?",
     "wrongDocumentTypePleaseTryAgain": "Wrong document type. Please try again",
@@ -376,6 +377,7 @@ module.exports = {
     "prefilledForCustomer": "For your convenience we prefilled some fields. Please review and submit",
     "prefillTheProduct": "Choose the application to prefill for the prospect",
     "importedData": "Click here to see {1} resources imported from {2} on your profile page.",
+    "requestedDataImport": "Importing data from {1}",
     // Tours buttons
     "Skip": "Skip",
     "Done": "Done",
