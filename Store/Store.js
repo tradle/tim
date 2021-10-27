@@ -182,6 +182,7 @@ const MY_AGENT_PASS       = 'tradle.MyAgentOnboarding'
 const FORM_REQUEST        = 'tradle.FormRequest'
 const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
+
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 
 const REMEDIATION         = 'tradle.Remediation'
@@ -646,7 +647,7 @@ var Store = Reflux.createStore({
     // this.maybeWatchSeal(msg)
 
     const payload = msg.object.object
-    if (payload[TYPE] === FORM_REQUEST  &&  payload.product === REFRESH_PRODUCT)
+    if (payload[TYPE] === FORM_REQUEST  &&  (payload.product === REFRESH_PRODUCT  &&  !payload.prefill))
       return
     const originalPayload = payload[TYPE] === MESSAGE ? payload.object : payload
     debug('newObject:', originalPayload[TYPE])
@@ -2515,6 +2516,8 @@ var Store = Reflux.createStore({
       }
       // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/aviva.html'
     }
+    if (org.name === 'Lenka local' || org.name === 'Lenka-local')
+      org.name = 'Bank of America'
     this._setItem(okey, org)
     if (!list[ikey]) {
       var profile = {
@@ -3570,13 +3573,14 @@ var Store = Reflux.createStore({
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = this.getBizPluginsContext()
     let moreInfo
+    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getModel(rtype)
 
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
       moreInfo = plugin(context).validateForm.call(
-          {models: {[rtype]: this.getModel(rtype)}},
+          {models: {[rtype]: m}},
           {application: _context, form: resource, currentResource: currentResource}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
@@ -4626,6 +4630,7 @@ if (!res[SIG]  &&  res._message)
       resource[CUR_HASH] = protocol.linkString(resource)
 
     let results = []
+    let isInBundle = resource._dataBundle
     for (let p in resource) {
       if (!props[p] ||  props[p].type !== 'object')
         continue
@@ -4643,7 +4648,7 @@ if (!res[SIG]  &&  res._message)
         refProps[rValue] = []
       refProps[rValue].push(p)
       let elm = this._getItem(rValue)
-      if (!elm  &&  me.isEmployee) {
+      if (!elm  && !isInBundle  &&  me.isEmployee) {
         elm = await this._getItemFromServer({idOrResource: rValue})
         foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
       }
@@ -4660,7 +4665,7 @@ if (!res[SIG]  &&  res._message)
           try {
             kres = await this._keeper.get(elm[CUR_HASH])
           } catch (err) {
-            if (me.isEmployee)
+            if (!isInBundle  &&  me.isEmployee)
               kres = await this._getItemFromServer({idOrResource: utils.getId(elm)})
             debugger
           }
@@ -5024,6 +5029,9 @@ if (!res[SIG]  &&  res._message)
           returnVal._context = {id: returnValKey, title: product ? product : requestFor}
         }
 
+        // if (returnVal._context  &&  returnVal._context.requestFor === REFRESH_PRODUCT)
+        //   returnVal[NOT_CHAT_ITEM] = true
+
         self._setItem(returnValKey, returnVal)
         let org
         let isSavedItem = utils.isSavedItem(returnVal)
@@ -5049,7 +5057,7 @@ if (!res[SIG]  &&  res._message)
         let origNoTrigger = noTrigger
         if (rtype === DATA_CLAIM) {
           org = self._getItem(utils.getId(org))
-          Actions.showModal({title: translate('requestMyData'), showIndicator: true})
+          // Actions.showModal({title: translate('requestMyData'), showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
@@ -5164,8 +5172,13 @@ if (!res[SIG]  &&  res._message)
           let org = to.organization ? self._getItem(to.organization) : to
           // Draft project
           // self.trigger({action: 'getItem', resource: returnVal, to: org})
-          if (!origNoTrigger)
-            self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+          if (!origNoTrigger) {
+            let context = returnVal._context
+            if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
+              prevRes._dataBundle = context._dataBundle
+            else
+              self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+          }
           await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
         }
@@ -5329,26 +5342,35 @@ if (!res[SIG]  &&  res._message)
         }
         // return
       }
-      let fr = await self._keeper.get(returnVal[CUR_HASH])
-      let r = {
-        [TYPE]: CONFIRMATION,
-        message: translate('afterRefresh')
-      }
-      let data = await self.createObject(r)
-      _.extend(r, data.object)
-      _.extend(r, {
-        [ROOT_HASH]: data.permalink,
-        [CUR_HASH]: data.link,
-        [IS_MESSAGE]: true,
-        from: returnVal.from,
-        to: returnVal.to
-      })
-      let rId = utils.getId(r)
-      await db.put(rId, r)
-      self._setItem(rId, r)
-      self.addMessagesToChat(utils.getId(r.from.organization), r)
-      self.addVisualProps(r)
-      self.trigger({action: 'addItem', resource: r})
+      // let fr = await self._keeper.get(returnVal[CUR_HASH])
+      // let r = {
+      //   [TYPE]: CONFIRMATION,
+      //   message: translate('afterRefresh'),
+      //   requestFor: REFRESH_PRODUCT
+      // }
+      // let data = await self.createObject(r)
+      // _.extend(r, data.object)
+      // _.extend(r, {
+      //   [ROOT_HASH]: data.permalink,
+      //   [CUR_HASH]: data.link,
+      //   [IS_MESSAGE]: true,
+      //   from: returnVal.from,
+      //   to: returnVal.to
+      // })
+      // let rId = utils.getId(r)
+      // await db.put(rId, r)
+      // self._setItem(rId, r)
+
+      // let org = r.from.organization
+      // if (!org) {
+      //   let fromR = self._getItem(r.from.id)
+      //   org = fromR  &&  fromR.organization
+      // }
+      // if (org)
+      //   self.addMessagesToChat(utils.getId(org), r)
+
+      // self.addVisualProps(r)
+      // self.trigger({action: 'addItem', resource: r})
     }
   },
   _makeIdentityStub(r) {
@@ -5726,18 +5748,36 @@ if (!res[SIG]  &&  res._message)
   },
 
   async onImportData(data) {
-    let { host, provider, dataHash } = data
-    let providerId = utils.makeId(PROFILE, data.provider)
-    let r = {
-      _t: DATA_CLAIM,
-      claimId: dataHash,
-      from: {
+    await this.ready
+    await this._loadedResourcesDefer.promise
+    let { host, provider, dataHash:claimId } = data
+    let to = {
+      id: utils.makeId(PROFILE, provider)
+    }
+    // let toR = this._getItem(to)
+    // Actions.list({resource: toR, modelName: MESSAGE, to: toR, isChat: true})
+    let from ={
         id: utils.getId(me),
         title: utils.getDisplayName({ resource: me })
-      },
-      to: {
-        id: providerId
       }
+    let dataClaims = await this.searchMessages({to: from, modelName: DATA_CLAIM, filterProps: {claimId}})
+debugger
+    if (dataClaims  &&  dataClaims.length) {
+      // let value = {
+      //   [TYPE]: SIMPLE_MESSAGE,
+      //   message: translate('youHaveThisBundle'),
+      //   from: me,
+      //   to,
+      //   _context: dataClaims[0]._context
+      // }
+      // Actions.addMessage({msg: value, disableAutoResponse: true})
+      return
+    }
+    let r = {
+      _t: DATA_CLAIM,
+      claimId,
+      from,
+      to
     }
     // check if we have this provider
     let sp = getServiceProviderByUrl(host)
@@ -5746,7 +5786,7 @@ if (!res[SIG]  &&  res._message)
       await this.getInfo({serverUrls: [host]})
       invalidQR = !getServiceProviderByUrl(host)
     } else {
-      invalidQR = !this._getItem(providerId)
+      invalidQR = !this._getItem(to)
     }
 
     if (invalidQR) {
@@ -5757,6 +5797,7 @@ if (!res[SIG]  &&  res._message)
     await this.onAddChatItem({
       resource: r,
       value: r,
+      isDeepLink: true,
       provider: {
         url: host,
         hash: provider
@@ -7898,8 +7939,10 @@ if (!res[SIG]  &&  res._message)
           if (links.includes(hash)  &&  !duplicateItems.includes(hash))
             duplicateItems.push(hash)
         }
-        if (item._dataBundle  &&  !item._latest)
+        if (item._dataBundle) {
+          if (!item._latest)
           continue
+        }
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
           if (item._originalSender  ||  item._forward)
             continue
@@ -11285,8 +11328,10 @@ if (!res[SIG]  &&  res._message)
       }
       await this.disableFormRequests({form:val.form, batch, org})
     }
-    if (val[TYPE] === DATA_BUNDLE)
+    if (val[TYPE] === DATA_BUNDLE) {
       await this.getDataBundle().processDataBundle({val, context})
+      noTrigger = true
+    }
     else if (val[TYPE] === DEVICE_SYNC_DATA_BUNDLE) {
       await this.deviceSync(val)
       val[NOT_CHAT_ITEM] = true
@@ -11330,8 +11375,8 @@ if (!res[SIG]  &&  res._message)
           }
         }
       }
-
-      noTrigger = val.from.id === meId
+      if (!noTrigger)
+        noTrigger = val.from.id === meId
     }
     let isStylesPack = type === STYLES_PACK
     if (isStylesPack) {

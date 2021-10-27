@@ -58,9 +58,9 @@ class DataBundle {
     let forg = fromR && fromR.organization
     let title = forg  &&  forg.title  ||  val.from.title
 
-    Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
+    // Actions.showModal({title: translate('sendingYourData', items.length, title), showIndicator: true})
 
-    setTimeout(() => Actions.hideModal(), 3000)
+    // setTimeout(() => Actions.hideModal(), 3000)
 
     let result = await Promise.all(items.map(item => this.Store.saveObject({object: item})))
     let resources = []
@@ -186,10 +186,11 @@ class DataBundle {
   async searchForRefresh(params) {
     let { to, resource } = params
     // let [ requestForRefresh ] = await this.Store.searchMessages({to, isRefresh: true, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-    let [ requestForRefresh ] = await this.Store.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
-    if (!requestForRefresh)
+    let requestForRefresh = await this.Store.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _documentCreated: false}})
+    if (!requestForRefresh.length)
       return { result: [] }
-
+    requestForRefresh.sort((a, b) => b._time - a._time)
+    requestForRefresh = requestForRefresh[0]
     let time = requestForRefresh._time
     let forms = requestForRefresh  &&  requestForRefresh._forms
 
@@ -202,7 +203,7 @@ class DataBundle {
         //   return false
         if (!r._latest)
           return false
-        if (!r._dataBundle)
+        if (!r._dataBundle || r._dataBundle !== requestForRefresh._dataBundle)
           return false
         if (r._time < time)
           return true
@@ -275,12 +276,13 @@ class DataBundle {
       requestFor: REFRESH_PRODUCT,
       from: me,
       to: val.from,
+      bundleId: val[ROOT_HASH],
       _dataBundle: getId(val)
     }
     return await this.Store.onAddChatItem({resource: requestForPR, noTrigger: true})
   }
   async fireRefresh({val, context, productBundle}) {
-    let timeout = productBundle  &&  0 || 5000
+    let timeout = 0 //productBundle  &&  0 || 5000
     setTimeout(async () => {
       let me = getMe()
       let from = getId(val.from) === getId(me) ? val.to : val.from
@@ -427,7 +429,13 @@ class DataBundle {
 
 debugger
     let context = resource._context || r._context
-    let isProductBundle = context  &&  context.bundleId || r.form === PRODUCT_BUNDLE
+    // let isProductBundle = context  &&  context.bundleId || r.form === PRODUCT_BUNDLE
+    let isProductBundle
+    if (context  && context.bundleId)
+      isProductBundle = getType(context.bundleId) === PRODUCT_BUNDLE
+    else
+      isProductBundle = r.form === PRODUCT_BUNDLE
+
     let delayedItems = []
     let resources = []
     let me = getMe()
@@ -512,7 +520,6 @@ debugger
       this.Store.setItem(itemId, ritem)
     }
     if (delayedItems.length) {
-      debugger
       await this.processUploadedDataBundleWithSourceIDs({val: resource, resources, dontAdd: true})
       for (let i=0; i<delayedItems.length; i++) {
         let { item, oldItemHash } = delayedItems[i]
@@ -523,7 +530,6 @@ debugger
         //   itemsForBundleUpdate[itemR._sourceId] = itemR
         await this.Store.deleteItemFromDB(oldItemHash)
       }
-      debugger
     }
     let dbRes
     Actions.hideModal()
@@ -532,7 +538,7 @@ debugger
     r._documentCreated = true
     await promiseDelay(5000)
     await this.Store.onAddChatItem({ resource: r })
-
+debugger
     let dataBundle
     if (isProductBundle)
       dataBundle = r._context.bundleId || getRootHash(r._context._dataBundle)
@@ -541,6 +547,7 @@ debugger
       let dbRes = await this.Store.onGetItem({resource: {id: r._dataBundle}, noTrigger: true})
       total = dbRes.items  &&  dbRes.items.length
     }
+debugger
 
     await promiseDelay(5000)
     await this.Store.onAddMessage({
