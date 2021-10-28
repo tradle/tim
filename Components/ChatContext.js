@@ -19,6 +19,7 @@ import PageView from './PageView'
 import { Text } from './Text'
 
 const REMEDIATION = 'tradle.Remediation'
+const REFRESH = 'tradle.RefreshProduct'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 
@@ -37,7 +38,10 @@ class ChatContext extends Component {
 
   render() {
     let { context, application, allContexts, bankStyle, chat, contextChooser, shareWith } = this.props
-    if (!context  ||  !context.requestFor  ||  context.requestFor === REMEDIATION)
+    if (!context)
+      return <View/>
+    const { requestFor } = context
+    if (!requestFor  ||  requestFor === REMEDIATION  ||  requestFor === REFRESH)
       return <View/>
     let m = utils.getModel(context.requestFor)
     if (!m)
