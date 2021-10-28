@@ -1408,8 +1408,8 @@ var NewResourceMixin = {
       doDelete = true
     }
     else {
-      resource[propName] = value[ROOT_HASH] ?  utils.buildRef(value) : value
-
+      // resource[propName] = value[ROOT_HASH] ?  utils.buildRef(value) : value
+      resource[propName] = isEnum ?  utils.buildRef(value) : value
 
       if (!this.floatingProps)
         this.floatingProps = {}
