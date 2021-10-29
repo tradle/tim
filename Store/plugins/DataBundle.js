@@ -84,10 +84,10 @@ class DataBundle {
     let fromR = this.Store._getItem(val.from)
     let forg = fromR && fromR.organization
     let title = forg  &&  forg.title  ||  val.from.title
-    // if (!productBundle) {
+    if (!productBundle) {
       Actions.showModal({title: translate(productBundle ? 'gettingYourData' : 'sendingYourData', items.length, title), showIndicator: true})
       setTimeout(() => Actions.hideModal(), 5000)
-    // }
+    }
     let resources = []
     await this.fillResources({result, context, val, resources, doAdd: true})
 
@@ -430,11 +430,7 @@ class DataBundle {
 debugger
     let context = resource._context || r._context
     // let isProductBundle = context  &&  context.bundleId || r.form === PRODUCT_BUNDLE
-    let isProductBundle
-    if (context  && context.bundleId)
-      isProductBundle = getType(context.bundleId) === PRODUCT_BUNDLE
-    else
-      isProductBundle = r.form === PRODUCT_BUNDLE
+    let isProductBundle = r.form === PRODUCT_BUNDLE
 
     let delayedItems = []
     let resources = []
