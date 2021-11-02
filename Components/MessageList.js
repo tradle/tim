@@ -39,7 +39,7 @@ import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
-import utils, { translate, isIphone10orMore, isAndroid, isWeb, isRM } from '../utils/utils'
+import utils, { translate, isIphone10orMore, isAndroid, isWeb, isRM, isWhitelabeled } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -59,11 +59,12 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
+const REFRESH = 'tradle.Refresh'
+const REFRESH_PRODUCT = 'tradle.RefreshProduct'
 const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
-const REFRESH = 'tradle.Refresh'
 const SELFIE = 'tradle.Selfie'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
 
@@ -121,7 +122,7 @@ class MessageList extends Component {
     if (!context)
       context = utils.isContext(resource)  &&  resource
 
-    if (!context  ||  context.requestFor === REMEDIATION)
+    if (!context  ||  context.requestFor === REMEDIATION  ||  context.requestFor === REFRESH_PRODUCT)
       return false
 
     // HACK - needs rewrite
@@ -176,6 +177,8 @@ class MessageList extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAction');
     this._watchSubmit()
+    if (isWhitelabeled())
+      Actions.noPairing(this.props.resource)
   }
 
   _watchSubmit() {
@@ -1024,7 +1027,8 @@ class MessageList extends Component {
     }
     let qrcode
     let me = utils.getMe()
-    if (pairingData  &&  !me._masterAuthor) {
+
+    if (!isWhitelabeled()  &&  pairingData  &&  !me._masterAuthor) {
       let w = isWeb() ? 500 : 350 //Math.floor((utils.getContentWidth(TimHome) / 3))
       // debugger
       let qr = JSON.stringify({

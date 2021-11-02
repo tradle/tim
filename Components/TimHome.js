@@ -23,7 +23,7 @@ const debug = require('debug')('tradle:app:Home')
 import { Text, setFontFamily } from './Text'
 import HomePageMixin from './HomePageMixin'
 import components from './components'
-import utils, { translate, isWeb } from '../utils/utils'
+import utils, { translate, isWeb, isWhitelabeled } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import constants from '@tradle/constants'
@@ -55,6 +55,7 @@ var {
 } = constants
 var {
   ORGANIZATION,
+  PROFILE,
   // CUSTOMER_WAITING,
   MESSAGE
 } = constants.TYPES
@@ -168,7 +169,7 @@ class TimHome extends Component {
   async _unsafeHandleOpenURL({ url }) {
     debug(`opening URL: ${url}`)
 
-    let URL = parseURL(url)
+    let URL = parseURL(decodeURIComponent(url))
     let pathname = URL.pathname || URL.hostname
     if (!pathname) throw new Error('failed to parse deep link')
 
@@ -195,6 +196,10 @@ class TimHome extends Component {
         let idx1 = query.indexOf('&', idx)
         linkText = decodeURIComponent(idx1 === -1 ? query.slice(idx + 10) : query.slice(idx + 10, idx1))
       }
+    }
+    if (isWhitelabeled()) {
+      let params = this.parseAdditionalParameters(query)
+      _.extend(qs, params)
     }
     let state = {firstPage, qs, isDeepLink: true, linkText}
     this.setState(state)
@@ -238,6 +243,17 @@ class TimHome extends Component {
         }
       ])
     })
+  }
+  parseAdditionalParameters(query) {
+    if (!utils.isWhitelabeled) return {}
+    let params = decodeURIComponent(query).split('&')
+    let qs = {}
+    params.forEach(pair => {
+      let [ key, value ] = pair.split('=')
+      qs[key] = value
+    })
+    // delete qs.qs
+    return qs
   }
 
   async onStart(params) {
@@ -331,8 +347,8 @@ class TimHome extends Component {
 
   async handleEvent(params) {
     let {action, activity, isConnected, models, me,
-        isRegistration, provider, termsAccepted, url} = params
-    var nav = this.props.navigator
+        isRegistration, provider, termsAccepted, url, importingData} = params
+    var {navigator, bankStyle} = this.props
     let { wasDeepLink } = this.state
     switch(action) {
     case 'busy':
@@ -359,15 +375,9 @@ class TimHome extends Component {
       Actions.openURL(url)
       break
     case 'getProvider':
-      let formStub
-      const { qs, linkText } = this.state
-      if (qs) {
-        const { rId } = qs
-        if (rId)
-          formStub = { id: rId, title: linkText || ''}
-        // debugger
-      }
-
+      const { qs={}, linkText } = this.state
+      let { rId, schema } = qs
+      let formStub = rId ? { id: rId, title: linkText || ''} : null
       this.showChatPage({resource: provider, formStub, termsAccepted, showProfile: true})
       return
     case 'getItemFromDeepLink':
@@ -377,7 +387,11 @@ class TimHome extends Component {
       this.showChat(params)
       return
     case 'showProfile':
-      this.showProfile(nav, 'replace', params.importingData)
+      let style = {}
+      extend(style, defaultBankStyle)
+      if (provider  &&  provider.style)
+        extend(style, provider.style)
+      this.showProfile({navigator, action: 'replace', importingData, bankStyle: style})
       return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
@@ -419,8 +433,8 @@ class TimHome extends Component {
           [
             {text: translate('eraseSession'), onPress: () => Actions.requestWipe()},
             {text: translate('enterAPassword'), onPress: () => {
-              signIn(this.props.navigator, null, true)
-                .then(() => this.props.navigator.pop())
+              signIn(navigator, null, true)
+                .then(() => navigator.pop())
             }}
           ]
         )
@@ -539,8 +553,11 @@ class TimHome extends Component {
         Actions.getResourceFromLink(qs)
         break
       case 'ImportData':
-        this.showChatPage({resource: qs.provider, action: state.wasDeepLink ? 'push' : 'replace', showProfile: state.wasDeepLink})
-        Actions.importData(qs)
+        Actions.getProvider(qs)
+        // this.showChatPage({resource: {
+        //   id: utils.makeId(PROFILE, qs.provider)
+        // }, action: state.wasDeepLink ? 'push' : 'replace', showProfile: state.wasDeepLink})
+        // Actions.importData(qs)
         break
       case 'applyForProduct':
         Actions.applyForProduct(qs)
@@ -622,7 +639,6 @@ class TimHome extends Component {
     if (resource.style)
       extend(style, resource.style)
 
-
     if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
       return
 
@@ -638,16 +654,18 @@ class TimHome extends Component {
           resource: formStub,
           isDeepLink: true,
           to: resource,
-          currency: currency,
+          currency,
           bankStyle:  style
         }
       }
     }
     else {
+      const { wasDeepLink, qs={} } = this.state
+      let title = isWhitelabeled() && (qs.title || resource.name)
+
       route = {
-        title: resource.name,
+        title,
         componentName: 'MessageList',
-        backButtonTitle: 'Back',
         rightButtonTitle: 'Profile',
         onRightButtonPress: {
           title: resource.name,
@@ -656,8 +674,8 @@ class TimHome extends Component {
           backButtonTitle: 'Back',
           passProps: {
             bankStyle: style,
-            resource: resource,
-            currency: currency
+            resource,
+            currency
           }
         },
         passProps: {
@@ -667,6 +685,10 @@ class TimHome extends Component {
           bankStyle:  style
         }
       }
+      if (wasDeepLink && qs.schema === 'ImportData')
+        Actions.importData(qs)
+      else
+        route.backButtonTitle = 'Back'
     }
     if (showProfile)
       route.passProps.onLeftButtonPress = () => this.showOfficialAccounts('replace')
@@ -843,11 +865,13 @@ class TimHome extends Component {
   }
   render() {
     // StatusBar.setHidden(true);
-    let { message, err, isLoading } = this.state
+    let { message, err, isLoading, isDeepLink, qs={} } = this.state
     if (message) {
       this.restartTiM()
       return
     }
+    if (isWhitelabeled())
+      return <View/>
     // var url = Linking.getInitialURL();
     var { height } = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
@@ -907,7 +931,10 @@ class TimHome extends Component {
                   </View>
                 </TouchableOpacity>
     }
-
+    if (isDeepLink  && qs.schema === 'ImportData')
+      return (
+        <View/>
+      )
     return (
       <View style={styles.container}>
         <BackgroundImage testID="homeBG" source={BG_IMAGE} />

@@ -12,7 +12,7 @@ import {
 
 import constants from '@tradle/constants'
 
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWhitelabeled } from '../utils/utils'
 import { getGridCols } from '../utils/uiUtils'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -75,11 +75,14 @@ var HomePageMixin = {
     if (!params.to)
       return
     let style = this.mergeStyle(params.to.style)
-
+debugger
+    let title = params.to.name
+    let { wasDeepLink, qs={} } = this.state
+    if (!title)
+      title = isWhitelabeled() && (qs.title || title)
     var route = {
       title: params.to.name,
       componentName: 'MessageList',
-      backButtonTitle: 'Back',
       passProps: {
         resource: params.to,
         filter: '',
@@ -90,6 +93,10 @@ var HomePageMixin = {
         dictionary: params.dictionary,
       }
     }
+    if (wasDeepLink  &&  qs.schema === 'ImportData')
+      Actions.importData(qs)
+    else
+      route.backButtonTitle = 'Back'
     // this.props.navigator.push(route)
     this.props.navigator.replace(route)
   },
@@ -138,7 +145,7 @@ var HomePageMixin = {
       })
       return true
     }
-    if (resource._noSplash)
+    if (isWhitelabeled() || resource._noSplash)
       return
     StatusBar.setHidden(true)
     let splashscreen = resource.style  &&  resource.style.splashscreen
@@ -165,7 +172,7 @@ var HomePageMixin = {
     }, 2000)
     return true
   },
-  showProfile(navigator, action, importingData) {
+  showProfile({navigator, action, importingData, bankStyle}) {
     if (importingData) {
       // this.props.navigator.pop()
       // this.props.navigator.pop()
@@ -190,13 +197,13 @@ var HomePageMixin = {
         passProps: {
           model: m,
           resource: me,
-          bankStyle: defaultBankStyle
+          bankStyle: bankStyle || defaultBankStyle
         }
       },
       passProps: {
         resource: me,
         backlink: m.properties.myForms,
-        bankStyle: defaultBankStyle
+        bankStyle: bankStyle || defaultBankStyle
       }
     })
   },

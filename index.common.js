@@ -36,7 +36,7 @@ console.disableYellowBox = true
 import { Text } from './Components/Text'
 import HomePageMixin from './Components/HomePageMixin'
 
-import utils, { isWeb } from './utils/utils'
+import utils, { isWeb, isWhitelabeled } from './utils/utils'
 import Actions from './Actions/Actions'
 import AutomaticUpdates from './utils/automaticUpdates';
 import Store from './Store/Store'
@@ -527,11 +527,13 @@ var NavigationBarRouteMapper = {
   rightButtonHandler: function({navigator, route}) {
     // 'Done' button case for creating new resources
     let isProfile = route.rightButtonTitle.toLowerCase() === 'profile'
-    if (typeof route.onRightButtonPress === 'function') {
-                    route.onRightButtonPress()
-                  }
-    else if (isProfile)
-      HomePageMixin.showProfile(navigator)
+    if (typeof route.onRightButtonPress === 'function')
+      route.onRightButtonPress()
+    else if (isProfile) {
+      let { passProps } = route.onRightButtonPress
+      let bankStyle = passProps  &&  passProps.bankStyle
+      HomePageMixin.showProfile({navigator, bankStyle})
+    }
     else if (!route.onRightButtonPress)
       return
     else if (route.onRightButtonPress.stateChange) {
@@ -578,7 +580,9 @@ var NavigationBarRouteMapper = {
       case 'ArticleView':
         break
       case 'MessageList':
-        if (resource) {
+        if (isWhitelabeled())
+          logoNeedsText = true
+        else if (resource) {
            let me = utils.getMe()
            if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
              logoNeedsText = true
