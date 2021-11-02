@@ -4559,8 +4559,8 @@ if (!res[SIG]  &&  res._message)
     return await this.onAddItem(params)
   },
   async onAddItem(params) {
-    var self = this
-    var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry, currentFolder,
+    let self = this
+    let {resource, application, disableFormRequest, isMessage, doneWithMultiEntry, currentFolder,
          value, chat, cb, meta, isRegistration, noTrigger, forceUpdate, lens, doNotSend, isRefresh, employeeSetup} = params
     if (!value)
       value = resource
@@ -4575,9 +4575,7 @@ if (!res[SIG]  &&  res._message)
       return
     }
     // Check if there are references to other resources
-    var refProps = {};
-    var foundRefs = [];
-    var props = meta.properties;
+    let props = meta.properties;
 
     if (meta.id == VERIFICATION  ||  utils.isVerification(meta)) {
       // debugger
@@ -4624,64 +4622,16 @@ if (!res[SIG]  &&  res._message)
       isRefreshRequest = meta.id === FORM_REQUEST  &&  resource.form === REFRESH
 
     // let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
-    var isNew = !resource[ROOT_HASH];
+    let isNew = !resource[ROOT_HASH];
 
     if (!isNew  &&  !resource[CUR_HASH])
       resource[CUR_HASH] = protocol.linkString(resource)
 
     let results = []
-    let isInBundle = resource._dataBundle
-    for (let p in resource) {
-      if (!props[p] ||  props[p].type !== 'object')
-        continue
-      var ref = props[p].ref;
-      if (!ref  ||  !resource[p])
-        continue
-      let refModel = this.getModel(ref)
-      if (refModel.inlined  ||  utils.isEnum(refModel))
-        continue;
-
-      var rValue = utils.getId(resource[p])
-      if (!rValue)
-        continue
-      if (!refProps[rValue])
-        refProps[rValue] = []
-      refProps[rValue].push(p)
-      let elm = this._getItem(rValue)
-      if (!elm  && !isInBundle  &&  me.isEmployee) {
-        elm = await this._getItemFromServer({idOrResource: rValue})
-        foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
-      }
-      else {
-        // HACK for scanned Identity
-        if (!elm) {
-          if (ref === IDENTITY)
-            foundRefs.push({value: resource[p], state: 'fulfilled'})
-        }
-        else if (!utils.isMessage(elm))
-          foundRefs.push({value: elm, state: 'fulfilled'})
-        else {
-          let kres
-          try {
-            kres = await this._keeper.get(elm[CUR_HASH])
-          } catch (err) {
-            if (!isInBundle  &&  me.isEmployee)
-              kres = await this._getItemFromServer({idOrResource: utils.getId(elm)})
-            debugger
-          }
-          let r = _.cloneDeep(kres)
-          // results.push(r)
-          // if (results.length) {
-          //   // let r = results[0]
-            _.extend(r, elm)
-            foundRefs.push({value: r, state: 'fulfilled'})
-          // }
-        }
-      }
-    }
+    let { foundRefs, refProps } = await this._getRefPropValues({ resource, model: meta })
     // Add items properties if they were created
-    var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
-    var prefill = disableFormRequest  &&  disableFormRequest.prefill
+    let json = utils.clone(value) // maybe not the best way to copy, try `clone`?
+    let prefill = disableFormRequest  &&  disableFormRequest.prefill
     for (let p in resource) {
       if (!props[p])
         continue
@@ -4719,11 +4669,11 @@ if (!res[SIG]  &&  res._message)
     }
     // if (!json[TYPE])
     //   json[TYPE] = meta.id;
-    var error = this.checkRequired(json, props);
+    let error = this.checkRequired(json, props);
     if (error) {
       foundRefs.forEach((val) => {
-        var propValue = utils.getId(val.value)
-        var propsToSet = refProps[propValue];
+        let propValue = utils.getId(val.value)
+        let propsToSet = refProps[propValue];
         propsToSet.forEach((p) => json[p] = val.value)
       });
 
@@ -4761,20 +4711,20 @@ if (!res[SIG]  &&  res._message)
       allFoundRefs.forEach((val) => {
         if (val.state !== 'fulfilled')
           return
-        var value = val.value;
-        var propValue = utils.getId(value)
-        var propsToSet = refProps[propValue];
+        let value = val.value;
+        let propValue = utils.getId(value)
+        let propsToSet = refProps[propValue];
         if (propsToSet)
           propsToSet.forEach((p) => json[p] = this.buildRef(value, true))
       })
     }
-    // var isMessage = utils.isMessage(meta)
+    // let isMessage = utils.isMessage(meta)
     if (isMessage  &&  !json._documentCreated  &&  (!isRemediation ||  !json._time))
       json._time = new Date().getTime();
     if (isNew  ||  !value._documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
       resource._time = new Date().getTime();
 
-    var returnVal
+    let returnVal
     if (!resource  ||  isNew)
       returnVal = json
     else {
@@ -4797,7 +4747,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     // case for Remediation WealthCV -> CVItems. Linking items to container
-    var readOnlyBacklinks = []
+    let readOnlyBacklinks = []
     if (!isRegistration  &&  !isBookmark) {
       for (let pr in props) {
         let prop = props[pr]
@@ -5373,10 +5323,61 @@ if (!res[SIG]  &&  res._message)
       // self.trigger({action: 'addItem', resource: r})
     }
   },
-  _makeIdentityStub(r) {
-    return {
-      id: utils.getId(r).replace(PROFILE, IDENTITY),
+  async _getRefPropValues({resource, model}) {
+    // let results = []
+    let refProps = {};
+    let foundRefs = [];
+    let isInBundle = resource._dataBundle
+    let refs = utils.getPropertiesWithAnnotation(model, 'ref')
+    let props = model.properties
+    for (let p in refs) {
+      let prop = refs[p]
+      let ref = prop.ref
+      if (!ref  ||  !resource[p])
+        continue
+      let refModel = this.getModel(ref)
+      if (refModel.inlined  ||  utils.isEnum(refModel))
+        continue;
+
+      var rValue = utils.getId(resource[p])
+      if (!rValue)
+        continue
+      if (!refProps[rValue])
+        refProps[rValue] = []
+      refProps[rValue].push(p)
+      let elm = this._getItem(rValue)
+      if (!elm  && !isInBundle  &&  me.isEmployee) {
+        elm = await this._getItemFromServer({idOrResource: rValue})
+        foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
+      }
+      else {
+        // HACK for scanned Identity
+        if (!elm) {
+          if (ref === IDENTITY)
+            foundRefs.push({value: resource[p], state: 'fulfilled'})
+        }
+        else if (!utils.isMessage(elm))
+          foundRefs.push({value: elm, state: 'fulfilled'})
+        else {
+          let kres
+          try {
+            kres = await this._keeper.get(elm[CUR_HASH])
+          } catch (err) {
+            if (!isInBundle  &&  me.isEmployee)
+              kres = await this._getItemFromServer({idOrResource: utils.getId(elm)})
+            debugger
+          }
+          let r = _.cloneDeep(kres)
+          // results.push(r)
+          // if (results.length) {
+          //   // let r = results[0]
+            _.extend(r, elm)
+            foundRefs.push({value: r, state: 'fulfilled'})
+          // }
+        }
+      }
     }
+    return { foundRefs, refProps }
   },
   async onNoPairing(to) {
     if (to[TYPE] !== ORGANIZATION)
@@ -5756,10 +5757,10 @@ if (!res[SIG]  &&  res._message)
     }
     // let toR = this._getItem(to)
     // Actions.list({resource: toR, modelName: MESSAGE, to: toR, isChat: true})
-    let from ={
-        id: utils.getId(me),
-        title: utils.getDisplayName({ resource: me })
-      }
+    let from = {
+      id: utils.getId(me),
+      title: utils.getDisplayName({ resource: me })
+    }
     let dataClaims = await this.searchMessages({to: from, modelName: DATA_CLAIM, filterProps: {claimId}})
 debugger
     if (dataClaims  &&  dataClaims.length) {
@@ -7925,7 +7926,7 @@ debugger
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         let item = this._getItem(thisChatMessages[i].id)
-        if (!item)
+        if (!item  ||  item[TYPE] === DATA_CLAIM  ||  item[TYPE] === DATA_BUNDLE)
           continue
         // HACK for white glove project
         if (item._hidden)
