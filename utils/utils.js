@@ -1672,6 +1672,9 @@ var utils = {
     const m = utils.getModel(type)
     return m.required  &&  !resource[m.required[0]]
   },
+  isWhitelabeled() {
+    return utils.isWeb() && window.location != window.parent.location
+  },
   hasSupportLine(resource) {
     let me = utils.getMe()
     if (resource._hasSupportLine)
