@@ -177,8 +177,25 @@ const merged = extend({
   zoomSDK: null,
 }, environment)
 
-merged.splashBackground = splash[merged.splashBackground]
-merged.splashContrastColor = splashContrastColor[merged.splashContrastColor]
+if (Platform.ok === 'web'  &&  window.location != window.parent.location) {
+  const { referrer, URL } = document
+  if (referrer) {
+    let params = decodeURIComponent(URL).split('&')
+    let qs = {}
+    params.forEach(pair => {
+      let [ key, value ] = pair.split('=')
+      qs[key] = value
+    })
+    if (qs.img)
+      merged.splashBackground = qs.img
+    if (qs.imgColor)
+      merged.splashContrastColor = qs.imgColor
+  }
+}
+else {
+  merged.splashBackground = splash[merged.splashBackground]
+  merged.splashContrastColor = splashContrastColor[merged.splashContrastColor]
+}
 merged.brandBackground = brandBG[merged.brandBackground]
 if (!__DEV__) {
   merged.paintContextIds = false
