@@ -141,7 +141,7 @@
     "react-native-accordion": "github:tradle/react-native-accordion#dev",
     "react-native-actionsheet": "^2.4.2",
     "react-native-animatable": "github:oblador/react-native-animatable#d72c092",
-    "react-native-app-intro": "github:tradle/react-native-app-intro#dev",
+    "react-native-app-intro": "github:tradle/react-native-app-intro#web",
     "react-native-button": "^2.3.0",
     "react-native-carousel": "github:tradle/react-native-carousel",
     "react-native-collapsible": "^0.10.0",

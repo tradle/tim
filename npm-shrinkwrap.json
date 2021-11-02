@@ -637,9 +637,9 @@
       "dev": true
     },
     "assign-deep": {
-      "version": "0.4.7",
+      "version": "0.4.8",
       "from": "assign-deep@>=0.4.5 <0.5.0",
-      "resolved": "https://registry.npmjs.org/assign-deep/-/assign-deep-0.4.7.tgz",
+      "resolved": "http://registry.npmjs.org/assign-deep/-/assign-deep-0.4.8.tgz",
       "dependencies": {
         "kind-of": {
           "version": "5.1.0",
@@ -6411,8 +6411,8 @@
     },
     "react-native-app-intro": {
       "version": "1.1.5",
-      "from": "tradle/react-native-app-intro#dev",
-      "resolved": "git://github.com/tradle/react-native-app-intro.git#f774220db421109ecf627ec9883b742bd2722486"
+      "from": "tradle/react-native-app-intro#web",
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#6915fdc4249c473049335b5353cdffd132914368"
     },
     "react-native-button": {
       "version": "2.3.0",
@@ -6531,7 +6531,7 @@
     "react-native-swiper": {
       "version": "1.4.4",
       "from": "tradle/react-native-swiper#dev",
-      "resolved": "git://github.com/tradle/react-native-swiper.git#88706d5378fc185d11c0e7956a07c9c271319b7c"
+      "resolved": "git://github.com/tradle/react-native-swiper.git#1b1129ef67411ef2a50216b4fcfcf39881a324f3"
     },
     "react-native-switch-selector": {
       "version": "1.1.8",
