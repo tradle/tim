@@ -4,7 +4,7 @@ import { TYPE } from '@tradle/constants'
 
 import validateResource from '@tradle/validate-resource'
 
-import { getModel, getPropertiesWithAnnotation, isNew, getEnumValueId } from '../utils/utils'
+import { getModel, getLensedModel, getPropertiesWithAnnotation, isNew, getEnumValueId } from '../utils/utils'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
@@ -26,11 +26,11 @@ module.exports = function LegalEntity ({ models }) {
       const type = form[TYPE]
       switch (type) {
       case CONTROLLING_ENTITY:
-        return getPropsForControllingEntity(form)
+        return getPropsForControllingEntity(form, this.models)
       case OWNERSHIP:
         return getPropsForOwnership(form)
       case LEGAL_ENTITY:
-        return getPropsForLegalEntity(form)
+        return getPropsForLegalEntity(form, this.models)
       case LEGAL_DOCUMENT_INTERSECTION:
         return getPropsForLegalDocumentI(form)
       default:
@@ -107,7 +107,7 @@ function getPropsForLegalDocument(form) {
   }
   return ret
 }
-function getPropsForLegalEntity(form) {
+function getPropsForLegalEntity(form, models) {
   let { streetAddress, city, postalCode, country } = form
   let countryCode = country  &&  country.id.split('_')[1]
 
@@ -147,36 +147,39 @@ function getPropsForLegalEntity(form) {
     }
     return { requestedProperties }
   }
-  let reqProps = {
-    requestedProperties: [
-      { name: 'info_group' },
-      { name: 'registrationDate', required: true },
-      { name: 'typeOfOwnership', required: true },
-      { name: 'numberOfEmployees'},
-      // { name: 'companyType'},
-      { name: 'companyEmail', required: true },
-      { name: 'companyWebsite', required: true },
-      { name: 'address_group'},
-      { name: 'region', hide: !addRegion, required: addRegion },
-      { name: 'taxIdNumber', required: false },
-      { name: 'companyFax', required: false },
-      { name: 'companyPhone', required: false },
-      { name: 'DBAName', required: false },
-      { name: 'formerlyKnownAs'},
-      { name: 'alsoKnownAs' }
-    ]
-  }
+  let requestedProperties = [
+    { name: 'info_group' },
+    { name: 'registrationDate', required: true },
+    { name: 'typeOfOwnership', required: true },
+    { name: 'numberOfEmployees'},
+    // { name: 'companyType'},
+    { name: 'companyEmail', required: true },
+    { name: 'companyWebsite', required: true },
+    { name: 'address_group'},
+    { name: 'region', hide: !addRegion, required: addRegion },
+    { name: 'taxIdNumber', required: false },
+    { name: 'companyFax', required: false },
+    { name: 'companyPhone', required: false },
+    { name: 'DBAName', required: false },
+    { name: 'formerlyKnownAs'},
+    { name: 'alsoKnownAs' }
+  ]
   let { typeOfOwnership } = form
   if (typeOfOwnership  &&  getEnumValueId({ model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership}) === 'publiclyTraded')
-    reqProps.requestedProperties.splice(3, 0, {name: 'tradedOnExchange', required: true})
-  return reqProps
+    requestedProperties.splice(3, 0, {name: 'tradedOnExchange', required: true})
+  const { hidden } = models[form[TYPE]]
+  if (hidden  &&  hidden.length) {
+    let rp = requestedProperties.filter(p => hidden.indexOf(p.name) === -1)
+    requestedProperties = rp
+  }
+  return { requestedProperties }
 }
 function isNewResource(stub) {
   const parts = stub.id.split('_')
   return parts[1] === parts[2]
 }
 
-function getPropsForControllingEntity(form) {
+function getPropsForControllingEntity(form, models) {
   let typeOfControllingEntity = form.typeOfControllingEntity
   if (!typeOfControllingEntity)
     return {
@@ -196,58 +199,57 @@ function getPropsForControllingEntity(form) {
   ownsTypeOfOwnership = ownsTypeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: ownsTypeOfOwnership})
   typeOfOwnership = typeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership})
 
-
   let isTrustee = ownsTypeOfOwnership && ownsTypeOfOwnership.startsWith('trustee')
   let isFund = ownsTypeOfOwnership === 'vcFirmFundPE'
   let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
+  let requestedProperties
   switch (id) {
   case 'person':
-    let retProps = {
-      requestedProperties: [
-        {name: 'name', required: true},
-        // {name: 'typeOfControllingPerson', required: true},
-        {name: 'natureOfControl'},
-        {name: 'percentageOfOwnership'},
-        {name: 'sourceOfWealth', required: isFund  &&  isLimitedPartner},
-        {name: 'evidenceOfSourceOfWealth', required: isFund && isLimitedPartner},
-        {name: 'inactive'},
-        {name: 'previousAddresses'},
-        {name: 'controllingEntityStreetAddress'},
-        {name: 'controllingEntityRegion'},
-        {name: 'controllingEntityPostalCode'},
-        {name: 'controllingEntityCountry', required: true},
-      ]
-    }
-    retProps.requestedProperties.push({name: 'emailAddress', required: true})
+    requestedProperties = [
+      {name: 'name', required: true},
+      // {name: 'typeOfControllingPerson', required: true},
+      {name: 'natureOfControl'},
+      {name: 'percentageOfOwnership'},
+      {name: 'sourceOfWealth', required: isFund  &&  isLimitedPartner},
+      {name: 'evidenceOfSourceOfWealth', required: isFund && isLimitedPartner},
+      {name: 'inactive'},
+      {name: 'previousAddresses'},
+      {name: 'controllingEntityStreetAddress'},
+      {name: 'controllingEntityRegion'},
+      {name: 'controllingEntityPostalCode'},
+      {name: 'controllingEntityCountry', required: true},
+    ]
+
+    requestedProperties.push({name: 'emailAddress', required: true})
     if (notificationMethod  &&  getEnumValueId({model: getModel(NOTIFICATION_METHOD), value: notificationMethod}) === 'sms')
-      retProps.requestedProperties.push({name: 'phone', required: true})
+      requestedProperties.push({name: 'phone', required: true})
 
     if (!inactive) {
-      retProps.requestedProperties.push({name: 'personal_group', required: true})
-      retProps.requestedProperties.push({name: 'middleName', required: false})
+      requestedProperties.push({name: 'personal_group', required: true})
+      requestedProperties.push({name: 'middleName', required: false})
       if (controllingEntityCountryOfResidence  &&  getEnumValueId({model: getModel(COUNTRY), value: controllingEntityCountryOfResidence}) == 'DE')
-        retProps.requestedProperties.push({name: 'controllingEntityPlaceOfBirth', required: false})
-      retProps.requestedProperties.push({name: 'nationality'})
+        requestedProperties.push({name: 'controllingEntityPlaceOfBirth', required: false})
+      requestedProperties.push({name: 'nationality'})
     }
 
-    // retProps.requestedProperties.push({name: 'notificationMethod'})
-    retProps.requestedProperties.push({name: 'isSeniorManager'})
+    // requestedProperties.push({name: 'notificationMethod'})
+    requestedProperties.push({name: 'isSeniorManager'})
     if (isSeniorManager)
-      retProps.requestedProperties.push({name: 'seniorManagerPosition', required: true})
+      requestedProperties.push({name: 'seniorManagerPosition', required: true})
 
-    retProps.requestedProperties.push({name: 'typeOfOwnership'})
+    requestedProperties.push({name: 'typeOfOwnership'})
 
     if (isTrustee) {
       // debugger
-      retProps.requestedProperties.push({name: 'roleInTrust', required: true})
+      requestedProperties.push({name: 'roleInTrust', required: true})
     }
     if (isFund) {
-      retProps.requestedProperties.push({name: 'isGeneralPartner'})
-      retProps.requestedProperties.push({name: 'isLimitedPartner'})
+      requestedProperties.push({name: 'isGeneralPartner'})
+      requestedProperties.push({name: 'isLimitedPartner'})
     }
 
     if (form.name) {
-      retProps.requestedProperties = retProps.requestedProperties.concat([
+      requestedProperties = requestedProperties.concat([
         // {name: 'dateOfBirth'},
         {name: 'startDate'},
         {name: 'endDate'},
@@ -255,45 +257,48 @@ function getPropsForControllingEntity(form) {
         {name: 'doNotReachOut'},
       ])
     }
-    retProps.requestedProperties.push({name: 'legalEntity', required: true})
-
-    return retProps
+    requestedProperties.push({name: 'legalEntity', required: true})
+    break
   case 'legalentity':
-    let requestedProps = {
-      requestedProperties: [
-        // {name: 'controllingLegalEntity'},
-        {name: 'name', required: true},
-        {name: 'emailAddress', required: true},
-        {name: 'controllingEntityCompanyNumber', required: true},
-        {name: 'controllingEntityRegistrationDate', required: true},
-        {name: 'typeOfOwnership', required: true},
-        // {name: 'companyType'},
-        {name: 'controllingEntityStreetAddress'},
-        {name: 'controllingEntityRegion'},
-        {name: 'controllingEntityPostalCode'},
-        {name: 'controllingEntityCountry', required: true},
-        {name: 'natureOfControl'},
-        {name: 'percentageOfOwnership'},
-        {name: 'phone'},
-        {name: 'legalEntity'},
-        {name: 'doNotReachOutToMembers'},
-      ]
-    }
-    let idx = requestedProps.requestedProperties.findIndex(p => p.name === 'typeOfOwnership')
+    requestedProperties = [
+      // {name: 'controllingLegalEntity'},
+      {name: 'name', required: true},
+      {name: 'emailAddress', required: true},
+      {name: 'controllingEntityCompanyNumber', required: true},
+      {name: 'controllingEntityRegistrationDate', required: true},
+      {name: 'typeOfOwnership', required: true},
+      // {name: 'companyType'},
+      {name: 'controllingEntityStreetAddress'},
+      {name: 'controllingEntityRegion'},
+      {name: 'controllingEntityPostalCode'},
+      {name: 'controllingEntityCountry', required: true},
+      {name: 'natureOfControl'},
+      {name: 'percentageOfOwnership'},
+      {name: 'phone'},
+      {name: 'legalEntity'},
+      {name: 'doNotReachOutToMembers'},
+    ]
+    let idx = requestedProperties.findIndex(p => p.name === 'typeOfOwnership')
     if (isTrustee)
-      requestedProps.requestedProperties.splice(idx++, 0, {name: 'roleInTrust', required: true})
+      requestedProperties.splice(idx++, 0, {name: 'roleInTrust', required: true})
     if (typeOfOwnership === 'publiclyTraded')
-      requestedProps.requestedProperties.splice(idx++, 0, {name: 'tradedOnExchange', required: true})
+      requestedProperties.splice(idx++, 0, {name: 'tradedOnExchange', required: true})
 
     if (typeOfOwnership === 'vcFirmFundPE')
-      requestedProps.requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
+      requestedProperties.splice(idx, 0, {name: 'limitedPartnershipAgreement', required: true})
     if (ownsTypeOfOwnership === 'vcFirmFundPE') {
-      requestedProps.requestedProperties.push({name: 'isLimitedPartner'})
+      requestedProperties.push({name: 'isLimitedPartner'})
       if (isLimitedPartner)
-        requestedProps.requestedProperties.push({name: 'sourceOfFunds', required: true})
+        requestedProperties.push({name: 'sourceOfFunds', required: true})
     }
-    return requestedProps
+    break
   }
+  const { hidden } = models[form[TYPE]]
+  if (hidden  &&  hidden.length) {
+    let rp = requestedProperties.filter(p => hidden.indexOf(p.name) === -1)
+    requestedProperties = rp
+  }
+  return { requestedProperties }
 }
 function getPropsForOwnership(form) {
   let typeOfLegalEntity = form.typeOfEntity
