@@ -325,7 +325,7 @@ class RefPropertyEditor extends Component {
         label = translateEnum(val)
     }
     if (!label) { // see if stub
-      label = val.title
+      label = val.title || utils.getDisplayName({resource: val})
       if (!label)
         label = prop.title
     }
