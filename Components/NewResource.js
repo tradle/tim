@@ -187,7 +187,9 @@ class NewResource extends Component {
     let { resource, isUploading, prop } = this.state
     let { isPrefilled, exploreData, originatingMessage: originatingResource, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
-      Actions.getItem({resource: resource})
+      Actions.getItem({resource})
+
+    let model = utils.getModel(utils.getType(resource))
     if (resource[ROOT_HASH]) {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
@@ -195,9 +197,8 @@ class NewResource extends Component {
         Actions.getRequestedProperties({resource, originatingResource})
     }
     else if (resource.id) {
-      let type = utils.getType(resource.id)
-      if (!utils.getModel(type).inlined)
-        Actions.getItem({resource: resource})
+      if (!model.inlined)
+        Actions.getItem({resource})
     }
     else if (isUploading) {
       if (containerResource)
