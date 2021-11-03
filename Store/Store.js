@@ -114,7 +114,7 @@ const excludeWhenSignAndSend = [
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
 
-import utils, {translate, translateEnum, isWeb, tryWithExponentialBackoff} from '../utils/utils'
+import utils, {translate, translateEnum, isWeb, tryWithExponentialBackoff, isWhitelabeled} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
 import DataBundle from './plugins/DataBundle'
@@ -8677,7 +8677,7 @@ debugger
         hasPR = true
         break
       case FORM_REQUEST:
-        if (r.chooser &&  (hasPR || hasFR))
+        if (r.chooser &&  (isWhitelabeled() || hasPR || hasFR))
           return false
         hasFR = true
         break
@@ -9730,12 +9730,16 @@ debugger
   },
   async searchSharables(params) {
     let { modelName } = params
-    if (!me.isEmployee)
-      return await this.searchMessages(params)
-    _.extend(params, {noTrigger: true, search: me.isEmployee})
-    let model = this.getModel(modelName)
-    if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION) {
-      return await this.searchServer(params)
+    if (!me.isEmployee) {
+      let result = await this.searchMessages(params)
+      // filter out not confirmed resources
+      return result && result.filter(r => !r[NOT_CHAT_ITEM])
+    }
+    else {
+      _.extend(params, {noTrigger: true, search: me.isEmployee})
+      let model = this.getModel(modelName)
+      if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION)
+        return await this.searchServer(params)
     }
   },
 
