@@ -906,7 +906,7 @@ class FormRequestRow extends Component {
             outputRange: ['0deg', '180deg', '0deg']
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
-          let style = {transform: [{rotate: rotateX}], paddingLeft: 5, marginLeft: -3}
+          let style = {transform: [{rotate: rotateX}], paddingLeft: 7, marginLeft: -3}
           msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: utils.isAndroid() ? 5 : 0}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={styles.infoButton}>
@@ -1210,7 +1210,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     row: {
       flexDirection: 'row',
-      paddingHorizontal: 3,
+      // paddingHorizontal: 3,
       // paddingVertical: 5,
       // justifyContent: 'space-between'
     },
