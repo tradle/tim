@@ -685,8 +685,11 @@ class TimHome extends Component {
           bankStyle:  style
         }
       }
-      if (wasDeepLink && qs.schema === 'ImportData')
+      if (wasDeepLink && qs.schema === 'ImportData') {
         Actions.importData(qs)
+        if (!isWhitelabeled())
+          route.backButtonTitle = 'Back'
+      }
       else
         route.backButtonTitle = 'Back'
     }
