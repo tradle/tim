@@ -546,8 +546,8 @@ debugger
 debugger
 
     await promiseDelay(5000)
-    await this.Store.onAddMessage({
-      msg: {
+    await this.Store.onAddChatItem({
+      resource: {
         [TYPE]: DATA_BUNDLE_SUBMITTED,
         from: me,
         to,
