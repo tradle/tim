@@ -176,7 +176,7 @@ class RefPropertyEditor extends Component {
     else
       iconColor = linkColor
 
-    let isReadOnly = prop.readOnly
+    let isReadOnly = utils.isReadOnly(prop)
     let icon, hasLock
     let isBookmarkSealed = bookmark  &&  bookmark.bookmark[pName]
     if (!isImmutable  &&  !isBookmarkSealed  &&  !isReadOnly) {

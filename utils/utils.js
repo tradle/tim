@@ -1864,6 +1864,11 @@ var utils = {
       return false
     return utils.compareOrg(me.organization, resource)
   },
+  isReadOnly(prop) {
+    if (prop.readOnly || (prop.readOnlyForClients && !utils.getMe().isEmployee))
+      return true
+    return false
+  },
   isAgent(resource) {
     let me = utils.getMe()
     if (!me.isAgent)

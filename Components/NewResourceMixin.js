@@ -120,7 +120,7 @@ var NewResourceMixin = {
       let prop = props[p]
       // prop is readOnly if explicitely has readOnly on it or
       // it is a _group property with 'list' of props annotation
-      if (prop  &&  !prop.readOnly  &&  !p.endsWith('_group')  && !prop.list) {
+      if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list) {
         if (!originatingMessage || !originatingMessage.prefill)
           showReadOnly = false
       }
@@ -131,13 +131,15 @@ var NewResourceMixin = {
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
     let softRequired
+
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       showReadOnly = true
       ;({ eCols, softRequired } = this.addRequestedProps({eCols, params, props}))
     }
     else if (data) {
       for (let p in data) {
-        if (!eCols.includes(p)  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+        let prop = props[p]
+        if (!eCols.includes(p)  &&  p.charAt(0) !== '_'  &&  prop  &&  !utils.isReadOnly(prop))
           eCols.push(p)
       }
     }
@@ -179,7 +181,7 @@ var NewResourceMixin = {
       let type = props[p].type
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
-      let isReadOnly = props[p].readOnly
+      let isReadOnly = utils.isReadOnly(props[p])
       if (isReadOnly  &&  !search  &&  !showReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
       this.setDefaultValue(props[p], data, true)
@@ -219,7 +221,7 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      let propNotEditable = props[p].readOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
+      let propNotEditable = isReadOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
 
       if (props[p].description)
         options.fields[p].help = props[p].description;
@@ -543,7 +545,7 @@ var NewResourceMixin = {
 
       eCols.push(p)
       let isRequired = requestedProperties[p].required
-      if (idx === -1  &&  props[p].readOnly);
+      if (idx === -1  &&  utils.isReadOnly(props[p]));
         // showReadOnly = true
       else if (props[p].list) {
         props[p].list.forEach((pp) => {
@@ -592,7 +594,7 @@ var NewResourceMixin = {
 
     let vColsList = utils.getViewCols(model)
     vColsList.forEach(p => {
-      if (!props.readOnly  &&  eCols.indexOf(p) === -1)
+      if (props[p]  &&  !utils.isReadOnly(props[p])  &&  eCols.indexOf(p) === -1)
         eCols.push(p)
     })
 
@@ -621,6 +623,8 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   changeValue(prop, value) {
+    // if (utils.isReadOnly(prop))
+    //   return
     let { name: pname, ref: pref, type: ptype } = prop
 
     if (ptype === 'string'  &&  !value.trim().length)
@@ -731,7 +735,7 @@ var NewResourceMixin = {
   },
 
   myMarkdownTextInputTemplate(params) {
-    let { prop, value } = params
+    let { prop, value, editable } = params
     let { bankStyle } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
@@ -761,7 +765,7 @@ var NewResourceMixin = {
       title = utils.translate('Please click here to view/edit')
 
     let header
-    if (prop.readOnly)
+    if (!editable)
       st.marginTop = -10
     else
       header = <View style={vStyle}>
@@ -885,8 +889,7 @@ var NewResourceMixin = {
     // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
-    let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'} : {}
-    // let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7', color: bankStyle.textColor || '#666666'} : {}
+    let addStyle = (editable) ? {} : {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
     return (
       <View style={st}>
         <FloatLabel
@@ -971,7 +974,7 @@ var NewResourceMixin = {
   },
 
   myBooleanTemplate(params) {
-    let {prop, model, value, required, component} = params
+    let {prop, model, value, required, component, editable} = params
     let { search, bankStyle } = this.props
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
@@ -1005,13 +1008,24 @@ var NewResourceMixin = {
     let switchC, icon, booleanContentStyle
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
-    if (prop.readOnly  &&  !search) {
-      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
-      switchC = <View style={{paddingVertical: 5}}>
-                  <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
+    if (!editable  &&  !search) {
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} />
+      switchC = <View style={{paddingVertical: 5, flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <Text style={[styles.dateText, fontF]}>{translate(value ? 'Yes' : 'No')}</Text>
                   {icon}
                 </View>
-      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+      return (
+        <View style={styles.bottom10} key={this.getNextKey()} ref={prop.name}>
+          <View style={[styles.booleanContainer, {borderColor: bcolor, backgroundColor:bankStyle.backgroundColor || '#f7f7f7'}]}>
+            <View>
+              <Text style={[style, {color: lcolor}]}>{label}</Text>
+              {switchC}
+            </View>
+          </View>
+          {this.paintHelp(prop)}
+          {this.paintError(params)}
+        </View>
+      )
     }
     else if (isTroolean) {
       const options = [
@@ -1049,7 +1063,6 @@ var NewResourceMixin = {
           </TouchableOpacity>
         </View>
         {this.paintHelp(prop)}
-        {icon}
         {this.paintError(params)}
       </View>
     )
@@ -1102,7 +1115,7 @@ var NewResourceMixin = {
         value = dateformat(localizedDate, format)
     }
     let datePicker
-    if (prop.readOnly  &&  !search) {
+    if (!editable  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={[styles.dateText, fontF]}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
@@ -1242,7 +1255,7 @@ var NewResourceMixin = {
    },
 
   inputFocused(prop) {
-    if (prop.readOnly)
+    if (utils.isReadOnly(prop))
       return
 
     let { metadata, parentMeta } = this.props
@@ -1530,17 +1543,17 @@ var NewResourceMixin = {
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     let { required, model, value, prop, editable, errors, component } = params
-    let { search, locale } = this.props
-
+    let { search, locale, bankStyle } = this.props
+    let isReadOnly = utils.isReadOnly(prop)
     let v
     if (!value.value)
       v = ''
-    else if (prop.readOnly)
+    else if (isReadOnly)
       v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''
 
-    let keyboard = prop.readOnly || search ? null : 'numeric'
+    let keyboard = isReadOnly || search ? null : 'numeric'
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1556,7 +1569,7 @@ var NewResourceMixin = {
                 })
 
     let currency
-    if (!prop.readOnly) {
+    if (editable) {
       let cur = utils.normalizeCurrencySymbol(value.currency)
       let symbol = utils.getModel(MONEY).properties.currency.oneOf.find(c => c[cur])
       symbol = symbol && symbol[cur] || cur
@@ -1573,12 +1586,12 @@ var NewResourceMixin = {
     }
     return (
       <View>
-      <View style={styles.moneyInput}>
-          {val}
-          {currency}
-      </View>
-      {this.paintError({prop, errors})}
-      {this.paintHelp(prop)}
+        <View style={styles.moneyInput}>
+            {val}
+            {currency}
+        </View>
+        {this.paintError({prop, errors})}
+        {this.paintHelp(prop)}
       </View>
     );
   },
@@ -1586,16 +1599,17 @@ var NewResourceMixin = {
   myDurationInputTemplate(params) {
     let { required, model, value, prop, editable, errors, component } = params
     let { search, locale } = this.props
+    let isReadOnly = utils.isReadOnly(prop)
 
     let v
     if (!value.value)
       v = ''
-    else if (prop.readOnly)
+    else if (!isReadOnly)
       v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''
 
-    let keyboard = prop.readOnly || search ? null : 'numeric'
+    let keyboard = !isReadOnly || search ? null : 'numeric'
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1611,7 +1625,7 @@ var NewResourceMixin = {
                 })
 
     let durationType
-    if (!prop.readOnly) {
+    if (editable) {
       durationType = this.myEnumTemplate({
                     prop,
                     enumProp: utils.getModel(DURATION).properties.durationType,
@@ -1964,7 +1978,7 @@ var styles= StyleSheet.create({
   },
   readOnly: {
     position: 'absolute',
-    right: 25,
+    right: 10,
     top: 20
   },
   immutable: {
