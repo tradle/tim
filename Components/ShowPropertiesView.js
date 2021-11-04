@@ -97,7 +97,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency, locale, isItem } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency, locale, isItem, isVerifier } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
@@ -194,8 +194,10 @@ class ShowPropertiesView extends Component {
               </View>
             </View>
           )
-          hasGroups = true
-          groups.push(viewCols.length - 1)
+          if (!isVerifier) {
+            hasGroups = true
+            groups.push(viewCols.length - 1)
+          }
           return
         }
         else if (checkProperties) {
