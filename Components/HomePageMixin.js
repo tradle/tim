@@ -72,25 +72,26 @@ var HomePageMixin = {
     return newStyle ? _.extend(style, newStyle) : style
   },
   showChat(params) {
-    if (!params.to)
+    let { to, dictionary } = params
+    if (!to)
       return
-    let style = this.mergeStyle(params.to.style)
+    let style = this.mergeStyle(to.style)
 debugger
-    let title = params.to.name
+    let title = to.name
     let { wasDeepLink, qs={} } = this.state
-    if (!title)
-      title = isWhitelabeled() && (qs.title || title)
+    if (isWhitelabeled())
+      title = qs.title || title
     var route = {
-      title: params.to.name,
+      title,
       componentName: 'MessageList',
       passProps: {
-        resource: params.to,
+        resource: to,
         filter: '',
         modelName: MESSAGE,
         noLoadingIndicator: true,
-        currency: params.to.currency,
+        currency: to.currency,
         bankStyle:  style,
-        dictionary: params.dictionary,
+        dictionary,
       }
     }
 
@@ -98,6 +99,22 @@ debugger
       Actions.importData(qs)
       if (!isWhitelabeled())
         route.backButtonTitle = 'Back'
+      else {
+        _.extend(route, {
+          rightButtonTitle: 'Profile',
+          onRightButtonPress: {
+            title: to.name,
+            componentName: 'ResourceView',
+            titleTextColor: '#7AAAC3',
+            backButtonTitle: 'Back',
+            passProps: {
+              bankStyle: style,
+              resource: to,
+              currency: to.currency
+            }
+          }
+        })
+      }
     }
     else
       route.backButtonTitle = 'Back'

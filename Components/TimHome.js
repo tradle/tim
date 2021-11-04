@@ -679,9 +679,9 @@ class TimHome extends Component {
           }
         },
         passProps: {
-          resource: resource,
+          resource,
           modelName: MESSAGE,
-          currency: currency,
+          currency,
           bankStyle:  style
         }
       }
