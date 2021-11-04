@@ -934,7 +934,7 @@ class TimHome extends Component {
                   </View>
                 </TouchableOpacity>
     }
-    if (isDeepLink  && qs.schema === 'ImportData')
+    if (isDeepLink  && qs.schema === 'ImportData' && isWhitelabeled())
       return (
         <View/>
       )
