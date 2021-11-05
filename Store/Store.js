@@ -5126,7 +5126,7 @@ if (!res[SIG]  &&  res._message)
             let context = returnVal._context
             if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
               prevRes._dataBundle = context._dataBundle
-            else
+            // else
               self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
           }
           await self.dbPut(prevResId, prevResCached)
@@ -5762,7 +5762,7 @@ if (!res[SIG]  &&  res._message)
       title: utils.getDisplayName({ resource: me })
     }
     let dataClaims = await this.searchMessages({to: from, modelName: DATA_CLAIM, filterProps: {claimId}})
-debugger
+// debugger
     if (dataClaims  &&  dataClaims.length) {
       // let value = {
       //   [TYPE]: SIMPLE_MESSAGE,
