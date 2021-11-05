@@ -29,11 +29,11 @@ import StringChooser from './StringChooser'
 
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
-var customFormDefaults
-if (__DEV__)
-  customFormDefaults = require('../data/customFormDefaults.json')
-else
-  customFormDefaults = {}
+var customFormDefaults = {}
+// if (__DEV__)
+//   customFormDefaults = require('../data/customFormDefaults.json')
+// else
+//   customFormDefaults = {}
 
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
