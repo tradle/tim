@@ -927,7 +927,11 @@ if (r.url)
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
       params.formErrors = {}
       originatingMessage.errors.forEach((r) => {
-        params.formErrors[r.name] = r.error
+        let err = translate(r.error)
+        if (r.oldValue) {
+          err = `${translate('oldValueWas', r.oldValue)}\n${err}`
+        }
+        params.formErrors[r.name] = err
       })
     }
     else if (validationErrors)
