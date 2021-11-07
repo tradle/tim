@@ -258,9 +258,10 @@ module.exports = {
     "youAreAboutToShare": "You are about to share '{1}' documents",
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
-    "reviewScannedProperties": "Please review and correct the data below",
+    "primarySourcesConflict": "Above is from primary data source. Please confirm or correct.",
     "scannedQRCodeToImportData": "Scanned QR code to import data from {1}",
     "reviewAndConfirm": "Please review and confirm",
+    "reviewScannedProperties": "Please review and correct the data below",
     "reviewScannedPropertiesAndSecondSideSnapshot": "Please review the data below, and take a snapshot of the {1} side of the document",
     "reviewScannedPropertiesWarning": "Is it your company? Please review and correct the data below",
     "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
@@ -399,6 +400,7 @@ module.exports = {
     // Page 2
     "Get set": "Get set",
     "Before we start you'll need a valid passport, identity card or driving license": "Before we start you'll need a valid passport, identity card or driving license",
+    "oldValueWas": "Old value was \"{1}\"",
     // // Page 3
     "Go!": "Go!",
     "We'll ask you questions in the chat and you simply fill the forms or follow the requests":  "We'll ask you questions in the chat and you simply fill the forms or follow the requests",

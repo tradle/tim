@@ -81,6 +81,7 @@ var strMap = {
   'Please overwrite if data can`t be reused': 'overwriteIfCantReuse',
   'FinCrime needs to review this application': 'finCrimeReview',
   'Add another': 'addAnother',
+  'Above is from primary data source. Please confirm or correct.': 'primarySourcesConflict',
 }
 
 var {
