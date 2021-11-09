@@ -61,11 +61,12 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
+const REFRESH = 'tradle.Refresh'
+const REFRESH_PRODUCT = 'tradle.RefreshProduct'
 const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
-const REFRESH = 'tradle.Refresh'
 const SELFIE = 'tradle.Selfie'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
 
@@ -123,7 +124,7 @@ class MessageList extends Component {
     if (!context)
       context = utils.isContext(resource)  &&  resource
 
-    if (!context  ||  context.requestFor === REMEDIATION)
+    if (!context  ||  context.requestFor === REMEDIATION  ||  context.requestFor === REFRESH_PRODUCT)
       return false
 
     // HACK - needs rewrite
@@ -656,7 +657,8 @@ class MessageList extends Component {
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
 
-    let bankStyle = this.state.bankStyle
+    // let bankStyle = this.state.bankStyle
+    let bankStyle = this.props.bankStyle || this.state.bankStyle
 
     let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
     let route = {
@@ -747,9 +749,11 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, originatingMessage, currency, locale, navigator, isModalOpen } = this.props
+    let { application, isAggregation, originatingMessage, currency, locale, navigator, isModalOpen, bankStyle } = this.props
+    if (!bankStyle)
+      bankStyle = this.state.bankStyle
 
-    let bankStyle = this.state.bankStyle
+    // let bankStyle = this.state.bankStyle
 
     let model = utils.getModel(utils.getType(resource))
     let previousMessageTime = currentMessageTime;
@@ -1020,7 +1024,6 @@ class MessageList extends Component {
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
-      <SafeAreaView style={styles.container}>
         {backgroundImage}
         {network}
         <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
@@ -1032,7 +1035,6 @@ class MessageList extends Component {
         {actionSheet}
         {alert}
         {assignRM}
-      </SafeAreaView>
       </PageView>
     )
   }

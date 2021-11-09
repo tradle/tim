@@ -111,7 +111,7 @@ var NewResourceMixin = {
       let prop = props[p]
       // prop is readOnly if explicitely has readOnly on it or
       // it is a _group property with 'list' of props annotation
-      if (prop  &&  !prop.readOnly  &&  !p.endsWith('_group')  && !prop.list)
+      if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list)
         showReadOnly = false
     })
     let requestedProperties, excludeProperties
@@ -130,7 +130,8 @@ var NewResourceMixin = {
     }
     else if (data) {
       for (let p in data) {
-        if (!eCols.includes(p)  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+        let prop = props[p]
+        if (!eCols.includes(p)  &&  p.charAt(0) !== '_'  &&  prop  &&  !utils.isReadOnly(prop))
           eCols.push(p)
       }
     }
@@ -172,7 +173,7 @@ var NewResourceMixin = {
       let type = props[p].type
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
-      let isReadOnly = props[p].readOnly
+      let isReadOnly = utils.isReadOnly(props[p])
       if (isReadOnly  &&  !search  &&  !showReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
       this.setDefaultValue(props[p], data, true)
@@ -212,7 +213,7 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      let propNotEditable = props[p].readOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
+      let propNotEditable = isReadOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
 
       if (props[p].description)
         options.fields[p].help = props[p].description;
@@ -541,7 +542,7 @@ var NewResourceMixin = {
 
       eCols.push(p)
       let isRequired = requestedProperties[p].required
-      if (idx === -1  &&  props[p].readOnly);
+      if (idx === -1  &&   utils.isReadOnly(props[p]));
         // showReadOnly = true
       else if (props[p].list) {
         props[p].list.forEach((pp) => {
@@ -590,7 +591,7 @@ var NewResourceMixin = {
 
     let vColsList = utils.getViewCols(model)
     vColsList.forEach(p => {
-      if (!props.readOnly  &&  eCols.indexOf(p) === -1)
+      if (props[p]  &&  !utils.isReadOnly(props[p])  &&  eCols.indexOf(p) === -1)
         eCols.push(p)
     })
 
@@ -715,14 +716,15 @@ var NewResourceMixin = {
     let bankStyle = this.props.bankStyle
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     return (
-      <View style={[styles.divider, {borderBottomColor: linkColor, paddingVertical: 5}]}>
+      <View style={{flexDirection: 'row', paddingVertical: 5, paddingLeft: 15}}>
+        <View style={[styles.accent, {borderLeftColor: bankStyle.accentColor || 'orange'}]}/>
         <Text style={[styles.dividerText, {color: linkColor}]}>{label}</Text>
       </View>
     );
   },
 
   myMarkdownTextInputTemplate(params) {
-    let { prop, value } = params
+    let { prop, value, editable } = params
     let { bankStyle } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
@@ -752,7 +754,7 @@ var NewResourceMixin = {
       title = utils.translate('Please click here to view/edit')
 
     let header
-    if (prop.readOnly)
+    if (editable)
       st.marginTop = -10
     else
       header = <View style={vStyle}>
@@ -878,8 +880,7 @@ var NewResourceMixin = {
 
     let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
-    let addStyle = prop.readOnly ? {backgroundColor: '#f7f7f7'} : {}
-    // let addStyle = prop.readOnly ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7', color: bankStyle.textColor || '#666666'} : {}
+    let addStyle = editable ? {} : {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
     return (
       <View style={st}>
         <FloatLabel
@@ -955,7 +956,7 @@ var NewResourceMixin = {
   },
 
   myBooleanTemplate(params) {
-    let {prop, model, value, required, component} = params
+    let {prop, model, value, required, component, editable} = params
     let { search, bankStyle } = this.props
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
@@ -989,7 +990,7 @@ var NewResourceMixin = {
     let switchC, icon
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
-    if (prop.readOnly  &&  !search) {
+    if (!editable  &&  !search) {
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
       switchC = <View style={{paddingVertical: 5}}>
                   <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
@@ -1088,7 +1089,7 @@ var NewResourceMixin = {
     //     value = dateformat(localizedDate, format)
     // }
     let datePicker
-    if (prop.readOnly  &&  !search) {
+    if (!editable  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
                      <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
@@ -1115,7 +1116,10 @@ var NewResourceMixin = {
               }],
               dateIconColor: {color: linkColor},
               dateIcon: styles.dateIcon,
-              btnTextConfirm: {color: linkColor}
+              btnTextConfirm: {color: linkColor},
+              datePicker: {
+                justifyContent:'center'
+              }
             }}
             {...dateProps}
           />
@@ -1222,7 +1226,7 @@ var NewResourceMixin = {
    },
 
   inputFocused(prop) {
-    if (prop.readOnly)
+    if (utils.isReadOnly(prop))
       return
 
     let { metadata, parentMeta } = this.props
@@ -1329,7 +1333,7 @@ var NewResourceMixin = {
       propName = propName.name
 // debugger
     let setItemCount
-    let { metadata, model, search } = this.props
+    let { metadata, model, search, originatingMessage:originatingResource } = this.props
     let isItem = metadata != null
     if (!model  &&  isItem)
       model = utils.getModel(metadata.items.ref)
@@ -1383,7 +1387,8 @@ var NewResourceMixin = {
       doDelete = true
     }
     else {
-      resource[propName] = utils.buildRef(value)
+      // resource[propName] = utils.buildRef(value)
+      resource[propName] = isEnum ?  utils.buildRef(value) : value
 
       if (!this.floatingProps)
         this.floatingProps = {}
@@ -1420,7 +1425,7 @@ var NewResourceMixin = {
     this.setState(state);
     if (!search) {
       if (utils.isForm(model))
-        Actions.getRequestedProperties({resource, currentResource: resource})//currentR})
+        Actions.getRequestedProperties({resource, currentResource: resource, originatingResource})
       if (!utils.isImplementing(r, INTERSECTION))
         Actions.saveTemporary(resource)
     }
@@ -1504,17 +1509,18 @@ var NewResourceMixin = {
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     let { required, model, value, prop, editable, errors, component } = params
-    let { search, locale } = this.props
+    let { search, locale, bankStyle } = this.props
+    let isReadOnly = utils.isReadOnly(prop)
 
     let v
     if (!value.value)
       v = ''
-    else if (prop.readOnly)
+    else if (isReadOnly)
       v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''
 
-    let keyboard = prop.readOnly || search ? null : 'numeric'
+    let keyboard = isReadOnly || search ? null : 'numeric'
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1530,7 +1536,7 @@ var NewResourceMixin = {
                 })
 
     let currency
-    if (!prop.readOnly) {
+    if (editable) {
       let cur = utils.normalizeCurrencySymbol(value.currency)
       let symbol = utils.getModel(MONEY).properties.currency.oneOf.find(c => c[cur])
       symbol = symbol && symbol[cur] || cur
@@ -1547,12 +1553,12 @@ var NewResourceMixin = {
     }
     return (
       <View>
-      <View style={styles.moneyInput}>
-          {val}
-          {currency}
-      </View>
-      {this.paintError({prop, errors})}
-      {this.paintHelp(prop)}
+        <View style={styles.moneyInput}>
+            {val}
+            {currency}
+        </View>
+        {this.paintError({prop, errors})}
+        {this.paintHelp(prop)}
       </View>
     );
   },
@@ -1601,16 +1607,17 @@ var NewResourceMixin = {
   myDurationInputTemplate(params) {
     let { required, model, value, prop, editable, errors, component } = params
     let { search, locale } = this.props
+    let isReadOnly = utils.isReadOnly(prop)
 
     let v
     if (!value.value)
       v = ''
-    else if (prop.readOnly)
-      v = utils.formatCurrency(value, locale)
+    // else if (isReadOnly)
+    //   v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''
 
-    let keyboard = prop.readOnly || search ? null : 'numeric'
+    let keyboard = isReadOnly || search ? null : 'numeric'
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1626,7 +1633,7 @@ var NewResourceMixin = {
                 })
 
     let durationType
-    if (!prop.readOnly) {
+    if (editable) {
       durationType = this.myEnumTemplate({
                     prop,
                     enumProp: utils.getModel(DURATION).properties.durationType,
@@ -1640,12 +1647,12 @@ var NewResourceMixin = {
     }
     return (
       <View>
-      <View style={styles.moneyInput}>
-          {val}
-          {durationType}
-      </View>
-      {this.paintError({prop, errors})}
-      {this.paintHelp(prop)}
+        <View style={styles.moneyInput}>
+            {val}
+            {durationType}
+        </View>
+        {this.paintError({prop, errors})}
+        {this.paintHelp(prop)}
       </View>
     );
   },
@@ -1745,7 +1752,7 @@ var NewResourceMixin = {
         this.checkNumber(value[p], prop, err)
       else if (prop.ref === MONEY) {
         let error = this.checkNumber(value[p], prop, err)
-        if (error  &&  m.required.indexOf(p) === -1)
+        if (error  &&  m.required  &&  m.required.indexOf(p) === -1)
           deleteProps.push(p)
         else if (!value[p].currency  &&  this.props.currency)
           value[p].currency = this.props.currency
@@ -2003,6 +2010,7 @@ var styles= StyleSheet.create({
   dividerText: {
     marginBottom: 5,
     fontSize: 26,
+    fontWeight: '500',
     color: '#ffffff'
   },
   font14: {
@@ -2051,6 +2059,10 @@ var styles= StyleSheet.create({
   moneyInput: {
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  accent: {
+    width: 12,
+    borderLeftWidth: 5,
   }
 })
 
