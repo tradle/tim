@@ -18,7 +18,7 @@ import { makeResponsive } from 'react-native-orient'
 
 import constants from '@tradle/constants'
 const {
-  TYPE,
+  TYPE
 } = constants
 const {
   VERIFICATION,
@@ -83,15 +83,15 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search, application, message, isChat, tab} = this.props
+    let {resource, isReview, search, application, message, isChat, tab, isDeepLink} = this.props
     if (isReview)
       return
     if (message) {
-      Actions.getItem({resource: message, search, application, isChat})
+      Actions.getItem({resource: message, search, application, isChat, isDeepLink})
       return
     }
     if (resource.id) {
-      Actions.getItem({resource, search, application, isChat})
+      Actions.getItem({resource, search, application, isChat, isDeepLink})
       return
     }
 
@@ -106,7 +106,7 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let { action, currency, style, country, backlink, isConnected } = params
+    let { action, currency, style, country, backlink, isConnected, error } = params
     if (action == 'connectivity') {
       this.setState({isConnected})
       return
@@ -123,6 +123,11 @@ class MessageView extends Component {
       return
     }
      if (action === 'getItem') {
+      if (error) {
+        Alert.alert(error)
+        this.setState({isLoading: false, error, resource})
+        return
+      }
       let newResource
       if (utils.isStub(this.state.resource))
         newResource = params.resource
@@ -322,10 +327,10 @@ class MessageView extends Component {
     navigator.push(route)
   }
   render() {
-    let { backlink, bankStyle, resource } = this.state
-    if (this.state.isLoading)
+    let { backlink, bankStyle, resource, isLoading, error } = this.state
+    if (isLoading)
       return this.showLoading({bankStyle, component: MessageView})
-    let { lensId, style, navigator, currency, isVerifier,
+    let { lensId, style, navigator, currency, isVerifier, isDeepLink,
           defaultPropertyValues, verification, application, isReview } = this.props
 
     if (resource[TYPE] === MESSAGE)
@@ -450,14 +455,17 @@ class MessageView extends Component {
     // let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     // borderBottomColor: bankStyle.productRowBgColor
     let dateView
-    if (isVerificationTree || isForm) {
+    if (isVerificationTree || (isForm  &&  (!rModel.viewCols || !rModel.viewCols.find(col => col.endsWith('_group'))))) {
       dateView = <View style={styles.band}>
                   <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('submissionDate')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
     let title = isVerification  ? this.makeViewTitle(model, styles) : null
+
+    let actionSheet = this.renderCopyLinkActionSheet(resource)
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
+
     let contentSeparator = getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto  &&  !checkProps)
@@ -468,7 +476,7 @@ class MessageView extends Component {
 
     let me = utils.getMe()
     let warning
-    if (!me.isEmployee  &&  !resource._latest  &&  !isReview) {
+    if (!me.isEmployee  &&  !resource._latest  &&  !isReview  &&  !error) {
       warning = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.errorBgColor, alignItems: 'center'}}>
                   <Text style={{fontSize: 18, color: bankStyle.errorColor}}>{translate('olderResourceVersion')}</Text>
                 </View>
@@ -495,8 +503,9 @@ class MessageView extends Component {
         {actionPanel}
       </ScrollView>
         {title}
-        {footer}
+        {actionSheet}
       </SafeAreaView>
+        {footer}
       </PageView>
     );
   }
@@ -521,6 +530,9 @@ class MessageView extends Component {
   }
 
   renderFooter(backlink, styles) {
+    if (!backlink)
+      return this.renderMenu(MessageView)
+
     if (!backlink  ||  !backlink.allowToAdd)
       return
     let me = utils.getMe()
