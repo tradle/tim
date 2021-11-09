@@ -1159,7 +1159,11 @@ class ResourceList extends Component {
       )
 
     let style = {backgroundColor: '#fff'}
-    let contentSeparator = getContentSeparator(this.state.bankStyle)
+    // let contentSeparator = getContentSeparator(this.state.bankStyle)
+    let contentSeparator = {
+      borderBottomColor: '#eee',
+      borderBottomWidth: 1
+    }
     return (
       <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
       <SafeAreaView style={styles.container}>
