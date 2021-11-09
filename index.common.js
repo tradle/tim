@@ -10,6 +10,7 @@ import {
   AppState,
   AppRegistry,
   BackHandler,
+  SafeAreaView,
   Alert
 } from 'react-native';
 import Orientation from 'react-native-orientation'
@@ -241,8 +242,14 @@ class TiMApp extends Component {
 
   render() {
     const modal = this.renderModal()
+    let componentName = this.state && this.state.componentName
+    let safe
+    // debugger
+    if (componentName  &&  componentName !== 'TimHome' && componentName !== 'SplashScreen' && componentName !== 'TourPage')
+      safe = <SafeAreaView style={{flex: 0, backgroundColor: this.state && this.state.navBarBgColor || 'transparent'}}/>
     return (
       <View style={styles.container}>
+        {safe}
         {modal}
         <Navigator
           style={styles.container}
@@ -257,14 +264,16 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             if (!newRoute)
               return
-            let style = newRoute.passProps.bankStyle
+            const { passProps, componentName } = newRoute
+            let style = passProps.bankStyle
             if (style)
-              this.setState({navBarBgColor: newRoute.componentName === 'TourPage' ? 'transparent' : style.navBarBackgroundColor || 'transparent'})
+              this.setState({navBarBgColor: componentName === 'TourPage' ? 'transparent' : style.navBarBackgroundColor || 'transparent', componentName})
             else
-              this.setState({navBarBgColor: 'transparent'})
+              this.setState({navBarBgColor: 'transparent', componentName})
           }}
           passProps={this.state.props}
           configureScene={(route) => {
+            this.setState({componentName: route.componentName})
             if (route.sceneConfig)
               return route.sceneConfig;
 
@@ -277,7 +286,7 @@ class TiMApp extends Component {
           }}
         />
       </View>
-    );
+    )
   }
   renderScene(route, nav) {
     if (!route.componentName || !components[route.componentName]) {
@@ -508,11 +517,13 @@ var NavigationBarRouteMapper = {
   rightButtonHandler: function({navigator, route}) {
     // 'Done' button case for creating new resources
     let isProfile = route.rightButtonTitle.toLowerCase() === 'profile'
-    if (typeof route.onRightButtonPress === 'function') {
-                    route.onRightButtonPress()
-                  }
-    else if (isProfile)
-      HomePageMixin.showProfile(navigator)
+    if (typeof route.onRightButtonPress === 'function')
+      route.onRightButtonPress()
+    else if (isProfile) {
+      let { passProps } = route.onRightButtonPress
+      let bankStyle = passProps  &&  passProps.bankStyle
+      HomePageMixin.showProfile({navigator, bankStyle})
+    }
     else if (!route.onRightButtonPress)
       return
     else if (route.onRightButtonPress.stateChange) {
@@ -570,7 +581,7 @@ var NavigationBarRouteMapper = {
       }
     }
     let t = title.split(' -- ')
-    let st = t.length > 1 ? {marginTop: 2} : {}
+    let st = {} // t.length > 1 ? {marginTop: 2} : {}
     if (uri) {
       let { width, height } = photoObj
       if (width  &&  height)
@@ -625,7 +636,7 @@ var NavigationBarRouteMapper = {
     let titleStyle = tArr ? platformStyles.navBarMultiRowTitle : styles.navBarMultiRowTitle
     return (
       <View key={'index.common.js'}>
-        <View style={[{flexDirection: 'row'}, platformStyles.navBarMargin]}>
+        <View style={[{flexDirection: 'row', alignItems: 'center'}, platformStyles.navBarMargin]}>
           {photo}
           <View style={titleStyle}>
             {text}
@@ -655,7 +666,7 @@ var styles = StyleSheet.create({
     height: LOGO_HEIGHT,
     resizeMode: 'contain',
     marginRight: 5,
-    marginTop: 7,
+    // marginTop: 7,
     marginLeft: 0,
     width: LOGO_HEIGHT * 2,
   },
@@ -663,7 +674,7 @@ var styles = StyleSheet.create({
     height: LOGO_HEIGHT,
     width: LOGO_HEIGHT * 2,
     resizeMode: 'contain',
-    marginTop: 7,
+    // marginTop: 7,
     marginLeft: 0,
   },
   navBarMultiRowTitle: {

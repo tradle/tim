@@ -19,27 +19,27 @@ export default StyleSheet.create({
     flex: 1,
   },
   navBarRightIcon: {
-    marginTop: isIphone10 ? -1 : 3
+    // marginTop: isIphone10 ? -1 : 3
   },
   navBarSeparator: {
-    height: isIphone10 ? 10 : 0
+    // height: isIphone10 ? 10 : 0
   },
   navBarMargin: {
-    marginTop: isIphone10 ? 10 : 1,
+    // marginTop: isIphone10 ? 10 : 1,
   },
   navBarText: {
-    marginTop: 10,
+    marginTop: 5,
     fontSize: 17
   },
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
-    marginTop: isIphone10 ? 16 : 5
+    marginTop: isIphone10 ? -2 : 5
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 10,
-    marginTop: isIphone10 ? 19 : 7
+    // marginTop: isIphone10 ? 19 : 7
   },
 
   // navBar: {
@@ -49,12 +49,12 @@ export default StyleSheet.create({
   touchIdText: {
     color: '#2E3B4E',
     fontSize: 18,
-    marginTop: 10,
+    // marginTop: 10,
     marginLeft: 15,
     alignSelf: 'flex-start'
   },
   logo: {
-    marginTop: 7
+    // marginTop: 7
   },
   navBarMultiRowTitle: {
     flexDirection: 'column'
