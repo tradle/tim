@@ -134,6 +134,8 @@ module.exports = function ValidateSelector ({ models }) {
               continue
             }
           }
+          delete form[p]
+          continue
         }
         if (props[p].type !== 'object') {
           form[p] = val
