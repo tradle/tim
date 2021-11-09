@@ -991,7 +991,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#96180c5ed1c822e9e227512db5eb46b3b73da4d8"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#ae81373c1da5e9f52c7d6e0ecb7dc9ffcd46066c"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -1075,9 +1075,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.32",
+      "version": "7.1.33",
       "from": "@tradle/validate-model@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.32.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.33.tgz",
       "dependencies": {
         "lodash": {
           "version": "4.17.21",
@@ -1085,9 +1085,9 @@
           "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
         },
         "mime": {
-          "version": "2.5.2",
+          "version": "2.6.0",
           "from": "mime@>=2.4.6 <3.0.0",
-          "resolved": "http://registry.npmjs.org/mime/-/mime-2.5.2.tgz"
+          "resolved": "https://registry.npmjs.org/mime/-/mime-2.6.0.tgz"
         }
       }
     },
@@ -1625,9 +1625,9 @@
       "dev": true
     },
     "assign-deep": {
-      "version": "0.4.7",
+      "version": "0.4.8",
       "from": "assign-deep@>=0.4.5 <0.5.0",
-      "resolved": "https://registry.npmjs.org/assign-deep/-/assign-deep-0.4.7.tgz",
+      "resolved": "http://registry.npmjs.org/assign-deep/-/assign-deep-0.4.8.tgz",
       "dependencies": {
         "assign-symbols": {
           "version": "0.1.1",
@@ -2754,9 +2754,14 @@
           "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz"
         },
         "fbjs": {
-          "version": "0.8.17",
+          "version": "0.8.18",
           "from": "fbjs@>=0.8.9 <0.9.0",
-          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
+          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.18.tgz"
+        },
+        "ua-parser-js": {
+          "version": "0.7.31",
+          "from": "ua-parser-js@>=0.7.30 <0.8.0",
+          "resolved": "https://registry.npmjs.org/ua-parser-js/-/ua-parser-js-0.7.31.tgz"
         }
       }
     },
@@ -7155,7 +7160,7 @@
     "react-native-app-intro": {
       "version": "1.1.5",
       "from": "tradle/react-native-app-intro#dev",
-      "resolved": "git://github.com/tradle/react-native-app-intro.git#c1ca89ffc8687f03199a098051a43028c5dbc9a8"
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#2e8c60c66dc0f8db9fb89a77cbf663f85e7d7b3f"
     },
     "react-native-async-storage-rocks": {
       "version": "2.2.0",
@@ -7317,11 +7322,16 @@
           "resolved": "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.0.tgz",
           "dependencies": {
             "fbjs": {
-              "version": "0.8.17",
+              "version": "0.8.18",
               "from": "fbjs@^0.8.9",
-              "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.17.tgz"
+              "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.18.tgz"
             }
           }
+        },
+        "ua-parser-js": {
+          "version": "0.7.31",
+          "from": "ua-parser-js@^0.7.30",
+          "resolved": "https://registry.npmjs.org/ua-parser-js/-/ua-parser-js-0.7.31.tgz"
         }
       }
     },
@@ -7378,7 +7388,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#8f4dfd43e1d98472a8ef36cc630f095751817706"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#13c6f45c0343e693dc5e3a4663d0124faaee84a4"
     },
     "react-native-gifted-spinner": {
       "version": "0.1.0",
