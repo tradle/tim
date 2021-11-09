@@ -3,6 +3,7 @@ import path from 'path'
 import { parse as parseURL } from 'url'
 import {
   Alert,
+  Clipboard,
   // NetInfo,
   Platform,
   InteractionManager
@@ -28,6 +29,8 @@ import JailMonkey from 'jail-monkey'
 
 import plugins from '@tradle/biz-plugins'
 import { allSettled } from '@tradle/promise-utils'
+import qrSchema from '@tradle/qr-schema'
+const links = qrSchema.links
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from '../utils/async-storage'
@@ -647,9 +650,8 @@ var Store = Reflux.createStore({
     msg.object = utils.clone(obj)
 
     // this.maybeWatchSeal(msg)
-
     const payload = msg.object.object
-    if (payload[TYPE] === FORM_REQUEST  &&  payload.product === REFRESH_PRODUCT)
+    if (payload[TYPE] === FORM_REQUEST  &&  payload.product === REFRESH_PRODUCT  &&  !payload.prefill)
       return
     const originalPayload = payload[TYPE] === MESSAGE ? payload.object : payload
     debug('newObject:', originalPayload[TYPE])
@@ -3538,13 +3540,15 @@ var Store = Reflux.createStore({
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = this.getBizPluginsContext()
     let moreInfo
+    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getModel(rtype)
 
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
       moreInfo = plugin(context).validateForm.call(
-          {models: {[rtype]: this.getModel(rtype)}},
+          // {models: {[rtype]: this.getModel(rtype)}},
+          {models: {[rtype]: m}},
           {application: _context, form: resource, currentResource: currentResource}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
@@ -3963,13 +3967,12 @@ var Store = Reflux.createStore({
     }
   },
   async onGetItem(params) {
-    let {resource, action, noTrigger, search, backlink, backlinks, isChat} = params
+    let {resource, action, noTrigger, search, backlink, backlinks, isChat, isDeepLink} = params
     // await this._loadedResourcesDefer.promise
     let type = utils.getType(resource)
     const resModel = this.getModel(type)
-    if (!resModel) {
-      throw new Error(`missing model for ${res[TYPE]}`)
-    }
+    if (!resModel)
+      throw new Error(`missing model for ${type}`)
 
     if (search)
       return await this.onGetItemFromServer(params)
@@ -3980,10 +3983,22 @@ var Store = Reflux.createStore({
     let res = {}
     if (!r) {
       if (me.isEmployee) {
+        if (isDeepLink) {
+          if (!this.client  &&  SERVICE_PROVIDERS)
+            this.client = graphQL.initClient(meDriver, me.organization.url)
+        }
         return await this.onGetItemFromServer(params)
         // res = await this._getItemFromServer(rId)
         // r = pick(res, TYPE)
       }
+      if (isDeepLink)
+        this.trigger({
+          action: 'getItem',
+          // list: list,
+          resource,
+          error: translate('cantFindResource', utils.getDisplayName({resource}))
+        })
+      return
     }
     if (utils.isMessage(r)) {
       let kres
@@ -4103,7 +4118,20 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
     return r
   },
+  async onGetResourceLink({ resource }) {
+    let toR = this._getItem(resource.to)
+    let org = this._getItem(toR.organization)
 
+    const { [TYPE]:type, [ROOT_HASH]: permalink, [CUR_HASH]: link} = toR
+    let baseUrl
+    if (utils.isWeb())
+      baseUrl = __DEV__ ? 'http://localhost:3001' : ENV.APP_URL
+    else
+      baseUrl = `https://${ENV.deepLinkHost}`
+    let { id: rId, title } = this.buildRef(resource)
+    let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
+    Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(title)}`)
+  },
   async getApplication(params) {
     let {resource, action, backlink, forwardlink} = params
     let blProp = backlink ||  forwardlink
@@ -4442,11 +4470,14 @@ if (!res[SIG]  &&  res._message)
     }
   },
   onSaveTemporary(resource) {
+    if (!__DEV__) return
     temporaryResources[resource[TYPE]] = utils.sanitize(resource)
   },
   async onGetTemporary(type, noFetch) {
-    var r = !noFetch &&  temporaryResources[type]
-    let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
+    let r, requestedProperties
+    if (__DEV__)
+      r = !noFetch &&  temporaryResources[type]
+    requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
     this.trigger({action: 'getTemporary', resource: r || {}, requestedProperties})
   },
 
@@ -4495,8 +4526,8 @@ if (!res[SIG]  &&  res._message)
     return await this.onAddItem(params)
   },
   async onAddItem(params) {
-    var self = this
-    var {resource, application, disableFormRequest, isMessage, doneWithMultiEntry, currentFolder,
+    let self = this
+    let {resource, application, disableFormRequest, isMessage, doneWithMultiEntry, currentFolder,
          value, chat, cb, meta, isRegistration, noTrigger, forceUpdate, lens, doNotSend, isRefresh, employeeSetup} = params
     if (!value)
       value = resource
@@ -4514,11 +4545,6 @@ if (!res[SIG]  &&  res._message)
       return
     }
 
-    // Check if there are references to other resources
-    var refProps = {};
-    var foundRefs = [];
-    var props = meta.properties;
-
     if (meta.id == VERIFICATION  ||  utils.isVerification(meta)) {
       // debugger
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
@@ -4533,6 +4559,7 @@ if (!res[SIG]  &&  res._message)
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
     let isRemediation, isRefreshRequest
+    let props = meta.properties;
     if (context) {
       if (context.associatedResource  &&  context.notes) {
         for (let p in context.notes) {
@@ -4563,63 +4590,17 @@ if (!res[SIG]  &&  res._message)
       isRefreshRequest = meta.id === FORM_REQUEST  &&  resource.form === REFRESH
 
     // let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
-    var isNew = !resource[ROOT_HASH];
+    let isNew = !resource[ROOT_HASH];
 
     if (!isNew  &&  !resource[CUR_HASH])
       resource[CUR_HASH] = protocol.linkString(resource)
 
-    let results = []
-    for (let p in resource) {
-      if (!props[p] ||  props[p].type !== 'object')
-        continue
-      var ref = props[p].ref;
-      if (!ref  ||  !resource[p])
-        continue
-      let refModel = this.getModel(ref)
-      if (refModel.inlined  ||  utils.isEnum(refModel))
-        continue;
-
-      var rValue = utils.getId(resource[p])
-      if (!rValue)
-        continue
-      if (!refProps[rValue])
-        refProps[rValue] = []
-      refProps[rValue].push(p)
-      let elm = this._getItem(rValue)
-      if (!elm  &&  me.isEmployee) {
-        elm = await this._getItemFromServer({idOrResource: rValue})
-        foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
-      }
-      else {
-        // HACK for scanned Identity
-        if (!elm) {
-          if (ref === IDENTITY)
-            foundRefs.push({value: resource[p], state: 'fulfilled'})
-        }
-        else if (!utils.isMessage(elm))
-          foundRefs.push({value: elm, state: 'fulfilled'})
-        else {
-          let kres
-          try {
-            kres = await this._keeper.get(elm[CUR_HASH])
-          } catch (err) {
-            if (me.isEmployee)
-              kres = await this._getItemFromServer({idOrResource: utils.getId(elm)})
-            debugger
-          }
-          let r = _.cloneDeep(kres)
-          // results.push(r)
-          // if (results.length) {
-          //   // let r = results[0]
-            _.extend(r, elm)
-            foundRefs.push({value: r, state: 'fulfilled'})
-          // }
-        }
-      }
-    }
+    // Check if there are references to other resources
+    let { foundRefs, refProps } = await this._getRefPropValues({ resource, model: meta })
     // Add items properties if they were created
-    var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
-    var prefill = disableFormRequest  &&  disableFormRequest.prefill
+    let json = utils.clone(value) // maybe not the best way to copy, try `clone`?
+    let prefill = disableFormRequest  &&  disableFormRequest.prefill
+    let results = []
     for (let p in resource) {
       if (!props[p])
         continue
@@ -4657,11 +4638,11 @@ if (!res[SIG]  &&  res._message)
     }
     // if (!json[TYPE])
     //   json[TYPE] = meta.id;
-    var error = this.checkRequired(json, props);
+    let error = this.checkRequired(json, props);
     if (error) {
       foundRefs.forEach((val) => {
-        var propValue = utils.getId(val.value)
-        var propsToSet = refProps[propValue];
+        let propValue = utils.getId(val.value)
+        let propsToSet = refProps[propValue];
         propsToSet.forEach((p) => json[p] = val.value)
       });
 
@@ -4699,20 +4680,20 @@ if (!res[SIG]  &&  res._message)
       allFoundRefs.forEach((val) => {
         if (val.state !== 'fulfilled')
           return
-        var value = val.value;
-        var propValue = utils.getId(value)
-        var propsToSet = refProps[propValue];
+        let value = val.value;
+        let propValue = utils.getId(value)
+        let propsToSet = refProps[propValue];
         if (propsToSet)
           propsToSet.forEach((p) => json[p] = this.buildRef(value, true))
       })
     }
-    // var isMessage = utils.isMessage(meta)
+    // let isMessage = utils.isMessage(meta)
     if (isMessage  &&  !json._documentCreated  &&  (!isRemediation ||  !json._time))
       json._time = new Date().getTime();
     if (isNew  ||  !value._documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
       resource._time = new Date().getTime();
 
-    var returnVal
+    let returnVal
     if (!resource  ||  isNew)
       returnVal = json
     else {
@@ -4735,7 +4716,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     // case for Remediation WealthCV -> CVItems. Linking items to container
-    var readOnlyBacklinks = []
+    let readOnlyBacklinks = []
     if (!isRegistration  &&  !isBookmark) {
       for (let pr in props) {
         let prop = props[pr]
@@ -4992,7 +4973,7 @@ if (!res[SIG]  &&  res._message)
         let origNoTrigger = noTrigger
         if (rtype === DATA_CLAIM) {
           org = self._getItem(utils.getId(org))
-          Actions.showModal({title: translate('requestMyData'), showIndicator: true})
+          // Actions.showModal({title: translate('requestMyData'), showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
@@ -5107,8 +5088,13 @@ if (!res[SIG]  &&  res._message)
           let org = to.organization ? self._getItem(to.organization) : to
           // Draft project
           // self.trigger({action: 'getItem', resource: returnVal, to: org})
-          if (!origNoTrigger)
-            self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+          if (!origNoTrigger) {
+            let context = returnVal._context
+            if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
+              prevRes._dataBundle = context._dataBundle
+            // else
+              self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+          }
           await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
         }
@@ -5272,26 +5258,27 @@ if (!res[SIG]  &&  res._message)
         }
         return
       }
-      let fr = await self._keeper.get(returnVal[CUR_HASH])
-      let r = {
-        [TYPE]: CONFIRMATION,
-        message: translate('afterRefresh')
-      }
-      let data = await self.createObject(r)
-      _.extend(r, data.object)
-      _.extend(r, {
-        [ROOT_HASH]: data.permalink,
-        [CUR_HASH]: data.link,
-        [IS_MESSAGE]: true,
-        from: returnVal.from,
-        to: returnVal.to
-      })
-      let rId = utils.getId(r)
-      await db.put(rId, r)
-      self._setItem(rId, r)
-      self.addMessagesToChat(utils.getId(r.from.organization), r)
-      self.addVisualProps(r)
-      self.trigger({action: 'addItem', resource: r})
+      // let fr = await self._keeper.get(returnVal[CUR_HASH])
+      // let r = {
+      //   [TYPE]: CONFIRMATION,
+      //   message: translate('afterRefresh'),
+      //   // confirmationFor:
+      // }
+      // let data = await self.createObject(r)
+      // _.extend(r, data.object)
+      // _.extend(r, {
+      //   [ROOT_HASH]: data.permalink,
+      //   [CUR_HASH]: data.link,
+      //   [IS_MESSAGE]: true,
+      //   from: returnVal.from,
+      //   to: returnVal.to
+      // })
+      // let rId = utils.getId(r)
+      // await db.put(rId, r)
+      // self._setItem(rId, r)
+      // self.addMessagesToChat(utils.getId(r.from.organization), r)
+      // self.addVisualProps(r)
+      // self.trigger({action: 'addItem', resource: r})
     }
    },
   _makeIdentityStub(r) {
@@ -5299,6 +5286,63 @@ if (!res[SIG]  &&  res._message)
       id: utils.getId(r).replace(PROFILE, IDENTITY),
     }
   },
+  async _getRefPropValues({resource, model}) {
+    // let results = []
+    let refProps = {};
+    let foundRefs = [];
+    let isInBundle = resource._dataBundle
+    let refs = utils.getPropertiesWithAnnotation(model, 'ref')
+    let props = model.properties
+    for (let p in refs) {
+      let prop = refs[p]
+      let ref = prop.ref
+      if (!ref  ||  !resource[p])
+        continue
+      let refModel = this.getModel(ref)
+      if (refModel.inlined  ||  utils.isEnum(refModel))
+        continue;
+
+      var rValue = utils.getId(resource[p])
+      if (!rValue)
+        continue
+      if (!refProps[rValue])
+        refProps[rValue] = []
+      refProps[rValue].push(p)
+      let elm = this._getItem(rValue)
+      if (!elm  && !isInBundle  &&  me.isEmployee) {
+        elm = await this._getItemFromServer({idOrResource: rValue})
+        foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
+      }
+      else {
+        // HACK for scanned Identity
+        if (!elm) {
+          if (ref === IDENTITY)
+            foundRefs.push({value: resource[p], state: 'fulfilled'})
+        }
+        else if (!utils.isMessage(elm))
+          foundRefs.push({value: elm, state: 'fulfilled'})
+        else {
+          let kres
+          try {
+            kres = await this._keeper.get(elm[CUR_HASH])
+          } catch (err) {
+            if (!isInBundle  &&  me.isEmployee)
+              kres = await this._getItemFromServer({idOrResource: utils.getId(elm)})
+            debugger
+          }
+          let r = _.cloneDeep(kres)
+          // results.push(r)
+          // if (results.length) {
+          //   // let r = results[0]
+            _.extend(r, elm)
+            foundRefs.push({value: r, state: 'fulfilled'})
+          // }
+        }
+      }
+    }
+    return { foundRefs, refProps }
+  },
+
   async onNoPairing(to) {
     if (to[TYPE] !== ORGANIZATION)
       to = to.organization
@@ -5513,7 +5557,8 @@ if (!res[SIG]  &&  res._message)
       publishRequestSent[orgId] = true
       if (!status.watches.link  &&  !status.link) {
         let orgRep = this.getRepresentative(orgId)
-        await this.publishMyIdentity(orgRep)
+        if (!me.isEmployee)
+          await this.publishMyIdentity(orgRep)
       }
     }
   },
@@ -5673,18 +5718,36 @@ if (!res[SIG]  &&  res._message)
   },
 
   async onImportData(data) {
-    let { host, provider, dataHash } = data
-    let providerId = utils.makeId(PROFILE, data.provider)
+    await this.ready
+    await this._loadedResourcesDefer.promise
+    let { host, provider, dataHash:claimId } = data
+    let to = {
+      id: utils.makeId(PROFILE, provider)
+    }
+    // let toR = this._getItem(to)
+    // Actions.list({resource: toR, modelName: MESSAGE, to: toR, isChat: true})
+    let from = {
+      id: utils.getId(me),
+      title: utils.getDisplayName({ resource: me })
+    }
+    let dataClaims = await this.searchMessages({to: from, modelName: DATA_CLAIM, filterProps: {claimId}})
+debugger
+    if (dataClaims  &&  dataClaims.length) {
+      // let value = {
+      //   [TYPE]: SIMPLE_MESSAGE,
+      //   message: translate('youHaveThisBundle'),
+      //   from: me,
+      //   to,
+      //   _context: dataClaims[0]._context
+      // }
+      // Actions.addMessage({msg: value, disableAutoResponse: true})
+      return
+    }
     let r = {
       _t: DATA_CLAIM,
-      claimId: dataHash,
-      from: {
-        id: utils.getId(me),
-        title: utils.getDisplayName({ resource: me })
-      },
-      to: {
-        id: providerId
-      }
+      claimId,
+      from,
+      to
     }
     // check if we have this provider
     let sp = getServiceProviderByUrl(host)
@@ -5693,7 +5756,7 @@ if (!res[SIG]  &&  res._message)
       await this.getInfo({serverUrls: [host]})
       invalidQR = !getServiceProviderByUrl(host)
     } else {
-      invalidQR = !this._getItem(providerId)
+      invalidQR = !this._getItem(to)
     }
 
     if (invalidQR) {
@@ -5704,6 +5767,7 @@ if (!res[SIG]  &&  res._message)
     await this.onAddChatItem({
       resource: r,
       value: r,
+      isDeepLink: true,
       provider: {
         url: host,
         hash: provider
@@ -6655,6 +6719,21 @@ if (!res[SIG]  &&  res._message)
   },
   async handleNotMessageRL(params) {
     let result = await this._searchNotMessages(params)
+    result = result &&  await Promise.all(result.map(async r => {
+      if (!r._message) return r
+      try {
+        // object = await this.getObject(link)
+        let object = await this._keeper.get(r[CUR_HASH])
+        return {...object, ...r}
+      } catch(err) {
+        debugger
+        console.log(err)
+        return r
+        // if (me.isEmployee)
+        //   object = await this._getItemFromServer({idOrResource: rId})
+      }
+    }))
+
     let {isTest, spinner, sponsorName, list, search, first,
          isAggregation, prop, modelName} = params
     let isOrg = modelName === ORGANIZATION
@@ -7784,7 +7863,8 @@ if (!res[SIG]  &&  res._message)
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         let item = this._getItem(thisChatMessages[i].id)
-        if (!item)
+        // if (!item)
+        if (!item  ||  item[TYPE] === DATA_CLAIM  ||  item[TYPE] === DATA_BUNDLE)
           continue
         // HACK for white glove project
         if (item._hidden)
@@ -7798,8 +7878,10 @@ if (!res[SIG]  &&  res._message)
           if (links.includes(hash)  &&  !duplicateItems.includes(hash))
             duplicateItems.push(hash)
         }
-        if (item._dataBundle  &&  !item._latest)
-          continue
+        if (item._dataBundle) {
+          if (!item._latest)
+           continue
+        }
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
           if (item._originalSender  ||  item._forward)
             continue
@@ -9556,12 +9638,17 @@ if (!res[SIG]  &&  res._message)
   },
   async searchSharables(params) {
     let { modelName } = params
-    if (!me.isEmployee)
-      return await this.searchMessages(params)
-    _.extend(params, {noTrigger: true, search: me.isEmployee})
-    let model = this.getModel(modelName)
-    if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION) {
-      return await this.searchServer(params)
+
+    if (!me.isEmployee) {
+      let result = await this.searchMessages(params)
+      // filter out not confirmed resources
+      return result && result.filter(r => !r[NOT_CHAT_ITEM])
+    }
+    else {
+      _.extend(params, {noTrigger: true, search: me.isEmployee})
+      let model = this.getModel(modelName)
+      if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION)
+        return await this.searchServer(params)
     }
   },
 
@@ -11159,8 +11246,10 @@ if (!res[SIG]  &&  res._message)
       }
       await this.disableFormRequests({form:val.form, batch, org})
     }
-    if (val[TYPE] === DATA_BUNDLE)
+    if (val[TYPE] === DATA_BUNDLE) {
       await this.getDataBundle().processDataBundle({val, context})
+      noTrigger = true
+    }
     else if (val[TYPE] === DEVICE_SYNC_DATA_BUNDLE) {
       await this.deviceSync(val)
       val[NOT_CHAT_ITEM] = true
@@ -11205,7 +11294,8 @@ if (!res[SIG]  &&  res._message)
         }
       }
 
-      noTrigger = val.from.id === meId
+      if (!noTrigger)
+        noTrigger = val.from.id === meId
     }
     let isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
