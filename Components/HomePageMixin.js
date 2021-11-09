@@ -12,12 +12,13 @@ import {
 
 import constants from '@tradle/constants'
 
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWhitelabeled } from '../utils/utils'
 import { getGridCols } from '../utils/uiUtils'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
 import buttonStyles from '../styles/buttonStyles'
+
 
 const {
   TYPE
@@ -72,22 +73,48 @@ var HomePageMixin = {
     return newStyle ? _.extend(style, newStyle) : style
   },
   showChat(params) {
-    if (!params.to)
+    let { to, dictionary } = params
+    if (!to)
       return
-    let style = this.mergeStyle(params.to.style)
+    let style = this.mergeStyle(to.style)
+
+    let title = to.name
+    let { wasDeepLink, qs={} } = this.state
+    if (isWhitelabeled())
+      title = qs.title || title
 
     var route = {
-      title: params.to.name,
+      title,
       componentName: 'MessageList',
-      backButtonTitle: 'Back',
       passProps: {
-        resource: params.to,
+        resource: to,
         filter: '',
         modelName: MESSAGE,
         noLoadingIndicator: true,
-        currency: params.to.currency,
+        currency: to.currency,
         bankStyle:  style,
-        dictionary: params.dictionary,
+        dictionary,
+      }
+    }
+    if (wasDeepLink && qs.schema === 'ImportData') {
+      Actions.importData(qs)
+      if (!isWhitelabeled())
+        route.backButtonTitle = 'Back'
+      else {
+        _.extend(route, {
+          rightButtonTitle: 'Profile',
+          onRightButtonPress: {
+            title: to.name,
+            componentName: 'ResourceView',
+            titleTextColor: '#7AAAC3',
+            backButtonTitle: 'Back',
+            passProps: {
+              bankStyle: style,
+              resource: to,
+              currency: to.currency
+            }
+          }
+        })
       }
     }
     // this.props.navigator.push(route)
@@ -106,7 +133,7 @@ var HomePageMixin = {
       }
     })
   },
-  showTourOrSplash({resource, showProfile, termsAccepted, action, callback, style}) {
+  showTourOrSplash({resource, formStub, showProfile, termsAccepted, action, callback, style}) {
     let { navigator, bankStyle } = this.props
     if (resource._tour  &&  !resource._noTour) {
       StatusBar.setHidden(true)
@@ -132,13 +159,13 @@ var HomePageMixin = {
             resource._noSplash = true
             Actions.addItem({resource: resource})
             // resource._noSplash = true
-            callback({resource, termsAccepted, action: 'replace', showProfile})
+            callback({resource, formStub, termsAccepted, action: 'replace', showProfile})
           }
         }
       })
       return true
     }
-    if (resource._noSplash)
+    if (isWhitelabeled() || resource._noSplash)
       return
     StatusBar.setHidden(true)
     let splashscreen = resource.style  &&  resource.style.splashscreen
@@ -161,11 +188,11 @@ var HomePageMixin = {
       resolvePromise()
       resource._noSplash = true
       Actions.addItem({resource: resource})
-      callback({resource, termsAccepted, action: 'replace', showProfile})
+      callback({resource, formStub, termsAccepted, action: 'replace', showProfile})
     }, 2000)
     return true
   },
-  showProfile(navigator, action, importingData) {
+  showProfile({navigator, action, importingData, bankStyle}) {
     if (importingData) {
       // this.props.navigator.pop()
       // this.props.navigator.pop()
@@ -190,13 +217,13 @@ var HomePageMixin = {
         passProps: {
           model: m,
           resource: me,
-          bankStyle: defaultBankStyle
+          bankStyle: bankStyle || defaultBankStyle
         }
       },
       passProps: {
         resource: me,
         backlink: m.properties.myForms,
-        bankStyle: defaultBankStyle
+        bankStyle: bankStyle || defaultBankStyle
       }
     })
   },
@@ -289,7 +316,7 @@ console.log('HomePageMixin: filterResource', resource)
         passProps: {
           bankStyle: style,
           resource,
-          currency,
+          currency
         }
       }
     })

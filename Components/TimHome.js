@@ -181,7 +181,15 @@ class TimHome extends Component {
 
     let firstPage = qs.schema && qs.schema || pathname
 
-    let state = {firstPage, qs, isDeepLink: true}
+    let linkText
+    if (qs.rId) {
+      let idx = query.indexOf('-linkText=')
+      if (idx !== -1) {
+        let idx1 = query.indexOf('&', idx)
+        linkText = decodeURIComponent(idx1 === -1 ? query.slice(idx + 10) : query.slice(idx + 10, idx1))
+      }
+    }
+    let state = {firstPage, qs, isDeepLink: true, linkText}
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -312,12 +320,13 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    let {action, activity, isConnected, models, me,
-        isRegistration, provider, termsAccepted, url} = params
-    var nav = this.props.navigator
+    let { action, activity, isConnected, models, me,
+        isRegistration, provider, termsAccepted, url, importingData } = params
+    const { navigator, bankStyle } = this.props
+
     let { wasDeepLink } = this.state
     switch(action) {
-    case 'busy':
+  case 'busy':
       this.setState({
         busyWith: activity
       })
@@ -341,7 +350,10 @@ class TimHome extends Component {
       Actions.openURL(url)
       break
     case 'getProvider':
-      this.showChatPage({resource: provider, termsAccepted, showProfile: true})
+      const { qs={}, linkText } = this.state
+      let { rId, schema } = qs
+      let formStub = rId ? { id: rId, title: linkText || ''} : null
+      this.showChatPage({resource: provider, formStub, termsAccepted, showProfile: true})
       return
     case 'getItemFromDeepLink':
       this.showResource(params)
@@ -350,7 +362,11 @@ class TimHome extends Component {
       this.showChat(params)
       return
     case 'showProfile':
-      this.showProfile(nav, 'replace', params.importingData)
+      let style = {}
+      extend(style, defaultBankStyle)
+      if (provider  &&  provider.style)
+        extend(style, provider.style)
+      this.showProfile({navigator, action: 'replace', importingData, bankStyle: style})
       return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
@@ -380,8 +396,8 @@ class TimHome extends Component {
           [
             {text: translate('wipeTheAppData'), onPress: () => Actions.requestWipe()},
             {text: translate('enterPassword'), onPress: () => {
-              signIn(nav, null, true)
-                .then(() => nav.pop())
+              signIn(navigator, null, true)
+                .then(() => navigator.pop())
             }}
           ]
         )
@@ -496,8 +512,9 @@ class TimHome extends Component {
         Actions.getProvider(qs)
         break
       case 'ImportData':
-        this.showChatPage({resource: qs.provider, action: state.wasDeepLink ? 'push' : 'replace', showProfile: state.wasDeepLink})
-        Actions.importData(qs)
+        Actions.getProvider(qs)
+        // this.showChatPage({resource: qs.provider, action: state.wasDeepLink ? 'push' : 'replace', showProfile: state.wasDeepLink})
+        // Actions.importData(qs)
         break
       case 'r':
         Actions.getResourceFromLink(qs)
@@ -556,7 +573,7 @@ class TimHome extends Component {
     // this.props.navigator.pop()
     let me = utils.getMe()
     if (me  &&  me._termsAccepted)
-      this.showChatPage({provider, termsAccepted: true})
+      this.showChatPage({resource: provider, termsAccepted: true})
     else
       Actions.acceptTermsAndChat({
         bot: this.state.permalink,
@@ -564,7 +581,7 @@ class TimHome extends Component {
       })
   }
 
-  showChatPage({resource, termsAccepted, action, showProfile}) {
+  showChatPage({resource, formStub, termsAccepted, action, showProfile}) {
     if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(resource, ENV.landingPage)
       return
@@ -583,31 +600,54 @@ class TimHome extends Component {
       extend(style, resource.style)
 
 
-    if (this.showTourOrSplash({resource, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
+    if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
       return
 
-    let route = {
-      title: resource.name,
-      componentName: 'MessageList',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Profile',
-      onRightButtonPress: {
-        title: resource.name,
-        componentName: 'ResourceView',
-        titleTextColor: '#7AAAC3',
+    let route
+    if (formStub) {
+      let fModel = utils.getModel(utils.getType(formStub))
+      route = {
+        title: `${formStub.title} -- ${translate(fModel)}`,
+        componentName: 'MessageView',
         backButtonTitle: 'Back',
+        rightButtonTitle: 'Profile',
         passProps: {
-          bankStyle: style,
-          resource: resource,
-          currency: currency
+          resource: formStub,
+          isDeepLink: true,
+          to: resource,
+          currency: currency,
+          bankStyle:  style
         }
-      },
-      passProps: {
-        resource: resource,
-        modelName: MESSAGE,
-        currency: currency,
-        bankStyle:  style
       }
+    }
+    else {
+      const { wasDeepLink, qs={} } = this.state
+      let title = qs.title || resource.name
+      route = {
+        title,
+        componentName: 'MessageList',
+        rightButtonTitle: 'Profile',
+        backButtonTitle: 'Back',
+        onRightButtonPress: {
+          title: resource.name,
+          componentName: 'ResourceView',
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          passProps: {
+            bankStyle: style,
+            resource,
+            currency
+          }
+        },
+        passProps: {
+          resource,
+          modelName: MESSAGE,
+          currency,
+          bankStyle:  style
+        }
+      }
+      if (wasDeepLink && qs.schema === 'ImportData')
+        Actions.importData(qs)
     }
     if (showProfile)
       route.passProps.onLeftButtonPress = () => this.showOfficialAccounts('replace')
@@ -669,21 +709,23 @@ class TimHome extends Component {
   showOfficialAccounts(action) {
     const me = utils.getMe()
     Actions.hasPartials()
-    let title = me.firstName;
+    const title = me.firstName
+    const { wasDeepLink, isConnected, qs } = this.state
+    const profileModel = utils.getModel(me[TYPE])
     let route = {
       title: translate('officialAccounts'),
       componentName: 'ResourceList',
       backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
-        isDeepLink: this.state.wasDeepLink,
-        isConnected: this.state.isConnected,
+        isDeepLink: wasDeepLink,
+        isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
       },
       rightButtonTitle: 'Profile',
       onRightButtonPress: {
-        title: title,
+        title,
         componentName: 'ResourceView',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
@@ -693,9 +735,9 @@ class TimHome extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(me[TYPE]),
+            model: profileModel,
             resource: me,
-            backlink: utils.getModel(me[TYPE]).properties.myForms,
+            backlink: profileModel.properties.myForms,
             bankStyle: defaultBankStyle
           }
         },
@@ -782,7 +824,7 @@ class TimHome extends Component {
   }
   render() {
     // StatusBar.setHidden(true);
-    let { message, err, isLoading } = this.state
+    let { message, err, isLoading, isDeepLink, qs={} } = this.state
     if (message) {
       this.restartTiM()
       return
@@ -833,6 +875,10 @@ class TimHome extends Component {
                   </View>
                 </TouchableOpacity>
     }
+    if (isDeepLink  &&  qs.schema === 'ImportData')
+      return (
+        <View/>
+      )
 
     return (
       <View style={styles.container}>
@@ -1071,7 +1117,7 @@ var styles = (function () {
       alignSelf: 'center'
     },
     flexGrow: {
-      flexGrow: 1
+      flexGrow: 0.95
     },
     bottom: {
       marginBottom: 20
