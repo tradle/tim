@@ -78,10 +78,10 @@ var strMap = {
   'Please take a **selfie** picture of your face': 'takeAPicture',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
   'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning',
-  'Is it your company? Please review and correct the data below for': 'reviewScannedPropertiesWarning',
   'Please overwrite if data can`t be reused': 'overwriteIfCantReuse',
   'FinCrime needs to review this application': 'finCrimeReview',
   'Add another': 'addAnother',
+  'Above is from primary data source. Please confirm or correct.': 'primarySourcesConflict',
 }
 
 var {
@@ -1626,6 +1626,9 @@ var utils = {
     const m = utils.getModel(type)
     return m.required  &&  !resource[m.required[0]]
   },
+  isWhitelabeled() {
+    return utils.isWeb() && window.location != window.parent.location
+  },
   hasSupportLine(resource) {
     let me = utils.getMe()
     if (resource._hasSupportLine)
@@ -1814,6 +1817,11 @@ var utils = {
     if (!me.isEmployee)
       return false
     return utils.compareOrg(me.organization, resource)
+  },
+  isReadOnly(prop) {
+    if (prop.readOnly || (prop.readOnlyForClients && !utils.getMe().isEmployee))
+      return true
+    return false
   },
   isAgent(resource) {
     let me = utils.getMe()
