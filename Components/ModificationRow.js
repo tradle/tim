@@ -112,6 +112,8 @@ class ModificationRow extends Component {
     let isProperties
     let bankStyle = this.props.bankStyle
     for (let p in json) {
+      if (p.charAt(0) === '_')
+        continue
       let isChanged
       let isRemoved
       let prop = props[p]
