@@ -12,6 +12,7 @@ import {
   View,
   // Text,
   ScrollView,
+  SafeAreaView,
   Platform,
   Alert,
   TouchableOpacity,
@@ -93,7 +94,7 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     let r = {};
-    let { resource, originatingMessage, model } = props
+    let { resource, originatingMessage, model, isPrefilled } = props
     if (resource)
       r = utils.clone(resource) //extend(true, r, props.resource)
     else
@@ -106,7 +107,7 @@ class NewResource extends Component {
       isUploading,
       isRegistration,
       isLoadingVideo: false,
-      isPrefilled: props.isPrefilled,
+      isPrefilled,
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
@@ -181,19 +182,21 @@ class NewResource extends Component {
   }
   componentWillMount() {
     let { resource, isUploading, prop } = this.state
-    let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
+    let { isPrefilled, exploreData, originatingMessage: originatingResource, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
+   // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
-      Actions.getItem({resource: resource})
+      Actions.getItem({resource})
+
+    let model = utils.getModel(utils.getType(resource))
     if (resource[ROOT_HASH]) {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
       else
-        Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
+        Actions.getRequestedProperties({resource, originatingResource})
     }
     else if (resource.id) {
-      let type = utils.getType(resource.id)
-      if (!utils.getModel(type).inlined)
-        Actions.getItem({resource: resource})
+      if (!model.inlined)
+        Actions.getItem({resource})
     }
     else if (isUploading) {
       if (containerResource)
@@ -210,7 +213,7 @@ class NewResource extends Component {
         if (!exclude  &&  prop  &&  m.properties[prop].inlined)
           exclude = true
         Actions.getTemporary(resource[TYPE], exclude)
-        Actions.getRequestedProperties({resource})
+        Actions.getRequestedProperties({resource, originatingResource})
       }
     }
     if (!this.props.exploreData  &&  Platform.OS === 'ios') {
@@ -923,7 +926,11 @@ if (r.url)
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
       params.formErrors = {}
       originatingMessage.errors.forEach((r) => {
-        params.formErrors[r.name] = r.error
+        let err = translate(r.error)
+        if (r.oldValue) {
+          err = `${translate('oldValueWas', r.oldValue)}\n${err}`
+        }
+        params.formErrors[r.name] = err
       })
     }
     else if (validationErrors)
@@ -1114,12 +1121,14 @@ if (r.url)
 
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 0}}>
             {description}
-            {form}
-            {formsToSign}
-            {button}
-            {arrayItems}
-            {jsons}
-            {loadingVideo}
+            <SafeAreaView style={styles.container}>
+              {form}
+              {formsToSign}
+              {button}
+              {arrayItems}
+              {jsons}
+              {loadingVideo}
+            </SafeAreaView>
           </View>
         </View>
         <View style={styles.submit}>
@@ -1136,6 +1145,7 @@ if (r.url)
                  </View>
       }
       else if (message) {
+        message = message.split(' **')[0]
         errors = <View style={styles.errors}>
                    <Text style={styles.errorsText}>{translate(message)}</Text>
                  </View>
@@ -1165,7 +1175,6 @@ if (r.url)
           {title}
           {content}
         </View>
-
       </View>
     )
   }
