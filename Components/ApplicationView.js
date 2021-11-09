@@ -238,10 +238,12 @@ class ApplicationView extends Component {
                  </View>
              </TouchableOpacity>
     }
+    let copyButton = this.generateCopyLinkButton(resource)
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
                     {tree}
+                    {copyButton}
                     {compareImages}
                     {chatButton}
                     {assignRM}

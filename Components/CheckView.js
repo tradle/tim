@@ -194,6 +194,8 @@ class CheckView extends Component {
 
     let { height, width } = dimensions(CheckView)
     let contentSeparator = getContentSeparator(bankStyle)
+    let actionSheet = this.renderCopyLinkActionSheet(resource)
+    let footer = this.renderMenu(CheckView)
     return (
       <PageView style={[platformStyles.container, {height, width, alignItems: 'center', borderTopColor: bankStyle.linkColor, borderTopWidth: 1}]} separator={contentSeparator} bankStyle={bankStyle} >
         <ScrollView
@@ -203,6 +205,8 @@ class CheckView extends Component {
           {propertySheet}
           {checkOverrideButton}
         </ScrollView>
+        {footer}
+        {actionSheet}
       </PageView>
     );
   }
