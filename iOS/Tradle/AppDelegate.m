@@ -39,7 +39,10 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
                                                    moduleName:@"Tradle"
                                             initialProperties:nil];
-
+  if (@available(iOS 14, *)) {
+    UIDatePicker *picker = [UIDatePicker appearance];
+    picker.preferredDatePickerStyle = UIDatePickerStyleWheels;
+  }
   /**
    * Loading JavaScript code - uncomment the one you want.
    *
