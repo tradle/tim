@@ -28,6 +28,12 @@ import OnePropFormMixin from './OnePropFormMixin'
 
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
+var customFormDefaults = {}
+// if (__DEV__)
+//   customFormDefaults = require('../data/customFormDefaults.json')
+// else
+//   customFormDefaults = {}
+
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
@@ -164,7 +170,7 @@ class FormRequestRow extends Component {
     return false
   }
   render() {
-    const { resource, to, bankStyle, application } = this.props
+    const { resource, to, bankStyle, application, list } = this.props
 
     var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -199,7 +205,7 @@ class FormRequestRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isProductBundle = resource.form === PRODUCT_BUNDLE
-    let isAttestation = resource.form === ATTESTATION
+    let isAttestation = resource.form === ATTESTATION  && (resource.prefill || list)
     if (isFormRequest  &&  !isProductBundle  &&  !isAttestation)
       onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
     else {
@@ -736,9 +742,15 @@ class FormRequestRow extends Component {
       }
 
       // Prefill for testing and demoing
-      if (ENV.prefillForms  &&  model.id in formDefaults) {
-        _.extend(r, formDefaults[model.id])
-        isPrefilled = true
+      if (ENV.prefillForms) {
+        if (model.id in formDefaults) {
+          _.extend(r, formDefaults[model.id])
+          isPrefilled = true
+        }
+        else if (model.id in customFormDefaults) {
+          _.extend(r, customFormDefaults[model.id])
+          isPrefilled = true
+        }
       }
 
       if (formRequest.prefill) {
@@ -895,7 +907,7 @@ class FormRequestRow extends Component {
             outputRange: ['0deg', '180deg', '0deg']
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
-          let style = {transform: [{rotate: rotateX}], paddingLeft: 5, marginLeft: -3}
+          let style = {transform: [{rotate: rotateX}], paddingLeft: 7, marginLeft: -3}
           msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: utils.isAndroid() ? 5 : 0}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={styles.infoButton}>
@@ -1125,7 +1137,7 @@ class FormRequestRow extends Component {
         bankStyle,
         reviewed: {},
         to,
-        list: resource.prefill.items || list,
+        list: resource.prefill && resource.prefill.items || list,
         currency
       }
     })
@@ -1219,7 +1231,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     row: {
       flexDirection: 'row',
-      paddingHorizontal: 3,
+      // paddingHorizontal: 3,
       // paddingVertical: 5,
       // justifyContent: 'space-between'
     },
