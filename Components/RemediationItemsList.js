@@ -17,7 +17,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
 
-import { TYPE, ROOT_HASH } from '@tradle/constants'
+import { TYPE, ROOT_HASH, TYPES } from '@tradle/constants'
+const {
+  FORM
+} = TYPES
 
 import { circled } from '../styles/utils'
 import platformStyles from '../styles/platform'
@@ -25,9 +28,9 @@ import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import OnePropFormMixin from './OnePropFormMixin'
 
-const FORM = 'tradle.Form'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 
 class RemediationItemsList extends Component {
   constructor(props) {
@@ -124,6 +127,8 @@ class RemediationItemsList extends Component {
     let { reviewed } = this.props
     if (action === 'refresh');
     else if (action === 'updateItem') {
+      if (resource[TYPE] === PRODUCT_REQUEST)
+        return
       let idx = _.findIndex(list, (r) => r[ROOT_HASH] === resource[ROOT_HASH])
       list.splice(idx, 1, resource)
     }
