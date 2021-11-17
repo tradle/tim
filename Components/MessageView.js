@@ -461,7 +461,7 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    let title = isVerification  ? this.makeViewTitle(model, styles) : null
+    let title = null //isVerification  ? this.makeViewTitle(model, styles) : null
 
     let actionSheet = this.renderCopyLinkActionSheet(resource)
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
