@@ -2516,8 +2516,8 @@ var Store = Reflux.createStore({
       }
       // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/aviva.html'
     }
-    if (org.name === 'Lenka local' || org.name === 'Lenka-local')
-      org.name = 'Bank of America'
+    // if (org.name === 'Lenka local' || org.name === 'Lenka-local')
+    //   org.name = 'Bank of America'
     this._setItem(okey, org)
     if (!list[ikey]) {
       var profile = {
@@ -3891,8 +3891,11 @@ var Store = Reflux.createStore({
         r.from.organization._online = false
       else
         r.from.organization._online = true
-      if (r[TYPE] === VERIFICATION)
+      if (r[TYPE] === VERIFICATION) {
         r.organization = from.organization
+        // if (me.isEmployee  &&  me.organization.id !== from.organization.id)
+          r.organization.photo = r.from.photo
+      }
     }
     let to = this._getItem(r.to)
     if (to && to.organization) {
@@ -4137,7 +4140,7 @@ if (!res[SIG]  &&  res._message)
           if (p === 'isVerification') continue
           let val = shared[p]
           val = this._getItem(utils.makeId(PROFILE, val, val))
-          if (val)
+          if (val  &&  val.organization)
             mod.modifications.shared[p] = val.organization.title
         }
       })
