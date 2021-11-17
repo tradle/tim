@@ -507,7 +507,7 @@ var ResourceMixin = {
     const model = utils.getModel(modelName)
     let hasFormItems = this.hasItemsWithFormRefs(model)
 
-    val = hasFormItems ? items : this.renderItemsGroups({groups: items, component})
+    val = hasFormItems || items.length < 2  ? items : this.renderItemsGroups({groups: items, component})
     val = <View style={{marginHorizontal: 7}}>{val}</View>
 
     let title = pMeta.title || utils.makeLabel(pMeta.name)
@@ -991,8 +991,8 @@ var styles = StyleSheet.create({
     flexDirection: 'row'
   },
   textContainer: {
-    width: 30
-    // flex: 1
+    // width: 30
+    flex: 1
   },
   container: {
     margin: 10,
@@ -1048,7 +1048,7 @@ var styles = StyleSheet.create({
     color: '#9b9b9b'
   },
   titleEl: {
-    fontSize: 20,
+    fontSize: 16,
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7,
