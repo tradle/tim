@@ -369,20 +369,25 @@ class ResourceView extends Component {
       }
       else if (photos.length === 1)
         mainPhoto = photos[0]
-      photoView = <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
+      if (mainPhoto)
+        photoView = <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
     }
     let contentSeparator = getContentSeparator(bankStyle)
     if (isModalOpen)
       width = utils.dimensions(ResourceView).width
     else
       width = utils.getContentWidth(ResourceView)
+    let photo
+    if (photoView)
+      photo = <View style={styles.photoBG}>
+                {photoView}
+                {identityPhotoList}
+              </View>
+
     return (
       <PageView style={platformStyles.container} bankStyle={bankStyle} separator={contentSeparator}>
         <ScrollView  ref='this' style={{width, alignSelf: 'center', backgroundColor: '#fff'}} name={this._lazyId}>
-          <View style={styles.photoBG}>
-            {photoView}
-            {identityPhotoList}
-          </View>
+          {photo}
           {attachmentsView}
           {actionPanel}
           <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
