@@ -653,7 +653,7 @@ var search = {
       }`
     )
   },
-  addProps({isList, backlink, props, currentProp, arr, model, excludeProps, mapping}) {
+  addProps({isList, backlink, props, currentProp, arr, model, excludeProps, mapping, noBacklinks}) {
     if (!arr)
       arr = []
     let isApplication = model  &&  model.id === APPLICATION
@@ -677,8 +677,12 @@ var search = {
         continue
       let ptype = prop.type
       if (ptype === 'array') {
-        let excludePropsFor = mapping  &&  prop.items.ref  &&  mapping[prop.items.ref]
-        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps: excludePropsFor})
+        let excludePropsFor
+        if (prop.items.ref === model.id)
+          excludePropsFor = excludeProps
+        else
+          excludePropsFor = mapping  &&  prop.items.ref  &&  mapping[prop.items.ref]
+        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps, noBacklinks})
         continue
       }
       if (ptype !== 'object') {
@@ -695,18 +699,18 @@ var search = {
         continue
 
       if (prop.inlined  ||  utils.getModel(ref).inlined)
-        arr.push(this.addInlined(prop))
+        arr.push(this.addInlined({prop}))
       else
         arr.push(this.addRef(prop))
     }
     return arr
   },
-  addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps}) {
+  addArrayProperty({prop, model, arr, isList, backlink, currentProp, excludeProps, noBacklinks}) {
     let p = prop.name
     let isApplication = model  &&  model.id === APPLICATION
     let isBookmarksFolder = model  &&  model.id === BOOKMARKS_FOLDER
-    if (p === 'verifications')
-      return
+    // if (p === 'verifications' && noBacklinks)
+    //   return
 
     let isSubmissions
     if (isApplication) {
@@ -724,8 +728,10 @@ var search = {
         if (isList  &&  !isApplication  &&  !isBookmarksFolder)
           return
         let props
-        if (iref !== model.id)
-          props = this.getSearchProperties({model: utils.getModel(iref)})
+        if (iref !== model.id) {
+          if (noBacklinks) return
+          props = this.getSearchProperties({model: utils.getModel(iref), noBacklinks: true})
+        }
         // HACK
         else if (isApplication)
           props = arr.concat(['hasFailedChecks', 'hasCheckOverrides'])
@@ -743,7 +749,7 @@ var search = {
       else if (prop.inlined  ||  isInlined) {
         if (currentProp  &&  currentProp === prop)
           return
-        arr.push(this.addInlined(prop))
+        arr.push(this.addInlined({prop, excludeProps}))
       }
       else
         arr.push(
@@ -768,7 +774,7 @@ var search = {
         arr.push(p)
     }
   },
-  addInlined(prop) {
+  addInlined({prop, excludeProps}) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
     let p = prop.name
     if (ref === MODEL)
@@ -787,7 +793,7 @@ var search = {
       )
     }
     else {
-      let allProps = this.getSearchProperties({model: refM, inlined: true, currentProp: prop})
+      let allProps = this.getSearchProperties({model: refM, inlined: true, currentProp: prop, noBacklinks: true, excludeProps})
       return (
         `${p} {
           ${allProps.toString().replace(/,/g, '\n')}
