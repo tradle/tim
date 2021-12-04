@@ -62,7 +62,6 @@ import employee from '../people/employee.json'
 
 const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
-
 import { getCoverPhotoForRegion, getYukiForRegion, getLanguage } from './locale'
 import ENV from '../utils/env'
 // const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
@@ -229,6 +228,12 @@ const OVERRIDE_STATUS     = 'tradle.OverrideStatus'
 const DEVICE_SYNC         = 'tradle.DeviceSync'
 const DEVICE_SYNC_DATA_BUNDLE = 'tradle.DeviceSyncDataBundle'
 const ATTESTATION         = 'tradle.Attestation'
+const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+
+const EXCLUDED_APPLICATION_FORMS = [
+  ASSIGN_RM,
+  TERMS_AND_CONDITIONS
+]
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -3894,7 +3899,7 @@ var Store = Reflux.createStore({
       if (r[TYPE] === VERIFICATION) {
         r.organization = from.organization
         // if (me.isEmployee  &&  me.organization.id !== from.organization.id)
-          r.organization.photo = r.from.photo
+        r.organization.photo = r.from.photo
       }
     }
     let to = this._getItem(r.to)
@@ -4197,6 +4202,14 @@ if (!res[SIG]  &&  res._message)
     if (!r)
       return
 
+    if (r.forms) {
+      let list = r.forms.filter(form => {
+        let ftype = utils.getType(form)
+        return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
+      })
+      r.forms = list
+      r._formsCount = r.forms.length
+    }
     let list, style
     if (prop) {
       let { name } = prop
@@ -4249,6 +4262,13 @@ if (!res[SIG]  &&  res._message)
           r[blProp.name] = list
         }
       }
+    }
+    else {
+      let list = r.forms.filter(form => {
+        let ftype = utils.getType(form)
+        return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
+      })
+      r.forms = list
     }
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
@@ -7169,6 +7189,7 @@ if (!res[SIG]  &&  res._message)
     let applicant = applicantId  &&  this._getItem(applicantId)
     let importedVerification
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    let hasPermalink
     // Right now we request all imported verifications the first time.
     // May be we'll decide to page them too
     if (application) { //  &&  !endCursor) {
@@ -7182,7 +7203,10 @@ if (!res[SIG]  &&  res._message)
       if (!context[TYPE])
         context = null
     }
-    else if (!filterResource) {
+    else if (filterResource) {
+      hasPermalink = filterResource['object___permalink']
+    }
+    else {
       if (me.isEmployee) {
         if (utils.getRootHash(me.organization) !== utils.getRootHash(to)) {
           filterResource = {
@@ -7206,7 +7230,7 @@ if (!res[SIG]  &&  res._message)
       // author = applicant  &&  this.getRootHash(applicant) // (applicant[ROOT_HASH] || applicantId.split('_')[1])
       // // recipient = myBot[ROOT_HASH]
     }
-    else {
+    else if (!hasPermalink) {
       // recipient = myBot[ROOT_HASH]
       let addAuthor = true
       if (me.isEmployee  &&  context  &&  context.from.organization)  {
@@ -7605,7 +7629,7 @@ if (!res[SIG]  &&  res._message)
           break
         if (m.id !== FORM  &&  !utils.isSubclassOf(m, FORM))
           break
-        if (APPLICATION_NOT_FORMS.includes(m.id))
+        if (APPLICATION_NOT_FORMS.includes(m.id) ||  EXCLUDED_APPLICATION_FORMS.includes(m.id))
           break
         if (!application.forms)
           application.forms = []
@@ -9435,7 +9459,9 @@ if (!res[SIG]  &&  res._message)
       }
     }
     if (!shareType)
-      return {verifications: shareableResources}
+      return
+
+
     let shareableResources = {};
     let shareableResourcesRootToR = {}
     let shareableResourcesRootToOrgs = {}
@@ -9477,11 +9503,20 @@ if (!res[SIG]  &&  res._message)
 
     let formList =  ll.list.filter((r) => {
       let dId = utils.getId(r)
-      if (excludeForms[dId])
-        return false
-      docs.push(dId)
-      return true
+      return !excludeForms[dId]
     })
+
+    // Share only the resources that were submitted by this provider to some other institutions.
+    // Eliminate the white gloved ones.
+    let appSubs = formList.map(l => this.searchServer({modelName: APPLICATION_SUBMISSION, noTrigger: true, filterResource: {'submission._permalink': l._r}}))
+    appSubs = await Promise.all(appSubs)
+    for (let i=appSubs.length - 1; i >= 0; i--) {
+      let { list } = appSubs[i]
+      if (list)
+        formList.splice(i, 1)
+      else
+        docs.push(utils.getId(formList[i]))
+    }
     let promises = []
     if (shareType === LEGAL_ENTITY) {
       let m = this.getModel(LEGAL_ENTITY)
@@ -9499,6 +9534,14 @@ if (!res[SIG]  &&  res._message)
     typeToDocs[shareType] = formList
     if (!docs.length)
       return
+    // let applications = await this.searchServer({
+    //   modelName: APPLICATION,
+    //   filterResource: {context: formRequest.context},
+    //   noTrigger: true,
+    // })
+    // debugger
+    // if (!applications || !applications.length || applications[0].draft)
+    //   return
 
     let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true}) //, limit: limit || 20})
     let verifiedShares ={}
@@ -9738,11 +9781,9 @@ if (!res[SIG]  &&  res._message)
       // filter out not confirmed resources
       return result && result.filter(r => !r[NOT_CHAT_ITEM])
     }
-    else {
+    else if (me.isEmployee  &&  modelName !== PROFILE  &&  modelName !== ORGANIZATION) {
       _.extend(params, {noTrigger: true, search: me.isEmployee})
-      let model = this.getModel(modelName)
-      if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION)
-        return await this.searchServer(params)
+      return await this.searchServer(params)
     }
   },
 
