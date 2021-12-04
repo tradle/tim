@@ -379,6 +379,7 @@ module.exports = {
     "reviewBeforeSharing": "(Click on text to review before sharing)",
     "requestingToShare": "Requesting {1}",
     "youHaveOneOnFile": "You already have one on file!",
+    "youHaveVerifiedOneOnFile": "You already have a verified document on file!",
     "goodNews": "Good news! You already have {1}. To share tap the icon below",
     "goodNewsFew": "Good news! You already have quite a few. To share tap icon below.",
     "prefilledForCustomer": "For your convenience we prefilled some fields. Please review and submit",
