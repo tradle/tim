@@ -30,10 +30,8 @@ import StringChooser from './StringChooser'
 // import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
 var customFormDefaults = {}
-// if (__DEV__)
-//   customFormDefaults = require('../data/customFormDefaults.json')
-// else
-//   customFormDefaults = {}
+if (__DEV__)
+  customFormDefaults = require('../data/customFormDefaults.json')
 
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
@@ -173,7 +171,7 @@ class FormRequestRow extends Component {
   render() {
     const { resource, to, bankStyle, application, list } = this.props
 
-    var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
+    let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
 
     let message = resource.message
@@ -207,15 +205,19 @@ class FormRequestRow extends Component {
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isProductBundle = resource.form === PRODUCT_BUNDLE
     let isAttestation = resource.form === ATTESTATION  && (resource.prefill || list)
+
+    let shareables
+    if (isFormRequest  && !resource._documentCreated)
+      shareables = this.showShareableResources(styles)
+
     if (isFormRequest  &&  !isProductBundle  &&  !isAttestation)
-      onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps})
+      onPressCall = this.formRequest({resource, renderedRow, prop, styles, hasMoreProps, shareables})
     else {
       let linkColor
       if (application)
         linkColor = '#757575'
       else
         linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
-      onPressCall
       if (!resource._documentCreated) {
         if (isProductBundle)
           onPressCall = this.reviewFormsInDraft.bind(this)
@@ -253,12 +255,12 @@ class FormRequestRow extends Component {
               </View>
       renderedRow.push(msg)
     }
-    var val = this.getTime(resource);
-    var date = val
+    let val = this.getTime(resource);
+    let date = val
              ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
-    var sendStatus = <View />
+    let sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     let parts = utils.splitMessage(message)
@@ -274,7 +276,7 @@ class FormRequestRow extends Component {
       message = formTitle
     // HACK
     let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(16)
-    var viewStyle = {
+    let viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
       width:  Math.min(msgWidth, msgL),
@@ -283,7 +285,7 @@ class FormRequestRow extends Component {
 
     if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
-    var sealedStatus = resource.txId  &&
+    let sealedStatus = resource.txId  &&
                        <View style={chatStyles.sealedStatus}>
                          <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                        </View>
@@ -291,9 +293,9 @@ class FormRequestRow extends Component {
     let addStyle = [chatStyles.verificationBody, styles.mstyle]
     if (message.length < 30)
       addStyle.push(styles.container)
-    var shareables
-    if (isFormRequest  && !resource._documentCreated)
-      shareables = this.showShareableResources(styles)
+    // let shareables
+    // if (isFormRequest  && !resource._documentCreated)
+    //   shareables = this.showShareableResources(styles)
 
     let cellStyle
     if (addStyle)
@@ -323,14 +325,18 @@ class FormRequestRow extends Component {
                       </View>
 
     let messageBody
-    let isMyProduct = isFormRequest  &&  utils.isMyProduct(resource.form)
-    if (prop  ||  isMyProduct  ||  (application  &&  !this.canEmployeePrefill(resource))  ||  resource._documentCreated)
-      messageBody = msgContent
+    let me = utils.getMe()
+    if (!me.isEmployee ||  !shareables) {
+      let isMyProduct = isFormRequest  &&  utils.isMyProduct(resource.form)
+      if (prop  ||  isMyProduct  ||  (application  &&  !this.canEmployeePrefill(resource))  ||  resource._documentCreated)
+        messageBody = msgContent
+      else
+        messageBody = <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}}>
+                        {msgContent}
+                      </TouchableOpacity>
+    }
     else
-      messageBody = <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}}>
-                      {msgContent}
-                    </TouchableOpacity>
-
+      messageBody = msgContent
     let contextId = this.getContextId(resource)
     return (
       <View style={styles.formRequest}>
@@ -356,8 +362,8 @@ class FormRequestRow extends Component {
     let entries = (isMultientryForm  &&  productToForms  &&  productToForms[product])
                 ? productToForms[product][resource.form]
                 : null
-    var vtt = [];
-    var cnt = 0;
+    let vtt = [];
+    let cnt = 0;
     let { verifications, providers, multientryResources } = shareableResources
     let resourceContextId = resource._context  &&  utils.getId(resource._context)
     let hasMultientry = !utils.isEmpty(multientryResources)
@@ -373,7 +379,7 @@ class FormRequestRow extends Component {
       }
     }
     if (!vtt.length) {
-      for (var t in  verifications) {
+      for (let t in  verifications) {
         if (t !== formModel.id)
           continue
         let ver = verifications[t]
@@ -386,7 +392,7 @@ class FormRequestRow extends Component {
         // Dont' share forms for the same product
         if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
           return
-        var doc = this.formatShareables({
+        let doc = this.formatShareables({
           model: formModel,
           verification: r,
           styles,
@@ -419,22 +425,30 @@ class FormRequestRow extends Component {
     if (!vtt.length)
       return null
 
-    var modelTitle = translate(formModel)
+    let modelTitle = translate(formModel)
     let number = vtt.length //numbers[vtt.length]
-    let offerToShare = "orShare"
 
 
     let or
+    let additionalMessage
     if (formModel.subClassOf === 'tradle.MyProduct')
       or = <View style={{paddingVertical: 5}}>
             <View style={{backgroundColor: bankStyle.verifiedBg, height: 1, flex: 1, alignSelf: 'stretch'}}/>
           </View>
     else {
       let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
+      let msg
+      if (this.hasSharables() && utils.getMe().isEmployee) {
+        msg = 'clickToShare'
+        additionalMessage = <Text style={[styles.orText, {fontSize: 14, marginTop: -7}]}>{translate('reviewBeforeSharing')}</Text>
+      }
+      else
+        msg = 'orShare'
+
       or = <View style={styles.row}>
             <View style={abStyle}/>
             <View style={styles.assistentBox}>
-              <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{translate('orShare')}</Text>
+              <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{translate(msg)}</Text>
             </View>
             <View style={abStyle}/>
           </View>
@@ -443,6 +457,7 @@ class FormRequestRow extends Component {
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
         {or}
+        {additionalMessage}
         <View style={styles.container}>
           <View style={styles.shareablesList}>
             {vtt}
@@ -568,7 +583,8 @@ class FormRequestRow extends Component {
                  ? to.name
                  : (to.organization ? to.organization.title : null);
     let verifiedBy
-    if (verification[ROOT_HASH]) {
+    let isVerified = utils.getRootHash(verification)
+    if (isVerified) {
       let orgs
       if (providers) {
         if (Array.isArray(providers)) {
@@ -594,16 +610,16 @@ class FormRequestRow extends Component {
       }
       else
         orgs = verification.organization.title
-      verifiedBy = doShareDocument ? translate('verifiedBy', orgs) : translate('verificationBy', orgs)
+      verifiedBy = doShareDocument ? translate('previouslyVerifiedBy', orgs) : translate('verificationBy', orgs)
     }
     else if (isItem)
       verifiedBy = translate('fromMyData')
     else {
       let meId = utils.getId(utils.getMe())
       if (utils.getId(document.from) === meId)
-        verifiedBy = translate('sentTo', verification.organization.title)
+        verifiedBy = translate('previouslySentTo', verification.organization.title)
       else if (document._sentTo)
-        verifiedBy = translate('sentTo', document._sentTo.title)
+        verifiedBy = translate('previouslySentTo', document._sentTo.title)
     }
     let verifiedByView
     if (verifiedBy)
@@ -680,7 +696,7 @@ class FormRequestRow extends Component {
   }
   showDocumentsToShare(shareableResources) {
     let { verifications } = shareableResources
-    if (!verifications.length) return
+    if (!verifications) return
     const { resource, to } = this.props
     verifications = verifications[resource.form]
     let documents = verifications.map((v) => v.document)
@@ -787,7 +803,7 @@ class FormRequestRow extends Component {
     });
   }
 
-  formRequest({resource, renderedRow, prop, styles, hasMoreProps}) {
+  formRequest({resource, renderedRow, prop, styles, hasMoreProps, shareables}) {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
 
@@ -851,11 +867,18 @@ class FormRequestRow extends Component {
 
     let icon
 
-    let addMessage = messagePart || translate(message)
+    let addMessage
+    let additionalMessage
+    let hasSharables = this.hasSharables()
+
+    let onlyShare = shareables && me.isEmployee
+    if (!onlyShare)
+      addMessage = messagePart || translate(message)
+    else
+      addMessage = translate('requestingToShare', translate(form))
+
     messagePart = null
     let msg, link
-
-    let hasSharables = this.hasSharables()
 
     let isRequestForNext = sameFormRequestForm  &&  !multientryMinimumNotExceeded && !resource._documentCreated  && !resource.dataLineage // &&  !resource.prefill    // HACK
     if (isRequestForNext) {
@@ -996,7 +1019,7 @@ class FormRequestRow extends Component {
         mColor = bankStyle.incomingMessageOpaqueTextColor
       else {
         mColor = bankStyle.incomingMessageTextColor
-        if (!sameFormRequestForm) {
+        if (!sameFormRequestForm  &&  !onlyShare) {
           addMore = <View style={{ marginLeft: -5 }}>
                       {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage})}
                     </View>
@@ -1005,8 +1028,19 @@ class FormRequestRow extends Component {
         }
       }
       if (addMessage) {
-        if (!isRequestForNext)
-          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, this.hasSharables() && {paddingBottom: 15}]}>{addMessage}</Text>
+        if (!isRequestForNext) {
+          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, hasSharables && !me.isEmployee && {paddingBottom: 15}]}>{addMessage}</Text>
+          if (onlyShare) {
+            messagePart = <View>
+                           {messagePart}
+                            <View style={styles.row}>
+                              <Text style={[chatStyles.resourceTitle, {marginTop: 4, fontSize: 16, fontWeight: '600', color: mColor, paddingLeft: 3}]}>{translate('WAIT')}</Text>
+                              <Icon name='ios-hand' size={20} color={bankStyle.verifiedBg} style={{paddingHorizontal: 2}}/>
+                              <Text style={[chatStyles.resourceTitle, {marginTop: 4, fontSize: 16, color: mColor, paddingLeft: 3}]}>{translate(shareables ? 'youHaveVerifiedOneOnFile' : 'youHaveOneOnFile')}</Text>
+                            </View>
+                          </View>
+          }
+        }
       }
       msg = <View key={this.getNextKey()}>
                <View style={styles.messageLink}>
@@ -1045,7 +1079,7 @@ class FormRequestRow extends Component {
       [TYPE]: NEXT_FORM_REQUEST,
       after: form.id
     }})
-    var params = {
+    let params = {
       value: {_documentCreated: true, _document: utils.getId(resource)},
       doneWithMultiEntry: true,
       resource: resource,
@@ -1057,7 +1091,7 @@ class FormRequestRow extends Component {
   hasSharables() {
     let shareableResources = this.props.shareableResources
     if (!shareableResources)
-      return
+      return false
     let rtype = this.props.resource.form
     let multientryResources = shareableResources.multientryResources
     if (!utils.isEmpty(multientryResources)  &&  multientryResources[rtype])
@@ -1171,8 +1205,8 @@ class FormRequestRow extends Component {
     if (oResource._context)
       resource._context = oResource._context
 
-    var propRef = prop.ref
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    let propRef = prop.ref
+    let currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate(prop), //m.title,
       componentName: 'ResourceList',
@@ -1202,7 +1236,7 @@ function isMultientry(resource) {
   return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
 }
 
-var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, bankStyle }) {
+let createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, bankStyle }) {
   let msgWidth = utils.getMessageWidth(FormRequestRow)
   return StyleSheet.create({
     container: {
@@ -1302,9 +1336,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     arrowForward: {
       paddingLeft: 5
     },
-    link: {
-      paddingBottom: 15,
-    },
+    // link: {
+    //   paddingBottom: 15,
+    // },
     center: {
       justifyContent: 'center'
     },
@@ -1390,6 +1424,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     docText: {
       fontSize: 16,
       color: '#555555',
+      paddingTop: 4,
       // paddingLeft: 5,
       paddingRight: 10
     },
