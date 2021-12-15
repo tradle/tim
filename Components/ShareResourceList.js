@@ -171,20 +171,20 @@ class ShareResourceList extends Component {
 
     let bgStyle =  {backgroundColor: bankStyle  &&  bankStyle.backgroundColor || '#ffffff'}
     let submit
-    if (multiChooser) {
-      submit = <TouchableOpacity onPress={this.shareChosen.bind(this)}>
-                 <View style={styles.shareButton}>
-                   <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
-                   <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
-                 </View>
-               </TouchableOpacity>
-    }
-    else {
-      submit = <View style={styles.shareBar}>
-                 <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
-                 <Text style={[styles.shareBarText, {fontSize: 18}]}>{translate('ChooseAndShare')}</Text>
-               </View>
-    }
+    // if (multiChooser) {
+    //   submit = <TouchableOpacity onPress={this.shareChosen.bind(this)}>
+    //              <View style={styles.shareButton}>
+    //                <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
+    //                <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
+    //              </View>
+    //            </TouchableOpacity>
+    // }
+    // else {
+    //   submit = <View style={styles.shareBar}>
+    //              <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
+    //              <Text style={[styles.shareBarText, {fontSize: 18}]}>{translate('ChooseAndShare')}</Text>
+    //            </View>
+    // }
     // let searchBar = <SearchBar
     //                 onChangeText={this.onSearchChange.bind(this)}
     //                 placeholder={translate('search')}
@@ -285,30 +285,30 @@ var createStyles = utils.styleFactory(ShareResourceList, function ({ dimensions,
       width: utils.dimensions(ShareResourceList).width,
       marginHorizontal: 20
     },
-    shareButton: {
-      backgroundColor: bankStyle && bankStyle.linkColor,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      width: 340,
-      marginTop: 20,
-      marginBottom: 30,
-      alignSelf: 'center',
-      height: 40,
-      borderRadius: 5,
-      marginHorizontal: 20
-    },
-    shareText: {
-      fontSize: 20,
-      paddingLeft: 5,
-      color: '#ffffff',
-      alignSelf: 'center'
-    },
-    shareBarText: {
-      fontSize: 20,
-      paddingLeft: 5,
-      color: bankStyle  &&  bankStyle.linkColor || '#ffffff',
-      alignSelf: 'center'
-    },
+    // shareButton: {
+    //   backgroundColor: bankStyle && bankStyle.linkColor,
+    //   flexDirection: 'row',
+    //   justifyContent: 'center',
+    //   width: 340,
+    //   marginTop: 20,
+    //   marginBottom: 30,
+    //   alignSelf: 'center',
+    //   height: 40,
+    //   borderRadius: 5,
+    //   marginHorizontal: 20
+    // },
+    // shareText: {
+    //   fontSize: 20,
+    //   paddingLeft: 5,
+    //   color: '#ffffff',
+    //   alignSelf: 'center'
+    // },
+    // shareBarText: {
+    //   fontSize: 20,
+    //   paddingLeft: 5,
+    //   color: bankStyle  &&  bankStyle.linkColor || '#ffffff',
+    //   alignSelf: 'center'
+    // },
   })
 })
 module.exports = ShareResourceList;

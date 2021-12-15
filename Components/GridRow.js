@@ -293,7 +293,7 @@ class GridRow extends Component {
       return <View style={cellStyle}>{row}</View>
     }
     if (colProp.type === 'date')
-      return <View style={cellStyle}>{this.addDateProp(pName)}</View>
+      return <View style={cellStyle}>{this.addDateProp(pName, styles.description)}</View>
 
     if (resource[pName]  &&  (typeof resource[pName] != 'string')) {
       if (criteria)
