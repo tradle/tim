@@ -5924,6 +5924,7 @@ if (!res[SIG]  &&  res._message)
         let documentId = utils.getId(document)
         this.dbBatchPut(documentId, document, batch)
         document._sendStatus = SENT
+        document._sentTime = Date.now()
         this._setItem(documentId, document)
         this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
         docStubs.push(this.buildRef(document, true))
