@@ -438,12 +438,10 @@ class FormRequestRow extends Component {
     else {
       let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
       let msg
-      if (this.hasSharables() && utils.getMe().isEmployee) {
+      if (this.hasSharables()) {// && utils.getMe().isEmployee) {
         msg = 'clickToShare'
         additionalMessage = <Text style={[styles.orText, {fontSize: 14, marginTop: -7}]}>{translate('reviewBeforeSharing')}</Text>
       }
-      else
-        msg = 'orShare'
 
       or = <View style={styles.row}>
             <View style={abStyle}/>
@@ -519,24 +517,26 @@ class FormRequestRow extends Component {
                   </View>
       }
       else {
-        orgRow = <View style={chatStyles.shareView}>
-                   <TouchableOpacity onPress={onPress ? onPress : () =>
-                            Alert.alert(
-                              `Sharing "${docTitle}"`,
-                              null,
-                              [
-                                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                                {text: translate('Share'), onPress: share.bind(this, verification, to, resource)},
-                              ]
-                          )}>
-                    {shareView}
-                   </TouchableOpacity>
-                   <View style={{justifyContent:'center'}}>
-                     {headerContent}
-                     <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
-                       {orgView}
+        orgRow = <View>
+                   <View style={chatStyles.shareView}>
+                     <TouchableOpacity onPress={onPress ? onPress : () =>
+                              Alert.alert(
+                                `Sharing "${docTitle}"`,
+                                null,
+                                [
+                                  {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                                  {text: translate('Share'), onPress: share.bind(this, verification, to, resource)},
+                                ]
+                            )}>
+                      {shareView}
                      </TouchableOpacity>
-                   </View>
+                     <View style={{justifyContent:'center'}}>
+                       {headerContent}
+                     </View>
+                  </View>
+                   <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
+                     {orgView}
+                   </TouchableOpacity>
                 </View>
       }
     }
@@ -706,7 +706,7 @@ class FormRequestRow extends Component {
     let { navigator, bankStyle, resource, to } = this.props
     let modelName = documents[0][TYPE]
     let m = utils.getModel(modelName)
-    let title = translate(m) + (verifiedBy  &&  ('  →  '  + verifiedBy))
+    let title = translate('ChooseAndShare') + ' -- ' +  translate(m) + (verifiedBy  &&  ('  →  '  + verifiedBy))
     navigator.push({
       title,
       componentName: 'ShareResourceList',
@@ -803,8 +803,8 @@ class FormRequestRow extends Component {
     });
   }
 
-  formRequest({resource, renderedRow, prop, styles, hasMoreProps, shareables}) {
-    const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
+  formRequest({resource, renderedRow, prop, styles, hasMoreProps}) {
+    const { bankStyle, to, application, context, productToForms, chooseTrustedProvider, shareableResources } = this.props
     let message = resource.message
 
     let me = utils.getMe()
@@ -871,7 +871,7 @@ class FormRequestRow extends Component {
     let additionalMessage
     let hasSharables = this.hasSharables()
 
-    let onlyShare = shareables && me.isEmployee
+    let onlyShare = shareableResources && hasSharables && me.isEmployee
     if (!onlyShare)
       addMessage = messagePart || translate(message)
     else
@@ -889,7 +889,7 @@ class FormRequestRow extends Component {
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     let isRefresh = resource.form === REFRESH
     if (isRequestForNext) {
-      let animStyle = {transform: [{scale: this.springValue}], paddingLeft: 5, marginLeft: -3}
+      let animStyle = {transform: [{scale: this.springValue}], paddingLeft: 7}
       let buttons = (
         <View style={[styles.row, {paddingTop: 10}]}>
           <Animated.View style={animStyle}>
@@ -1012,8 +1012,9 @@ class FormRequestRow extends Component {
         }
       }
     }
-
     if (!msg) {
+      let verifications = shareableResources && shareableResources.verifications
+      let isVerified = verifications && verifications[resource.form] && verifications[resource.form].find(v => v[ROOT_HASH])
       let mColor, addMore
       if (resource._documentCreated)
         mColor = bankStyle.incomingMessageOpaqueTextColor
@@ -1022,9 +1023,10 @@ class FormRequestRow extends Component {
         if (!sameFormRequestForm  &&  !onlyShare) {
           addMore = <View style={{ marginLeft: -5 }}>
                       {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage})}
+                      {hasSharables && this.getYouHaveOneMessage({isVerified, onlyShare, styles})}
                     </View>
           // if (!shareableResources)
-            addMessage = null
+          addMessage = null
         }
       }
       if (addMessage) {
@@ -1032,12 +1034,8 @@ class FormRequestRow extends Component {
           messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, hasSharables && !me.isEmployee && {paddingBottom: 15}]}>{addMessage}</Text>
           if (onlyShare) {
             messagePart = <View>
-                           {messagePart}
-                            <View style={styles.row}>
-                              <Text style={[chatStyles.resourceTitle, {marginTop: 4, fontSize: 16, fontWeight: '600', color: mColor, paddingLeft: 3}]}>{translate('WAIT')}</Text>
-                              <Icon name='ios-hand' size={20} color={bankStyle.verifiedBg} style={{paddingHorizontal: 2}}/>
-                              <Text style={[chatStyles.resourceTitle, {marginTop: 4, fontSize: 16, color: mColor, paddingLeft: 3}]}>{translate(shareables ? 'youHaveVerifiedOneOnFile' : 'youHaveOneOnFile')}</Text>
-                            </View>
+                            {messagePart}
+                            {hasSharables && !resource._documentCreated && this.getYouHaveOneMessage({isVerified, onlyShare, styles})}
                           </View>
           }
         }
@@ -1052,6 +1050,18 @@ class FormRequestRow extends Component {
     }
     renderedRow.push(msg);
     return isReadOnly || isRefresh ? null : onPressCall
+  }
+  getYouHaveOneMessage({isVerified, onlyShare, mColor, styles}) {
+    const { bankStyle } = this.props
+    let paddingLeft = onlyShare ? 3 : 57
+    let marginTop = onlyShare ? 4 : 10
+    return (
+      <View style={styles.row}>
+        <Text style={[chatStyles.resourceTitle, {paddingLeft, marginTop, fontSize: 16, fontWeight: '600', color: mColor}]}>{translate('WAIT')}</Text>
+        <Icon name='ios-hand' size={20} color={bankStyle.verifiedBg} style={{paddingHorizontal: 2, marginTop: marginTop - 4}}/>
+        <Text style={[chatStyles.resourceTitle, {marginTop, fontSize: 16, color: mColor, paddingLeft: 3}]}>{translate(isVerified ? 'youHaveVerifiedOneOnFile' : 'youHaveOneOnFile')}</Text>
+      </View>
+    )
   }
   canEmployeePrefill(resource) {
     let { application } = this.props
@@ -1115,7 +1125,7 @@ class FormRequestRow extends Component {
          </View>
       )
     }
-    let zoomIn = {transform: [{scale: this.springValue}], justifyContent: 'center', paddingLeft: 5, marginLeft: -3}
+    let zoomIn = {transform: [{scale: this.springValue}], justifyContent: 'center', paddingLeft: 7}
     let hasSharables = this.hasSharables()
     let content = <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
                     <Animated.View style={zoomIn}>
