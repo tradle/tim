@@ -2973,6 +2973,12 @@ debugger
   isNew(r) {
     return !utils.getRootHash(r)
   },
+  isSmallScreen(component) {
+    // return false
+    if (!component) return false
+    const {width} = utils.dimensions(component)
+    return width < MAX_WIDTH
+  },
   hasModificationHistory(r) {
     if (!utils.getMe().isEmployee)
       return false
