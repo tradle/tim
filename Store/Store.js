@@ -4136,8 +4136,9 @@ if (!res[SIG]  &&  res._message)
     }
     if (resource._sourceOfData)
       r._sourceOfData = resource._sourceOfData
-    if (r.modificationHistory) {
-      r.modificationHistory.forEach(mod => {
+    let modifications = r[TYPE] === MODIFICATION  &&  r.modifications ? [{modifications: r.modifications}] : r.modificationHistory
+    if (modifications) {
+      modifications.forEach(mod => {
         let shared = mod.modifications.shared
         if (!shared)
           return
