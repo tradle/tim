@@ -36,6 +36,7 @@ const CHECK = 'tradle.Check'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
 const DURATION = 'tradle.Duration'
+const VERIFICATION = 'tradle.Verification'
 
 const {
   TYPE,
@@ -331,9 +332,9 @@ class ShowPropertiesView extends Component {
   }
   renderGroups(resource, viewCols, groups, propsIn, styles) {
     let groupEnd = viewCols.length
-    const { bankStyle } = this.props
+    const { bankStyle, noGradient } = this.props
     let props = utils.getModel(resource[TYPE]).properties
-    let isSmall = utils.getContentWidth(ShowPropertiesView) < 800
+    let isSmall = utils.isSmallScreen(ShowPropertiesView) || resource[TYPE] === VERIFICATION
     let cardGradient = bankStyle.cardGradient || '#dcf8ef,#fee2f8'// '#d7e1ec, #ffffff'
     const colors = cardGradient.split(',').map(c => c.trim())
     for (let i=groups.length - 1, j=1; i>=0; i--, j++) {
@@ -350,7 +351,7 @@ class ShowPropertiesView extends Component {
       }
       let cols = viewCols.slice(groupStart, groupEnd)
       if (isSmall  ||  size < 4  ||  hasMarkdown || hasItems) {
-        if (hasMarkdown  ||  hasItems  ||  i > 0) {
+        if (hasMarkdown  ||  hasItems  ||  i > 0 || noGradient) {
           groupView = <View style={{padding: 5, marginVertical: 10}}>
                         <View style={{backgroundColor: '#fafafa', borderColor: '#eeeeee', borderRadius: 15, borderWidth: 1}}>
                           {i === 0  &&  this.getDateView({resource, styles, noGradient: true})}
@@ -366,12 +367,12 @@ class ShowPropertiesView extends Component {
                                 {cols.slice(1, cols.length)}
                               </View>
                           </View>
-          if (hasMarkdown  ||  hasItems) {
+          if (hasMarkdown  ||  hasItems || noGradient) {
             groupView = <View style={{margin: 10 }}>
                           {groupBody}
                         </View>
           }
-          else if (i === 0 ){
+          else if (i === 0) {
             groupView = <View style={{margin: 10 }}>
                           <LinearGradient colors={colors} style={styles.linearGradient}>
                             {groupBody}

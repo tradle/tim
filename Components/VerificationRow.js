@@ -194,7 +194,8 @@ class VerificationRow extends Component {
              : (isForm)
                 ? translate('sentToOn', title)
                 : translate('verifiedByOn', title)
-// vicon = null
+vicon = null
+
       if (vicon) {
         verifiedByIcon = <LinearGradient
             start={{ x: 0.8, y: 0.2 }}
@@ -213,7 +214,7 @@ class VerificationRow extends Component {
             }}
           >
               <Image style={styles.thumb} source={{uri: vicon}}/>
-              <Text style={{fontSize: 12, color: '#777', marginTop: 5, alignSelf: 'center'}}>{title}</Text>
+              <Text style={{position:'absolute', bottom: 10, fontSize: 12, color: '#777', marginTop: 5, alignSelf: 'center'}}>{title}</Text>
           </LinearGradient>
       }
     }

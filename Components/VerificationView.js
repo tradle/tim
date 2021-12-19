@@ -43,7 +43,7 @@ class VerificationView extends Component {
     }
   }
   render() {
-    let { resource, bankStyle } = this.props
+    let { resource, bankStyle, currency, navigator } = this.props
     let verifier = `${resource.trustCircle ? resource.trustCircle.title + ' ' : ''}${resource.entityType ? resource.entityType.title : ''}`
     if (verifier.length);
     else if (resource._verifiedBy)
@@ -67,20 +67,29 @@ class VerificationView extends Component {
     if (!dtitle)
       dtitle = translate(utils.getModel(utils.getType(resource.document)))
 
-    let details = <View style={styles.document}>
-                    <Text style={styles.ptitle}>{dprop.title}</Text>
-                    <TouchableOpacity onPress={() => this.showRefResource(resource.document, dprop)}>
-                      <Text style={styles.pvalue}>{dtitle}</Text>
-                    </TouchableOpacity>
-                  </View>
+    // let details = <View style={styles.document}>
+    //                 <Text style={styles.ptitle}>{dprop.title}</Text>
+    //                 <TouchableOpacity onPress={() => this.showRefResource(resource.document, dprop)}>
+    //                   <Text style={styles.pvalue}>{dtitle}</Text>
+    //                 </TouchableOpacity>
+    //               </View>
+
+    let details = <View style={{paddingVertical: 3}}>
+          <ShowPropertiesView resource={resource}
+                              currency={currency}
+                              bankStyle={bankStyle}
+                              showRefResource={this.showRefResource.bind(this, resource.document, dprop)}
+                              isItem={true}
+                              navigator={navigator} />
+        </View>
+
     let vTree = []
     return (
        <View style={{width: utils.getContentWidth(VerificationView)}}>
-        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.verifiedHeaderColor}]}>
-          <Text style={[styles.description, {color: this.props.bankStyle.verifiedHeaderTextColor, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
-        </View>
         {details}
+        <View>
         {this.renderVerification(resource, utils.getModel(VERIFICATION), vTree, 0, 0, styles)}
+        </View>
         {dataSecurity}
       </View>
     );
@@ -91,22 +100,32 @@ class VerificationView extends Component {
     const { currency, locale, bankStyle } = this.props
     if (resource.method) {
       let displayName = utils.getDisplayName({ resource: resource.method })
-      // let val = <View>{this.renderResource(resource, m)}</View>
+      // // let val = <View>{this.renderResource(resource, m)}</View>
 
       vTree.push(
-        <View style={{paddingVertical: 3}}>
-          <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, justifyContent: 'center'}}>
-            <View style={{justifyContent: 'flex-start', paddingLeft: 15, width: utils.getContentWidth(VerificationView)}}>
-               <Text style={{color: bankStyle.verifiedTextColor, fontSize: 18}}>{displayName}</Text>
-            </View>
-          </View>
+        <View style={{paddingVertical: 3, marginTop: -50}}>
           <ShowPropertiesView resource={resource.method}
                               currency={currency}
                               bankStyle={bankStyle}
+                              noGradient={true}
                               isItem={true}
                               navigator={navigator} />
         </View>
        )
+      // vTree.push(
+      //   <View style={{paddingVertical: 3}}>
+      //     <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, justifyContent: 'center'}}>
+      //       <View style={{justifyContent: 'flex-start', paddingLeft: 15, width: utils.getContentWidth(VerificationView)}}>
+      //          <Text style={{color: bankStyle.verifiedTextColor, fontSize: 18}}>{displayName}</Text>
+      //       </View>
+      //     </View>
+      //     <ShowPropertiesView resource={resource.method}
+      //                         currency={currency}
+      //                         bankStyle={bankStyle}
+      //                         isItem={true}
+      //                         navigator={navigator} />
+      //   </View>
+      //  )
       // vTree.push(<TouchableOpacity onPress={() => this.showMethod(resource)} key={this.getNextKey()}>
       //             <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
       //               <Icon name='ios-add-circle-outline' size={25} color={bankStyle.verifiedTextColor} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
