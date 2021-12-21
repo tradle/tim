@@ -187,8 +187,18 @@ class VerificationRow extends Component {
         title = `${resource.trustCircle ? resource.trustCircle.title + ' ' : ''}${resource.entityType ? resource.entityType.title : ''}`
         vicon = org  &&  org.photo  &&  org.photo.url
       }
-      if (!title || !title.length)
-        title = org ? org.title : to.title
+      let me = utils.getMe()
+      if (!title || !title.length) {
+        if (me.isEmployee) {
+          if (org && me.organization.id === org.id ||
+              me.organization.id === to.id)
+            title = org ? org.title : to.title
+          else
+            title = translate('corporate')
+        }
+        else
+          title = org ? org.title : to.title
+      }
       by = (isMyProduct)
              ? translate('issuedByOn', title)
              : (isForm)
