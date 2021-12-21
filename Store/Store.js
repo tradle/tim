@@ -205,6 +205,7 @@ const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const BOOKMARKS_FOLDER    = 'tradle.BookmarksFolder'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
+const SHARE_REQUEST_SUBMITTED = 'tradle.ShareRequestSubmitted'
 const APPLICATION         = 'tradle.Application'
 // const DRAFT_APPLICATION   = 'tradle.DraftApplication'
 // const FORM_PREFILL        = 'tradle.FormPrefill'
@@ -5908,9 +5909,12 @@ if (!res[SIG]  &&  res._message)
     // debugger
     let doShareDocuments = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     if (doShareDocuments) {
+      if (!me.isEmployee)
+        await this.shareResourcesForCustomer(documents, to, formResource, shareBatchId)
       let errorMsg = await this.shareForms({documents, to, formRequest: formResource, batch, shareBatchId})
       if (errorMsg) {
         this.trigger({action: 'addItem', errorMsg: 'Sharing failed: ' + errorMsg, resource: document, to: this._getItem(toOrgId)})
+        await this.shareResourcesForCustomerSubmitted(to, formResource)
         return
       }
     }
@@ -5934,28 +5938,35 @@ if (!res[SIG]  &&  res._message)
       // this.trigger({action: 'updateItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
     }
     // let m = this.getModel(VERIFICATION)
-    let docModel = this.getModel(documents[0][TYPE])
-    var params = {
-      modelName: VERIFICATION,
-      to: documents[0],
-      noTrigger: true,
-      // meta: m,
-      prop: docModel.properties['verifications'],
-      // props: m.properties
-    }
 
-    let verifications
-    if (me.isEmployee) {
-      params.search = me.isEmployee,
-      params.filterResource = {document: docStubs}
-      verifications  = await this.searchServer(params)
-      verifications = verifications  &&  verifications.list
+    let verifications = []
+    for (let i=0; i<documents.length; i++) {
+      let docModel = this.getModel(documents[0][TYPE])
+      let params = {
+        modelName: VERIFICATION,
+        to: documents[0],
+        noTrigger: true,
+        // meta: m,
+        prop: docModel.properties['verifications'],
+        // props: m.properties
+      }
+      let fverifications
+      if (me.isEmployee) {
+        params.search = me.isEmployee,
+        params.filterResource = {document: docStubs}
+        fverifications  = await this.searchServer(params)
+        fverifications = fverifications ?  fverifications.list : null
+      }
+      else
+        fverifications = await this.searchMessages(params)
+      fverifications  &&  fverifications.forEach(v => verifications.push(v))
     }
-    else
-      verifications  = await this.searchMessages(params)
-    if (!verifications) {
-      if (batch.length)
+    if (!verifications.length) {
+      if (batch.length) {
         await db.batch(batch)
+        if (!me.isEmployee)
+          await this.shareResourcesForCustomerSubmitted(to, formResource)
+      }
       return
     }
     await this.shareVerifications({verifications, to, formRequest: formResource, batch, shareBatchId})
@@ -5963,6 +5974,8 @@ if (!res[SIG]  &&  res._message)
       this.addLastMessage(verifications[verifications.length - 1], batch, to)
 
     await db.batch(batch)
+    if (!me.isEmployee)
+      await this.shareResourcesForCustomerSubmitted(to, formResource)
   },
 
   async onShare(resource, shareWithList, originatingResource) {
@@ -6084,6 +6097,47 @@ if (!res[SIG]  &&  res._message)
         await this.getAllShareableLinkedResources(r, links)
       }
     }
+  },
+  async shareResourcesForCustomer(resources, to, formRequest, shareBatchId) {
+    // return
+    let hashes = resources.map(d => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    debugger
+    let r = this._getItem(utils.makeId(PROFILE, to[ROOT_HASH], to[CUR_HASH]))
+    let isVerification = resources[0][TYPE] === VERIFICATION
+    let propName = isVerification ? 'verificationStubs' : 'formStubs'
+    let sr = {
+      [TYPE]: SHARE_REQUEST,
+      links: hashes,
+      with:  [{
+        [TYPE]: IDENTITY,
+        _permalink: to[ROOT_HASH],
+        _link: to[CUR_HASH],
+        _displayName: r.organization && r.organization.title || r.formatted
+        // id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+      }]
+    }
+    let msg = await this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
+    msg.seal =  true
+    await this.meDriverSignAndSend(msg)
+  },
+  async shareResourcesForCustomerSubmitted(to, formRequest) {
+    // return
+    debugger
+    let r = this._getItem(utils.makeId(PROFILE, to[ROOT_HASH], to[CUR_HASH]))
+    let sr = {
+      [TYPE]: SHARE_REQUEST_SUBMITTED,
+      submitted: true
+    }
+    let msg = await this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
+    msg.seal =  true
+    await utils.promiseDelay(2000)
+    await this.meDriverSignAndSend(msg)
   },
 
   async shareResources(resources, to, formRequest, shareBatchId) {
@@ -6262,7 +6316,7 @@ if (!res[SIG]  &&  res._message)
     let stub = {
       bankRepresentative: toId,
       timeShared: time,
-      shareBatchId: shareBatchId
+      shareBatchId
     }
     if (lens)
       stub.lens = lens
