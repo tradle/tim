@@ -852,7 +852,7 @@ class FormRequestRow extends Component {
             let minCardinalityProps = utils.getPropertiesWithAnnotation(formL, 'minCardinality')
             if (_.size(minCardinalityProps)) {
               let minCardinality = Object.values(minCardinalityProps)[0].minCardinality
-              debugger
+              // debugger
               let vals = _.uniq(formsArray.map(v => v.split('_').slice(0, -1).join('_')))
               if (vals.length < minCardinality)
                 multientryMinimumNotExceeded = true
