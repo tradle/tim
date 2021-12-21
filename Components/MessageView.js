@@ -347,7 +347,7 @@ class MessageView extends Component {
     let isVerificationTree
     if (isVerification &&  (resource.method || (resource.sources  &&  resource.sources.length))) {
       // if (utils.isEmployee(resource.organization))
-      if (utils.getMe().isEmployee)
+      // if (utils.getMe().isEmployee)
         isVerificationTree = true
     }
     let isForm = utils.isForm(model)
