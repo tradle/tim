@@ -767,18 +767,23 @@ console.log('GridList.componentWillMount: filterResource', resource)
       }
     }
     let title
+    let dn = utils.getDisplayName({ resource })
     if (isContact)
       title = resource.firstName
     else if (isApplication) {
       let aTitle = resource.applicantName || resource.applicant.title
+      if (aTitle  &&  aTitle === '[name unknown]') {
+        aTitle = ' '
+        dn = translate(utils.getModel(resource.requestFor))
+      }
       if (aTitle)
-        title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName({ resource })
+        title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + dn
       else {
-        title = me.organization.title  + '  --  ' + utils.getDisplayName({ resource })
+        title = me.organization.title  + '  --  ' + dn
       }
     }
     else if (me.isEmployee)
-      title = me.organization.title + '  →  ' + utils.getDisplayName({ resource })
+      title = me.organization.title + '  →  ' + dn
     else
       title = resource.name; //utils.getDisplayName(resource, model.properties);
     let style
