@@ -8007,12 +8007,20 @@ if (!res[SIG]  &&  res._message)
     let refs = []
     let all = {}
     let duplicateItems = []
+    let hasProduct
     if (typeof lastId === 'undefined' || j) {
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         let item = this._getItem(thisChatMessages[i].id)
         if (!item  ||  item[TYPE] === DATA_CLAIM  ||  item[TYPE] === DATA_BUNDLE  ||  item[TYPE] === VERIFICATION)
           continue
+        // HACK for sharing set of forms
+        let imodel = utils.getModel(item[TYPE])
+        if (imodel.subClassOf === MY_PRODUCT) {
+          if (hasProduct)
+            continue
+          hasProduct = true
+        }
         // HACK for white glove project
         if (item._hidden)
           continue
