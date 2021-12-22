@@ -1280,7 +1280,7 @@ var Store = Reflux.createStore({
       let { r, context, timeShared } = await getSharedVerification(message)
       if (!r)
         return
-      this.trigger({action: 'insertItem', context, resource: r, to: context.to.organization, timeShared})
+      // this.trigger({action: 'insertItem', context, resource: r, to: context.to.organization, timeShared})
     }
     const deleteSharedVerification = async (message) => {
       let { r, context } = await getSharedVerification(message, true)
@@ -3638,7 +3638,8 @@ var Store = Reflux.createStore({
   },
   async onAddVerification(params) {
     let { r, dontSend, notOneClickVerification, noTrigger, application } = params
-
+    // HACK
+    noTrigger = true
     let to = params.to || r.to
     if (!Array.isArray(to))
       to = [to]
@@ -10873,20 +10874,22 @@ if (!res[SIG]  &&  res._message)
         let result = await this.searchMessages({ to, modelName: FORM_REQUEST, filterProps: {context: msgContext}, noTrigger: true })
       debugger
         let formRequests = result.filter(fr => fr.form === val[TYPE])
-        formRequests.sort((a, b) => b._time - a._time)
-        let fr = formRequests[0]
-        fr._documentCreated = true
-        let frId = utils.getId(fr)
-        await this.dbPut(frId, fr)
-        this._setItem(frId, fr)
-        let time = fr._time + 100
-        this.addSharedWith({resource: inDB, shareWith: to, shareBatchId: Date.now(), time, formRequest: fr})
-        let valId = utils.getId(inDB)
-        this._setItem(valId, inDB)
-        await this.dbPut(valId, inDB)
-        this.addMessagesToChat(utils.getId(to.organization), inDB, false, time)
-        let v = {...inDB, ...val}
-        this.trigger({action: 'addItem', sendStatus: SENT, resource: v, to: toOrg})
+        if (formRequests.length) {
+          formRequests.sort((a, b) => b._time - a._time)
+          let fr = formRequests[0]
+          fr._documentCreated = true
+          let frId = utils.getId(fr)
+          await this.dbPut(frId, fr)
+          this._setItem(frId, fr)
+          let time = fr._time + 100
+          this.addSharedWith({resource: inDB, shareWith: to, shareBatchId: Date.now(), time, formRequest: fr})
+          let valId = utils.getId(inDB)
+          this._setItem(valId, inDB)
+          await this.dbPut(valId, inDB)
+          this.addMessagesToChat(utils.getId(to.organization), inDB, false, time)
+          let v = {...inDB, ...val}
+          this.trigger({action: 'addItem', sendStatus: SENT, resource: v, to: toOrg})
+        }
       }
       return
     }
@@ -11114,6 +11117,18 @@ if (!res[SIG]  &&  res._message)
               let cRes = application  &&  await this._getItemFromServer({idOrResource: val[p]}) || this._getItem(val[p])
               if (cRes )
                 this.trigger({action: 'getItem', resource: cRes, application})
+            }
+          }
+        }
+        if (!me.isEmployee  &&  model.subClassOf === MY_PRODUCT) {
+          debugger
+          let orgChatMessages
+          if (from.organization) {
+            orgChatMessages = chatMessages[from.organization.id]
+            if (orgChatMessages) {
+              let myProductMsg = orgChatMessages.filter(m => m.id.startsWith(model.id))
+              if (myProductMsg.length > 1)
+                return
             }
           }
         }
