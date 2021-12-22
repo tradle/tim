@@ -5941,10 +5941,11 @@ if (!res[SIG]  &&  res._message)
 
     let verifications = []
     for (let i=0; i<documents.length; i++) {
-      let docModel = this.getModel(documents[0][TYPE])
+      let doc = documents[i]
+      let docModel = this.getModel(doc[TYPE])
       let params = {
         modelName: VERIFICATION,
-        to: documents[0],
+        to: doc,
         noTrigger: true,
         // meta: m,
         prop: docModel.properties['verifications'],
