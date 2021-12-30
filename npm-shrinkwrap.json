@@ -102,7 +102,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#2770e9395542dc41db4ff0de6d7a997c7ed01d3c"
+      "resolved": "git://github.com/tradle/custom-models.git#aeadf7aa42a8c098416b77ba882c106023ee68fc"
     },
     "@tradle/embed": {
       "version": "1.2.4",
@@ -230,9 +230,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/merge-models/-/merge-models-2.1.0.tgz"
     },
     "@tradle/models": {
-      "version": "4.10.10",
+      "version": "4.10.12",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#05a2f67bb3689f602be1cdc213b6437ccb5f35d6"
+      "resolved": "git://github.com/tradle/models.git#64bda00b13ff0c58cd94bc25099d599d2beb8f45"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
