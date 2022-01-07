@@ -1395,7 +1395,18 @@ var NewResourceMixin = {
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value
-      resource[propName] = value
+      if (resource[propName]) {
+        if (Array.isArray(resource[propName])) {
+          if (Array.isArray(value))
+            value.forEach(v => resource[propName].push(v))
+          else
+            resource[propName].push(value)
+        }
+        else
+          resource[propName] = [resource[propName], value]
+      }
+      else
+        resource[propName] = value
     }
     else if (isArray || isMultichooser) {
       let hasReset
