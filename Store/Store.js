@@ -4615,6 +4615,9 @@ if (!res[SIG]  &&  res._message)
     }
     if (isBookmark)
       resource.to = this.buildRef(resource.from)
+    else if (resource.to  &&  utils.getType(resource.to) === ORGANIZATION)
+      resource.to = this.buildRef(this.getRepresentative(resource.to))
+
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
