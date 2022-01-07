@@ -367,11 +367,8 @@ var ResourceMixin = {
                     navigator.push({
                      title: vTitle,
                      componentName,
-                     locale,
-                     currency,
                      backButtonTitle: 'Back',
-                     bankStyle,
-                     passProps: {resource: v}
+                     passProps: {resource: v, bankStyle, currency, locale}
                     })
                   }}>
                    {item}
@@ -757,7 +754,8 @@ var ResourceMixin = {
           // }}
           getItemString={(type, data, itemType, itemString) => {
             if (type === 'Array')
-              return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+              // return <Text style={{fontSize: 16}}>{itemType} {itemString}</Text>
+              return <Text style={{fontSize: 16}}>{itemString}</Text>
             if (type === 'Object')
               return
             return <Text style={{fontSize: 16, paddingTop: 10}}>{itemType} {itemString}</Text>
@@ -769,8 +767,10 @@ var ResourceMixin = {
             const isObject = nodeType === 'Object'
             // let val = isObject && translate(raw[0]) || `${translate(raw[0])}:`
             let val = raw[0]
+            if (typeof val === 'number'  &&  raw.length > 1)
+              val = ''
             // if (isObject)
-            if (typeof val === 'string')
+            else if (typeof val === 'string')
               val = translate(val)
             if (typeof val === 'string') {
               let idx = val.indexOf(';link:')
@@ -815,12 +815,11 @@ var ResourceMixin = {
       if (isTree  &&  params.showTree) {
         let tree = this.paintTree(json, resource)
         content = <View style={styles.justRow}>
-                   {content}
-                   <View style={{flex: 1, alignItems: 'flex-end'}}>
-                     {tree}
-                   </View>
+                    {content}
+                    <View style={{flex: 1, alignItems: 'flex-end'}}>
+                      {tree}
+                    </View>
                   </View>
-
       }
       else if (pieChart  && prop.name === 'scoreDetails') {
         // content = <View style={{flexDirection: 'row'}}>
