@@ -307,7 +307,7 @@ class ShowPropertiesView extends Component {
     if (groups.length)
       this.renderGroups(resource, viewCols, groups, propIn, styles)
 
-    if (resource.txId) { // || utils.isSealableModel(model)) {
+    if (resource.txId  &&  !isItem) { // || utils.isSealableModel(model)) {
       viewCols.push(
           <View key={this.getNextKey()} ref='propertySheet'>
             {this.addDataSecurity(resource)}

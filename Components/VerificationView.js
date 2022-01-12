@@ -24,6 +24,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Linking
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -57,7 +58,7 @@ class VerificationView extends Component {
     let dataSecurity
     if (resource.txId) {
       this.addDataSecurity(resource)
-      dataSecurity = <View ref='propertySheet' style={{marginTop: 20}}>
+      dataSecurity = <View ref='propertySheet' style={{marginTop: -50}}>
                        {this.addDataSecurity(resource)}
                      </View>
     }
@@ -168,13 +169,16 @@ class VerificationView extends Component {
     })
   }
   onPress(url, event) {
-    this.props.navigator.push({
-      backButtonTitle: 'Back',
-      title: utils.getDisplayName({ resource: this.props.resource }),
-      componentName: 'ArticleView',
-      passProps: {url: url ? url : this.props.resource.url}
-    });
+    Linking.openURL(url)
   }
+  // onPress(url, event) {
+  //   this.props.navigator.push({
+  //     backButtonTitle: 'Back',
+  //     title: utils.getDisplayName({ resource: this.props.resource }),
+  //     componentName: 'ArticleView',
+  //     passProps: {href: url ? url : this.props.resource.url}
+  //   });
+  // }
   renderResource(r, model, styles) {
     let resource = !r ? this.props.resource : r
     let isVerification = resource[TYPE] === VERIFICATION

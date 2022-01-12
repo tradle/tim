@@ -1060,10 +1060,12 @@ var ResourceMixin = {
 
     let header = (<View style={{padding: 10}} key={this.getNextKey()}>
                     <View style={[styles.textContainer, styles.row]}>
-                      <Text style={lstyles.bigTitle}>{translate('dataSecurity')}</Text>
+                      <View style={{flexDirection: 'row', paddingVertical: 5, paddingLeft: 10}}>
+                        <View style={lstyles.accent}/>
+                        <Text style={lstyles.dividerText}>{translate('dataSecurity')}</Text>
+                      </View>
                       <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
                     </View>
-                    <View style={styles.separator} />
                   </View>)
     if (blockchain === 'corda') {
       let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
@@ -1095,9 +1097,7 @@ var ResourceMixin = {
         const txs = <View>{urls.map(renderRow)}</View>
         content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-                       <Text style={styles.content}>{description}
-                         <Text style={lstyles.learnMore}> Learn more</Text>
-                       </Text>
+                       <Text style={styles.content}>{description}</Text>
                      </TouchableOpacity>
                      {txs}
                     </View>
@@ -1121,7 +1121,7 @@ var ResourceMixin = {
     let key = `url${i}`
     return (
       <TouchableOpacity onPress={this.onPress.bind(this, url)} key={key}>
-        <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
+        <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer')}</Text>
       </TouchableOpacity>
     )
   },
@@ -1140,13 +1140,25 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
       color: bankStyle.linkColor,
       marginTop: 3,
       marginBottom: 0,
-      marginHorizontal: 7
+      // marginHorizontal: 7
     },
     col: {
       paddingVertical: 5,
       paddingRight: 10,
       paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)
-    }
+    },
+    accent: {
+      width: 12,
+      borderLeftColor: bankStyle.accentColor || 'orange',
+      borderLeftWidth: 5,
+    },
+    dividerText: {
+      marginBottom: 5,
+      fontSize: 26,
+      fontWeight: '500',
+      color: '#ffffff',
+      fontFamily: bankStyle.headerFont
+    },
   })
 })
 
