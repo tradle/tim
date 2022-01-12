@@ -1156,7 +1156,7 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
       marginBottom: 5,
       fontSize: 26,
       fontWeight: '500',
-      color: '#ffffff',
+      color: bankStyle.linkColor,
       fontFamily: bankStyle.headerFont
     },
   })
