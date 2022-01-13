@@ -624,22 +624,23 @@ console.log('GridList.componentWillMount: filterResource', resource)
       navigator.push(route)
   }
   _emptyListHandler(params) {
-    let { resource, query, alert, errorMessage } = params
+    let { resource, query, alert, errorMessage, addAllowed } = params
     let { modelName, isModel, search, prop, exploreData } = this.props
     if (alert) {
       Alert.alert(alert)
       return
     }
+
     if (search  &&  !isModel) {
       if (params.modelName !== modelName)  {
         if (!exploreData)
           return
         if (!resource  ||  resource[TYPE] !== modelName) {
           this.errorAlert('noResourcesForCriteria')
-          this.setState({ isLoading: false })
+          this.setState({ isLoading: false, addAllowed })
           return
         }
-        this.setState({ resource, isLoading: false })
+        this.setState({ resource, isLoading: false, addAllowed })
         this.errorAlert('noResourcesForCriteria')
         return
       }
@@ -653,19 +654,19 @@ console.log('GridList.componentWillMount: filterResource', resource)
             this.errorAlert('noResourcesForCriteria')
         // }, 1)
       }
-      this.setState({refreshing: false})
+      this.setState({refreshing: false, addAllowed})
       return
     }
     if (this.state.allowToAdd) {
-      this.setState({isLoading: false, list: null})
+      this.setState({isLoading: false, list: null, addAllowed})
       return
     }
     if (exploreData) {
       if (!resource  ||  resource[TYPE] !== modelName) {
-        this.setState({ isLoading: false })
+        this.setState({ isLoading: false, addAllowed })
         return
       }
-      this.setState({ resource })
+      this.setState({ resource, addAllowed })
       this.errorAlert('noResourcesForCriteria')
     }
   }
@@ -710,6 +711,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.chosen !== nextState.chosen)
+      return true
+    if (this.state.addAllowed !== nextState.addAllowed)
       return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop.name !== nextProps.prop.name)
@@ -1866,7 +1869,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       let r = this.state.resource
       resource = {
         [TYPE]: BOOKMARK,
-        bookmark: Object.keys(r).length ? r : {[TYPE]: this.props.modelName},
+        bookmark: r && Object.keys(r).length ? r : {[TYPE]: this.props.modelName},
         from: me,
         to: me,
         message: translate(utils.getModel(this.props.modelName))

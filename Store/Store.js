@@ -7100,9 +7100,10 @@ if (!res[SIG]  &&  res._message)
     _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
     let list
     let { result, error, retry } = await graphQL.searchServer(params)
+    let addAllowed = ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId))
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, errorMessage: error, query: retry  &&  params})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, addAllowed})
       return { list, errorMessage: error, query: params }
     }
 
@@ -7118,10 +7119,9 @@ if (!res[SIG]  &&  res._message)
         debugger
     }
 
-    if (!noTrigger) {
-      let addAllowed = ALLOW_TO_ADD.filter(modelId => utils.isSubclassOf(modelName, modelId))
+    if (!noTrigger)
       this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, addAllowed})
-    }
+
     return {list, endCursor: newCursor}
   },
   async getBookmarkChat(parameters) {
