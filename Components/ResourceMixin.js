@@ -182,12 +182,38 @@ var ResourceMixin = {
           vCols.push(p);
       }
     }
+    // else
+    //   vCols = utils.ungroup({model: pModel, viewCols: vCols})
+
     let cnt = value.length;
     let isView = component  &&  component.name === 'ShowPropertiesView'
     let isWeb = utils.isWeb()
     return value.map((v) => {
       let ret = [];
       counter++;
+      if (!prop.inlined  &&  !pModel.inlined) {
+        let item = <View>
+                     <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
+                       <View style={styles.itemContent}>
+                         <Text style={styles.itemHighlightTitle}>{utils.getDisplayName({resource: v})}</Text>
+                       </View>
+                     </TouchableOpacity>
+                     <View style={styles.cancelIcon}>
+                       <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                        <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                       </TouchableOpacity>
+                     </View>
+                   </View>
+
+
+        let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
+        return <View key={this.getNextKey()} style={{paddingVertical: 10, paddingLeft:10}} >
+                 {item}
+                 {sep}
+              </View>
+
+      }
+
       let displayName
       let hadCancel
       let hasEdit
@@ -1059,12 +1085,9 @@ var ResourceMixin = {
     let lstyles = createStyles({bankStyle})
 
     let header = (<View style={{padding: 10}} key={this.getNextKey()}>
-                    <View style={[styles.textContainer, styles.row]}>
-                      <View style={{flexDirection: 'row', paddingVertical: 5, paddingLeft: 10}}>
-                        <View style={lstyles.accent}/>
-                        <Text style={lstyles.dividerText}>{translate('dataSecurity')}</Text>
-                      </View>
-                      <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+                    <View style={{ flex: 1, flexDirection: 'row', paddingVertical: 5, paddingLeft: 10}}>
+                      <View style={lstyles.accent}/>
+                      <Text style={lstyles.dividerText}>{translate('dataSecurity')}</Text>
                     </View>
                   </View>)
     if (blockchain === 'corda') {
@@ -1103,18 +1126,22 @@ var ResourceMixin = {
                     </View>
       }
     }
-    return <Accordion
-                sections={['txId']}
-                onPress={() => {
-                  this.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
-                    if (h  &&  y > pY)
-                      onPageLayout(pY, h)
-                  })
-                }}
-                header={header}
-                content={content}
-                underlayColor='transparent'
-                easing='easeIn' />
+    return <View>
+             {header}
+             {content}
+           </View>
+    // return <Accordion
+    //             sections={['txId']}
+    //             onPress={() => {
+    //               this.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
+    //                 if (h  &&  y > pY)
+    //                   onPageLayout(pY, h)
+    //               })
+    //             }}
+    //             header={header}
+    //             content={content}
+    //             underlayColor='transparent'
+    //             easing='easeIn' />
   },
   getBlockchainExplorerRow(url, i, styles) {
     const { bankStyle } = this.props
@@ -1194,6 +1221,13 @@ var styles = StyleSheet.create({
     marginRight: 5,
     // marginHorizontal: 7,
     fontWeight: '600',
+    color: '#555555',
+  },
+  itemHighlightTitle: {
+    fontSize: 16,
+    marginBottom: 0,
+    marginRight: 5,
+    // marginHorizontal: 7,
     color: '#555555',
   },
   itemTitle: {

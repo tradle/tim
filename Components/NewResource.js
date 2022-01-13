@@ -1402,7 +1402,7 @@ if (r.url)
                        </View>
     }
     else {
-      actionableItem = <View style={{width}}>
+      actionableItem = <View style={{width: width + 10}}>
                        <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
                          <View style={[styles.iitems, {paddingBottom: 10}]}>
                            <Text style={styles.noItemsText}>{label}</Text>
@@ -1428,7 +1428,7 @@ if (r.url)
     }
     istyle = StyleSheet.flatten(istyle)
     return (
-      <View key={this.getNextKey()}>
+      <View key={this.getNextKey()} style={{paddingBottom: 10}}>
         <View style={istyle} ref={bl.name}>
           {actionableItem}
         </View>
