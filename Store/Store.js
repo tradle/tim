@@ -57,6 +57,8 @@ const QUEUED = 'Queued'
 const ADD = 1
 const DELETE = -1
 
+const ALLOW_TO_ADD = ['tradle.Asset', 'tradle.EntityRole', 'tradle.EmployeeRole']
+
 var debug = Debug('tradle:app:store')
 import employee from '../people/employee.json'
 
@@ -7116,8 +7118,10 @@ if (!res[SIG]  &&  res._message)
         debugger
     }
 
-    if (!noTrigger)
-      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit})
+    if (!noTrigger) {
+      let addAllowed = ALLOW_TO_ADD.filter(modelId => utils.isSubclassOf(modelName, modelId))
+      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, addAllowed})
+    }
     return {list, endCursor: newCursor}
   },
   async getBookmarkChat(parameters) {
