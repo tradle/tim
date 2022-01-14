@@ -232,7 +232,7 @@ vicon = null
       let title = from.organization.title
       by =  'Sent from ' + title
     }
-    if (!vicon)
+    if (by  &&  !vicon)
       verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
 
     let date
