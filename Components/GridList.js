@@ -1420,7 +1420,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (isModel) // || bookmark)
       return
     let { resource, isDraft, allowToAdd, addAllowed } = this.state
-    if (prop  &&  !allowToAdd)
+    if (prop  &&  !allowToAdd  &&  !addAllowed)
       return
     let me = utils.getMe()
     let model = utils.getModel(modelName);
@@ -1800,15 +1800,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
           onPress: () => this.bookmark()
         }
       ]
-      let model = utils.getModel(modelName)
-      if (exploreData) {
-        if (addAllowed) {
-          buttons.push({
-            text: translate('addNew', translate(model)),
-            onPress: () => this.addNewResource(model)
-          })
-        }
-      }
     }
     else if (allowToAdd) {
       if (isBacklink)
@@ -1820,8 +1811,18 @@ console.log('GridList.componentWillMount: filterResource', resource)
         }
       ]
     }
-    else
+    if (!addAllowed && !buttons)
       return
+
+    let model = utils.getModel(modelName)
+    if (addAllowed) {
+      if (!buttons)
+        buttons = []
+      buttons.push({
+        text: translate('addNew', translate(model)),
+        onPress: () => this.addNewResource(model)
+      })
+    }
 
     buttons.push({ text: translate('cancel') })
     return (
