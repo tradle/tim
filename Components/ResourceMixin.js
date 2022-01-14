@@ -163,7 +163,7 @@ var ResourceMixin = {
 
   renderItems({value, prop, cancelItem, editItem, component, showResourceProperty}) {
     let { bankStyle, navigator, resource, currency, locale } = this.props
-    let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
+    let linkColor = (bankStyle  &&  bankStyle.linkColor) || defaultBankStyle.linkColor
     let itemsMeta = prop.items.properties;
     let pModel
     let ref = prop.items.ref;
@@ -192,20 +192,7 @@ var ResourceMixin = {
       let ret = [];
       counter++;
       if (!prop.inlined  &&  !pModel.inlined) {
-        let item = <View>
-                     <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
-                       <View style={styles.itemContent}>
-                         <Text style={styles.itemHighlightTitle}>{utils.getDisplayName({resource: v})}</Text>
-                       </View>
-                     </TouchableOpacity>
-                     <View style={styles.cancelIcon}>
-                       <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                        <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
-                       </TouchableOpacity>
-                     </View>
-                   </View>
-
-
+        let item = this.renderItem({editItem, cancelItem, prop, v})
         let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
         return <View key={this.getNextKey()} style={{paddingVertical: 10, paddingLeft:10}} >
                  {item}
@@ -411,6 +398,34 @@ var ResourceMixin = {
         </View>
       )
     });
+  },
+  renderItem({editItem, cancelItem, prop, v}) {
+    const { bankStyle } = this.props
+    let linkColor = (bankStyle  &&  bankStyle.linkColor) || defaultBankStyle.linkColor
+
+    if (editItem) {
+      return <View>
+               <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
+                 <View style={styles.itemContent}>
+                   <Text style={styles.itemHighlightTitle}>{utils.getDisplayName({resource: v})}</Text>
+                 </View>
+               </TouchableOpacity>
+               <View style={styles.cancelIcon}>
+                 <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                  <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                 </TouchableOpacity>
+               </View>
+             </View>
+    }
+    else {
+      return <View>
+               <TouchableOpacity underlayColor='transparent' onPress={this.showRefResource.bind(this, v, prop)}>
+                 <View style={styles.itemContent}>
+                   <Text style={styles.itemHighlightTitle}>{utils.getDisplayName({resource: v})}</Text>
+                 </View>
+               </TouchableOpacity>
+             </View>
+    }
   },
   renderSimpleProp({val, pMeta, modelName, component, hasGroups, showResourceProperty}) {
     let { bankStyle } = this.props
