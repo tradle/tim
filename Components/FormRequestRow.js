@@ -770,7 +770,7 @@ class FormRequestRow extends Component {
         }
       }
       if (formRequest.prefill) {
-        _.defaults(r, formRequest.prefill)
+        _.extend(r, formRequest.prefill)
         isPrefilled = true
       }
     }
