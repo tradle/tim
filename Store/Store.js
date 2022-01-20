@@ -57,7 +57,12 @@ const QUEUED = 'Queued'
 const ADD = 1
 const DELETE = -1
 
-const ALLOW_TO_ADD = ['tradle.Asset', 'tradle.EntityRole', 'tradle.EmployeeRole']
+const ALLOW_TO_ADD = [
+'tradle.Asset',
+'tradle.Configuration',
+'tradle.EntityRole',
+'tradle.EmployeeRole'
+]
 
 var debug = Debug('tradle:app:store')
 import employee from '../people/employee.json'
@@ -4297,7 +4302,34 @@ if (!res[SIG]  &&  res._message)
     let org = r.to.organization
     if (org)
       retParams.provider = this._getItem(org)
+    const { certificate } = r
 
+    if (certificate) {
+      let cType = utils.getType(certificate)
+      let prerequisiteFor = utils.getModel(cType).prerequisiteFor
+      if (prerequisiteFor) {
+        let cert = await this._getItemFromServer({idOrResource: certificate})
+        let c = _.clone(cert)
+        for (let p in c) {
+          if (p.charAt(0) === '_')
+            delete c[p]
+        }
+        delete c.to
+        delete c.from
+        let rep = this.getRepresentative(retParams.provider)
+        debugger
+        retParams.nextStep = {
+          ...c,
+          associatedResource: utils.getId(certificate),
+          parentApplication: r[ROOT_HASH],
+          type: prerequisiteFor,
+          host: retParams.provider.url,
+          provider: rep[ROOT_HASH],
+          product: prerequisiteFor,
+
+        }
+      }
+    }
     this.trigger(retParams)
     return r
   },
@@ -5658,7 +5690,8 @@ if (!res[SIG]  &&  res._message)
         _.extend(resource, { bundleId })
       // else if (product === CP_ONBOARDING ||
       //          product === CE_ONBOARDING) {
-      else if (associatedResource  &&  parentApplication) {
+      // else
+      if (associatedResource  &&  parentApplication) {
         resource.associatedResource = associatedResource
         resource.parentApplication = parentApplication
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
@@ -9461,6 +9494,7 @@ if (!res[SIG]  &&  res._message)
     // no shareable for employee in his employee chat
     if (me.isEmployee  &&  utils.compareOrg(me.organization, to.organization || to))
       return
+
     if (context) {
       if (context._appSubmitted)
         return
@@ -11402,7 +11436,7 @@ if (!res[SIG]  &&  res._message)
           continue
         if (!prefill)
           prefill = {}
-        if (fprops[p].ref) {
+        if (fprops[p].ref  &&  typeof prefill[p] === 'string') {
           try {
             prefill[p] = JSON.parse(notes[p])
           } catch (err) {

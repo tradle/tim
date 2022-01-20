@@ -107,7 +107,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider} = params
+    let {resource, action, backlink, application, style, provider, nextStep} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -119,7 +119,8 @@ class ApplicationView extends Component {
         resource,
         isLoading: false,
         bankStyle: style || this.state.bankStyle,
-        locale: provider && provider.locale
+        locale: provider && provider.locale,
+        nextStep
       })
       break
     case 'exploreBacklink':
@@ -156,7 +157,7 @@ class ApplicationView extends Component {
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale, nextStep } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -237,6 +238,14 @@ class ApplicationView extends Component {
                  </View>
              </TouchableOpacity>
     }
+    let nextApp
+    if (isRM  &&  nextStep) {
+      nextApp = <TouchableOpacity onPress={() => this.applyForNext(nextStep)} style={styles.tree}>
+                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                   <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
+                 </View>
+             </TouchableOpacity>
+    }
     let copyButton = this.generateCopyLinkButton(resource)
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
@@ -246,6 +255,7 @@ class ApplicationView extends Component {
                     {compareImages}
                     {chatButton}
                     {assignRM}
+                    {nextApp}
                   </View>
                 </View>
     return (
@@ -272,7 +282,24 @@ class ApplicationView extends Component {
       </PageView>
      );
   }
-
+  applyForNext(params) {
+    const { type } = params
+    const { navigator } = this.props
+    Alert.alert(
+      translate('applyForNextProduct', translate(utils.getModel(type))), // + utils.getDisplayName({ resource }),
+      null,
+      [
+        {text: 'Cancel', onPress: () => console.log('Canceled!')},
+        {text: 'Ok', onPress: () => {
+          Actions.applyForProduct(params)
+          // const routes = this.props.navigator.getCurrentRoutes()
+          // // get the top TimHome in the stack
+          // const homeRoute = routes.filter(r => r.componentName === 'ResourceList')
+          // navigator.popToRoute(homeRoute[0])
+        }}
+      ]
+    )
+  }
   compareImages(photoId, selfie) {
     let { navigator, bankStyle } = this.props
     let resource = this.state.resource || this.props.resource

@@ -157,6 +157,7 @@ module.exports = {
     "pleaseCorrectFields": "Please correct the following fields: {1}",
     "pleaseCorrect": "Please correct",
     "applyForProduct": "Apply for a product",
+    "applyForNextProduct": "Apply for a product {1}",
     "verifyPrompt": "Verify?",
     "selectPropertiesForCorrection": "Select properties you want recipient to correct",
     "fieldErrorMessagePrompt": "What's wrong with this field?",
