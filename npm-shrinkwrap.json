@@ -225,9 +225,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/lens/-/lens-1.3.1.tgz"
     },
     "@tradle/merge-models": {
-      "version": "2.1.0",
-      "from": "@tradle/merge-models@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/merge-models/-/merge-models-2.1.0.tgz"
+      "version": "3.0.0",
+      "from": "@tradle/merge-models@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/merge-models/-/merge-models-3.0.0.tgz"
     },
     "@tradle/models": {
       "version": "4.10.12",
@@ -307,19 +307,29 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.33",
+      "version": "7.1.36",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.33.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.36.tgz",
       "dependencies": {
+        "@tradle/constants": {
+          "version": "2.5.1",
+          "from": "@tradle/constants@>=2.5.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-2.5.1.tgz"
+        },
         "lodash": {
           "version": "4.17.21",
           "from": "lodash@>=4.17.19 <5.0.0",
           "resolved": "http://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
         },
         "mime": {
-          "version": "2.6.0",
-          "from": "mime@>=2.4.6 <3.0.0",
-          "resolved": "https://registry.npmjs.org/mime/-/mime-2.6.0.tgz"
+          "version": "3.0.0",
+          "from": "mime@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/mime/-/mime-3.0.0.tgz"
+        },
+        "minimist": {
+          "version": "1.2.5",
+          "from": "minimist@>=1.2.5 <2.0.0",
+          "resolved": "http://registry.npmjs.org/minimist/-/minimist-1.2.5.tgz"
         }
       }
     },
