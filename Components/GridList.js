@@ -455,7 +455,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
         return
       l = l.slice()
       l.splice(idx, 1, resource)
-      this.setState({ list: l, forceUpdate: true })
+
+      this.setState({
+        list: l,
+        dataSource: this.state.dataSource.cloneWithRows(l),
+        forceUpdate: true
+      })
       return
     }
     if (action === 'talkToEmployee') {
@@ -626,6 +631,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
   _emptyListHandler(params) {
     let { resource, query, alert, errorMessage, addAllowed } = params
     let { modelName, isModel, search, prop, exploreData } = this.props
+
     if (alert) {
       Alert.alert(alert)
       return
@@ -635,7 +641,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
       if (params.modelName !== modelName)  {
         if (!exploreData)
           return
-        if (!resource  ||  resource[TYPE] !== modelName) {
+        if (!resource)
+          return
+        if (resource[TYPE] !== modelName) {
           this.errorAlert('noResourcesForCriteria')
           this.setState({ isLoading: false, addAllowed })
           return
