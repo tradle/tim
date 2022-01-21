@@ -5057,11 +5057,15 @@ if (!res[SIG]  &&  res._message)
           let toR
           if (isRefreshRequest  ||  returnVal[TYPE] === FORM_REQUEST)
             toR = self._getItem(utils.getId(returnVal.from))
-          else
+          else {
             toR = self._getItem(utils.getId(returnVal.to))
+            if (utils.getType(returnVal.to) === ORGANIZATION)
+              returnVal.to = self.getRepresentative(returnVal.to)
+          }
+
           let id = toR.organization ? utils.getId(toR.organization) : utils.getId(toR)
           self.addMessagesToChat(id, returnVal)
-          org = toR.organization
+          org = toR.organization || toR
           org = self._getItem(utils.getId(org))
         }
 
@@ -5191,7 +5195,8 @@ if (!res[SIG]  &&  res._message)
             if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
               prevRes._dataBundle = context._dataBundle
             // else
-              self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+              // self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+              self.trigger({action: 'updateItem', resource: returnVal, to: org})
           }
           await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
