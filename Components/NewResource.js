@@ -794,7 +794,7 @@ if (r.url)
     this.setState({resource, err: '', inFocus: bl.name});
     let { bankStyle, currency, model, navigator } = this.props
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
-    if (bl.items.ref) { //  &&  bl.allowToAdd) {
+    if (bl.items.ref  &&  !bl.inlined) { //  &&  bl.allowToAdd) {
       navigator.push({
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: 'Back',
