@@ -640,7 +640,7 @@ var NewResourceMixin = {
       let val = Number(value)
       let idx = value.indexOf('.')
       if (idx !== -1) {
-        debugger
+        // debugger
         const len = value.length
         if (++idx === len)
           return
