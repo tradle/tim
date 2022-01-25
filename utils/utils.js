@@ -1260,7 +1260,7 @@ var utils = {
     else
       return resource[p] + '';
   },
-  getEditCols(model) {
+  getEditCols(model, exploreData) {
     let { editCols, properties } = model
     let eCols = []
     let isWeb = utils.isWeb()
@@ -1268,7 +1268,7 @@ var utils = {
       let viewCols = utils.getViewCols(model)
       if (viewCols) {
         viewCols.forEach(p => {
-          if (!properties[p].readOnly)
+          if (exploreData || !properties[p].readOnly)
             eCols.push(properties[p])
         })
       }
@@ -1342,25 +1342,28 @@ var utils = {
   getViewCols(model) {
     let { viewCols, properties } = model
     let vCols = []
-    if (viewCols) {
-      viewCols.forEach((p) => {
-        let prop = properties[p]
-        let idx = p.indexOf('_group')
-        if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p  ||  vCols.indexOf(p) !== -1)
-          vCols.push(p)
+    if (!viewCols)
+      return utils.getAllCols({properties})
 
-        if (idx !== -1  &&  prop.list)
-          prop.list.forEach((p) => vCols.push(p))
-        // eCols[p] = props[p]
-      })
-    }
-    return utils.getAllCols({properties})
+    viewCols.forEach((p) => {
+      let prop = properties[p]
+      let idx = p.indexOf('_group')
+      if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p  ||  vCols.indexOf(p) !== -1)
+        vCols.push(p)
+
+      if (idx !== -1  &&  prop.list)
+        prop.list.forEach((p) => vCols.push(p))
+      // eCols[p] = props[p]
+    })
+    return utils.getAllCols({properties, vCols})
   },
-  getAllCols({properties, isView}) {
-    let vCols = []
+  getAllCols({properties, isView, vCols}) {
+    if (!vCols)
+      vCols = []
     let onePropView = []
     for (let p in properties) {
       if (p.charAt(0) === '_') continue
+      if (vCols.indexOf(p) !== -1) continue
       let prop = properties[p]
       if (prop.signature)
         onePropView.push(p)
