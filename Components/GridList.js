@@ -669,6 +669,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this.setState({isLoading: false, list: null, addAllowed})
       return
     }
+    if (addAllowed) {
+      if (params.modelName === modelName)
+        this.setState({isLoading: false, list: null, addAllowed})
+    }
     if (exploreData) {
       if (!resource  ||  resource[TYPE] !== modelName) {
         this.setState({ isLoading: false, addAllowed })
@@ -1779,7 +1783,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
         let bm = utils.getModel(bookmark.bookmark[TYPE])
         if (this.state.addAllowed) {
           buttons = [{
-            text: translate('addNew', translate(bm)),
+            text: translate('Bookmark'),
+            // text: translate('addNew', translate(bm)),
             onPress: () => this.bookmark(true)
           }]
         }
