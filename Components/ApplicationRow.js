@@ -154,11 +154,13 @@ class ApplicationRow extends Component {
       iname = hasRM ? 'ios-person-add' : 'ios-person-add-outline'
       icolor = hasRM ? '#CA9DF2' : '#7AAAc3'
     }
-    let icon1, icon2
+    let icon1, icon2, icon3
     if (resource.hasFailedChecks)
       icon1 = <View style={{marginHorizontal: 2}}><Icon name='md-close-circle' size={20} color='red' style={{alignSelf: 'center'}}/></View>
     if (resource.hasCheckOverrides)
       icon2 = <View style={{marginHorizontal: 2}}><Icon name='md-checkmark-circle' size={20} color='crimson' style={{alignSelf: 'center'}}/></View>
+    if (resource.itemsCount)
+      icon3 = <View style={{marginHorizontal: 2}}><Icon name='ios-git-branch' size={20} color='darkblue' style={{alignSelf: 'center'}}/></View>
 
     let icon = <Icon name={iname} size={30} color={icolor}/>
     let icon0
@@ -183,6 +185,7 @@ class ApplicationRow extends Component {
     let icons = <View style={{flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
             {icon1}
             {icon2}
+            {icon3}
             {icon0}
             {icon}
           </View>
