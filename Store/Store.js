@@ -59,6 +59,7 @@ const DELETE = -1
 
 const ALLOW_TO_ADD = [
 'tradle.Asset',
+'tradle.Contract',
 'tradle.Configuration',
 'tradle.EntityRole',
 'tradle.EmployeeRole'
@@ -4632,8 +4633,11 @@ if (!res[SIG]  &&  res._message)
 
     const isBookmark = meta.id === BOOKMARK
     if (isBookmark  && currentFolder) {
-      await this.moveBookmark(params)
-      return
+      if (utils.getId(currentFolder) !== utils.getId(resource.folder)) {
+        await this.moveBookmark(params)
+        return
+      }
+      debugger
     }
     // Check if there are references to other resources
     let props = meta.properties;
@@ -5142,7 +5146,11 @@ if (!res[SIG]  &&  res._message)
             if (bookmarksFolder) {
               if (!bookmarksFolder.list)
                 bookmarksFolder.list = []
-              bookmarksFolder.list.push(self.buildRef(returnVal))
+              let bidx = isNew ? -1 : bookmarksFolder.list.findIndex(b => utils.getRootHash(b) === returnVal[ROOT_HASH])
+              if (bidx === -1)
+                bookmarksFolder.list.push(self.buildRef(returnVal))
+              else
+                bookmarksFolder.list.splice(bidx, 1, self.buildRef(returnVal))
               let bf = await self.onAddChatItem({resource: bookmarksFolder, noTrigger: true, origNoTrigger: true})
               if (!noTrigger)
                 self.trigger({action: 'updateItem', resource: bf})
@@ -6922,7 +6930,7 @@ if (!res[SIG]  &&  res._message)
     if (!result) {
       // First time. No connection no providers yet loaded
       if (!this.isConnected  &&  isOrg)
-        this.trigger({action: 'list', alert: translate('noConnection'), first: first, modelName: modelName})
+        this.trigger({action: 'list', alert: translate('noConnection'), first, modelName})
       return
     }
     // if (!SERVICE_PROVIDERS)
@@ -6948,15 +6956,19 @@ if (!res[SIG]  &&  res._message)
                   ? { action: 'filteredList', list: result}
                   : { action: sponsorName ? 'sponsorsList' : 'list',
                       list: result,
-                      isTest: isTest,
-                      modelName: modelName,
-                      spinner: spinner,
-                      isAggregation: isAggregation
+                      isTest,
+                      modelName,
+                      spinner,
+                      addAllowed: this.isAddAllowed(modelName),
+                      isAggregation
                     }
     if (prop)
       retParams.prop = prop;
     retParams.first = first
     this.trigger(retParams);
+  },
+  isAddAllowed(modelName) {
+    return ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
   },
   handleChatResult({result, orgId, modelName}) {
     if (modelName !== MESSAGE)
@@ -7138,10 +7150,10 @@ if (!res[SIG]  &&  res._message)
     _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
     let list
     let { result, error, retry } = await graphQL.searchServer(params)
-    let addAllowed = ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
+    let addAllowed = this.isAddAllowed(modelName)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, addAllowed})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, addAllowed, modelName})
       return { list, errorMessage: error, query: params }
     }
 
@@ -8920,7 +8932,7 @@ if (!res[SIG]  &&  res._message)
   async moveBookmark(params) {
     let { currentFolder, resource } = params
     let curFolder = currentFolder
-    if (utils.getDisplayName({resource: resource.folder}) === utils.getDisplayName({ resource: currentFolder }))
+    if (utils.getId(resource.folder) === utils.getId(currentFolder))
       return
     let prevRef = this.buildRef(resource)
     debugger
@@ -8934,7 +8946,7 @@ if (!res[SIG]  &&  res._message)
     // else
     let isShared = resource.shared
     if (!isShared  &&  folder.shared) {
-      this.trigger({action: 'addItem', error: 'personalBookmarkInSharedFolder', resource} )
+      this.trigger({action: 'addItem', error: translate('personalBookmarkInSharedFolder'), resource} )
       return
     }
 
