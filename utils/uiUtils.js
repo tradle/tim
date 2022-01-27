@@ -24,6 +24,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import Actions from '../Actions/Actions'
 
 const PHOTO = 'tradle.Photo'
+const APPLICATION = 'tradle.Application'
 const FORM_REQUEST = 'tradle.FormRequest'
 
 const GRID_LIST = 'GridList'
@@ -40,7 +41,7 @@ var uiUtils = {
     let route = {
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
-      componentName: resource.grid && APPLICATIONS_GRID || GRID_LIST,
+      componentName: btype === APPLICATION && resource.grid ? APPLICATIONS_GRID : GRID_LIST,
       passProps: {
         modelName: btype,
         bookmark: resource,
