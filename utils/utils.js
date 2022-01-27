@@ -1674,7 +1674,7 @@ var utils = {
     if (!type)
       return
     const m = utils.getModel(type)
-    return m.required  &&  !resource[m.required[0]]
+    return m.required  &&  !resource.hasOwnProperty(m.required[0])
   },
   isWhitelabeled() {
     return utils.isWeb() && window.location != window.parent.location
