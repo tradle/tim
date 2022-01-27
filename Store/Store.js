@@ -5670,8 +5670,16 @@ if (!res[SIG]  &&  res._message)
     }
   },
   async onApplyForProduct(params) {
-    const { host, provider, product, contextId, bundleId,
-            associatedResource, parentApplication } = params
+    let { host, provider, product, contextId, bundleId,
+          associatedResource, parentApplication, _ref } = params
+    if (!host  &&  provider) {
+      if (utils.getType(provider) !== ORGANIZATION)
+        return
+      let organization = this._getItem(provider)
+      let rep = this.getRepresentative(utils.getId(provider))
+      host = organization.url
+      provider = rep[ROOT_HASH]
+    }
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
@@ -5704,9 +5712,12 @@ if (!res[SIG]  &&  res._message)
       // else if (product === CP_ONBOARDING ||
       //          product === CE_ONBOARDING) {
       // else
+      let getExtraParams = associatedResource  &&  parentApplication || _ref
       if (associatedResource  &&  parentApplication) {
         resource.associatedResource = associatedResource
         resource.parentApplication = parentApplication
+      }
+      if (getExtraParams) {
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
         if (_.size(notes))
           resource.notes = notes
@@ -11444,15 +11455,31 @@ if (!res[SIG]  &&  res._message)
           }
       }
     }
-    if (isFormRequest  &&  !val.prefill &&  context  &&  context.notes) {
-      let fprops = utils.getModel(val.form).properties
+    if (isFormRequest /* &&  !val.prefill*/ &&  context  &&  context.notes) {
+      let fModel = utils.getModel(val.form)
+      let fprops = fModel.properties
       let prefill
       let { notes } = context
       for (let p in notes) {
-        if (!fprops[p])
+        if (!fprops[p]) {
+          if (p === '_ref') {
+            let ref = utils.getType(notes._ref)
+            let refProps = utils.getPropertiesWithAnnotation(fModel, 'ref')
+            let prop = Object.values(refProps).find(p => p.ref === ref)
+            if (!prop) continue
+            p = prop.name
+            if (!prefill)
+              prefill = val.prefill || {}
+            if (prefill[p])
+              continue
+            prefill[p] = notes._ref
+          }
           continue
+        }
         if (!prefill)
-          prefill = {}
+          prefill = val.prefill || {}
+        if (prefill[p])
+          continue
         if (fprops[p].ref  &&  typeof prefill[p] === 'string') {
           try {
             prefill[p] = JSON.parse(notes[p])

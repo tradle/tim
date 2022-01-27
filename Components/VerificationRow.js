@@ -10,7 +10,7 @@ import {
   // LazyloadImage as Image
 } from 'react-native-lazyload'
 import LinearGradient from 'react-native-linear-gradient'
-
+import Actions from '../Actions/Actions'
 // import ImageComponent from './Image'
 import Image from './Image'
 
@@ -409,6 +409,12 @@ vicon = null
                          </View>
 
     }
+    let prerequisiteFor
+    if (model.prerequisiteFor) {
+      prerequisiteFor = <TouchableOpacity onPress={this.applyForProduct.bind(this)} style={styles.button}>
+                          <Icon name='ios-sunny-outline'  size={25} color={bankStyle.linkColor} />
+                        </TouchableOpacity>
+    }
     let header =  <View style={[styles.header, styles.contentBg, {flexDirection: 'row'}]} key={this.getNextKey()}>
                     <View style={[styles.row, {flex: 6.5, marginTop: 8, paddingBottom: 5}]}>
                       {photo}
@@ -421,6 +427,7 @@ vicon = null
                           </View>
                           {supportingDocuments}
                           {multiChooserIcon}
+                          {prerequisiteFor}
                         </View>
                         {sharedFrom}
                         <View style={styles.verifiedByAndDateStyle}>
@@ -493,7 +500,6 @@ vicon = null
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
   }
-
   formatFilteredResource(model, resource, renderedRows) {
     let rType = utils.getType(resource)
     let props = utils.getModel(rType).properties
@@ -799,7 +805,14 @@ var styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: 'white'
-  }
+  },
+  button: {
+    ...circled(30),
+    shadowOpacity: 0.7,
+    opacity: 0.9,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+  },
 });
 
 module.exports = VerificationRow;

@@ -150,10 +150,10 @@ class GridRow extends Component {
     let { multiChooser, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
     let size
     let isMessage = modelName === MESSAGE
+    let model = utils.getModel(modelName)
     if (isMessage)
       size = gridCols.length
     else if (gridCols) {
-      let model = utils.getModel(modelName)
       let props = model.properties
 
       let vCols = gridCols.filter((c) => props[c].type !== 'array')
@@ -169,12 +169,30 @@ class GridRow extends Component {
     let key = this.getNextKey(resource)
     let cols
     let justifyContent = isMessage ? 'flex-start' : 'center'
+    let prerequisiteFor
+    if (model.prerequisiteFor) {
+      prerequisiteFor = <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + '_prereq'}>
+                          <View style={{paddingLeft: 5}}>
+                            <TouchableOpacity onPress={this.applyForProduct.bind(this)} style={styles.button}>
+                              <Icon name='ios-sunny-outline'  size={25} color={bankStyle.linkColor} />
+                            </TouchableOpacity>
+                          </View>
+                        </Col>
+    }
+
     if (gridCols  &&  gridCols.length) {
-      cols = gridCols.map((v) => (
-        <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + v}>
-          {this.formatCol(v) || <View />}
-        </Col>
-      ))
+      cols = gridCols.map((v, i) => {
+        let content = this.formatCol(v) || <View/>
+        if (i === 0 &&  prerequisiteFor) {
+          content = <View style={{flexDirection: 'row'}}>
+                      {prerequisiteFor}
+                      {content}
+                    </View>
+        }
+        return <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + v}>
+                 {content}
+               </Col>
+      })
     }
     else {
       let m = utils.getModel(modelName)
@@ -202,6 +220,7 @@ class GridRow extends Component {
                  </View>
                </Col>)
     }
+
     let row = <Row size={size} style={styles.gridRow, {backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
                 {cols}
               </Row>
