@@ -276,7 +276,7 @@ var styles = StyleSheet.create({
     fontWeight: '600',
     color: '#555555',
     marginBottom: 2,
-    fontSize: 16
+    fontSize: 20
   },
   textRight: {
     fontSize: 16,
