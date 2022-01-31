@@ -233,7 +233,8 @@ var NewResourceMixin = {
       if (formType) {
         if (props[p].keyboard)
           options.fields[p].keyboardType = props[p].keyboard
-        model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
+        if (!model[p])
+          model[p] = maybe ? t.maybe(formType) : formType
         if (type == 'date') {
           model[p] = t.Str
           if (val)
