@@ -5672,6 +5672,7 @@ if (!res[SIG]  &&  res._message)
   async onApplyForProduct(params) {
     let { host, provider, product, contextId, bundleId,
           associatedResource, parentApplication, _ref } = params
+    let newProvider
     if (!host  &&  provider) {
       if (utils.getType(provider) !== ORGANIZATION)
         return
@@ -5679,8 +5680,10 @@ if (!res[SIG]  &&  res._message)
       let rep = this.getRepresentative(utils.getId(provider))
       host = organization.url
       provider = rep[ROOT_HASH]
+      newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => utils.urlsEqual(r.url, host))
     }
-    let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
+    if (!newProvider)
+      newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
     // debugger
