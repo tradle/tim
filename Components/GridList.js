@@ -1638,6 +1638,25 @@ console.log('GridList.componentWillMount: filterResource', resource)
       if (me  &&  (!me.isEmployee  ||  utils.isMyMessage({resource})))
         isEmptyItemsTab = true
     }
+    let loading
+    if (isLoading  &&  !isModel) {
+      let showLoadingIndicator = true
+      if (isBacklink  &&  application)
+        showLoadingIndicator = false
+      else if (isBacklink  ||  isForwardlink) {
+        let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
+        let cnt = resource['_' + pName + 'Count']
+        if (!cnt) {
+          if (!resource[pName]  || !resource[pName].length)
+            showLoadingIndicator = false
+        }
+        else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
+          showLoadingIndicator = false
+        }
+      }
+      if (showLoadingIndicator)
+        loading = showLoading({bankStyle, component: GridList, message: translate('loading')})
+    }
 
     let content
     if (isEmptyItemsTab) {
@@ -1650,6 +1669,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                     model={model}
                     isLoading={isLoading}>
                   </NoResources>
+                  {loading}
                 </View>
     }
     else {
@@ -1713,26 +1733,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
 
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
-    let loading
-    if (isLoading  &&  !isModel) {
-      let showLoadingIndicator = true
-      if (isBacklink  &&  application)
-        showLoadingIndicator = false
-      else if (isBacklink  ||  isForwardlink) {
-        let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
-        let cnt = resource['_' + pName + 'Count']
-        if (!cnt) {
-          if (!resource[pName]  || !resource[pName].length)
-            showLoadingIndicator = false
-        }
-        else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
-          showLoadingIndicator = false
-        }
-      }
-      if (showLoadingIndicator)
-        loading = showLoading({bankStyle, component: GridList, message: translate('loading')})
-    }
-
     // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : uiUtils.getContentSeparator(bankStyle)
     let contentSeparator = getContentSeparator(bankStyle)
     return (
@@ -1741,7 +1741,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         {searchBar}
         <View style={styles.separator} />
         {content}
-        {loading}
+        {!isEmptyItemsTab && loading}
         {footer}
         {actionSheet}
       </PageView>
