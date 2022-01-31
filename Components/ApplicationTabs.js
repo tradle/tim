@@ -121,7 +121,9 @@ class ApplicationTabs extends Component {
 
     refList.push(detailsTab)
 
-    let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items)
+    let vCols = utils.ungroup({model, viewCols: model.viewCols})
+    vCols = vCols.filter((p) => !props[p].hidden  &&  props[p].items)
+    // let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items)
     if (vCols) {
       vCols.forEach((p) => {
         let idx = propsToShow.indexOf(p)
