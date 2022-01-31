@@ -310,7 +310,7 @@
   "tradle.PhotoID": {
     "documentType": {
       "id": "tradle.IDCardType_license",
-      "title": "Valid Driver Licence"
+      "title": "Driver Licence"
     },
     "country": {
       "id": "tradle.Country_GB",
