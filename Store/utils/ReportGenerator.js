@@ -48,8 +48,8 @@ class ReportGenerator {
     let formsToProps = {}
     varsOnly.forEach(v => {
       let [form, prop] = v.split('^')
-      form = form.replace(/_/g, '.')
-      prop = prop.replace(/_/g, '.')
+      form = form.replace(/-/g, '.')
+      prop = prop.replace(/-/g, '.')
       let details = formsToProps[form]
       if (!formsToProps[form])
         formsToProps[form] = {[prop]: ''}
@@ -137,12 +137,12 @@ class ReportGenerator {
   async addProps({resource, form, props}) {
     const { locale } = this
     let ftype = getType(form)
-    let prefix = ftype.replace(/\./g, '_')
+    let prefix = ftype.replace(/\./g, '-')
     let formProps = Object.keys(props)
     let moreForms = {}
     for (let i=0; i<formProps.length; i++) {
       let prop = formProps[i].split('.')
-      let propName = `${prefix}^${prop.join('_')}`
+      let propName = `${prefix}^${prop.join('-')}`
       if (prop.length === 1) {
         let val = this.getValue({resource, form, prop: prop[0], locale})
         this.setPropValue({resource, propName, val})
