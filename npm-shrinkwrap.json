@@ -5030,6 +5030,11 @@
       "from": "mumath@>=3.3.4 <4.0.0",
       "resolved": "http://registry.npmjs.org/mumath/-/mumath-3.3.4.tgz"
     },
+    "mustache": {
+      "version": "4.2.0",
+      "from": "mustache@latest",
+      "resolved": "https://registry.npmjs.org/mustache/-/mustache-4.2.0.tgz"
+    },
     "mute-stream": {
       "version": "0.0.5",
       "from": "mute-stream@0.0.5",

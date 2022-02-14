@@ -94,7 +94,8 @@ var asyncActions = [
   'showAllShareables',
   'submitDraftApplication',
   'noPairing',
-  'getResourceLink'
+  'getResourceLink',
+  'getReport'
 ]
 
 var syncActions = [

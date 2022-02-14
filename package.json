@@ -109,6 +109,7 @@
     "lru-cache": "^4.0.1",
     "map-stream": "0.0.6",
     "moment": "^2.22.2",
+    "mustache": "^4.2.0",
     "nkey": "^2.0.2",
     "nkey-bitcoin": "^1.2.0",
     "nkey-curve25519": "^1.0.1",

@@ -5,12 +5,14 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native'
+import { WebView } from 'react-native-webview'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 import { LazyloadScrollView } from 'react-native-lazyload'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
+import ActionSheet from 'react-native-actionsheet'
 
 import constants from '@tradle/constants'
 const {
@@ -107,7 +109,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider, nextStep} = params
+    let {resource, action, backlink, application, style, provider, nextStep, templates} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -120,7 +122,8 @@ class ApplicationView extends Component {
         isLoading: false,
         bankStyle: style || this.state.bankStyle,
         locale: provider && provider.locale,
-        nextStep
+        nextStep,
+        templates
       })
       break
     case 'exploreBacklink':
@@ -157,7 +160,8 @@ class ApplicationView extends Component {
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale, nextStep } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected,
+          showDetails, locale, nextStep, templates } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -166,7 +170,6 @@ class ApplicationView extends Component {
     let styles = createStyles({ hasRM, isRM, bankStyle })
 
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
-    let contentSeparator = getContentSeparator(bankStyle)
     let loading
     if (isLoading) {
       loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
@@ -200,14 +203,21 @@ class ApplicationView extends Component {
                     </View>
                   </TouchableOpacity>
     let routes = navigator.getCurrentRoutes()
-    let home
+    let home, print
     if (__DEV__)
-       home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={styles.homeButton}>
-                  <View style={[buttonStyles.homeButton]}>
-                    <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
-                  </View>
-                </TouchableOpacity>
+      home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={styles.homeButton}>
+               <View style={[buttonStyles.homeButton]}>
+                 <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
+               </View>
+             </TouchableOpacity>
 
+    let actionSheet = templates  && this.renderActionSheet()
+    if (actionSheet)
+      print = <TouchableOpacity onPress={() => this.ActionSheet.show()} style={styles.homeButton}>
+               <View style={[buttonStyles.homeButton]}>
+                 <Icon name='ios-print-outline' color={bankStyle.linkColor} size={33}/>
+               </View>
+             </TouchableOpacity>
     let photoId, selfie
     if (resource.forms) {
       photoId = resource.forms.find(r => utils.getType(r) === PHOTO_ID)
@@ -250,6 +260,8 @@ class ApplicationView extends Component {
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
+                    {print}
+                    {actionSheet}
                     {tree}
                     {copyButton}
                     {compareImages}
@@ -258,6 +270,7 @@ class ApplicationView extends Component {
                     {nextApp}
                   </View>
                 </View>
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
@@ -282,6 +295,43 @@ class ApplicationView extends Component {
       </PageView>
      );
   }
+  renderActionSheet() {
+    const buttons = this.getActionSheetItems()
+    if (!buttons || !buttons.length) return
+    let titles = buttons.map((b) => b.title)
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={titles}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          buttons[index].callback()
+        }}
+      />
+    )
+  }
+  getActionSheetItems() {
+    const { templates } = this.state
+    const buttons = []
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
+
+    if (!templates)
+      return buttons
+    templates.forEach(template =>
+      push({
+        title: template.title,
+        callback: () => this.printReport(template)
+      })
+    )
+    push({
+      title: translate('cancel'),
+      callback: () => {}
+    })
+
+    return buttons
+  }
   applyForNext(params) {
     const { type } = params
     const { navigator } = this.props
@@ -299,6 +349,21 @@ class ApplicationView extends Component {
         }}
       ]
     )
+  }
+  printReport(template) {
+    const { navigator, bankStyle, locale } = this.props
+    const { resource:application } = this.state
+    navigator.push({
+      title: "",
+      componentName: 'PrintReport',
+      backButtonTitle: null,
+      passProps: {
+        application,
+        bankStyle,
+        locale,
+        template
+      }
+    });
   }
   compareImages(photoId, selfie) {
     let { navigator, bankStyle } = this.props

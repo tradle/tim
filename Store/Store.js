@@ -124,6 +124,7 @@ const NOT_CHAT_ITEM = '_notChatItem'
 import utils, {translate, translateEnum, isWeb, tryWithExponentialBackoff, isWhitelabeled} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
+import ReportGenerator from './utils/ReportGenerator'
 import DataBundle from './plugins/DataBundle'
 
 import { models as baseModels, data as sampleData } from '@tradle/models'
@@ -2421,6 +2422,12 @@ var Store = Reflux.createStore({
       return
 
     sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
+    let templates
+    if (sp.templates) {
+      sp.templates.forEach(t => {
+        t.template = Buffer.from(t.template, 'utf-8').toString()
+      })
+    }
     let newSp = {
       id: sp.id,
       org: utils.getId(sp.org),
@@ -2429,7 +2436,8 @@ var Store = Reflux.createStore({
       permalink: sp.bot.permalink,
       sandbox: sp.sandbox,
       // publicConfig: sp.publicConfig,
-      connectEndpoint: sp.connectEndpoint
+      connectEndpoint: sp.connectEndpoint,
+      templates: sp.templates
     }
     // Check is this is an update SP info
     let oldSp
@@ -4294,7 +4302,7 @@ if (!res[SIG]  &&  res._message)
       style = this._getItem(applicant.organization).style
     }
     if (r.creditScoreDetails) {
-      debugger
+      // debugger
       this.convertCreditScore(r)
     }
     let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
@@ -4318,7 +4326,6 @@ if (!res[SIG]  &&  res._message)
         delete c.to
         delete c.from
         let rep = this.getRepresentative(retParams.provider)
-        debugger
         retParams.nextStep = {
           ...c,
           associatedResource: utils.getId(certificate),
@@ -4327,12 +4334,24 @@ if (!res[SIG]  &&  res._message)
           host: retParams.provider.url,
           provider: rep[ROOT_HASH],
           product: prerequisiteFor,
-
         }
       }
     }
+    let templates = this.getTemplatesList({application: r})
+    if (templates)
+      retParams.templates = templates
     this.trigger(retParams)
     return r
+  },
+  getTemplatesList({application}) {
+    if (!me.isEmployee)
+      return
+    let url = me.organization.url
+    let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
+    if (!sp  ||  !sp.templates || !sp.templates.length)
+      return
+    const { requestFor } = application
+    return sp.templates.filter(r => r.applicationFor === requestFor)
   },
   convertCreditScore(r) {
     r.creditScoreDetails.forEach(cd => {
@@ -5643,7 +5662,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger({action: 'syncDevicesIsDone', to: org})
 
     Actions.showModal({title: `${title}${translate('pairingDevicesSync')}`, showIndicator: true})
-     var msg = {
+    const msg = {
       message: 'Pairing devices',
       [TYPE]: DEVICE_SYNC,
       from: me,
@@ -5838,6 +5857,14 @@ if (!res[SIG]  &&  res._message)
       await this.getList({action: 'list', modelName: ORGANIZATION, isTest})
     }
     return newProvider
+  },
+
+  async onGetReport({application, template, locale}) {
+    if (!me.isEmployee)
+      return
+    let reports = new ReportGenerator({application, template, locale, getObjects: this.getObjects, getApplication: this.getApplication})
+    let html = await reports.genReport()
+    this.trigger({action: 'report', application, html})
   },
 
   async onImportData(data) {
