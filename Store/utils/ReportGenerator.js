@@ -225,6 +225,8 @@ class ReportGenerator {
     }
     if (properties[prop].type === 'date')
       return formatDate(new Date(form[prop]))
+    if (properties[prop].units)
+      return `${form[prop]}${properties[prop].units}`
     return form[prop]
   }
 }
