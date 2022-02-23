@@ -258,7 +258,7 @@ vicon = null
     else if (isMyProduct  &&  modelName === MY_PRODUCT)
       dn = translate(model)
     else
-      dn = utils.getDisplayName({ resource, locale })
+      dn = utils.getDisplayName({ resource, locale, model })
     let title
     if (isChooser)
       title = dn
