@@ -703,10 +703,12 @@ var NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
-    if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
-      Actions.getRequestedProperties({resource: r})
-    }
 
+    if (!search  &&  r[TYPE] !== SETTINGS) {
+      // if 'string' no need to check if requested properties changed on entering every letter
+      if (ptype !== 'string' || value.length <= 1)
+        Actions.getRequestedProperties({resource: r})
+    }
     this.setState({
       resource: r,
       inFocus: pname
