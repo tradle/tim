@@ -179,7 +179,7 @@ class CheckRow extends Component {
                     </View>
       }
     }
-    else if (form.title) {
+    else if (form  &&  form.title) {
       let ftype = utils.getType(form)
       let title
       if (form.title.indexOf('\n') === -1) {
