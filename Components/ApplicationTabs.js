@@ -376,18 +376,20 @@ class ApplicationTabs extends Component {
                </TouchableOpacity>
       })
     }
-    if (resource.checks  &&  resource.checks.length  &&  resource.checks[0].status) {
-      let statusM = utils.getModel(STATUS).enum.find(r => r.id === 'fail')
-      let { icon, color } = statusM
-      let style = [styles.checkButton, {backgroundColor: color}]
-
-      impl.push(
-         <TouchableOpacity onPress={() => {this.props.filterChecks('fail')}} style={styles.checkCategory} key={this.getNextKey()}>
-           <View style={style}>
-             <Icon name={icon} color='#fff' size={25} />
-           </View>
-         </TouchableOpacity>
-      )
+    if (resource.checks  &&  resource.checks.length) { //  &&  resource.checks[0].status) {
+      let hasFailed = resource.checks.find(check => check.status  &&  check.status.id === `${STATUS}_fail`)
+      if (hasFailed) {
+        let statusM = utils.getModel(STATUS).enum.find(r => r.id === 'fail')
+        let { icon, color } = statusM
+        let style = [styles.checkButton, {backgroundColor: color}]
+        impl.push(
+           <TouchableOpacity onPress={() => {this.props.filterChecks('fail')}} style={styles.checkCategory} key={this.getNextKey()}>
+             <View style={style}>
+               <Icon name={icon} color='#fff' size={25} />
+             </View>
+           </TouchableOpacity>
+        )
+      }
     }
 
     return <View style={styles.checksTabs}>
