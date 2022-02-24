@@ -210,9 +210,10 @@ class ReportGenerator {
     let ftype = getType(form)
     let properties = getModel(ftype).properties
     let { locale } = this
-    if (!form[prop]) {
+
+    if (!form[prop])
       return ''
-    }
+
     if (typeof form[prop] === 'object') {
       let ref = properties[prop].ref
       if (ref) {
