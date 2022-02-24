@@ -729,8 +729,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop.name !== nextProps.prop.name)
         return true
-      if (this.props.backlinkList  &&  this.props.backlinkList.length !== nextProps.backlinkList.length)
-        return true
+      if (this.props.backlinkList) {
+        if (!nextProps.backlinkList || this.props.backlinkList.length !== nextProps.backlinkList.length)
+          return true
+      }
     }
     if (this.props.isForwardlink  &&  nextProps.isForwardlink) {
       if (this.props.forwardlink !== nextProps.forwardlink)
