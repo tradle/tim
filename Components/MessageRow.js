@@ -761,7 +761,7 @@ class MessageRow extends Component {
                  automaticallyAdjustContentInsets={false} />)
             }
             else
-              vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>)
+              vCols.push(<Text style={[style, {color: '#757575'}]} key={this.getNextKey()}>{resource[v]}</Text>)
           }
           else
             vCols.push(row)
