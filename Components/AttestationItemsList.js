@@ -163,6 +163,7 @@ class AttestationItemsList extends Component {
         model,
         bankStyle,
         resource: item,
+        originatingMessage: resource,
         action: (value) => {
           debugger
           // reviewed[rowId] = {...resource, ...value}
