@@ -4,7 +4,7 @@ import extend from 'lodash/extend'
 
 const QUOTATION_DETAILS = '.QuotationDetails'
 
-module.exports = function CheckOverride ({ models }) {
+module.exports = function LeasingQuotes ({ models }) {
   return {
     validateForm: function validateForm ({
       application,
