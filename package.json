@@ -49,7 +49,7 @@
     "@tradle/lens": "^1.3.1",
     "@tradle/models": "github:tradle/models",
     "@tradle/models-cloud": "github:tradle/models-cloud",
-    "@tradle/models-corporate-onboarding": "github:tradle/models-corporate-onboarding",
+    "@tradle/models-corporate-onboarding": "github:tradle/models-corporate-onboarding#leasing",
     "@tradle/models-nz": "github:pgmemk/models-nz",
     "@tradle/models-onfido": "github:tradle/models-onfido",
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
