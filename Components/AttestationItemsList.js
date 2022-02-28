@@ -164,16 +164,9 @@ class AttestationItemsList extends Component {
         bankStyle,
         resource: item,
         originatingMessage: resource,
-        action: (value) => {
+        callback: (value) => {
           debugger
-          // reviewed[rowId] = {...resource, ...value}
-
-          // let list = this.state.list
-          // list.splice(rowId, 1, reviewed[rowId])
-          // this.setState({
-          //   // list: newList,
-          //   dataSource: this.state.dataSource.cloneWithRows(list) //(this.state.list)
-          // })
+          navigator.pop()
           navigator.pop()
         }
       }
