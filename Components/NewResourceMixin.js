@@ -624,6 +624,7 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   changeValue(prop, value) {
+    const { originatingMessage: originatingResource } = this.props
     // if (utils.isReadOnly(prop))
     //   return
     let { name: pname, ref: pref, type: ptype } = prop
@@ -707,7 +708,7 @@ var NewResourceMixin = {
     if (!search  &&  r[TYPE] !== SETTINGS) {
       // if 'string' no need to check if requested properties changed on entering every letter
       if (ptype !== 'string' || value.length <= 1)
-        Actions.getRequestedProperties({resource: r})
+        Actions.getRequestedProperties({resource: r, originatingResource})
     }
     this.setState({
       resource: r,
