@@ -39,7 +39,7 @@ module.exports = function LeasingQuotes ({ models }) {
             return { name: p }
           })
       }
-      return { requestedProperties } || []
+      return { requestedProperties }
     }
   }
 }
