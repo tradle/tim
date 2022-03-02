@@ -180,6 +180,13 @@ function isNewResource(stub) {
 }
 
 function getPropsForControllingEntity(form, models) {
+  let m = models[form[TYPE]]
+  if (m.lens  &&  m.editCols) {
+    let requestedProperties = []
+    m.editCols.forEach(p => requestedProperties.push({name: p}))
+    return { requestedProperties }
+  }
+
   let typeOfControllingEntity = form.typeOfControllingEntity
   if (!typeOfControllingEntity)
     return {

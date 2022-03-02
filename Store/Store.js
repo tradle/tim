@@ -3595,7 +3595,7 @@ var Store = Reflux.createStore({
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = this.getBizPluginsContext()
     let moreInfo
-    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getModel(rtype)
+    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
 
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
@@ -12718,6 +12718,16 @@ if (!res[SIG]  &&  res._message)
   },
   getLens(id) {
     return lenses[id]
+  },
+  getLensForType(type) {
+    let lensId
+    for (let id in lenses) {
+      if (lenses[id].model === type) {
+        lensId = id
+        break
+      }
+    }
+    return lensId ? { lensId, lens: lenses[lensId] } : {}
   },
 
   validateResource(resource) {

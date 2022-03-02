@@ -375,11 +375,25 @@ var utils = {
       return Store.getAugmentedModel(model)
 
     let merged = Lens.merge({ models: utils.getModels(), model, lens })
+    merged.lens = lensId
     // let m = _.cloneDeep(merged)
     // let props = m.properties
     // for (let p in props)
     //   props[p].name = p
     return Store.getAugmentedModel(merged)
+  },
+  getLensedModelForType(type) {
+    const Store = getStore()
+
+    let {lens, lensId} = Store.getLensForType(type)
+
+    if (lens) {
+      let merged = Lens.merge({ models: utils.getModels(), model, lens })
+      merged.lens = lensId
+      return merged
+    }
+    const model = Store.getOriginalModel(type)
+    return Store.getAugmentedModel(model)
   },
   applyLens({prop, values, list }) {
     let pin = prop.pin  ||  values
@@ -2398,6 +2412,7 @@ var utils = {
       image.addEventListener('load', function () {
         cb(null, {
           url: dataUrl,
+          name: file.name,
           width: image.width,
           height: image.height
         })
@@ -2717,7 +2732,9 @@ var utils = {
   },
   isHidden(p, resource) {
     let modelName = utils.getType(resource)
-    let model = utils.getModel(modelName)
+    // let model = utils.getModel(modelName)
+    let model = utils.getLensedModelForType(modelName)
+
     let props = model.properties
     if (!utils.isMessage(resource)  ||  !resource.from)
       return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
