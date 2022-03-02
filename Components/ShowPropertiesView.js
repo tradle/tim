@@ -37,6 +37,7 @@ const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
 const DURATION = 'tradle.Duration'
 const VERIFICATION = 'tradle.Verification'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 const {
   TYPE,
@@ -304,6 +305,7 @@ class ShowPropertiesView extends Component {
         style.push({flexDirection: 'column'})
       if (hasGroups)
         style.push({flex: 1})
+
       viewCols.push(
         <View key={this.getNextKey()}>
            <View style={isItem ? {} : {width: utils.getContentWidth(ShowPropertiesView), flexDirection: isDirectionRow ? 'row' : 'column'}}>
@@ -532,7 +534,7 @@ class ShowPropertiesView extends Component {
     let { ref } = pMeta
     if (!ref)
       ref = pMeta.items  &&  pMeta.items.ref
-    if (ref === PHOTO) {
+    if (ref === PHOTO  && pMeta.range !== 'document') {
       if (vCols.length === 1  &&  resource._time  &&  !isForm(utils.getModel(resource[TYPE])))
         viewCols.push(
           <View  key={this.getNextKey()} style={{padding: 10}}>
@@ -575,6 +577,19 @@ class ShowPropertiesView extends Component {
                 <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
               </TouchableOpacity>
         return { val, isRef: true }
+      }
+      if (pMeta.range === 'document') {
+        let model = utils.getModel(resource[TYPE])
+        let v
+        if (val.name)
+          v = <Text style={[styles.title, styles.linkTitle]}>{val.name}</Text>
+        else
+          v = <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
+
+        val = <TouchableOpacity onPress={this.showPDF.bind(this, {photo: val})} style={{justifyContent: 'flex-end'}}>
+                {v}
+              </TouchableOpacity>
+        return {val, isRef: false}
       }
       if (!val[TYPE])
         val[TYPE] = ref
@@ -620,6 +635,17 @@ class ShowPropertiesView extends Component {
       val = <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
 
     return { val }
+  }
+  showPDF({photo}) {
+    let route = {
+      backButtonTitle: 'Back',
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url
+      },
+      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
+    }
+    this.props.navigator.push(route)
   }
   showScoreDetails() {
     let m = utils.getModel(APPLICATION)

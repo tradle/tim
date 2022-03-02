@@ -46,7 +46,6 @@ import StyleSheet from '../StyleSheet'
 import ApplicantLegalEntityConsent from './ApplicantLegalEntityConsent'
 
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
-const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 const PRINTABLE = 'tradle.Printable'
 const FORM_ERROR = 'tradle.FormError'
 
@@ -502,12 +501,16 @@ class MessageView extends Component {
     let height = utils.dimensions(MessageView).height
     let width = utils.getContentWidth()
 
-    let documents = utils.getResourceDocuments(model, resource)
-    if (documents.length) {
-      documents = <TouchableOpacity style={{position: 'absolute', right: 0, top: 100}} onPress={this.showPDF.bind(this, {photo: documents[0]})}>
-                    <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
-                  </TouchableOpacity>
-    }
+    // let documents = utils.getResourceDocuments(model, resource)
+    // if (documents.length) {
+    //   documents = documents.map((doc, i) => (
+    //       <TouchableOpacity onPress={this.showPDF.bind(this, {photo: doc})}>
+    //         <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
+    //       </TouchableOpacity>
+    //     )
+    //   )
+    //   documents = <View style={{flexDirection: 'row'}}>{documents}</View>
+    // }
     let me = utils.getMe()
     let warning
     if (!me.isEmployee  &&  !resource._latest  &&  !isReview  &&  !error) {
@@ -536,7 +539,6 @@ class MessageView extends Component {
           {bigPhoto}
           {photoStrip}
           {actionPanel}
-          {documents}
         </ScrollView>
         {title}
         {footer}
@@ -554,17 +556,6 @@ class MessageView extends Component {
         resource
       }
     })
-  }
-  showPDF({photo}) {
-    let route = {
-      backButtonTitle: 'Back',
-      componentName: 'ArticleView',
-      passProps: {
-        href: photo.url
-      },
-      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
-    }
-    this.props.navigator.push(route)
   }
   onPageLayout(height, scrollDistance) {
     let scrollTo = height + scrollDistance - NAV_BAR_CONST
