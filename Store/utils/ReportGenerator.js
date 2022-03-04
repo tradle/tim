@@ -137,32 +137,52 @@ class ReportGenerator {
   async addProps({resource, form, props}) {
     const { locale } = this
     let ftype = getType(form)
+    let fmodel = getModel(ftype)
     let prefix = ftype.replace(/\./g, '-')
     let formProps = Object.keys(props)
     let moreForms = {}
     for (let i=0; i<formProps.length; i++) {
       let prop = formProps[i].split('.')
       let propName = `${prefix}^${prop.join('-')}`
-      if (prop.length === 1) {
-        let val = this.getValue({resource, form, prop: prop[0], locale})
-        this.setPropValue({resource, propName, val})
-        continue
-      }
       let val
       let pForm = form
       let notFound = false
       for (let ii=0; ii<prop.length  &&  !notFound; ii++) {
-        let propValue = pForm[prop[ii]]
+        let property = prop[ii]
+        // Check if backlink
+        let idx = property.indexOf('[')
+        if (idx !== -1) {
+          let ptype = property.slice(idx + 1, -1).replace(/_/g, '.')
+          let p =  property.slice(0, idx)
+          let r = pForm[p] && pForm[p].find(f => f[TYPE] === ptype)
+          if (!r)
+            break
+          r = await this.getObjects([getCurrentHash(r)])
+          pForm = r[0]
+        }
+
+        let propValue = pForm[property]
         if (!propValue)
           continue
+        if (typeof propValue !== 'object') {
+          val = propValue
+          break
+        }
         let pModel = getModel(getType(pForm))
-        let p = pModel.properties[prop[ii]]
+        let p = pModel.properties[property]
         let ref = p.ref
         if (!ref  &&  p.items)
           ref = p.items.ref
-        if (ref  &&  (isEnum(ref) || ii === prop.length - 1)) {
-          val = propValue.title
-          break
+        if (ref) {
+          let refModel = getModel(ref)
+          if (refModel.inlined) {
+            val = this.getValue({resource, form: pForm, prop: property, locale})
+            break
+          }
+          if (isEnum(ref) || ii === prop.length - 1) {
+            val = propValue.title
+            break
+          }
         }
         if (pModel.inlined || p.inlined) {
           if (ii !== prop.length - 1) {
