@@ -360,7 +360,9 @@ console.log('HomePageMixin: filterResource', resource)
   },
   addHomeButton() {
     let { bankStyle, navigator } = this.props
-    if (!__DEV__ || !bankStyle) return
+    // if (!__DEV__ || !bankStyle) return
+    if (!bankStyle)
+      bankStyle = defaultBankStyle
     let routes = navigator.getCurrentRoutes()
     let style = {alignSelf: 'flex-start', paddingRight: Platform.OS === 'android' ? 0 : 10, paddingBottom: 15, paddingLeft: 10}
     return <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={style}>

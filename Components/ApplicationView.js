@@ -202,15 +202,9 @@ class ApplicationView extends Component {
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
                   </TouchableOpacity>
-    let routes = navigator.getCurrentRoutes()
     let home, print
-    if (__DEV__)
-      home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={styles.homeButton}>
-               <View style={[buttonStyles.homeButton]}>
-                 <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
-               </View>
-             </TouchableOpacity>
-
+    if (utils.getMe().isEmployee)
+      home = this.addHomeButton()
     let actionSheet = templates  && this.renderActionSheet()
     if (actionSheet)
       print = <TouchableOpacity onPress={() => this.ActionSheet.show()} style={styles.homeButton}>

@@ -1478,7 +1478,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
       menuBtn = <View/>
 
     let homeButton
-    if (__DEV__  &&  bookmark)
+    // if (__DEV__  &&  bookmark)
+    if (me.isEmployee  &&  modelName !== BOOKMARKS_FOLDER)
       homeButton = this.addHomeButton()
     return (
         <View style={styles.footer}>
