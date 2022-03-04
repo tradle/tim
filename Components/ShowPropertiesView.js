@@ -262,8 +262,9 @@ class ShowPropertiesView extends Component {
         isItems = Array.isArray(val)
         let iref = isItems  &&  pMeta.items.ref
         if (iref) {
-          if (iref === PHOTO)
+          if (iref === PHOTO  &&  pMeta.range === 'photo') {
             return
+          }
           if (isEnum(iref)) {
             let values = val.map((v) => translateEnum(v)).join(', ')
             viewCols.push(
@@ -636,17 +637,17 @@ class ShowPropertiesView extends Component {
 
     return { val }
   }
-  showPDF({photo}) {
-    let route = {
-      backButtonTitle: 'Back',
-      componentName: 'ArticleView',
-      passProps: {
-        href: photo.url
-      },
-      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
-    }
-    this.props.navigator.push(route)
-  }
+  // showPDF({photo}) {
+  //   let route = {
+  //     backButtonTitle: 'Back',
+  //     componentName: 'ArticleView',
+  //     passProps: {
+  //       href: photo.url
+  //     },
+  //     // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
+  //   }
+  //   this.props.navigator.push(route)
+  // }
   showScoreDetails() {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle, resource } = this.props
