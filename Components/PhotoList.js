@@ -12,6 +12,7 @@ import {
   StyleSheet,
   View,
   ListView,
+  Text,
   Animated,
   TouchableHighlight,
 } from 'react-native'
@@ -100,7 +101,10 @@ class PhotoList extends Component {
     let source = {uri: uri};
     if (isDataUrl  ||  uri.charAt(0) == '/')
       source.isStatic = true;
-    let item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
+    let item = <View>
+                 <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
+                 <Text style={styles.text}>{photo.name}</Text>
+               </View>
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
         <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
@@ -140,6 +144,10 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     margin: 1,
     borderColor: '#999999'
+  },
+  text: {
+    font: 12,
+    alignSelf: 'center'
   },
   row: {
     flexDirection: 'row'
