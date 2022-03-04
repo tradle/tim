@@ -739,8 +739,9 @@ if (r.url)
     if (this.props.model.properties[propName].items.ref) {
       item[TYPE] = this.props.model.properties[propName].items.ref
       if (item.file)  {
-        if (item[TYPE] !== PHOTO) {
+        if (item.file.name)
           item.name = item.file.name
+        if (item[TYPE] !== PHOTO) {
           if (item.file.mimeType)
             item.mimeType = item.file.mimeType
           item.size = item.file.size

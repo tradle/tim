@@ -1401,8 +1401,12 @@ var NewResourceMixin = {
       this.floatingProps[propName] = value
       if (resource[propName]) {
         if (Array.isArray(resource[propName])) {
-          if (Array.isArray(value))
-            value.forEach(v => resource[propName].push(v))
+          if (Array.isArray(value)) {
+            // if (value.length)
+            //   value.forEach(v => resource[propName].push(v))
+            // else
+              resource[propName] = value
+          }
           else
             resource[propName].push(value)
         }

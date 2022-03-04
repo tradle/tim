@@ -51,6 +51,8 @@ const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
 const MODIFICATION = 'tradle.Modification'
 const DEFAULT_CURRENCY_SYMBOL = '$'
+const PHOTO = 'tradle.Photo'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -174,9 +176,23 @@ var ResourceMixin = {
       }
     }
     let counter = 0;
-    let vCols = pModel  &&  pModel.viewCols;
+    let vCols = pModel  &&  pModel.viewCols
+    let isPhoto = ref === PHOTO
+    let content
+    if (isPhoto) {
+      return value.map(v => {
+          if (v.name)
+            content = <Text style={[styles.bigTitle, {color: bankStyle.linkColor}]}>{v.name}</Text>
+          else
+            content = <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
+
+          return <TouchableOpacity onPress={this.showPDF.bind(this, {photo: v})}>
+                   {content}
+                 </TouchableOpacity>
+       })
+    }
     if (!vCols) {
-      vCols = [];
+      vCols = []
       for (let p in itemsMeta) {
         if (p.charAt(0) !== '_'  &&  !itemsMeta[p].hidden)
           vCols.push(p);
@@ -398,6 +414,17 @@ var ResourceMixin = {
         </View>
       )
     });
+  },
+  showPDF({photo}) {
+    let route = {
+      backButtonTitle: 'Back',
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url
+      },
+      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
+    }
+    this.props.navigator.push(route)
   },
   renderItem({editItem, cancelItem, prop, v}) {
     const { bankStyle } = this.props
