@@ -236,6 +236,7 @@ class CheckRow extends Component {
                             <Icon color={'#ffffff'} size={20} name={checkOverrideStatus.icon} />
                           </View>
     }
+    let providerProp = <Text style={styles.checkDescription}>{'Provider: ' + (provider || translate(model))}</Text>
     return <View style={styles.titleView}>
              <View>
              {checkIcon}
@@ -244,7 +245,7 @@ class CheckRow extends Component {
              <View style={{justifyContent: 'center', paddingLeft: 10}}>
                <Text style={styles.rTitle}>{dn}</Text>
                {searchTerm}
-               <Text style={styles.checkDescription}>{'Provider: ' + provider || translate(model)}</Text>
+               {providerProp}
              </View>
            </View>
   }
