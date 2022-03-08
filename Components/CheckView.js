@@ -128,7 +128,7 @@ class CheckView extends Component {
   }
 
   render() {
-    let { backlink, bankStyle, resource } = this.state
+    let { backlink, bankStyle, resource, isLoading } = this.state
     let { navigator, application, currency } = this.props
     const styles = createStyles({bankStyle})
 
@@ -184,7 +184,7 @@ class CheckView extends Component {
                             </View>
                           </TouchableOpacity>
     }
-    else if (!this.state.isLoading) { //  &&  isRM(application)) {
+    else if (!isLoading) { //  &&  isRM(application)) {
       let checkOverrideProp = getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
       if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
@@ -197,6 +197,15 @@ class CheckView extends Component {
                               </View>
       }
     }
+    let loading
+    if (isLoading) {
+      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+                  {this.showLoading({bankStyle, component: CheckView})}
+                </View>
+      if (!resource[TYPE])
+        return loading
+    }
+
     // let copyButton = this.generateCopyLinkButton()
     let actionSheet = this.renderCopyLinkActionSheet(resource)
     let footer = this.renderMenu(CheckView)
@@ -213,8 +222,9 @@ class CheckView extends Component {
           {propertySheet}
           {checkOverrideButton}
         </ScrollView>
-        {footer}
-        {actionSheet}
+          {loading}
+          {footer}
+          {actionSheet}
       </PageView>
     );
   }
