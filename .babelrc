@@ -51,6 +51,7 @@
         ['transform-es2015-for-of', { loose: true }],
         'lodash',
         'inline-package-json',
+        'transform-exponentiation-operator',
       ]
     },
     development: {
@@ -91,6 +92,7 @@
         ['transform-es2015-for-of', { loose: true }],
         'lodash',
         'inline-package-json',
+        'transform-exponentiation-operator',
       ]
     }
   }
