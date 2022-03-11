@@ -33,7 +33,7 @@ import levelup from 'levelup'
 import JailMonkey from 'jail-monkey'
 import RNExitApp from 'react-native-exit-app';
 
-import plugins from '@tradle/biz-plugins'
+// import plugins from '@tradle/biz-plugins'
 import { allSettled } from '@tradle/promise-utils'
 import qrSchema from '@tradle/qr-schema'
 const links = qrSchema.links
@@ -3579,10 +3579,10 @@ var Store = Reflux.createStore({
   },
   async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource}) {
     let rtype = resource[TYPE]
-    if (!plugins.length  &&  !appPlugins.length)
+    if (/*!plugins.length  && */ !appPlugins.length)
       return
 
-    let allPlugins = plugins && plugins.slice() || []
+    let allPlugins = [] //plugins && plugins.slice() || []
     let appP = require('../plugins')
     appP.forEach(p => allPlugins.push(p))
 
@@ -3593,7 +3593,7 @@ var Store = Reflux.createStore({
       _context = originatingResource._context
     // if (appPlugins)
     //   appPlugins.forEach(p => allPlugins.push(p))
-    let context = this.getBizPluginsContext()
+    let context = { models: this.getModels() }
     let moreInfo
     let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
 
@@ -3601,9 +3601,9 @@ var Store = Reflux.createStore({
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
-      moreInfo = plugin(context).validateForm.call(
+      moreInfo = await plugin(context).validateForm.call(
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource: currentResource}
+          {application: _context, form: resource, currentResource, search: me.isEmployee && this.searchServer.bind(this)}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
@@ -3640,17 +3640,6 @@ var Store = Reflux.createStore({
     if (!noTrigger)
       this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties})
     // return rProps
-  },
-  getBizPluginsContext() {
-    return {
-      bot: {
-        objects: {
-          get: link => this._keeper.get(link)
-        }
-      },
-      productsAPI: {},
-      models: this.getModels()
-    }
   },
   async onAddVerification(params) {
     let { r, dontSend, notOneClickVerification, noTrigger, application } = params
