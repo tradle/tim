@@ -25,7 +25,7 @@ module.exports = function LeasingQuotes ({ models }) {
       // if (ftype.endsWith(QUOTATION_DETAILS))
       //   return await chooseDetail(form, models)
       // if (ftype.endsWith(QUOTE)) {
-        let {requestedProperties, costOfCapital} = await getQuote({form, models, search, currentResource})
+        let {costOfCapital} = await getQuote({form, models, search, currentResource})
         return chooseDetail({form, models, costOfCapital})
       // }
     }
@@ -61,6 +61,7 @@ function chooseDetail({form, models, costOfCapital}) {
 
   //   return { requestedProperties }
   // }
+  if (!costOfCapital) return
   if (form.xirr > costOfCapital.minIRR)
     form.approve = true
   else
@@ -68,10 +69,10 @@ function chooseDetail({form, models, costOfCapital}) {
 }
 async function getQuote({form, models, search, currentResource}) {
   let model = models[getType(form)]
-  if (!model) return
+  if (!model) return {}
 
   let { prefill, costOfCapital } = await quotationPerTerm({form, search, currentResource})
-  if (!prefill) return
+  if (!prefill) return {}
   extend(form, prefill)
   // let requestedProperties = []
   // if (model.editCols) {
@@ -120,7 +121,7 @@ async function quotationPerTerm({form, search, currentResource}) {
     presentValueFactor,
   } = costOfCapital
   if (isStub(asset)) {
-    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getCurrentHash(asset)}, noTrigger: true})
+    let { list } = await search({modelName: getType(asset), filterResource: {_link: getCurrentHash(asset)}, noTrigger: true})
     asset = list && list[0]
     if (!asset) return {}
   }
