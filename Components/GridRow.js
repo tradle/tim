@@ -234,7 +234,7 @@ class GridRow extends Component {
   formatCol(pName) {
     let { resource, isModel, search, locale, modelName } = this.props
     let rtype = utils.getType(resource)
-    let mName = rtype && !resource.id
+    let mName = rtype || resource.id
     if (!mName  &&  utils.isInlined(utils.getModel(modelName)))
       mName = modelName
     let model = utils.getModel(mName)//utils.getModel(rtype || resource.id || modelName)
