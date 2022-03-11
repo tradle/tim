@@ -4,7 +4,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import size from 'lodash/size'
 import extend from 'lodash/extend'
 import { TYPE } from '@tradle/constants'
-import { getMe, getModel, getType } from '../utils/utils'
+import { getMe, getModel, getType, getCurrentHash, isStub } from '../utils/utils'
 import validateResource from '@tradle/validate-resource'
 // @ts-ignore
 const { sanitize } = validateResource.utils
@@ -119,7 +119,12 @@ async function quotationPerTerm({form, search, currentResource}) {
     lowDepositFactor: lowDepositPercent,
     presentValueFactor,
   } = costOfCapital
-  let { residualValue } = form.asset
+  if (isStub(asset)) {
+    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getCurrentHash(asset)}, noTrigger: true})
+    asset = list && list[0]
+    if (!asset) return
+  }
+  let { residualValue } = asset
   let defaultQC = configurationItems[0]
 
   let depositVal = depositValue && depositValue.value || 0
