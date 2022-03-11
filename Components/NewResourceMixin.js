@@ -22,7 +22,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate, isWeb, enumValue } from '../utils/utils'
+import utils, { translate, isWeb, enumValue, getLensedModelForType } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -112,20 +112,21 @@ var NewResourceMixin = {
       if (!interfaces  ||  interfaces.indexOf(data[TYPE]) === -1)
         return;
     }
-
+    meta = getLensedModelForType(meta.id)
     let eCols = this.getEditCols(props, meta)
 
-    let showReadOnly = true
-    eCols.forEach(p => {
-      let prop = props[p]
-      // prop is readOnly if explicitely has readOnly on it or
-      // it is a _group property with 'list' of props annotation
-      if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list) {
-        if (!originatingMessage || !originatingMessage.prefill)
-          showReadOnly = false
-      }
-    })
-    // showReadOnly = true
+    let showReadOnly = data._dataBundle !== null
+    if (!showReadOnly) {
+      eCols.forEach(p => {
+        let prop = props[p]
+        // prop is readOnly if explicitely has readOnly on it or
+        // it is a _group property with 'list' of props annotation
+        if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list) {
+          if (!originatingMessage || !originatingMessage.prefill)
+            showReadOnly = false
+        }
+      })
+    }
     let requestedProperties, excludeProperties
     if (this.state.requestedProperties)
       ({requestedProperties, excludeProperties} = this.state.requestedProperties)

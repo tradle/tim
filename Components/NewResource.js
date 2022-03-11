@@ -500,12 +500,14 @@ class NewResource extends Component {
     let reqProperties = this.state.requestedProperties || this.props.requestedProperties
     if (reqProperties) {
       let { requestedProperties } = reqProperties
-      let eCols = []
-      let { softRequired } = this.addRequestedProps({eCols, props})
-      softRequired.forEach(p => {
-        if (required.indexOf(p) === -1)
-          required.push(p)
-      })
+      if (requestedProperties) {
+        let eCols = []
+        let { softRequired } = this.addRequestedProps({eCols, props})
+        softRequired.forEach(p => {
+          if (required.indexOf(p) === -1)
+            required.push(p)
+        })
+      }
     }
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
       Object.keys(errs).forEach(prop => {
