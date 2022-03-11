@@ -122,7 +122,7 @@ async function quotationPerTerm({form, search, currentResource}) {
   if (isStub(asset)) {
     let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getCurrentHash(asset)}, noTrigger: true})
     asset = list && list[0]
-    if (!asset) return
+    if (!asset) return {}
   }
   let { residualValue } = asset
   let defaultQC = configurationItems[0]
@@ -223,7 +223,7 @@ async function quotationPerTerm({form, search, currentResource}) {
       }
     }
     let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
-    let initPayment = depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
+    let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
     let d = new Date()
     let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
