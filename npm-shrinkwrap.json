@@ -242,7 +242,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding#leasing",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#44ae4bbfafe3ff60d784e0ef068122b427c578bd"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#abe02ac698b70882507b5ef712d711a2be07adaa"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -801,6 +801,12 @@
         }
       }
     },
+    "babel-helper-builder-binary-assignment-operator-visitor": {
+      "version": "6.24.1",
+      "from": "babel-helper-builder-binary-assignment-operator-visitor@>=6.24.1 <7.0.0",
+      "resolved": "https://registry.npmjs.org/babel-helper-builder-binary-assignment-operator-visitor/-/babel-helper-builder-binary-assignment-operator-visitor-6.24.1.tgz",
+      "dev": true
+    },
     "babel-helper-builder-react-jsx": {
       "version": "6.26.0",
       "from": "babel-helper-builder-react-jsx@>=6.24.1 <7.0.0",
@@ -817,6 +823,12 @@
       "version": "6.26.0",
       "from": "babel-helper-define-map@>=6.24.1 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-helper-define-map/-/babel-helper-define-map-6.26.0.tgz",
+      "dev": true
+    },
+    "babel-helper-explode-assignable-expression": {
+      "version": "6.24.1",
+      "from": "babel-helper-explode-assignable-expression@>=6.24.1 <7.0.0",
+      "resolved": "https://registry.npmjs.org/babel-helper-explode-assignable-expression/-/babel-helper-explode-assignable-expression-6.24.1.tgz",
       "dev": true
     },
     "babel-helper-function-name": {
@@ -907,6 +919,12 @@
       "version": "6.13.0",
       "from": "babel-plugin-syntax-class-properties@>=6.5.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-plugin-syntax-class-properties/-/babel-plugin-syntax-class-properties-6.13.0.tgz",
+      "dev": true
+    },
+    "babel-plugin-syntax-exponentiation-operator": {
+      "version": "6.13.0",
+      "from": "babel-plugin-syntax-exponentiation-operator@>=6.8.0 <7.0.0",
+      "resolved": "https://registry.npmjs.org/babel-plugin-syntax-exponentiation-operator/-/babel-plugin-syntax-exponentiation-operator-6.13.0.tgz",
       "dev": true
     },
     "babel-plugin-syntax-flow": {
@@ -1027,6 +1045,12 @@
       "version": "6.22.0",
       "from": "babel-plugin-transform-es2015-template-literals@>=6.5.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-template-literals/-/babel-plugin-transform-es2015-template-literals-6.22.0.tgz",
+      "dev": true
+    },
+    "babel-plugin-transform-exponentiation-operator": {
+      "version": "6.24.1",
+      "from": "babel-plugin-transform-exponentiation-operator@latest",
+      "resolved": "https://registry.npmjs.org/babel-plugin-transform-exponentiation-operator/-/babel-plugin-transform-exponentiation-operator-6.24.1.tgz",
       "dev": true
     },
     "babel-plugin-transform-flow-strip-types": {
@@ -5127,6 +5151,11 @@
       "from": "node-forge@>=0.7.1 <0.8.0",
       "resolved": "http://registry.npmjs.org/node-forge/-/node-forge-0.7.6.tgz",
       "dev": true
+    },
+    "node-irr": {
+      "version": "2.0.3",
+      "from": "node-irr@2.0.3",
+      "resolved": "https://registry.npmjs.org/node-irr/-/node-irr-2.0.3.tgz"
     },
     "node-libs-browser": {
       "version": "1.1.1",
