@@ -80,6 +80,9 @@ module.exports = {
   get SplashPage() {
     return require('./SplashPage')
   },
+  get PrintReport() {
+    return require('./PrintReport')
+  },
   get TouchIDOptIn() {
     return require('./TouchIDOptIn')
   },
