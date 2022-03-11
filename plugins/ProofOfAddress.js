@@ -8,7 +8,7 @@ const PROOF_OF_ADDRESS = 'tradle.ProofOfAddress'
 
 module.exports = function ProofOfAddress ({ models }) {
   return {
-    validateForm: function validateForm ({
+    validateForm: async function validateForm ({
       application,
       form
     }) {

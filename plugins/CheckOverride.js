@@ -5,7 +5,7 @@ const CHECK_OVERRIDE = 'tradle.CheckOverride'
 
 module.exports = function CheckOverride ({ models }) {
   return {
-    validateForm: function validateForm ({
+    validateForm: async function validateForm ({
       application,
       form
     }) {

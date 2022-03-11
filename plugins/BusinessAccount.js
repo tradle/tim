@@ -4,7 +4,7 @@ import { TYPE } from '@tradle/constants'
 
 import validateResource from '@tradle/validate-resource'
 
-import { getModel, getLensedModel, getPropertiesWithAnnotation, isNew, getEnumValueId } from '../utils/utils'
+import { getModel, getLensedModel, getLens, getPropertiesWithAnnotation, isNew, getEnumValueId } from '../utils/utils'
 
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
@@ -17,7 +17,7 @@ const COUNTRY = 'tradle.Country'
 
 module.exports = function LegalEntity ({ models }) {
   return {
-    validateForm: function validateForm ({
+    validateForm: async function validateForm ({
       application,
       form
     }) {
@@ -108,6 +108,12 @@ function getPropsForLegalDocument(form) {
   return ret
 }
 function getPropsForLegalEntity(form, models) {
+  let m = models[form[TYPE]]
+  if (m.lens) {
+    let lens= getLens(m.lens)
+    if (lens.editCols)
+      return
+  }
   let { streetAddress, city, postalCode, country } = form
   let countryCode = country  &&  country.id.split('_')[1]
 
@@ -180,6 +186,13 @@ function isNewResource(stub) {
 }
 
 function getPropsForControllingEntity(form, models) {
+  let m = models[form[TYPE]]
+  if (m.lens  &&  m.editCols) {
+    let requestedProperties = []
+    m.editCols.forEach(p => requestedProperties.push({name: p}))
+    return { requestedProperties }
+  }
+
   let typeOfControllingEntity = form.typeOfControllingEntity
   if (!typeOfControllingEntity)
     return {
