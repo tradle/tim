@@ -92,6 +92,17 @@ var NewResourceMixin = {
     }
     let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
+
+    let dModel = data  &&  getLensedModelForType(data[TYPE])
+    if (!utils.isEmpty(data)    &&
+        !meta.items             &&
+        data[TYPE] !== meta.id  &&
+        !utils.isSubclassOf(dModel, meta.id)) {
+      let interfaces = meta.interfaces;
+      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) === -1)
+        return;
+    }
+    meta = getLensedModelForType(meta.id)
     let props, bl
     if (!meta.items)
       props = meta.properties;
@@ -102,17 +113,6 @@ var NewResourceMixin = {
       else
         props = meta.items.properties
     }
-
-    let dModel = data  &&  utils.getModel(data[TYPE])
-    if (!utils.isEmpty(data)    &&
-        !meta.items             &&
-        data[TYPE] !== meta.id  &&
-        !utils.isSubclassOf(dModel, meta.id)) {
-      let interfaces = meta.interfaces;
-      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) === -1)
-        return;
-    }
-    meta = getLensedModelForType(meta.id)
     let eCols = this.getEditCols(props, meta)
 
     let showReadOnly = data._dataBundle !== null
