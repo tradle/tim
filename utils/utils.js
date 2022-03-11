@@ -361,6 +361,9 @@ var utils = {
     const [type, permalink, link] = id.split('_')
     return { type, permalink, link }
   },
+  getLens(lensId) {
+    return getStore().getLens(lensId)
+  },
   getLensedModel(fr, lensId) {
     const Store = getStore()
     const form = utils.getRequestedFormType(fr)
