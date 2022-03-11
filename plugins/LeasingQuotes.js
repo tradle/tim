@@ -97,6 +97,7 @@ async function quotationPerTerm({form, search, currentResource}) {
     priceMx,
     depositValue,
     fundedInsurance,
+    discountFromVendor,
     blindDiscount = 0
   } = quotationInfo
   if (!factor || !netPrice || !exchangeRate || !deliveryTime ||
@@ -121,14 +122,14 @@ async function quotationPerTerm({form, search, currentResource}) {
   let { residualValue } = form.asset
   let defaultQC = configurationItems[0]
 
+  let depositVal = depositValue && depositValue.value || 0
+
   configurationItems.forEach((quotConf, i) => {
     let qc = cloneDeep(defaultQC)
     for (let p in quotConf)
       qc[p] = quotConf[p]
-    let {
-      term,
-      // factor: factorVPdelVR
-    } = quotConf
+
+    let { term } = quotConf
 
     let residualValuePerTerm = residualValue.find(rv => {
       return rv.term.id === term.id
@@ -147,8 +148,6 @@ async function quotationPerTerm({form, search, currentResource}) {
       lowDepositFactor = 0
     let totalPercentage = mathRound(1 + factorPercentage + deliveryTermPercentage + depositFactor + lowDepositFactor, 4)
 
-    let depositVal = depositValue && depositValue.value || 0
-
     let factorVPdelVR = termVal/12 * presentValueFactor/100
 
     // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
@@ -163,6 +162,7 @@ async function quotationPerTerm({form, search, currentResource}) {
 
     let currency = netPriceMx.currency
     let vatQc =  mathRound((monthlyPayment + insurance) * vatRate)
+    let paymentFromVendor = (priceMx.value - depositVal) * discountFromVendor / 100
     let qd = {
       [TYPE]: termsPropRef,
       factorPercentage,
@@ -202,6 +202,10 @@ async function quotationPerTerm({form, search, currentResource}) {
       },
       purchaseOptionPrice: priceMx && {
         value: mathRound(priceMx.value * residualValuePerTerm),
+        currency
+      },
+      paymentFromVendor: paymentFromVendor && {
+        value: mathRound(paymentFromVendor),
         currency
       }
     }
