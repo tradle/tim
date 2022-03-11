@@ -14,7 +14,7 @@ module.exports = function ValidateSelector ({ models }) {
       if (!application  &&  form[TYPE] !== BOOKMARK)
         return
       // let m = getModel(form[TYPE])
-      let m = models[form[TYPE]]
+      let m = this.models[form[TYPE]]
       // if (m.lens) {
       //   let lens= getLens(m.lens)
       //   if (lens.editCols)
