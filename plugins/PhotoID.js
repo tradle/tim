@@ -21,7 +21,7 @@ const sideToSnap = {
 }
 module.exports = function PhotoID ({ models }) {
   return {
-    validateForm: function validateForm ({
+    validateForm: async function validateForm ({
       application,
       form,
       currentResource

@@ -7,13 +7,19 @@ const BOOKMARK = 'tradle.Bookmark'
 
 module.exports = function ValidateSelector ({ models }) {
   return {
-    validateForm: function validateForm ({
+    validateForm: async function validateForm ({
       application,
       form
     }) {
       if (!application  &&  form[TYPE] !== BOOKMARK)
         return
-      const m = getModel(form[TYPE])
+      // let m = getModel(form[TYPE])
+      let m = models[form[TYPE]]
+      // if (m.lens) {
+      //   let lens= getLens(m.lens)
+      //   if (lens.editCols)
+      //     return {}
+      // }
       if (!m)
         return
       const show = getPropertiesWithAnnotation(m, 'showIf')
@@ -217,7 +223,7 @@ module.exports = function ValidateSelector ({ models }) {
         if (!exclude.includes(p))
           requestedProperties.push({name: p})
       })
-      return {
+      return !form[TYPE].endsWith('.Quote') && {
         requestedProperties,
         excludeProperties: exclude.length && exclude
       }

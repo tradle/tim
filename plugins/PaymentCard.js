@@ -4,7 +4,7 @@ const PAYMENT_CARD = 'tradle.CreditCard'
 
 module.exports = function PaymentCard ({ models }) {
   return {
-    validateForm: function validateForm ({
+    validateForm: async function validateForm ({
       application,
       form,
       currentResource
