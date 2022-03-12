@@ -186,8 +186,14 @@ class ReportGenerator {
         }
         if (pModel.inlined || p.inlined) {
           if (ii !== prop.length - 1) {
-            if (Array.isArray(propValue))
-              val = propValue.map(pf => pf[prop[ii + 1]])
+            if (Array.isArray(propValue)) {
+              val = propValue.map((pf, i) => {
+                let propV = pf[prop[ii + 1]]
+                let v = this.getValue({resource, form: pf, prop: prop[ii+1], locale})
+                return v
+                // pf[prop[ii + 1]]
+              })
+            }
             else
               val = propValue[prop[ii + 1]]
           }
