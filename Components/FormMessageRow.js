@@ -20,6 +20,7 @@ var { TYPE, SIG } = constants
 import utils, { translate } from '../utils/utils'
 import PhotoList from './PhotoList'
 import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
 import { makeStylish } from './makeStylish'
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
@@ -240,17 +241,6 @@ class FormMessageRow extends Component {
       </View>
     );
   }
-  showPDF({photo}) {
-    let route = {
-      backButtonTitle: 'Back',
-      componentName: 'ArticleView',
-      passProps: {
-        href: photo.url
-      },
-      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
-    }
-    this.props.navigator.push(route)
-  }
   formatRow(isMyMessage, renderedRow, styles) {
     let resource = this.props.resource;
     let rtype = utils.getType(resource)
@@ -449,6 +439,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   })
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
+reactMixin(FormMessageRow.prototype, ResourceMixin);
 FormMessageRow = makeStylish(FormMessageRow)
 FormMessageRow = makeResponsive(FormMessageRow)
 

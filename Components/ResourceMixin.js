@@ -416,15 +416,17 @@ var ResourceMixin = {
     });
   },
   showPDF({photo}) {
-    let route = {
+    const { bankStyle, navigator } = this.props
+    navigator.push({
       backButtonTitle: 'Back',
+      title: photo.name || translate('Document'),
       componentName: 'ArticleView',
       passProps: {
-        href: photo.url
+        href: photo.url,
+        bankStyle
       },
       // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
-    }
-    this.props.navigator.push(route)
+    })
   },
   renderItem({editItem, cancelItem, prop, v}) {
     const { bankStyle } = this.props

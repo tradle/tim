@@ -11,6 +11,7 @@ import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import WebView from './WebView'
 import StyleSheet from '../StyleSheet'
+import platformStyles from '../styles/platform'
 
 // import defaultBankStyle from '../styles/bankStyle.json'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -66,7 +67,7 @@ class ArticleView extends Component {
                </View>
              </TouchableOpacity>
     return (
-      <View style={{height: utils.dimensions().height}}>
+      <View style={[platformStyles.container, {height: utils.dimensions().height}]}>
         {wView}
         {actionItem}
       </View>
