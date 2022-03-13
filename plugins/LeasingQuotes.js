@@ -52,15 +52,7 @@ function chooseDetail({form, models, costOfCapital}) {
 
   extend(form, term)
   form[TYPE] = ftype
-  // if (ftype === termsPropRef) {
-  //   if (m.editCols) {
-  //     requestedProperties = m.editCols.map(p => {
-  //         return { name: p }
-  //       })
-  //   }
 
-  //   return { requestedProperties }
-  // }
   if (!costOfCapital) return
   if (form.xirr > costOfCapital.minIRR)
     form.approve = true
@@ -74,18 +66,12 @@ async function getQuote({form, models, search, currentResource}) {
   let { prefill, costOfCapital } = await quotationPerTerm({form, search, currentResource})
   if (!prefill) return {}
   extend(form, prefill)
-  // let requestedProperties = []
-  // if (model.editCols) {
-  //   requestedProperties = model.editCols.map(p => {
-  //     return { name: p }
-  //   })
-  // }
-  // return { requestedProperties, costOfCapital }
   return { costOfCapital }
 }
 async function quotationPerTerm({form, search, currentResource}) {
   const quotationInfo = form
   let {
+    term: termQuote,
     factor,
     netPrice,
     commissionFeePercent,
@@ -99,13 +85,13 @@ async function quotationPerTerm({form, search, currentResource}) {
     depositValue,
     fundedInsurance,
     discountFromVendor,
-    blindDiscount = 0
+    blindDiscount = 0,
+    residualValue: residualValueQuote
   } = quotationInfo
   if (!factor || !netPrice || !exchangeRate || !deliveryTime ||
       !netPriceMx || !priceMx || !fundedInsurance) {
     return {}
   }
-  // let costOfCapital = CostOfCapital
   debugger
   let { list } = await search({modelName: COST_OF_CAPITAL, filterResource: {current: true}, noTrigger: true})
   if (!list || !list.length) return {}
@@ -140,7 +126,20 @@ async function quotationPerTerm({form, search, currentResource}) {
     let residualValuePerTerm = residualValue.find(rv => {
       return rv.term.id === term.id
     })
-    residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
+    // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
+    if (termQuote && term.id == termQuote.id) {
+      if (!residualValueQuote) {
+        form.residualValue = residualValuePerTerm.rv
+        residualValuePerTerm = residualValuePerTerm.rv
+      }
+      else if (residualValueQuote < residualValuePerTerm.rv)
+        residualValuePerTerm = residualValueQuote
+      else {
+        form.residualValue = residualValuePerTerm.rv
+        residualValuePerTerm = residualValuePerTerm.rv
+      }
+    }
+    residualValuePerTerm /= 100
     let termVal = term.title.split(' ')[0]
     let factorPercentage = mathRound(factor / 100 / 12 * termVal, 4)
 
@@ -173,7 +172,6 @@ async function quotationPerTerm({form, search, currentResource}) {
       [TYPE]: termsPropRef,
       factorPercentage,
       deliveryTermPercentage,
-      // depositFactor:
       lowDepositFactor,
       term,
       commissionFee: {
