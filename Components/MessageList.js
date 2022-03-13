@@ -177,7 +177,7 @@ class MessageList extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAction');
     this._watchSubmit()
-    if (isWhitelabeled())
+    // if (isWhitelabeled())
       Actions.noPairing(this.props.resource)
   }
 
