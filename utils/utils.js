@@ -869,7 +869,7 @@ var utils = {
     let toId = utils.getId(r.to);
 
     let meId = utils.getId(me)
-    if (fromId === meId)
+    if (fromId === meId || r._author === utils.getRootHash(me))
       return true;
     if (toId === meId)
       return false
