@@ -115,6 +115,7 @@ async function quotationPerTerm({form, search, currentResource}) {
   let defaultQC = configurationItems[0]
 
   let depositVal = depositValue && depositValue.value || 0
+  blindDiscount = blindDiscount/100
 
   configurationItems.forEach((quotConf, i) => {
     let qc = cloneDeep(defaultQC)
@@ -226,12 +227,14 @@ async function quotationPerTerm({form, search, currentResource}) {
     }
     let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
     let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
+    let blindPayment = priceMx.value * blindDiscount
     let d = new Date()
     let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
     let data = [
       {amount: -priceMx.value, date},
-      {amount: initPayment, date}
+      {amount: initPayment, date},
+      {amount: blindPayment, date}
     ]
     let m = d.getMonth()
     for (let j=0; j<termVal - 1; j++) {
