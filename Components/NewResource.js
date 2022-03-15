@@ -973,27 +973,27 @@ if (r.url)
       itemsMeta = utils.getItemsMeta(meta);
 
     let arrayItems
-    if (!search) {
-      for (let p in itemsMeta) {
-        if (!this.checkRequestedProperties(p))
-          continue
+    for (let p in itemsMeta) {
+      let bl = itemsMeta[p]
+      // if (search && !bl.inlined || (bl.items.ref && !utils.getModel(bl.items.ref).inlined))
+      //   continue
+      if (!this.checkRequestedProperties(p))
+        continue
 
-        let bl = itemsMeta[p]
-        if (bl.icon === 'ios-telephone-outline') {
-          bl.icon = 'ios-call-outline'
-        }
-        if (!arrayItems)
-          arrayItems = []
-        if (bl.readOnly  ||  bl.items.backlink) {
-          arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
-          continue
-        }
-        // let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
-          arrayItems.push(this.getPhotoItem(bl, styles))
-        else
-          arrayItems.push(this.getItem(bl, styles))
+      if (bl.icon === 'ios-telephone-outline') {
+        bl.icon = 'ios-call-outline'
       }
+      if (!arrayItems)
+        arrayItems = []
+      if (bl.readOnly  ||  bl.items.backlink) {
+        arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
+        continue
+      }
+      // let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+      if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
+        arrayItems.push(this.getPhotoItem(bl, styles))
+      else
+        arrayItems.push(this.getItem(bl, styles))
     }
     if (isRegistration)
       Form.stylesheet = rStyles
