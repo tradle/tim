@@ -3595,7 +3595,8 @@ var Store = Reflux.createStore({
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = { models: this.getModels() }
     let moreInfo
-    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
+    // let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
+    let m = originatingResource && originatingResource.lens ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
 
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
