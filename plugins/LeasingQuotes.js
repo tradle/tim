@@ -139,7 +139,10 @@ async function quotationPerTerm({form, search, currentResource}) {
         residualValuePerTerm = residualValuePerTerm.rv
       }
     }
-    residualValuePerTerm /= 100
+    else
+      residualValuePerTerm = residualValuePerTerm.rv
+
+    residualValuePerTerm = residualValuePerTerm / 100
     let termVal = term.title.split(' ')[0]
     let factorPercentage = mathRound(factor / 100 / 12 * termVal, 4)
 
