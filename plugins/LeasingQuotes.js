@@ -115,6 +115,7 @@ async function quotationPerTerm({form, search, currentResource}) {
   let defaultQC = configurationItems[0]
 
   let depositVal = depositValue && depositValue.value || 0
+  blindDiscount = blindDiscount/100
 
   configurationItems.forEach((quotConf, i) => {
     let qc = cloneDeep(defaultQC)
