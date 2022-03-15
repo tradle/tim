@@ -334,7 +334,7 @@ class GridList extends Component {
       });
       return
     }
-    if (modelName === BOOKMARK || modelName === BOOKMARKS_FOLDER) {
+    if ((resource && modelName === BOOKMARK) || modelName === BOOKMARKS_FOLDER) {
       Actions.getBookmarks({ modelName, resource, isChooser })
       return
     }
@@ -414,7 +414,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
   }
   onAction(params) {
-    let { action, error, list, resource, endCursor, isConnected, noMove, addAllowed } = params
+    let { action, error, list, resource, endCursor, isConnected, noMove, addAllowed, cancelled } = params
     if (error)
       return;
     let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink } = this.props
@@ -454,7 +454,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
       if (idx == -1)
         return
       l = l.slice()
-      l.splice(idx, 1, resource)
+      if (cancelled)
+        l.splice(idx, 1)
+      else
+        l.splice(idx, 1, resource)
 
       this.setState({
         list: l,
@@ -1008,7 +1011,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
           passProps: {
             model: rModel,
             resource,
-            search: !isBacklink  &&  search,
+            // search: !isBacklink  &&  search,
             serverOffline,
             currency,
             locale,
@@ -1294,13 +1297,15 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 lazy={lazy}
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 onMove={() => this.moveBookmark({resource: selectedResource})}
+                onCancel={() => this.cancelBookmark({resource: selectedResource, folder: this.props.resource})}
                 bankStyle={bankStyle}
                 navigator={navigator}
                 locale={locale}
                 noMove={this.state.noMove}
                 currency={currency}
                 isChooser={isChooser}
-                resource={resource}/>
+                resource={resource}
+                folder={this.props.resource || resource}/>
       )
 
       return (<VerificationRow
@@ -1363,6 +1368,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
 
     navigator.push(route)
+  }
+  cancelBookmark({ resource, folder }) {
+    resource.cancelled = true
+    Actions.addChatItem({resource})
   }
 
   showCategory(model) {
@@ -1802,12 +1811,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
       }
     }
     else if (modelName === BOOKMARKS_FOLDER) {
-      buttons = [
-        {
-          text: translate('addNew', translate(utils.getModel(BOOKMARKS_FOLDER))),
-          onPress: () => this.bookmark(true)
-        }
-      ]
+      // buttons = [
+      //   {
+      //     text: translate('addNew', translate(utils.getModel(BOOKMARKS_FOLDER))),
+      //     onPress: () => this.bookmark(true)
+      //   }
+      // ]
     }
     else if (search) {
       buttons = [

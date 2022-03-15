@@ -3595,7 +3595,6 @@ var Store = Reflux.createStore({
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = { models: this.getModels() }
     let moreInfo
-    // let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
     let m = originatingResource && originatingResource.lens ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
 
     for (let i=0; i<allPlugins.length; i++) {
@@ -3604,7 +3603,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = await plugin(context).validateForm.call(
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource, search: me.isEmployee && this.searchServer.bind(this)}
+          {application: _context, form: resource, currentResource, search: me.isEmployee ? this.searchServer.bind(this) : null}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
@@ -5130,41 +5129,45 @@ if (!res[SIG]  &&  res._message)
           }
           self.onHasBookmarks()
 
+          // if (!employeeSetup) {
+          //   if (!resource.shared  &&  resource.title !== translate('initialBookmarks')) {
+          //     if (bookmarksFolder) {
+          //       bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: bookmarksFolder.title}, noTrigger: true})
+          //       bookmarksFolder = bookmarksFolder[0]
+          //       bookmarksFolder = await self.onGetItem({resource: bookmarksFolder, noTrigger: true})
+
+          //       if (!isSharedBookmark && bookmarksFolder.shared) {
+          //         Alert.alert(translate('personalBookmarkInSharedFolder'))
+          //         return
+          //       }
+          //     }
+
+          //     else {
+          //       let folderName
+          //       if (returnVal.shared)
+          //         folderName = translate('sharedBookmarks')
+          //       else
+          //         folderName = translate('personalBookmarks')
+          //       bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: folderName}, noTrigger: true})
+          //       bookmarksFolder = bookmarksFolder[0]
+          //     }
+          //     if (bookmarksFolder) {
+          //       if (!bookmarksFolder.list)
+          //         bookmarksFolder.list = []
+          //       let bidx = isNew ? -1 : bookmarksFolder.list.findIndex(b => utils.getRootHash(b) === returnVal[ROOT_HASH])
+          //       if (bidx === -1  &&  !returnVal.cancelled)
+          //         bookmarksFolder.list.push(self.buildRef(returnVal))
+          //       else if (returnVal.cancelled)
+          //         bookmarksFolder.list.splice(bidx, 1)
+          //       else
+          //         bookmarksFolder.list.splice(bidx, 1, self.buildRef(returnVal))
           // debugger
-          if (!employeeSetup) {
-            if (bookmarksFolder) {
-              bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: bookmarksFolder.title}, noTrigger: true})
-              bookmarksFolder = bookmarksFolder[0]
-              bookmarksFolder = await self.onGetItem({resource: bookmarksFolder, noTrigger: true})
-
-              if (!isSharedBookmark && bookmarksFolder.shared) {
-                Alert.alert(translate('personalBookmarkInSharedFolder'))
-                return
-              }
-            }
-
-            else {
-              let folderName
-              if (returnVal.shared)
-                folderName = translate('sharedBookmarks')
-              else
-                folderName = translate('personalBookmarks')
-              bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: folderName}, noTrigger: true})
-              bookmarksFolder = bookmarksFolder[0]
-            }
-            if (bookmarksFolder) {
-              if (!bookmarksFolder.list)
-                bookmarksFolder.list = []
-              let bidx = isNew ? -1 : bookmarksFolder.list.findIndex(b => utils.getRootHash(b) === returnVal[ROOT_HASH])
-              if (bidx === -1)
-                bookmarksFolder.list.push(self.buildRef(returnVal))
-              else
-                bookmarksFolder.list.splice(bidx, 1, self.buildRef(returnVal))
-              let bf = await self.onAddChatItem({resource: bookmarksFolder, noTrigger: true, origNoTrigger: true})
-              if (!noTrigger)
-                self.trigger({action: 'updateItem', resource: bf})
-            }
-          }
+          //       let bf = await self.onAddChatItem({resource: bookmarksFolder, noTrigger: true, origNoTrigger: true})
+          //       if (!noTrigger)
+          //         self.trigger({action: 'updateItem', resource: bf})
+          //     }
+          //   }
+          // }
         }
         if (!isSavedItem) { //  &&  (!isBookmark  ||  isSharedBookmark)) {
           if (!doNotSend) {
@@ -5222,8 +5225,8 @@ if (!res[SIG]  &&  res._message)
           if (isBookmark) {
             if (isNew)
               self.trigger({ action: 'addItem', resource: returnVal })
-          //   else
-          //     self.trigger({ action: 'updateItem', resource: returnVal })
+            else
+              self.trigger({ action: 'updateItem', resource: returnVal, cancelled: returnVal.cancelled })
           }
 
           return
@@ -7607,7 +7610,8 @@ if (!res[SIG]  &&  res._message)
     }
 
     let isIdentity = r[TYPE] === IDENTITY
-    let authorId = utils.makeId(PROFILE, isIdentity && r._permalink || (r._org  ||  r._author))
+    let authorId = utils.makeId(PROFILE, isIdentity && r._permalink || (r._org  ||  r._author))    // let permalink
+
     let author = this._getItem(authorId)
     let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName({ resource: author.organization }))
     let org
@@ -8101,7 +8105,12 @@ if (!res[SIG]  &&  res._message)
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         let item = this._getItem(thisChatMessages[i].id)
-        if (!item  ||  item[TYPE] === DATA_CLAIM  ||  item[TYPE] === DATA_BUNDLE  ||  item[TYPE] === VERIFICATION)
+        if (!item  ||
+             item[TYPE] === DATA_CLAIM   ||
+             item[TYPE] === DATA_BUNDLE  ||
+             item[TYPE] === VERIFICATION ||
+             // item[TYPE] === BOOKMARK     ||
+             item[TYPE] === BOOKMARKS_FOLDER)
           continue
         // HACK for sharing set of forms
         let imodel = utils.getModel(item[TYPE])
@@ -8939,21 +8948,41 @@ if (!res[SIG]  &&  res._message)
       this.trigger({list, action: 'list', isChooser, first: true})
       return
     }
-    const isShared = resource.shared
+    const isShared = resource && resource.shared
     if (isShared) {
-      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true}, modelName: BOOKMARK, search: true, noTrigger: true })
-      this.trigger({list, action: 'list', isChooser, first: true, noMove})
+      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true })
+      this.trigger({list, action: 'list', isChooser, first: true, noMove: true})
       return
     }
-    if (!resource.list  ||  !resource.list.length)
+
+    if (!resource.list  ||  !resource.list.length) {
+      let initFolder = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('initialBookmarks'))
+      let initFolderLinks = initFolder[0].list.map(r => utils.getRootHash(r))
+      debugger
+      let result = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true })
+      let list
+      if (result) {
+        list = result.list
+        list = list  &&  list.filter(r => {
+          if (initFolderLinks.find(b => b === r[ROOT_HASH]))
+            return false
+          return true
+        })
+      }
+      this.trigger({list, action: 'list', isChooser, first: true, noMove: true})
       return
+    }
 
     let list = []
     let { list:l } = resource
+    let search = resource.message !== translate('initialBookmarks') // && resource.message !== translate('personalBookmarks')
     for (let i=0; i<l.length; i++) {
       let r = l[i]
-      if (utils.isStub(r))
-        list.push(await this.onGetItem({resource: r, noTrigger: true, search: resource.message !== translate('initialBookmarks')}))
+      if (utils.isStub(r)) {
+        let item = await this.onGetItem({resource: r, noTrigger: true, search})
+        if (item)
+          list.push(item)
+      }
       else
         list.push(r)
     }
