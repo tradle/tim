@@ -159,7 +159,7 @@ async function quotationPerTerm({form, search, currentResource}) {
     let factorVPdelVR = termVal/12 * presentValueFactor/100
 
     // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
-    blindDiscount = blindDiscount/100
+    // blindDiscount = blindDiscount/100
     let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscount) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscount)
     // let monthlyPaymentPMT = (vatRate/12)/(((1+vatRate/12)**termVal)-1)*(netPriceMx.value*((1+vatRate/12)**termVal)-(netPriceMx.value*residualValue/100))
 
