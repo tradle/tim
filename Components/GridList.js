@@ -1371,7 +1371,17 @@ console.log('GridList.componentWillMount: filterResource', resource)
   }
   cancelBookmark({ resource, folder }) {
     resource.cancelled = true
-    Actions.addChatItem({resource})
+    Alert.alert(
+      translate('pleaseConfirm'),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => console.log('Cancel')},
+        {text: 'OK', onPress: () => {
+          Actions.addChatItem({resource})
+          // this.props.navigator.pop()
+        }}
+      ]
+    )
   }
 
   showCategory(model) {
