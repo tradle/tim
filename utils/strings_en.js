@@ -318,7 +318,7 @@ module.exports = {
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
-    "completeApplicationForClient": "Complete application for client",
+    "completeApplicationForClient": "Complete for the prospect application: {1}",
     "notSupportedMimeTypes": "Not supported mime types {1}",
     "bookmarkWasCreated": "Bookmark was created",
     "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
