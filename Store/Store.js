@@ -4267,6 +4267,7 @@ if (!res[SIG]  &&  res._message)
             let m = utils.getModel(blProp.items.ref)
             let sortProp = m.sort || '_time'
             list.sort((a, b) => b[sortProp] - a[sortProp])
+            list.forEach(l => l._context = r._context)
           }
           r[blProp.name] = list
         }
@@ -5755,7 +5756,7 @@ if (!res[SIG]  &&  res._message)
   },
   async onSubmitDraftApplication({context}) {
     let contextId = context.contextId
-    var params = {
+    let params = {
       modelName: APPLICATION,
       to: me.organization,
       noTrigger: true,
@@ -5776,6 +5777,32 @@ if (!res[SIG]  &&  res._message)
 
     await this.onAddChatItem({resource: application})
   },
+  async onSubmitCompletedApplication({context}) {
+    let contextId = context.contextId
+    let params = {
+      modelName: APPLICATION,
+      to: me.organization,
+      noTrigger: true,
+      search: true,
+      filterResource: {
+        context: contextId,
+        draft: true
+      }
+    }
+
+    let { list } = await this.searchServer(params)
+    if (!list  ||  !list.length) {
+      debugger
+      return
+    }
+    let application = list[0]
+    application.draft = false
+    application.draftCompleted = true
+    application.processingDataBundle = false
+
+    await this.onAddChatItem({resource: application})
+  },
+
   async onGetProductList({ resource }) {
     if (resource[TYPE] !== ORGANIZATION) {
       let org = resource.organization

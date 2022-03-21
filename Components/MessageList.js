@@ -1280,6 +1280,22 @@ class MessageList extends Component {
             )
           }
         })
+        push({
+          title: translate('completeApplicationForClient', translate(utils.getModel(ctx.requestFor))),
+          callback: () => {
+            Alert.alert(
+              translate('pleaseConfirm'),
+              null,
+              [
+                {text: translate('cancel'), onPress: () => console.log('Cancel')},
+                {text: 'OK', onPress: () => {
+                  Actions.submitCompletedApplication({context: ctx})
+                  // this.props.navigator.pop()
+                }}
+              ]
+            )
+          }
+        })
       }
     }
     push({
