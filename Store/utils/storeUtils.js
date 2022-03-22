@@ -612,6 +612,7 @@ const storeUtils = {
     let { properties } = getModel(resource[TYPE])
     for (let p in resource) {
       let val = resource[p]
+      if (!val) continue
       if (typeof val === 'object'  &&  val._displayName) {
         resource[p] = storeUtils.makeStub(val)
         continue
