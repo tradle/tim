@@ -199,6 +199,7 @@ const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 const CURRENCY            = 'tradle.Currency'
+const APPLICATION_COMPLETED  = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED  = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const PERSONAL_INFO       = 'tradle.PersonalInfo'
@@ -5805,6 +5806,15 @@ if (!res[SIG]  &&  res._message)
     application.processingDataBundle = false
 
     await this.onAddChatItem({resource: application})
+    await utils.promiseDelay(2000)
+    await this.onAddChatItem({resource: {
+      [TYPE]: APPLICATION_COMPLETED,
+      message: translate(utils.getModel(APPLICATION_COMPLETED)),
+      from: application.from,
+      to: application.to,
+      context: application.context,
+      _context: context
+    }})
   },
 
   async onGetProductList({ resource }) {

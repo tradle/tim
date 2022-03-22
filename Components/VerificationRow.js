@@ -47,6 +47,7 @@ const {
 } = constants.TYPES
 
 const APPLICATION = 'tradle.Application'
+const APPLICATION_COMPLETED = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const CONFIRMATION = 'tradle.Confirmation'
@@ -296,7 +297,7 @@ vicon = null
       else if (search) {
         if (isVerification)
           title = translate(verificationRequest)
-        else if (model.id === APPLICATION_SUBMITTED)
+        else if (model.id === APPLICATION_SUBMITTED ||  model.id === APPLICATION_COMPLETED)
           title = resource.message
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
