@@ -209,7 +209,6 @@ class CheckRow extends Component {
     let statusId = getEnumValueId({model: sModel, value: status})
     let statusM = sModel.enum.find(r => r.id === statusId)
     let checkIcon
-    let checkOverrideStatus = this.getCheckOverrideStatus()
 
     const { icon, color } = statusM
     let style, size, icolor
@@ -231,6 +230,7 @@ class CheckRow extends Component {
     }
     let checkOverrideIcon
     let dnTitle
+    let checkOverrideStatus = this.getCheckOverrideStatus()
     if (checkOverrideStatus) {
       style = [styles.checkButton, {alignSelf: 'flex-end', alignItems: 'center', width: 20, height: 20, marginTop: -20, backgroundColor: checkOverrideStatus.color}]
       checkOverrideIcon = <View style={style}>
