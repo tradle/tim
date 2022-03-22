@@ -297,7 +297,7 @@ vicon = null
         if (isVerification)
           title = translate(verificationRequest)
         else if (model.id === APPLICATION_SUBMITTED)
-          title = resource.application.title
+          title = resource.message
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
         else if (utils.getModel(modelName).abstract)
