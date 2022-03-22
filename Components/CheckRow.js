@@ -230,12 +230,20 @@ class CheckRow extends Component {
                   </View>
     }
     let checkOverrideIcon
+    let dnTitle
     if (checkOverrideStatus) {
       style = [styles.checkButton, {alignSelf: 'flex-end', alignItems: 'center', width: 20, height: 20, marginTop: -20, backgroundColor: checkOverrideStatus.color}]
       checkOverrideIcon = <View style={style}>
                             <Icon color={'#ffffff'} size={20} name={checkOverrideStatus.icon} />
                           </View>
+      dnTitle = <View style={{flexDirection: 'row'}}>
+                 <Text style={styles.rTitleCrossed}>{dn}</Text>
+                 <Text style={styles.rTitle}>{checkOverrideStatus.title}</Text>
+               </View>
     }
+    else
+      dnTitle = <Text style={styles.rTitle}>{dn}</Text>
+
     let providerProp = <Text style={styles.checkDescription}>{'Provider: ' + (provider || translate(model))}</Text>
     return <View style={styles.titleView}>
              <View>
@@ -243,7 +251,7 @@ class CheckRow extends Component {
              {checkOverrideIcon}
              </View>
              <View style={{justifyContent: 'center', paddingLeft: 10}}>
-               <Text style={styles.rTitle}>{dn}</Text>
+               {dnTitle}
                {searchTerm}
                {providerProp}
              </View>
@@ -312,6 +320,13 @@ var styles = StyleSheet.create({
   rTitle: {
     fontSize: 18,
     color: '#555555',
+  },
+  rTitleCrossed: {
+    fontSize: 18,
+    color: '#555555',
+    textDecorationLine: 'line-through',
+    textDecorationStyle: 'solid',
+    paddingRight: 5
   },
   search: {
     fontSize: 16,
