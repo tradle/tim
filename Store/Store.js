@@ -4316,14 +4316,18 @@ if (!res[SIG]  &&  res._message)
         delete c.to
         delete c.from
         let rep = this.getRepresentative(retParams.provider)
-        retParams.nextStep = {
-          ...c,
-          associatedResource: utils.getId(certificate),
-          parentApplication: r[ROOT_HASH],
-          type: prerequisiteFor,
-          host: retParams.provider.url,
-          provider: rep[ROOT_HASH],
-          product: prerequisiteFor,
+        let isRM = utils.isRM(r)
+        debugger
+        if (isRM || utils.getRootHash(r.applicant) === utils.getRootHash(me)) {
+          retParams.nextStep = {
+            ...c,
+            associatedResource: utils.getId(certificate),
+            parentApplication: r[ROOT_HASH],
+            type: prerequisiteFor,
+            host: retParams.provider.url,
+            provider: rep[ROOT_HASH],
+            product: prerequisiteFor,
+          }
         }
       }
     }

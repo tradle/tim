@@ -1344,7 +1344,7 @@ class MessageList extends Component {
           // Actions.addChatItem({resource: resource, disableFormRequest: oResource})
         },
       }
-    });
+    })
   }
   renderActionSheet() {
     const buttons = this.getActionSheetItems()

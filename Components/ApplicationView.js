@@ -243,7 +243,7 @@ class ApplicationView extends Component {
              </TouchableOpacity>
     }
     let nextApp
-    if (isRM  &&  nextStep) {
+    if (/*isRM  &&  */nextStep) {
       nextApp = <TouchableOpacity onPress={() => this.applyForNext(nextStep)} style={styles.tree}>
                  <View style={[styles.treeButton, buttonStyles.treeButton]}>
                    <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
