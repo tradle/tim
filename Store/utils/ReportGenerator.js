@@ -164,12 +164,15 @@ class ReportGenerator {
         let propValue = pForm[property]
         if (!propValue)
           continue
-        if (typeof propValue !== 'object') {
-          val = propValue
-          break
-        }
+
         let pModel = getModel(getType(pForm))
         let p = pModel.properties[property]
+        if (typeof propValue !== 'object') {
+          val = propValue
+          if (p.type === 'date')
+            val = formatDate(new Date(pForm[property]))
+          break
+        }
         let ref = p.ref
         if (!ref  &&  p.items)
           ref = p.items.ref
