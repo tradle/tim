@@ -1,4 +1,5 @@
 import Mustache from 'mustache'
+import dateformat from 'dateformat'
 import constants from '@tradle/constants'
 const {
   TYPE
@@ -14,7 +15,6 @@ import {
   formatCurrency,
   isEnum,
   translate,
-  formatDate
 } from '../../utils/utils'
 
 const APPLICATION = 'tradle.Application'
@@ -170,7 +170,7 @@ class ReportGenerator {
         if (typeof propValue !== 'object') {
           val = propValue
           if (p.type === 'date')
-            val = formatDate(new Date(pForm[property]))
+            val = dateformat(new Date(pForm[property]), 'dd mmm yyyy')
           break
         }
         let ref = p.ref
@@ -254,7 +254,7 @@ class ReportGenerator {
       return form[prop].title
     }
     if (properties[prop].type === 'date')
-      return formatDate(new Date(form[prop]))
+      return dateformat(new Date(form[prop]), 'dd mmm yyyy')
     if (properties[prop].units)
       return `${form[prop]}${properties[prop].units}`
     return form[prop]
