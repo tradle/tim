@@ -5802,7 +5802,7 @@ if (!res[SIG]  &&  res._message)
     }
     let application = list[0]
     application.draft = false
-    application.draftCompleted = true
+    // application.draftCompleted = true
     application.processingDataBundle = false
 
     await this.onAddChatItem({resource: application})
@@ -5813,6 +5813,7 @@ if (!res[SIG]  &&  res._message)
       from: application.from,
       to: application.to,
       context: application.context,
+      application,
       _context: context
     }})
   },

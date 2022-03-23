@@ -68,7 +68,7 @@ class MessageRow extends Component {
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func,
     bankStyle: PropTypes.object,
-    to: PropTypes.object,
+    to: PropTypes.object
   };
   constructor(props) {
     super(props);
@@ -547,10 +547,13 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
     }
-    if (model.id === APPLICATION_SUBMITTED || model.id === APPLICATION_COMPLETED) {
-      let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.myMessageLinkColor}]}>{translate(resource.message)}</Text>
-                </View>
+    if (model.id === APPLICATION_COMPLETED) {
+      let content = <Text style={[chatStyles.resourceTitle, {color: bankStyle.myMessageLinkColor}]}>{translate('applicationCompleted')}</Text>
+      if (resource.application)
+        content = <TouchableOpacity underlayColor='transparent' onPress={this.props.onSelect.bind(this, {resource: resource.application})}  key={this.getNextKey()}>
+                    {content}
+                  </TouchableOpacity>
+      let msg = <View key={this.getNextKey()}>{content}</View>
       renderedRow.push(msg);
       return null
     }

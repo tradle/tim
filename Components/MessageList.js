@@ -67,6 +67,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
 const SELFIE = 'tradle.Selfie'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
+const APPLICATION = 'tradle.Application'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 const MAX_STEPS = isWeb() ? 10 : 5
@@ -676,18 +677,26 @@ class MessageList extends Component {
           isVerifier = !verification && utils.isVerifier(r)
       }
     }
-    let { resource, currency } = this.props
+    let { resource, currency, navigator } = this.props
     let lensId = utils.getLensId(r, resource)
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
 
+    let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
     let bankStyle = this.props.bankStyle || this.state.bankStyle
 
-    let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
+    let isApplication = rtype === APPLICATION
+    let componentName
+    if (isApplication)
+      componentName = 'ApplicationView'
+    else if (utils.isSubclassOf(rtype, MY_PRODUCT))
+      componentName = 'ResourceView'
+    else
+      componentName = 'MessageView'
     let route = {
       title: newTitle,
       backButtonTitle: 'Back',
-      componentName: utils.isSubclassOf(utils.getType(r), MY_PRODUCT) ? 'ResourceView' : 'MessageView',
+      componentName,
       // parentMeta: model,
       passProps: {
         bankStyle,
@@ -755,8 +764,10 @@ class MessageList extends Component {
       route.help = translate('verifierHelp')  // will show in alert when clicked on help icon in navbar
       route.application = application
     }
-
-    this.props.navigator.push(route);
+    if (isApplication)
+      navigator.replace(route)
+    else
+      navigator.push(route);
   }
 
   onSearchChange(text) {
