@@ -8059,7 +8059,7 @@ if (!res[SIG]  &&  res._message)
     // await this._loadedResourcesDefer.promise
     let self = this
 
-    let {resource, query, context, to, isForgetting, lastId, limit, prop, filterProps} = params
+    let {resource, query, context, to, isForgetting, lastId, limit=isWeb() ? 50 : 20, prop, filterProps} = params
 
     let meId = utils.getId(me)
     let meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
