@@ -324,6 +324,7 @@ module.exports = {
     "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
     "cantFindResource": "Can't find resource {1}",
     "createResourceLink": "Copy link to this page",
+    "applicationCompleted": "Application Completed - click here to view",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
