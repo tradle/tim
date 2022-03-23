@@ -298,12 +298,12 @@ class MessageRow extends Component {
     else
       separator = <View style={{height: 3}} />
 
-    const rowStyle = { margin:1, backgroundColor: '#f7f7f7', whiteSpace: 'pre-wrap' }
+    let viewStyle = { margin: 1, backgroundColor: '#f7f7f7', whiteSpace: 'pre-wrap' }
 
     let bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
     return (
-      <View style={[rowStyle, {backgroundColor: bg}]}>
+      <View style={[viewStyle, {backgroundColor: bg}]}>
         {this.getChatDate(resource)}
         {messageBody}
         {contextId}
