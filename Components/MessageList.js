@@ -52,7 +52,7 @@ import buttonStyles from '../styles/buttonStyles'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 import BackgroundImage from './BackgroundImage'
-var LIMIT = 50
+const LIMIT = 50
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE } = TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -71,7 +71,7 @@ const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 const MAX_STEPS = isWeb() ? 10 : 5
 
-var currentMessageTime
+let currentMessageTime
 
 class MessageList extends Component {
   static propTypes = {
@@ -954,9 +954,9 @@ class MessageList extends Component {
         maxHeight -= 35
       if (hideTextInput)
         maxHeight -= 10
-      var marginLeft = 10
+      let marginLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
-      var marginRight = 10
+      let marginRight = 10
       let width = utils.getContentWidth(MessageList)
       let alignSelf = 'center'
 
