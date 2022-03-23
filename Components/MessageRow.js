@@ -34,6 +34,7 @@ import Markdown from './Markdown'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const SHARE_CONTEXT = 'tradle.ShareContext'
+const APPLICATION_COMPLETED = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 // const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const DATA_BUNDLE = 'tradle.DataBundle'
@@ -542,6 +543,13 @@ class MessageRow extends Component {
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: bankStyle.confirmationColor}]}>{translate(resource.message)}</Text>
+                </View>
+      renderedRow.push(msg);
+      return null
+    }
+    if (model.id === APPLICATION_SUBMITTED || model.id === APPLICATION_COMPLETED) {
+      let msg = <View key={this.getNextKey()}>
+                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.myMessageLinkColor}]}>{translate(resource.message)}</Text>
                 </View>
       renderedRow.push(msg);
       return null
