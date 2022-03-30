@@ -124,9 +124,11 @@ async function quotationPerTerm({form, search, currentResource}) {
 
     let { term } = quotConf
 
-    let residualValuePerTerm = residualValue.find(rv => {
+    let residualValuePerTerm = residualValue && residualValue.find(rv => {
       return rv.term.id === term.id
     })
+    if (!residualValuePerTerm)
+      residualValuePerTerm = 0
     // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
     if (termQuote && term.id == termQuote.id) {
       if (!residualValueQuote) {
