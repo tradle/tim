@@ -52,6 +52,9 @@ function chooseDetail({form, models, costOfCapital}) {
 
   extend(form, term)
   form[TYPE] = ftype
+  let { monthlyPayment, term:chosenTerm, purchaseOptionPrice } = form
+  debugger
+  form.finalNoteValue = Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
 
   if (!costOfCapital) return
   if (form.xirr > costOfCapital.minIRR)
@@ -88,7 +91,7 @@ async function quotationPerTerm({form, search, currentResource}) {
     blindDiscount = 0,
     residualValue: residualValueQuote
   } = quotationInfo
-  if (!factor || !netPrice || !exchangeRate || !deliveryTime ||
+  if (!termQuote || !factor || !netPrice || !exchangeRate || !deliveryTime ||
       !netPriceMx || !priceMx || !fundedInsurance) {
     return {}
   }
