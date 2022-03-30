@@ -1723,18 +1723,19 @@ var NewResourceMixin = {
       resource = {};
       resource[TYPE] = model.id;
     }
-
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
+    const { navigator, bankStyle, currency, locale } = this.props
+    let currentRoutes = navigator.getCurrentRoutes();
+    navigator.push({
       title: enumProp.title,
       // titleTextColor: '#7AAAC3',
       componentName: 'EnumList',
       backButtonTitle: 'Back',
       passProps: {
-        prop:        prop,
-        bankStyle:   this.props.bankStyle,
-        enumProp:    enumProp,
-        resource:    resource,
+        prop,
+        bankStyle,
+        enumProp,
+        resource,
+        currency,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback:    this.setChosenEnumValue.bind(this),
       }
