@@ -146,7 +146,7 @@ var styles = StyleSheet.create({
     borderColor: '#999999'
   },
   text: {
-    font: 12,
+    fontSize: 12,
     alignSelf: 'center'
   },
   row: {
