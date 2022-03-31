@@ -54,7 +54,10 @@ function chooseDetail({form, models, costOfCapital}) {
   form[TYPE] = ftype
   let { monthlyPayment, term:chosenTerm, purchaseOptionPrice } = form
   debugger
-  form.finalNoteValue = Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
+  form.finalNoteValue = {
+    currency: monthlyPayment.currency,
+    value: Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
+  }
 
   if (!costOfCapital) return
   if (form.xirr > costOfCapital.minIRR)
