@@ -34,6 +34,7 @@
         'transform-object-rest-spread',
         'transform-react-display-name',
         'transform-react-jsx',
+        'transform-exponentiation-operator',
         // iOS 10.3+
         ['transform-regenerator', {
           asyncGenerators: true, // true by default

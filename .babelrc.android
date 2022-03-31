@@ -37,6 +37,7 @@
         // }],
         ['transform-es2015-for-of', { loose: true }],
         'lodash',
+        'transform-exponentiation-operator',
       ]
     // },
     // development: {
