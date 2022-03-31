@@ -280,12 +280,3 @@ function mathRound(val, digits) {
   let pow = Math.pow(10, digits)
   return Math.round(val * pow)/pow
 }
-function nextMonth(date) {
-  let m = date.getMonth() + 1
-  if (m && m % 12 === 0) {
-    m = 0
-    date.setFullYear(date.getFullYear() + 1)
-  }
-
-  date.setMonth(m)
-}
