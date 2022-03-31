@@ -337,6 +337,9 @@ module.exports = {
     "toPairDevices": "to pair devices",
     "syncDevicesIsDone": "Device syncronization finished",
     "cancelDevicePairing": "Cancel device pairing",
+    "initialBookmarks": "Initial Bookmarks",
+    "sharedBookmarks": "Shared Bookmarks",
+    "personalBookmarks": "Personal Bookmarks",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
