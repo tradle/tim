@@ -393,7 +393,7 @@ var utils = {
     if (lens) {
       let merged = Lens.merge({ models: utils.getModels(), model, lens })
       merged.lens = lensId
-      return merged
+      return Store.getAugmentedModel(merged)
     }
     const model = Store.getOriginalModel(type)
     return Store.getAugmentedModel(model)
