@@ -317,11 +317,15 @@ module.exports = {
     "otherEnumResources": "Other {1} choices",
     "suggestions": "Suggestions",
     "submitDraft": "Send to the prospect prefilled application for: {1}",
+    "completeApplicationForClient": "Complete application for client",
     "notSupportedMimeTypes": "Not supported mime types {1}",
     "bookmarkWasCreated": "Bookmark was created",
     "personalBookmarkInSharedFolder": "Attempting to move personal bookmark in a shared folder",
     "cantFindResource": "Can't find resource {1}",
     "createResourceLink": "Copy link to this page",
+    "initialBookmarks": "Initial Bookmarks",
+    "sharedBookmarks": "Shared Bookmarks",
+    "personalBookmarks": "Personal Bookmarks",
     // Regula
     "regulaStatus": "Searching for document",
     // Bookmarks
@@ -336,6 +340,7 @@ module.exports = {
     "toPairDevices": "to pair devices",
     "syncDevicesIsDone": "Device syncronization finished",
     "cancelDevicePairing": "Cancel device pairing",
+    "applicationCompleted": "Application Completed - click here to view",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
