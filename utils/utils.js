@@ -347,6 +347,9 @@ var utils = {
     const [type, permalink, link] = id.split('_')
     return { type, permalink, link }
   },
+  getLens(lensId) {
+    return getStore().getLens(lensId)
+  },
   getLensedModel(fr, lensId) {
     const Store = getStore()
     const form = utils.getRequestedFormType(fr)
@@ -361,11 +364,25 @@ var utils = {
       return Store.getAugmentedModel(model)
 
     let merged = Lens.merge({ models: utils.getModels(), model, lens })
+    merged.lens = lensId
     // let m = _.cloneDeep(merged)
     // let props = m.properties
     // for (let p in props)
     //   props[p].name = p
     return Store.getAugmentedModel(merged)
+  },
+  getLensedModelForType(type) {
+    const Store = getStore()
+
+    let {lens, lensId} = Store.getLensForType(type)
+
+    if (lens) {
+      let merged = Lens.merge({ models: utils.getModels(), model, lens })
+      merged.lens = lensId
+      return merged
+    }
+    const model = Store.getOriginalModel(type)
+    return Store.getAugmentedModel(model)
   },
   applyLens({prop, values, list }) {
     let pin = prop.pin  ||  values
@@ -830,7 +847,7 @@ var utils = {
     let toId = utils.getId(r.to);
 
     let meId = utils.getId(me)
-    if (fromId === meId)
+    if (fromId === meId || r._author === utils.getRootHash(me))
       return true;
     if (toId === meId)
       return false
@@ -1235,7 +1252,7 @@ var utils = {
     else
       return resource[p] + '';
   },
-  getEditCols(model) {
+  getEditCols(model, exploreData) {
     let { editCols, properties } = model
     let eCols = []
     let isWeb = utils.isWeb()
@@ -1243,7 +1260,7 @@ var utils = {
       let viewCols = utils.getViewCols(model)
       if (viewCols) {
         viewCols.forEach(p => {
-          if (!properties[p].readOnly)
+          if (exploreData || !properties[p].readOnly)
             eCols.push(properties[p])
         })
       }
@@ -1294,25 +1311,28 @@ var utils = {
   getViewCols(model) {
     let { viewCols, properties } = model
     let vCols = []
-    if (viewCols) {
-      viewCols.forEach((p) => {
-        let prop = properties[p]
-        let idx = p.indexOf('_group')
-        if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p  ||  vCols.indexOf(p) !== -1)
-          vCols.push(p)
+    if (!viewCols)
+      return utils.getAllCols({properties})
 
-        if (idx !== -1  &&  prop.list)
-          prop.list.forEach((p) => vCols.push(p))
-        // eCols[p] = props[p]
-      })
-    }
-    return utils.getAllCols({properties})
+    viewCols.forEach((p) => {
+      let prop = properties[p]
+      let idx = p.indexOf('_group')
+      if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p  ||  vCols.indexOf(p) !== -1)
+        vCols.push(p)
+
+      if (idx !== -1  &&  prop.list)
+        prop.list.forEach((p) => vCols.push(p))
+      // eCols[p] = props[p]
+    })
+    return utils.getAllCols({properties, vCols})
   },
-  getAllCols({properties, isView}) {
-    let vCols = []
+  getAllCols({properties, isView, vCols}) {
+    if (!vCols)
+      vCols = []
     let onePropView = []
     for (let p in properties) {
       if (p.charAt(0) === '_') continue
+      if (vCols.indexOf(p) !== -1) continue
       let prop = properties[p]
       if (prop.signature)
         onePropView.push(p)
@@ -1624,7 +1644,7 @@ var utils = {
     if (!type)
       return
     const m = utils.getModel(type)
-    return m.required  &&  !resource[m.required[0]]
+    return m.required  &&  !resource.hasOwnProperty(m.required[0])
   },
   isWhitelabeled() {
     return utils.isWeb() && window.location != window.parent.location
@@ -2590,7 +2610,8 @@ var utils = {
   },
   isHidden(p, resource) {
     let modelName = utils.getType(resource)
-    let model = utils.getModel(modelName)
+    // let model = utils.getModel(modelName)
+    let model = utils.getLensedModelForType(modelName)
     let props = model.properties
     if (!utils.isMessage(resource)  ||  !resource.from)
       return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
