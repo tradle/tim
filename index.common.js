@@ -264,12 +264,16 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             if (!newRoute)
               return
-            const { passProps, componentName } = newRoute
-            let style = passProps.bankStyle
-            if (style)
-              this.setState({navBarBgColor: componentName === 'TourPage' ? 'transparent' : style.navBarBackgroundColor || 'transparent', componentName})
+            let style = newRoute.passProps.bankStyle
+            const { componentName } = newRoute
+            let navBarBgColor
+            if (!style)
+              navBarBgColor = 'transparent'
+            else if (componentName === 'TourPage' || componentName === 'PrintReport')
+              navBarBgColor = 'transparent'
             else
-              this.setState({navBarBgColor: 'transparent', componentName})
+              navBarBgColor = style.navBarBackgroundColor || 'transparent'
+            this.setState({navBarBgColor, componentName})
           }}
           passProps={this.state.props}
           configureScene={(route) => {
