@@ -67,6 +67,7 @@ const SUBMIT_LOG_TEXT = {
   submitted: translate('restartApp')
 }
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
+const APPLICATION = 'tradle.Application'
 
 class TimHome extends Component {
   static displayName = 'TimHome'
@@ -606,9 +607,15 @@ class TimHome extends Component {
     let route
     if (formStub) {
       let fModel = utils.getModel(utils.getType(formStub))
+      let isApplication = fModel.id === APPLICATION
+      let componentName
+      if (isApplication)
+        componentName = 'ApplicationView'
+      else
+        componentName = 'MessageView'
       route = {
         title: `${formStub.title} -- ${translate(fModel)}`,
-        componentName: 'MessageView',
+        componentName,
         backButtonTitle: 'Back',
         rightButtonTitle: 'Profile',
         passProps: {
@@ -619,6 +626,8 @@ class TimHome extends Component {
           bankStyle:  style
         }
       }
+      if (isApplication)
+        route.passProps.application = formStub
     }
     else {
       const { wasDeepLink, qs={} } = this.state
