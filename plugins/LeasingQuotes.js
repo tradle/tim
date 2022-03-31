@@ -4,7 +4,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import size from 'lodash/size'
 import extend from 'lodash/extend'
 import { TYPE } from '@tradle/constants'
-import { getMe, getModel, getType } from '../utils/utils'
+import { getMe, getModel, getType, getCurrentHash, isStub } from '../utils/utils'
 import validateResource from '@tradle/validate-resource'
 // @ts-ignore
 const { sanitize } = validateResource.utils
@@ -25,7 +25,7 @@ module.exports = function LeasingQuotes ({ models }) {
       // if (ftype.endsWith(QUOTATION_DETAILS))
       //   return await chooseDetail(form, models)
       // if (ftype.endsWith(QUOTE)) {
-        let {requestedProperties, costOfCapital} = await getQuote({form, models, search, currentResource})
+        let {costOfCapital} = await getQuote({form, models, search, currentResource})
         return chooseDetail({form, models, costOfCapital})
       // }
     }
@@ -52,15 +52,11 @@ function chooseDetail({form, models, costOfCapital}) {
 
   extend(form, term)
   form[TYPE] = ftype
-  // if (ftype === termsPropRef) {
-  //   if (m.editCols) {
-  //     requestedProperties = m.editCols.map(p => {
-  //         return { name: p }
-  //       })
-  //   }
+  let { monthlyPayment, term:chosenTerm, purchaseOptionPrice } = form
+  debugger
+  form.finalNoteValue = Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
 
-  //   return { requestedProperties }
-  // }
+  if (!costOfCapital) return
   if (form.xirr > costOfCapital.minIRR)
     form.approve = true
   else
@@ -68,23 +64,17 @@ function chooseDetail({form, models, costOfCapital}) {
 }
 async function getQuote({form, models, search, currentResource}) {
   let model = models[getType(form)]
-  if (!model) return
+  if (!model) return {}
 
   let { prefill, costOfCapital } = await quotationPerTerm({form, search, currentResource})
-  if (!prefill) return
+  if (!prefill) return {}
   extend(form, prefill)
-  // let requestedProperties = []
-  // if (model.editCols) {
-  //   requestedProperties = model.editCols.map(p => {
-  //     return { name: p }
-  //   })
-  // }
-  // return { requestedProperties, costOfCapital }
   return { costOfCapital }
 }
 async function quotationPerTerm({form, search, currentResource}) {
   const quotationInfo = form
   let {
+    term: termQuote,
     factor,
     netPrice,
     commissionFeePercent,
@@ -97,13 +87,14 @@ async function quotationPerTerm({form, search, currentResource}) {
     priceMx,
     depositValue,
     fundedInsurance,
-    blindDiscount = 0
+    discountFromVendor,
+    blindDiscount = 0,
+    residualValue: residualValueQuote
   } = quotationInfo
-  if (!factor || !netPrice || !exchangeRate || !deliveryTime ||
+  if (!termQuote || !factor || !netPrice || !exchangeRate || !deliveryTime ||
       !netPriceMx || !priceMx || !fundedInsurance) {
     return {}
   }
-  // let costOfCapital = CostOfCapital
   debugger
   let { list } = await search({modelName: COST_OF_CAPITAL, filterResource: {current: true}, noTrigger: true})
   if (!list || !list.length) return {}
@@ -118,22 +109,46 @@ async function quotationPerTerm({form, search, currentResource}) {
     lowDepositFactor: lowDepositPercent,
     presentValueFactor,
   } = costOfCapital
-  let { residualValue } = form.asset
+  if (isStub(asset)) {
+    let { list } = await search({modelName: getType(asset), filterResource: {_link: getCurrentHash(asset)}, noTrigger: true})
+    asset = list && list[0]
+    if (!asset) return {}
+  }
+  let { residualValue } = asset
   let defaultQC = configurationItems[0]
+
+  let depositVal = depositValue && depositValue.value || 0
+  blindDiscount = blindDiscount/100
 
   configurationItems.forEach((quotConf, i) => {
     let qc = cloneDeep(defaultQC)
     for (let p in quotConf)
       qc[p] = quotConf[p]
-    let {
-      term,
-      // factor: factorVPdelVR
-    } = quotConf
 
-    let residualValuePerTerm = residualValue.find(rv => {
+    let { term } = quotConf
+
+    let residualValuePerTerm = residualValue && residualValue.find(rv => {
       return rv.term.id === term.id
     })
-    residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
+    if (!residualValuePerTerm)
+      residualValuePerTerm = 0
+    // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
+    if (termQuote && term.id == termQuote.id) {
+      if (!residualValueQuote) {
+        form.residualValue = residualValuePerTerm.rv
+        residualValuePerTerm = residualValuePerTerm.rv
+      }
+      else if (residualValueQuote < residualValuePerTerm.rv)
+        residualValuePerTerm = residualValueQuote
+      else {
+        form.residualValue = residualValuePerTerm.rv
+        residualValuePerTerm = residualValuePerTerm.rv
+      }
+    }
+    else
+      residualValuePerTerm = residualValuePerTerm.rv
+
+    residualValuePerTerm = residualValuePerTerm / 100
     let termVal = term.title.split(' ')[0]
     let factorPercentage = mathRound(factor / 100 / 12 * termVal, 4)
 
@@ -147,12 +162,10 @@ async function quotationPerTerm({form, search, currentResource}) {
       lowDepositFactor = 0
     let totalPercentage = mathRound(1 + factorPercentage + deliveryTermPercentage + depositFactor + lowDepositFactor, 4)
 
-    let depositVal = depositValue && depositValue.value || 0
-
     let factorVPdelVR = termVal/12 * presentValueFactor/100
 
     // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
-    blindDiscount = blindDiscount/100
+    // blindDiscount = blindDiscount/100
     let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscount) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscount)
     // let monthlyPaymentPMT = (vatRate/12)/(((1+vatRate/12)**termVal)-1)*(netPriceMx.value*((1+vatRate/12)**termVal)-(netPriceMx.value*residualValue/100))
 
@@ -163,11 +176,11 @@ async function quotationPerTerm({form, search, currentResource}) {
 
     let currency = netPriceMx.currency
     let vatQc =  mathRound((monthlyPayment + insurance) * vatRate)
+    let paymentFromVendor = (priceMx.value - depositVal) * discountFromVendor / 100
     let qd = {
       [TYPE]: termsPropRef,
       factorPercentage,
       deliveryTermPercentage,
-      // depositFactor:
       lowDepositFactor,
       term,
       commissionFee: {
@@ -203,6 +216,10 @@ async function quotationPerTerm({form, search, currentResource}) {
       purchaseOptionPrice: priceMx && {
         value: mathRound(priceMx.value * residualValuePerTerm),
         currency
+      },
+      paymentFromVendor: paymentFromVendor && {
+        value: mathRound(paymentFromVendor),
+        currency
       }
     }
 
@@ -214,13 +231,15 @@ async function quotationPerTerm({form, search, currentResource}) {
       }
     }
     let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
-    let initPayment = depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
+    let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
+    let blindPayment = priceMx.value * blindDiscount
     let d = new Date()
     let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
     let data = [
       {amount: -priceMx.value, date},
-      {amount: initPayment, date}
+      {amount: initPayment, date},
+      {amount: blindPayment, date}
     ]
     let m = d.getMonth()
     for (let j=0; j<termVal - 1; j++) {
