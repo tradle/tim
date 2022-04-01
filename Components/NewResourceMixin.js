@@ -54,8 +54,8 @@ const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
 
-var cnt = 0;
-var propTypesMap = {
+let cnt = 0;
+const propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
   'date': t.Dat,
@@ -64,7 +64,7 @@ var propTypesMap = {
 
 const DEFAULT_LINK_COLOR = '#a94442'
 
-var NewResourceMixin = {
+const NewResourceMixin = {
   onScroll(e) {
     // from ListView._onScroll
     const target = ReactDOM.findDOMNode(this.refs.scrollView)
@@ -654,6 +654,7 @@ var NewResourceMixin = {
       }
       value = val
     }
+
     if (!this.floatingProps)
       this.floatingProps = {}
     if (pref == MONEY) {
@@ -860,7 +861,6 @@ var NewResourceMixin = {
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
     let label = translate(prop, model)
-
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
@@ -1616,6 +1616,7 @@ var NewResourceMixin = {
     );
   },
 
+
   myDurationInputTemplate(params) {
     let { required, model, value, prop, editable, errors, component } = params
     let { search, locale } = this.props
@@ -1839,6 +1840,12 @@ var NewResourceMixin = {
         if (!(new RegExp(prop.pattern).test(value[p])))
           err[prop.name] = translate('invalidProperty', prop.title)
       }
+      else if (prop.range === 'phone'  &&  isWeb()) {
+        let { val, hasError } = this.normalizePhoneNumber(value[p])
+        if (hasError)
+          err[prop.name] = translate('invalidProperty', prop.title)
+        value[p] = val
+      }
     }
     if (deleteProps)
       deleteProps.forEach((p) => {
@@ -1867,7 +1874,41 @@ var NewResourceMixin = {
       err[p] = error
     return error
   },
+  normalizePhoneNumber(value) {
+    // value = value.replace(/[^a-zA-Z0-9]+$/g, '').split('')
+    let vArr = value.split('')
+    let val = ''
+    let hasError
+    for (let i=0; i<vArr.length; i++) {
+      let v = vArr[i]
+      if (v >= '0'  &&  v <= '9' || (v === '+'  &&  i === 0)) {
+        val += v
+        continue
+      }
+      if (v === ' ' || v === '-') {
+        ({ i, val } = this.addToPhoneNumber(vArr, i, val))
+        continue
+      }
+      hasError = true
+      val += v
+    }
+    return { val, hasError }
+  },
+  addToPhoneNumber(vArr, i, val) {
+    let v = vArr[i]
+    if (i) {
+      let ch = vArr[i - 1]
+      let ch2 = i < vArr.length && vArr[i + 1]
+      if (ch >= '0' && ch <= '9') {
+        // if (!ch2 || (ch2 >= '0' && ch2 <= '9'))
+          val += v
+      }
+    }
+    for (; i<vArr.length && vArr[i] === v; i++);
+    return { i: --i, val }
+  }
 }
+
 function coerceNumber (obj, p) {
   const val = obj[p]
   if (typeof val === 'string') {
@@ -1880,7 +1921,7 @@ const formField = {
   borderColor: '#dddddd',
   borderRadius: 6,
 }
-var styles= StyleSheet.create({
+const styles= StyleSheet.create({
   enumProp: {
     marginTop: 15,
   },
