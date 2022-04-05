@@ -5210,22 +5210,25 @@ if (!res[SIG]  &&  res._message)
 
         if (!isNew) {
           let prevRes = self._getItem(prevResId)
-          prevRes._latest = false
-          prevResCached._latest = false
+          if (!prevRes  &&  rtype === BOOKMARK);
+          else {
+            prevRes._latest = false
+            prevResCached._latest = false
 
-          let org = to.organization ? self._getItem(to.organization) : to
-          // Draft project
-          // self.trigger({action: 'getItem', resource: returnVal, to: org})
-          if (!origNoTrigger) {
-            let context = returnVal._context
-            if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
-              prevRes._dataBundle = context._dataBundle
-            // else
-              // self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
-              self.trigger({action: 'updateItem', resource: returnVal, to: org})
+            let org = to.organization ? self._getItem(to.organization) : to
+            // Draft project
+            // self.trigger({action: 'getItem', resource: returnVal, to: org})
+            if (!origNoTrigger) {
+              let context = returnVal._context
+              if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
+                prevRes._dataBundle = context._dataBundle
+              // else
+                // self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+                self.trigger({action: 'updateItem', resource: returnVal, to: org})
+            }
+            await self.dbPut(prevResId, prevResCached)
+            self._setItem(prevResId, prevRes)
           }
-          await self.dbPut(prevResId, prevResCached)
-          self._setItem(prevResId, prevRes)
         }
         if (!isNew  ||  !utils.isForm(rtype)) {
           if (isBookmark) {
@@ -7878,7 +7881,7 @@ if (!res[SIG]  &&  res._message)
     // Product chooser for example
     let props = meta.properties;
     let containerProp, resourceId;
-  let foundRecs = 0
+    let foundRecs = 0
 
     let isOrg = modelName == ORGANIZATION
 
@@ -8992,7 +8995,7 @@ if (!res[SIG]  &&  res._message)
     }
     const isShared = resource && resource.shared
     if (isShared) {
-      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true })
+      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true })
       this.trigger({list, action: 'list', isChooser, first: true, noMove: true})
       return
     }
@@ -9001,7 +9004,7 @@ if (!res[SIG]  &&  res._message)
       let initFolder = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('initialBookmarks'))
       let initFolderLinks = initFolder[0].list.map(r => utils.getRootHash(r))
       debugger
-      let result = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true })
+      let result = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true })
       let list
       if (result) {
         list = result.list
