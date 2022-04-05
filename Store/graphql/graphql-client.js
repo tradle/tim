@@ -167,7 +167,7 @@ var search = {
               continue
             if (isEnum) {
               if (val.length === 1) {
-                this.addTo(op, `\n   ${p}__id: "${val[0].id}",`)
+                this.addTo(op, neq, `\n   ${p}__id: "${val[0].id}",`)
               }
               else {
                 let s = `${p}__id: [`
