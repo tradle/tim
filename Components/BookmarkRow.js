@@ -35,6 +35,7 @@ class BookmarkRow extends Component {
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
     onMove: PropTypes.func,
+    onEdit: PropTypes.func,
     prop: PropTypes.object
     // currency: PropTypes.object,
   };
@@ -71,7 +72,7 @@ class BookmarkRow extends Component {
   }
 
   render() {
-    let {resource, lazy, onSelect, prop, bankStyle, isChooser, noMove, folder } = this.props
+    let {resource, lazy, onSelect, prop, bankStyle, isChooser, noMove, folder, exploreData } = this.props
     if (resource[TYPE] === BOOKMARKS_FOLDER) {
       let count
       if (!resource.shared && !isChooser  &&  resource.list  &&  resource.list.length) {
@@ -106,10 +107,19 @@ class BookmarkRow extends Component {
     //   action = <TouchableOpacity onPress={this.props.onMove.bind(this)} style={{justifyContent: 'center'}}>
     //              <Icon name='ios-exit-outline'  size={30}  color={bankStyle.linkColor}/>
     //            </TouchableOpacity>
-    let isCancellable
-    if (resource._author === utils.getRootHash(utils.getMe()) && folder.message !== translate('Initial Bookmarks'))
-      isCancellable = true
-    if (isCancellable) {
+    let isCancellable = true
+    // Don't allow to cancel somebody else's bookmark
+    // if (resource._author === utils.getRootHash(utils.getMe()) && folder.message !== translate('Initial Bookmarks'))
+    //   isCancellable = true
+    if (exploreData) {
+      action = <View style={{flexDirection: 'row'}}>
+                 {action}
+                 <TouchableOpacity onPress={this.props.onEdit.bind(this)} style={{paddingLeft: 5, justifyContent: 'center'}}>
+                   <Icon name='md-create'  size={27}  color='darkblue'/>
+                 </TouchableOpacity>
+               </View>
+    }
+    else if (isCancellable) {
       action = <View style={{flexDirection: 'row'}}>
                  {action}
                  <TouchableOpacity onPress={this.props.onCancel.bind(this)} style={{paddingLeft: 5, justifyContent: 'center'}}>

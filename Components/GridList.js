@@ -768,7 +768,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     return false
   }
 
-  selectResource({resource}) {
+  selectResource({resource, isEdit}) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, search, bankStyle, navigator, currency, locale } = this.props
@@ -779,7 +779,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
     if (!isApplication  &&  !isMyProduct && utils.isMessage(resource)  ||  utils.isStub(resource)) {
-      this.selectMessage(resource)
+      this.selectMessage(resource, isEdit)
       return;
     }
     if (isMyProduct) {
@@ -897,7 +897,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     Actions.refreshApplication({resource})
   }
 
-  selectMessage(resource) {
+  selectMessage(resource, isEdit) {
     let { modelName, search, bankStyle, navigator, currency, locale, prop,
           returnRoute, callback, application, isBacklink, serverOffline } = this.props
     if (callback) {
@@ -909,17 +909,34 @@ console.log('GridList.componentWillMount: filterResource', resource)
         navigator.pop()
       return;
     }
-
+    let rType = utils.getType(resource)
+    if (rType === MESSAGE)
+      rType = resource._payloadType
+    const rModel = utils.getModel(rType)
+    if (modelName === BOOKMARK  &&  isEdit) {
+      navigator.push({
+        title: resource.message,
+        componentName: 'NewResource',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: rModel,
+          resource,
+          // search: !isBacklink  &&  search,
+          serverOffline,
+          currency,
+          locale,
+          bankStyle: bankStyle || defaultBankStyle
+        }
+      })
+      return
+    }
     if (modelName === BOOKMARK  ||  modelName === BOOKMARKS_FOLDER) {
       if (!bankStyle)
         bankStyle = this.state.bankStyle
       showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
       return
     }
-    let rType = utils.getType(resource)
-    if (rType === MESSAGE)
-      rType = resource._payloadType
-    const rModel = utils.getModel(rType)
     const isStub = utils.isStub(resource)
     const isFormError = rType === FORM_ERROR
     const isForm = utils.isForm(rModel)
@@ -1207,7 +1224,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         return <View/>
     }
     let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application, bookmark,
-          currency, locale, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
+          exploreData, currency, locale, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
     let resType = utils.getType(resource)
@@ -1295,7 +1312,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else if (modelName === BOOKMARK || modelName === BOOKMARKS_FOLDER)
         return (<BookmarkRow
                 lazy={lazy}
+                exploreData={exploreData}
                 onSelect={() => this.selectResource({resource: selectedResource})}
+                onEdit={() => this.selectResource({resource: selectedResource, isEdit: true})}
                 onMove={() => this.moveBookmark({resource: selectedResource})}
                 onCancel={() => this.cancelBookmark({resource: selectedResource, folder: this.props.resource})}
                 bankStyle={bankStyle}

@@ -215,7 +215,8 @@ class NewResource extends Component {
         if (!exclude  &&  prop  &&  m.properties[prop].inlined)
           exclude = true
         Actions.getTemporary(resource[TYPE], exclude)
-        Actions.getRequestedProperties({resource, originatingResource})
+        if (!exploreData)
+          Actions.getRequestedProperties({resource, originatingResource})
       }
     }
     if (!exploreData  &&  Platform.OS === 'ios') {
@@ -843,9 +844,15 @@ if (r.url)
   }
 
   getSearchResult() {
-    let value = this.refs.form.getValue();
+    // let value = this.refs.form.getValue();
+    // if (!value) {
+    //   value = this.refs.form.refs.input.state.value;
+    //   if (!value)
+    //     value = {}
+    // }
+    let value = this.refs.form.refs.input.state.value;
     if (!value) {
-      value = this.refs.form.refs.input.state.value;
+      value = this.refs.form.getValue();
       if (!value)
         value = {}
     }
