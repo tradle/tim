@@ -1056,7 +1056,8 @@ var ResourceMixin = {
     })
   },
   openApplicationChat(resource) {
-    let { navigator, bankStyle, locale, wasFilledByEmployee } = this.props
+    let { navigator, bankStyle, locale } = this.props
+    let { wasFilledByEmployee } = this.state
     // let { bankStyle } = this.state
     // let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
