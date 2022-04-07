@@ -277,7 +277,11 @@ class MessageList extends Component {
       return
     }
     if (action === 'addItem'  ||  action === 'insertItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
-      this.add(params)
+      // Check if this is the application chat then refresh application if item was updated or added
+      if (this.add(params) && this.props.resource[TYPE] === PRODUCT_REQUEST) {
+        if (application)
+          Actions.refreshApplication({resource: application})
+      }
       return
     }
     if (action === 'stepIndicatorPress') {
@@ -529,6 +533,7 @@ class MessageList extends Component {
     state = {...state, pairingData, isModalOpen: pairingData != null}
     this.showAnotherEmployeeAlert(resource)
     this.setState(state)
+    return true
   }
   // Application was started by another employee
   showAnotherEmployeeAlert(resource) {
