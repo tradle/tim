@@ -374,7 +374,7 @@ class MessageRow extends Component {
   }
 
   formatRow(isMyMessage, renderedRow, styles) {
-    let { resource, bankStyle, navigator, to, isLast } = this.props
+    let { resource, bankStyle, navigator, to, isLast, application } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
@@ -548,7 +548,8 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === APPLICATION_COMPLETED) {
-      let content = <Text style={[chatStyles.resourceTitle, {color: bankStyle.myMessageLinkColor}]}>{translate('applicationCompleted')}</Text>
+      let color = application ? bankStyle.confirmationColor : bankStyle.myMessageLinkColor
+      let content = <Text style={[chatStyles.resourceTitle, {color}]}>{translate('applicationCompleted')}</Text>
       if (resource.application)
         content = <TouchableOpacity underlayColor='transparent' onPress={this.props.onSelect.bind(this, {resource: resource.application})}  key={this.getNextKey()}>
                     {content}
