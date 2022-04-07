@@ -679,7 +679,7 @@ class MessageList extends Component {
           isVerifier = !verification && utils.isVerifier(r)
       }
     }
-    let { resource, currency, navigator } = this.props
+    let { resource, currency, navigator, wasFilledByEmployee } = this.props
     let lensId = utils.getLensId(r, resource)
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
@@ -720,7 +720,7 @@ class MessageList extends Component {
       //   showEdit = true
     }
     else
-      showEdit = !notEditable  &&   r._latest  && !application  &&  !utils.isMyProduct(model)
+      showEdit = !notEditable  &&   r._latest  && (!application || wasFilledByEmployee) &&  !utils.isMyProduct(model)
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
