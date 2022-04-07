@@ -107,7 +107,7 @@ class BookmarkRow extends Component {
     //   action = <TouchableOpacity onPress={this.props.onMove.bind(this)} style={{justifyContent: 'center'}}>
     //              <Icon name='ios-exit-outline'  size={30}  color={bankStyle.linkColor}/>
     //            </TouchableOpacity>
-    let isCancellable = true
+    let isCancellable = folder.message !== translate('Initial Bookmarks')
     // Don't allow to cancel somebody else's bookmark
     // if (resource._author === utils.getRootHash(utils.getMe()) && folder.message !== translate('Initial Bookmarks'))
     //   isCancellable = true
