@@ -4346,20 +4346,6 @@ if (!res[SIG]  &&  res._message)
       })
       wasFilledByEmployee = cert.list  &&  cert.list.length
     }
-    const application = r
-    const { applicant:applicantIdentity } = application
-    let wasFilledByEmployee = utils.getRootHash(applicantIdentity) === me[ROOT_HASH]
-    if (!application.analyst  &&  !wasFilledByEmployee) {
-      let cert = await this.searchServer({
-        modelName: MY_EMPLOYEE_PASS,
-        to: me.organization,
-        search: true,
-        filterResource: {
-          owner: this.buildRef(applicantIdentity)
-        }
-      })
-      wasFilledByEmployee = cert.list  &&  cert.list.length
-    }
     retParams.wasFilledByEmployee = wasFilledByEmployee
     let templates = this.getTemplatesList({application: r})
     if (templates)
