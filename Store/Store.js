@@ -4875,8 +4875,13 @@ if (!res[SIG]  &&  res._message)
     }
 
     if (chat) {
-      let chatId = utils.getId(chat)
-      returnVal.to = self.buildRef(self.getRepresentative(chatId))
+      if (chat[TYPE] === PRODUCT_REQUEST) {
+        returnVal.to = chat.to
+      }
+      else {
+        let chatId = utils.getId(chat)
+        returnVal.to = self.buildRef(self.getRepresentative(chatId))
+      }
     }
     let addDocumentCreated, fr
     // grayout form request that originated this form submission
