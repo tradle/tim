@@ -109,7 +109,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider, nextStep, templates} = params
+    let {resource, action, backlink, application, style, provider, nextStep, templates, wasFilledByEmployee} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -123,7 +123,8 @@ class ApplicationView extends Component {
         bankStyle: style || this.state.bankStyle,
         locale: provider && provider.locale,
         nextStep,
-        templates
+        templates,
+        wasFilledByEmployee
       })
       break
     case 'exploreBacklink':
@@ -154,14 +155,16 @@ class ApplicationView extends Component {
            this.state.resource    !== nextState.resource       ||
            this.state.isLoading   !== nextState.isLoading      ||
            this.state.backlink    !== nextState.backlink       ||
-           this.state.checksCategory !== nextState.checksCategory ||
-           this.state.checkFilter !== nextState.checkFilter
+           this.state.checkFilter !== nextState.checkFilter    ||
+           this.state.checksCategory !== nextState.checksCategory  ||
+           this.state.wasFilledByEmployee !== nextState.wasFilledByEmployee
+
       return true
   }
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected,
-          showDetails, locale, nextStep, templates } = this.state
+          showDetails, locale, nextStep, templates, wasFilledByEmployee } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -196,7 +199,7 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM  &&  !utils.isMe(resource.applicant))
+    if (!isRM  &&  !utils.isMe(resource.applicant) && !wasFilledByEmployee)
       assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
@@ -570,7 +573,7 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
     },
     footer: {
       height: 45,
-      backgroundColor: '#efefef',
+      // backgroundColor: '#efefef',
       borderColor: '#eeeeee',
       borderWidth: 1,
       alignItems: 'flex-end',

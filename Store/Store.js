@@ -4318,7 +4318,7 @@ if (!res[SIG]  &&  res._message)
         delete c.from
         let rep = this.getRepresentative(retParams.provider)
         let isRM = utils.isRM(r)
-        debugger
+        // debugger
         if (isRM || utils.getRootHash(r.applicant) === utils.getRootHash(me)) {
           retParams.nextStep = {
             ...c,
@@ -4332,6 +4332,35 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
+    const application = r
+    const { applicant:applicantIdentity } = application
+    let wasFilledByEmployee = utils.getRootHash(applicantIdentity) === me[ROOT_HASH]
+    if (!application.analyst  &&  !wasFilledByEmployee) {
+      let cert = await this.searchServer({
+        modelName: MY_EMPLOYEE_PASS,
+        to: me.organization,
+        search: true,
+        filterResource: {
+          owner: this.buildRef(applicantIdentity)
+        }
+      })
+      wasFilledByEmployee = cert.list  &&  cert.list.length
+    }
+    const application = r
+    const { applicant:applicantIdentity } = application
+    let wasFilledByEmployee = utils.getRootHash(applicantIdentity) === me[ROOT_HASH]
+    if (!application.analyst  &&  !wasFilledByEmployee) {
+      let cert = await this.searchServer({
+        modelName: MY_EMPLOYEE_PASS,
+        to: me.organization,
+        search: true,
+        filterResource: {
+          owner: this.buildRef(applicantIdentity)
+        }
+      })
+      wasFilledByEmployee = cert.list  &&  cert.list.length
+    }
+    retParams.wasFilledByEmployee = wasFilledByEmployee
     let templates = this.getTemplatesList({application: r})
     if (templates)
       retParams.templates = templates
@@ -5480,8 +5509,10 @@ if (!res[SIG]  &&  res._message)
   async onNoPairing(to) {
     if (to[TYPE] !== ORGANIZATION)
       to = to.organization
-    if (!to)
-      debugger
+    if (!to) {
+      // debugger
+      return
+    }
     to._noPairing = true
     let toId = utils.getId(to)
     this._setItem(toId, to)
