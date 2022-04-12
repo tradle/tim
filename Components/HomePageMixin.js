@@ -32,6 +32,9 @@ const PHOTO = 'tradle.Photo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 
 var HomePageMixin = {
+  refreshApplication(resource) {
+    Actions.refreshApplication({resource})
+  },
   scanFormsQRCode(opts) {
     return new Promise((resolve, reject) => {
       this.setState({hideMode: false})

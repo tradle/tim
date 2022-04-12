@@ -893,9 +893,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
 
   }
-  refreshApplication(resource) {
-    Actions.refreshApplication({resource})
-  }
 
   selectMessage(resource, isEdit) {
     let { modelName, search, bankStyle, navigator, currency, locale, prop,

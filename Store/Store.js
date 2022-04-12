@@ -4319,7 +4319,7 @@ if (!res[SIG]  &&  res._message)
         let rep = this.getRepresentative(retParams.provider)
         let isRM = utils.isRM(r)
         // debugger
-        if (isRM || utils.getRootHash(r.applicant) === utils.getRootHash(me)) {
+        if (isRM || r.filledForCustomer) {
           retParams.nextStep = {
             ...c,
             associatedResource: utils.getId(certificate),
@@ -4334,19 +4334,20 @@ if (!res[SIG]  &&  res._message)
     }
     const application = r
     const { applicant:applicantIdentity } = application
-    let wasFilledByEmployee = utils.getRootHash(applicantIdentity) === me[ROOT_HASH]
-    if (!application.analyst  &&  !wasFilledByEmployee) {
-      let cert = await this.searchServer({
-        modelName: MY_EMPLOYEE_PASS,
-        to: me.organization,
-        search: true,
-        filterResource: {
-          owner: this.buildRef(applicantIdentity)
-        }
-      })
-      wasFilledByEmployee = cert.list  &&  cert.list.length
-    }
-    retParams.wasFilledByEmployee = wasFilledByEmployee
+    // let wasFilledByEmployee = utils.getRootHash(applicantIdentity) === me[ROOT_HASH]
+    // if (!application.analyst  &&  !wasFilledByEmployee) {
+    //   let cert = await this.searchServer({
+    //     modelName: MY_EMPLOYEE_PASS,
+    //     to: me.organization,
+    //     search: true,
+    //     filterResource: {
+    //       owner: this.buildRef(applicantIdentity)
+    //     }
+    //   })
+    //   wasFilledByEmployee = cert.list  &&  cert.list.length
+    // }
+    // retParams.wasFilledByEmployee = wasFilledByEmployee
+    retParams.wasFilledByEmployee = application.filledForCustomer
     let templates = this.getTemplatesList({application: r})
     if (templates)
       retParams.templates = templates
@@ -4873,10 +4874,12 @@ if (!res[SIG]  &&  res._message)
           returnVal[p] = pValue
       }
     }
-
+    let doRefreshApplication
     if (chat) {
       if (chat[TYPE] === PRODUCT_REQUEST) {
         returnVal.to = chat.to
+        if (isNew)
+          doRefreshApplication = true
       }
       else {
         let chatId = utils.getId(chat)
@@ -4910,7 +4913,7 @@ if (!res[SIG]  &&  res._message)
     if (isRegistration)
       await handleRegistration()
     else if (isMessage  &&  (!returnVal[NOT_CHAT_ITEM] || isRefresh))
-      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, employeeSetup})
+      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, employeeSetup, doRefreshApplication})
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
@@ -4969,7 +4972,7 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal)
     }
 
-    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest, employeeSetup}) {
+    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest, employeeSetup, doRefreshApplication}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -5129,7 +5132,7 @@ if (!res[SIG]  &&  res._message)
           if (!params) {
             if (!isNew  &&  isRefresh)
               noTrigger = true
-            params = { action: 'addItem', resource: returnVal, isRefresh }
+            params = { action: 'addItem', resource: returnVal, isRefresh, doRefreshApplication }
           }
         }
 
@@ -5829,6 +5832,7 @@ if (!res[SIG]  &&  res._message)
     application.draft = false
     // application.draftCompleted = true
     application.processingDataBundle = false
+    application.filledForCustomer = true
 
     await this.onAddChatItem({resource: application})
     await utils.promiseDelay(2000)
