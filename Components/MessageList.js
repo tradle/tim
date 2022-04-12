@@ -203,7 +203,8 @@ class MessageList extends Component {
     })
   }
   onAction(params) {
-    let {action, error, to, isConnected, pairingData} = params
+    let { action, error, to, isConnected, pairingData } = params
+    let { doRefreshApplication } = this.state
     if (error)
       return
     if (action === 'connectivity') {
@@ -277,11 +278,7 @@ class MessageList extends Component {
       return
     }
     if (action === 'addItem'  ||  action === 'insertItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
-      // Check if this is the application chat then refresh application if item was updated or added
-      if (this.add(params) && this.props.resource[TYPE] === PRODUCT_REQUEST) {
-        if (application)
-          Actions.refreshApplication({resource: application})
-      }
+      this.add(params)
       return
     }
     if (action === 'stepIndicatorPress') {
@@ -318,8 +315,17 @@ class MessageList extends Component {
         list.push(resource)
 
       this.setState({
-        list: list
+        list
       })
+
+      if (application && doRefreshApplication && resource._sendStatus === 'Sent') {
+        debugger
+        this.setState({
+          doRefreshApplication: false
+        })
+        this.refreshApplication(application)
+      }
+
       return
     }
     if (params.isAggregation !== this.props.isAggregation)
@@ -411,7 +417,7 @@ class MessageList extends Component {
     this.setState(state)
   }
   add(params) {
-    let { action, resource, to, productToForms, shareableResources, timeShared, pairingData } = params
+    let { action, resource, to, productToForms, shareableResources, timeShared, pairingData, doRefreshApplication } = params
     if (!utils.isMessage(resource))
       return
     // HACK for Agent to not to receive messages from one customer in the chat for another
@@ -477,11 +483,13 @@ class MessageList extends Component {
     }
     if (!replace  &&  !application)
       utils.pinFormRequest(list)
-
     let state = {
       // addedItem: addedItem,
-      list: list,
+      list
     }
+    if (doRefreshApplication)
+      state.doRefreshApplication = doRefreshApplication
+
     if (this.state.isLoading) {
       state.isLoading = false
       StatusBar.setHidden(false);
@@ -719,6 +727,9 @@ class MessageList extends Component {
         isVerifier
       }
     }
+    if (isApplication)
+      route.refreshHandler = this.refreshApplication.bind(this, r)
+
     let showEdit
     if (verification)  {
       // if (application  &&  isRM(application))
@@ -748,6 +759,7 @@ class MessageList extends Component {
           country: resource.country,
           locale: resource.locale,
           chat: resource,
+          application,
           lensId,
           bankStyle,
           isReview
@@ -1383,6 +1395,7 @@ class MessageList extends Component {
             to: resource.to,
             _context: resource
           },
+          chat: resource,
           currency,
           country,
           locale,
