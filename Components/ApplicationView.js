@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   SafeAreaView
 } from 'react-native'
+import { WebView } from 'react-native-webview'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 import { LazyloadScrollView } from 'react-native-lazyload'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
+import ActionSheet from 'react-native-actionsheet'
 
 import constants from '@tradle/constants'
 const {
@@ -108,7 +110,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider} = params
+    let {resource, action, backlink, application, style, provider, nextStep, templates, wasFilledByEmployee} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -120,7 +122,10 @@ class ApplicationView extends Component {
         resource: resource,
         isLoading: false,
         bankStyle: style || this.state.bankStyle,
-        locale: provider && provider.locale
+        locale: provider && provider.locale,
+        nextStep,
+        templates,
+        wasFilledByEmployee
       })
       break
     case 'exploreBacklink':
@@ -151,13 +156,15 @@ class ApplicationView extends Component {
            this.state.resource    !== nextState.resource       ||
            this.state.isLoading   !== nextState.isLoading      ||
            this.state.backlink    !== nextState.backlink       ||
-           this.state.checksCategory !== nextState.checksCategory ||
-           this.state.checkFilter !== nextState.checkFilter
+           this.state.checkFilter !== nextState.checkFilter    ||
+           this.state.checksCategory !== nextState.checksCategory  ||
+           this.state.wasFilledByEmployee !== nextState.wasFilledByEmployee
       return true
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected, showDetails, locale } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected,
+          showDetails, locale, nextStep, templates, wasFilledByEmployee } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -166,7 +173,6 @@ class ApplicationView extends Component {
     let styles = createStyles({ hasRM, isRM, bankStyle })
 
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
-    let contentSeparator = getContentSeparator(bankStyle)
     let loading
     if (isLoading) {
       loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
@@ -193,21 +199,23 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM  &&  !utils.isMe(resource.applicant))
+    if (!isRM  &&  !utils.isMe(resource.applicant) && !wasFilledByEmployee)
        assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
                   </TouchableOpacity>
-    let routes = navigator.getCurrentRoutes()
-    let home
-    if (__DEV__)
-       home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={styles.homeButton}>
-                  <View style={[buttonStyles.homeButton]}>
-                    <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
-                  </View>
-                </TouchableOpacity>
+    let home, print
+    if (utils.getMe().isEmployee)
+      home = this.addHomeButton()
 
+    let actionSheet = templates  && this.renderActionSheet()
+    if (actionSheet)
+      print = <TouchableOpacity onPress={() => this.ActionSheet.show()} style={styles.homeButton}>
+               <View style={[buttonStyles.homeButton]}>
+                 <Icon name='ios-print-outline' color={bankStyle.linkColor} size={33}/>
+               </View>
+             </TouchableOpacity>
     let photoId, selfie
     if (resource.forms) {
       photoId = resource.forms.find(r => utils.getType(r) === PHOTO_ID)
@@ -238,10 +246,20 @@ class ApplicationView extends Component {
                  </View>
              </TouchableOpacity>
     }
+    let nextApp
+    if (/*isRM  && */ nextStep) {
+      nextApp = <TouchableOpacity onPress={() => this.applyForNext(nextStep)} style={styles.tree}>
+                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                   <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
+                 </View>
+             </TouchableOpacity>
+    }
     let copyButton = this.generateCopyLinkButton(resource)
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
+                    {print}
+                    {actionSheet}
                     {tree}
                     {copyButton}
                     {compareImages}
@@ -249,6 +267,7 @@ class ApplicationView extends Component {
                     {assignRM}
                   </View>
                 </View>
+    let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         <SafeAreaView style={styles.container}>
@@ -275,7 +294,76 @@ class ApplicationView extends Component {
       </PageView>
      );
   }
+  renderActionSheet() {
+    const buttons = this.getActionSheetItems()
+    if (!buttons || !buttons.length) return
+    let titles = buttons.map((b) => b.title)
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={titles}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          buttons[index].callback()
+        }}
+      />
+    )
+  }
+  getActionSheetItems() {
+    const { templates } = this.state
+    const buttons = []
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
 
+    if (!templates)
+      return buttons
+    templates.forEach(template =>
+      push({
+        title: template.title,
+        callback: () => this.printReport(template)
+      })
+    )
+    push({
+      title: translate('cancel'),
+      callback: () => {}
+    })
+
+    return buttons
+  }
+  applyForNext(params) {
+    const { type } = params
+    const { navigator } = this.props
+    Alert.alert(
+      translate('applyForNextProduct', translate(utils.getModel(type))), // + utils.getDisplayName({ resource }),
+      null,
+      [
+        {text: 'Cancel', onPress: () => console.log('Canceled!')},
+        {text: 'Ok', onPress: () => {
+          Actions.applyForProduct(params)
+          // const routes = this.props.navigator.getCurrentRoutes()
+          // // get the top TimHome in the stack
+          // const homeRoute = routes.filter(r => r.componentName === 'ResourceList')
+          // navigator.popToRoute(homeRoute[0])
+        }}
+      ]
+    )
+  }
+  printReport(template) {
+    const { navigator, bankStyle, locale } = this.props
+    const { resource:application } = this.state
+    navigator.push({
+      title: "",
+      componentName: 'PrintReport',
+      backButtonTitle: null,
+      passProps: {
+        application,
+        bankStyle,
+        locale,
+        template
+      }
+    });
+  }
   compareImages(photoId, selfie) {
     let { navigator, bankStyle } = this.props
     let resource = this.state.resource || this.props.resource
