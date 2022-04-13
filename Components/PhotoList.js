@@ -131,7 +131,10 @@ class PhotoList extends Component {
     let source = { uri: uri }
     if (isDataUrl  ||  uri.charAt(0) == '/')
       source.isStatic = true;
-    let item = <Image source={source} resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} />
+    let item = <View>
+                 <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle, {backgroundColor: isPng && '#ffffff' || 'transparent'}]} source={source} />
+                 <Text style={styles.text}>{photo.name}</Text>
+               </View>
 
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
@@ -152,6 +155,10 @@ var styles = StyleSheet.create({
   photoContainer: {
     paddingTop: 9,
     paddingBottom: 4
+  },
+  text: {
+    fontSize: 12,
+    alignSelf: 'center'
   },
   thumbCommon: {
     borderWidth: .5,
