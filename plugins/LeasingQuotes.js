@@ -54,7 +54,10 @@ function chooseDetail({form, models, costOfCapital}) {
   form[TYPE] = ftype
   let { monthlyPayment, term:chosenTerm, purchaseOptionPrice } = form
   debugger
-  form.finalNoteValue = Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
+  form.finalNoteValue = {
+    currency: monthlyPayment.currency,
+    value: Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
+  }
 
   if (!costOfCapital) return
   if (form.xirr > costOfCapital.minIRR)
@@ -279,13 +282,4 @@ function mathRound(val, digits) {
     digits = 2
   let pow = Math.pow(10, digits)
   return Math.round(val * pow)/pow
-}
-function nextMonth(date) {
-  let m = date.getMonth() + 1
-  if (m && m % 12 === 0) {
-    m = 0
-    date.setFullYear(date.getFullYear() + 1)
-  }
-
-  date.setMonth(m)
 }
