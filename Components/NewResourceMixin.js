@@ -21,7 +21,7 @@ import DatePicker from 'react-native-datepicker'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate, isWeb, enumValue } from '../utils/utils'
+import utils, { translate, isWeb, enumValue, getLensedModelForType } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -83,6 +83,18 @@ var NewResourceMixin = {
     }
     let onSubmitEditing = exploreData && this.getSearchResult || this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
+
+    let dModel = data  &&  getLensedModelForType(data[TYPE])
+    if (!utils.isEmpty(data)    &&
+        !meta.items             &&
+        data[TYPE] !== meta.id  &&
+        !utils.isSubclassOf(dModel, meta.id)) {
+      let interfaces = meta.interfaces;
+      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) === -1)
+        return;
+    }
+
+    meta = getLensedModelForType(meta.id)
     let props, bl
     if (!meta.items)
       props = meta.properties;
@@ -93,27 +105,20 @@ var NewResourceMixin = {
       else
         props = meta.items.properties
     }
-
-    let dModel = data  &&  utils.getModel(data[TYPE])
-    if (!utils.isEmpty(data)    &&
-        !meta.items             &&
-        data[TYPE] !== meta.id  &&
-        !utils.isSubclassOf(dModel, meta.id)) {
-      let interfaces = meta.interfaces;
-      if (!interfaces  ||  interfaces.indexOf(data[TYPE]) === -1)
-        return;
-    }
-
     let eCols = this.getEditCols(props, meta)
 
-    let showReadOnly = true
-    eCols.forEach(p => {
-      let prop = props[p]
-      // prop is readOnly if explicitely has readOnly on it or
-      // it is a _group property with 'list' of props annotation
-      if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list)
-        showReadOnly = false
-    })
+    let showReadOnly = data._dataBundle !== null
+    if (!showReadOnly) {
+      eCols.forEach(p => {
+        let prop = props[p]
+        // prop is readOnly if explicitely has readOnly on it or
+        // it is a _group property with 'list' of props annotation
+        if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list) {
+          if (!originatingMessage || !originatingMessage.prefill)
+            showReadOnly = false
+        }
+      })
+    }
     let requestedProperties, excludeProperties
     if (this.state.requestedProperties)
        ({requestedProperties, excludeProperties} = this.state.requestedProperties)
@@ -231,7 +236,8 @@ var NewResourceMixin = {
           if (utils.isIOS())
             options.fields[p].keyboardType = 'url'
         }
-        model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
+        if (!model[p])
+          model[p] = maybe ? t.maybe(formType) : formType
         if (type == 'date') {
           model[p] = t.Str
           if (val)
@@ -579,7 +585,7 @@ var NewResourceMixin = {
       return model.viewCols
 
     let isSearch = exploreData  ||  (bookmark && search)
-    let eCols = utils.getEditCols(model).map(p => p.name)
+    let eCols = utils.getEditCols(model, exploreData).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
         return model.required.slice()
@@ -620,6 +626,7 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   changeValue(prop, value) {
+    const { originatingMessage: originatingResource } = this.props
     let { name: pname, ref: pref, type: ptype } = prop
 
     if (ptype === 'string'  &&  !value.trim().length)
@@ -701,10 +708,11 @@ var NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
-    if (!search  &&  r[TYPE] !== SETTINGS  &&  ptype !== 'string') {
-      Actions.getRequestedProperties({resource: r})
+    if (!search  &&  r[TYPE] !== SETTINGS) {
+      // if 'string' no need to check if requested properties changed on entering every letter
+      if (ptype !== 'string' || value.length <= 1)
+        Actions.getRequestedProperties({resource: r, originatingResource})
     }
-
     this.setState({
       resource: r,
       inFocus: pname
@@ -1361,7 +1369,22 @@ var NewResourceMixin = {
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value
-      resource[propName] = value
+      if (resource[propName]) {
+        if (Array.isArray(resource[propName])) {
+          if (Array.isArray(value)) {
+            // if (value.length)
+            //   value.forEach(v => resource[propName].push(v))
+            // else
+              resource[propName] = value
+          }
+          else
+            resource[propName].push(value)
+        }
+        else
+          resource[propName] = [resource[propName], value]
+      }
+      else
+        resource[propName] = value
     }
     else if (isArray || isMultichooser) {
       let hasReset
@@ -1672,17 +1695,19 @@ var NewResourceMixin = {
       resource[TYPE] = model.id;
     }
 
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
+    const { navigator, bankStyle, currency, locale } = this.props
+    let currentRoutes = navigator.getCurrentRoutes();
+    navigator.push({
       title: enumProp.title,
       // titleTextColor: '#7AAAC3',
       componentName: 'EnumList',
       backButtonTitle: 'Back',
       passProps: {
-        prop:        prop,
-        bankStyle:   this.props.bankStyle,
-        enumProp:    enumProp,
-        resource:    resource,
+        prop,
+        bankStyle,
+        enumProp,
+        resource,
+        currency,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback:    this.setChosenEnumValue.bind(this),
       }
