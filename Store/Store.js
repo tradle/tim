@@ -27,7 +27,7 @@ Q.onerror = function (err) {
 }
 import JailMonkey from 'jail-monkey'
 
-import plugins from '@tradle/biz-plugins'
+// import plugins from '@tradle/biz-plugins'
 import { allSettled } from '@tradle/promise-utils'
 import qrSchema from '@tradle/qr-schema'
 const links = qrSchema.links
@@ -51,6 +51,12 @@ const QUEUED = 'Queued'
 
 const ADD = 1
 const DELETE = -1
+const ALLOW_TO_ADD = [
+  'tradle.Asset',
+  'tradle.Configuration',
+  'tradle.EntityRole',
+  'tradle.EmployeeRole'
+]
 
 var debug = Debug('tradle:app:store')
 import employee from '../people/employee.json'
@@ -112,6 +118,7 @@ const NOT_CHAT_ITEM = '_notChatItem'
 import utils, {translate, translateEnum, isWeb, tryWithExponentialBackoff} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
+import ReportGenerator from './utils/ReportGenerator'
 import DataBundle from './plugins/DataBundle'
 // import Driver from './Driver'
 
@@ -198,6 +205,7 @@ const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 const CURRENCY            = 'tradle.Currency'
+const APPLICATION_COMPLETED  = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED  = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const PERSONAL_INFO       = 'tradle.PersonalInfo'
@@ -213,6 +221,7 @@ const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const BOOKMARKS_FOLDER    = 'tradle.BookmarksFolder'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
+const SHARE_REQUEST_SUBMITTED = 'tradle.ShareRequestSubmitted'
 const APPLICATION         = 'tradle.Application'
 // const DRAFT_APPLICATION   = 'tradle.DraftApplication'
 // const FORM_PREFILL        = 'tradle.FormPrefill'
@@ -236,6 +245,12 @@ const OVERRIDE_STATUS     = 'tradle.OverrideStatus'
 const DEVICE_SYNC         = 'tradle.DeviceSync'
 const DEVICE_SYNC_DATA_BUNDLE = 'tradle.DeviceSyncDataBundle'
 const ATTESTATION         = 'tradle.Attestation'
+const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+
+const EXCLUDED_APPLICATION_FORMS = [
+  ASSIGN_RM,
+  TERMS_AND_CONDITIONS
+]
 
 const APPLICATION_NOT_FORMS = [
   PRODUCT_REQUEST,
@@ -1271,7 +1286,7 @@ var Store = Reflux.createStore({
       let { r, context, timeShared } = await getSharedVerification(message)
       if (!r)
         return
-      this.trigger({action: 'insertItem', context, resource: r, to: context.to.organization, timeShared})
+      // this.trigger({action: 'insertItem', context, resource: r, to: context.to.organization, timeShared})
     }
     const deleteSharedVerification = async (message) => {
       let { r, context } = await getSharedVerification(message, true)
@@ -2392,6 +2407,12 @@ var Store = Reflux.createStore({
       return
 
     sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
+    let templates
+    if (sp.templates) {
+      sp.templates.forEach(t => {
+        t.template = Buffer.from(t.template, 'utf-8').toString()
+      })
+    }
     let newSp = {
       id: sp.id,
       org: utils.getId(sp.org),
@@ -2400,7 +2421,8 @@ var Store = Reflux.createStore({
       permalink: sp.bot.permalink,
       sandbox: sp.sandbox,
       // publicConfig: sp.publicConfig,
-      connectEndpoint: sp.connectEndpoint
+      connectEndpoint: sp.connectEndpoint,
+      templates: sp.templates
     }
     // Check is this is an update SP info
     let oldSp
@@ -3523,10 +3545,10 @@ var Store = Reflux.createStore({
   },
   async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource}) {
     let rtype = resource[TYPE]
-    if (!plugins.length  &&  !appPlugins.length)
+    if (!appPlugins.length)
       return
 
-    let allPlugins = plugins && plugins.slice() || []
+    let allPlugins = []
     let appP = require('../plugins')
     appP.forEach(p => allPlugins.push(p))
 
@@ -3538,18 +3560,18 @@ var Store = Reflux.createStore({
 
     // if (appPlugins)
     //   appPlugins.forEach(p => allPlugins.push(p))
-    let context = this.getBizPluginsContext()
+    let context = { models: this.getModels() }
     let moreInfo
-    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getModel(rtype)
+    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
 
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
-      moreInfo = plugin(context).validateForm.call(
+      moreInfo = await plugin(context).validateForm.call(
           // {models: {[rtype]: this.getModel(rtype)}},
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource: currentResource}
+          {application: _context, form: resource, currentResource, search: me.isEmployee && this.searchServer.bind(this)}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
@@ -3587,17 +3609,6 @@ var Store = Reflux.createStore({
       this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties, exclude: moreInfo.exclude})
     // return rprops
   },
-  getBizPluginsContext() {
-    return {
-      bot: {
-        objects: {
-          get: link => this._keeper.get(link)
-        }
-      },
-      productsAPI: {},
-      models: this.getModels()
-    }
-  },
   async onAddVerification(params) {
     let { r, dontSend, notOneClickVerification, noTrigger, application } = params
 
@@ -3618,6 +3629,7 @@ var Store = Reflux.createStore({
     else { //if (!dontSend) {
       try {
         let kres = await this._keeper.get(this.getCurHash(document))
+        storeUtils.rewriteStubs(kres)
         _.extend(document, kres)
       } catch (err) {
         debug('Store.onAddVerification', err)
@@ -4097,8 +4109,10 @@ if (!res[SIG]  &&  res._message)
 
     if (resource._sourceOfData)
       r._sourceOfData = resource._sourceOfData
-    if (r.modificationHistory) {
-      r.modificationHistory.forEach(mod => {
+
+    let modifications = r[TYPE] === MODIFICATION  &&  r.modifications ? [{modifications: r.modifications}] : r.modificationHistory
+    if (modifications) {
+      modifications.forEach(mod => {
         let shared = mod.modifications.shared
         if (!shared)
           return
@@ -4119,6 +4133,16 @@ if (!res[SIG]  &&  res._message)
       retParams.provider = this._getItem(org)
     this.trigger(retParams)
     return r
+  },
+  getTemplatesList({application}) {
+    if (!me.isEmployee)
+      return
+    let url = me.organization.url
+    let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
+    if (!sp  ||  !sp.templates || !sp.templates.length)
+      return
+    const { requestFor } = application
+    return sp.templates.filter(r => r.applicationFor === requestFor)
   },
   async onGetResourceLink({ resource }) {
     let toR = this._getItem(resource.to)
@@ -4163,6 +4187,14 @@ if (!res[SIG]  &&  res._message)
     if (!r)
       return
 
+    if (r.forms) {
+      let list = r.forms.filter(form => {
+        let ftype = utils.getType(form)
+        return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
+      })
+      r.forms = list
+      r._formsCount = r.forms.length
+    }
     let list, style
     if (prop) {
       let { name } = prop
@@ -4211,10 +4243,18 @@ if (!res[SIG]  &&  res._message)
             let m = utils.getModel(blProp.items.ref)
             let sortProp = m.sort || '_time'
             list.sort((a, b) => b[sortProp] - a[sortProp])
+            list.forEach(l => l._context = r._context)
           }
           r[blProp.name] = list
         }
       }
+    }
+    else {
+      let list = r.forms.filter(form => {
+        let ftype = utils.getType(form)
+        return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
+      })
+      r.forms = list
     }
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
@@ -4239,6 +4279,42 @@ if (!res[SIG]  &&  res._message)
     if (org)
       retParams.provider = this._getItem(org)
 
+    const { certificate } = r
+
+    if (certificate) {
+      let cType = utils.getType(certificate)
+      let prerequisiteFor = utils.getModel(cType).prerequisiteFor
+      if (prerequisiteFor) {
+        let cert = await this._getItemFromServer({idOrResource: certificate})
+        let c = _.clone(cert)
+        for (let p in c) {
+          if (p.charAt(0) === '_')
+            delete c[p]
+        }
+        delete c.to
+        delete c.from
+        let rep = this.getRepresentative(retParams.provider)
+        let isRM = utils.isRM(r)
+        debugger
+         if (isRM || r.filledForCustomer) {
+          retParams.nextStep = {
+            ...c,
+            associatedResource: utils.getId(certificate),
+            parentApplication: r[ROOT_HASH],
+            type: prerequisiteFor,
+            host: retParams.provider.url,
+            provider: rep[ROOT_HASH],
+            product: prerequisiteFor,
+          }
+        }
+      }
+    }
+    const application = r
+    const { applicant:applicantIdentity } = application
+    retParams.wasFilledByEmployee = application.filledForCustomer
+    let templates = this.getTemplatesList({application: r})
+    if (templates)
+      retParams.templates = templates
     this.trigger(retParams)
     return r
   },
@@ -4543,8 +4619,11 @@ if (!res[SIG]  &&  res._message)
     //   resource[IS_MESSAGE] = true
     const isBookmark = meta.id === BOOKMARK
     if (isBookmark  && currentFolder) {
-      await this.moveBookmark(params)
-      return
+      if (utils.getId(currentFolder) !== utils.getId(resource.folder)) {
+        await this.moveBookmark(params)
+        return
+      }
+      debugger
     }
 
     if (meta.id == VERIFICATION  ||  utils.isVerification(meta)) {
@@ -4557,6 +4636,9 @@ if (!res[SIG]  &&  res._message)
     }
     if (isBookmark)
       resource.to = this.buildRef(resource.from)
+    else if (resource.to  &&  utils.getType(resource.to) === ORGANIZATION)
+      resource.to = this.buildRef(this.getRepresentative(resource.to))
+
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
@@ -4747,10 +4829,17 @@ if (!res[SIG]  &&  res._message)
           returnVal[p] = pValue
       }
     }
-
+    let doRefreshApplication
     if (chat) {
-      let chatId = utils.getId(chat)
-      returnVal.to = self.buildRef(self.getRepresentative(chatId))
+      if (chat[TYPE] === PRODUCT_REQUEST) {
+        returnVal.to = chat.to
+        if (isNew)
+          doRefreshApplication = true
+      }
+      else {
+        let chatId = utils.getId(chat)
+        returnVal.to = self.buildRef(self.getRepresentative(chatId))
+      }
     }
     let addDocumentCreated, fr
     // grayout form request that originated this form submission
@@ -4779,7 +4868,7 @@ if (!res[SIG]  &&  res._message)
     if (isRegistration)
       await handleRegistration()
     else if (isMessage  &&  (!returnVal[NOT_CHAT_ITEM] || isRefresh))
-      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, employeeSetup})
+      await handleMessage({forceUpdate, noTrigger, returnVal, lens, isRefreshRequest, isRefresh, doNotSend, employeeSetup, doRefreshApplication})
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (isRefresh) {
@@ -4838,7 +4927,7 @@ if (!res[SIG]  &&  res._message)
       await save(returnVal)
     }
 
-    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest, employeeSetup}) {
+    async function handleMessage ({noTrigger, returnVal, forceUpdate, lens, isRefresh, isRefreshRequest, employeeSetup, doRefreshApplication}) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -4961,11 +5050,14 @@ if (!res[SIG]  &&  res._message)
           let toR
           if (isRefreshRequest  ||  returnVal[TYPE] === FORM_REQUEST)
             toR = self._getItem(utils.getId(returnVal.from))
-          else
+          else {
             toR = self._getItem(utils.getId(returnVal.to))
+            if (utils.getType(returnVal.to) === ORGANIZATION)
+              returnVal.to = self.getRepresentative(returnVal.to)
+          }
           let id = toR.organization ? utils.getId(toR.organization) : utils.getId(toR)
           self.addMessagesToChat(id, returnVal)
-          org = toR.organization
+          org = toR.organization || toR
           org = self._getItem(utils.getId(org))
         }
 
@@ -4991,7 +5083,7 @@ if (!res[SIG]  &&  res._message)
           if (!params) {
             if (!isNew  &&  isRefresh)
               noTrigger = true
-            params = { action: 'addItem', resource: returnVal, isRefresh }
+            params = { action: 'addItem', resource: returnVal, isRefresh, doRefreshApplication }
           }
         }
 
@@ -5041,7 +5133,11 @@ if (!res[SIG]  &&  res._message)
             if (bookmarksFolder) {
               if (!bookmarksFolder.list)
                 bookmarksFolder.list = []
-              bookmarksFolder.list.push(self.buildRef(returnVal))
+              let bidx = isNew ? -1 : bookmarksFolder.list.findIndex(b => utils.getRootHash(b) === returnVal[ROOT_HASH])
+              if (bidx === -1)
+                bookmarksFolder.list.push(self.buildRef(returnVal))
+              else
+                bookmarksFolder.list.splice(bidx, 1, self.buildRef(returnVal))
               let bf = await self.onAddChatItem({resource: bookmarksFolder, noTrigger: true, origNoTrigger: true})
               if (!noTrigger)
                 self.trigger({action: 'updateItem', resource: bf})
@@ -5084,21 +5180,25 @@ if (!res[SIG]  &&  res._message)
 
         if (!isNew) {
           let prevRes = self._getItem(prevResId)
-          prevRes._latest = false
-          prevResCached._latest = false
+          if (!prevRes  &&  rtype === BOOKMARK);
+          else {
+            prevRes._latest = false
+            prevResCached._latest = false
 
-          let org = to.organization ? self._getItem(to.organization) : to
-          // Draft project
-          // self.trigger({action: 'getItem', resource: returnVal, to: org})
-          if (!origNoTrigger) {
-            let context = returnVal._context
-            if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
-              prevRes._dataBundle = context._dataBundle
-            // else
-              self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+            let org = to.organization ? self._getItem(to.organization) : to
+            // Draft project
+            // self.trigger({action: 'getItem', resource: returnVal, to: org})
+            if (!origNoTrigger) {
+              let context = returnVal._context
+              if (context && context._dataBundle && prevRes[ROOT_HASH] === prevRes[CUR_HASH])
+                prevRes._dataBundle = context._dataBundle
+              // else
+                // self.trigger({action: 'updateItem', resource: isRefresh && returnVal || prevResCached, to: org})
+                self.trigger({action: 'updateItem', resource: returnVal, to: org})
+            }
+            await self.dbPut(prevResId, prevResCached)
+            self._setItem(prevResId, prevRes)
           }
-          await self.dbPut(prevResId, prevResCached)
-          self._setItem(prevResId, prevRes)
         }
         if (!isNew  ||  !utils.isForm(rtype)) {
           if (isBookmark) {
@@ -5538,7 +5638,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger({action: 'syncDevicesIsDone', to: org})
 
     Actions.showModal({title: `${title}${translate('pairingDevicesSync')}`, showIndicator: true})
-     var msg = {
+     const msg = {
       message: 'Pairing devices',
       [TYPE]: DEVICE_SYNC,
       from: me,
@@ -5565,9 +5665,20 @@ if (!res[SIG]  &&  res._message)
     }
   },
   async onApplyForProduct(params) {
-    const { host, provider, product, contextId, bundleId,
-            associatedResource, parentApplication } = params
-    let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
+    let { host, provider, product, contextId, bundleId,
+          associatedResource, parentApplication, _ref } = params
+    let newProvider
+    if (!host  &&  provider) {
+      if (utils.getType(provider) !== ORGANIZATION)
+        return
+      let organization = this._getItem(provider)
+      let rep = this.getRepresentative(utils.getId(provider))
+      host = organization.url
+      provider = rep[ROOT_HASH]
+      newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => utils.urlsEqual(r.url, host))
+    }
+    if (!newProvider)
+      newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
     // debugger
@@ -5596,9 +5707,13 @@ if (!res[SIG]  &&  res._message)
         _.extend(resource, { bundleId })
       // else if (product === CP_ONBOARDING ||
       //          product === CE_ONBOARDING) {
-      else if (associatedResource  &&  parentApplication) {
+      // else
+      let getExtraParams = associatedResource  &&  parentApplication || _ref
+      if (associatedResource  &&  parentApplication) {
         resource.associatedResource = associatedResource
         resource.parentApplication = parentApplication
+      }
+      if (getExtraParams) {
         let notes = _.omit(params, ['host', 'provider', 'product', 'application'])
         if (_.size(notes))
           resource.notes = notes
@@ -5621,7 +5736,7 @@ if (!res[SIG]  &&  res._message)
   },
   async onSubmitDraftApplication({context}) {
     let contextId = context.contextId
-    var params = {
+    let params = {
       modelName: APPLICATION,
       to: me.organization,
       noTrigger: true,
@@ -5642,6 +5757,43 @@ if (!res[SIG]  &&  res._message)
 
     await this.onAddChatItem({resource: application})
   },
+  async onSubmitCompletedApplication({context}) {
+    let contextId = context.contextId
+    let params = {
+      modelName: APPLICATION,
+      to: me.organization,
+      noTrigger: true,
+      search: true,
+      filterResource: {
+        context: contextId,
+        draft: true
+      }
+    }
+
+    let { list } = await this.searchServer(params)
+    if (!list  ||  !list.length) {
+      debugger
+      return
+    }
+    let application = list[0]
+    application.draft = false
+    // application.draftCompleted = true
+    application.processingDataBundle = false
+    application.filledForCustomer = true
+
+    await this.onAddChatItem({resource: application})
+    await utils.promiseDelay(2000)
+    await this.onAddChatItem({resource: {
+      [TYPE]: APPLICATION_COMPLETED,
+      message: translate(utils.getModel(APPLICATION_COMPLETED)),
+      from: application.from,
+      to: application.to,
+      application,
+      context: application.context,
+      _context: context
+    }})
+  },
+
   async onGetProductList({ resource }) {
     if (resource[TYPE] !== ORGANIZATION) {
       let org = resource.organization
@@ -5717,6 +5869,13 @@ if (!res[SIG]  &&  res._message)
       await this.getList({action: 'list', modelName: ORGANIZATION, isTest})
     }
     return newProvider
+  },
+  async onGetReport({application, template, locale}) {
+    if (!me.isEmployee)
+      return
+    let reports = new ReportGenerator({application, template, locale, getObjects: this.getObjects, getApplication: this.getApplication})
+    let html = await reports.genReport()
+    this.trigger({action: 'report', application, html})
   },
 
   async onImportData(data) {
@@ -5854,9 +6013,12 @@ debugger
     // debugger
     let doShareDocuments = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     if (doShareDocuments) {
+      if (!me.isEmployee)
+        await this.shareResourcesForCustomer(documents, to, formResource, shareBatchId)
       let errorMsg = await this.shareForms({documents, to, formRequest: formResource, batch, shareBatchId})
       if (errorMsg) {
         this.trigger({action: 'addItem', errorMsg: 'Sharing failed: ' + errorMsg, resource: document, to: this._getItem(toOrgId)})
+        await this.shareResourcesForCustomerSubmitted(to, formResource)
         return
       }
     }
@@ -5872,6 +6034,7 @@ debugger
         let documentId = utils.getId(document)
         this.dbBatchPut(documentId, document, batch)
         document._sendStatus = SENT
+        document._sentTime = Date.now()
         this._setItem(documentId, document)
         this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
         docStubs.push(this.buildRef(document, true))
@@ -5879,28 +6042,35 @@ debugger
       // this.trigger({action: 'updateItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
     }
     // let m = this.getModel(VERIFICATION)
-    let docModel = this.getModel(documents[0][TYPE])
-    var params = {
-      modelName: VERIFICATION,
-      to: documents[0],
-      noTrigger: true,
-      // meta: m,
-      prop: docModel.properties['verifications'],
-      // props: m.properties
+    let verifications = []
+    for (let i=0; i<documents.length; i) {
+      let doc = documents[i]
+      let docModel = this.getModel(doc[TYPE])
+      let params = {
+        modelName: VERIFICATION,
+        to: doc,
+        noTrigger: true,
+        // meta: m,
+        prop: docModel.properties['verifications'],
+        // props: m.properties
+      }
+      let fverifications
+      if (me.isEmployee) {
+        params.search = me.isEmployee,
+        params.filterResource = {document: docStubs}
+        fverifications  = await this.searchServer(params)
+        fverifications = fverifications ?  fverifications.list : null
+      }
+      else
+        fverifications = await this.searchMessages(params)
+      fverifications  &&  fverifications.forEach(v => verifications.push(v))
     }
-
-    let verifications
-    if (me.isEmployee) {
-      params.search = me.isEmployee,
-      params.filterResource = {document: docStubs}
-      verifications  = await this.searchServer(params)
-      verifications = verifications  &&  verifications.list
-    }
-    else
-      verifications  = await this.searchMessages(params)
-    if (!verifications) {
-      if (batch.length)
+    if (!verifications.length) {
+      if (batch.length) {
         await db.batch(batch)
+        if (!me.isEmployee)
+          await this.shareResourcesForCustomerSubmitted(to, formResource)
+      }
       return
     }
     await this.shareVerifications({verifications, to, formRequest: formResource, batch, shareBatchId})
@@ -6029,6 +6199,47 @@ debugger
         await this.this.getAllShareableLinkedResources(r, links)
       }
     }
+  },
+  async shareResourcesForCustomer(resources, to, formRequest, shareBatchId) {
+    // return
+    let hashes = resources.map(d => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    debugger
+    let r = this._getItem(utils.makeId(PROFILE, to[ROOT_HASH], to[CUR_HASH]))
+    let isVerification = resources[0][TYPE] === VERIFICATION
+    let propName = isVerification ? 'verificationStubs' : 'formStubs'
+    let sr = {
+      [TYPE]: SHARE_REQUEST,
+      links: hashes,
+      with:  [{
+        [TYPE]: IDENTITY,
+        _permalink: to[ROOT_HASH],
+        _link: to[CUR_HASH],
+        _displayName: r.organization && r.organization.title || r.formatted
+        // id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+      }]
+    }
+    let msg = await this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
+    msg.seal =  true
+    await this.meDriverSignAndSend(msg)
+  },
+  async shareResourcesForCustomerSubmitted(to, formRequest) {
+    // return
+    debugger
+    let r = this._getItem(utils.makeId(PROFILE, to[ROOT_HASH], to[CUR_HASH]))
+    let sr = {
+      [TYPE]: SHARE_REQUEST_SUBMITTED,
+      submitted: true
+    }
+    let msg = await this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
+    msg.seal =  true
+    await utils.promiseDelay(2000)
+    await this.meDriverSignAndSend(msg)
   },
 
   async shareResources(resources, to, formRequest, shareBatchId) {
@@ -6207,7 +6418,7 @@ debugger
     let stub = {
       bankRepresentative: toId,
       timeShared: time,
-      shareBatchId: shareBatchId
+      shareBatchId
     }
     if (lens)
       stub.lens = lens
@@ -6742,7 +6953,7 @@ debugger
     if (!result) {
       // First time. No connection no providers yet loaded
       if (!this.isConnected  &&  isOrg)
-        this.trigger({action: 'list', alert: translate('noConnection'), first: first, modelName: modelName})
+        this.trigger({action: 'list', alert: translate('noConnection'), first, modelName})
       return
     }
     // if (!SERVICE_PROVIDERS)
@@ -6768,15 +6979,19 @@ debugger
                   ? { action: 'filteredList', list: result}
                   : { action: sponsorName ? 'sponsorsList' : 'list',
                       list: result,
-                      isTest: isTest,
-                      modelName: modelName,
-                      spinner: spinner,
-                      isAggregation: isAggregation
+                      isTest,
+                      modelName,
+                      spinner,
+                      addAllowed: this.isAddAllowed(modelName),
+                      isAggregation
                     }
     if (prop)
       retParams.prop = prop;
     retParams.first = first
     this.trigger(retParams);
+  },
+  isAddAllowed(modelName) {
+    return ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
   },
   handleChatResult({result, orgId, modelName}) {
     if (modelName !== MESSAGE)
@@ -6958,9 +7173,10 @@ debugger
     _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
     let list
     let { result, error, retry } = await graphQL.searchServer(params)
+    let addAllowed = this.isAddAllowed(modelName)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, errorMessage: error, query: retry  &&  params})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, addAllowed, modelName})
       return { list, errorMessage: error, query: params }
     }
 
@@ -6977,7 +7193,8 @@ debugger
     }
 
     if (!noTrigger)
-      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit})
+      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, addAllowed})
+
     return {list, endCursor: newCursor}
   },
   async getBookmarkChat(parameters) {
@@ -7111,6 +7328,7 @@ debugger
     let applicant = applicantId  &&  this._getItem(applicantId)
     let importedVerification
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    let hasPermalink
     // Right now we request all imported verifications the first time.
     // May be we'll decide to page them too
     if (application) { //  &&  !endCursor) {
@@ -7124,7 +7342,10 @@ debugger
       if (!context[TYPE])
         context = null
     }
-    else if (!filterResource) {
+    else if (filterResource) {
+      hasPermalink = filterResource['object___permalink']
+    }
+    else {
       if (me.isEmployee) {
         if (utils.getRootHash(me.organization) !== utils.getRootHash(to)) {
           filterResource = {
@@ -7148,7 +7369,7 @@ debugger
       // author = applicant  &&  this.getRootHash(applicant) // (applicant[ROOT_HASH] || applicantId.split('_')[1])
       // // recipient = myBot[ROOT_HASH]
     }
-    else {
+    else if (!hasPermalink) {
       // recipient = myBot[ROOT_HASH]
       let addAuthor = true
       if (me.isEmployee  &&  context  &&  context.from.organization)  {
@@ -7378,7 +7599,15 @@ debugger
     }
 
     let isIdentity = r[TYPE] === IDENTITY
-    let authorId = utils.makeId(PROFILE, isIdentity && r._permalink || (r._org  ||  r._author))
+    let permalink
+    if (isIdentity)
+      permalink = r._permalink
+    else if (r._author === me._r)
+      permalink = r._author
+    else
+      permalink = r._org  ||  r._author
+    let authorId = utils.makeId(PROFILE, permalink)
+
     let author = this._getItem(authorId)
     let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName({ resource: author.organization }))
     let org
@@ -7547,7 +7776,7 @@ debugger
           break
         if (m.id !== FORM  &&  !utils.isSubclassOf(m, FORM))
           break
-        if (APPLICATION_NOT_FORMS.includes(m.id))
+        if (APPLICATION_NOT_FORMS.includes(m.id) ||  EXCLUDED_APPLICATION_FORMS.includes(m.id))
           break
         if (!application.forms)
           application.forms = []
@@ -7784,7 +8013,7 @@ debugger
   async searchAllMessages(params) {
     let self = this
 
-    let {resource, query, context, to, isForgetting, lastId, limit, prop, filterProps} = params
+    let {resource, query, context, to, isForgetting, lastId, limit=isWeb() ? 50 : 20, prop, filterProps} = params
 
     let meId = utils.getId(me)
     let meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
@@ -7861,13 +8090,26 @@ debugger
     let refs = []
     let all = {}
     let duplicateItems = []
+    let hasProduct
     if (typeof lastId === 'undefined' || j) {
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         let item = this._getItem(thisChatMessages[i].id)
         // if (!item)
-        if (!item  ||  item[TYPE] === DATA_CLAIM  ||  item[TYPE] === DATA_BUNDLE)
+        if (!item  ||
+             item[TYPE] === DATA_CLAIM   ||
+             item[TYPE] === DATA_BUNDLE  ||
+             item[TYPE] === VERIFICATION ||
+             // item[TYPE] === BOOKMARK     ||
+             item[TYPE] === BOOKMARKS_FOLDER)
           continue
+        // HACK for sharing set of forms
+        let imodel = utils.getModel(item[TYPE])
+        if (imodel.subClassOf === MY_PRODUCT) {
+          if (hasProduct)
+            continue
+          hasProduct = true
+        }
         // HACK for white glove project
         if (item._hidden)
           continue
@@ -8677,21 +8919,41 @@ debugger
       this.trigger({list, action: 'list', isChooser, first: true})
       return
     }
-    const isShared = resource.shared
+    const isShared = resource && resource.shared
     if (isShared) {
-      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true}, modelName: BOOKMARK, search: true, noTrigger: true })
-      this.trigger({list, action: 'list', isChooser, first: true, noMove})
+      let { list } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true })
+      this.trigger({list, action: 'list', isChooser, first: true, noMove: true})
       return
     }
-    if (!resource.list  ||  !resource.list.length)
+
+    if (!resource.list  ||  !resource.list.length) {
+      let initFolder = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('initialBookmarks'))
+      let initFolderLinks = initFolder[0].list.map(r => utils.getRootHash(r))
+      debugger
+      let result = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true })
+      let list
+      if (result) {
+        list = result.list
+        list = list  &&  list.filter(r => {
+          if (initFolderLinks.find(b => b === r[ROOT_HASH]))
+            return false
+          return true
+        })
+      }
+      this.trigger({list, action: 'list', isChooser, first: true, noMove: true})
       return
+    }
 
     let list = []
     let { list:l } = resource
+    let search = resource.message !== translate('initialBookmarks') // && resource.message !== translate('personalBookmarks')
     for (let i=0; i<l.length; i++) {
       let r = l[i]
-      if (utils.isStub(r))
-        list.push(await this.onGetItem({resource: r, noTrigger: true, search: resource.message !== translate('initialBookmarks')}))
+      if (utils.isStub(r)) {
+        let item = await this.onGetItem({resource: r, noTrigger: true, search})
+        if (item)
+          list.push(item)
+      }
       else
         list.push(r)
     }
@@ -8701,7 +8963,7 @@ debugger
   async moveBookmark(params) {
     let { currentFolder, resource } = params
     let curFolder = currentFolder
-    if (utils.getDisplayName({resource: resource.folder}) === utils.getDisplayName({ resource: currentFolder }))
+    if (utils.getId(resource.folder) === utils.getId(currentFolder))
       return
     let prevRef = this.buildRef(resource)
     debugger
@@ -8715,7 +8977,7 @@ debugger
     // else
     let isShared = resource.shared
     if (!isShared  &&  folder.shared) {
-      this.trigger({action: 'addItem', error: 'personalBookmarkInSharedFolder', resource} )
+      this.trigger({action: 'addItem', error: translate('personalBookmarkInSharedFolder'), resource} )
       return
     }
 
@@ -9173,7 +9435,7 @@ debugger
       })
     }
     if (!shareType)
-      return {verifications: shareableResources}
+      return
     let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: shareType, limit}})
     let verifiedShares = {}
     if (l) {
@@ -9384,11 +9646,20 @@ debugger
 
     let formList =  ll.list.filter((r) => {
       let dId = utils.getId(r)
-      if (excludeForms[dId])
-        return false
-      docs.push(dId)
-      return true
+      return !excludeForms[dId]
     })
+
+    // Share only the resources that were submitted by this provider to some other institutions.
+    // Eliminate the white gloved ones.
+    let appSubs = formList.map(l => this.searchServer({modelName: APPLICATION_SUBMISSION, noTrigger: true, filterResource: {'submission._permalink': l._r}}))
+    appSubs = await Promise.all(appSubs)
+    for (let i=appSubs.length - 1; i >= 0; i--) {
+      let { list } = appSubs[i]
+      if (list)
+        formList.splice(i, 1)
+      else
+        docs.push(utils.getId(formList[i]))
+    }
     let promises = []
     if (shareType === LEGAL_ENTITY) {
       let m = this.getModel(LEGAL_ENTITY)
@@ -9646,11 +9917,9 @@ debugger
       // filter out not confirmed resources
       return result && result.filter(r => !r[NOT_CHAT_ITEM])
     }
-    else {
+    else if (me.isEmployee  &&  modelName !== PROFILE  &&  modelName !== ORGANIZATION) {
       _.extend(params, {noTrigger: true, search: me.isEmployee})
-      let model = this.getModel(modelName)
-      if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION)
-        return await this.searchServer(params)
+      return await this.searchServer(params)
     }
   },
 
@@ -11176,22 +11445,35 @@ debugger
           }
       }
     }
-    if (isFormRequest  &&  !val.prefill &&  context  &&  context.notes) {
-      let fprops = utils.getModel(val.form).properties
+    if (isFormRequest  /*&&  !val.prefill*/ &&  context  &&  context.notes) {
+      let fModel = utils.getModel(val.form)
+      let fprops = fModel.properties
       let prefill
       let { notes } = context
       for (let p in notes) {
-        if (!fprops[p])
+        if (!fprops[p]) {
+          if (p === '_ref') {
+            let ref = utils.getType(notes._ref)
+            let refProps = utils.getPropertiesWithAnnotation(fModel, 'ref')
+            let prop = Object.values(refProps).find(p => p.ref === ref)
+            if (!prop) continue
+            p = prop.name
+            if (!prefill)
+              prefill = val.prefill || {}
+            if (prefill[p])
+              continue
+            prefill[p] = notes._ref
+          }
           continue
-        if (!prefill)
-          prefill = {}
-        if (fprops[p].ref) {
+        }
+        prefill = val.prefill || {}
+        if (fprops[p].ref  &&  typeof prefill[p] === 'string') {
           try {
             prefill[p] = JSON.parse(notes[p])
           } catch (err) {
             debugger
           }
-         }
+        }
         if (!prefill[p])
           prefill[p] = notes[p]
        }
@@ -12393,6 +12675,16 @@ debugger
   },
   getLens(id) {
     return lenses[id]
+  },
+  getLensForType(type) {
+    let lensId
+    for (let id in lenses) {
+      if (lenses[id].model === type) {
+        lensId = id
+        break
+      }
+    }
+    return lensId ? { lensId, lens: lenses[lensId] } : {}
   },
 
   validateResource(resource) {
