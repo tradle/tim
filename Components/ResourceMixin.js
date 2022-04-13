@@ -160,7 +160,7 @@ var ResourceMixin = {
 
   renderItems({value, prop, cancelItem, editItem, component, showResourceProperty}) {
     let { bankStyle, navigator, resource, currency, locale } = this.props
-    let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
+    let linkColor = (bankStyle  &&  bankStyle.linkColor) || defaultBankStyle.linkColor
     let itemsMeta = prop.items.properties;
     let pModel
     let ref = prop.items.ref;
@@ -171,9 +171,9 @@ var ResourceMixin = {
       }
     }
     let counter = 0;
-    let vCols = pModel  &&  pModel.viewCols;
+    let vCols = pModel  &&  pModel.viewCols
     if (!vCols) {
-      vCols = [];
+      vCols = []
       for (let p in itemsMeta) {
         if (p.charAt(0) !== '_'  &&  !itemsMeta[p].hidden)
           vCols.push(p);
@@ -185,6 +185,15 @@ var ResourceMixin = {
     return value.map((v) => {
       let ret = [];
       counter++;
+      if (!prop.inlined  &&  !pModel.inlined) {
+        let item = this.renderItem({editItem, cancelItem, prop, v})
+        let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
+        return <View key={this.getNextKey()} style={{paddingVertical: 10, paddingLeft:10}} >
+                 {item}
+                 {sep}
+              </View>
+      }
+
       let displayName
       let hadCancel
       let hasEdit
@@ -364,11 +373,8 @@ var ResourceMixin = {
                     navigator.push({
                      title: vTitle,
                      componentName,
-                     locale,
-                     currency,
                      backButtonTitle: 'Back',
-                     bankStyle,
-                     passProps: {resource: v}
+                     passProps: {resource: v, bankStyle, currency, locale}
                     })
                   }}>
                    {item}
@@ -385,6 +391,47 @@ var ResourceMixin = {
         </View>
       )
     });
+  },
+  showPDF({photo}) {
+    const { bankStyle, navigator } = this.props
+    navigator.push({
+      backButtonTitle: 'Back',
+      title: photo.name || translate('Document'),
+      componentName: 'ArticleView',
+      passProps: {
+        href: photo.url,
+        bankStyle
+      },
+      // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
+    })
+  },
+  renderItem({editItem, cancelItem, prop, v}) {
+    const { bankStyle } = this.props
+    let linkColor = (bankStyle  &&  bankStyle.linkColor) || defaultBankStyle.linkColor
+
+    if (editItem) {
+      return <View>
+               <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
+                 <View style={styles.itemContent}>
+                   <Text style={styles.itemHighlightTitle}>{utils.getDisplayName({resource: v})}</Text>
+                 </View>
+               </TouchableOpacity>
+               <View style={styles.cancelIcon}>
+                 <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                  <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
+                 </TouchableOpacity>
+               </View>
+             </View>
+    }
+    else {
+      return <View>
+               <TouchableOpacity underlayColor='transparent' onPress={this.showRefResource.bind(this, v, prop)}>
+                 <View style={styles.itemContent}>
+                   <Text style={styles.itemHighlightTitle}>{utils.getDisplayName({resource: v})}</Text>
+                 </View>
+               </TouchableOpacity>
+             </View>
+    }
   },
   renderSimpleProp({val, pMeta, modelName, component, hasGroups, showResourceProperty}) {
     let { bankStyle } = this.props
@@ -833,11 +880,10 @@ var ResourceMixin = {
     let lstyles = createStyles({bankStyle})
 
     let header = (<View style={{padding: 10}} key={this.getNextKey()}>
-                    <View style={[styles.textContainer, styles.row]}>
-                      <Text style={lstyles.bigTitle}>{translate('dataSecurity')}</Text>
-                      <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+                    <View style={{ flex: 1, flexDirection: 'row', paddingVertical: 5, paddingLeft: 10}}>
+                      <View style={lstyles.accent}/>
+                      <Text style={lstyles.dividerText}>{translate('dataSecurity')}</Text>
                     </View>
-                    <View style={styles.separator} />
                   </View>)
     if (blockchain === 'corda') {
       let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
@@ -869,26 +915,16 @@ var ResourceMixin = {
         const txs = <View>{urls.map(renderRow)}</View>
         content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-                       <Text style={styles.content}>{description}
-                         <Text style={lstyles.learnMore}> Learn more</Text>
-                       </Text>
+                       <Text style={styles.content}>{description}</Text>
                      </TouchableOpacity>
                      {txs}
                     </View>
       }
     }
-    return <Accordion
-                sections={['txId']}
-                onPress={() => {
-                  this.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
-                    if (h  &&  y > pY)
-                      onPageLayout(pY, h)
-                  })
-                }}
-                header={header}
-                content={content}
-                underlayColor='transparent'
-                easing='easeIn' />
+    return <View>
+             {header}
+             {content}
+           </View>
   },
   getBlockchainExplorerRow(url, i, styles) {
     const { bankStyle } = this.props
@@ -934,6 +970,7 @@ var ResourceMixin = {
   },
   openApplicationChat(resource) {
     let { navigator, bankStyle, locale } = this.props
+    let { wasFilledByEmployee } = this.state
     // let { bankStyle } = this.state
     // let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
@@ -955,6 +992,7 @@ var ResourceMixin = {
         modelName: MESSAGE,
         application: resource,
         currency: resource.currency,
+        wasFilledByEmployee,
         locale,
         bankStyle: style,
       }
@@ -982,7 +1020,19 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
       paddingVertical: 5,
       paddingRight: 10,
       paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)
-    }
+    },
+    accent: {
+      width: 12,
+      borderLeftColor: bankStyle.accentColor || 'orange',
+      borderLeftWidth: 5,
+    },
+    dividerText: {
+      marginBottom: 5,
+      fontSize: 26,
+      fontWeight: '500',
+      color: bankStyle.linkColor,
+      fontFamily: bankStyle.headerFont
+    },
   })
 })
 
@@ -1018,7 +1068,14 @@ var styles = StyleSheet.create({
     fontWeight: '600',
     color: '#555555',
   },
-  itemSeparator: {
+  itemHighlightTitle: {
+    fontSize: 16,
+    marginBottom: 0,
+    marginRight: 5,
+    // marginHorizontal: 7,
+    color: '#555555',
+  },
+   itemSeparator: {
     height: 1,
     marginTop: 5,
     // backgroundColor: '#eeeeee',
