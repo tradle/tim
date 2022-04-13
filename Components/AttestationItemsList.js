@@ -167,7 +167,8 @@ class AttestationItemsList extends Component {
         model,
         bankStyle,
         resource: item,
-        action: (value) => {
+        originatingMessage: resource,
+        callback: (value) => {
           debugger
           // reviewed[rowId] = {...resource, ...value}
 
@@ -177,6 +178,7 @@ class AttestationItemsList extends Component {
           //   // list: newList,
           //   dataSource: this.state.dataSource.cloneWithRows(list) //(this.state.list)
           // })
+          navigator.pop()
           navigator.pop()
         }
       }
