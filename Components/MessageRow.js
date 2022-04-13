@@ -33,6 +33,7 @@ import Markdown from './Markdown'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const SHARE_CONTEXT = 'tradle.ShareContext'
+const APPLICATION_COMPLETED = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 // const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const DATA_BUNDLE = 'tradle.DataBundle'
@@ -66,7 +67,7 @@ class MessageRow extends Component {
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func,
     bankStyle: PropTypes.object,
-    to: PropTypes.object,
+    to: PropTypes.object
   };
   constructor(props) {
     super(props);
@@ -86,17 +87,15 @@ class MessageRow extends Component {
     let { resource, to, bankStyle, navigator } = this.props
     let styles = createStyles({bankStyle})
 
-    let isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
-    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
+    let rtype = utils.getType(resource)
+    let isBookmark = rtype === BOOKMARK
+    let isMyMessage = this.isMyMessage()
 
     let renderedRow = [];
     let ret = this.formatRow(isMyMessage, renderedRow, styles);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let rtype = utils.getType(resource)
     let isConfirmation = rtype === CONFIRMATION
-    let isBookmark = rtype === BOOKMARK
     let isSimpleMessage = rtype === SIMPLE_MESSAGE
 
     let photoUrls = [];
@@ -161,7 +160,7 @@ class MessageRow extends Component {
       if (resource.photos) {
         let len = resource.photos.length;
         resource.photos.forEach((p) => {
-          photoUrls.push({url: utils.getImageUri(p.url)});
+          photoUrls.push({url: utils.getImageUri(p.url)})
         })
 
         let isReadOnlyChat = utils.isContext(to[TYPE])  &&  utils.isReadOnlyChat(resource._context) //context  &&  context._readOnly
@@ -177,16 +176,20 @@ class MessageRow extends Component {
     let rowStyle = isSimpleMessage ? {backgroundColor: 'transparent'} : [chatStyles.row, {backgroundColor: 'transparent'}];
     // let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
 
-    let showMessageBody;
+    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
+
+    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos
+
+    let showMessageBody
     if (noMessage) {
       if (hasOwnerPhoto)
-        showMessageBody = true;
+        showMessageBody = true
       else if (!model.properties['message'])
-        showMessageBody = true;
+        showMessageBody = true
     }
     else
-      showMessageBody = true;
-    let messageBody;
+      showMessageBody = true
+    let messageBody
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     if (message  &&  !isContext) {
@@ -384,7 +387,7 @@ class MessageRow extends Component {
   }
 
   formatRow(isMyMessage, renderedRow, styles) {
-    let { resource, bankStyle, navigator, to, isLast } = this.props
+    let { resource, bankStyle, navigator, to, isLast, application } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
@@ -560,9 +563,20 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
     }
+    if (model.id === APPLICATION_COMPLETED) {
+      let color = application ? bankStyle.confirmationColor : bankStyle.myMessageLinkColor
+      let content = <Text style={[chatStyles.resourceTitle, {color}]}>{translate('applicationCompleted')}</Text>
+      if (resource.application)
+        content = <TouchableOpacity underlayColor='transparent' onPress={this.props.onSelect.bind(this, {resource: resource.application})}  key={this.getNextKey()}>
+                    {content}
+                  </TouchableOpacity>
+      let msg = <View key={this.getNextKey()}>{content}</View>
+      renderedRow.push(msg);
+      return null
+    }
     if (model.id === BOOKMARK) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('bookmarkWasCreated')}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate(resource._p ? 'bookmarkWasChanged' : 'bookmarkWasCreated')}</Text>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || translate(model)}</Text>
                 </View>
       renderedRow.push(msg);
