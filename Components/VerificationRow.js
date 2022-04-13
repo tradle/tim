@@ -9,6 +9,7 @@ import {
   LazyloadView as View,
   // LazyloadImage as Image
 } from 'react-native-lazyload'
+import LinearGradient from 'react-native-linear-gradient'
 
 // import ImageComponent from './Image'
 import Image from './Image'
@@ -45,6 +46,8 @@ const {
   PROFILE
 } = constants.TYPES
 
+const APPLICATION = 'tradle.Application'
+const APPLICATION_COMPLETED = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const CONFIRMATION = 'tradle.Confirmation'
@@ -102,6 +105,7 @@ class VerificationRow extends Component {
     let isVerification = model.id === VERIFICATION  &&  resource.document != null
     let r = isVerification ? resource.document : resource
 
+    let isApplicationBacklinkForms = parentResource && parentResource[TYPE] === APPLICATION && prop && prop.items && prop.items.backlink && prop.name === 'forms'
     let listModel = utils.getModel(modelName)
     let ph = utils.getMainPhotoProperty(listModel)
 
@@ -122,18 +126,26 @@ class VerificationRow extends Component {
       // photo = <Image imageComponent={ImageComponent} host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
       photo = <Image resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     }
-    else if (model.icon  ||  isForm) {
-      let icon = model.icon
+    else if (prop  &&  (prop.icon ||  model.icon  ||  isForm)) {
+      let icon = prop.icon ||  model.icon
       if (!icon)
         icon = isForm ? 'ios-paper-outline' : 'ios-checkmark-circle-outline'
       photo = <View style={styles.photo}>
-                <Icon name={icon} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={icon} size={40} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     }
-    else if (isMyProduct)
+    else if (isMyProduct) {
+      let iconName = model.icon
+      if (!iconName) {
+        if (parentResource && parentResource[TYPE] === APPLICATION)
+          iconName = utils.getModel(APPLICATION).properties.products.icon
+        else
+          iconName = 'ios-ribbon-outline'
+      }
       photo = <View style={styles.photo}>
-                <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={iconName} size={40} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
+    }
     else if (ph)
       photo = <View style={styles.photoPlaceholder} />
 
@@ -143,27 +155,76 @@ class VerificationRow extends Component {
 
     let notAccordion = true //!isMyProduct  &&  !isVerification && !prop === null || resource.sources || resource.method || isForm
 
-    let verifiedBy, org
-    if (!isChooser  && !search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
-      if (isMyProduct)
-        org = resource.from.organization
-      else if (isForm)
-        org = resource.to.organization
-      else
-        org = resource._verifiedBy || resource.organization
+    let verifiedBy, verifiedByIcon, org, vicon, by
+    // if (!isChooser  /*&& !search*/  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
+    //   if (isMyProduct)
+    //     org = resource.from.organization
+    //   else if (isForm)
+    //     org = resource.to.organization
+    //   else
+    //     org = resource._verifiedBy || resource.organization
 
-      let title = org ? org.title : resource.to.title
-      let by = (isMyProduct)
-             ? translate('issuedByOn', title)
-             : (isForm)
-                ? translate('sentToOn', title)
-                : translate('verifiedByOn', title)
-      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
+    //   let title = org ? org.title : resource.to.title
+    //   let by = (isMyProduct)
+    //          ? translate('issuedByOn', title)
+    //          : (isForm)
+    //             ? translate('sentToOn', title)
+    //             : translate('verifiedByOn', title)
+    //   verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
+    // }
+    // else if (search  &&  listModel.id === FORM_REQUEST) {
+    //   let by =  'Sent from ' + resource.from.organization.title
+    //   verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
+    // }
+    let { from, to, _verifiedBy, organization } = resource
+    if (!isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
+      let title
+       if (isMyProduct)
+         org = from.organization
+       else if (isForm)
+        org = to.organization
+      else {
+        org = _verifiedBy || organization
+        title = `${resource.trustCircle ? resource.trustCircle.title + ' ' : ''}${resource.entityType ? resource.entityType.title : ''}`
+        vicon = org  &&  org.photo  &&  org.photo.url
+      }
+      let me = utils.getMe()
+      if (!title || !title.length) {
+        if (me.isEmployee) {
+          if (org && me.organization.id === org.id ||
+              me.organization.id === to.id)
+            title = org ? org.title : to.title
+          else
+            title = translate('corporate')
+        }
+        else
+          title = org ? org.title : to.title
+      }
+      by = (isMyProduct)
+              ? translate('issuedByOn', title)
+              : (isForm)
+                 ? translate('sentToOn', title)
+                 : translate('verifiedByOn', title)
+vicon = null
+      if (vicon) {
+        verifiedByIcon = <LinearGradient
+            start={{ x: 0.8, y: 0.2 }}
+            end={{ x: 0.5, y: 1.0 }}
+            locations={[0.1, 0.9]}
+            colors={['#8FBC8F', '#F0FFFF']}
+            style={styles.verifiedByLG}
+          >
+              <Image style={styles.thumb} source={{uri: vicon}}/>
+              <Text style={{fontSize: 12, color: '#777', marginTop: 5, alignSelf: 'center'}}>{title}</Text>
+          </LinearGradient>
+      }
     }
     else if (search  &&  listModel.id === FORM_REQUEST) {
-      let by =  'Sent from ' + resource.from.organization.title
-      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
+      let title = from.organization.title
+      by =  'Sent from ' + title
     }
+    if (by  &&  !vicon)
+      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
 
     let date
     let isStub = utils.isStub(resource)
@@ -188,7 +249,7 @@ class VerificationRow extends Component {
     else if (isMyProduct  &&  modelName === MY_PRODUCT)
       dn = translate(model)
     else
-      dn = utils.getDisplayName({ resource, locale })
+      dn = utils.getDisplayName({ resource, locale, model })
     let title
     if (isChooser)
       title = dn
@@ -218,8 +279,8 @@ class VerificationRow extends Component {
       else if (search) {
         if (isVerification)
           title = translate(verificationRequest)
-        else if (model.id === APPLICATION_SUBMITTED)
-          title = resource.application.title
+        else if (model.id === APPLICATION_SUBMITTED || model.id === APPLICATION_COMPLETED)
+          title = resource.message
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
         else if (utils.getModel(modelName).abstract)
@@ -331,29 +392,30 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    let header =  <View style={[styles.header, styles.contentBg]} key={this.getNextKey()}>
-                    <View style={styles.row}>
-                      {photo}
-                      <View style={styles.noImageBlock}>
-                        <View style={styles.rowContent}>
-                          <View style={styles.title}>
-                            {titleComponent}
-                            {description}
-                            {renderedRows}
-                          </View>
-                          {supportingDocuments}
-                          {multiChooserIcon}
-                        </View>
-                        {sharedFrom}
-                        <View style={styles.verifiedByAndDateStyle}>
-                          {verifiedBy}
-                          {date}
-                        </View>
-                      </View>
-                    </View>
-                  </View>
 
-    let row
+    let header = <View style={[styles.header, styles.contentBg, {flexDirection: 'row'}]} key={this.getNextKey()}>
+                   <View style={[styles.row, {flex: 6.5, marginTop: 8, paddingBottom: 5}]}>
+                     {photo}
+                     <View style={styles.noImageBlock}>
+                       <View style={styles.rowContent}>
+                         <View style={styles.title}>
+                           {titleComponent}
+                           {description}
+                           {renderedRows}
+                         </View>
+                         {supportingDocuments}
+                         {multiChooserIcon}
+                       </View>
+                       {sharedFrom}
+                       <View style={styles.verifiedByAndDateStyle}>
+                         {verifiedBy}
+                         {date}
+                       </View>
+                     </View>
+                   </View>
+                   {verifiedByIcon}
+                 </View>
+
     if (isChooser)
       return <View>
               <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
@@ -372,12 +434,27 @@ class VerificationRow extends Component {
     let content = <TouchableOpacity onPress={onSelect.bind(this)}>
                  {header}
                </TouchableOpacity>
-    if (!isVerification)
+    let verCheck
+    if (!isVerification) {
+      if (isApplicationBacklinkForms) {
+        if (parentResource.verifications) {
+          let dn = utils.getDisplayName({resource})
+          let v = parentResource.verifications.filter(v => v.title === dn)
+          if (v.length) {
+            verCheck = <View style={styles.numberOfVerificationsButton}>
+                         <Text style={styles.numberOfVerificationsText}>{v.length}</Text>
+                       </View>
+          }
+        }
+      }
+      // <Icon name='ios-checkmark-circle-outline' size={30}  style={{position: 'absolute', right: 10, top: 10}} color='green' />
       content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                   {content}
                 </Swipeout>
+    }
     return <View host={lazy} style={{marginTop: 8}}>
             {content}
+            {verCheck}
           </View>
   }
   revokeDocument() {
@@ -549,7 +626,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomColor: '#f0f0f0',
     borderBottomWidth: 1,
-    paddingBottom: 5
+    // paddingBottom: 5
   },
   rTitle: {
     fontSize: 18,
@@ -644,8 +721,11 @@ var styles = StyleSheet.create({
     // alignItems: 'flex-end',
     paddingRight: 5
   },
-  photoIconPlacement: {
-    // marginTop: 8
+  thumb: {
+    width: 25,
+    height: 25,
+    alignSelf: 'center',
+    marginTop: 10,
   },
   photoPlaceholder: {
     width: 70
@@ -691,6 +771,28 @@ var styles = StyleSheet.create({
     width: 25,
     height: 25,
   },
+  numberOfVerificationsButton: {
+    position: 'absolute',
+    top: 10,
+    right: 0,
+    backgroundColor: 'green',
+    ...circled(30),
+  },
+  numberOfVerificationsText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white'
+  },
+  verifiedByLG: {
+    flex: 1,
+    height: '100%',
+    width: 80,
+    right: 0,
+    justifyContent: 'center',
+    backgroundColor: 'red',
+    borderTopLeftRadius: 150,
+    // transform: [{ scaleX: 3 }]
+  }
 });
 
 module.exports = VerificationRow;
