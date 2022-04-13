@@ -83,6 +83,10 @@ class CheckView extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.isLoading !== nextState.isLoading)
+      return true
+  }
   onAction(params) {
     let { action, currency, style, country, backlink, isConnected } = params
     if (action == 'connectivity') {
