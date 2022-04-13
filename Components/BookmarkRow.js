@@ -35,6 +35,7 @@ class BookmarkRow extends Component {
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
     onMove: PropTypes.func,
+    onEdit: PropTypes.func,
     prop: PropTypes.object
     // currency: PropTypes.object,
   };
@@ -71,10 +72,10 @@ class BookmarkRow extends Component {
   }
 
   render() {
-    let {resource, lazy, onSelect, prop, bankStyle, isChooser, noMove } = this.props
+    let {resource, lazy, onSelect, prop, bankStyle, isChooser, noMove, folder, exploreData } = this.props
     if (resource[TYPE] === BOOKMARKS_FOLDER) {
       let count
-      if (!isChooser  &&  resource.list  &&  resource.list.length) {
+      if (!resource.shared && !isChooser  &&  resource.list  &&  resource.list.length) {
         count = <View style={[styles.count, {backgroundColor: bankStyle.linkColor}]}>
                  <Text style={styles.countText}>{resource.list.length}</Text>
                </View>
@@ -102,11 +103,27 @@ class BookmarkRow extends Component {
 
     let renderedRows = []
     let action
-    if (!noMove)
-      action = <TouchableOpacity onPress={this.props.onMove.bind(this)} style={{justifyContent: 'center'}}>
-                 <Icon name='ios-exit-outline'  size={30}  color={bankStyle.linkColor}  style={{marginTop: 5}}/>
+    // if (!noMove)
+    //   action = <TouchableOpacity onPress={this.props.onMove.bind(this)} style={{justifyContent: 'center'}}>
+    //              <Icon name='ios-exit-outline'  size={30}  color={bankStyle.linkColor}  style={{marginTop: 5}}/>
+    //            </TouchableOpacity>
+    let isCancellable = folder.message !== translate('Initial Bookmarks')
+    // Don't allow to cancel somebody else's bookmark
+    // if (resource._author === utils.getRootHash(utils.getMe()) && folder.message !== translate('Initial Bookmarks'))
+    //   isCancellable = true
+    if (exploreData) {
+      action = <View style={{flexDirection: 'row', height: 30}}>
+                 {action}
+                 <TouchableOpacity onPress={this.props.onEdit.bind(this)} style={{paddingLeft: 5, justifyContent: 'center'}}>
+                   <Icon name='md-create'  size={25}  color='darkblue' style={{margintop: -3, marginLeft: -5}}/>
+                 </TouchableOpacity>
+               </View>
+    }
+    else if (isCancellable) {
+      action = <TouchableOpacity onPress={this.props.onCancel.bind(this)} style={{justifyContent: 'center'}}>
+                 <Icon name='ios-close-circle'  size={25}  color='red'  style={{marginTop: -3}}/>
                </TouchableOpacity>
-
+    }
     // let shared = resource.shared && this._isMine(resource) && <Icon name={'md-share'}  size={20}  color='#cccccc' style={{marginRight: 5, marginTop: 10}}/>
     if (resource.message) {
       titleComponent = <View style={{flex: 1}}>
