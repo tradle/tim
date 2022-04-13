@@ -981,7 +981,7 @@
     "@tradle/models": {
       "version": "4.10.12",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#cc352b7c5a80b8e55d777568bc32279d0626962a"
+      "resolved": "git://github.com/tradle/models.git#f79e3cdbd5ed6465f7e6bff870b0eb8ee4cffb11"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -991,7 +991,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#f11eaa84593680e0a423e82bd8a6b043ab62999b"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#c32312be2c86b758bd8115f2ce076bf866195eff"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -1006,7 +1006,7 @@
     "@tradle/models-products-bot": {
       "version": "1.0.0",
       "from": "tradle/models-products-bot",
-      "resolved": "git://github.com/tradle/models-products-bot.git#1074281ef8e1ddf046f6f7319ec4975b087f9e47"
+      "resolved": "git://github.com/tradle/models-products-bot.git#edf8c82daff6d5fea113cd6e776f01d95436b677"
     },
     "@tradle/multiqueue": {
       "version": "2.3.1",
@@ -1783,6 +1783,18 @@
       "resolved": "https://registry.npmjs.org/babel-eslint/-/babel-eslint-7.1.1.tgz",
       "dev": true
     },
+    "babel-helper-builder-binary-assignment-operator-visitor": {
+      "version": "6.24.1",
+      "from": "babel-helper-builder-binary-assignment-operator-visitor@>=6.24.1 <7.0.0",
+      "resolved": "https://registry.npmjs.org/babel-helper-builder-binary-assignment-operator-visitor/-/babel-helper-builder-binary-assignment-operator-visitor-6.24.1.tgz",
+      "dev": true
+    },
+    "babel-helper-explode-assignable-expression": {
+      "version": "6.24.1",
+      "from": "babel-helper-explode-assignable-expression@>=6.24.1 <7.0.0",
+      "resolved": "https://registry.npmjs.org/babel-helper-explode-assignable-expression/-/babel-helper-explode-assignable-expression-6.24.1.tgz",
+      "dev": true
+    },
     "babel-jest": {
       "version": "24.7.1",
       "from": "babel-jest@24.7.1",
@@ -1851,6 +1863,12 @@
       "resolved": "https://registry.npmjs.org/babel-plugin-lodash/-/babel-plugin-lodash-3.3.4.tgz",
       "dev": true
     },
+    "babel-plugin-syntax-exponentiation-operator": {
+      "version": "6.13.0",
+      "from": "babel-plugin-syntax-exponentiation-operator@>=6.8.0 <7.0.0",
+      "resolved": "https://registry.npmjs.org/babel-plugin-syntax-exponentiation-operator/-/babel-plugin-syntax-exponentiation-operator-6.13.0.tgz",
+      "dev": true
+    },
     "babel-plugin-syntax-object-rest-spread": {
       "version": "6.13.0",
       "from": "babel-plugin-syntax-object-rest-spread@>=6.8.0 <7.0.0",
@@ -1861,6 +1879,12 @@
       "version": "7.0.0-beta.0",
       "from": "babel-plugin-syntax-trailing-function-commas@>=7.0.0-beta.0 <8.0.0",
       "resolved": "http://registry.npmjs.org/babel-plugin-syntax-trailing-function-commas/-/babel-plugin-syntax-trailing-function-commas-7.0.0-beta.0.tgz"
+    },
+    "babel-plugin-transform-exponentiation-operator": {
+      "version": "6.24.1",
+      "from": "babel-plugin-transform-exponentiation-operator@latest",
+      "resolved": "https://registry.npmjs.org/babel-plugin-transform-exponentiation-operator/-/babel-plugin-transform-exponentiation-operator-6.24.1.tgz",
+      "dev": true
     },
     "babel-plugin-transform-inline-imports-commonjs": {
       "version": "1.2.0",
@@ -6138,6 +6162,11 @@
       "from": "ms@2.0.0",
       "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
     },
+    "mustache": {
+      "version": "4.2.0",
+      "from": "mustache@latest",
+      "resolved": "https://registry.npmjs.org/mustache/-/mustache-4.2.0.tgz"
+    },
     "mute-stream": {
       "version": "0.0.7",
       "from": "mute-stream@0.0.7",
@@ -6310,6 +6339,11 @@
       "version": "0.4.0",
       "from": "node-int64@>=0.4.0 <0.5.0",
       "resolved": "https://registry.npmjs.org/node-int64/-/node-int64-0.4.0.tgz"
+    },
+    "node-irr": {
+      "version": "2.0.3",
+      "from": "node-irr@latest",
+      "resolved": "https://registry.npmjs.org/node-irr/-/node-irr-2.0.3.tgz"
     },
     "node-modules-regexp": {
       "version": "1.0.0",
