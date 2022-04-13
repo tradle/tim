@@ -257,7 +257,7 @@
     "@tradle/models-products-bot": {
       "version": "1.0.0",
       "from": "tradle/models-products-bot",
-      "resolved": "git://github.com/tradle/models-products-bot.git#1074281ef8e1ddf046f6f7319ec4975b087f9e47"
+      "resolved": "git://github.com/tradle/models-products-bot.git#edf8c82daff6d5fea113cd6e776f01d95436b677"
     },
     "@tradle/multiqueue": {
       "version": "2.3.1",
