@@ -36,6 +36,7 @@ const CHECK = 'tradle.Check'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
 const DURATION = 'tradle.Duration'
+const VERIFICATION = 'tradle.Verification'
 
 const {
   TYPE,
@@ -149,7 +150,7 @@ class ShowPropertiesView extends Component {
 
     let viewCols = []
     let groups = []
-    let propIn = []
+    let propsIn = []
 
     let hasGroups
     let propsDisplayed
@@ -166,9 +167,9 @@ class ShowPropertiesView extends Component {
       if (!me.isEmployee  &&  pMeta.internalUse)
         return
       let val = resource[p]
-      propIn.push(p)
       if (pMeta.range === 'json') {
-        this.renderJsonProp(val, model, pMeta, viewCols)
+        if (this.renderJsonProp(val, model, pMeta, viewCols))
+          propsIn.push(p)
         return
       }
       let isRef;
@@ -193,14 +194,17 @@ class ShowPropertiesView extends Component {
           )
           if (!isVerifier) {
             hasGroups = true
-            groups.push(viewCols.length - 1)
+            groups.push(viewCols.length)
           }
+          propsIn.push(p)
           return
         }
         else if (checkProperties) {
           if (pMeta.items) {
-            if (pMeta.items.ref  &&  !utils.isEnum(pMeta.items.ref))
+            if (pMeta.items.ref  &&  !utils.isEnum(pMeta.items.ref)) {
+              propsIn.push(p)
               return
+            }
           }
           val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
         }
@@ -229,6 +233,7 @@ class ShowPropertiesView extends Component {
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           viewCols.push(this.addForPartial(val, styles))
+          propsIn.push(p)
           return
         }
         else if (pMeta.range === 'property') {
@@ -241,6 +246,7 @@ class ShowPropertiesView extends Component {
                           <Text style={styles.title}>{translate(pMeta, model)}</Text>
                           <Text style={styles.description}>{val}</Text>
                         </View>)
+          propsIn.push(p)
           return
         }
         isItems = Array.isArray(val)
@@ -259,6 +265,7 @@ class ShowPropertiesView extends Component {
                 {checkForCorrection}
               </View>
               )
+            propsIn.push(p)
             return
           }
           if (pMeta.items.backlink)
@@ -300,11 +307,12 @@ class ShowPropertiesView extends Component {
            </View>
          </View>
       )
+      propsIn.push(p)
     })
     if (groups.length)
-      this.renderGroups(resource, viewCols, groups, propIn, styles)
+      viewCols = this.renderGroups(resource, viewCols, groups, propsIn, styles)
 
-    if (resource.txId) { // || utils.isSealableModel(model)) {
+    if (resource.txId  &&  !isItem) { // || utils.isSealableModel(model)) {
       viewCols.push(
           <View key={this.getNextKey()} ref='propertySheet'>
             {this.addDataSecurity(resource)}
@@ -329,14 +337,19 @@ class ShowPropertiesView extends Component {
   }
   renderGroups(resource, viewCols, groups, propsIn, styles) {
     let groupEnd = viewCols.length
-    const { bankStyle } = this.props
+    const { bankStyle, noGradient } = this.props
     let props = utils.getModel(resource[TYPE]).properties
-    let isSmall = utils.isSmallScreen(ShowPropertiesView)
+    let isSmall = utils.isSmallScreen(ShowPropertiesView) || resource[TYPE] === VERIFICATION
     let cardGradient = bankStyle.cardGradient || '#dcf8ef,#fee2f8'// '#d7e1ec, #ffffff'
     const colors = cardGradient.split(',').map(c => c.trim())
+    let retGroups = []
     for (let i=groups.length - 1, j=1; i>=0; i--, j++) {
       let groupStart = groups[i]
       let size = groupEnd - groupStart - 1
+      if (!size) {
+        groupEnd--
+        continue
+      }
       let groupView
       let hasMarkdown, hasItems
       for (let ii=groupStart; ii<groupEnd && !hasMarkdown && !hasItems; ii++) {
@@ -348,7 +361,7 @@ class ShowPropertiesView extends Component {
       }
       let cols = viewCols.slice(groupStart, groupEnd)
       if (isSmall  ||  size < 4  ||  hasMarkdown || hasItems) {
-        if (hasMarkdown  ||  hasItems  ||  i > 0) {
+        if (hasMarkdown  ||  hasItems  ||  i > 0  || noGradient) {
           groupView = <View style={{margin: 10}}>
                         <View style={{backgroundColor: '#fafafa', borderColor: '#eeeeee', borderRadius: 15, borderWidth: 1}}>
                           {i === 0  &&  this.getDateView({resource, styles, noGradient: true})}
@@ -364,12 +377,12 @@ class ShowPropertiesView extends Component {
                                 {cols.slice(1, cols.length)}
                               </View>
                           </View>
-          if (hasMarkdown  ||  hasItems) {
+          if (hasMarkdown  ||  hasItems || noGradient) {
             groupView = <View style={{margin: 10 }}>
                           {groupBody}
                         </View>
           }
-          else if (i === 0 ) {
+          else if (i === 0) {
             groupView = <View style={{margin: 10, borderColor: '#eee', borderWidth: 1, borderRadius: 15 }}>
                           <LinearGradient colors={colors} style={styles.linearGradient}>
                             {groupBody}
@@ -423,16 +436,14 @@ class ShowPropertiesView extends Component {
                         {groupBody}
                       </View>
       }
-
-      viewCols.splice(groupStart, groupEnd - groupStart, groupView)
-      // propIn.splice(groupStart, groupEnd - groupStart,  `${i}`)
-
-      groupEnd = viewCols.length - j
+      retGroups.push(groupView)
+      groupEnd = groupEnd - cols.length
     }
+    return retGroups.reverse()
   }
   renderJsonProp(val, model, pMeta, viewCols) {
     if (!val  ||  utils.isEmpty(val))
-      return
+      return false
     let { resource, bankStyle, checkProperties } = this.props
     if (pMeta.ref) {
       let v = _.cloneDeep(val)
@@ -443,7 +454,7 @@ class ShowPropertiesView extends Component {
           delete v[p]
       }
       if (utils.isEmpty(v))
-        return
+        return false
       val = v
     }
     let jsonRows = []
@@ -479,14 +490,13 @@ class ShowPropertiesView extends Component {
       jVal = this.showJson(params)
 
     if (!jVal)
-      return
+      return false
 
-    if (!Array.isArray(jVal)) {
+    if (!Array.isArray(jVal))
       viewCols.push(jVal)
-      return
-    }
+
     if (jVal.length) {
-      var isDirectionRow
+      let isDirectionRow
       if (checkProperties)
         isDirectionRow = true
       viewCols.push(
@@ -497,6 +507,7 @@ class ShowPropertiesView extends Component {
          </View>
          )
     }
+    return true
   }
   getDateView({resource, styles, noGradient}) {
     let dateView
