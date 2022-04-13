@@ -13,7 +13,7 @@ module.exports = function ValidateSelector ({ models }) {
     }) {
       if (!application  &&  form[TYPE] !== BOOKMARK)
         return
-      let m = models[form[TYPE]]
+      let m = this.models[form[TYPE]]
       if (!m)
         return
       const show = getPropertiesWithAnnotation(m, 'showIf')
