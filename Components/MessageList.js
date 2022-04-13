@@ -40,7 +40,7 @@ import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
-import utils, { translate, isIphone10orMore, isAndroid, isWeb, isRM } from '../utils/utils'
+import utils, { translate, isIphone10orMore, isAndroid, isWeb, isRM, getRootHash } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -54,7 +54,7 @@ import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 import BackgroundImage from './BackgroundImage'
 
-var LIMIT = 20
+const LIMIT = 20
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE } = TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -69,6 +69,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
 const SELFIE = 'tradle.Selfie'
 const CHECK_OVERRIDE = 'tradle.CheckOverride'
+const APPLICATION = 'tradle.Application'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 const MAX_STEPS = isWeb() ? 10 : 5
@@ -79,12 +80,13 @@ class MessageList extends Component {
   static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string,
-    resource: PropTypes.object.isRequired
-  };
+    resource: PropTypes.object.isRequired,
+    wasFilledByEmployee: PropTypes.bool
+   };
   constructor(props) {
     super(props);
     currentMessageTime = null;
-    let { resource, filter, application, navigator, bankStyle } = props
+    let { resource, filter, application, navigator, bankStyle, wasFilledByEmployee } = props
     this.state = {
       isLoading: true,
       isConnected: navigator.isConnected,
@@ -101,7 +103,7 @@ class MessageList extends Component {
       bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: utils.getMe()._showStepIndicator
     }
-    if (application  &&  isRM(application)) {
+    if (application  &&  (isRM(application) ||  wasFilledByEmployee)) {
       let additionalForms = this.getAdditionalForms(application)
       if (additionalForms.length)
         this.state.additionalForms = additionalForms.map(f => ({id: f}))
@@ -180,7 +182,8 @@ class MessageList extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let {action, error, to, isConnected, pairingData} = params
+    let { action, error, to, isConnected, pairingData } = params
+    let { doRefreshApplication } = this.state
     if (error)
       return
     if (action === 'connectivity') {
@@ -199,7 +202,7 @@ class MessageList extends Component {
     }
     let chatWith = this.props.resource
     if (action === 'syncDevicesIsDone') {
-      if (to  &&  utils.getRootHash(to) === utils.getRootHash(chatWith))
+      if (to  &&  getRootHash(to) === getRootHash(chatWith))
         this.props.navigator.pop()
       return
     }
@@ -217,7 +220,7 @@ class MessageList extends Component {
     }
     if (this.state.isModalOpen)
       return
-    if (to  &&  utils.getRootHash(to) !== utils.getRootHash(chatWith))
+    if (to  &&  getRootHash(to) !== getRootHash(chatWith))
       return
 
     let { resource, online, productToForms, shareableResources, context } = params
@@ -291,8 +294,17 @@ class MessageList extends Component {
         list.push(resource)
 
       this.setState({
-        list: list
+        list
       })
+
+      if (application && doRefreshApplication && resource._sendStatus === 'Sent') {
+        debugger
+        this.setState({
+          doRefreshApplication: false
+        })
+        this.refreshApplication(application)
+      }
+
       return
     }
     if (params.isAggregation !== this.props.isAggregation)
@@ -384,7 +396,7 @@ class MessageList extends Component {
     this.setState(state)
   }
   add(params) {
-    let { action, resource, to, productToForms, shareableResources, timeShared, pairingData } = params
+    let { action, resource, to, productToForms, shareableResources, timeShared, pairingData, doRefreshApplication } = params
     if (!utils.isMessage(resource))
       return
     // HACK for Agent to not to receive messages from one customer in the chat for another
@@ -453,8 +465,11 @@ class MessageList extends Component {
 
     let state = {
       // addedItem: addedItem,
-      list: list,
+      list,
     }
+    if (doRefreshApplication)
+      state.doRefreshApplication = doRefreshApplication
+
     if (this.state.isLoading) {
       state.isLoading = false
       StatusBar.setHidden(false);
@@ -652,19 +667,26 @@ class MessageList extends Component {
           isVerifier = !verification && utils.isVerifier(r)
       }
     }
-    let { resource, currency } = this.props
+    let { resource, currency, navigator, wasFilledByEmployee } = this.props
     let lensId = utils.getLensId(r, resource)
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
       verification = resource
 
-    // let bankStyle = this.state.bankStyle
+    let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
     let bankStyle = this.props.bankStyle || this.state.bankStyle
 
-    let notEditable = model.notEditable  ||  utils.isSubclassOf(model, CHECK_OVERRIDE)
+    let isApplication = rtype === APPLICATION
+    let componentName
+    if (isApplication)
+      componentName = 'ApplicationView'
+    else if (utils.isSubclassOf(rtype, MY_PRODUCT))
+      componentName = 'ResourceView'
+    else
+      componentName = 'MessageView'
     let route = {
       title: newTitle,
       backButtonTitle: 'Back',
-      componentName: utils.isSubclassOf(utils.getType(r), MY_PRODUCT) ? 'ResourceView' : 'MessageView',      // parentMeta: model,
+      componentName,
       passProps: {
         bankStyle,
         resource: r,
@@ -679,13 +701,16 @@ class MessageList extends Component {
         isVerifier
       }
     }
+    if (isApplication)
+      route.refreshHandler = this.refreshApplication.bind(this, r)
+
     let showEdit
     if (verification)  {
       // if (application  &&  isRM(application))
       //   showEdit = true
     }
     else
-      showEdit = !notEditable  &&   r._latest  && !application  &&  !utils.isMyProduct(model)
+      showEdit = !notEditable  &&   r._latest  && (!application || wasFilledByEmployee) &&  !utils.isMyProduct(model)
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
@@ -708,6 +733,7 @@ class MessageList extends Component {
           country: resource.country,
           locale: resource.locale,
           chat: resource,
+          application,
           lensId,
           bankStyle,
           isReview
@@ -732,7 +758,10 @@ class MessageList extends Component {
       route.application = application
     }
 
-    this.props.navigator.push(route);
+    if (isApplication)
+      navigator.replace(route)
+    else
+      navigator.push(route);
   }
 
   onSearchChange(text) {
@@ -858,7 +887,7 @@ class MessageList extends Component {
   }
 
   render() {
-    let { modelName, resource, bankStyle, navigator, originatingMessage } = this.props
+    let { modelName, resource, bankStyle, navigator, originatingMessage, wasFilledByEmployee } = this.props
     if (!modelName)
       modelName = MESSAGE
     let application = this.state.application ||  this.props.application
@@ -874,7 +903,7 @@ class MessageList extends Component {
     if (modelName === ORGANIZATION)
       hideTextInput = !utils.hasSupportLine(resource)
     else if (application)
-      hideTextInput = !isRM(application)
+      hideTextInput = !isRM(application) &&  !wasFilledByEmployee
       // hideTextInput = !isRM(application)
     // HACK for RM
     // hideTextInput = false
@@ -889,7 +918,7 @@ class MessageList extends Component {
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
     // Move to a separate source: also from ApplicationView
     let assignRM
-    if (application  &&  !isRM(application)) {
+    if (application  &&  !isRM(application) && !wasFilledByEmployee) {
       let hasRM = application.analyst != null
       let iconName = 'ios-person-add-outline'
       let icolor
@@ -966,7 +995,7 @@ class MessageList extends Component {
     let sepStyle = { height: 1, backgroundColor: 'transparent' }
     if (!allLoaded  && !navigator.isConnected  &&  isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
-    let actionSheet = !hideTextInput  && this.renderActionSheet()
+    let actionSheet = (!hideTextInput || wasFilledByEmployee) && this.renderActionSheet()
     let network
     if (originatingMessage)
        network = <NetworkInfoProvider connected={isConnected} resource={resource} online={onlineStatus} />
@@ -975,7 +1004,7 @@ class MessageList extends Component {
     let separator = getContentSeparator(bankStyle)
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
-    let hash = utils.getRootHash(progressInfoR)
+    let hash = getRootHash(progressInfoR)
 
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle
@@ -1174,13 +1203,13 @@ class MessageList extends Component {
            </View>
   }
   getActionSheetItems() {
-    const { resource } = this.props
+    const { resource, wasFilledByEmployee } = this.props
     let application = this.state.application || this.props.application
     const buttons = []
     const push = btn => buttons.push({ ...btn, index: buttons.length })
 
     if (application) {
-      if (!isRM(application)  ||  !this.state.additionalForms)//this.hasAdditionalForms(application))
+      if ((!isRM(application) && !wasFilledByEmployee) ||  !this.state.additionalForms)//this.hasAdditionalForms(application))
         return
 
       push({
@@ -1242,6 +1271,22 @@ class MessageList extends Component {
             )
           }
         })
+        push({
+          title: translate('completeApplicationForClient', translate(utils.getModel(ctx.requestFor))),
+          callback: () => {
+            Alert.alert(
+              translate('pleaseConfirm'),
+              null,
+              [
+                {text: translate('cancel'), onPress: () => console.log('Cancel')},
+                {text: 'OK', onPress: () => {
+                  Actions.submitCompletedApplication({context: ctx})
+                  // this.props.navigator.pop()
+                }}
+              ]
+            )
+          }
+        })
       }
     }
     push({
@@ -1258,40 +1303,73 @@ class MessageList extends Component {
     Actions.stepIndicatorPress({context: currentContext || context, step, to: this.props.resource})
   }
   chooseFormForApplication() {
-    let application = this.props.application
+    let { application, navigator, wasFilledByEmployee } = this.props
+    let { additionalForms, bankStyle } = this.state
     let model = utils.getModel(application.requestFor)
-    this.props.navigator.push({
+    navigator.push({
       title: translate(model),
       componentName: 'StringChooser',
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        strings:   this.state.additionalForms, // model.additionalForms,
-        bankStyle: this.state.bankStyle,
-        callback:  (val) => {
-          let m = utils.getModel(val)
-          let msg = {
-            [TYPE]: FORM_REQUEST,
-            message: m.formRequestMessage
-                    ? translate(m.formRequestMessage)
-                    : translate('fillTheForm', translate(m)),
-                // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
-            product: model.id,
-            form: val,
-            from: utils.getMe(),
-            to: application.applicant,
-            _context: application._context,
-            context: application.context
-          }
-          // msg._t = constants.TYPES.SIMPLE_MESSAGE
-          // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
-          utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg}))
-          // resource[prop.name] = val
-          // Actions.addChatItem({resource: resource, disableFormRequest: oResource})
-        },
+        strings:  additionalForms, // model.additionalForms,
+        bankStyle,
+        callback:  this.requestForm.bind(this),
+        isReplace: wasFilledByEmployee
       }
-    });
+    })
   }
+  requestForm(val) {
+    const { navigator, application, resource, country, locale, currency, bankStyle, wasFilledByEmployee } = this.props
+    let m = utils.getModel(val)
+
+    if (isRM(application)) {
+      let msg = {
+        [TYPE]: FORM_REQUEST,
+        message: m.formRequestMessage
+                ? translate(m.formRequestMessage)
+                : translate('fillTheForm', translate(m)),
+            // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+        product: m.id,
+        form: val,
+        from: utils.getMe(),
+        to: application.applicant,
+        _context: application._context,
+        context: application.context
+      }
+      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
+      return
+    }
+    if (wasFilledByEmployee) {
+      navigator.push({
+        title: translate(m),
+        componentName: 'NewResource',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getLensedModelForType(val),
+          application,
+          resource: {
+            [TYPE]: val,
+            from: utils.getMe(),
+            to: resource.to,
+            _context: resource
+          },
+          chat: resource,
+          currency,
+          country,
+          locale,
+          bankStyle
+        }
+      })
+      // utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
+    }
+    // msg._t = constants.TYPES.SIMPLE_MESSAGE
+    // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
+    // resource[prop.name] = val
+    // Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+  }
+
   renderActionSheet() {
     const buttons = this.getActionSheetItems()
     if (!buttons || !buttons.length) return
@@ -1408,7 +1486,7 @@ class MessageList extends Component {
     let application = this.state.application || this.props.application
 
     if (application) {
-      if (!isRM(application)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
+      if ((!isRM(application) && !this.props.wasFilledByEmployee)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
         return
     }
     return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
