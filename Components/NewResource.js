@@ -182,7 +182,7 @@ class NewResource extends Component {
   }
   componentWillMount() {
     let { resource, isUploading, prop } = this.state
-    let { isPrefilled, exploreData, originatingMessage: originatingResource, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
+    let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
    // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource})
@@ -192,7 +192,7 @@ class NewResource extends Component {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
       else
-        Actions.getRequestedProperties({resource, originatingResource})
+        Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
     }
     else if (resource.id) {
       if (!model.inlined)
@@ -213,7 +213,8 @@ class NewResource extends Component {
         if (!exclude  &&  prop  &&  m.properties[prop].inlined)
           exclude = true
         Actions.getTemporary(resource[TYPE], exclude)
-        Actions.getRequestedProperties({resource, originatingResource})
+        if (!exploreData)
+          Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
       }
     }
     if (!this.props.exploreData  &&  Platform.OS === 'ios') {
@@ -489,16 +490,18 @@ class NewResource extends Component {
       })
     }
 
-
     let reqProperties = this.state.requestedProperties || this.props.requestedProperties
     if (reqProperties) {
       let { requestedProperties } = reqProperties
       let eCols = []
-      let { softRequired } = this.addRequestedProps({eCols, props})
-      softRequired.forEach(p => {
-        if (required.indexOf(p) === -1)
-          required.push(p)
-      })
+      if (requestedProperties) {
+        let eCols = []
+        let { softRequired } = this.addRequestedProps({eCols, props})
+        softRequired.forEach(p => {
+          if (required.indexOf(p) === -1)
+            required.push(p)
+        })
+      }
       // for (let p in requestedProperties) {
       //   if (p.indexOf('_group') !== -1) {
       //     // props[p].list.forEach(p => {
@@ -739,8 +742,9 @@ if (r.url)
     if (this.props.model.properties[propName].items.ref) {
       item[TYPE] = this.props.model.properties[propName].items.ref
       if (item.file)  {
-        if (item[TYPE] !== PHOTO) {
+        if (item.file.name)
           item.name = item.file.name
+        if (item[TYPE] !== PHOTO) {
           if (item.file.mimeType)
             item.mimeType = item.file.mimeType
           item.size = item.file.size
@@ -793,7 +797,7 @@ if (r.url)
     this.setState({resource, err: '', inFocus: bl.name});
     let { bankStyle, currency, model, navigator } = this.props
     let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
-    if (bl.items.ref  &&  bl.allowToAdd) {
+    if (bl.items.ref  &&  !bl.inlined) { //  &&  bl.allowToAdd) {
       navigator.push({
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: 'Back',
@@ -839,9 +843,15 @@ if (r.url)
   }
 
   getSearchResult() {
-    let value = this.refs.form.getValue();
+    // let value = this.refs.form.getValue();
+    // if (!value) {
+    //   value = this.refs.form.refs.input.state.value;
+    //   if (!value)
+    //     value = {}
+    // }
+    let value = this.refs.form.refs.input.state.value;
     if (!value) {
-      value = this.refs.form.refs.input.state.value;
+      value = this.refs.form.getValue();
       if (!value)
         value = {}
     }
@@ -970,26 +980,24 @@ if (r.url)
       itemsMeta = utils.getItemsMeta(meta);
 
     let arrayItems
-    if (!search) {
-      for (let p in itemsMeta) {
-        if (!this.checkRequestedProperties(p))
-          continue
-        let bl = itemsMeta[p]
-        if (bl.icon === 'ios-telephone-outline') {
-          bl.icon = 'ios-call-outline'
-        }
-        if (!arrayItems)
-          arrayItems = []
-        if (bl.readOnly  ||  bl.items.backlink) {
-          arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
-          continue
-        }
-        // let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
-          arrayItems.push(this.getPhotoItem(bl, styles))
-        else
-          arrayItems.push(this.getItem(bl, styles))
+    for (let p in itemsMeta) {
+      if (!this.checkRequestedProperties(p))
+        continue
+      let bl = itemsMeta[p]
+      if (bl.icon === 'ios-telephone-outline') {
+        bl.icon = 'ios-call-outline'
       }
+      if (!arrayItems)
+        arrayItems = []
+      if (bl.readOnly  ||  bl.items.backlink) {
+        arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
+        continue
+      }
+      // let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+      if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
+        arrayItems.push(this.getPhotoItem(bl, styles))
+      else
+        arrayItems.push(this.getItem(bl, styles))
     }
     if (isRegistration)
       Form.stylesheet = rStyles
