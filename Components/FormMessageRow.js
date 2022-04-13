@@ -20,6 +20,7 @@ var { TYPE, SIG } = constants
 import utils, { translate } from '../utils/utils'
 import PhotoList from './PhotoList'
 import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
 import { makeStylish } from './makeStylish'
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
@@ -352,21 +353,11 @@ class FormMessageRow extends Component {
     //   return {onPressCall: onPressCall}
     // return {onPressCall: this.props.onSelect.bind(this, resource, null)}
   }
-  showPDF({photo}) {
+  showPdfFile({photo}) {
     if (utils.isWeb())
-      this.showWebPDF({photo})
+      this.showPDF({photo})
     else
       this.showMobilePDF({photo})
-  }
-  showWebPDF({photo}) {
-    this.props.navigator.push({
-      backButtonTitle: 'Back',
-      title: photo.fileName || 'PDF',
-      componentName: 'ArticleView',
-      passProps: {
-        href: photo.url
-      },
-    })
   }
   showMobilePDF({photo}) {
     this.props.navigator.push({
@@ -461,6 +452,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   })
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
+reactMixin(FormMessageRow.prototype, ResourceMixin);
 FormMessageRow = makeStylish(FormMessageRow)
 FormMessageRow = makeResponsive(FormMessageRow)
 
