@@ -149,10 +149,10 @@ class GridRow extends Component {
     let { multiChooser, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
     let size
     let isMessage = modelName === MESSAGE
+    let model = utils.getModel(modelName)
     if (isMessage)
       size = gridCols.length
     else if (gridCols) {
-      let model = utils.getModel(modelName)
       let props = model.properties
 
       let vCols = gridCols.filter((c) => props[c].type !== 'array')
@@ -168,12 +168,30 @@ class GridRow extends Component {
     let key = this.getNextKey(resource)
     let cols
     let justifyContent = isMessage ? 'flex-start' : 'center'
+    let prerequisiteFor
+    if (model.prerequisiteFor) {
+      prerequisiteFor = <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={`${key}_prereq`}>
+                          <View style={{paddingLeft: 5}}>
+                            <TouchableOpacity onPress={this.applyForProduct.bind(this)} style={styles.button}>
+                              <Icon name='ios-sunny-outline'  size={25} color={bankStyle.linkColor} />
+                            </TouchableOpacity>
+                          </View>
+                        </Col>
+    }
+
     if (gridCols  &&  gridCols.length) {
-      cols = gridCols.map((v) => (
-        <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + v}>
-          {this.formatCol(v) || <View />}
-        </Col>
-      ))
+      cols = gridCols.map((v, i) => {
+        let content = this.formatCol(v) || <View/>
+        if (i === 0 &&  prerequisiteFor) {
+          content = <View style={{flexDirection: 'row'}}>
+                      {prerequisiteFor}
+                      {content}
+                    </View>
+        }
+        return <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={`${key}${v}`}>
+                 {content}
+               </Col>
+      })
     }
     else {
       let m = utils.getModel(modelName)
@@ -212,9 +230,12 @@ class GridRow extends Component {
       return row
   }
   formatCol(pName) {
-    let { resource, isModel, search, locale } = this.props
+    let { resource, isModel, search, locale, modelName } = this.props
     let rtype = utils.getType(resource)
-    let model = utils.getModel(rtype || resource.id);
+    let mName = rtype || resource.id
+    if (!mName  &&  utils.isInlined(utils.getModel(modelName)))
+      mName = modelName
+    let model = utils.getModel(mName)//utils.getModel(rtype || resource.id || modelName)
     let properties = model.properties;
     let isContact = rtype === PROFILE;
     let colProp = properties[pName]
