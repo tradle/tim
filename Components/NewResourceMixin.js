@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {
-  // Text,
   View,
   TouchableOpacity,
   Image,
@@ -66,14 +65,11 @@ const DEFAULT_LINK_COLOR = '#a94442'
 
 const NewResourceMixin = {
   onScroll(e) {
-    // from ListView._onScroll
     const target = ReactDOM.findDOMNode(this.refs.scrollView)
     this._contentOffset = {
       x: target.scrollLeft,
       y: target.scrollTop
     }
-
-    // this._contentOffset = { ...e.nativeEvent.contentOffset }
   },
   getScrollOffset() {
     return { ...this._contentOffset }
@@ -891,7 +887,6 @@ const NewResourceMixin = {
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
 
-    // let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     let addStyle = (editable) ? {} : {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
@@ -1231,14 +1226,9 @@ const NewResourceMixin = {
       // let newState = {};
       let date
       const {action, year, month, day} = await DatePickerAndroid.open(options);
-      if (action !== DatePickerAndroid.dismissedAction) {
-      //   newState[stateKey + 'Text'] = 'dismissed';
-      // } else {
+      if (action !== DatePickerAndroid.dismissedAction)
         date = new Date(year, month, day);
-        // newState[stateKey + 'Text'] = date.toLocaleDateString();
-        // newState[stateKey + 'Date'] = date;
-      }
-      // this.setState(newState);
+
       this.changeTime(prop, date)
     } catch ({code, message}) {
       console.warn(`Error in example '${stateKey}': `, message);
@@ -1369,7 +1359,6 @@ const NewResourceMixin = {
     if (typeof propName === 'object')
       propName = propName.name
 
-// debugger
     let setItemCount
     let { metadata, model, search, originatingMessage:originatingResource } = this.props
     let isItem = metadata != null
@@ -1441,7 +1430,6 @@ const NewResourceMixin = {
       doDelete = true
     }
     else {
-      // resource[propName] = value[ROOT_HASH] ?  utils.buildRef(value) : value
       resource[propName] = isEnum ?  utils.buildRef(value) : value
 
       if (!this.floatingProps)
