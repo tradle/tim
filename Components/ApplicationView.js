@@ -109,7 +109,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider, nextStep, templates, wasFilledByEmployee} = params
+    let {resource, action, backlink, application, style, provider, nextStep, templates} = params
 
     const hash = utils.getRootHash(this.props.resource)
     if (resource  &&  utils.getRootHash(resource) !== hash)
@@ -123,8 +123,7 @@ class ApplicationView extends Component {
         bankStyle: style || this.state.bankStyle,
         locale: provider && provider.locale,
         nextStep,
-        templates,
-        wasFilledByEmployee
+        templates
       })
       break
     case 'exploreBacklink':
@@ -156,15 +155,14 @@ class ApplicationView extends Component {
            this.state.isLoading   !== nextState.isLoading      ||
            this.state.backlink    !== nextState.backlink       ||
            this.state.checkFilter !== nextState.checkFilter    ||
-           this.state.checksCategory !== nextState.checksCategory  ||
-           this.state.wasFilledByEmployee !== nextState.wasFilledByEmployee
+           this.state.checksCategory !== nextState.checksCategory
 
       return true
   }
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected,
-          showDetails, locale, nextStep, templates, wasFilledByEmployee } = this.state
+          showDetails, locale, nextStep, templates } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -199,7 +197,7 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM  &&  !utils.isMe(resource.applicant) && !wasFilledByEmployee)
+    if (!isRM  &&  !utils.isMe(resource.applicant) && !resource.filledForCustomer)
       assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
