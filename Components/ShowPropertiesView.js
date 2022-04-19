@@ -75,7 +75,7 @@ class ShowPropertiesView extends Component {
   render() {
     let viewCols = this.getViewCols()
     return (
-      <View style={{paddingBottom: 50}} key={this.getNextKey()}>
+      <View style={{paddingLeft: 3, paddingBottom: 50}} key={this.getNextKey()}>
         {viewCols}
       </View>
     );
@@ -373,7 +373,7 @@ class ShowPropertiesView extends Component {
       let cols = viewCols.slice(groupStart, groupEnd)
       if (isSmall  ||  size < 4  ||  hasMarkdown || hasItems) {
         if (hasMarkdown  ||  hasItems  ||  i > 0 || noGradient) {
-          groupView = <View style={{padding: 5, marginVertical: 10}}>
+          groupView = <View style={{marginVertical: 10}}>
                         <View style={{backgroundColor: '#fafafa', borderColor: '#eeeeee', borderRadius: 15, borderWidth: 1}}>
                           {i === 0  &&  this.getDateView({resource, styles, noGradient: true})}
                           {cols}
