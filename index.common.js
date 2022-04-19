@@ -343,7 +343,7 @@ const goBack = debounce(function (nav) {
   return true
 }, 500, true)
 
-var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
+var HIT_SLOP = {top:10, right:10, bottom:10, left:10}
 
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
@@ -385,36 +385,41 @@ var NavigationBarRouteMapper = {
               : <Text style={style}>
                   {lbTitle}
                 </Text>
+    let back = <TouchableOpacity
+                 hitSlop={HIT_SLOP}
+                 onPress={passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
+                 <View style={platformStyles.navBarLeftButton}>
+                   {title}
+                 </View>
+               </TouchableOpacity>
 
-    if (componentName === 'ApplicationView'  &&  route.refreshHandler) {
-      return (
-        <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity
-            hitSlop={HIT_SLOP}
-            onPress={passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
-            <View style={platformStyles.navBarLeftButton}>
-              {title}
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            hitSlop={HIT_SLOP}
-            onPress={() => route.refreshHandler()}>
-            <View style={platformStyles.navBarRightButton}>
-              <Icon name='ios-refresh' size={30} color={color} style={platformStyles.navBarIcon}/>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )
+    let menu
+    let { noMenu, modelName, model, resource } = route.passProps
+    if (isWeb()  &&  !noMenu && componentName !== 'GridList'  &&  componentName !== 'ResourceView' && componentName !== 'CheckView') {
+      menu = <TouchableOpacity
+               hitSlop={HIT_SLOP}
+               onPress={() => Actions.getMenu({resource, modelName: modelName || (model && model.id)})}>
+               <View style={platformStyles.navBarRightButton}>
+                 <Icon name='md-menu' size={30} color={color} style={platformStyles.navBarIcon}/>
+               </View>
+             </TouchableOpacity>
     }
-    return (
-      <TouchableOpacity
-        hitSlop={HIT_SLOP}
-        onPress={passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
-        <View style={platformStyles.navBarLeftButton}>
-          {title}
-        </View>
-      </TouchableOpacity>
-      )
+    let refreshApplication
+    if (componentName === 'ApplicationView'  &&  route.refreshHandler) {
+      refreshApplication = <TouchableOpacity
+                            hitSlop={HIT_SLOP}
+                            onPress={() => route.refreshHandler()}>
+                            <View style={platformStyles.navBarRightButton}>
+                              <Icon name='ios-refresh' size={30} color={color} style={platformStyles.navBarIcon}/>
+                            </View>
+                          </TouchableOpacity>
+    }
+
+    return <View style={{flexDirection: 'row'}}>
+             {back}
+             {menu}
+             {refreshApplication}
+           </View>
   },
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)

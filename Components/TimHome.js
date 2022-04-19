@@ -462,6 +462,7 @@ class TimHome extends Component {
         sortProperty: 'lastMessageTime',
         officialAccounts: true,
         bankStyle,
+        noMenu: true,
         locale,
         currency
       };
@@ -774,6 +775,7 @@ class TimHome extends Component {
         isDeepLink: wasDeepLink  &&  !qs.stub,
         isConnected,
         officialAccounts: true,
+        // noMenu: true,
         bankStyle: defaultBankStyle
       },
       rightButtonTitle: 'Profile',

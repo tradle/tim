@@ -41,6 +41,16 @@ export default StyleSheet.create({
     width: 25,
     height: 25,
     // marginTop: 10
+  },
+  pageMenu: {
+    width: 300,
+    // flex: 1,
+    borderRightWidth: 2,
+    backgroundColor: 'transparent',
+    borderRightColor: '#f0f0f0'
+  },
+  pageContentWithMenu: {
+    flex: 3,
   }
 })
 

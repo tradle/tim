@@ -17,6 +17,7 @@ import { getGridCols } from '../utils/uiUtils'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
+import GridList from './GridList'
 import buttonStyles from '../styles/buttonStyles'
 
 const {
@@ -28,6 +29,7 @@ const {
 } = constants.TYPES
 
 const APPLICATION = 'tradle.Application'
+const BOOKMARK = 'tradle.Bookmark'
 const PHOTO = 'tradle.Photo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 
@@ -231,7 +233,20 @@ debugger
       }
     })
   },
-
+  showMenu(passProps, navigator) {
+    let menu = utils.getMe().menu
+    if (!menu)
+      return
+    const { bankStyle, lazy } = passProps
+    return <GridList
+            lazy={lazy}
+            modelName={BOOKMARK}
+            bankStyle={bankStyle}
+            list={menu}
+            isMenu={true}
+            listView={true}
+            navigator={navigator} />
+  },
   renderGridHeader() {
     let { modelName, navigator, multiChooser, bookmark, isBacklink } = this.props
     if ((modelName === APPLICATION  &&  bookmark && !bookmark.grid) || isBacklink)

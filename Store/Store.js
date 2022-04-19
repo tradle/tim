@@ -638,6 +638,11 @@ var Store = Reflux.createStore({
       storeUtils.rewriteStubs(res)
       this.addVisualProps(res)
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
+      if (res[TYPE] === BOOKMARK) {
+        debugger
+        setTimeout(async () => await this.onGetMenu({noTrigger: true, updateMenu: true}), 1000)
+      }
+
       await this.dbPut(objId, r)
     }
     // let msg = await meDriver.objects.get(link)
@@ -2359,6 +2364,11 @@ var Store = Reflux.createStore({
         list: list,
         modelName: ORGANIZATION
       })
+    }
+    if (me.isEmployee) {
+      if (!this.client)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+      await this.onGetMenu(true)
     }
     return results
       .filter(r => r.state === 'fulfilled')
@@ -4334,20 +4344,6 @@ if (!res[SIG]  &&  res._message)
     }
     const application = r
     const { applicant:applicantIdentity } = application
-    // let wasFilledByEmployee = utils.getRootHash(applicantIdentity) === me[ROOT_HASH]
-    // if (!application.analyst  &&  !wasFilledByEmployee) {
-    //   let cert = await this.searchServer({
-    //     modelName: MY_EMPLOYEE_PASS,
-    //     to: me.organization,
-    //     search: true,
-    //     filterResource: {
-    //       owner: this.buildRef(applicantIdentity)
-    //     }
-    //   })
-    //   wasFilledByEmployee = cert.list  &&  cert.list.length
-    // }
-    // retParams.wasFilledByEmployee = wasFilledByEmployee
-    retParams.wasFilledByEmployee = application.filledForCustomer
     let templates = this.getTemplatesList({application: r})
     if (templates)
       retParams.templates = templates
@@ -5157,46 +5153,6 @@ if (!res[SIG]  &&  res._message)
             bookmark[p] = bookmark[p].map((r) => self.buildRef(r))
           }
           self.onHasBookmarks()
-
-          // if (!employeeSetup) {
-          //   if (!resource.shared  &&  resource.title !== translate('initialBookmarks')) {
-          //     if (bookmarksFolder) {
-          //       bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: bookmarksFolder.title}, noTrigger: true})
-          //       bookmarksFolder = bookmarksFolder[0]
-          //       bookmarksFolder = await self.onGetItem({resource: bookmarksFolder, noTrigger: true})
-
-          //       if (!isSharedBookmark && bookmarksFolder.shared) {
-          //         Alert.alert(translate('personalBookmarkInSharedFolder'))
-          //         return
-          //       }
-          //     }
-
-          //     else {
-          //       let folderName
-          //       if (returnVal.shared)
-          //         folderName = translate('sharedBookmarks')
-          //       else
-          //         folderName = translate('personalBookmarks')
-          //       bookmarksFolder = await self.searchMessages({modelName: BOOKMARKS_FOLDER, filterProps: {message: folderName}, noTrigger: true})
-          //       bookmarksFolder = bookmarksFolder[0]
-          //     }
-          //     if (bookmarksFolder) {
-          //       if (!bookmarksFolder.list)
-          //         bookmarksFolder.list = []
-          //       let bidx = isNew ? -1 : bookmarksFolder.list.findIndex(b => utils.getRootHash(b) === returnVal[ROOT_HASH])
-          //       if (bidx === -1  &&  !returnVal.cancelled)
-          //         bookmarksFolder.list.push(self.buildRef(returnVal))
-          //       else if (returnVal.cancelled)
-          //         bookmarksFolder.list.splice(bidx, 1)
-          //       else
-          //         bookmarksFolder.list.splice(bidx, 1, self.buildRef(returnVal))
-          // debugger
-          //       let bf = await self.onAddChatItem({resource: bookmarksFolder, noTrigger: true, origNoTrigger: true})
-          //       if (!noTrigger)
-          //         self.trigger({action: 'updateItem', resource: bf})
-          //     }
-          //   }
-          // }
         }
         if (!isSavedItem) { //  &&  (!isBookmark  ||  isSharedBookmark)) {
           if (!doNotSend) {
@@ -5252,6 +5208,10 @@ if (!res[SIG]  &&  res._message)
             await self.dbPut(prevResId, prevResCached)
             self._setItem(prevResId, prevRes)
           }
+        }
+        if (isBookmark) {
+          debugger
+          await self.onGetMenu({noTrigger: true, updateMenu: true})
         }
         if (!isNew  ||  !utils.isForm(rtype)) {
           if (isBookmark) {
@@ -9006,6 +8966,32 @@ if (!res[SIG]  &&  res._message)
     // list.forEach(r => count += (r.list  && r.list.length || 0))
     this.trigger({action: 'hasBookmarks', count: list.length, bankStyle: style})
   },
+  async onGetMenu({noTrigger, modelName, updateMenu, resource}) {
+    if (!modelName  &&  resource)
+      modelName = utils.getType(resource)
+    if (!updateMenu  &&  me.menu) {
+      if (!noTrigger)
+        this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
+      return
+    }
+    let org = this.getRepresentative(me.organization)
+    let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
+    let initFolderIdx = folders.findIndex(bf => bf.message === translate('initialBookmarks'))
+    let initFolder = folders[initFolderIdx]
+    let sharedFolderIdx = folders.findIndex(bf => bf.message === translate('sharedBookmarks'))
+    let sharedFolder = folders[sharedFolderIdx]
+    let personalFolderIdx = folders.findIndex(bf => bf.message === translate('personalBookmarks'))
+    let personalFolder = folders[personalFolderIdx]
+    debugger
+    let { list: initB } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
+    let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 10 })
+
+    let personalB = this.filterOutInitialBookmarks(initFolder, initB)
+    me.menu = [ personalFolder, ...personalB, sharedFolder, ...sharedB]
+    await this.setMe(me)
+    if (!noTrigger)
+      this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
+  },
   async onGetBookmarks({ modelName, resource, isChooser }) {
     let org = this.getRepresentative(me.organization)
     if (modelName === BOOKMARKS_FOLDER) {
@@ -9059,6 +9045,16 @@ if (!res[SIG]  &&  res._message)
     }
     let noMove = resource.message === translate('initialBookmarks')
     this.trigger({list, action: 'list', isChooser, first: true, noMove})
+  },
+  filterOutInitialBookmarks(initFolder, result) {
+    let initFolderLinks = initFolder.list.map(r => utils.getRootHash(r))
+    debugger
+    let list = result  &&  result.filter(r => {
+      if (initFolderLinks.find(b => b === r[ROOT_HASH]))
+        return false
+      return true
+    })
+    return list
   },
   async moveBookmark(params) {
     let { currentFolder, resource } = params
@@ -10217,7 +10213,7 @@ if (!res[SIG]  &&  res._message)
       let contact
       if (isMessage) { //  &&  value[TYPE] === NAME) {
         contact = this._getItem(value.from)
-        if (!contact.bot)
+        if (contact && !contact.bot)
           contact = await this.changeName(value, contact)
       }
       if (contact)

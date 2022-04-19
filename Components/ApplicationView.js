@@ -126,6 +126,10 @@ class ApplicationView extends Component {
         templates
       })
       break
+    case 'getMenu':
+      const { menuIsShown=false } = this.state
+      this.setState({menuIsShown: !menuIsShown})
+      break
     case 'exploreBacklink':
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         if (backlink.items.backlink) {
@@ -155,13 +159,14 @@ class ApplicationView extends Component {
            this.state.isLoading   !== nextState.isLoading      ||
            this.state.backlink    !== nextState.backlink       ||
            this.state.checkFilter !== nextState.checkFilter    ||
+           this.state.menuIsShown !== nextState.menuIsShown    ||
            this.state.checksCategory !== nextState.checksCategory
 
       return true
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected,
+    let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown,
           showDetails, locale, nextStep, templates } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
@@ -265,26 +270,53 @@ class ApplicationView extends Component {
                     {nextApp}
                   </View>
                 </View>
+    let navBarMenu
+    if (menuIsShown)
+      navBarMenu = this.showMenu(this.props, navigator)
+    let width = utils.getContentWidth(ApplicationView)
+    let content = <ScrollView  ref='this' style={{width, alignSelf: 'center'}} name={this._lazyId}>
+                   {network}
+                   {loading}
+                   <ApplicationTabs  lazy={this._lazyId}
+                                     resource={resource}
+                                     navigator={navigator}
+                                     currency={currency}
+                                     locale={locale}
+                                     backlink={!showDetails && backlink}
+                                     checksCategory={this.state.checksCategory}
+                                     showCategory={this.showCategory.bind(this)}
+                                     checkFilter={this.state.checkFilter}
+                                     filterChecks={this.filterChecks.bind(this)}
+                                     showDetails={showDetails}
+                                     approve={this.approve}
+                                     deny={this.deny}
+                                     bankStyle={bankStyle}/>
+                 </ScrollView>
+
     let contentSeparator = getContentSeparator(bankStyle)
+    if (menuIsShown)
+      return (
+        <PageView style={[platformStyles.container, {flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+          <View style={platformStyles.pageMenu}>
+            {navBarMenu}
+          </View>
+          <View style={platformStyles.pageContentWithMenu}>
+            <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
+              {network}
+              {loading}
+              {content}
+            </ScrollView>
+            {footer}
+          </View>
+        </PageView>
+       );
+
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
-        {network}
-        {loading}
-          <ApplicationTabs  lazy={this._lazyId}
-                            resource={resource}
-                            navigator={navigator}
-                            currency={currency}
-                            locale={locale}
-                            backlink={!showDetails && backlink}
-                            checksCategory={this.state.checksCategory}
-                            showCategory={this.showCategory.bind(this)}
-                            checkFilter={this.state.checkFilter}
-                            filterChecks={this.filterChecks.bind(this)}
-                            showDetails={showDetails}
-                            approve={this.approve}
-                            deny={this.deny}
-                            bankStyle={bankStyle}/>
+          {network}
+          {loading}
+          {content}
         </ScrollView>
        {footer}
       </PageView>

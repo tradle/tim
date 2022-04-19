@@ -265,6 +265,12 @@ class ResourceList extends Component {
       // Actions.list(ORGANIZATION)
       return
     }
+    if (action === 'getMenu') {
+      if (params.modelName !== this.props.modelName) return
+      const { menuIsShown=false } = this.state
+      this.setState({menuIsShown: !menuIsShown})
+      return
+    }
     if (params.error)
       return;
     // if (params.action === 'onlineStatus') {
@@ -523,6 +529,8 @@ class ResourceList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
+      return true
+    if (this.state.menuIsShown !== nextState.menuIsShown)
       return true
     if (utils.resized(this.props, nextProps))
       return true
@@ -1080,8 +1088,8 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, bankStyle } = this.props
-    let { isModalOpen } = this.state
+    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, bankStyle, navigator } = this.props
+    let { isModalOpen, menuIsShown } = this.state
     let model = utils.getModel(modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1095,7 +1103,7 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/>
     }
     else {
-      content = <ListView style={{width: utils.getContentWidth(ResourceList), marginHorizontal: 10, alignSelf: 'center'}}
+      content = <ListView style={{width: utils.getContentWidth(ResourceList), marginHorizontal: 10, alignSelf: menuIsShown ? 'flex-start' : 'center'}}
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
           enableEmptySections={true}
@@ -1140,6 +1148,9 @@ class ResourceList extends Component {
     let style
     if (this.props.isBacklink)
       style = {height: utils.dimensions().height, backgroundColor: '#fff'}
+    let navBarMenu
+    if (menuIsShown)
+      navBarMenu = this.showMenu(this.props, navigator)
 
     let { qr } = this.state
     let { width, height } = utils.dimensions(ResourceList)
@@ -1161,20 +1172,38 @@ class ResourceList extends Component {
          </TouchableOpacity>
        </Modal>
       )
-
     let contentSeparator = getContentSeparator(this.state.bankStyle)
-    return (
-      // <PageView style={style} separator={contentSeparator}>
-      <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
-        {network}
-        {searchBar}
-        <View style={(searchBar || !hasNetworkRow) &&  styles.separator} />
-        {content}
-        {qrcode}
-        {footer}
-        {actionSheet}
-      </PageView>
-    );
+    if (menuIsShown)
+      return (
+        // <PageView style={style} separator={contentSeparator}>
+        <PageView style={[{justifyContent: 'flex-start', flexDirection: 'row'}, platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
+          <View style={platformStyles.pageMenu}>
+            {navBarMenu}
+          </View>
+          <View style={platformStyles.pageContentWithMenu}>
+            {network}
+            {searchBar}
+            <View style={(searchBar || !hasNetworkRow) &&  styles.separator} />
+            {content}
+            {qrcode}
+            {footer}
+            {actionSheet}
+          </View>
+        </PageView>
+      );
+    else
+      return (
+        // <PageView style={style} separator={contentSeparator}>
+        <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
+          {network}
+          {searchBar}
+          <View style={(searchBar || !hasNetworkRow) &&  styles.separator} />
+          {content}
+          {qrcode}
+          {footer}
+          {actionSheet}
+        </PageView>
+      );
   }
   _onRefresh() {
     if (this.state.list  &&  this.state.list.length > LIMIT)
@@ -1486,6 +1515,7 @@ class ResourceList extends Component {
       passProps: {
         strings:   productList.chooser.oneOf,
         bankStyle,
+        noMenu: true,
         forScan: true,
         callback:  (val) => {
           this.showProductQR(val)
@@ -1531,6 +1561,7 @@ class ResourceList extends Component {
         modelName: MESSAGE,
         bankStyle: this.state.bankStyle,
         isModel: true,
+        noMenu: true,
         search: true,
         exploreData: true
       },
@@ -1553,6 +1584,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         modelName: BOOKMARKS_FOLDER,
+        noMenu: true,
         locale,
         bankStyle: bankStyle || this.state.bankStyle
       },

@@ -126,6 +126,8 @@ class GridList extends Component {
     isRegistration: PropTypes.bool,
     isBacklink: PropTypes.bool,
     isForwardlink: PropTypes.bool,
+    isMenu: PropTypes.bool,
+    list: PropTypes.array
     // backlinkList: PropTypes.array
   };
   constructor(props) {
@@ -326,12 +328,17 @@ class GridList extends Component {
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
     let { chat, resource, navigator, search, application, prop, bookmark, backlinkList, checkFilter,
-          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
+          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser, isMenu, list } = this.props
 
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
       });
+      return
+    }
+    if (isMenu  &&  list) {
+      this.state.isLoading = false
+      this.state.dataSource = this.state.dataSource.cloneWithRows(list)
       return
     }
     if ((resource && modelName === BOOKMARK) || modelName === BOOKMARKS_FOLDER) {
@@ -665,7 +672,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
             this.errorAlert('noResourcesForCriteria')
         // }, 1)
       }
-      this.setState({refreshing: false, addAllowed})
+      this.setState({refreshing: false, addAllowed, isLoading: false})
       return
     }
     if (this.state.allowToAdd) {
@@ -1220,7 +1227,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application, bookmark,
+    let { isModel, isBacklink, isForwardlink, isMenu, modelName, prop, lazy, application, bookmark,
           exploreData, currency, locale, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1321,6 +1328,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 currency={currency}
                 isChooser={isChooser}
                 resource={resource}
+                isMenu={isMenu}
                 folder={this.props.resource || resource}/>
       )
 
@@ -1667,7 +1675,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { filter, dataSource, isLoading, list, isConnected,
           allLoaded, serverOffline, allowToAdd } = state
     let { isChooser, modelName, isModel, application, search, _readOnly,
-          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = props
+          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle, isMenu } = props
     let model = utils.getModel(modelName);
     let me = utils.getMe()
 
@@ -1733,7 +1741,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let footer = actionSheet && this.renderFooter()
     let searchBar
 
-    if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
+    if (SearchBar  &&  !isBacklink  &&  !isForwardlink && !isMenu) {
       let hasSearch = isModel  ||  utils.isEnum(model)
       // Check if the starting - no filter list - is small
       if (hasSearch  &&  (!filter  &&  list  &&  list.length < SEARCH_LIMIT))
@@ -1774,10 +1782,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : uiUtils.getContentSeparator(bankStyle)
     let contentSeparator = getContentSeparator(bankStyle)
     return (
-      <PageView style={isBacklink || isForwardlink ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && contentSeparator} bankStyle={bankStyle}>
+      <PageView style={isBacklink || isForwardlink || isMenu ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu && contentSeparator} bankStyle={bankStyle}>
         {network}
         {searchBar}
-        <View style={styles.separator} />
         {content}
         {!isEmptyItemsTab && loading}
         {footer}

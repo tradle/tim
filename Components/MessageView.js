@@ -39,6 +39,7 @@ import PageView from './PageView'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
+import HomePageMixin from './HomePageMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
@@ -124,6 +125,12 @@ class MessageView extends Component {
     }
     if (action === 'verifyOrCorrect') {
       this.verifyOrCreateError()
+      return
+    }
+    if (action === 'getMenu') {
+      if (params.modelName !== utils.getType(this.props.resource)) return
+      const { menuIsShown=false } = this.state
+      this.setState({menuIsShown: !menuIsShown})
       return
     }
     if (action === 'getItem') {
@@ -328,7 +335,7 @@ class MessageView extends Component {
     this.props.navigator.push(route)
   }
   render() {
-    let { backlink, bankStyle, resource, isLoading, error } = this.state
+    let { backlink, bankStyle, resource, isLoading, error, menuIsShown } = this.state
     if (isLoading)
       return this.showLoading({bankStyle, component: MessageView})
 
@@ -526,6 +533,32 @@ class MessageView extends Component {
                       </Markdown>
                     </View>
     }
+    let navBarMenu
+    if (menuIsShown) {
+      navBarMenu = this.showMenu(this.props, navigator)
+      return <PageView style={[platformStyles.container, {height, flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+          <View style={platformStyles.pageMenu}>
+            {navBarMenu}
+          </View>
+          <View style={platformStyles.pageContentWithMenu}>
+            <ScrollView
+              ref='messageView'
+              keyboardShouldPersistTaps="always"
+              style={{width: width, alignSelf: 'flex-start'}}>
+              {dateView}
+              {description}
+              {warning}
+              {bigPhoto}
+              {photoStrip}
+              {actionPanel}
+            </ScrollView>
+            {title}
+            {footer}
+            {print}
+            {actionSheet}
+          </View>
+        </PageView>
+    }
 
     return (
       <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
@@ -593,6 +626,10 @@ class MessageView extends Component {
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     let width = utils.dimensions(MessageView).width
+    if (this.state.menuIsShown) {
+      debugger
+      width -= 300
+    }
     return (
         <View style={[styles.footer, {width}]}>
           <TouchableOpacity onPress={() => this.addNew(backlink)}>
@@ -642,6 +679,7 @@ class MessageView extends Component {
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
+reactMixin(MessageView.prototype, HomePageMixin);
 MessageView = makeResponsive(MessageView)
 
 var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {

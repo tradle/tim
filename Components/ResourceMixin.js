@@ -550,6 +550,10 @@ var ResourceMixin = {
     const color = isAndroid ? bankStyle.menuBgColor : bankStyle.menuColor
     const backgroundColor = isAndroid ? '#ffffff' : bankStyle.menuBgColor
     let width = utils.dimensions(component).width
+    if (this.state.menuIsShown) {
+      debugger
+      width = '100%'
+    }
     return (
         <View style={[styles.footer, {width}]}>
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>

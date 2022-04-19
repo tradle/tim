@@ -82,7 +82,7 @@ class BookmarkRow extends Component {
                </View>
 
       }
-      return <View style={[isMenu && styles.menu || styles.header, {backgroundColor: '#ffffff'}]}>
+      return <View style={[isMenu && styles.menu || styles.header]}>
                <View style={styles.rowContent}>
                  <TouchableOpacity onPress={isChooser ? this.props.onSelect.bind(this) : this.showBookmarks.bind(this)}>
                    <View style={{flex: 1, paddingTop: isMenu ? 10 : 0}}>
@@ -311,8 +311,7 @@ const createStyles = utils.styleFactory(BookmarkRow, function ({ dimensions, ban
       paddingBottom: 5
     },
     menu: {
-      flex: 1,
-      backgroundColor: '#ffffff',
+      flex: 1
     },
     rTitle: {
       fontSize: 18,
