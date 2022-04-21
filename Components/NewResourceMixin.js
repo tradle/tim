@@ -129,6 +129,7 @@ const NewResourceMixin = {
 
     let softRequired
 
+
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       showReadOnly = true
       ;({ eCols, softRequired } = this.addRequestedProps({eCols, params, props}))
@@ -628,7 +629,7 @@ const NewResourceMixin = {
 
     if (ptype === 'string'  &&  !value.trim().length)
       value = ''
-    const { resource, missedRequiredOrErrorValue } = this.state
+    const { resource, missedRequiredOrErrorValue, fixedProps } = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
     let { metadata, parentMeta } = this.props
@@ -702,11 +703,15 @@ const NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
-
-    if (!search  &&  r[TYPE] !== SETTINGS) {
+    let isFixedProp
+    if (fixedProps && fixedProps[pname]) {
+      fixedProps[pname] = value
+      isFixedProp = true
+    }
+    if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
       // if 'string' no need to check if requested properties changed on entering every letter
       if (ptype !== 'string' || value.length <= 1)
-        Actions.getRequestedProperties({resource: r, originatingResource})
+        Actions.getRequestedProperties({resource: r, originatingResource, fixedProps})
     }
     this.setState({
       resource: r,
@@ -884,14 +889,26 @@ const NewResourceMixin = {
     let { bankStyle } = this.props
     if (!help)
       st = {...st, flex: 5}
+
+    let check
+    let { fixedProps } = this.state
+    let fval = fixedProps[prop.name]
+    if (!editable && fval)
+      editable = true
+
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+
+    if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+      check = this.addGoalSeek(prop)
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     let addStyle = (editable) ? {} : {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
     return (
       <View style={st}>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+        <View style={{flex: 1}}>
         <FloatLabel
           labelStyle={[lStyle, fontF, {color: lcolor}]}
           autoCorrect={false}
@@ -913,8 +930,23 @@ const NewResourceMixin = {
         {icon}
         {this.paintError(params)}
         {help}
+        </View>
+        <View>
+        {check}
+        </View>
+        </View>
       </View>
     );
+  },
+  checkGoalSeeker(prop, value) {
+    let { fixedProps } = this.state
+    let newFixedProps = _.cloneDeep(fixedProps)
+    let val = newFixedProps[prop.name]
+    if (val)
+      delete newFixedProps[prop.name]
+    else
+      newFixedProps[prop.name] = value
+    this.setState({fixedProps: newFixedProps})
   },
   onKeyPress(onSubmit, key) {
     if (key.nativeEvent.key === 'Enter')
@@ -1276,9 +1308,9 @@ const NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata, isRefresh, bookmark, allowedMimeTypes } = this.props
+    let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle } = this.props
     let { required, errors, component } = params
-    let { missedRequiredOrErrorValue, resource, inFocus } = this.state
+    let { missedRequiredOrErrorValue, resource, inFocus, fixedProps } = this.state
     let props
     if (model)
       props = model.properties
@@ -1299,7 +1331,14 @@ const NewResourceMixin = {
     if (!error  &&  params.errors  &&  params.errors[pName])
       error = params.errors[pName]
 
-    return <RefPropertyEditor {...this.props}
+    let fval = fixedProps[pName]
+    let check
+    if (model && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1  &&  resource[pName])
+      check = this.addGoalSeek(prop)
+
+    return <View style={{flexDirection: 'row'}}>
+             <View style={{flex: 1}}>
+               <RefPropertyEditor {...this.props}
                              resource={params.resource ||   this.state.resource}
                              onChange={onChange}
                              prop={prop}
@@ -1316,6 +1355,23 @@ const NewResourceMixin = {
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
                              styles={styles}/>
+             </View>
+             {check}
+            </View>
+  },
+  addGoalSeek(prop) {
+    let { resource, fixedProps } = this.state
+    let { bankStyle } = this.props
+    let pName = prop.name
+    let isEnum = prop.ref && utils.getModel(prop.ref).enum
+    let style = isEnum
+              ? {justifyContent: 'center', paddingLeft: 5, marginTop: -10}
+              : {justifyContent: 'center', paddingLeft: 5, paddingTop: 17}
+    return <View style={style}>
+             <TouchableOpacity underlayColor='transparent' onPress={this.checkGoalSeeker.bind(this, prop, resource[pName])}>
+               <Icon name={fixedProps[pName] && 'ios-checkmark-circle' || 'ios-radio-button-off'}  size={30}  color={bankStyle.linkColor} />
+             </TouchableOpacity>
+           </View>
   },
   setDefaultValue(prop, data, isHidden) {
     let p = prop.name

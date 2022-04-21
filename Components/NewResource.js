@@ -111,7 +111,8 @@ class NewResource extends Component {
       isLoadingVideo: false,
       isPrefilled,
       modal: {},
-      termsAccepted: isRegistration ? false : true
+      termsAccepted: isRegistration ? false : true,
+      fixedProps: {}
     }
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
       if (originatingMessage.message)
@@ -163,12 +164,15 @@ class NewResource extends Component {
       this.props.action(value)
   }
   shouldComponentUpdate(nextProps, nextState) {
+    let fixedPropsCount = this.state.fixedProps  &&  Object.keys(this.state.fixedProps).length
+    let nextFixedPropsCount = nextState.fixedProps  &&  Object.keys(nextState.fixedProps).length
     let isUpdate = nextState.err                             ||
            utils.resized(this.props, nextProps)              ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
+           fixedPropsCount !== nextFixedPropsCount           ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
@@ -875,7 +879,7 @@ if (r.url)
 
   render() {
     let { message, isUploading, resource, disableEditing, isRegistration, validationErrors,
-          termsAccepted, isLoadingVideo, err, missedRequiredOrErrorValue } = this.state
+          termsAccepted, isLoadingVideo, err, missedRequiredOrErrorValue, fixedProps } = this.state
     if (isUploading)
       return <View/>
 
@@ -1117,7 +1121,15 @@ if (r.url)
         Alert.alert(err)
         this.state.err = null
       }
-      if (bankStyle  &&  bankStyle.submitBarInFooter)
+      if (Object.keys(fixedProps).length) {
+        submit = <TouchableOpacity style={{paddingBottom: 30}} onPress={() => Actions.getRequestedProperties({resource, originatingResource:originatingMessage, fixedProps})}>
+                   <View style={[styles.submitButton, { paddingTop: 5 }]}>
+                     <Icon name='ios-calculator' color='#fff' size={30} style={{paddingRight: 3}}/>
+                     <Text style={styles.submitBarInFooterText}>{submitTitle}</Text>
+                   </View>
+                 </TouchableOpacity>
+      }
+      else if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={onPress}>
                    <View style={styles.submitBarInFooter}>
                      <View style={styles.bar}>
@@ -1241,6 +1253,8 @@ if (r.url)
   // If this is a confirmation resource i.e. not props to enter only to review
   // then use OK instead of Submit
   getSubmitTitle(meta) {
+    if (Object.keys(this.state.fixedProps).length)
+      return translate('Recalculate')
     let hasNotReadOnly = false
     const { properties } = meta
     for (let p in properties) {

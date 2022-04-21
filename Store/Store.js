@@ -3588,7 +3588,7 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
-  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource}) {
+  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource, fixedProps}) {
     let rtype = resource[TYPE]
     if (/*!plugins.length  && */ !appPlugins.length)
       return
@@ -3614,7 +3614,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = await plugin(context).validateForm.call(
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource, search: me.isEmployee ? this.searchServer.bind(this) : null}
+          {application: _context, form: resource, currentResource, fixedProps, search: me.isEmployee ? this.searchServer.bind(this) : null}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo

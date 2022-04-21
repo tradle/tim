@@ -626,10 +626,6 @@ class MessageView extends Component {
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     let width = utils.dimensions(MessageView).width
-    if (this.state.menuIsShown) {
-      debugger
-      width -= 300
-    }
     return (
         <View style={[styles.footer, {width}]}>
           <TouchableOpacity onPress={() => this.addNew(backlink)}>

@@ -232,7 +232,7 @@
     "@tradle/models": {
       "version": "4.10.12",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#f79e3cdbd5ed6465f7e6bff870b0eb8ee4cffb11"
+      "resolved": "git://github.com/tradle/models.git#2190866f472f5a80bc33f7a0785903c1d571d1ce"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -307,9 +307,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.37",
+      "version": "7.1.40",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.37.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.40.tgz",
       "dependencies": {
         "@tradle/constants": {
           "version": "2.5.1",
@@ -327,9 +327,9 @@
           "resolved": "https://registry.npmjs.org/mime/-/mime-3.0.0.tgz"
         },
         "minimist": {
-          "version": "1.2.5",
+          "version": "1.2.6",
           "from": "minimist@>=1.2.5 <2.0.0",
-          "resolved": "http://registry.npmjs.org/minimist/-/minimist-1.2.5.tgz"
+          "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.6.tgz"
         }
       }
     },
