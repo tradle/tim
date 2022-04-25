@@ -27,7 +27,7 @@ module.exports = function LeasingQuotes ({ models }) {
       //   return await chooseDetail(form, models)
       // if (ftype.endsWith(QUOTE)) {
         let {costOfCapital} = await getQuote({form, models, search, currentResource, fixedProps})
-        return chooseDetail({form, models, costOfCapital})
+        chooseDetail({form, models, costOfCapital})
       // }
     }
   }
@@ -39,12 +39,9 @@ function chooseDetail({form, models, costOfCapital}) {
   if (!m) return
 
   let termsPropRef = m.properties.terms.items.ref
-  let requestedProperties
-  if (!form.term) {
+  if (!form.term)
     return
-    // requestedProperties = [{name: 'term'}]
-    // return ftype === getModel(termsPropRef) && { requestedProperties }
-  }
+
   let terms = form.terms
   if (!terms) return
 
@@ -212,8 +209,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       let factorVPdelVR = termVal/12 * presentValueFactor/100
 
       // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
-      blindDiscount = blindDiscount/100
-      let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscount) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscount)
+      let blindDiscountVal = blindDiscount/100
+      let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
       // let monthlyPaymentPMT = (vatRate/12)/(((1+vatRate/12)**termVal)-1)*(netPriceMx.value*((1+vatRate/12)**termVal)-(netPriceMx.value*residualValue/100))
 
       let insurance = fundedInsurance.value
@@ -264,12 +261,13 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           value: mathRound(priceMx.value * residualValuePerTerm),
           currency
         },
-        paymentFromVendor: paymentFromVendor && {
+      }
+      if (paymentFromVendor) {
+        qd.paymentFromVendor = {
           value: mathRound(paymentFromVendor),
           currency
         }
       }
-
       let totalPaymentLessInsuranceAndCommission = (qd.totalInitialPayment.value - qd.commissionFee.value * (1+vatRate))+(monthlyPayment*(1+vatRate)*termVal) + qd.purchaseOptionPrice.value
       if (totalPaymentLessInsuranceAndCommission) {
         qd.totalPaymentLessInsuranceAndCommission = {
@@ -279,8 +277,13 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       }
       let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
       let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
-      let blindPayment = priceMx.value * blindDiscount
-      qd.blindPayment = blindPayment
+      let blindPayment = priceMx.value * blindDiscountVal
+      if (blindPayment) {
+        qd.blindPayment = {
+          value: blindPayment,
+          currency
+        }
+      }
       let d = new Date()
       let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
