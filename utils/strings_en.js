@@ -340,6 +340,8 @@ module.exports = {
     "initialBookmarks": "Initial Bookmarks",
     "sharedBookmarks": "Shared Bookmarks",
     "personalBookmarks": "Personal Bookmarks",
+    "fixedValue": "The fixed value was {1}",
+    "pleaseRecalculate": "Please recalculate before submitting",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

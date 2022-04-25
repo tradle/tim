@@ -328,10 +328,11 @@ const NewResourceMixin = {
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
-          if (val)
+          if (val || val === 0)
             val += ''
           else
             val = null
+
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label,
                     prop:  props[p],
@@ -344,7 +345,7 @@ const NewResourceMixin = {
                     editable: editable && !propNotEditable || search || false,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
-
+          // }
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
           if (onEndEditing)
             options.fields[p].onEndEditing = onEndEditing.bind(this, p);
@@ -629,7 +630,7 @@ const NewResourceMixin = {
 
     if (ptype === 'string'  &&  !value.trim().length)
       value = ''
-    const { resource, missedRequiredOrErrorValue, fixedProps } = this.state
+    const { resource, missedRequiredOrErrorValue, fixedProps, recalculateMode } = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
     let { metadata, parentMeta } = this.props
@@ -646,7 +647,7 @@ const NewResourceMixin = {
           return
         while(value.charAt(idx) === '0') idx++
 
-        if (idx === len)
+        if (idx === len  &&  val === this.state.resource[pname])
           return
       }
       value = val
@@ -715,7 +716,8 @@ const NewResourceMixin = {
     }
     this.setState({
       resource: r,
-      inFocus: pname
+      inFocus: pname,
+      recalculateMode: recalculateMode || isFixedProp
     })
   },
   // debugChanges(resource, prop) {
@@ -882,19 +884,30 @@ const NewResourceMixin = {
     // avoid <input type="number"> on web
     // it good-naturedly interferes with validation
     let multiline = prop.maxLength > 100
-    let help = prop.ref !== MONEY  &&  prop.ref !== DURATION  && this.paintHelp(prop)
     let st = { paddingBottom: 10 }
     let icon
     // Especially for money type props
     let { bankStyle } = this.props
-    if (!help)
-      st = {...st, flex: 5}
 
     let check
     let { fixedProps } = this.state
     let fval = fixedProps[prop.name]
-    if (!editable && fval)
+    if (!editable && (fval || fval === 0))
       editable = true
+
+    let help
+    if (prop.ref !== MONEY  &&  prop.ref !== DURATION) {
+      if ((!fval  &&  fval !== 0) || fval === value)
+        help = this.paintHelp(prop)
+      else {
+       if (prop.type === 'number' &&  fval === parseInt(value))
+          help = this.paintHelp(prop)
+        else
+          help = this.paintHelp(prop, fval)
+      }
+    }
+    if (!help)
+      st = {...st, flex: 5}
 
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
@@ -942,25 +955,39 @@ const NewResourceMixin = {
     let { fixedProps } = this.state
     let newFixedProps = _.cloneDeep(fixedProps)
     let val = newFixedProps[prop.name]
-    if (val)
+    if (val || val === 0)
       delete newFixedProps[prop.name]
     else
       newFixedProps[prop.name] = value
-    this.setState({fixedProps: newFixedProps})
+    this.setState({fixedProps: newFixedProps, recalculateMode: true})
   },
   onKeyPress(onSubmit, key) {
     if (key.nativeEvent.key === 'Enter')
       onSubmit()
   },
-  paintHelp(prop) {
-    if (!prop.description)
+  paintHelp(prop, fixedValue) {
+    const { bankStyle } = this.props
+    const { resource } = this.state
+    let addToHelp
+    if (fixedValue  &&  resource[prop.name] !== fixedValue) {
+      addToHelp = <Text style={{color: bankStyle.accentColor, fontSize: 14, fontWeight: '600'}}>
+                    {translate('fixedValue', fixedValue)}
+                  </Text>
+    }
+    if (!prop.description  &&  !addToHelp)
       return <View style={styles.help1}/>
+    if (!prop.description) {
+      return <View style={styles.help}>
+               {addToHelp}
+            </View>
+    }
     try {
       return (
         <View style={styles.help}>
           <Markdown markdownStyles={getMarkdownStyles(this.props.bankStyle, false)}>
             {translate(prop, this.props.model, true)}
           </Markdown>
+           {addToHelp}
         </View>
       )
     } catch (err) {
@@ -1202,6 +1229,7 @@ const NewResourceMixin = {
       </View>
      )
   },
+
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle
     let lcolor, bcolor
@@ -1369,7 +1397,7 @@ const NewResourceMixin = {
               : {justifyContent: 'center', paddingLeft: 5, paddingTop: 17}
     return <View style={style}>
              <TouchableOpacity underlayColor='transparent' onPress={this.checkGoalSeeker.bind(this, prop, resource[pName])}>
-               <Icon name={fixedProps[pName] && 'ios-checkmark-circle' || 'ios-radio-button-off'}  size={30}  color={bankStyle.linkColor} />
+               <Icon name={fixedProps[pName] || fixedProps[pName] === 0 ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={30}  color={bankStyle.linkColor} />
              </TouchableOpacity>
            </View>
   },
