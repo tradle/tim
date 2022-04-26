@@ -626,7 +626,7 @@ const NewResourceMixin = {
     const { originatingMessage: originatingResource } = this.props
     // if (utils.isReadOnly(prop))
     //   return
-    let { name: pname, ref: pref, type: ptype } = prop
+    let { name: pname, ref: pref, type: ptype, readOnly } = prop
 
     if (ptype === 'string'  &&  !value.trim().length)
       value = ''
@@ -912,7 +912,7 @@ const NewResourceMixin = {
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
 
-    if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    if (!prop.ref && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
       check = this.addGoalSeek(prop)
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
@@ -952,13 +952,21 @@ const NewResourceMixin = {
     );
   },
   checkGoalSeeker(prop, value) {
-    let { fixedProps } = this.state
+    let { fixedProps, resource } = this.state
     let newFixedProps = _.cloneDeep(fixedProps)
     let val = newFixedProps[prop.name]
     if (val || val === 0)
       delete newFixedProps[prop.name]
-    else
+    else {
+      if (prop.readOnly) {
+        const { properties } = utils.getModel(resource[TYPE])
+        for (let p in newFixedProps) {
+          if (properties[p].readOnly)
+            delete newFixedProps[p]
+        }
+      }
       newFixedProps[prop.name] = value
+    }
     this.setState({fixedProps: newFixedProps, recalculateMode: true})
   },
   onKeyPress(onSubmit, key) {
@@ -970,16 +978,16 @@ const NewResourceMixin = {
     const { resource } = this.state
     let addToHelp
     if (fixedValue  &&  resource[prop.name] !== fixedValue) {
-      addToHelp = <Text style={{color: bankStyle.accentColor, fontSize: 14, fontWeight: '600'}}>
-                    {translate('fixedValue', fixedValue)}
+      addToHelp = <Text style={{color: bankStyle.linkColor, fontSize: 16, fontWeight: '600'}}>
+                    {translate('goalValue', fixedValue)}
                   </Text>
     }
-    if (!prop.description  &&  !addToHelp)
-      return <View style={styles.help1}/>
     if (!prop.description) {
-      return <View style={styles.help}>
-               {addToHelp}
-            </View>
+      if (addToHelp)
+        return <View style={prop.ref ? styles.help2 : styles.help}>
+                 {addToHelp}
+              </View>
+      return <View style={styles.help1}/>
     }
     try {
       return (
@@ -1392,12 +1400,26 @@ const NewResourceMixin = {
     let { bankStyle } = this.props
     let pName = prop.name
     let isEnum = prop.ref && utils.getModel(prop.ref).enum
-    let style = isEnum
-              ? {justifyContent: 'center', paddingLeft: 5, marginTop: -10}
-              : {justifyContent: 'center', paddingLeft: 5, paddingTop: 17}
+    let style
+    if (isEnum)
+      style = {justifyContent: 'center', paddingLeft: 5, marginTop: -10}
+    else if (prop.ref)
+      style = {justifyContent: 'center', paddingLeft: 5}
+    else
+      style = {justifyContent: 'center', paddingLeft: 5, paddingTop: 17}
+    let icon
+    if (fixedProps[pName] || fixedProps[pName] === 0) {
+      if (prop.readOnly)
+        icon = 'ios-radio-button-on'
+      else
+        icon = 'ios-checkmark-circle'
+    }
+    else
+      icon = 'ios-radio-button-off'
+
     return <View style={style}>
              <TouchableOpacity underlayColor='transparent' onPress={this.checkGoalSeeker.bind(this, prop, resource[pName])}>
-               <Icon name={fixedProps[pName] || fixedProps[pName] === 0 ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={30}  color={bankStyle.linkColor} />
+               <Icon name={icon}  size={30}  color={prop.readOnly ? bankStyle.accentColor : bankStyle.linkColor} />
              </TouchableOpacity>
            </View>
   },
@@ -1637,6 +1659,12 @@ const NewResourceMixin = {
     let { required, model, value, prop, editable, errors, component } = params
     let { search, locale, bankStyle } = this.props
     let isReadOnly = utils.isReadOnly(prop)
+    let { fixedProps } = this.state
+    let fval = fixedProps[prop.name]
+    if (!editable && (fval || fval === 0)) {
+      editable = true
+      isReadOnly = false
+    }
     let v
     if (!value.value)
       v = ''
@@ -1646,6 +1674,11 @@ const NewResourceMixin = {
       v = value.value + ''
 
     let keyboard = isReadOnly || search ? null : 'numeric'
+
+
+    let check
+    if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+      check = this.addGoalSeek(prop)
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1670,20 +1703,27 @@ const NewResourceMixin = {
                     enumProp: utils.getModel(MONEY).properties.currency,
                     required,
                     value:    symbol,
-                    // errors:   errors,
                     component,
-                    // noError:  errors && errors[prop],
                     noError: true
                   })
     }
+    let goalValue
+    if (fval  &&  !fval.value  &&  fval !== value.value + '') {
+      goalValue = utils.formatCurrency({
+        value: fval,
+        currency: value.currency
+      })
+    }
+
     return (
       <View>
         <View style={styles.moneyInput}>
             {val}
             {currency}
+            {check}
         </View>
         {this.paintError({prop, errors})}
-        {this.paintHelp(prop)}
+        {this.paintHelp(prop, goalValue)}
       </View>
     );
   },
@@ -2200,6 +2240,12 @@ const styles= StyleSheet.create({
   help1: {
     backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
     paddingHorizontal: 10,
+  },
+  help2: {
+    backgroundColor: '#f3f3f3',
+    paddingHorizontal: 10,
+    marginTop: -10,
+    paddingBottom: 15
   },
   help: {
     backgroundColor: '#f3f3f3',

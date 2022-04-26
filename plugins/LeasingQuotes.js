@@ -26,7 +26,11 @@ module.exports = function LeasingQuotes ({ models }) {
       // if (ftype.endsWith(QUOTATION_DETAILS))
       //   return await chooseDetail(form, models)
       // if (ftype.endsWith(QUOTE)) {
-        let {costOfCapital} = await getQuote({form, models, search, currentResource, fixedProps})
+        let {costOfCapital, foundCloseGoal} = await getQuote({form, models, search, currentResource, fixedProps})
+        if (!foundCloseGoal)
+          return {
+            recalculate: true
+          }
         chooseDetail({form, models, costOfCapital})
       // }
     }
@@ -54,7 +58,7 @@ function chooseDetail({form, models, costOfCapital}) {
   debugger
   form.finalNoteValue = {
     currency: monthlyPayment.currency,
-    value: Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1]  - purchaseOptionPrice.value)
+    value: Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1] - purchaseOptionPrice.value)
   }
 
   if (!costOfCapital) return
@@ -67,10 +71,10 @@ async function getQuote({form, models, search, currentResource, fixedProps}) {
   let model = models[getType(form)]
   if (!model) return {}
 
-  let { prefill, costOfCapital } = await quotationPerTerm({form, search, currentResource, fixedProps})
+  let { prefill, costOfCapital, foundCloseGoal } = await quotationPerTerm({form, search, currentResource, fixedProps})
   if (!prefill) return {}
   extend(form, prefill)
-  return { costOfCapital }
+  return { costOfCapital, foundCloseGoal }
 }
 async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   const quotationInfo = form
@@ -121,45 +125,51 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let defaultQC = configurationItems[0]
 
   let formXIRR = form.xirr
+  let formMonthlyPayment = form.monthlyPayment && form.monthlyPayment.value
+
   let depositVal = depositValue && depositValue.value || 0
   // blindDiscount = blindDiscount/100
-  let goalSeekProp
+  let iterateBy
+  let goalProp
   let valuesToIterate = [null]
+  let foundCloseGoal = true
 
   if (fixedProps  &&  Object.keys(fixedProps).length) {
-    let goalSeekProps = model.goalSeek.filter(p => !fixedProps[p])
-    goalSeekProp = goalSeekProps.length && goalSeekProps[0]
-    if (goalSeekProp) {
-      if (properties[goalSeekProp].type === 'object') {
-        let pmodel = getModel(properties[goalSeekProp].ref)
+    let goalSeekProps = model.goalSeek.filter(p => !fixedProps[p]  &&  !properties[p].readOnly)
+    iterateBy = goalSeekProps.length && goalSeekProps[0]
+    goalProp = model.goalSeek.find(p => fixedProps[p]  &&  properties[p].readOnly)
+    if (iterateBy) {
+      if (properties[iterateBy].type === 'object') {
+        let pmodel = getModel(properties[iterateBy].ref)
         if (!pmodel || !pmodel.enum)
-          goalSeekProp = null
+          iterateBy = null
         else
           valuesToIterate = pmodel.enum.map(v => {
             return {
-              id: `${properties[goalSeekProp].ref}_${v.id}`,
+              id: `${properties[iterateBy].ref}_${v.id}`,
               title: v.title
             }
           })
       }
-      else if (properties[goalSeekProp].units === '%') {
+      else if (properties[iterateBy].units === '%') {
         let start = 1 //form[goalSeekProp]
         valuesToIterate = Array(100).fill().map((_, idx) => start + idx)
       }
+      foundCloseGoal = false
     }
   }
   let termQuoteVal = termQuote.title.split(' ')[0]
   for (let ii=0; ii<valuesToIterate.length; ii++) {
     let val = valuesToIterate[ii]
 
-    let goalSeekPropValue
+    let iterateByPropValue
     if (val) {
-      if (goalSeekProp === 'blindDiscount')
+      if (iterateBy === 'blindDiscount')
         blindDiscount = val
-      else if (goalSeekProp === 'deliveryTime')
+      else if (iterateBy === 'deliveryTime')
         deliveryTime = val
 
-      goalSeekPropValue = val
+      iterateByPropValue = val
     }
 
     let k = 0
@@ -211,6 +221,13 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
       let blindDiscountVal = blindDiscount/100
       let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
+
+      if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
+        if (Math.abs(monthlyPayment - formMonthlyPayment) > formMonthlyPayment/100)
+          break
+        foundCloseGoal = true
+      }
+
       // let monthlyPaymentPMT = (vatRate/12)/(((1+vatRate/12)**termVal)-1)*(netPriceMx.value*((1+vatRate/12)**termVal)-(netPriceMx.value*residualValue/100))
 
       let insurance = fundedInsurance.value
@@ -305,17 +322,18 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
 
       const {days, rate} = xirr(data)
       let xirrVal = Math.round(convertRate(rate, 365) * 100 * 100)/100
-      if (goalSeekProp && fixedProps.xirr &&  termVal === termQuoteVal) {
+      if (goalProp === 'xirr'  &&  iterateBy  && fixedProps.xirr &&  termVal === termQuoteVal) {
         if (formXIRR > xirrVal) {
-          if (ii !== valuesToIterate.length - 1)
-            break
+          // if (ii !== valuesToIterate.length - 1)
+          //   break
           if (Math.abs(formXIRR - xirrVal) > 1)
             break
         }
+        foundCloseGoal = true
       }
-      if (goalSeekProp) {
-        qd[goalSeekProp] = goalSeekPropValue
-        form[goalSeekProp] = goalSeekPropValue
+      if (iterateBy) {
+        qd[iterateBy] = iterateByPropValue
+        form[iterateBy] = iterateByPropValue
       }
       qd.xirr = xirrVal
       qd = sanitize(qd).sanitized
@@ -333,7 +351,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       // type: ftype,
       terms: quotationDetails,
     },
-    costOfCapital
+    costOfCapital,
+    foundCloseGoal
   }
 }
 function nextMonth(date, numberOfMonths) {

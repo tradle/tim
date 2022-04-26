@@ -3607,7 +3607,9 @@ var Store = Reflux.createStore({
     let context = { models: this.getModels() }
     let moreInfo
     let m = originatingResource && originatingResource.lens ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
-
+    let showLoading = (fixedProps && _.size(fixedProps))
+    if (showLoading)
+      Actions.showModal({title: translate('calculationsInProgress'), showIndicator: true})
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
@@ -3621,17 +3623,17 @@ var Store = Reflux.createStore({
       if (moreInfo  &&  moreInfo.requestedProperties)
         break
     }
+    if (showLoading)
+      Actions.hideModal()
     if (!moreInfo) {
       this.trigger({action: 'formEdit', requestedProperties: {}})
       return
     }
     // let moreInfo = plugin().validateForm({application: resource._context, form: r})
     let rProps
-    let message, deleteProperties
+    let message, deleteProperties, recalculate, requestedProperties
     if (moreInfo) {
-      deleteProperties = moreInfo.deleteProperties
-      message = moreInfo.message
-      let requestedProperties = moreInfo.requestedProperties
+      ({deleteProperties, message, recalculate, requestedProperties} = moreInfo)
       if (requestedProperties) {
         let rprops = {}
         requestedProperties.forEach((r) => {
@@ -3649,7 +3651,7 @@ var Store = Reflux.createStore({
     }
 
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties})
+      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties, recalculate})
     // return rProps
   },
   async onAddVerification(params) {

@@ -164,20 +164,20 @@ class NewResource extends Component {
       this.props.action(value)
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let fixedPropsCount = this.state.fixedProps  &&  _.size(this.state.fixedProps)
-    let nextFixedPropsCount = nextState.fixedProps  &&  _.size(nextState.fixedProps)
+    // let fixedPropsCount = this.state.fixedProps  &&  _.size(this.state.fixedProps)
+    // let nextFixedPropsCount = nextState.fixedProps  &&  _.size(nextState.fixedProps)
     let isUpdate = nextState.err                             ||
            utils.resized(this.props, nextProps)              ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
-           fixedPropsCount !== nextFixedPropsCount           ||
            this.state.recalculateMode !== nextState.recalculateMode ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo   ||
            this.state.keyboardSpace !== nextState.keyboardSpace     ||
            this.state.inFocus !== nextState.inFocus                 ||
            this.state.disableEditing !== nextState.disableEditing   ||
+           !_.isEqual(this.state.fixedProps, nextState.fixedProps)  ||
            this.state.requestedProperties !== nextState.requestedProperties ||
            this.state.validationErrors !== nextState.validationErrors       ||
            this.state.itemsChangesCounter !== nextState.itemsChangesCounter ||
@@ -274,7 +274,8 @@ class NewResource extends Component {
   }
 
   onAction(params) {
-    let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
+    let { resource, action, error, requestedProperties, deleteProperties,
+          message, validationErrors, recalculate } = params
     let { navigator, prop, containerResource, callback,
           originatingMessage, bankStyle, model, currency, chat, isRefresh } = this.props
     if (action === 'languageChange') {
@@ -300,7 +301,11 @@ class NewResource extends Component {
     }
     if (action === 'formEdit') {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
-        if (requestedProperties) {
+        if (recalculate) {
+          Alert.alert(translate('goalNotFound'))
+          this.setState({recalculateMode: true})
+        }
+        else if (requestedProperties) {
           let r = resource ||  this.state.resource
           if (originatingMessage  &&  originatingMessage.prefill)
             _.defaults(r, originatingMessage.prefill)
@@ -309,7 +314,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties, resource: r, message: message || this.state.message })
+          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -319,7 +324,7 @@ class NewResource extends Component {
           if (!this.floatingProps)
             this.floatingProps = {}
           this.floatingProps[pName] = params.value
-          this.setState({resource: r})
+          this.setState({resource: r, recalculateMode: false})
         }
       }
       return
@@ -1130,7 +1135,6 @@ if (r.url)
       if (recalculateMode) {
         submit = <TouchableOpacity style={{paddingBottom: 30}} onPress={() => {
                       Actions.getRequestedProperties({resource, originatingResource:originatingMessage, fixedProps})
-                      setTimeout(() => this.setState({recalculateMode: false}), 500)
                     }}>
                    <View style={[styles.submitButton, { paddingTop: 5 }]}>
                      <Icon name='ios-calculator' color='#fff' size={30} style={{paddingRight: 3}}/>
