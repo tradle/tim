@@ -970,8 +970,8 @@ const NewResourceMixin = {
     const { resource } = this.state
     let addToHelp
     if (fixedValue  &&  resource[prop.name] !== fixedValue) {
-      addToHelp = <Text style={{color: bankStyle.accentColor, fontSize: 14, fontWeight: '600'}}>
-                    {translate('fixedValue', fixedValue)}
+      addToHelp = <Text style={{color: bankStyle.linkColor, fontSize: 16, fontWeight: '600'}}>
+                    {translate('goalValue', fixedValue)}
                   </Text>
     }
     if (!prop.description  &&  !addToHelp)
