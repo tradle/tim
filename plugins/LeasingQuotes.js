@@ -27,7 +27,7 @@ module.exports = function LeasingQuotes ({ models }) {
       //   return await chooseDetail(form, models)
       // if (ftype.endsWith(QUOTE)) {
         let {costOfCapital, foundCloseGoal} = await getQuote({form, models, search, currentResource, fixedProps})
-        if (!foundCloseGoal)
+        if (!foundCloseGoal  &&  fixedProps  &&  size(fixedProps))
           return {
             recalculate: true
           }

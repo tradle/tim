@@ -891,7 +891,7 @@ const NewResourceMixin = {
 
     let check
     let { fixedProps } = this.state
-    let fval = fixedProps[prop.name]
+    let fval = fixedProps && fixedProps[prop.name]
     if (!editable && (fval || fval === 0))
       editable = true
 
@@ -1367,7 +1367,7 @@ const NewResourceMixin = {
     if (!error  &&  params.errors  &&  params.errors[pName])
       error = params.errors[pName]
 
-    let fval = fixedProps[pName]
+    let fval = fixedProps && fixedProps[pName]
     let check
     if (model && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1  &&  resource[pName])
       check = this.addGoalSeek(prop)
@@ -1660,7 +1660,7 @@ const NewResourceMixin = {
     let { search, locale, bankStyle } = this.props
     let isReadOnly = utils.isReadOnly(prop)
     let { fixedProps } = this.state
-    let fval = fixedProps[prop.name]
+    let fval = fixedProps && fixedProps[prop.name]
     if (!editable && (fval || fval === 0)) {
       editable = true
       isReadOnly = false
