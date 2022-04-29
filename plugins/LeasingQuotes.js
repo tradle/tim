@@ -115,11 +115,15 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     minimumDeposit,
     lowDepositFactor: lowDepositPercent,
     presentValueFactor,
+    // minXIRR
   } = costOfCapital
+  let vendor
   if (isStub(asset)) {
     let { list } = await search({modelName: getType(asset), filterResource: {_link: getCurrentHash(asset)}, noTrigger: true})
     asset = list && list[0]
     if (!asset) return {}
+    if (asset.vendor)
+      vendor = await search({modelName: getType(asset.vendor), filterResource: {_link: getCurrentHash(asset.vendor)}, noTrigger: true})
   }
   let { residualValue } = asset
   let defaultQC = configurationItems[0]
@@ -135,9 +139,9 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let foundCloseGoal = true
 
   if (fixedProps  &&  Object.keys(fixedProps).length) {
-    let goalSeekProps = model.goalSeek.filter(p => !fixedProps[p]  &&  !properties[p].readOnly)
+    let goalSeekProps = model.goalSeek.filter(p => fixedProps[p] == null &&  !properties[p].readOnly)
     iterateBy = goalSeekProps.length && goalSeekProps[0]
-    goalProp = model.goalSeek.find(p => fixedProps[p]  &&  properties[p].readOnly)
+    goalProp = model.goalSeek.find(p => fixedProps[p] != null  &&  properties[p].readOnly)
     if (iterateBy) {
       if (properties[iterateBy].type === 'object') {
         let pmodel = getModel(properties[iterateBy].ref)
@@ -159,192 +163,212 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     }
   }
   let termQuoteVal = termQuote.title.split(' ')[0]
-  for (let ii=0; ii<valuesToIterate.length; ii++) {
-    let val = valuesToIterate[ii]
+  let currentBest
+  for (let jj=0; jj<2; jj++) {
+    for (let ii=0; ii<valuesToIterate.length; ii++) {
+      let val = valuesToIterate[ii]
 
-    let iterateByPropValue
-    if (val) {
-      if (iterateBy === 'blindDiscount')
-        blindDiscount = val
-      else if (iterateBy === 'deliveryTime')
-        deliveryTime = val
+      let iterateByPropValue
+      if (val) {
+        if (iterateBy === 'blindDiscount')
+          blindDiscount = val
+        else if (iterateBy === 'deliveryTime')
+          deliveryTime = val
 
-      iterateByPropValue = val
-    }
+        iterateByPropValue = val
+      }
 
-    let k = 0
-    for (; k<configurationItems.length; k++) {
-      let quotConf = configurationItems[k]
-      let qc = cloneDeep(defaultQC)
-      for (let p in quotConf)
-        qc[p] = quotConf[p]
+      let k = 0
+      for (; k<configurationItems.length; k++) {
+        let quotConf = configurationItems[k]
+        let qc = cloneDeep(defaultQC)
+        for (let p in quotConf)
+          qc[p] = quotConf[p]
 
-      let { term } = quotConf
+        let { term } = quotConf
 
-      let residualValuePerTerm = residualValue && residualValue.find(rv => {
-        return rv.term.id === term.id
-      })
-      if (!residualValuePerTerm)
-        residualValuePerTerm = 0
-      // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
-      if (termQuote && term.id == termQuote.id) {
-        if (!residualValueQuote) {
-          form.residualValue = residualValuePerTerm.rv
+        let residualValuePerTerm = residualValue && residualValue.find(rv => {
+          return rv.term.id === term.id
+        })
+        if (!residualValuePerTerm)
+          residualValuePerTerm = 0
+        // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
+        if (termQuote && term.id == termQuote.id) {
+          if (!residualValueQuote) {
+            form.residualValue = residualValuePerTerm.rv
+            residualValuePerTerm = residualValuePerTerm.rv
+          }
+          else if (residualValueQuote < residualValuePerTerm.rv)
+            residualValuePerTerm = residualValueQuote
+          else {
+            form.residualValue = residualValuePerTerm.rv
+            residualValuePerTerm = residualValuePerTerm.rv
+          }
+        }
+        else
           residualValuePerTerm = residualValuePerTerm.rv
-        }
-        else if (residualValueQuote < residualValuePerTerm.rv)
-          residualValuePerTerm = residualValueQuote
-        else {
-          form.residualValue = residualValuePerTerm.rv
-          residualValuePerTerm = residualValuePerTerm.rv
-        }
-      }
-      else
-        residualValuePerTerm = residualValuePerTerm.rv
 
-      residualValuePerTerm = residualValuePerTerm / 100
-      let termVal = term.title.split(' ')[0]
-      let factorPercentage = mathRound(factor / 100 / 12 * termVal, 4)
+        residualValuePerTerm = residualValuePerTerm / 100
+        let termVal = term.title.split(' ')[0]
+        let factorPercentage = mathRound(factor / 100 / 12 * termVal, 4)
 
-      let dtID = deliveryTime.id.split('_')[1]
-      let deliveryTermPercentage = qc[dtID] || 0
-      let depositFactor = 0
-      let lowDepositFactor
-      if (depositPercentage < minimumDeposit)
-        lowDepositFactor = termVal/12 * lowDepositPercent/100
-      else
-        lowDepositFactor = 0
-      let totalPercentage = mathRound(1 + factorPercentage + deliveryTermPercentage + depositFactor + lowDepositFactor, 4)
+        let dtID = deliveryTime.id.split('_')[1]
+        let deliveryTermPercentage = qc[dtID] || 0
+        let depositFactor = 0
+        let lowDepositFactor
+        if (depositPercentage < minimumDeposit)
+          lowDepositFactor = termVal/12 * lowDepositPercent/100
+        else
+          lowDepositFactor = 0
+        let totalPercentage = mathRound(1 + factorPercentage + deliveryTermPercentage + depositFactor + lowDepositFactor, 4)
 
-      let factorVPdelVR = termVal/12 * presentValueFactor/100
+        let factorVPdelVR = termVal/12 * presentValueFactor/100
 
-      // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
-      let blindDiscountVal = blindDiscount/100
-      let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
+        // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
+        let blindDiscountVal = blindDiscount/100
+        let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
 
-      if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
-        if (Math.abs(monthlyPayment - formMonthlyPayment) > formMonthlyPayment/100)
-          break
-        foundCloseGoal = true
-      }
-
-      // let monthlyPaymentPMT = (vatRate/12)/(((1+vatRate/12)**termVal)-1)*(netPriceMx.value*((1+vatRate/12)**termVal)-(netPriceMx.value*residualValue/100))
-
-      let insurance = fundedInsurance.value
-      let initialPayment = depositPercentage === 0 && monthlyPayment + insurance ||  depositVal / (1 + vatRate)
-      let commissionFeeCalculated = priceMx.value * commissionFeePercent / 100
-      let initialPaymentVat = (initialPayment + commissionFeeCalculated) * vatRate
-
-      let currency = netPriceMx.currency
-      let vatQc =  mathRound((monthlyPayment + insurance) * vatRate)
-      let paymentFromVendor = (priceMx.value - depositVal) * discountFromVendor / 100
-      let qd = {
-        [TYPE]: termsPropRef,
-        factorPercentage,
-        deliveryTermPercentage,
-        lowDepositFactor,
-        term,
-        commissionFee: {
-          value: mathRound(commissionFeeCalculated),
-          currency
-        },
-        initialPayment: initialPayment && {
-          value: mathRound(initialPayment),
-          currency
-        },
-        initialPaymentVat: initialPaymentVat && {
-          value: mathRound(initialPaymentVat),
-          currency
-        },
-        totalPercentage,
-        totalInitialPayment: initialPayment && {
-          value: mathRound(commissionFeeCalculated + initialPayment + initialPaymentVat),
-          currency
-        },
-        monthlyPayment: monthlyPayment  &&  {
-          value: mathRound(monthlyPayment),
-          currency
-        },
-        monthlyInsurance: fundedInsurance,
-        vatPerTerm: monthlyPayment && {
-          value: vatQc,
-          currency
-        },
-        totalPayment: monthlyPayment && {
-          value: mathRound(monthlyPayment + insurance + vatQc),
-          currency
-        },
-        purchaseOptionPrice: priceMx && {
-          value: mathRound(priceMx.value * residualValuePerTerm),
-          currency
-        },
-      }
-      if (paymentFromVendor) {
-        qd.paymentFromVendor = {
-          value: mathRound(paymentFromVendor),
-          currency
-        }
-      }
-      let totalPaymentLessInsuranceAndCommission = (qd.totalInitialPayment.value - qd.commissionFee.value * (1+vatRate))+(monthlyPayment*(1+vatRate)*termVal) + qd.purchaseOptionPrice.value
-      if (totalPaymentLessInsuranceAndCommission) {
-        qd.totalPaymentLessInsuranceAndCommission = {
-          value: mathRound(totalPaymentLessInsuranceAndCommission),
-          currency
-        }
-      }
-      let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
-      let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
-      let blindPayment = priceMx.value * blindDiscountVal
-      if (blindPayment) {
-        qd.blindPayment = {
-          value: blindPayment,
-          currency
-        }
-      }
-      let d = new Date()
-      let date = dateformat(d.getTime(), 'yyyy-mm-dd')
-
-      let data = [
-        {amount: -priceMx.value, date},
-        {amount: initPayment, date},
-        {amount: blindPayment, date}
-      ]
-      let m = d.getMonth()
-      let firstMonth = deliveryTime.id.split('_')[1].split('dt')[1]
-
-      for (let j=0; j<termVal - 1; j++) {
-        nextMonth(d, j ? 1 : parseInt(firstMonth))
-        let md = dateformat(d.getTime(), 'yyyy-mm-dd')
-        data.push({amount: payPerMonth, date: md})
-      }
-      nextMonth(d, 1)
-      data.push({amount: payPerMonth + qd.purchaseOptionPrice.value, date: dateformat(d.getTime(), 'yyyy-mm-dd')})
-
-      const {days, rate} = xirr(data)
-      let xirrVal = Math.round(convertRate(rate, 365) * 100 * 100)/100
-      if (goalProp === 'xirr'  &&  iterateBy  && fixedProps.xirr &&  termVal === termQuoteVal) {
-        if (formXIRR > xirrVal) {
-          // if (ii !== valuesToIterate.length - 1)
-          //   break
-          if (Math.abs(formXIRR - xirrVal) > 1)
+        if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
+          if (Math.abs(monthlyPayment - formMonthlyPayment) > formMonthlyPayment/100)
             break
+          if (!currentBest || Math.abs(formMonthlyPayment - currentBest.monthlyPayment) > Math.abs(formMonthlyPayment - monthlyPayment)) {
+            currentBest = {
+              monthlyPayment,
+              valuesToIterate: val
+            }
+          }
+          foundCloseGoal = true
         }
-        foundCloseGoal = true
+
+        // let monthlyPaymentPMT = (vatRate/12)/(((1+vatRate/12)**termVal)-1)*(netPriceMx.value*((1+vatRate/12)**termVal)-(netPriceMx.value*residualValue/100))
+
+        let insurance = fundedInsurance.value
+        let initialPayment = depositPercentage === 0 && monthlyPayment + insurance ||  depositVal / (1 + vatRate)
+        let commissionFeeCalculated = priceMx.value * commissionFeePercent / 100
+        let initialPaymentVat = (initialPayment + commissionFeeCalculated) * vatRate
+
+        let currency = netPriceMx.currency
+        let vatQc =  mathRound((monthlyPayment + insurance) * vatRate)
+        let paymentFromVendor = (priceMx.value - depositVal) * discountFromVendor / 100
+        let qd = {
+          [TYPE]: termsPropRef,
+          factorPercentage,
+          deliveryTermPercentage,
+          lowDepositFactor,
+          term,
+          commissionFee: {
+            value: mathRound(commissionFeeCalculated),
+            currency
+          },
+          initialPayment: initialPayment && {
+            value: mathRound(initialPayment),
+            currency
+          },
+          initialPaymentVat: initialPaymentVat && {
+            value: mathRound(initialPaymentVat),
+            currency
+          },
+          totalPercentage,
+          totalInitialPayment: initialPayment && {
+            value: mathRound(commissionFeeCalculated + initialPayment + initialPaymentVat),
+            currency
+          },
+          monthlyPayment: monthlyPayment  &&  {
+            value: mathRound(monthlyPayment),
+            currency
+          },
+          monthlyInsurance: fundedInsurance,
+          vatPerTerm: monthlyPayment && {
+            value: vatQc,
+            currency
+          },
+          totalPayment: monthlyPayment && {
+            value: mathRound(monthlyPayment + insurance + vatQc),
+            currency
+          },
+          purchaseOptionPrice: priceMx && {
+            value: mathRound(priceMx.value * residualValuePerTerm),
+            currency
+          },
+        }
+        if (paymentFromVendor) {
+          qd.paymentFromVendor = {
+            value: mathRound(paymentFromVendor),
+            currency
+          }
+        }
+        let totalPaymentLessInsuranceAndCommission = (qd.totalInitialPayment.value - qd.commissionFee.value * (1+vatRate))+(monthlyPayment*(1+vatRate)*termVal) + qd.purchaseOptionPrice.value
+        if (totalPaymentLessInsuranceAndCommission) {
+          qd.totalPaymentLessInsuranceAndCommission = {
+            value: mathRound(totalPaymentLessInsuranceAndCommission),
+            currency
+          }
+        }
+        let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
+        let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
+        let blindPayment = priceMx.value * blindDiscountVal
+        if (blindPayment) {
+          qd.blindPayment = {
+            value: blindPayment,
+            currency
+          }
+        }
+        let d = new Date()
+        let date = dateformat(d.getTime(), 'yyyy-mm-dd')
+
+        let data = [
+          {amount: -priceMx.value, date},
+          {amount: initPayment, date},
+          {amount: blindPayment, date}
+        ]
+        let m = d.getMonth()
+        let firstMonth = deliveryTime.id.split('_')[1].split('dt')[1]
+
+        for (let j=0; j<termVal - 1; j++) {
+          nextMonth(d, j ? 1 : parseInt(firstMonth))
+          let md = dateformat(d.getTime(), 'yyyy-mm-dd')
+          data.push({amount: payPerMonth, date: md})
+        }
+        nextMonth(d, 1)
+        data.push({amount: payPerMonth + qd.purchaseOptionPrice.value, date: dateformat(d.getTime(), 'yyyy-mm-dd')})
+
+        const {days, rate} = xirr(data)
+        let xirrVal = Math.round(convertRate(rate, 365) * 100 * 100)/100
+
+        let minXIRR = calcMinXIRR({costOfCapital, asset, vendor, term, termProp: properties.term})
+
+        if (goalProp === 'xirr'  &&  iterateBy  && fixedProps.xirr != null &&  termVal === termQuoteVal) {
+          if (formXIRR > xirrVal) {
+            // if (ii !== valuesToIterate.length - 1)
+            //   break
+            // if (formXIRR - xirrVal > 1)
+            break
+          }
+          foundCloseGoal = true
+          if (!currentBest || (currentBest.xirr - formXIRR > xirrVal - formXIRR))
+            currentBest = {
+              xirr: xirrVal,
+              valuesToIterate: val
+            }
+        }
+        if (iterateBy) {
+          qd[iterateBy] = iterateByPropValue
+          form[iterateBy] = iterateByPropValue
+        }
+        qd.xirr = xirrVal
+        qd = sanitize(qd).sanitized
+        quotationDetails.push(qd)
       }
-      if (iterateBy) {
-        qd[iterateBy] = iterateByPropValue
-        form[iterateBy] = iterateByPropValue
+      if (k < configurationItems.length || (currentBest && !jj)) {
+        for (let jj=0; jj<k; jj++)
+          quotationDetails.pop()
       }
-      qd.xirr = xirrVal
-      qd = sanitize(qd).sanitized
-      quotationDetails.push(qd)
+      else
+        break
     }
-    if (k < configurationItems.length) {
-      for (let jj=0; jj<k; jj++)
-        quotationDetails.pop()
-    }
-    else
+    if (!currentBest || jj)
       break
+    valuesToIterate = [currentBest.valuesToIterate]
   }
   return {
     prefill: {
@@ -371,3 +395,51 @@ function mathRound(val, digits) {
   let pow = Math.pow(10, digits)
   return Math.round(val * pow)/pow
 }
+function calcMinXIRR({costOfCapital, asset, vendor, term, termProp}) {
+  let minXIRR = costOfCapital.minIRR
+  let adj
+  if (asset.xirrAdjustmentPerTerm) {
+    let adjPerTerm = asset.xirrAdjustmentPerTerm.find(r => r.term.id === term.id)
+    if (adjPerTerm)
+      adj = adjPerTerm.xirrAdjustment
+  }
+  if (!adj  &&  asset.xirrAdjustment)
+    adj = asset.xirrAdjustment
+  if (!adj  &&  vendor  &&  vendor.xirrAdjustment)
+    adj = vendor.xirrAdjustment
+  minXIRR += adj
+  // now apply increment for term
+  let termModel = getModel(termProp.ref)
+  let currentTerm = termModel.enum.find(t => term.id.endsWith(`_${t.id}`))
+  if (currentTerm && currentTerm.coef)
+    minXIRR += costOfCapital.xirrIncrement * currentTerm.coef
+
+  return minXIRR
+}
+// function checkProp({pname, pval, term, formType, currentBest, formValue, iterateBy}) {
+//   const { properties } = getModel(formType)
+//   if (properties[pname].ref === MONEY) {
+//     if (Math.abs(pval - formValue) > formValue/100) {
+//       return { notFound: true }
+//     }
+//     if (!currentBest || Math.abs(formValue - currentBest[pname]) > Math.abs(formValue - pval))
+//       newCurrentBest = true
+//   }
+//   else if (properties[pname].units === '%') {
+//     if (formValue > pval) {
+//       // if (ii !== valuesToIterate.length - 1)
+//       //   break
+//       // if (formValue - pval > 1)
+//         return { notFound: true }
+//     }
+//     if (!currentBest || (currentBest[pname] - formValue > pval - formValue))
+//       newCurrentBest = true
+//   }
+//   if (newCurrentBest) {
+//     currentBest = {
+//       [pname]: pval,
+//       valuesToIterate: iterateBy
+//     }
+//   }
+//   return currentBest
+// }
