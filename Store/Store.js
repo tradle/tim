@@ -58,11 +58,12 @@ const ADD = 1
 const DELETE = -1
 
 const ALLOW_TO_ADD = [
-'tradle.Asset',
-'tradle.Contract',
-'tradle.Configuration',
-'tradle.EntityRole',
-'tradle.EmployeeRole'
+  'tradle.Asset',
+  'tradle.Vendor',
+  'tradle.Contract',
+  'tradle.Configuration',
+  'tradle.EntityRole',
+  'tradle.EmployeeRole'
 ]
 
 var debug = Debug('tradle:app:store')
