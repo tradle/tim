@@ -705,7 +705,7 @@ const NewResourceMixin = {
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
     let isFixedProp
-    if (fixedProps && fixedProps[pname]) {
+    if (fixedProps && fixedProps[pname] != null) {
       fixedProps[pname] = value
       isFixedProp = true
     }
@@ -897,10 +897,10 @@ const NewResourceMixin = {
 
     let help
     if (prop.ref !== MONEY  &&  prop.ref !== DURATION) {
-      if ((!fval  &&  fval !== 0) || fval === value)
+      if (fval == null || fval === value)
         help = this.paintHelp(prop)
       else {
-       if (prop.type === 'number' &&  fval === parseInt(value))
+       if (prop.type === 'number' &&  fval === parseFloat(value))
           help = this.paintHelp(prop)
         else
           help = this.paintHelp(prop, fval)
@@ -974,12 +974,21 @@ const NewResourceMixin = {
       onSubmit()
   },
   paintHelp(prop, fixedValue) {
-    const { bankStyle } = this.props
-    const { resource } = this.state
+    const { bankStyle, locale } = this.props
+    const { resource, fixedProps } = this.state
+    const pname = prop.name
     let addToHelp
-    if (fixedValue  &&  resource[prop.name] !== fixedValue) {
+    if (fixedValue  &&  resource[pname] !== fixedValue) {
+      let fval = fixedProps[pname]
+      let rval
+      if (prop.ref === MONEY)
+        rval = resource[pname].value
+      else
+        rval = resource[pname]
+      let percent = Math.round((rval/fval*100 - 100)*100)/100
+
       addToHelp = <Text style={{color: bankStyle.linkColor, fontSize: 16, fontWeight: '600'}}>
-                    {translate('goalValue', fixedValue)}
+                    {translate('goalValue', percent, fixedValue)}
                   </Text>
     }
     if (!prop.description) {
