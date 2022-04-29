@@ -340,7 +340,7 @@ module.exports = {
     "initialBookmarks": "Initial Bookmarks",
     "sharedBookmarks": "Shared Bookmarks",
     "personalBookmarks": "Personal Bookmarks",
-    "goalValue": "Your goal is: {1}",
+    "goalValue": "Found value is within {1}% of the goal of {2}.",
     "pleaseRecalculate": "Please recalculate before submitting",
     // Buttons
     "Submit": "Submit",
