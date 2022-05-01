@@ -23,7 +23,7 @@ import debounce from 'debounce'
 var ReactPerf //= __DEV__ && require('ReactPerf')
 import Navigator from './Components/Navigator'
 
-var constants = require('@tradle/constants');
+const constants = require('@tradle/constants');
 const {
   TYPE
 } = constants
@@ -76,6 +76,12 @@ const landingPageMapping = {
     componentName: 'TourPage',
   }
 }
+const NO_MENU_COMPONENTS = [
+  'GridList',
+  'ResourceView',
+  'CheckView',
+  'NewResource'
+]
 
 class TiMApp extends Component {
   constructor(props) {
@@ -395,7 +401,7 @@ var NavigationBarRouteMapper = {
 
     let menu
     let { noMenu, modelName, model, resource } = route.passProps
-    if (isWeb()  &&  !noMenu && componentName !== 'GridList'  &&  componentName !== 'ResourceView' && componentName !== 'CheckView') {
+    if (isWeb()  &&  !noMenu && NO_MENU_COMPONENTS.indexOf(componentName) === -1) {
       menu = <TouchableOpacity
                hitSlop={HIT_SLOP}
                onPress={() => Actions.getMenu({resource, modelName: modelName || (model && model.id)})}>
