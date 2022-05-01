@@ -177,7 +177,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   }
   let termQuoteVal = termQuote.title.split(' ')[0]
   let formErrors
-  let currentBest
+  let currentBest = {}
   let residualValueIterator
   for (let jj=0; jj<2; jj++) {
     for (let ii=0; ii<valuesToIterate.length; ii++) {
@@ -248,7 +248,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
           if (Math.abs(monthlyPayment - formMonthlyPayment) > formMonthlyPayment/100)
             break
-          if (!currentBest || Math.abs(formMonthlyPayment - currentBest.monthlyPayment) > Math.abs(formMonthlyPayment - monthlyPayment)) {
+          if (!currentBest.monthlyPayment || Math.abs(formMonthlyPayment - currentBest.monthlyPayment) > Math.abs(formMonthlyPayment - monthlyPayment)) {
             currentBest = {
               monthlyPayment,
               valuesToIterate: val
@@ -356,7 +356,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
 
         if (termVal === termQuoteVal) {
           if (xirrVal < minXIRR) {
-            if (!fixedProps || (ii === valuesToIterate.length - 1  && !currentBest)) {
+            if (!fixedProps || (ii === valuesToIterate.length - 1  && !currentBest.xirr)) {
               foundCloseGoal = false
               formErrors = {
                 xirr: translate('boundsLessError', 'xirr', xirrVal, minXIRR)
@@ -371,7 +371,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
               break
             }
             foundCloseGoal = true
-            if (!currentBest || (currentBest.xirr - formXIRR > xirrVal - formXIRR))
+            if (!currentBest.xirr || (currentBest.xirr - formXIRR > xirrVal - formXIRR))
               currentBest = {
                 xirr: xirrVal,
                 valuesToIterate: val
