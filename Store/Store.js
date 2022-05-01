@@ -2369,7 +2369,7 @@ var Store = Reflux.createStore({
     if (me.isEmployee) {
       if (!this.client)
         this.client = graphQL.initClient(meDriver, me.organization.url)
-      await this.onGetMenu(true)
+      await this.onGetMenu({noTrigger: true, updateMenu: true})
     }
     return results
       .filter(r => r.state === 'fulfilled')
@@ -3632,27 +3632,24 @@ var Store = Reflux.createStore({
     }
     // let moreInfo = plugin().validateForm({application: resource._context, form: r})
     let rProps
-    let message, deleteProperties, recalculate, requestedProperties
-    if (moreInfo) {
-      ({deleteProperties, message, recalculate, requestedProperties} = moreInfo)
-      if (requestedProperties) {
-        let rprops = {}
-        requestedProperties.forEach((r) => {
-          rprops[r.name] = {
-            message: r.message || '',
-            required: r.required,
-            hide: r.hide
-          }
-        })
-        rProps = {
-          requestedProperties: rprops,
-          excludeProperties: moreInfo.excludeProperties
+    let {message, deleteProperties, recalculate, requestedProperties, formErrors} = moreInfo
+    if (requestedProperties) {
+      let rprops = {}
+      requestedProperties.forEach((r) => {
+        rprops[r.name] = {
+          message: r.message || '',
+          required: r.required,
+          hide: r.hide
         }
+      })
+      rProps = {
+        requestedProperties: rprops,
+        excludeProperties: moreInfo.excludeProperties
       }
     }
 
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties, recalculate})
+      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties, recalculate, validationErrors: formErrors})
     // return rProps
   },
   async onAddVerification(params) {

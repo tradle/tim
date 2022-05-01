@@ -301,9 +301,12 @@ class NewResource extends Component {
     }
     if (action === 'formEdit') {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
+        let { validationErrors } = params
+        let { fixedProps } = this.state
         if (recalculate) {
-          Alert.alert(translate('goalNotFound'))
-          this.setState({recalculateMode: true})
+          if (_.size(fixedProps))
+            Alert.alert(translate('goalNotFound'))
+          this.setState({recalculateMode: true, validationErrors})
         }
         else if (requestedProperties) {
           let r = resource ||  this.state.resource
@@ -314,7 +317,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false })
+          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false, validationErrors })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -324,7 +327,7 @@ class NewResource extends Component {
           if (!this.floatingProps)
             this.floatingProps = {}
           this.floatingProps[pName] = params.value
-          this.setState({resource: r, recalculateMode: false})
+          this.setState({resource: r, recalculateMode: false, validationErrors})
         }
       }
       return

@@ -325,6 +325,7 @@ module.exports = {
     "cantFindResource": "Can't find resource {1}",
     "createResourceLink": "Copy link to this page",
     "applicationCompleted": "Application Completed - click here to view",
+    "boundsLessError": "The calculated value is less than allowed for {1}: {2} < {3}",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",

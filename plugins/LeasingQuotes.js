@@ -4,7 +4,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import size from 'lodash/size'
 import extend from 'lodash/extend'
 import { TYPE } from '@tradle/constants'
-import { getMe, getModel, getType, getCurrentHash, isStub } from '../utils/utils'
+import { getMe, getModel, getType, getRootHash, isStub, translate } from '../utils/utils'
 import validateResource from '@tradle/validate-resource'
 // @ts-ignore
 const { sanitize } = validateResource.utils
@@ -26,12 +26,18 @@ module.exports = function LeasingQuotes ({ models }) {
       // if (ftype.endsWith(QUOTATION_DETAILS))
       //   return await chooseDetail(form, models)
       // if (ftype.endsWith(QUOTE)) {
-        let {costOfCapital, foundCloseGoal} = await getQuote({form, models, search, currentResource, fixedProps})
+        let {costOfCapital, foundCloseGoal, formErrors} = await getQuote({form, models, search, currentResource, fixedProps})
         if (!foundCloseGoal  &&  fixedProps  &&  size(fixedProps))
           return {
-            recalculate: true
+            recalculate: true,
+            formErrors
           }
         chooseDetail({form, models, costOfCapital})
+        if (formErrors)
+          return {
+            recalculate: true,
+            formErrors
+          }
       // }
     }
   }
@@ -71,10 +77,10 @@ async function getQuote({form, models, search, currentResource, fixedProps}) {
   let model = models[getType(form)]
   if (!model) return {}
 
-  let { prefill, costOfCapital, foundCloseGoal } = await quotationPerTerm({form, search, currentResource, fixedProps})
+  let { prefill, costOfCapital, foundCloseGoal, formErrors } = await quotationPerTerm({form, search, currentResource, fixedProps})
   if (!prefill) return {}
   extend(form, prefill)
-  return { costOfCapital, foundCloseGoal }
+  return { costOfCapital, foundCloseGoal, formErrors }
 }
 async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   const quotationInfo = form
@@ -117,14 +123,14 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     presentValueFactor,
     // minXIRR
   } = costOfCapital
-  let vendor
   if (isStub(asset)) {
-    let { list } = await search({modelName: getType(asset), filterResource: {_link: getCurrentHash(asset)}, noTrigger: true})
+    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getRootHash(asset)}, noTrigger: true})
     asset = list && list[0]
     if (!asset) return {}
-    if (asset.vendor)
-      vendor = await search({modelName: getType(asset.vendor), filterResource: {_link: getCurrentHash(asset.vendor)}, noTrigger: true})
   }
+  let vendor
+  if (asset.vendor)
+    vendor = await search({modelName: getType(asset.vendor), filterResource: {_link: getRootHash(asset.vendor)}, noTrigger: true})
   let { residualValue } = asset
   let defaultQC = configurationItems[0]
 
@@ -157,13 +163,22 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       }
       else if (properties[iterateBy].units === '%') {
         let start = 1 //form[goalSeekProp]
-        valuesToIterate = Array(100).fill().map((_, idx) => start + idx)
+        if (iterateBy === 'residualValue') {
+          let residualValuePerTerm = residualValue && residualValue.find(rv => {
+            return rv.term.id === termQuote.id
+          })
+          valuesToIterate = Array(residualValuePerTerm.rv).fill().map((_, idx) => start + idx)
+        }
+        else
+          valuesToIterate = Array(100).fill().map((_, idx) => start + idx)
       }
       foundCloseGoal = false
     }
   }
   let termQuoteVal = termQuote.title.split(' ')[0]
+  let formErrors
   let currentBest
+  let residualValueIterator
   for (let jj=0; jj<2; jj++) {
     for (let ii=0; ii<valuesToIterate.length; ii++) {
       let val = valuesToIterate[ii]
@@ -174,6 +189,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           blindDiscount = val
         else if (iterateBy === 'deliveryTime')
           deliveryTime = val
+        if (iterateBy === 'residualValue')
+          residualValueQuote = val
 
         iterateByPropValue = val
       }
@@ -337,19 +354,29 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
 
         let minXIRR = calcMinXIRR({costOfCapital, asset, vendor, term, termProp: properties.term})
 
-        if (goalProp === 'xirr'  &&  iterateBy  && fixedProps.xirr != null &&  termVal === termQuoteVal) {
-          if (formXIRR > xirrVal) {
-            // if (ii !== valuesToIterate.length - 1)
-            //   break
-            // if (formXIRR - xirrVal > 1)
-            break
-          }
-          foundCloseGoal = true
-          if (!currentBest || (currentBest.xirr - formXIRR > xirrVal - formXIRR))
-            currentBest = {
-              xirr: xirrVal,
-              valuesToIterate: val
+        if (termVal === termQuoteVal) {
+          if (xirrVal < minXIRR) {
+            if (!fixedProps || (ii === valuesToIterate.length - 1  && !currentBest)) {
+              foundCloseGoal = false
+              formErrors = {
+                xirr: translate('boundsLessError', 'xirr', xirrVal, minXIRR)
+              }
             }
+          }
+          else if (goalProp === 'xirr'  &&  iterateBy  && fixedProps.xirr != null) {
+            if (formXIRR > xirrVal) {
+              // if (ii !== valuesToIterate.length - 1)
+              //   break
+              // if (formXIRR - xirrVal > 1)
+              break
+            }
+            foundCloseGoal = true
+            if (!currentBest || (currentBest.xirr - formXIRR > xirrVal - formXIRR))
+              currentBest = {
+                xirr: xirrVal,
+                valuesToIterate: val
+              }
+          }
         }
         if (iterateBy) {
           qd[iterateBy] = iterateByPropValue
@@ -359,14 +386,15 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         qd = sanitize(qd).sanitized
         quotationDetails.push(qd)
       }
-      if (k < configurationItems.length || (currentBest && !jj)) {
-        for (let jj=0; jj<k; jj++)
+      // if (k < configurationItems.length || (iterateBy && !currentBest && !jj)) {
+      if (!jj  &&  goalProp) {
+        for (let kj=0; kj<k; kj++)
           quotationDetails.pop()
       }
       else
         break
     }
-    if (!currentBest || jj)
+    if (!currentBest || jj || !goalProp)
       break
     valuesToIterate = [currentBest.valuesToIterate]
   }
@@ -375,6 +403,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       // type: ftype,
       terms: quotationDetails,
     },
+    formErrors,
     costOfCapital,
     foundCloseGoal
   }
