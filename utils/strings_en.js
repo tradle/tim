@@ -327,7 +327,7 @@ module.exports = {
     "applicationCompleted": "Application Completed - click here to view",
     "boundsLessError": "The calculated value is less than allowed for {1}: {2} < {3}",
     "boundsError": "The goal can not be achived:\n{1}",
-    "closestBest": "The goal can not be achived.\nThe closest best value for {1}: {2}",
+    "noIteratorPresent": "No iterator property was assigned. Please uncheck one of the checkboxes and try again",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",

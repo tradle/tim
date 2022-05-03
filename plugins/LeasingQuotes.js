@@ -82,7 +82,12 @@ async function getQuote({form, models, search, currentResource, fixedProps}) {
   if (!model) return {}
 
   let { prefill, costOfCapital, foundCloseGoal, formErrors, message } = await quotationPerTerm({form, search, currentResource, fixedProps})
-  if (!prefill) return {}
+  if (!prefill) {
+    if (message)
+      return { message }
+    if (formErrors)
+      return { formErrors }
+  }
   extend(form, prefill)
   return { costOfCapital, foundCloseGoal, formErrors, message }
 }
@@ -151,6 +156,11 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     let goalSeekProps = model.goalSeek.filter(p => fixedProps[p] == null &&  !properties[p].readOnly)
     iterateBy = goalSeekProps.length && goalSeekProps[0]
     goalProp = model.goalSeek.find(p => fixedProps[p] != null  &&  properties[p].readOnly)
+    if (!iterateBy) {
+      return {
+        message: translate('noIteratorPresent')
+      }
+    }
     if (iterateBy) {
       if (properties[iterateBy].type === 'object') {
         let pmodel = getModel(properties[iterateBy].ref)
