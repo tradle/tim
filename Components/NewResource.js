@@ -304,8 +304,12 @@ class NewResource extends Component {
         let { validationErrors } = params
         let { fixedProps } = this.state
         if (recalculate) {
-          if (_.size(fixedProps))
-            Alert.alert(translate('goalNotFound'))
+          if (_.size(fixedProps)) {
+            if (message)
+              Alert.alert(message)
+            else
+              Alert.alert(translate('goalNotFound'))
+          }
           this.setState({recalculateMode: true, validationErrors})
         }
         else if (requestedProperties) {

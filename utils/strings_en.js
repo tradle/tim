@@ -326,6 +326,8 @@ module.exports = {
     "createResourceLink": "Copy link to this page",
     "applicationCompleted": "Application Completed - click here to view",
     "boundsLessError": "The calculated value is less than allowed for {1}: {2} < {3}",
+    "boundsError": "The goal can not be achived:\n{1}",
+    "closestBest": "The goal can not be achived.\nThe closest best value for {1}: {2}",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",

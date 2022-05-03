@@ -970,8 +970,14 @@ const NewResourceMixin = {
     this.setState({fixedProps: newFixedProps, recalculateMode: true})
   },
   onKeyPress(onSubmit, key) {
-    if (key.nativeEvent.key === 'Enter')
-      onSubmit()
+    if (key.nativeEvent.key === 'Enter') {
+      let { resource, fixedProps, recalculateMode } = this.state
+      let { originatingMessage } = this.props
+      if (recalculateMode)
+        Actions.getRequestedProperties({resource, originatingResource:originatingMessage, fixedProps})
+      else
+        onSubmit()
+    }
   },
   paintHelp(prop, fixedValue) {
     const { bankStyle, locale } = this.props
