@@ -3632,7 +3632,7 @@ var Store = Reflux.createStore({
     }
     // let moreInfo = plugin().validateForm({application: resource._context, form: r})
     let rProps
-    let {message, deleteProperties, recalculate, requestedProperties, formErrors} = moreInfo
+    let {message, deleteProperties, recalculate, requestedProperties, formErrors, form} = moreInfo
     if (requestedProperties) {
       let rprops = {}
       requestedProperties.forEach((r) => {
@@ -3649,7 +3649,7 @@ var Store = Reflux.createStore({
     }
 
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties, recalculate, validationErrors: formErrors})
+      this.trigger({action: 'formEdit', requestedProperties: rProps, resource:form || resource, message, deleteProperties, recalculate, validationErrors: formErrors})
     // return rProps
   },
   async onAddVerification(params) {

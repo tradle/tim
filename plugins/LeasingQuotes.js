@@ -16,14 +16,18 @@ module.exports = function LeasingQuotes ({ models }) {
   return {
     validateForm: async function validateForm ({
       application,
-      form,
+      form:formOrig,
       currentResource,
       search,
       fixedProps={}
     }) {
       if (!getMe().isEmployee || !application) return
+
+      let form = cloneDeep(formOrig)
       const ftype = form[TYPE]
       if (!ftype.endsWith('.Quote')) return
+
+
       let {costOfCapital, foundCloseGoal, formErrors, message} = await getQuote({form, models, search, currentResource, fixedProps})
       if (!foundCloseGoal  &&  fixedProps  &&  size(fixedProps))
         return {
@@ -43,6 +47,9 @@ module.exports = function LeasingQuotes ({ models }) {
           recalculate: true,
           message
         }
+      }
+      return {
+        form
       }
     }
   }
@@ -263,6 +270,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
         let blindDiscountVal = blindDiscount/100
         let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
+
+// =PMT(monthlyRateLease,term,(-priceMx/(1-monthlyRateLease)^(deliveryTime-delayedFunding))*(1-(deposit+blindDiscount)),residualValue*priceMx,0)
 
         if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
           currentGoalValue = monthlyPayment

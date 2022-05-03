@@ -333,6 +333,8 @@ class NewResource extends Component {
           this.floatingProps[pName] = params.value
           this.setState({resource: r, recalculateMode: false, validationErrors})
         }
+        else if (fixedProps)
+          this.setState({ resource })
       }
       return
     }
