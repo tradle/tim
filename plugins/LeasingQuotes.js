@@ -393,6 +393,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           form[iterateBy] = iterateByPropValue
         }
         qd.xirr = xirrVal
+        qd.irr = irrVal
         qd = sanitize(qd).sanitized
         quotationDetails.push(qd)
       }
