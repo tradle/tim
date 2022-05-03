@@ -310,7 +310,10 @@ class NewResource extends Component {
             else
               Alert.alert(translate('goalNotFound'))
           }
-          this.setState({recalculateMode: true, validationErrors})
+          let state = {recalculateMode: true, validationErrors }
+          if (resource)
+            state.resource = resource
+          this.setState(state)
         }
         else if (requestedProperties) {
           let r = resource ||  this.state.resource

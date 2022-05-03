@@ -40,7 +40,8 @@ module.exports = function LeasingQuotes ({ models }) {
         return {
           recalculate: true,
           message,
-          formErrors
+          formErrors,
+          form: !size(fixedProps) && form
         }
       if (message) {
         return {
@@ -281,8 +282,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             value: monthlyPayment,
             formValue: formMonthlyPayment,
             fixedProps,
-            ii,
-            valuesToIterate,
+            valueToIterate: valuesToIterate[ii],
             currentBest,
             prevBest,
             currentGoalValue,
@@ -398,8 +398,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             minValue: minXIRR,
             formValue: formXIRR,
             fixedProps,
-            ii,
-            valuesToIterate,
+            valueToIterate: valuesToIterate[ii],
             currentBest,
             prevBest,
             currentGoalValue,
@@ -491,8 +490,7 @@ function checkBounds({
   maxValue,
   formValue,
   fixedProps,
-  ii,
-  valuesToIterate,
+  valueToIterate,
   currentBest,
   prevBest,
   currentGoalValue,
@@ -501,7 +499,7 @@ function checkBounds({
 }) {
   const prop = property.name
   if ((minValue && value < minValue) ||  (maxValue  &&  value > maxValue)) {
-    if (!fixedProps || !currentBest[prop] || (ii === valuesToIterate.length - 1 && !currentBest[prop])) {
+    if (!fixedProps || !currentBest[prop]) {
       currentBest = {}
       if (prevBest) {
         currentBest = prevBest
@@ -517,27 +515,22 @@ function checkBounds({
   }
   else {
     if (goalProp === prop  &&  fixedProps[prop] != null) {
-    // if (goalProp === prop  &&  iterateBy  && fixedProps[prop] != null) {
       foundCloseGoal = true
       let diff
-      if (currentBest[prop]) {
-        // if (property.ref === MONEY)
-          diff = Math.abs(currentBest[prop] - formValue) > Math.abs(value - formValue)
-        // else
-        //   diff = currentBest[prop] - formValue > value - formValue
-      }
+      if (currentBest[prop])
+        diff = Math.abs(currentBest[prop] - formValue) > Math.abs(value - formValue)
+
       if (!currentBest[prop] || diff) {
         prevBest = currentBest || null
         currentBest = {
           [prop]: value,
-          valuesToIterate: valuesToIterate[ii]
+          valuesToIterate: valueToIterate
         }
       }
     }
-    else {
-      if (currentBest[goalProp] && currentBest[goalProp] === currentGoalValue)
-        currentBest[prop] = value
-    }
+    else if (currentBest[goalProp] && currentBest[goalProp] === currentGoalValue)
+      currentBest[prop] = value
+
     if (formErrors && formErrors[prop])
       formErrors = null
   }
