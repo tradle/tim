@@ -1033,6 +1033,9 @@ const NewResourceMixin = {
       else
         return
     }
+    let isWarning = err.startsWith('Warning: ')
+    if (isWarning)
+      err = err.slice(9)
     if (isRegistration) {
       let estyle = [styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]
       return <View style={estyle} key={this.getNextKey()}>
@@ -1045,12 +1048,12 @@ const NewResourceMixin = {
     let addStyle = {
       paddingVertical: 3,
       marginTop: prop.type === 'object' ||  prop.type === 'date' ||  prop.items ? 0 : 2,
-      backgroundColor: bankStyle.errorBgColor  ||  '#990000',
+      backgroundColor: isWarning ? 'lightyellow' : bankStyle.errorBgColor  ||  '#990000',
       paddingHorizontal: 10,
     }
     return <View style={styles.err} key={this.getNextKey()}>
              <View style={addStyle}>
-               <Text style={styles.font14, {paddingLeft: 5, color: bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
+               <Text style={styles.font14, {paddingLeft: 5, color: isWarning ? bankStyle.linkColor : bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
              </View>
            </View>
   },

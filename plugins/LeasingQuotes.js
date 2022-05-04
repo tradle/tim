@@ -445,23 +445,26 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       formErrors = null
     }
   }
-  // else {
-    // if (quotationDetails.length < configurationItems.length) {
-    let terms = ''
+  let terms = ''
+  if (formErrors  ||  quotationDetails.length !== configurationItems.length) {
     if (quotationDetails.length) {
-      quotationDetails.forEach((t, i ) => terms += ` ${t.term.title} ✅`)
+      quotationDetails.forEach((t, i ) => {
+        if (formErrors && t.term.id === termQuote.id)
+          terms += ` ${t.term.title.split(' ')[0]} ❌`
+        else
+          terms += ` ${t.term.title.split(' ')[0]} ✅`
+      })
       if (quotationDetails.length < configurationItems.length) {
         let notQD = configurationItems.filter(ci => !quotationDetails.find(qd => qd.term.id === ci.term.id))
-        notQD.forEach((t, i ) => terms += ` ${t.term.title} ❌`)
+        notQD.forEach((t, i ) => terms += ` ${t.term.title.split(' ')[0]} ❌`)
       }
     }
     else
-      configurationItems.forEach((t, i ) => terms += ` ${t.term.title} ❌`)
-    formErrors = {
-      term: `${terms}`
-    }
-    // }
-  // }
+      configurationItems.forEach((t, i ) => terms += ` ${t.term.title.split(' ')[0]} ❌`)
+    if (!formErrors)
+      formErrors = {}
+    formErrors.term = `Warning: ${terms}`
+  }
   return {
     prefill: {
       terms: quotationDetails,

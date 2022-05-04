@@ -301,7 +301,6 @@ class NewResource extends Component {
     }
     if (action === 'formEdit') {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
-        let { validationErrors } = params
         let { fixedProps } = this.state
         if (recalculate) {
           if (_.size(fixedProps)) {
@@ -1217,9 +1216,14 @@ if (r.url)
                  </View>
       }
       else if (params.validationErrors) {
-        errors = <View style={styles.errors}>
-                   <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
-                 </View>
+        if (_.size(validationErrors) === 1 && Object.values(validationErrors)[0].indexOf('Warning: ') === 0)
+          errors = <View style={styles.warnings}>
+                     <Text style={styles.warningText}>{translate('validationInfo')}</Text>
+                   </View>
+        else
+          errors = <View style={styles.errors}>
+                     <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
+                   </View>
       }
     }
     const droppable = Object.keys(properties).find(key => {
@@ -1745,6 +1749,18 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
+      fontSize: 16
+    },
+    warnings: {
+      height: 45,
+      justifyContent: 'center',
+      backgroundColor: 'lightyellow',
+      width: utils.getContentWidth(NewResource),
+      alignItems: 'center',
+      paddingHorizontal: 7
+    },
+    warningText: {
+      color: bankStyle.linkColor,
       fontSize: 16
     },
     sendIcon: {
