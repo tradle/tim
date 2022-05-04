@@ -38,10 +38,10 @@ module.exports = function LeasingQuotes ({ models }) {
       chooseDetail({form, models, costOfCapital})
       if (formErrors)
         return {
-          recalculate: true,
+          recalculate: size(formErrors) > 1,
           message,
           formErrors,
-          form: !size(fixedProps) && form
+          form //: !size(fixedProps) ? form : null
         }
       if (message) {
         return {
@@ -145,8 +145,14 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     if (!asset) return {}
   }
   let vendor
-  if (asset.vendor)
-    vendor = await search({modelName: getType(asset.vendor), filterResource: {_link: getRootHash(asset.vendor)}, noTrigger: true})
+  if (asset.vendor) {
+    let { list } = await search({modelName: getType(asset.vendor), filterResource: {_permalink: getRootHash(asset.vendor)}, noTrigger: true})
+    vendor = list && list[0]
+    if (vendor  && (!factor ||  factor < vendor.minFactor)) {
+      factor = vendor.minFactor
+      form.factor = factor
+    }
+  }
   let { residualValue } = asset
   let defaultQC = configurationItems[0]
 
@@ -389,23 +395,27 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let irrVal = Math.round(irrRate * 100 * 100)/100
 
         let minXIRR = calcMinXIRR({costOfCapital, asset, vendor, term, termProp: properties.term})
+        let inBounds
+        // if (termVal === termQuoteVal) {
+        ;({formErrors, foundCloseGoal, currentBest, prevBest, inBounds} = checkBounds({
+          property: properties.xirr,
+          goalProp,
+          value: xirrVal,
+          minValue: minXIRR,
+          formValue: formXIRR,
+          fixedProps,
+          valueToIterate: valuesToIterate[ii],
+          currentBest,
+          prevBest,
+          currentGoalValue,
+          formErrors,
+          foundCloseGoal,
+          boundsOnly: termVal !== termQuoteVal
+        }))
+        // }
+        if (!inBounds)
+          continue
 
-        if (termVal === termQuoteVal) {
-          ({formErrors, foundCloseGoal, currentBest, prevBest} = checkBounds({
-            property: properties.xirr,
-            goalProp,
-            value: xirrVal,
-            minValue: minXIRR,
-            formValue: formXIRR,
-            fixedProps,
-            valueToIterate: valuesToIterate[ii],
-            currentBest,
-            prevBest,
-            currentGoalValue,
-            formErrors,
-            foundCloseGoal
-          }))
-        }
         if (iterateBy) {
           qd[iterateBy] = iterateByPropValue
           form[iterateBy] = iterateByPropValue
@@ -435,6 +445,23 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       formErrors = null
     }
   }
+  // else {
+    // if (quotationDetails.length < configurationItems.length) {
+    let terms = ''
+    if (quotationDetails.length) {
+      quotationDetails.forEach((t, i ) => terms += ` ${t.term.title} ✅`)
+      if (quotationDetails.length < configurationItems.length) {
+        let notQD = configurationItems.filter(ci => !quotationDetails.find(qd => qd.term.id === ci.term.id))
+        notQD.forEach((t, i ) => terms += ` ${t.term.title} ❌`)
+      }
+    }
+    else
+      configurationItems.forEach((t, i ) => terms += ` ${t.term.title} ❌`)
+    formErrors = {
+      term: `${terms}`
+    }
+    // }
+  // }
   return {
     prefill: {
       terms: quotationDetails,
@@ -495,17 +522,21 @@ function checkBounds({
   prevBest,
   currentGoalValue,
   formErrors,
-  foundCloseGoal
+  foundCloseGoal,
+  boundsOnly
 }) {
   const prop = property.name
+  let inBounds = true
   if ((minValue && value < minValue) ||  (maxValue  &&  value > maxValue)) {
+    if (boundsOnly)
+      inBounds = false
     if (!fixedProps || !currentBest[prop]) {
       currentBest = {}
       if (prevBest) {
         currentBest = prevBest
         prevBest = null
       }
-      else {
+      else  if (!boundsOnly) {
         foundCloseGoal = false
         formErrors = {
           [prop]: translate('boundsLessError', prop, value, minValue)
@@ -513,7 +544,7 @@ function checkBounds({
       }
     }
   }
-  else {
+  else if (!boundsOnly) {
     if (goalProp === prop  &&  fixedProps[prop] != null) {
       foundCloseGoal = true
       let diff
@@ -534,5 +565,5 @@ function checkBounds({
     if (formErrors && formErrors[prop])
       formErrors = null
   }
-  return { formErrors, foundCloseGoal, currentBest, prevBest }
+  return { formErrors, foundCloseGoal, currentBest, prevBest, inBounds }
 }

@@ -337,7 +337,7 @@ class NewResource extends Component {
           this.setState({resource: r, recalculateMode: false, validationErrors})
         }
         else if (fixedProps)
-          this.setState({ resource, recalculateMode: false })
+          this.setState({ resource, recalculateMode: false, validationErrors })
       }
       return
     }
