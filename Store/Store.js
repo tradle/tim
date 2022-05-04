@@ -8975,19 +8975,22 @@ if (!res[SIG]  &&  res._message)
       return
     }
     let org = this.getRepresentative(me.organization)
-    let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
-    let initFolderIdx = folders.findIndex(bf => bf.message === translate('initialBookmarks'))
-    let initFolder = folders[initFolderIdx]
-    let sharedFolderIdx = folders.findIndex(bf => bf.message === translate('sharedBookmarks'))
-    let sharedFolder = folders[sharedFolderIdx]
-    let personalFolderIdx = folders.findIndex(bf => bf.message === translate('personalBookmarks'))
-    let personalFolder = folders[personalFolderIdx]
+    // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
+    let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('sharedBookmarks'))
+    let sharedFolder = folders[0]
+    // let initFolderIdx = folders.findIndex(bf => bf.message === translate('initialBookmarks'))
+    // let initFolder = folders[initFolderIdx]
+    // let sharedFolderIdx = folders.findIndex(bf => bf.message === translate('sharedBookmarks'))
+    // let sharedFolder = folders[sharedFolderIdx]
+    // let personalFolderIdx = folders.findIndex(bf => bf.message === translate('personalBookmarks'))
+    // let personalFolder = folders[personalFolderIdx]
     debugger
-    let { list: initB } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
+    // let { list: initB } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
     let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 10 })
 
-    let personalB = this.filterOutInitialBookmarks(initFolder, initB)
-    me.menu = [ personalFolder, ...personalB, sharedFolder, ...sharedB]
+    // let personalB = this.filterOutInitialBookmarks(initFolder, initB)
+    // me.menu = [ personalFolder, ...personalB, sharedFolder, ...sharedB]
+    me.menu = sharedB
     await this.setMe(me)
     if (!noTrigger)
       this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
