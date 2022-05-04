@@ -344,7 +344,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             currency
           },
           purchaseOptionPrice: priceMx && {
-            value: residualValuePerTerm ? 1 : mathRound(priceMx.value * residualValuePerTerm),
+            value: residualValuePerTerm ? mathRound(priceMx.value * residualValuePerTerm) : 1,
             currency
           },
         }
