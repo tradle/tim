@@ -388,6 +388,17 @@ console.log('HomePageMixin: filterResource', resource)
                <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
              </View>
            </TouchableOpacity>
+  },
+  applyForProduct() {
+    let { resource } = this.props
+    let rType = utils.getType(resource)
+    let model = utils.getModel(rType);
+
+    Actions.applyForProduct({
+      provider: utils.getMe().organization,
+      _ref: utils.buildRef(resource),
+      product: model.prerequisiteFor
+    })
   }
 }
 

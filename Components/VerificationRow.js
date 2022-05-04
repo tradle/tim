@@ -27,6 +27,7 @@ import constants from '@tradle/constants'
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
 import RowMixin from './RowMixin'
+import HomePageMixin from './HomePageMixin'
 import StyleSheet from '../StyleSheet'
 import appStyle from '../styles/appStyle.json'
 import { Text } from './Text'
@@ -629,6 +630,7 @@ vicon = null
 }
 
 reactMixin(VerificationRow.prototype, RowMixin);
+reactMixin(VerificationRow.prototype, HomePageMixin);
 
 var styles = StyleSheet.create({
   textContainer: {

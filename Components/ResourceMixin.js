@@ -526,12 +526,21 @@ var ResourceMixin = {
     Actions.getResourceLink({resource})
   },
   renderCopyLinkActionSheet(resource) {
-    let buttons = [{
+    let buttons = []
+    let prerequisiteFor
+    let model = utils.getModel(utils.getType(resource))
+    if (model.prerequisiteFor) {
+      buttons.push({
+        text: translate('addNew', translate(utils.getModel(model.prerequisiteFor))),
+        onPress: this.applyForProduct.bind(this)
+      })
+    }
+    buttons.push({
         text: translate('createResourceLink'),
         onPress: () => this.copy(resource)
-      },
-      { text: translate('cancel') }
-    ]
+      })
+    buttons.push({ text: translate('cancel') })
+
 
     return (
       <ActionSheet

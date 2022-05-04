@@ -352,17 +352,6 @@ var RowMixin = {
       this.props.chosen[id] = resource
     }
   },
-  applyForProduct() {
-    let { resource } = this.props
-    let rType = utils.getType(resource)
-    let model = utils.getModel(rType);
-
-    Actions.applyForProduct({
-      provider: utils.getMe().organization,
-      _ref: utils.buildRef(resource),
-      product: model.prerequisiteFor
-    })
-  }
 }
 
 var styles = StyleSheet.create({
