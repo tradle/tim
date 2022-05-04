@@ -269,6 +269,7 @@ module.exports = {
     "reviewScannedPropertiesWarning": "Is it your company? Please review and correct the data below",
     "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
     "validationErrors": "Please correct failed validation fields",
+    "validationInfo": "All good. See some warnings below.",
     "createNew": "Fill out form \"{1}\"",
     "createNext": "Fill out another form \"{1}\"",
     "resetRequired": "Reset Required",
