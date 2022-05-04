@@ -244,7 +244,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           residualValuePerTerm = 0
         // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
         if (termQuote && term.id == termQuote.id) {
-          if (!residualValueQuote) {
+          if (residualValueQuote == null) {
             form.residualValue = residualValuePerTerm.rv
             residualValuePerTerm = residualValuePerTerm.rv
           }
@@ -255,6 +255,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             residualValuePerTerm = residualValuePerTerm.rv
           }
         }
+        else if (residualValueQuote < residualValuePerTerm.rv)
+          residualValuePerTerm = residualValueQuote
         else
           residualValuePerTerm = residualValuePerTerm.rv
 
@@ -342,7 +344,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             currency
           },
           purchaseOptionPrice: priceMx && {
-            value: mathRound(priceMx.value * residualValuePerTerm),
+            value: residualValuePerTerm ? 1 : mathRound(priceMx.value * residualValuePerTerm),
             currency
           },
         }
