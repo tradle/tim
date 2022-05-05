@@ -8986,7 +8986,7 @@ if (!res[SIG]  &&  res._message)
     // let personalFolder = folders[personalFolderIdx]
     debugger
     // let { list: initB } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
-    let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 10 })
+    let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
 
     // let personalB = this.filterOutInitialBookmarks(initFolder, initB)
     // me.menu = [ personalFolder, ...personalB, sharedFolder, ...sharedB]
