@@ -1225,6 +1225,8 @@ if (r.url)
                      <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
                    </View>
       }
+      else
+        errors = <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
     }
     const droppable = Object.keys(properties).find(key => {
       const prop = properties[key]
