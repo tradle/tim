@@ -1570,9 +1570,22 @@ if (r.url)
     );
   }
 
-  onEndEditing(prop, event) {
-    if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
-      this.state.resource[prop] = event.nativeEvent.text;
+  onEndEditing(prop, value) {
+    // if (this.state.resource[prop]  ||  text.length)
+    //   this.state.resource[prop] = text;
+    const { fixedProps, resource } = this.state
+    const { originatingMessage: originatingResource, search } = this.props
+    const { name, type } = prop
+    let isFixedProp
+    if (fixedProps && fixedProps[name] != null) {
+      fixedProps[name] = value
+      isFixedProp = true
+    }
+    if (!isFixedProp && !search  &&  resource[TYPE] !== SETTINGS) {
+      // if 'string' no need to check if requested properties changed on entering every letter
+      if (type !== 'string' || value.length <= 1)
+        Actions.getRequestedProperties({resource, originatingResource, fixedProps})
+    }
   }
   onChange(value, properties) {
     if (!properties)

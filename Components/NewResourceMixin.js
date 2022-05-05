@@ -709,11 +709,11 @@ const NewResourceMixin = {
       fixedProps[pname] = value
       isFixedProp = true
     }
-    if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
-      // if 'string' no need to check if requested properties changed on entering every letter
-      if (ptype !== 'string' || value.length <= 1)
-        Actions.getRequestedProperties({resource: r, originatingResource, fixedProps})
-    }
+    // if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
+    //   // if 'string' no need to check if requested properties changed on entering every letter
+    //   if (ptype !== 'string' || value.length <= 1)
+    //     Actions.getRequestedProperties({resource: r, originatingResource, fixedProps})
+    // }
     this.setState({
       resource: r,
       inFocus: pname,
@@ -936,7 +936,10 @@ const NewResourceMixin = {
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
           keyboardShouldPersistTaps='always'
           keyboardType={keyboard || 'default'}
-          onChangeText={this.changeValue.bind(this, prop)}
+          onChangeText={(e) => {
+            this.changeValue(prop, e)
+            this.detectStoppedTyping(prop, e)
+          }}
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
@@ -2038,6 +2041,11 @@ const NewResourceMixin = {
     return { i: --i, val }
   }
 }
+
+NewResourceMixin.detectStoppedTyping = _.debounce(function (prop, event) {
+  console.log('user stopped typing')
+  this.onEndEditing(prop, event)
+}, 2000)
 
 function coerceNumber (obj, p) {
   const val = obj[p]
