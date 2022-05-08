@@ -40,6 +40,7 @@ import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
 import Image from './Image'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
+import HomePageMixin from './HomePageMixin'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
@@ -115,14 +116,21 @@ class RefPropertyEditor extends Component {
         val = null
     }
     let pLabel = this.getPropertyLabel(prop) + (!search  &&  required ? ' *' : '')
-    let label, propLabel, isImmutable
+    let label, propLabel
+    let isImmutable = prop.immutable  &&  resource[ROOT_HASH]
 
     if (!val)
       label = pLabel
-    else if (utils.getModel(prop.ref || prop.items.ref).abstract)
-      label = translate(utils.getModel(utils.getType(val)))
+    else if (utils.getModel(prop.ref || prop.items.ref).abstract) {
+      let vtype = utils.getType(val)
+      let vm = utils.getModel(vtype)
+      if (typeof val === 'object'  &&  vtype  &&  !vm.abstract)
+        label = this.getRefLabel(prop, val, resource)
+      else
+        label = translate(vm)
+      propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
+    }
     else {
-      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto)
         label = pLabel
       else if (isFile  &&  resource[pName].name)
@@ -536,9 +544,21 @@ class RefPropertyEditor extends Component {
     this.setState({ r })
     Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
   }
-  chooser(prop, propName,event) {
+  chooser(prop, propName, event, pRef) {
     let { isRegistration } = this.state
     let { resource, model, bankStyle, search, navigator, originatingMessage, onChange, exploreData } = this.props
+
+    let propRef = pRef || prop.ref || prop.items.ref
+    let m = utils.getModel(propRef);
+
+    if (m.abstract) {
+      let subList = utils.getAllSubclasses(m.id)
+      let callback = val =>  this.chooser(prop, propName, event, utils.getModel(val).id)
+
+      this.showSubclasses({ list: subList, callback, notModel: true, title: translate(model) })
+      return
+    }
+
     if (model  &&  !resource) {
       resource = {};
       resource[TYPE] = model.id;
@@ -548,8 +568,6 @@ class RefPropertyEditor extends Component {
     // let value = parent.refs.form.input // this.refs.form.input;
 
     let filter = event.nativeEvent.text;
-    let propRef = prop.ref || prop.items.ref
-    let m = utils.getModel(propRef);
     let currentRoutes = navigator.getCurrentRoutes();
 
     if (originatingMessage) {
@@ -573,7 +591,7 @@ class RefPropertyEditor extends Component {
         isChooser:      true,
         modelName:      propRef,
         isModel:        m.abstract  &&  exploreData,
-        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        returnRoute:    !pRef && currentRoutes[currentRoutes.length - 1],
         callback:       onChange
       }
     }
@@ -584,7 +602,8 @@ class RefPropertyEditor extends Component {
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
     }
-    navigator.push(route)
+    // navigator.push(route)
+    navigator[pRef ? 'replace' : 'push'](route)
   }
   multiChooser(prop, values) {
     const { navigator, onChange } = this.props
@@ -632,4 +651,5 @@ function getDocumentTypeFromTitle (title='') {
   }
 }
 reactMixin(RefPropertyEditor.prototype, PhotoCarouselMixin);
+reactMixin(RefPropertyEditor.prototype, HomePageMixin);
 module.exports = RefPropertyEditor;
