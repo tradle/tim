@@ -45,7 +45,6 @@ import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 import ApplicantLegalEntityConsent from './ApplicantLegalEntityConsent'
-import Navigator from './Navigator'
 
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 const PRINTABLE = 'tradle.Printable'
@@ -188,19 +187,8 @@ class MessageView extends Component {
     let blModel = utils.getModel(ref)
     if (model.abstract) {
       let subList = utils.getAllSubclasses(model.id)
-
-      navigator.push({
-        title: translate(model),
-        componentName: 'StringChooser',
-        backButtonTitle: 'Back',
-        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-        passProps: {
-          strings: subList, // model.additionalForms,
-          notModel: true,
-          bankStyle,
-          callback:  val => this.createNewResource({model: utils.getModel(val)})
-        }
-      });
+      let callback =  val => this.createNewResource({model: utils.getModel(val)})
+      this.showSubclasses({ list: subList, callback, notModel: true, title: translate(model) })
       return
     }
     // resource if present is a container resource as for example subreddit for posts or post for comments

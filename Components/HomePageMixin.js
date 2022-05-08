@@ -19,6 +19,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
 import GridList from './GridList'
 import buttonStyles from '../styles/buttonStyles'
+import Navigator from './Navigator'
 
 const {
   TYPE
@@ -398,6 +399,22 @@ console.log('HomePageMixin: filterResource', resource)
       provider: utils.getMe().organization,
       _ref: utils.buildRef(resource),
       product: model.prerequisiteFor
+    })
+  },
+  showSubclasses({list, callback, notModel, title }) {
+    let { model, bankStyle, navigator } = this.props
+
+    navigator.push({
+      title,
+      componentName: 'StringChooser',
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings: list, // model.additionalForms,
+        notModel,
+        bankStyle,
+        callback
+      }
     })
   }
 }
