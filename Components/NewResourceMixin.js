@@ -709,11 +709,11 @@ const NewResourceMixin = {
       fixedProps[pname] = value
       isFixedProp = true
     }
-    // if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
-    //   // if 'string' no need to check if requested properties changed on entering every letter
-    //   if (ptype !== 'string' || value.length <= 1)
-    //     Actions.getRequestedProperties({resource: r, originatingResource, fixedProps})
-    // }
+    if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
+      // if 'string' no need to check if requested properties changed on entering every letter
+      if (ptype === 'boolean')
+        Actions.getRequestedProperties({resource: r, originatingResource, fixedProps})
+    }
     this.setState({
       resource: r,
       inFocus: pname,
