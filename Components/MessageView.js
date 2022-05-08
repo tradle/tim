@@ -45,6 +45,7 @@ import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 import ApplicantLegalEntityConsent from './ApplicantLegalEntityConsent'
+import Navigator from './Navigator'
 
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 const PRINTABLE = 'tradle.Printable'
@@ -183,13 +184,29 @@ class MessageView extends Component {
     let { defaultPropertyValues, bankStyle, navigator, search, allowedMimeTypes } = this.props
     let resource = this.state.resource
     let ref = itemBl.items.ref
+
+    let blModel = utils.getModel(ref)
+    if (model.abstract) {
+      let subList = utils.getAllSubclasses(model.id)
+
+      navigator.push({
+        title: translate(model),
+        componentName: 'StringChooser',
+        backButtonTitle: 'Back',
+        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+        passProps: {
+          strings: subList, // model.additionalForms,
+          notModel: true,
+          bankStyle,
+          callback:  val => this.createNewResource({model: utils.getModel(val)})
+        }
+      });
+      return
+    }
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     let r = {[TYPE]: ref};
     let rType = resource[TYPE]
-    // let rModel = utils.getModel(rType)
-
-    let blModel = utils.getModel(ref)
 
     let refProps = utils.getPropertiesWithRef(rType, blModel)
     let containerProp = refProps.filter(prop => prop.name === itemBl.items.backlink)[0].name
