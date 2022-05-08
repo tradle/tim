@@ -27,8 +27,7 @@ module.exports = function LeasingQuotes ({ models }) {
       const ftype = form[TYPE]
       if (!ftype.endsWith('.Quote')) return
 
-
-      let {costOfCapital, foundCloseGoal, formErrors, message} = await getQuote({form, models, search, currentResource, fixedProps})
+      let {costOfCapital, foundCloseGoal, formErrors, message} = await getQuote({form, models, search, currentResource, fixedProps, application})
       if (!foundCloseGoal  &&  fixedProps  &&  size(fixedProps))
         return {
           recalculate: true,
@@ -85,19 +84,28 @@ function chooseDetail({form, models, costOfCapital}) {
   else
     form.approve = false
 }
-async function getQuote({form, models, search, currentResource, fixedProps}) {
+async function getQuote({form, models, search, currentResource, fixedProps, application}) {
   let model = models[getType(form)]
   if (!model) return {}
 
-  let { prefill, costOfCapital, foundCloseGoal, formErrors, message } = await quotationPerTerm({form, search, currentResource, fixedProps})
-  if (!prefill) {
-    if (message)
-      return { message }
-    if (formErrors)
-      return { formErrors }
+  let { prefill, costOfCapital, foundCloseGoal, formErrors, message, calculateFormulas } = await quotationPerTerm({form, search, currentResource, fixedProps})
+  if (prefill) {
+    extend(form, prefill)
+    return { costOfCapital, foundCloseGoal, formErrors, message }
   }
-  extend(form, prefill)
-  return { costOfCapital, foundCloseGoal, formErrors, message }
+  if (message)
+    return { message }
+  if (formErrors)
+    return { formErrors }
+  if (calculateFormulas) {
+    let plugin = require('./ValidateSelectors')
+    await plugin({models}).validateForm.call(
+          {models: {[form[TYPE]]: model}},
+          {application, form}
+      )
+  }
+
+  return {}
 }
 async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   const quotationInfo = form
@@ -119,6 +127,27 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     blindDiscount = 0,
     residualValue: residualValueQuote
   } = quotationInfo
+
+  if (!asset)
+    return {}
+
+  if (isStub(asset)) {
+    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getRootHash(asset)}, noTrigger: true})
+    asset = list && list[0]
+    if (!asset) return {}
+  }
+  const { listPrice, maxBlindDiscount } = asset
+  if (netPrice) {
+    if (netPrice !== listPrice) {
+      form.netPrice = listPrice
+      return {calculateFormulas: true}
+    }
+  }
+  else {
+    form.netPrice = listPrice
+    return {calculateFormulas: true}
+  }
+
   if (!termQuote || !factor || !netPrice || !exchangeRate || !deliveryTime ||
       !netPriceMx || !priceMx || !fundedInsurance) {
     return {}
@@ -139,11 +168,6 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     presentValueFactor,
     // minXIRR
   } = costOfCapital
-  if (isStub(asset)) {
-    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getRootHash(asset)}, noTrigger: true})
-    asset = list && list[0]
-    if (!asset) return {}
-  }
   let vendor
   if (asset.vendor) {
     let { list } = await search({modelName: getType(asset.vendor), filterResource: {_permalink: getRootHash(asset.vendor)}, noTrigger: true})
@@ -165,6 +189,9 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let goalProp
   let valuesToIterate = [null]
   let foundCloseGoal = true
+
+  if (blindDiscount > maxBlindDiscount)
+    form.blindDiscount = blindDiscount = maxBlindDiscount
 
   if (fixedProps  &&  Object.keys(fixedProps).length) {
     let goalSeekProps = model.goalSeek.filter(p => fixedProps[p] == null &&  !properties[p].readOnly)
@@ -196,6 +223,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           })
           valuesToIterate = Array(residualValuePerTerm.rv).fill().map((_, idx) => start + idx)
         }
+        else if (iterateBy === 'blindDiscount')
+          valuesToIterate = Array(maxBlindDiscount || 100).fill().map((_, idx) => start + idx)
         else
           valuesToIterate = Array(100).fill().map((_, idx) => start + idx)
       }
