@@ -117,7 +117,7 @@ const excludeWhenSignAndSend = [
   '_dataBundle',
   '_lens'
 ]
-
+const AUTHOR_ORG = '_authorOrg'
 // const MSG_LINK = '_msg'
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
@@ -241,6 +241,7 @@ const DEVICE_SYNC         = 'tradle.DeviceSync'
 const DEVICE_SYNC_DATA_BUNDLE = 'tradle.DeviceSyncDataBundle'
 const ATTESTATION         = 'tradle.Attestation'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const COUNTERPARTY = 'tradle.Counterparty'
 
 const EXCLUDED_APPLICATION_FORMS = [
   ASSIGN_RM,
@@ -1755,12 +1756,29 @@ var Store = Reflux.createStore({
     }
   },
 
+  _maybePrepForCounterparty(object) {
+    let org = me.counterparty
+    if (org) {
+      object[AUTHOR_ORG] = utils.getRootHash(org)
+      return
+    }
+    let props = utils.getPropertiesWithRef(COUNTERPARTY, utils.getModel(object[TYPE]))
+    if (props.length) {
+      for (let i=0; i<props.length  &&  !object[AUTHOR_ORG]; i++) {
+    debugger
+        org = object[props[i].name]
+        if (org)
+          object[AUTHOR_ORG] = org._permalink
+      }
+    }
+  },
   async createObject(object) {
     const node = await this._enginePromise
     const me = utils.getMe()
     if (me.isEmployee) {
       object = _.clone(object)
       this._maybePrepForEmployerBot(object)
+      this._maybePrepForCounterparty(object)
     }
     if (me._masterAuthor) {
       // debugger
@@ -2369,6 +2387,10 @@ var Store = Reflux.createStore({
     if (me.isEmployee) {
       if (!this.client)
         this.client = graphQL.initClient(meDriver, me.organization.url)
+      me.menu = null
+      me.employeePass = await this.onGetItem({resource: me.employeePass, noTrigger: true})
+      if (me.employeePass.counterparty)
+        me.counterparty = me.employeePass.counterparty
       await this.onGetMenu({noTrigger: true, updateMenu: true})
     }
     return results
@@ -3627,7 +3649,7 @@ var Store = Reflux.createStore({
     if (showLoading)
       Actions.hideModal()
     if (!moreInfo) {
-      this.trigger({action: 'formEdit', requestedProperties: {}})
+      this.trigger({action: 'formEdit', requestedProperties: {}, resource})
       return
     }
     // let moreInfo = plugin().validateForm({application: resource._context, form: r})
@@ -4012,7 +4034,7 @@ var Store = Reflux.createStore({
   async onShowStepIndicator() {
     let showStepIndicator = !me._showStepIndicator
     me._showStepIndicator = showStepIndicator
-    await db.put(utils.getId(me), me)
+    await this.dbPut(utils.getId(me), me)
     await this.setMe(me)
     this.trigger({action: 'showStepIndicator', showStepIndicator})
   },
@@ -5713,7 +5735,7 @@ if (!res[SIG]  &&  res._message)
         }//await this._getItemFromServer(utils.makeId(LEGAL_ENTITY, params.legalEntity))
         let meId = utils.getId(me)
         await utils.setMe({meRes: me})
-        await db.put(meId, me)
+        await this.dbPut(meId, me)
         this._setItem(meId, me)
       }
       else if (bundleId)
@@ -8984,7 +9006,7 @@ if (!res[SIG]  &&  res._message)
     // let sharedFolder = folders[sharedFolderIdx]
     // let personalFolderIdx = folders.findIndex(bf => bf.message === translate('personalBookmarks'))
     // let personalFolder = folders[personalFolderIdx]
-    debugger
+    // debugger
     // let { list: initB } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
     let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
 
@@ -12065,6 +12087,9 @@ if (!res[SIG]  &&  res._message)
     me.organization = this.buildRef(org)
     this.resetForEmployee(me, org)
     me.employeePass = this.buildRef(myEmployeeBadge)
+    if (myEmployeeBadge.counterparty)
+      me.counterparty = myEmployeeBadge.counterparty
+
     let rep = this.getRepresentative(me.organization)
     const bookmarks = storeUtils.getEmployeeBookmarks({
       me,
@@ -12360,7 +12385,7 @@ if (!res[SIG]  &&  res._message)
         }
         if (changed) {
           let meId = utils.getId(me)
-          await db.put(meId, me)
+          await this.dbPut(meId, me)
           this._setItem(meId, me)
         }
       }

@@ -6,5 +6,6 @@ module.exports = [
   require('./ProofOfAddress'),
   require('./CheckOverride'),
   require('./ValidateSelectors'),
+  require('./Counterparty'),
   require('./LeasingQuotes'),
 ]
