@@ -622,7 +622,7 @@ class MessageView extends Component {
     if (!backlink  ||  !backlink.allowToAdd)
       return
     let me = utils.getMe()
-    let resource = this.props.resource
+    let resource = this.state.resource || this.props.resource
 
     // Allow employee to add backlinks only to the resource he created
     if (me  &&  me.isEmployee  &&  !utils.isMyMessage({resource})) //  &&  resource[TYPE] !== DRAFT_APPLICATION)
