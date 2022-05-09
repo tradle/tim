@@ -207,6 +207,8 @@ class NewItem extends Component {
       this.state.options = null;
     return !hasError;
   }
+  onEndEditing(prop, value) {
+  }
   render() {
     let {err, metadata} = this.props;
     let error

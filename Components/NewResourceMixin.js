@@ -2044,8 +2044,9 @@ const NewResourceMixin = {
 
 NewResourceMixin.detectStoppedTyping = _.debounce(function (prop, event) {
   console.log('user stopped typing')
-  this.onEndEditing(prop, event)
-}, 2000)
+  // if (this.onEndEditing)
+    this.onEndEditing(prop, event)
+}, 700)
 
 function coerceNumber (obj, p) {
   const val = obj[p]
