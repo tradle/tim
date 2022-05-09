@@ -997,7 +997,6 @@ var utils = {
 
     return props
   },
-
   getDisplayName({ resource, model, propsUsed, locale }) {
     if (Array.isArray(resource))
       return
@@ -1717,10 +1716,11 @@ var utils = {
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? _.cloneDeep(resource) : resource
     let m = utils.getModel(res[TYPE])
+    let isMe = utils.getMe() === resource
     // if (!m.interfaces)
     //   res = utils.optimizeResource1(resource, doNotChangeOriginal)
     // else {
-      var properties = m.properties
+      let properties = m.properties
       var exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
       let isContext = utils.isContext(m)
@@ -1728,6 +1728,8 @@ var utils = {
       let isFormError = m.id === FORM_ERROR
       let isBookmark = m.id === BOOKMARK
       Object.keys(res).forEach(p => {
+        if (isMe && p === 'menu')
+          return
         if (p === '_context'  &&  res._context) {
           res._context = utils.buildRef(res._context)
           return
