@@ -13,6 +13,7 @@ import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
+import HomePageMixin from './HomePageMixin'
 
 import RowMixin from './RowMixin'
 import utils, { translate, getEnumValueId } from '../utils/utils'
@@ -436,6 +437,7 @@ class GridRow extends Component {
 }
 reactMixin(GridRow.prototype, Reflux.ListenerMixin);
 reactMixin(GridRow.prototype, RowMixin)
+reactMixin(GridRow.prototype, HomePageMixin)
 GridRow = makeResponsive(GridRow)
 
 var styles = StyleSheet.create({
