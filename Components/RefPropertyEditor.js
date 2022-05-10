@@ -69,8 +69,8 @@ class RefPropertyEditor extends Component {
     if (!_.isEqual(nextProps.resource[pName], this.props.resource[pName]))
       return true
 
-    if (nextProps.error) {
-      if (!this.props.error || this.props.error !== nextProps.error)
+    if (nextProps.error !== this.props.error) {
+      // if (!this.props.error || this.props.error !== nextProps.error)
         return true
     }
     // in case document type was changed a different scanning could be replaced by taking a photo and vice versa
