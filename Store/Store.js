@@ -3671,7 +3671,7 @@ var Store = Reflux.createStore({
     }
 
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rProps, resource:form || resource, message, deleteProperties, recalculate, validationErrors: formErrors})
+      this.trigger({action: 'formEdit', requestedProperties: rProps, resource:form || resource, message, deleteProperties, recalculate, validationErrors: formErrors || {}})
     // return rProps
   },
   async onAddVerification(params) {
