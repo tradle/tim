@@ -15,7 +15,7 @@ module.exports = function Counterparty ({ models }) {
       let model = getModel(form[TYPE])
 
       let props = getPropertiesWithRef(COUNTERPARTY, model)
-      if (props)
+      if (props && props.length)
         form[props[0].name] = me.counterparty
     }
   }
