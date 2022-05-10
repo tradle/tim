@@ -1215,7 +1215,7 @@ if (r.url)
                    <Text style={styles.errorsText}>{translate(message)}</Text>
                  </View>
       }
-      else if (params.validationErrors) {
+      else if (validationErrors && _.size(validationErrors)) {
         if (_.size(validationErrors) === 1 && Object.values(validationErrors)[0].indexOf('Warning: ') === 0)
           errors = <View style={styles.warnings}>
                      <Text style={styles.warningText}>{translate('validationInfo')}</Text>
