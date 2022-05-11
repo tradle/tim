@@ -504,7 +504,7 @@ class NewResource extends Component {
     this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (let p in this.floatingProps) {
-        if (isNew  ||  resource[p] !== this.floatingProps[p])
+        // if (isNew  ||  resource[p] !== this.floatingProps[p])
           json[p] = this.floatingProps[p]
       }
     }

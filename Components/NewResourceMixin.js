@@ -1367,7 +1367,8 @@ const NewResourceMixin = {
       this.floatingProps = {}
     let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle } = this.props
     let { required, errors, component } = params
-    let { missedRequiredOrErrorValue, resource, inFocus, fixedProps } = this.state
+    let { missedRequiredOrErrorValue, inFocus, fixedProps } = this.state
+    let resource = params.resource ||  this.state.resource
     let props
     if (model)
       props = model.properties
@@ -1382,8 +1383,14 @@ const NewResourceMixin = {
     let onChange
     if (isMedia)
       onChange = this.setState.bind(this)
-    else
+    else {
+      if (resource[pName]) {
+        let pmodel = utils.getModel(ref)
+        if (!pmodel.enum)
+          this.floatingProps[pName] = resource[pName]
+      }
       onChange = this.setChosenValue.bind(this)
+    }
     let error = missedRequiredOrErrorValue  &&  missedRequiredOrErrorValue[pName]
     if (!error  &&  params.errors  &&  params.errors[pName])
       error = params.errors[pName]
@@ -1396,7 +1403,7 @@ const NewResourceMixin = {
     return <View style={{flexDirection: 'row'}}>
              <View style={{flex: 1}}>
                <RefPropertyEditor {...this.props}
-                             resource={params.resource ||   this.state.resource}
+                             resource={resource}
                              onChange={onChange}
                              prop={prop}
                              bookmark={bookmark}
