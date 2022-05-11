@@ -1,4 +1,5 @@
-const { xirr, convertRate, irr } = require('node-irr')
+import { xirr, convertRate, irr } from 'node-irr'
+import { pmt, pv } from 'financial'
 import dateformat from 'dateformat'
 import cloneDeep from 'lodash/cloneDeep'
 import size from 'lodash/size'
@@ -125,6 +126,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     fundedInsurance,
     discountFromVendor,
     blindDiscount = 0,
+    delayedFunding = 0,
     residualValue: residualValueQuote
   } = quotationInfo
 
@@ -138,7 +140,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   }
   const { listPrice, maxBlindDiscount } = asset
   if (netPrice) {
-    if (netPrice !== listPrice) {
+    if (netPrice.value !== listPrice.value) {
       form.netPrice = listPrice
       return {calculateFormulas: true}
     }
@@ -161,11 +163,13 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let model = getModel(ftype)
   let properties = model.properties
   let termsPropRef = properties.terms.items.ref
-  const {
+  let {
     deliveryFactor: configurationItems,
     minimumDeposit,
     lowDepositFactor: lowDepositPercent,
     presentValueFactor,
+    monthlyRateLease = 0,
+    monthlyRateLoan = 0
     // minXIRR
   } = costOfCapital
   let vendor
@@ -309,7 +313,15 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let blindDiscountVal = blindDiscount/100
         let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
 
-// =PMT(monthlyRateLease,term,(-priceMx/(1-monthlyRateLease)^(deliveryTime-delayedFunding))*(1-(deposit+blindDiscount)),residualValue*priceMx,0)
+// let termIRR = parseInt(termVal)
+// let deliveryTimeLoan = deliveryTime - 1
+// let deposit = depositPercentage/100
+
+// monthlyRateLease /= 100
+// monthlyRateLoan /= 100
+// let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFunding)) * (1 - (deposit + blindDiscount)), residualValuePerTerm * priceMx.value, 0)
+// let monthlyPaymentLoan = (priceMx.value - deposit * priceMx.value) / termIRR
+// let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
 
         if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
           currentGoalValue = monthlyPayment
