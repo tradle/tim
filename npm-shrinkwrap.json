@@ -3008,6 +3008,11 @@
       "resolved": "https://registry.npmjs.org/finalhandler/-/finalhandler-1.1.1.tgz",
       "dev": true
     },
+    "financial": {
+      "version": "0.1.3",
+      "from": "financial@latest",
+      "resolved": "https://registry.npmjs.org/financial/-/financial-0.1.3.tgz"
+    },
     "find-cache-dir": {
       "version": "0.1.1",
       "from": "find-cache-dir@>=0.1.1 <0.2.0",
