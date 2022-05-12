@@ -970,8 +970,9 @@ class ResourceList extends Component {
 
     let employee
     if (me.isEmployee) {
+      let orgTitle = me.counterparty ? me.counterparty.title : me.organization.title
       employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: bankStyle.linkColor}}>{`${me.firstName}@${orgTitle}`}</Text>
                  </View>
     }
     return (
