@@ -8989,6 +8989,8 @@ if (!res[SIG]  &&  res._message)
     this.trigger({action: 'hasBookmarks', count: list.length, bankStyle: style})
   },
   async onGetMenu({noTrigger, modelName, updateMenu, resource}) {
+    if (!me.isEmployee)
+      return
     if (!modelName  &&  resource)
       modelName = utils.getType(resource)
     if (!updateMenu  &&  me.menu) {

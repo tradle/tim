@@ -55,7 +55,7 @@ var search = {
 
   async searchServer(params) {
     let {client, modelName, filterResource, sortProperty, asc, limit,
-         endCursor, properties, select, excludeProps, bookmark} = params
+         endCursor, properties, select, excludeProps, bookmark, allow} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -63,8 +63,17 @@ var search = {
     let table = `rl_${modelName.replace(/\./g, '_')}`
     let model = utils.getModel(modelName)
     let versionId = params.versionId || model._versionId
-    let version = versionId ? '($modelsVersionId: String!)' : ''
-    let query = `query ${version} {\n${table}\n`
+    // let version = versionId ? '($modelsVersionId: String!)' : ''
+    // let allowVar = allow ? '($allow: String!)' : ''
+    let str =''
+    if (versionId && allow)
+      str = '($modelsVersionId: String!, $allow: String!)'
+    else if (versionId)
+      str = '($modelsVersionId: String!)'
+    else if (allow)
+      str = '($allow: String!)'
+
+    let query = `query ${str} {\n${table}\n`
     let props = model.properties
     let inClause = []
     let op = {
@@ -255,6 +264,8 @@ var search = {
     query += '('
     if (versionId)
       query += `\nmodelsVersionId: $modelsVersionId\n`
+    if (allow)
+      query += `\nallow: $allow\n`
     if (limit) {
       if (endCursor)
         query += `checkpoint: "${endCursor}"\n`
@@ -301,7 +312,7 @@ var search = {
 
     let error, mapping, retry = true
     for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
-      let data = await this.execute({client, query, table, versionId})
+      let data = await this.execute({client, query, table, versionId, allow})
       if (data.result) {
         return { result:  data.result }
       }
@@ -1072,9 +1083,17 @@ var search = {
   async execute(params) {
     if (useApollo)
       return this.executeApollo(params)
-    var {query, table, versionId} = params
+    var {query, table, versionId, allow} = params
 
-    let variables = versionId  &&  {modelsVersionId: versionId} || undefined
+    let variables
+    if (versionId)
+      variables = { modelsVersionId: versionId }
+    if (allow) {
+      if (!variables)
+        variables = {}
+      variables.allow = allow
+    }
+
     // debugger
     const rawBody = { query }
     if (variables) rawBody.variables = variables
