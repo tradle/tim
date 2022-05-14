@@ -401,7 +401,9 @@ var NavigationBarRouteMapper = {
 
     let menu
     let { noMenu, modelName, model, resource } = route.passProps
-    if (isWeb()  &&  !noMenu && NO_MENU_COMPONENTS.indexOf(componentName) === -1) {
+    let me = utils.getMe()
+
+    if (isWeb()  &&  me  &&  me.isEmployee && !noMenu && NO_MENU_COMPONENTS.indexOf(componentName) === -1) {
       menu = <TouchableOpacity
                hitSlop={HIT_SLOP}
                onPress={() => Actions.getMenu({resource, modelName: modelName || (model && model.id)})}>
