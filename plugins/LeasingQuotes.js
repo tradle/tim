@@ -4,6 +4,7 @@ import dateformat from 'dateformat'
 import cloneDeep from 'lodash/cloneDeep'
 import size from 'lodash/size'
 import extend from 'lodash/extend'
+import isEqual from 'lodash/isEqual'
 import { TYPE } from '@tradle/constants'
 import { getMe, getModel, getType, getRootHash, isStub, translate, formatCurrency } from '../utils/utils'
 import validateResource from '@tradle/validate-resource'
@@ -134,7 +135,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     return {}
 
   if (isStub(asset)) {
-    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getRootHash(asset)}, noTrigger: true})
+    let { list } = await search({modelName: getType(asset), filterResource: {_permalink: getRootHash(asset)}, noTrigger: true, allow: true})
     asset = list && list[0]
     if (!asset) return {}
   }
@@ -150,11 +151,16 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     return {calculateFormulas: true}
   }
 
+  let globalBounds = {}
+  if (maxBlindDiscount)
+    globalBounds.blindDiscount = {
+      max: maxBlindDiscount
+    }
   if (!termQuote || !factor || !netPrice || !exchangeRate || !deliveryTime ||
       !netPriceMx || !priceMx || !fundedInsurance) {
     return {}
   }
-  let { list } = await search({modelName: COST_OF_CAPITAL, filterResource: {current: true}, noTrigger: true})
+  let { list } = await search({modelName: COST_OF_CAPITAL, filterResource: {current: true}, noTrigger: true, allow: COST_OF_CAPITAL})
   if (!list || !list.length) return {}
   let costOfCapital = list[0]
 
@@ -238,9 +244,11 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let termQuoteVal = termQuote.title.split(' ')[0]
   let formErrors
   let currentGoalValue
-  let prevBest
-  let currentBest = {}
+  let goalSeekSuccess
+  let iterations = {}
   let residualValueIterator
+  let finalBest = {}
+  let valueToIterate
   for (let jj=0; jj<2; jj++) {
     for (let ii=0; ii<valuesToIterate.length; ii++) {
       let val = valuesToIterate[ii]
@@ -262,6 +270,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       }
 
       let k = 0
+      let currentBest = {}
+      iterations[val] = currentBest
       for (; k<configurationItems.length; k++) {
         let quotConf = configurationItems[k]
         let qc = cloneDeep(defaultQC)
@@ -313,19 +323,14 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let blindDiscountVal = blindDiscount/100
         let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
 
-// let termIRR = parseInt(termVal)
-// let deliveryTimeLoan = deliveryTime - 1
-// let deposit = depositPercentage/100
-
-// monthlyRateLease /= 100
-// monthlyRateLoan /= 100
-// let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFunding)) * (1 - (deposit + blindDiscount)), residualValuePerTerm * priceMx.value, 0)
-// let monthlyPaymentLoan = (priceMx.value - deposit * priceMx.value) / termIRR
-// let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
-
+        currentBest[term.id] = {
+          monthlyPayment
+        }
         if (goalProp === 'monthlyPayment' && iterateBy &&  termVal === termQuoteVal) {
           currentGoalValue = monthlyPayment
-          ;({formErrors, foundCloseGoal, currentBest, prevBest} = checkBounds({
+          ;({formErrors, foundCloseGoal, currentBest} = checkBounds({
+            term,
+            termQuote,
             property: properties.monthlyPayment,
             goalProp,
             value: monthlyPayment,
@@ -333,7 +338,6 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             fixedProps,
             valueToIterate: valuesToIterate[ii],
             currentBest,
-            prevBest,
             currentGoalValue,
             formErrors,
             foundCloseGoal
@@ -402,6 +406,32 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             currency
           }
         }
+        let termIRR = termVal //parseInt(termVal)
+        let deliveryTimeLoan = dtID.split('dt')[1] - 1
+        let deposit = depositPercentage/100
+        let delayedFundingVal = delayedFunding && delayedFunding.id.split('_df')[1] || 0
+
+        monthlyRateLease /= 100
+        monthlyRateLoan /= 100
+        let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscount)), residualValuePerTerm * priceMx.value, 0)
+        let monthlyPaymentLoan = (priceMx.value - deposit * priceMx.value) / termIRR
+        let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
+
+        if (monthlyPaymentLoan) {
+          qd.monthlyPaymentLoan = {
+            value: mathRound(monthlyPaymentLoan),
+            currency
+          }
+        }
+        if (monthlyPaymentLease && monthlyPaymentLease !== Infinity) {
+          qd.monthlyPaymentLease= {
+            value: mathRound(monthlyPaymentLease),
+            currency
+          }
+        }
+        if (finCostLoan)
+          qd.finCostLoan = mathRound(finCostLoan) * 100
+
         let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
         let blindPayment = priceMx.value * blindDiscountVal
@@ -438,26 +468,36 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let irrVal = Math.round(irrRate * 100 * 100)/100
 
         let minXIRR = calcMinXIRR({costOfCapital, asset, vendor, term, termProp: properties.term})
-        let inBounds
+
+        if (!currentBest[term.id])
+          currentBest[term.id] = {}
+        if (!currentBest[term.id].min)
+          currentBest[term.id].min = {}
+        currentBest[term.id].min.xirr = minXIRR
+        currentBest[term.id].xirr = xirrVal
+
         // if (termVal === termQuoteVal) {
-        ;({formErrors, foundCloseGoal, currentBest, prevBest, inBounds} = checkBounds({
+        let inBounds
+        ;({formErrors, foundCloseGoal, currentBest, inBounds} = checkBounds({
+          term,
+          termQuote,
           property: properties.xirr,
           goalProp,
           value: xirrVal,
-          minValue: minXIRR,
           formValue: formXIRR,
           fixedProps,
           valueToIterate: valuesToIterate[ii],
           currentBest,
-          prevBest,
           currentGoalValue,
           formErrors,
           foundCloseGoal,
-          boundsOnly: termVal !== termQuoteVal
+          // boundsOnly: termVal !== termQuoteVal
         }))
         // }
-        if (!inBounds)
-          continue
+        if (!inBounds) {
+          currentBest = {}
+          break
+        }
 
         if (iterateBy) {
           qd[iterateBy] = iterateByPropValue
@@ -476,43 +516,39 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       else
         break
     }
-    if (!size(currentBest) || jj || !goalProp)
+    let ilen = size(iterations)
+    if (ilen === 1)
+      finalBest = Object.values(iterations)[0]
+    if (!ilen || jj || !goalProp || foundCloseGoal)
       break
-    valuesToIterate = [currentBest.valuesToIterate]
+
+    // if (!size(currentBest) || jj || !goalProp)
+    //   break
+    // valuesToIterate = [currentBest.valuesToIterate]
+    ;({ valueToIterate, finalBest, foundCloseGoal } = findBest({iterations, iterateBy, goalProp, form, globalBounds})) // [currentBest.valuesToIterate]
+    if (valueToIterate === -1)
+      break
+    iterations = {}
+    goalSeekSuccess = foundCloseGoal
+    valuesToIterate = [valueToIterate]
   }
+  foundCloseGoal = goalSeekSuccess || foundCloseGoal
   let message
-  if (!foundCloseGoal) {
-    if (goalProp  &&  formErrors  &&  !formErrors.goalProp) {
-      let key = Object.keys(formErrors)[0]
-      message = translate('boundsError', `${formErrors[key]}`)
-      formErrors = null
-    }
-  }
   let terms = ''
-  if (formErrors  ||  quotationDetails.length !== configurationItems.length) {
-    if (quotationDetails.length) {
-      quotationDetails.forEach((t, i ) => {
-        if (i)
-          terms += '    '
-        if (formErrors && t.term.id === termQuote.id)
-          terms += `${t.term.title.split(' ')[0]} ❌`
-        else
-          terms += `${t.term.title.split(' ')[0]} ✅`
-      })
-      if (quotationDetails.length < configurationItems.length) {
-        let notQD = configurationItems.filter(ci => !quotationDetails.find(qd => qd.term.id === ci.term.id))
-        notQD.forEach((t, i ) => {
-          terms += '    '
-          terms += `${t.term.title.split(' ')[0]} ❌`
-        })
+
+  if (size(finalBest)  &&  !formErrors  &&  !goalSeekSuccess && !foundCloseGoal) {
+    let i = 0
+    for (let t in finalBest) {
+      if (i++)
+        terms += '    '
+      if (finalBest[t].formErrors) {
+        terms += `${t.split('_t')[1]} ❌`
+        if (goalProp && t === termQuote.id)
+          message = finalBest[t].formErrors[goalProp]
       }
+      else
+        terms += `${t.split('_t')[1]} ✅`
     }
-    else
-      configurationItems.forEach((t, i ) => {
-        if (i)
-          terms += '    '
-        terms += `${t.term.title.split(' ')[0]} ❌`
-      })
     if (!formErrors)
       formErrors = {}
     formErrors.term = `Warning: ${terms}`
@@ -526,6 +562,85 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     costOfCapital,
     foundCloseGoal
   }
+}
+function findBest({iterations, iterateBy, goalProp, form, globalBounds}) {
+  // debugger
+  let goalPropValue = form[goalProp]
+  let term = form.term
+  let numberOfTerms
+  let filtered = {}
+  let successfulTerms = {}
+  for (let t in iterations) {
+    let results = iterations[t]
+    if (!numberOfTerms)
+      numberOfTerms = size(results)
+    let j = 0
+    for (let r in results) {
+      if (results[r].formErrors)
+        continue
+      j++
+    }
+    let st = successfulTerms[j]
+    if (!st)
+      st = successfulTerms[j] = {}
+    st[t] = {[t]: iterations[t]}
+    // if (j === numberOfTerms)
+    //   filtered[t] = iterations[t]
+  }
+  for (let i=numberOfTerms; i>0 && !size(filtered); i--) {
+    let s = successfulTerms[i]
+    if (s)
+      filtered[i] = s
+  }
+  let flen = size(filtered)
+  if (!flen)
+    return {valueToIterate: -1, currentBest: Object.values(iterations)[0], foundCloseGoal: false}
+  filtered = Object.values(filtered)[0]
+  if (flen === 1) {
+    let val = Object.keys(filtered)[0]
+    return {valueToIterate: val, currentBest: filtered[val], foundCloseGoal: true}
+  }
+  let finalBest = {}
+  let { properties } = getModel(form[TYPE])
+  let { max, min } = globalBounds[iterateBy]
+  let currentIterateBy
+  for (let c in filtered) {
+    let rr = filtered[c]
+    for (let t in rr) {
+      if (t !== term.id)
+        continue
+      let r = rr[t]
+      if (!size(finalBest)) {
+        finalBest = r
+        currentIterateBy = c
+        continue
+      }
+      let currentVal = r[goalProp]
+      let finalBestVal = finalBest[goalProp]
+      // let { max:gmax, min:gmin } = r
+      // if (!gmax  &&  !gmin) {
+        if (Math.abs(currentVal - goalPropValue) < Math.abs(finalBestVal - goalPropValue)) {
+          finalBest = r
+          currentIterateBy = c
+        }
+      // }
+      // else if (gmax) {
+      //   if ( (currentVal - goalPropValue > 0 || finalBestVal - goalPropValue < 0)  &&
+      //       Math.abs(currentVal - goalPropValue) < Math.abs(finalBestVal - goalPropValue)) {
+      //     finalBest = r
+      //     currentIterateBy = t
+      //   }
+      // }
+      // if (gmin) {
+      //   if ( (currentVal - goalPropValue <= 0 || finalBestVal - goalPropValue > 0)  &&
+      //       Math.abs(currentVal - goalPropValue) > Math.abs(finalBestVal - goalPropValue)) {
+      //     finalBest = r
+      //     currentIterateBy = t
+      //   }
+      // }
+    }
+  }
+  return { valueToIterate: currentIterateBy, finalBest, foundCloseGoal: true }
 }
 function nextMonth(date, numberOfMonths) {
   let m = date.getMonth() + numberOfMonths
@@ -565,60 +680,46 @@ function calcMinXIRR({costOfCapital, asset, vendor, term, termProp}) {
   return minXIRR
 }
 function checkBounds({
+  term,
+  termQuote,
   property,
   goalProp,
-  value,
-  minValue,
-  maxValue,
+  // value,
   formValue,
   fixedProps,
   valueToIterate,
   currentBest,
-  prevBest,
   currentGoalValue,
   formErrors,
   foundCloseGoal,
-  boundsOnly
 }) {
   const prop = property.name
-  let inBounds = true
+  let tId = term.id
+  let cb = currentBest[tId]
+  let {min, max} = cb || {}
+  let minValue = min && min[prop]
+  let maxValue = max && max[prop]
+  let value = cb[prop]
+  // cb[prop] = value
   if ((minValue && value < minValue) ||  (maxValue  &&  value > maxValue)) {
-    if (boundsOnly)
-      inBounds = false
-    if (!fixedProps || !currentBest[prop]) {
-      currentBest = {}
-      if (prevBest) {
-        currentBest = prevBest
-        prevBest = null
-      }
-      else  if (!boundsOnly) {
-        foundCloseGoal = false
-        formErrors = {
-          [prop]: translate('boundsLessError', prop, value, minValue)
-        }
-      }
+    cb.formErrors = {
+      [prop]: translate('boundsLessError', prop, value, minValue)
     }
   }
-  else if (!boundsOnly) {
+  else {
     if (goalProp === prop  &&  fixedProps[prop] != null) {
       foundCloseGoal = true
       let diff
-      if (currentBest[prop])
-        diff = Math.abs(currentBest[prop] - formValue) > Math.abs(value - formValue)
 
-      if (!currentBest[prop] || diff) {
-        prevBest = currentBest || null
-        currentBest = {
-          [prop]: value,
-          valuesToIterate: valueToIterate
-        }
-      }
+      if (cb[prop])
+        diff = Math.abs(cb[prop] - formValue) > Math.abs(value - formValue)
+
+      if (!cb[prop] || diff)
+        cb[prop] = value
     }
-    else if (currentBest[goalProp] && currentBest[goalProp] === currentGoalValue)
-      currentBest[prop] = value
-
-    if (formErrors && formErrors[prop])
-      formErrors = null
+    else if (cb[goalProp] && cb[goalProp] === currentGoalValue)
+      cb[prop] = value
   }
-  return { formErrors, foundCloseGoal, currentBest, prevBest, inBounds }
+  return {currentBest, inBounds: true}
 }
+
