@@ -302,8 +302,9 @@ class NewResource extends Component {
     if (action === 'formEdit') {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
         let { fixedProps } = this.state
+        let doRecalculate = this.isRecalculate(validationErrors)
         if (recalculate) {
-          if (_.size(fixedProps)) {
+          if (doRecalculate) {
             if (message)
               Alert.alert(message)
             else
@@ -472,6 +473,9 @@ class NewResource extends Component {
     if (currentRoutesLength != 2)
       navigator.pop();
   }
+  isRecalculate(validationErrors) {
+    return validationErrors && validationErrors.term &&  validationErrors.term.indexOf('❌') !== -1
+  }
   shareWith(newResource, list) {
     if (list.length)
       Actions.share(newResource, list)
@@ -504,7 +508,7 @@ class NewResource extends Component {
     this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (let p in this.floatingProps) {
-        // if (isNew  ||  resource[p] !== this.floatingProps[p])
+        if (isNew  ||  resource[p] !== this.floatingProps[p])
           json[p] = this.floatingProps[p]
       }
     }
@@ -1143,15 +1147,16 @@ if (r.url)
         Alert.alert(err)
         this.state.err = null
       }
-      if (recalculateMode) {
-        submit = <TouchableOpacity style={{paddingBottom: 30}} onPress={() => {
-                      Actions.getRequestedProperties({resource, originatingResource:originatingMessage, fixedProps})
-                    }}>
-                   <View style={[styles.submitButton, { paddingTop: 5 }]}>
-                     <Icon name='ios-calculator' color='#fff' size={30} style={{paddingRight: 3}}/>
-                     <Text style={styles.submitBarInFooterText}>{submitTitle}</Text>
+      let doRecalculate = this.isRecalculate(validationErrors)
+
+      if (recalculateMode ||  doRecalculate) {
+        submit = <View style={{paddingBottom: 30}}>
+                   <View style={[styles.submitButton, {backgroundColor: '#ccc'}]}>
+                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
+                     <Text style={styles.submitText}>{submitTitle}</Text>
                    </View>
-                 </TouchableOpacity>
+                 </View>
+
       }
       else if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={onPress}>
@@ -1284,9 +1289,6 @@ if (r.url)
   // If this is a confirmation resource i.e. not props to enter only to review
   // then use OK instead of Submit
   getSubmitTitle(meta) {
-    if (this.state.recalculateMode)
-      return translate('Recalculate')
-
     let hasNotReadOnly = false
     const { properties } = meta
     for (let p in properties) {
@@ -1574,14 +1576,13 @@ if (r.url)
     // if (this.state.resource[prop]  ||  text.length)
     //   this.state.resource[prop] = text;
     const { fixedProps, resource } = this.state
-    const { originatingMessage: originatingResource, search } = this.props
-    const { name, type } = prop
-    let isFixedProp
-    if (fixedProps && fixedProps[name] != null) {
-      fixedProps[name] = value
-      isFixedProp = true
-    }
-    if (!isFixedProp && !search  &&  resource[TYPE] !== SETTINGS) {
+    const { originatingMessage: originatingResource, search, model } = this.props
+    const { name, type, readOnly } = prop
+    let isGoalProp = readOnly && model.goalSeek && model.goalSeek.indexOf(name) !== -1
+    if (isGoalProp)
+      this.setState({recalculateMode: true})
+
+    else if (!search  &&  resource[TYPE] !== SETTINGS) {
       // if 'string' no need to check if requested properties changed on entering every letter
       if (type !== 'string' || value.length <= 1)
         Actions.getRequestedProperties({resource, originatingResource, fixedProps})

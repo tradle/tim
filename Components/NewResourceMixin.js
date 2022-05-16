@@ -161,6 +161,8 @@ const NewResourceMixin = {
     let resource = this.state.resource
     let isNew = !data[ROOT_HASH]
     let me = utils.getMe()
+    let goalSeek = meta.goalSeek || []
+
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
@@ -219,7 +221,7 @@ const NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      let propNotEditable = isReadOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
+      let propNotEditable = (isReadOnly && goalSeek.indexOf(p) === -1)  ||  (props[p].immutable  &&  data[p]  && !isNew)
 
       if (props[p].description)
         options.fields[p].help = props[p].description;
@@ -704,8 +706,12 @@ const NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
-    let isFixedProp
-    if (fixedProps && fixedProps[pname] != null) {
+
+    let isFixedProp = readOnly
+    if (readOnly) { //fixedProps && fixedProps[pname] != null) {
+      for (let p in fixedProps)
+        delete fixedProps[p]
+
       fixedProps[pname] = value
       isFixedProp = true
     }
@@ -873,12 +879,13 @@ const NewResourceMixin = {
       label += ' *'
     let lStyle = styles.labelStyle
 
+    let { fixedProps, recalculateMode, isRegistration, resource } = this.state
     let maxChars = (utils.dimensions(params.component).width - 40)/utils.getFontSize(9)
-    if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
+    if (maxChars < label.length  &&  (!resource[prop.name] || !resource[prop.name].length))
       lStyle = [lStyle, {marginTop: 0}]
 
     let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
-    if (this.state.isRegistration)
+    if (isRegistration)
       lStyle = [lStyle, {color: lcolor}]
 
     // avoid <input type="number"> on web
@@ -890,7 +897,6 @@ const NewResourceMixin = {
     let { bankStyle } = this.props
 
     let check
-    let { fixedProps } = this.state
     let fval = fixedProps && fixedProps[prop.name]
     if (!editable && (fval || fval === 0))
       editable = true
@@ -912,7 +918,8 @@ const NewResourceMixin = {
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
 
-    if (!prop.ref && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    // if (!prop.ref && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    if (recalculateMode)
       check = this.addGoalSeek(prop)
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
@@ -955,22 +962,17 @@ const NewResourceMixin = {
     );
   },
   checkGoalSeeker(prop, value) {
-    let { fixedProps, resource } = this.state
-    let newFixedProps = _.cloneDeep(fixedProps)
-    let val = newFixedProps[prop.name]
-    if (val || val === 0)
-      delete newFixedProps[prop.name]
-    else {
-      if (prop.readOnly) {
-        const { properties } = utils.getModel(resource[TYPE])
-        for (let p in newFixedProps) {
-          if (properties[p].readOnly)
-            delete newFixedProps[p]
-        }
-      }
-      newFixedProps[prop.name] = value
-    }
-    this.setState({fixedProps: newFixedProps, recalculateMode: true})
+    const { model, originatingMessage } = this.props
+    const { goalSeek, properties } = model
+
+    let { resource } = this.state
+    let fixedProps = { ...this.state.fixedProps }
+    goalSeek.forEach(p => {
+      if (p !== prop.name  &&  !properties[p].readOnly)
+        fixedProps[p] = resource[p]
+    })
+
+    Actions.getRequestedProperties({resource, originatingResource:originatingMessage, fixedProps})
   },
   onKeyPress(onSubmit, key) {
     if (key.nativeEvent.key === 'Enter') {
@@ -1367,7 +1369,7 @@ const NewResourceMixin = {
       this.floatingProps = {}
     let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle } = this.props
     let { required, errors, component } = params
-    let { missedRequiredOrErrorValue, inFocus, fixedProps } = this.state
+    let { missedRequiredOrErrorValue, inFocus, fixedProps, recalculateMode } = this.state
     let resource = params.resource ||  this.state.resource
     let props
     if (model)
@@ -1397,7 +1399,8 @@ const NewResourceMixin = {
 
     let fval = fixedProps && fixedProps[pName]
     let check
-    if (model && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1  &&  resource[pName])
+    // if (model && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1  &&  resource[pName])
+    if (recalculateMode)
       check = this.addGoalSeek(prop)
 
     return <View style={{flexDirection: 'row'}}>
@@ -1424,7 +1427,7 @@ const NewResourceMixin = {
             </View>
   },
   addGoalSeek(prop) {
-    let { resource, fixedProps } = this.state
+    let { resource, fixedProps, recalculateMode } = this.state
     let { bankStyle } = this.props
     let pName = prop.name
     let isEnum = prop.ref && utils.getModel(prop.ref).enum
@@ -1436,14 +1439,8 @@ const NewResourceMixin = {
     else
       style = {justifyContent: 'center', paddingLeft: 5, paddingTop: 17}
     let icon
-    if (fixedProps[pName] || fixedProps[pName] === 0) {
-      if (prop.readOnly)
-        icon = 'ios-radio-button-on'
-      else
-        icon = 'ios-checkmark-circle'
-    }
-    else
-      icon = 'ios-radio-button-off'
+    if (recalculateMode  &&  !prop.readOnly)
+      icon = 'md-calculator'
 
     return <View style={style}>
              <TouchableOpacity underlayColor='transparent' onPress={this.checkGoalSeeker.bind(this, prop, resource[pName])}>
@@ -1687,7 +1684,7 @@ const NewResourceMixin = {
     let { required, model, value, prop, editable, errors, component } = params
     let { search, locale, bankStyle } = this.props
     let isReadOnly = utils.isReadOnly(prop)
-    let { fixedProps } = this.state
+    let { fixedProps, recalculateMode } = this.state
     let fval = fixedProps && fixedProps[prop.name]
     if (!editable && (fval || fval === 0)) {
       editable = true
@@ -1705,7 +1702,8 @@ const NewResourceMixin = {
 
 
     let check
-    if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    // if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    if (recalculateMode)
       check = this.addGoalSeek(prop)
 
     let val = this.myTextInputTemplate({
