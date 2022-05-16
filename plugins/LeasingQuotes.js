@@ -543,7 +543,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         terms += '    '
       if (finalBest[t].formErrors) {
         terms += `${t.split('_t')[1]} ❌`
-        if (goalProp && t === termQuote.id)
+        if (/*goalProp &&*/ t === termQuote.id)
           message = finalBest[t].formErrors[goalProp]
       }
       else
