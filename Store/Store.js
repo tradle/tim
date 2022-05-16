@@ -1811,13 +1811,11 @@ var Store = Reflux.createStore({
         // debugger
         args[0].object._masterAuthor = me._masterAuthor
       }
+      this._maybePrepForEmployerBot(args[0].object)
+      this._maybePrepForCounterparty(args[0].object)
     }
     if (method === 'sign' || method === 'send' || method === 'signAndSend') {
       await this._preSendCheck(...args)
-    }
-
-    if (method === 'sign' || method === 'signAndSend') {
-      this._maybePrepForEmployerBot(args[0].object)
     }
 
     // give animations a chance to animate
@@ -5450,7 +5448,8 @@ if (!res[SIG]  &&  res._message)
       refProps[rValue].push(p)
       let elm = this._getItem(rValue)
       if (!elm  && !isInBundle  &&  me.isEmployee) {
-        elm = await this._getItemFromServer({idOrResource: rValue})
+        elm = resource[p]
+        // elm = await this._getItemFromServer({idOrResource: rValue})
         foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
       }
       else {
@@ -12146,6 +12145,9 @@ if (!res[SIG]  &&  res._message)
     }
     this._setItem(meId, me)
     await this.dbPut(meId, me)
+    if (!this.client)
+      this.client = graphQL.initClient(meDriver, me.organization.url)
+
     disableBlockchainSync(meDriver)
   },
 
