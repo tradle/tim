@@ -660,6 +660,8 @@ const NewResourceMixin = {
     if (pref == MONEY) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
+      if (isNaN(value.charAt(0)))
+        value = value.slice(1)
       let val = Number(value)
       this.floatingProps[pname].value = val
       if (!r[pname])
@@ -709,8 +711,10 @@ const NewResourceMixin = {
 
     let isFixedProp = readOnly
     if (readOnly) { //fixedProps && fixedProps[pname] != null) {
-      for (let p in fixedProps)
-        delete fixedProps[p]
+      for (let p in fixedProps) {
+        if (p !== pname)
+          delete fixedProps[p]
+      }
 
       fixedProps[pname] = value
       isFixedProp = true
@@ -1686,14 +1690,15 @@ const NewResourceMixin = {
     let isReadOnly = utils.isReadOnly(prop)
     let { fixedProps, recalculateMode } = this.state
     let fval = fixedProps && fixedProps[prop.name]
-    if (!editable && (fval || fval === 0)) {
+    if (fval || fval === 0) {
       editable = true
       isReadOnly = false
     }
+
     let v
     if (!value.value)
       v = ''
-    else if (isReadOnly)
+    else if (isReadOnly && !fval)
       v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''

@@ -231,6 +231,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           let residualValuePerTerm = residualValue && residualValue.find(rv => {
             return rv.term.id === termQuote.id
           })
+          if (!residualValuePerTerm)
+            residualValuePerTerm = {rv: 0}
           valuesToIterate = Array(residualValuePerTerm.rv).fill().map((_, idx) => start + idx)
         }
         else if (iterateBy === 'blindDiscount')
@@ -284,7 +286,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           return rv.term.id === term.id
         })
         if (!residualValuePerTerm)
-          residualValuePerTerm = 0
+          residualValuePerTerm = {rv: 0}
         // residualValuePerTerm = residualValuePerTerm && residualValuePerTerm.rv / 100
         if (termQuote && term.id == termQuote.id) {
           if (residualValueQuote == null) {

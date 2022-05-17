@@ -238,7 +238,7 @@ debugger
     let menu = utils.getMe().menu
     if (!menu)
       return
-    const { bankStyle, lazy } = passProps
+    const { bankStyle, lazy, currency, locale } = passProps
     return <GridList
             lazy={lazy}
             modelName={BOOKMARK}
@@ -246,6 +246,8 @@ debugger
             list={menu}
             isMenu={true}
             listView={true}
+            currency={currency || utils.getCompanyCurrency()}
+            locale={locale || utils.getCompanyLocale()}
             navigator={navigator} />
   },
   renderGridHeader() {

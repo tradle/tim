@@ -164,8 +164,6 @@ class NewResource extends Component {
       this.props.action(value)
   }
   shouldComponentUpdate(nextProps, nextState) {
-    // let fixedPropsCount = this.state.fixedProps  &&  _.size(this.state.fixedProps)
-    // let nextFixedPropsCount = nextState.fixedProps  &&  _.size(nextState.fixedProps)
     let isUpdate = nextState.err                             ||
            utils.resized(this.props, nextProps)              ||
            nextState.missedRequiredOrErrorValue              ||
