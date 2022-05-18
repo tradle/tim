@@ -188,6 +188,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     }
   }
   let { residualValue } = asset
+  monthlyRateLease /= 100
+  monthlyRateLoan /= 100
   let defaultQC = configurationItems[0]
 
   let formXIRR = form.xirr
@@ -413,26 +415,24 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let deposit = depositPercentage/100
         let delayedFundingVal = delayedFunding && delayedFunding.id.split('_df')[1] || 0
 
-        monthlyRateLease /= 100
-        monthlyRateLoan /= 100
-        let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscount)), residualValuePerTerm * priceMx.value, 0)
         let monthlyPaymentLoan = (priceMx.value - deposit * priceMx.value) / termIRR
-        let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
-
         if (monthlyPaymentLoan) {
           qd.monthlyPaymentLoan = {
             value: mathRound(monthlyPaymentLoan),
             currency
           }
         }
+
+        let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscount)), residualValuePerTerm * priceMx.value, 0)
         if (monthlyPaymentLease && monthlyPaymentLease !== Infinity) {
           qd.monthlyPaymentLease= {
             value: mathRound(monthlyPaymentLease),
             currency
           }
         }
+        let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
         if (finCostLoan)
-          qd.finCostLoan = mathRound(finCostLoan) * 100
+          qd.finCostLoan = mathRound(finCostLoan * 100 , 2)
 
         let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
