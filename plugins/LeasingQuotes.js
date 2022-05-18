@@ -527,7 +527,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     // if (!size(currentBest) || jj || !goalProp)
     //   break
     // valuesToIterate = [currentBest.valuesToIterate]
-    ;({ valueToIterate, finalBest, foundCloseGoal } = findBest({iterations, iterateBy, goalProp, form, globalBounds})) // [currentBest.valuesToIterate]
+    ;({ valueToIterate, finalBest, foundCloseGoal } = findBest({iterations, iterateBy, goalProp, form})) // [currentBest.valuesToIterate]
     if (valueToIterate === -1)
       break
     iterations = {}
@@ -538,7 +538,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let message
   let terms = ''
 
-  if (size(finalBest)  &&  !formErrors  &&  !goalSeekSuccess && !foundCloseGoal) {
+  if (size(finalBest)  &&  !formErrors) { //  &&  !goalSeekSuccess && !foundCloseGoal) {
     let i = 0
     for (let t in finalBest) {
       if (i++)
@@ -553,7 +553,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     }
     if (!formErrors)
       formErrors = {}
-    formErrors.term = `Warning: ${terms}`
+    formErrors._info = `${terms}`
   }
   return {
     prefill: {
@@ -565,7 +565,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     foundCloseGoal
   }
 }
-function findBest({iterations, iterateBy, goalProp, form, globalBounds}) {
+function findBest({iterations, iterateBy, goalProp, form}) {
   // debugger
   let goalPropValue = form[goalProp]
   let term = form.term
@@ -585,7 +585,7 @@ function findBest({iterations, iterateBy, goalProp, form, globalBounds}) {
     let st = successfulTerms[j]
     if (!st)
       st = successfulTerms[j] = {}
-    st[t] = {[t]: iterations[t]}
+    st[t] = iterations[t]
     // if (j === numberOfTerms)
     //   filtered[t] = iterations[t]
   }
@@ -594,52 +594,35 @@ function findBest({iterations, iterateBy, goalProp, form, globalBounds}) {
     if (s)
       filtered[i] = s
   }
-  let flen = size(filtered)
-  if (!flen)
+  if (!size(filtered))
     return {valueToIterate: -1, currentBest: Object.values(iterations)[0], foundCloseGoal: false}
   filtered = Object.values(filtered)[0]
-  if (flen === 1) {
+  if (size(filtered) === 1) {
     let val = Object.keys(filtered)[0]
     return {valueToIterate: val, currentBest: filtered[val], foundCloseGoal: true}
   }
   let finalBest = {}
   let { properties } = getModel(form[TYPE])
-  let { max, min } = globalBounds[iterateBy]
   let currentIterateBy
-  for (let c in filtered) {
-    let rr = filtered[c]
-    for (let t in rr) {
-      if (t !== term.id)
-        continue
-      let r = rr[t]
-      if (!size(finalBest)) {
-        finalBest = r
-        currentIterateBy = c
-        continue
-      }
-      let currentVal = r[goalProp]
-      let finalBestVal = finalBest[goalProp]
-      // let { max:gmax, min:gmin } = r
-      // if (!gmax  &&  !gmin) {
+  for (let key in filtered) {
+    let rr = filtered[key]
+    for (let c in rr) {
+      for (let t in rr) {
+        if (t !== term.id)
+          continue
+        let r = rr[t]
+        if (!size(finalBest)) {
+          finalBest = r
+          currentIterateBy = key
+          continue
+        }
+        let currentVal = r[goalProp]
+        let finalBestVal = finalBest[goalProp]
         if (Math.abs(currentVal - goalPropValue) < Math.abs(finalBestVal - goalPropValue)) {
           finalBest = r
-          currentIterateBy = c
+          currentIterateBy = key
         }
-      // }
-      // else if (gmax) {
-      //   if ( (currentVal - goalPropValue > 0 || finalBestVal - goalPropValue < 0)  &&
-      //       Math.abs(currentVal - goalPropValue) < Math.abs(finalBestVal - goalPropValue)) {
-      //     finalBest = r
-      //     currentIterateBy = t
-      //   }
-      // }
-      // if (gmin) {
-      //   if ( (currentVal - goalPropValue <= 0 || finalBestVal - goalPropValue > 0)  &&
-      //       Math.abs(currentVal - goalPropValue) > Math.abs(finalBestVal - goalPropValue)) {
-      //     finalBest = r
-      //     currentIterateBy = t
-      //   }
-      // }
+      }
     }
   }
   return { valueToIterate: currentIterateBy, finalBest, foundCloseGoal: true }

@@ -335,7 +335,7 @@ class NewResource extends Component {
           this.setState({resource: r, recalculateMode: false, validationErrors})
         }
         else if (fixedProps)
-          this.setState({ resource, recalculateMode: false, validationErrors })
+          this.setState({ resource, recalculateMode: false, validationErrors, fixedProps: {} })
       }
       return
     }
@@ -472,7 +472,7 @@ class NewResource extends Component {
       navigator.pop();
   }
   isRecalculate(validationErrors) {
-    return validationErrors && validationErrors.term &&  validationErrors.term.indexOf('❌') !== -1
+    return validationErrors && validationErrors._info &&  validationErrors._info.indexOf('❌') !== -1
   }
   shareWith(newResource, list) {
     if (list.length)
@@ -1219,13 +1219,18 @@ if (r.url)
                  </View>
       }
       else if (validationErrors && _.size(validationErrors)) {
-        if (_.size(validationErrors) === 1 && Object.values(validationErrors)[0].indexOf('Warning: ') === 0)
+        let info
+        if (validationErrors._info)
+          info = <Text style={styles.warningText}>{validationErrors._info}</Text>
+        if (_.size(validationErrors) === 1 && info)
           errors = <View style={styles.warnings}>
                      <Text style={styles.warningText}>{translate('validationInfo')}</Text>
+                     {info}
                    </View>
         else
           errors = <View style={styles.errors}>
                      <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
+                     {info}
                    </View>
       }
       else
@@ -1754,7 +1759,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       alignSelf: 'center'
     },
     errors: {
-      height: 45,
+      height: 55,
       justifyContent: 'center',
       backgroundColor: bankStyle.errorBgColor || '#990000',
       width: utils.getContentWidth(NewResource),
@@ -1763,10 +1768,11 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
+      alignSelf: 'center',
       fontSize: 16
     },
     warnings: {
-      height: 45,
+      height: 55,
       justifyContent: 'center',
       backgroundColor: 'lightyellow',
       width: utils.getContentWidth(NewResource),
@@ -1775,6 +1781,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     warningText: {
       color: bankStyle.linkColor,
+      paddingVertical: 3,
       fontSize: 16
     },
     sendIcon: {
