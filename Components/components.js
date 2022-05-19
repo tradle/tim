@@ -32,6 +32,9 @@ module.exports = {
   get ScoreDetails() {
     return require('./ScoreDetails')
   },
+  get LoanQuotationDetail() {
+    return require('./LoanQuotationDetail')
+  },
   get CreditScoreDetails() {
     return require('./CreditScoreDetails')
   },

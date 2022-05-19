@@ -29,12 +29,13 @@ module.exports = function LeasingQuotes ({ models }) {
       const ftype = form[TYPE]
       if (!ftype.endsWith('.Quote')) return
 
-      let {costOfCapital, foundCloseGoal, formErrors, message} = await getQuote({form, models, search, currentResource, fixedProps, application})
+      let {costOfCapital, foundCloseGoal, formErrors, message, doTable} = await getQuote({form, models, search, currentResource, fixedProps, application})
       if (!foundCloseGoal  &&  fixedProps  &&  size(fixedProps))
         return {
           recalculate: true,
           message,
-          formErrors
+          formErrors,
+          doTable
         }
       chooseDetail({form, models, costOfCapital})
       if (formErrors)
@@ -51,7 +52,8 @@ module.exports = function LeasingQuotes ({ models }) {
         }
       }
       return {
-        form
+        form,
+        doTable
       }
     }
   }
@@ -90,10 +92,10 @@ async function getQuote({form, models, search, currentResource, fixedProps, appl
   let model = models[getType(form)]
   if (!model) return {}
 
-  let { prefill, costOfCapital, foundCloseGoal, formErrors, message, calculateFormulas } = await quotationPerTerm({form, search, currentResource, fixedProps})
+  let { prefill, costOfCapital, foundCloseGoal, formErrors, message, calculateFormulas, doTable } = await quotationPerTerm({form, search, currentResource, fixedProps})
   if (prefill) {
     extend(form, prefill)
-    return { costOfCapital, foundCloseGoal, formErrors, message }
+    return { costOfCapital, foundCloseGoal, formErrors, message, doTable }
   }
   if (message)
     return { message }
@@ -165,6 +167,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let costOfCapital = list[0]
 
   let quotationDetails = []
+  let loanQuotationDetail = {}
+
   let ftype = getType(form)
   let model = getModel(ftype)
   let properties = model.properties
@@ -201,6 +205,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let goalProp
   let valuesToIterate = [null]
   let foundCloseGoal = true
+  let realTimeCalculations
 
   if (blindDiscount > maxBlindDiscount)
     form.blindDiscount = blindDiscount = maxBlindDiscount
@@ -245,6 +250,11 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       foundCloseGoal = false
     }
   }
+  else {
+    valuesToIterate = [depositPercentage, 20, 25, 30, 35, 40, 50]
+    iterateBy = 'depositPercentage'
+    realTimeCalculations = true
+  }
   let termQuoteVal = termQuote.title.split(' ')[0]
   let formErrors
   let currentGoalValue
@@ -268,6 +278,9 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           break
         case 'residualValue':
           residualValueQuote = val
+          break
+        case 'depositPercentage':
+          depositPercentage = val
           break
         }
         iterateByPropValue = val
@@ -350,6 +363,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
 
         let insurance = fundedInsurance.value
         let initialPayment = depositPercentage === 0 && monthlyPayment + insurance ||  depositVal / (1 + vatRate)
+
         let commissionFeeCalculated = priceMx.value * commissionFeePercent / 100
         let initialPaymentVat = (initialPayment + commissionFeeCalculated) * vatRate
 
@@ -410,7 +424,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             currency
           }
         }
-        let termIRR = termVal //parseInt(termVal)
+        let termIRR = parseInt(termVal)
         let deliveryTimeLoan = dtID.split('dt')[1] - 1
         let deposit = depositPercentage/100
         let delayedFundingVal = delayedFunding && delayedFunding.id.split('_df')[1] || 0
@@ -423,7 +437,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           }
         }
 
-        let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscount)), residualValuePerTerm * priceMx.value, 0)
+        let monthlyPaymentLease = pmt(monthlyRateLease, termIRR, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscountVal)), residualValuePerTerm * priceMx.value, 0)
         if (monthlyPaymentLease && monthlyPaymentLease !== Infinity) {
           qd.monthlyPaymentLease= {
             value: mathRound(monthlyPaymentLease),
@@ -432,7 +446,12 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         }
         let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
         if (finCostLoan)
-          qd.finCostLoan = mathRound(finCostLoan * 100 , 2)
+          qd.finCostLoan = mathRound(finCostLoan * 100, 2)
+        if (realTimeCalculations) {
+          addToLoanQuotationDetail({loanQuotationDetail, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit})
+          if (ii)
+            continue
+        }
 
         let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
@@ -515,7 +534,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         for (let kj=0; kj<k; kj++)
           quotationDetails.pop()
       }
-      else
+      else if (!iterateBy)
         break
     }
     let ilen = size(iterations)
@@ -558,8 +577,10 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   return {
     prefill: {
       terms: quotationDetails,
+      loanQuotationDetail
     },
     formErrors,
+    doTable: size(loanQuotationDetail) && 'loanQuotationDetail',
     message,
     costOfCapital,
     foundCloseGoal
@@ -708,3 +729,170 @@ function checkBounds({
   return {currentBest, inBounds: true}
 }
 
+function addToLoanQuotationDetail({
+  loanQuotationDetail,
+  term,
+  deliveryTimeLoan,
+  delayedFundingVal,
+  residualValuePerTerm,
+  deposit,
+  quotationInfo,
+  qd
+}) {
+  let {
+    priceMx,
+    vatRate,
+    blindDiscount
+  } = quotationInfo
+  let {
+    commissionFee: commissionFeeCalculated,
+    finCostLoan,
+    monthlyPaymentLease,
+    monthlyPaymentLoan,
+  } = qd
+  let leaseIRR = []
+  let loanIRR = []
+  let leaseXIRR = []
+  let loanXIRR = []
+
+  let termIRR = term + deliveryTimeLoan
+
+  finCostLoan = finCostLoan / 100
+  let initialPayment = (priceMx.value * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
+
+  let d = new Date()
+  let month = d.getTime()
+  let month1 = month;
+
+  let leasea = 0
+  let leaseb = 0
+  let loana = 0
+  let loanb = 0
+  let finalPayment = 0
+
+  // IRR lease and loan
+  for (let i=0; i <= termIRR; i++) {
+    if (deliveryTimeLoan < i) {
+      if (i - deliveryTimeLoan > termIRR) {
+        leasea = 0
+        loana = 0
+      } else {
+        leasea = monthlyPaymentLease.value
+        loana = monthlyPaymentLoan.value
+      }
+    }
+    if (delayedFundingVal === i) {
+      leaseb = -priceMx.value
+      loanb = -priceMx.value
+    } else {
+      leaseb = 0
+      loanb = 0
+    }
+    if (i === 0) {
+      leaseIRR.push(deposit * priceMx.value + leaseb)
+      loanIRR.push(deposit * priceMx.value + loanb + finCostLoan * priceMx.value)
+    } else if (i > 0) {
+      if (i === termIRR)
+        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPaymentLease.value) - leasea - leaseb
+
+      leaseIRR.push(leasea + leaseb + finalPayment)
+      loanIRR.push(loana + loanb)
+    }
+  }
+
+  // XIRR lease and loan
+  nextMonth(d, delayedFundingVal)
+  month = d.getTime()
+  let date = dateformat(d.getTime(), 'yyyy-mm-dd')
+
+  leaseXIRR.push({
+    date,
+    amount: -priceMx.value
+  })
+  loanXIRR.push({
+    date,
+    amount: -priceMx.value
+  })
+  leaseXIRR.push({
+    date,
+    amount: priceMx.value * blindDiscount / 100
+  })
+  loanXIRR.push({
+    date,
+    amount: -priceMx.value * finCostLoan * -1
+  })
+  month = month1
+  leaseXIRR.push({
+    date,
+    amount: initialPayment
+  })
+  loanXIRR.push({
+    date,
+    amount: initialPayment
+  })
+
+  d = new Date()
+  month = d.getTime()
+  date = dateformat(d.getTime(), 'yyyy-mm-dd')
+  nextMonth(d, 1 + deliveryTimeLoan)
+  month = d.getTime()
+  leaseXIRR.push({
+    date,
+    amount: monthlyPaymentLease.value
+  })
+  loanXIRR.push({
+    date,
+    amount: monthlyPaymentLoan.value
+  })
+  leasea = 0
+
+  for (let x=1; x < term; x++) {
+    nextMonth(d, 1)
+    date = dateformat(d.getTime(), 'yyyy-mm-dd')
+    if (x < term-1)
+      leasea = monthlyPaymentLease.value
+    else
+      leasea = monthlyPaymentLease.value + (residualValuePerTerm * priceMx.value)
+
+    leaseXIRR.push({
+        date,
+        amount: leasea
+    })
+    loanXIRR.push({
+        date,
+        amount: monthlyPaymentLoan.value
+    })
+    x++
+  }
+  //console.log(leaseIRR)
+  //console.log(loanIRR)
+  //console.log("leaseXIRR",leaseXIRR)
+  //console.log("loanXIRR",loanXIRR)
+
+
+  let { rate } = xirr(leaseXIRR)
+  let xirrLease = Math.round(convertRate(rate, 365) * 10000) / 100
+
+  let { rate:loanRate } = xirr(loanXIRR)
+  let xirrLoan = Math.round(convertRate(loanRate, 365) * 10000) / 100
+
+  let irrLoan = irr(loanIRR)
+  let irrLease = irr(leaseIRR)
+
+
+  // console.log("term", term,"leaseIRR", irr(leaseIRR), "loanIRR", irr(loanIRR),"leaseXIRR", xirrLease, "loanXIRR", xirrLoan)
+
+  let p = deposit * 100 + ''
+  let elm = loanQuotationDetail[p]
+  if (!elm)
+    loanQuotationDetail[p] = {}
+  loanQuotationDetail[p][term] = {
+    finCostLoan: qd.finCostLoan,
+    term: termIRR,
+    xirrLoan,
+    xirrLease,
+    irrLoan,
+    irrLease,
+    depositPercentage: deposit * 100
+  }
+}

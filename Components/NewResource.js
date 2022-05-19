@@ -32,6 +32,7 @@ const {
   MONEY
 } = constants.TYPES
 
+import components from './components'
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
 import Markdown from './Markdown'
@@ -300,6 +301,7 @@ class NewResource extends Component {
     if (action === 'formEdit') {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
         let { fixedProps } = this.state
+        let { doTable } = params
         let doRecalculate = this.isRecalculate(validationErrors)
         if (recalculate) {
           if (doRecalculate) {
@@ -308,7 +310,7 @@ class NewResource extends Component {
             else
               Alert.alert(translate('goalNotFound'))
           }
-          let state = {recalculateMode: true, validationErrors }
+          let state = {recalculateMode: true, validationErrors, doTable }
           if (resource)
             state.resource = resource
           this.setState(state)
@@ -322,7 +324,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false, validationErrors })
+          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false, validationErrors, doTable })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -332,10 +334,10 @@ class NewResource extends Component {
           if (!this.floatingProps)
             this.floatingProps = {}
           this.floatingProps[pName] = params.value
-          this.setState({resource: r, recalculateMode: false, validationErrors})
+          this.setState({ resource: r, recalculateMode: false, validationErrors, doTable })
         }
         else if (fixedProps)
-          this.setState({ resource, recalculateMode: false, validationErrors, fixedProps: {} })
+          this.setState({ resource, recalculateMode: false, validationErrors, fixedProps: {}, doTable })
       }
       return
     }
@@ -902,7 +904,7 @@ if (r.url)
   }
 
   render() {
-    let { message, isUploading, resource, disableEditing, isRegistration, validationErrors,
+    let { message, isUploading, resource, disableEditing, isRegistration, validationErrors, doTable,
           termsAccepted, isLoadingVideo, err, missedRequiredOrErrorValue, fixedProps, recalculateMode } = this.state
     if (isUploading)
       return <View/>
@@ -1180,7 +1182,13 @@ if (r.url)
                    </View>
     }
     let form = <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
-
+    let table
+    if (doTable) {
+      let component = components[`${doTable.charAt(0).toUpperCase()}${doTable.slice(1)}`]
+      if (component) {
+        table = React.createElement(component, {resource: resource[doTable], bankStyle})
+      }
+    }
     let content =
       <ScrollView style={contentStyle}
                   ref='scrollView' {...this.scrollviewProps}>
@@ -1191,6 +1199,7 @@ if (r.url)
             {form}
             {formsToSign}
             {button}
+            {table}
             {arrayItems}
             {jsons}
             {loadingVideo}
