@@ -82,7 +82,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, parentMeta, metadata, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark,
-          search, photo, component, paintError, paintHelp, required, exploreData, allowedMimeTypes } = this.props
+          search, photo, component, paintError, paintHelp, required, exploreData, allowedMimeTypes, floatingProps } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -100,10 +100,10 @@ class RefPropertyEditor extends Component {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName]  &&  country) {
         resource[pName] = country
-        this.props.floatingProps[pName] = country
+        floatingProps[pName] = country
       }
       else if (isInlineArray && resource[ipName])
-        this.props.floatingProps[ipName] = resource[ipName]
+        floatingProps[ipName] = resource[ipName]
     }
     let val
     if (isInlineArray) {

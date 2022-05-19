@@ -21,7 +21,6 @@ const PHOTO = 'tradle.Photo'
 
 class GridHeader extends Component {
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     gridCols: PropTypes.array.isRequired,
     multiChooser: PropTypes.bool,
