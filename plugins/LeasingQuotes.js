@@ -427,7 +427,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let termIRR = parseInt(termVal)
         let deliveryTimeLoan = dtID.split('dt')[1] - 1
         let deposit = depositPercentage/100
-        let delayedFundingVal = delayedFunding && delayedFunding.id.split('_df')[1] || 0
+        let delayedFundingVal = delayedFunding && parseInt(delayedFunding.id.split('_df')[1]) || 0
 
         let monthlyPaymentLoan = (priceMx.value - deposit * priceMx.value) / termIRR
         if (monthlyPaymentLoan) {
