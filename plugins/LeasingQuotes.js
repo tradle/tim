@@ -43,6 +43,7 @@ module.exports = function LeasingQuotes ({ models }) {
           recalculate: size(formErrors) > 1,
           message,
           formErrors,
+          doTable,
           form //: !size(fixedProps) ? form : null
         }
       if (message) {
@@ -447,11 +448,6 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let finCostLoan = (pv(monthlyRateLoan, termIRR, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
         if (finCostLoan)
           qd.finCostLoan = mathRound(finCostLoan * 100, 2)
-        if (realTimeCalculations) {
-          addToLoanQuotationDetail({loanQuotationDetail, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit})
-          if (ii)
-            continue
-        }
 
         let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
@@ -515,6 +511,11 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           // boundsOnly: termVal !== termQuoteVal
         }))
         // }
+        if (realTimeCalculations && ii) {
+          addToLoanQuotationDetail({loanQuotationDetail, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
+          if (ii)
+            continue
+        }
         if (!inBounds) {
           currentBest = {}
           break
@@ -536,6 +537,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       }
       else if (!iterateBy)
         break
+      else if (realTimeCalculations && !ii)
+        finalBest = currentBest
     }
     let ilen = size(iterations)
     if (ilen === 1)
@@ -556,31 +559,35 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   foundCloseGoal = goalSeekSuccess || foundCloseGoal
   let message
   let terms = ''
-
-  if (size(finalBest)  &&  !formErrors) { //  &&  !goalSeekSuccess && !foundCloseGoal) {
-    let i = 0
-    for (let t in finalBest) {
-      if (i++)
-        terms += '    '
-      if (finalBest[t].formErrors) {
-        terms += `${t.split('_t')[1]} ❌`
-        if (/*goalProp &&*/ t === termQuote.id)
-          message = finalBest[t].formErrors[goalProp]
+  if (!formErrors) {
+    if (size(finalBest)) { //  &&  !goalSeekSuccess && !foundCloseGoal) {
+      let i = 0
+      for (let t in finalBest) {
+        if (i++)
+          terms += '    '
+        if (finalBest[t].formErrors) {
+          terms += `${t.split('_t')[1]} ❌`
+          if (/*goalProp &&*/ t === termQuote.id)
+            message = finalBest[t].formErrors[goalProp]
+        }
+        else
+          terms += `${t.split('_t')[1]} ✅`
       }
-      else
-        terms += `${t.split('_t')[1]} ✅`
+      if (!formErrors)
+        formErrors = {}
+      formErrors._info = `${terms}`
     }
-    if (!formErrors)
-      formErrors = {}
-    formErrors._info = `${terms}`
   }
+
   return {
     prefill: {
       terms: quotationDetails,
-      loanQuotationDetail
+      // loanQuotationDetail: loanQuotationDetail || null
     },
     formErrors,
-    doTable: size(loanQuotationDetail) && 'loanQuotationDetail',
+    doTable: size(loanQuotationDetail) && {
+      loanQuotationDetail
+    },
     message,
     costOfCapital,
     foundCloseGoal
@@ -737,6 +744,7 @@ function addToLoanQuotationDetail({
   residualValuePerTerm,
   deposit,
   quotationInfo,
+  currentBest,
   qd
 }) {
   let {
@@ -876,8 +884,8 @@ function addToLoanQuotationDetail({
   let { rate:loanRate } = xirr(loanXIRR)
   let xirrLoan = Math.round(convertRate(loanRate, 365) * 10000) / 100
 
-  let irrLoan = irr(loanIRR)
-  let irrLease = irr(leaseIRR)
+  let irrLoan = irr(loanIRR) * 100
+  let irrLease = irr(leaseIRR) * 100
 
 
   // console.log("term", term,"leaseIRR", irr(leaseIRR), "loanIRR", irr(loanIRR),"leaseXIRR", xirrLease, "loanXIRR", xirrLoan)
@@ -886,13 +894,15 @@ function addToLoanQuotationDetail({
   let elm = loanQuotationDetail[p]
   if (!elm)
     loanQuotationDetail[p] = {}
+  let type = getModel(quotationInfo[TYPE]).properties.loanQuotationDetail.items.ref
   loanQuotationDetail[p][term] = {
+    [TYPE]: type,
     finCostLoan: qd.finCostLoan,
     term: termIRR,
     xirrLoan,
-    xirrLease,
+    // xirrLease,
     irrLoan,
-    irrLease,
-    depositPercentage: deposit * 100
+    // irrLease,
+    deposit: deposit * 100
   }
 }

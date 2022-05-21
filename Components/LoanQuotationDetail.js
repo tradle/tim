@@ -52,12 +52,16 @@ class LoanQuotationDetail extends Component {
     let values = Object.values(resource)
 
     let rows = {}
+    let irr = {}
     for (let i=0; i<values.length; i++) {
       let val = values[i]
       for (let term in val) {
-        if (!rows[term])
+        if (!rows[term]) {
           rows[term] = []
+          irr[term] = []
+        }
         rows[term].push(val[term].finCostLoan)
+        irr[term].push(val[term].irrLoan)
       }
     }
 debugger

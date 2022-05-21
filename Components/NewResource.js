@@ -310,7 +310,7 @@ class NewResource extends Component {
             else
               Alert.alert(translate('goalNotFound'))
           }
-          let state = {recalculateMode: true, validationErrors, doTable }
+          let state = {recalculateMode: true, validationErrors, doTable: false }
           if (resource)
             state.resource = resource
           this.setState(state)
@@ -1184,10 +1184,12 @@ if (r.url)
     let form = <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
     let table
     if (doTable) {
-      let component = components[`${doTable.charAt(0).toUpperCase()}${doTable.slice(1)}`]
+      let componentName = Object.keys(doTable)[0]
+      let component = components[`${componentName.charAt(0).toUpperCase()}${componentName.slice(1)}`]
       if (component) {
-        table = React.createElement(component, {resource: resource[doTable], bankStyle})
+        table = React.createElement(component, {resource: doTable[componentName], bankStyle})
       }
+      this.state.doTable = null
     }
     let content =
       <ScrollView style={contentStyle}
