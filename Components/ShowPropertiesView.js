@@ -170,9 +170,9 @@ class ShowPropertiesView extends Component {
       if (!pMeta)
         pMeta = ObjectModel.properties[p]
 
-      if (!me.isEmployee  &&  pMeta.internalUse) {
+      if (pMeta.internalUse &&  (!me.isEmployee || me.counterparty))
         return
-      }
+
       let val = resource[p]
       if (pMeta.range === 'json') {
         if (this.renderJsonProp(val, model, pMeta, viewCols))

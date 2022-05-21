@@ -171,8 +171,12 @@ const NewResourceMixin = {
       if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
-      if (!me.isEmployee  &&  props[p].internalUse)
+      if (props[p].internalUse &&  (!me.isEmployee || me.counterparty))
         continue
+
+      if (props[p].hiddenFromClient  &&  !me.isEmployee)
+        continue
+
       let maybe = !required  ||  !required.includes(p)
       if (maybe) {
         if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
