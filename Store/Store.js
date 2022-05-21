@@ -5453,9 +5453,9 @@ if (!res[SIG]  &&  res._message)
         foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
       }
       else {
-        // HACK for scanned Identity
+        // HACK for scanned Identity and third party employees
         if (!elm) {
-          if (ref === IDENTITY)
+          if (ref === IDENTITY || ref === COUNTERPARTY)
             foundRefs.push({value: resource[p], state: 'fulfilled'})
         }
         else if (!utils.isMessage(elm))
