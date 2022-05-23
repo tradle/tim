@@ -870,7 +870,6 @@ function addToLoanQuotationDetail({
         date,
         amount: monthlyPaymentLoan.value
     })
-    x++
   }
   //console.log(leaseIRR)
   //console.log(loanIRR)
