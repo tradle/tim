@@ -854,7 +854,7 @@ function addToLoanQuotationDetail({
   })
   leasea = 0
 
-  for (let x=1; x < term; x++) {
+  for (let x=1; x <= term; x++) {
     nextMonth(d, 1)
     date = dateformat(d.getTime(), 'yyyy-mm-dd')
     if (x < term-1)
@@ -870,7 +870,6 @@ function addToLoanQuotationDetail({
         date,
         amount: monthlyPaymentLoan.value
     })
-    x++
   }
   //console.log(leaseIRR)
   //console.log(loanIRR)
