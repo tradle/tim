@@ -78,14 +78,14 @@ debugger
               </Col>)
 
     let style = { fontSize: 16, alignSelf: rid ? 'flex-end': 'center' }
-    let bg = {}
     for (let i=0; i<resource.length; i++) {
       let val = resource[i]
+      let bg = {}
       if (rid) {
-        if (rid  &&  resource[i].status === 'pass') {
-          val = resource[i].finCostLoan
+        val = resource[i].finCostLoan
+        if (rid  &&  resource[i].status === 'pass')
           bg.backgroundColor = '#D6E7D6'
-        }
+
         let [decimal, mantissa] = (val + '').split('.')
         if (!mantissa)
           mantissa = '00'
