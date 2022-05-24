@@ -163,29 +163,15 @@ var styles = StyleSheet.create({
   col: {
     height: 40,
     justifyContent: 'center',
-    // paddingVertical: 5,
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: '400',
-    color: '#555555',
-    marginBottom: 2,
-    paddingLeft: 10,
-  },
-  textRight: {
-    fontSize: 16,
-    fontWeight: '400',
-    color: '#555555',
-    marginBottom: 2,
     paddingRight: 10,
-    alignSelf: 'flex-end'
+    // paddingVertical: 5,
   },
   gridRow: {
     height: 40,
     borderBottomColor: '#f5f5f5',
     justifyContent: 'center',
     // paddingVertical: 5,
-    paddingRight: 7,
+    // paddingRight: 7,
     borderBottomWidth: 1
   },
 });
