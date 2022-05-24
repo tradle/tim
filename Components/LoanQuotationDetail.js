@@ -58,10 +58,10 @@ class LoanQuotationDetail extends Component {
       for (let term in val) {
         if (!rows[term]) {
           rows[term] = []
-          irr[term] = []
+          // irr[term] = []
         }
-        rows[term].push(val[term].finCostLoan)
-        irr[term].push(val[term].irrLoan)
+        rows[term].push(val[term]) //.finCostLoan)
+        // irr[term].push(val[term].irrLoan)
       }
     }
 debugger
@@ -73,14 +73,19 @@ debugger
     let cols = []
     let rid = parseInt(rowId)
     let id = rowId + 100
-    cols.push(<Col sm={1} md={1} lg={1} style={[styles.col, {backgroundColor: 'aliceblue'}]} key={++id}>
+    cols.push(<Col sm={1} md={1} lg={1} style={[styles.col, {backgroundColor: '#cfcfcf'}]} key={++id}>
                 <Text style={{fontSize: 16, alignSelf: 'center'}}>{rid ? terms[rowId - 1] : ''}</Text>
               </Col>)
 
     let style = { fontSize: 16, alignSelf: rid ? 'flex-end': 'center' }
+    let bg = {}
     for (let i=0; i<resource.length; i++) {
       let val = resource[i]
       if (rid) {
+        if (rid  &&  resource[i].status === 'pass') {
+          val = resource[i].finCostLoan
+          bg.backgroundColor = '#D6E7D6'
+        }
         let [decimal, mantissa] = (val + '').split('.')
         if (!mantissa)
           mantissa = '00'
@@ -90,12 +95,12 @@ debugger
           }
         val = `${decimal}.${mantissa}`
       }
-      cols.push(<Col sm={1} md={1} lg={1} style={styles.col} key={++id + i * 10}>
+      cols.push(<Col sm={1} md={1} lg={1} style={[styles.col, bg]} key={++id + i * 10}>
                   <Text style={style}>{val}</Text>
                 </Col>)
     }
 
-    return <Row size={resource.length + 1} style={[styles.gridRow, {backgroundColor: rid ? 'transparent' : 'aliceblue' }]} key={id + 1} nowrap>
+    return <Row size={resource.length + 1} style={[styles.gridRow, {backgroundColor: rid ? 'transparent' : '#e0e0e0' }]} key={id + 1} nowrap>
              {cols}
            </Row>
 

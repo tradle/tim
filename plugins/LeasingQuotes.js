@@ -180,8 +180,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     lowDepositFactor: lowDepositPercent,
     presentValueFactor,
     monthlyRateLease = 0,
-    monthlyRateLoan = 0
-    // minXIRR
+    monthlyRateLoan = 0,
+    minXIRR
   } = costOfCapital
   let vendor
   if (asset.vendor) {
@@ -512,7 +512,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         }))
         // }
         if (realTimeCalculations && ii) {
-          addToLoanQuotationDetail({loanQuotationDetail, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
+          addToLoanQuotationDetail({loanQuotationDetail, minXIRR, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
           if (ii)
             continue
         }
@@ -745,6 +745,7 @@ function addToLoanQuotationDetail({
   deposit,
   quotationInfo,
   currentBest,
+  minXIRR,
   qd
 }) {
   let {
@@ -899,6 +900,7 @@ function addToLoanQuotationDetail({
     finCostLoan: qd.finCostLoan,
     term: termIRR,
     xirrLoan,
+    status: xirrLoan > minXIRR ? 'pass' : 'fail',
     // xirrLease,
     irrLoan,
     // irrLease,
