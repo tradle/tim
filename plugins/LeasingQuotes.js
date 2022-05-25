@@ -511,8 +511,16 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           // boundsOnly: termVal !== termQuoteVal
         }))
         // }
-        if (realTimeCalculations && ii) {
+        if (realTimeCalculations) {
           addToLoanQuotationDetail({loanQuotationDetail, minXIRR, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
+          if (ii === 0) {
+            let result = loanQuotationDetail[deposit][termIRR]
+            qd.xirrLoan = result.xirrLoan
+            qd.xirrLease = result.xirrLease
+            qd.irrLoan = result.irrLoan
+            qd.irrLease = result.irrLease
+            delete loanQuotationDetail[deposit]
+          }
           if (ii)
             continue
         }
@@ -901,9 +909,9 @@ function addToLoanQuotationDetail({
     term: termIRR,
     xirrLoan,
     status: xirrLoan > minXIRR ? 'pass' : 'fail',
-    // xirrLease,
+    xirrLease,
     irrLoan,
-    // irrLease,
+    irrLease,
     deposit: deposit * 100
   }
 }
