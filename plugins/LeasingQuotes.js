@@ -133,7 +133,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     delayedFunding = 0,
     residualValue: residualValueQuote
   } = quotationInfo
-
+  let depositPercentageQuote = depositPercentage
   if (!asset)
     return {}
 
@@ -512,14 +512,15 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         }))
         // }
         if (realTimeCalculations) {
-          addToLoanQuotationDetail({loanQuotationDetail, minXIRR, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
-          if (ii === 0) {
-            let result = loanQuotationDetail[deposit][termIRR]
+          if (ii   ||  termVal == termQuoteVal)
+            addToLoanQuotationDetail({loanQuotationDetail, minXIRR, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
+          if (ii === 0  &&  termVal == termQuoteVal) {
+            let result = loanQuotationDetail[depositPercentage][termIRR]
             qd.xirrLoan = result.xirrLoan
             qd.xirrLease = result.xirrLease
             qd.irrLoan = result.irrLoan
             qd.irrLease = result.irrLease
-            delete loanQuotationDetail[deposit]
+            delete loanQuotationDetail[depositPercentage]
           }
           if (ii)
             continue
