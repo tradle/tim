@@ -84,7 +84,7 @@ debugger
       if (rid) {
         val = resource[i].finCostLoan
         if (rid  &&  resource[i].status === 'pass')
-          bg.backgroundColor = '#D6E7D6'
+          bg.backgroundColor = '#cfcfcf'
 
         let [decimal, mantissa] = (val + '').split('.')
         if (!mantissa)
