@@ -100,7 +100,7 @@ debugger
                 </Col>)
     }
 
-    return <Row size={resource.length + 1} style={[styles.gridRow, {backgroundColor: rid ? 'transparent' : '#e0e0e0' }]} key={id + 1} nowrap>
+    return <Row size={resource.length + 1} style={[styles.gridRow, {backgroundColor: rid ? 'transparent' : '#cfcfcf' }]} key={id + 1} nowrap>
              {cols}
            </Row>
 
