@@ -516,10 +516,10 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             addToLoanQuotationDetail({loanQuotationDetail, minXIRR, term: termIRR, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
           if (ii === 0  &&  termVal == termQuoteVal) {
             let result = loanQuotationDetail[depositPercentage][termIRR]
-            qd.xirrLoan = result.xirrLoan
-            qd.xirrLease = result.xirrLease
-            qd.irrLoan = result.irrLoan
-            qd.irrLease = result.irrLease
+            qd.xirrLoan = mathRound(result.xirrLoan)
+            qd.xirrLease = mathRound(result.xirrLease)
+            qd.irrLoan = mathRound(result.irrLoan)
+            qd.irrLease = mathRound(result.irrLease)
             delete loanQuotationDetail[depositPercentage]
           }
           if (ii)
