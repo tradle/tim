@@ -290,6 +290,9 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       let k = 0
       let currentBest = {}
       iterations[val] = currentBest
+      if (realTimeCalculations && ii)
+        depositVal = (netPrice.value * exchangeRate * vatRate + netPrice.value * exchangeRate) * depositPercentage/100 || 0
+
       for (; k<configurationItems.length; k++) {
         let quotConf = configurationItems[k]
         let qc = cloneDeep(defaultQC)
@@ -338,6 +341,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let factorVPdelVR = termVal/12 * presentValueFactor/100
 
         // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
+        let termInt = parseInt(termVal)
+
         let blindDiscountVal = blindDiscount/100
         let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
 
@@ -425,7 +430,6 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
             currency
           }
         }
-        let termInt = parseInt(termVal)
         let deliveryTimeLoan = dtID.split('dt')[1] - 1
         let deposit = depositPercentage/100
         let delayedFundingVal = delayedFunding && parseInt(delayedFunding.id.split('_df')[1]) || 0
