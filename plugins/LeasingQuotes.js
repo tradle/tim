@@ -429,8 +429,8 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let deliveryTimeLoan = dtID.split('dt')[1] - 1
         let deposit = depositPercentage/100
         let delayedFundingVal = delayedFunding && parseInt(delayedFunding.id.split('_df')[1]) || 0
-
-        let monthlyPaymentLoan = (priceMx.value - deposit * priceMx.value) / termIRR
+        let discountedLoanPrice = priceMx * (1 - blindDiscount)
+        let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termIRR
         if (monthlyPaymentLoan) {
           qd.monthlyPaymentLoan = {
             value: mathRound(monthlyPaymentLoan),
@@ -776,7 +776,7 @@ function addToLoanQuotationDetail({
   let termIRR = term + deliveryTimeLoan
 
   finCostLoan = finCostLoan / 100
-  let initialPayment = (priceMx.value * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
+  let initialPayment = (discountedLoanPrice * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
 
   let d = new Date()
   let month = d.getTime()
