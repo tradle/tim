@@ -1187,7 +1187,12 @@ if (r.url)
       let componentName = Object.keys(doTable)[0]
       let component = components[`${componentName.charAt(0).toUpperCase()}${componentName.slice(1)}`]
       if (component) {
-        table = React.createElement(component, {resource: doTable[componentName], bankStyle})
+        let { tableParams } = this.state
+        table = React.createElement(component, {resource, tableParams, table: doTable[componentName], bankStyle, callback: (params) => {
+          this.setState(params)
+          if (params.resource)
+            Actions.getRequestedProperties({resource: params.resource, originatingResource: originatingMessage, fixedProps})
+        }})
       }
       this.state.doTable = null
     }

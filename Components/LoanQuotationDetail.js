@@ -1,15 +1,15 @@
-import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
 import {
   ListView,
   View,
+  TouchableOpacity,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
+import cloneDeep from 'lodash/cloneDeep'
+import extend from 'lodash/extend'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
-
-import _ from 'lodash'
-import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
 
 import { Text } from './Text'
 import PageView from './PageView'
@@ -17,11 +17,9 @@ import { getContentSeparator } from '../utils/uiUtils'
 import utils, {
   translate
 } from '../utils/utils'
-import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
-import { makeStylish } from './makeStylish'
 import platformStyles from '../styles/platform'
-
+import { circled } from '../styles/utils'
 
 class LoanQuotationDetail extends Component {
   static propTypes = {
@@ -39,7 +37,7 @@ class LoanQuotationDetail extends Component {
         return true
       }
     })
-    let { resource } = props
+    let { table:resource } = props
     let {list, terms} = this.flatten(resource)
     this.state = {
       dataSource: dataSource.cloneWithRows(list),
@@ -58,17 +56,14 @@ class LoanQuotationDetail extends Component {
       for (let term in val) {
         if (!rows[term]) {
           rows[term] = []
-          // irr[term] = []
         }
         rows[term].push(val[term]) //.finCostLoan)
-        // irr[term].push(val[term].irrLoan)
       }
     }
-debugger
     return {list: [header].concat(Object.values(rows)), terms: Object.keys(rows)}
   }
   renderRow(resource, sectionId, rowId) {
-    let { navigator, bankStyle } = this.props
+    let { navigator, bankStyle, callback, resource: source, tableParams } = this.props
     let { terms } = this.state
     let cols = []
     let rid = parseInt(rowId)
@@ -81,10 +76,14 @@ debugger
     for (let i=0; i<resource.length; i++) {
       let val = resource[i]
       let bg = {}
+      let pass
       if (rid) {
         val = resource[i].finCostLoan
-        if (rid  &&  resource[i].status === 'pass')
-          bg.backgroundColor = '#cfcfcf'
+        pass = rid  &&  resource[i].status === 'pass'
+        if (pass) {
+          bg.backgroundColor = '#D6E7D6'
+          bg.color = bankStyle.linkColor
+        }
 
         let [decimal, mantissa] = (val + '').split('.')
         if (!mantissa)
@@ -95,8 +94,22 @@ debugger
           }
         val = `${decimal}.${mantissa}`
       }
+      let content = <Text style={style}>{val}</Text>
+      if (pass) {
+        let check
+        if (tableParams) {
+          if (tableParams.term.id === resource[i].term.id  &&  tableParams.depositPercentage === resource[i].deposit)
+            check = <Icon name='ios-checkmark-circle' size={25} color='green' style={styles.icon}/>
+        }
+        content = <TouchableOpacity onPress={() => this.setProps({term: resource[i].term, depositPercentage: resource[i].deposit})}>
+                    {check}
+                    {content}
+                  </TouchableOpacity>
+      }
+      else
+        content = <Text style={style}>{val}</Text>
       cols.push(<Col sm={1} md={1} lg={1} style={[styles.col, bg]} key={++id + i * 10}>
-                  <Text style={style}>{val}</Text>
+                  {content}
                 </Col>)
     }
 
@@ -104,6 +117,12 @@ debugger
              {cols}
            </Row>
 
+  }
+  setProps({term, depositPercentage}) {
+    let { resource, callback } = this.props
+    let newResource = cloneDeep(resource)
+    extend(newResource, {depositPercentage, term})
+    callback({resource: newResource, tableParams: {depositPercentage, term}})
   }
   render() {
     let { list } = this.state
@@ -142,18 +161,8 @@ debugger
                <Text style={{fontSize: 16, color: '#fff'}}>{translate('Deposits')}</Text>
              </View>
            </View>
-    // const { list } = this.state
-    // return <View key='LoanQuotationDetail_h1'>
-    //         <Row size={1} style={[styles.gridRow, {backgroundColor: 'aliceblue'}]} key={'LoanQuotationDetail_0'} nowrap>
-    //           <Col sm={list.length + 1} md={list.length + 1} lg={list.length + 1} style={[styles.col, {alignItems: 'center'}]} key={'LoanQuotationDetail_1'}>
-    //             <Text style={{fontSize: 20}}>{translate('Deposits')}</Text>
-    //           </Col>)
-    //         </Row>
-    //       </View>
   }
 }
-LoanQuotationDetail = makeResponsive(LoanQuotationDetail)
-LoanQuotationDetail = makeStylish(LoanQuotationDetail)
 
 var styles = StyleSheet.create({
   separator: {
@@ -164,15 +173,17 @@ var styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     paddingRight: 10,
-    // paddingVertical: 5,
   },
   gridRow: {
     height: 40,
     borderBottomColor: '#f5f5f5',
     justifyContent: 'center',
-    // paddingVertical: 5,
-    // paddingRight: 7,
     borderBottomWidth: 1
+  },
+  icon: {
+    position: 'absolute',
+    bottom: -5,
+    left: 10
   },
 });
 
