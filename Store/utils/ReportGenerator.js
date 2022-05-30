@@ -20,12 +20,12 @@ import {
 const APPLICATION = 'tradle.Application'
 
 class ReportGenerator {
-  constructor({application, template, locale, getObjects, getApplication}) {
+  constructor({application, template, locale, getApplication, getItem}) {
     this.application = application
     this.template = template
     this.locale = locale
-    this.getObjects = getObjects
     this.getApplication = getApplication
+    this.getItem = getItem
   }
   async genReport() {
     const { application, template } = this
@@ -56,7 +56,7 @@ class ReportGenerator {
       else
         formsToProps[form][prop] = ''
     })
-    let links = []
+    let all = []
     let formNames = Object.keys(formsToProps)
     let idx = formNames.indexOf(APPLICATION)
     if (idx !== -1)
@@ -64,7 +64,7 @@ class ReportGenerator {
     for (let i=formNames.length-1; i>=0; i--) {
       let forms = application.forms.filter(f => getType(f) === formNames[i])
       if (forms.length) {
-        forms.forEach(f => links.push(getCurrentHash(f)))
+        forms.forEach(f => all.push(this.getItem({ idOrResource: f, noBacklinks: true})))
         formNames.splice(i, 1)
       }
     }
@@ -73,7 +73,7 @@ class ReportGenerator {
     if (formNames.length)
       debugger
 
-    let forms = await this.getObjects(links)
+    let forms = await Promise.all(all)
     if (parentForms)
       parentForms.forEach(f => forms.push(f))
 
@@ -131,7 +131,6 @@ class ReportGenerator {
       application.items.forEach(item => ilinks.push(getCurrentHash(item)))
       debugger
       return
-      // let items = await this.getObjects(ilinks)
     }
   }
   async addProps({resource, form, props}) {
@@ -157,7 +156,7 @@ class ReportGenerator {
           let r = pForm[p] && pForm[p].find(f => f[TYPE] === ptype)
           if (!r)
             break
-          r = await this.getObjects([getCurrentHash(r)])
+          r = await this.getItem({ idOrResource: r, noBacklinks: true })
           pForm = r[0]
         }
 
@@ -204,11 +203,12 @@ class ReportGenerator {
         }
         try {
           let link = getCurrentHash(propValue)
-          propValue = moreForms[link]
-          if (!propValue) {
-            let r = await this.getObjects([link])
-            propValue = r[0]
-          }
+          let pv = moreForms[link]
+          if (pv)
+            propValue = pv
+          else
+            propValue = await this.getItem({idOrResource: propValue, noBacklinks: true})
+
           moreForms[link] = propValue
           val = propValue[prop[ii + 1]]
           if (!val || typeof val !== 'object')

@@ -5907,7 +5907,7 @@ if (!res[SIG]  &&  res._message)
   async onGetReport({application, template, locale}) {
     if (!me.isEmployee)
       return
-    let reports = new ReportGenerator({application, template, locale, getObjects: this.getObjects, getApplication: this.getApplication})
+    let reports = new ReportGenerator({application, template, locale, getItem: this._getItemFromServer, getApplication: this.getApplication})
     let html = await reports.genReport()
     this.trigger({action: 'report', application, html})
   },
