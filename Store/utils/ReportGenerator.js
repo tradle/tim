@@ -205,8 +205,10 @@ class ReportGenerator {
         try {
           let link = getCurrentHash(propValue)
           propValue = moreForms[link]
-          if (!propValue)
-            ([propValue] = await this.getObjects([link]))
+          if (!propValue) {
+            let r = await this.getObjects([link])
+            propValue = r[0]
+          }
           moreForms[link] = propValue
           val = propValue[prop[ii + 1]]
           if (!val || typeof val !== 'object')
