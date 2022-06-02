@@ -531,9 +531,25 @@ const NewResourceMixin = {
       _.extend(params, {formErrors: {}})
       formErrors = params.formErrors
     }
-    eCols = eCols.filter(p => requestedProperties[p])
     let softRequired = []
     let groupped = []
+    let hasNotHidden
+    for (let p in requestedProperties) {
+      if (!requestedProperties[p].hide) {
+        hasNotHidden = true
+        break
+      }
+    }
+    if (!hasNotHidden) {
+      for (let i=eCols.length - 1; i>=0; i--) {
+        let p = eCols[i]
+        if (requestedProperties[p])
+          eCols.splice(i, 1)
+      }
+      return { eCols }
+    }
+
+    eCols = eCols.filter(p => requestedProperties[p])
     for (let p in requestedProperties) {
       // if (eCols.some((prop) => prop.name === p) {
       let idx = p.indexOf('_group')
@@ -546,8 +562,9 @@ const NewResourceMixin = {
       if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
         continue
 
-      if (requestedProperties[p].hide)
+      if (requestedProperties[p].hide) {
         continue
+      }
 
       eCols.push(p)
       let isRequired = requestedProperties[p].required
@@ -726,7 +743,7 @@ const NewResourceMixin = {
     if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
       // if 'string' no need to check if requested properties changed on entering every letter
       if (ptype === 'boolean')
-        Actions.getRequestedProperties({resource: r, originatingResource, fixedProps})
+        Actions.getRequestedProperties({resource: r, originatingResource, additionalInfo: {fixedProps}})
     }
     this.setState({
       resource: r,
