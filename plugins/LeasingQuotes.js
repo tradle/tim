@@ -4,11 +4,9 @@ import dateformat from 'dateformat'
 import cloneDeep from 'lodash/cloneDeep'
 import size from 'lodash/size'
 import extend from 'lodash/extend'
-import isEqual from 'lodash/isEqual'
 import { TYPE } from '@tradle/constants'
 import { getMe, getModel, getType, getRootHash, isStub, translate, formatCurrency } from '../utils/utils'
 import validateResource from '@tradle/validate-resource'
-// @ts-ignore
 const { sanitize } = validateResource.utils
 
 const COST_OF_CAPITAL = 'tradle.credit.CostOfCapital'
@@ -21,7 +19,7 @@ module.exports = function LeasingQuotes ({ models }) {
       form:formOrig,
       currentResource,
       search,
-      fixedProps={}
+      additionalInfo={}
     }) {
       if (!getMe().isEmployee || !application) return
 
@@ -29,19 +27,29 @@ module.exports = function LeasingQuotes ({ models }) {
       const ftype = form[TYPE]
       if (!ftype.endsWith('.Quote')) return
 
-      let {costOfCapital, foundCloseGoal, formErrors, message, doTable} = await getQuote({form, models, search, currentResource, fixedProps, application})
+      let { fixedProps, calculatingForLoan } = additionalInfo || {}
+      if (calculatingForLoan) {
+        return {
+          form,
+          requestedProperties: [],
+          doTable: 'loanQuotationDetail'
+        }
+      }
+      let {costOfCapital, foundCloseGoal, formErrors, message, doTable, requestedProperties} = await getQuote({form, models, search, currentResource, additionalInfo, application})
       if (!foundCloseGoal  &&  fixedProps  &&  size(fixedProps))
         return {
           recalculate: true,
+          requestedProperties,
           message,
           formErrors,
           doTable
         }
-      chooseDetail({form, models, costOfCapital})
+      chooseDetail({form, models, costOfCapital, additionalInfo})
       if (formErrors)
         return {
           recalculate: size(formErrors) > 1,
           message,
+          requestedProperties,
           formErrors,
           doTable,
           form //: !size(fixedProps) ? form : null
@@ -49,54 +57,63 @@ module.exports = function LeasingQuotes ({ models }) {
       if (message) {
         return {
           recalculate: true,
+          requestedProperties,
           message
         }
       }
       return {
         form,
+        requestedProperties: requestedProperties || getRequestedProperties(form),
         doTable
       }
     }
   }
 }
-function chooseDetail({form, models, costOfCapital}) {
+function chooseDetail({form, models, costOfCapital, additionalInfo}) {
   let ftype = getType(form)
   const m = models[ftype]
 
   if (!m) return
 
-  let termsPropRef = m.properties.terms.items.ref
   if (!form.term)
     return
 
-  let terms = form.terms
+  let { terms, loanTerms, loanTerm } = form
   if (!terms) return
 
+  let term
   let termId = form.term.id
-  let term = terms.find(t => t.term.id === termId)
+  term = terms.find(t => t.term.id === termId)
 
   extend(form, term)
+
+  if (loanTerm && loanTerms)
+    extend(form, loanTerms)
+
   form[TYPE] = ftype
   let { monthlyPayment, term:chosenTerm, purchaseOptionPrice } = form
-  form.finalNoteValue = {
-    currency: monthlyPayment.currency,
-    value: Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1] - purchaseOptionPrice.value)
-  }
 
+  let isLoan = loanTerm && chosenTerm.id === loanTerm.id
+  if (!isLoan) {
+    form.finalNoteValue = {
+      currency: monthlyPayment.currency,
+      value: Math.round(monthlyPayment.value * chosenTerm.id.split('_t')[1] - purchaseOptionPrice.value)
+    }
+  }
   if (!costOfCapital) return
   if (form.xirr > costOfCapital.minXIRR)
     form.approve = true
   else
     form.approve = false
 }
-async function getQuote({form, models, search, currentResource, fixedProps, application}) {
+async function getQuote({form, models, search, currentResource, additionalInfo, application}) {
   let model = models[getType(form)]
   if (!model) return {}
 
-  let { prefill, costOfCapital, foundCloseGoal, formErrors, message, calculateFormulas, doTable } = await quotationPerTerm({form, search, currentResource, fixedProps})
+  let { prefill, costOfCapital, foundCloseGoal, formErrors, message, calculateFormulas, doTable, requestedProperties } = await quotationPerTerm({form, search, currentResource, additionalInfo})
   if (prefill) {
     extend(form, prefill)
-    return { costOfCapital, foundCloseGoal, formErrors, message, doTable }
+    return { costOfCapital, foundCloseGoal, formErrors, message, doTable, requestedProperties }
   }
   if (message)
     return { message }
@@ -112,7 +129,7 @@ async function getQuote({form, models, search, currentResource, fixedProps, appl
 
   return {}
 }
-async function quotationPerTerm({form, search, currentResource, fixedProps}) {
+async function quotationPerTerm({form, search, currentResource, additionalInfo}) {
   const quotationInfo = form
   let {
     term: termQuote,
@@ -131,9 +148,10 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
     discountFromVendor,
     blindDiscount = 0,
     delayedFunding = 0,
-    residualValue: residualValueQuote
+    residualValue: residualValueQuote,
+    loanTerm,
+    loanDeposit
   } = quotationInfo
-  let depositPercentageQuote = depositPercentage
   if (!asset)
     return {}
 
@@ -197,20 +215,23 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   monthlyRateLoan /= 100
   let defaultQC = configurationItems[0]
 
+  let { fixedProps } = additionalInfo
   let formXIRR = form.xirr
+
   let formMonthlyPayment = form.monthlyPayment && form.monthlyPayment.value
 
   let depositVal = depositValue && depositValue.value || 0
+
   // blindDiscount = blindDiscount/100
   let iterateBy
   let goalProp
   let valuesToIterate = [null]
   let foundCloseGoal = true
   let realTimeCalculations
+  let originalDepositPercentage = depositPercentage
 
   if (blindDiscount > maxBlindDiscount)
     form.blindDiscount = blindDiscount = maxBlindDiscount
-
   if (fixedProps  &&  Object.keys(fixedProps).length) {
     let goalSeekProps = model.goalSeek.filter(p => fixedProps[p] == null &&  !properties[p].readOnly)
     iterateBy = goalSeekProps.length && goalSeekProps[0]
@@ -251,7 +272,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
       foundCloseGoal = false
     }
   }
-  else {
+  else if (allowLoan) {
     valuesToIterate = [depositPercentage, 20, 25, 30, 35, 40, 50]
     iterateBy = 'depositPercentage'
     realTimeCalculations = true
@@ -264,6 +285,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   let residualValueIterator
   let finalBest = {}
   let valueToIterate
+  let loanTermInt = loanTerm && parseInt(loanTerm.title.split(' ')[0])
   for (let jj=0; jj<2; jj++) {
     for (let ii=0; ii<valuesToIterate.length; ii++) {
       let val = valuesToIterate[ii]
@@ -339,9 +361,6 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let totalPercentage = mathRound(1 + factorPercentage + deliveryTermPercentage + depositFactor + lowDepositFactor, 4)
 
         let factorVPdelVR = termVal/12 * presentValueFactor/100
-
-        // let monthlyPayment = (priceMx.value - depositVal - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal
-        let termInt = parseInt(termVal)
 
         let blindDiscountVal = blindDiscount/100
         let monthlyPayment = (priceMx.value - depositVal * (1 + blindDiscountVal) - (residualValuePerTerm * priceMx.value)/(1 + factorVPdelVR))/(1 + vatRate) * totalPercentage/termVal * (1 - blindDiscountVal)
@@ -435,14 +454,15 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let delayedFundingVal = delayedFunding && parseInt(delayedFunding.id.split('_df')[1]) || 0
 
 
+        let termInt = parseInt(termVal)
         let monthlyPaymentLease = pmt(monthlyRateLease, termInt, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscountVal)), residualValuePerTerm * priceMx.value, 0)
         if (monthlyPaymentLease && monthlyPaymentLease !== Infinity) {
-          qd.monthlyPaymentLease= {
+          qd.monthlyPaymentLease = {
             value: mathRound(monthlyPaymentLease),
             currency
           }
         }
-        let payPerMonth = qd.monthlyPayment.value*(1 + vatRate)
+        let payPerMonth = qd.monthlyPayment.value * (1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
         let blindPayment = priceMx.value * blindDiscountVal
         if (blindPayment) {
@@ -462,7 +482,9 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
         let m = d.getMonth()
         let firstMonth = deliveryTime.id.split('_')[1].split('dt')[1]
 
-        for (let j=0; j<termVal - 1; j++) {
+        let numberOfMonthlyPayments = depositPercentage ?  termVal - 1 : termVal - 2
+
+        for (let j=0; j<numberOfMonthlyPayments; j++) {
           nextMonth(d, j ? 1 : parseInt(firstMonth))
           let md = dateformat(d.getTime(), 'yyyy-mm-dd')
           data.push({amount: payPerMonth, date: md})
@@ -485,7 +507,7 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           currentBest[term.id].min = {}
         currentBest[term.id].min.xirr = minXIRR
         currentBest[term.id].xirr = xirrVal
-
+        let isLoan = (allowLoan  &&  loanTerm  &&  termInt === loanTermInt)
         // if (termVal === termQuoteVal) {
         let inBounds
         ;({formErrors, foundCloseGoal, currentBest, inBounds} = checkBounds({
@@ -504,47 +526,57 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
           // boundsOnly: termVal !== termQuoteVal
         }))
         // }
-        if (allowLoan) {
-          let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
-          let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
-          if (monthlyPaymentLoan) {
-            qd.monthlyPaymentLoan = {
-              value: mathRound(monthlyPaymentLoan),
-              currency
-            }
-          }
+        let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
 
-          let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
-          if (finCostLoan)
-            qd.finCostLoan = mathRound(finCostLoan * 100, 2)
-          if (realTimeCalculations) {
-            if (ii   ||  termVal == termQuoteVal)
-              addToLoanQuotationDetail({loanQuotationDetail, minXIRR, discountedLoanPrice, term, termVal: termInt, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, currentBest})
-            if (ii === 0  &&  termVal == termQuoteVal) {
-              let result = loanQuotationDetail[depositPercentage][termInt]
-              qd.xirrLoan = mathRound(result.xirrLoan)
-              qd.xirrLease = mathRound(result.xirrLease)
-              qd.irrLoan = mathRound(result.irrLoan)
-              qd.irrLease = mathRound(result.irrLease)
-              delete loanQuotationDetail[depositPercentage]
-            }
-            if (ii)
-              continue
+        // if (allowLoan) {
+        let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
+        if (monthlyPaymentLoan) {
+          qd.monthlyPaymentLoan = {
+            value: mathRound(monthlyPaymentLoan),
+            currency
           }
         }
+        let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
+        if (finCostLoan && allowLoan && loanTerm && termVal == loanTermInt)
+          qd.finCostLoan = mathRound(finCostLoan * 100, 2)
+        // if (realTimeCalculations) {
+          // if (ii   ||  termVal == loanTermInt)
+        addLoanLease({loanQuotationDetail, minXIRR, discountedLoanPrice, term, termVal: termInt, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, finCostLoan})
+        let result = loanQuotationDetail[depositPercentage][termVal]
+        if (realTimeCalculations && ii === 0  &&  termVal == loanTermInt) {
+          // qd.xirrLoan = mathRound(result.xirrLoan)
+          quotationInfo.xirrLoan = result.xirrLoan
+          quotationInfo.irrLoan = result.irrLoan
+          // delete loanQuotationDetail[depositPercentage]
+        }
+        else if (!isLoan) {
+          // qd.xirr = mathRound(result.xirrLease)
+          // qd.irr = mathRound(result.irrLease)
+          delete qd.monthlyPaymentLoan
+          delete qd.finCostLoan
+        }
+        if (ii)
+          continue
+          // }
+        // }
         if (!inBounds) {
           currentBest = {}
           break
         }
 
-        if (iterateBy) {
+        if (iterateBy  &&  iterateByPropValue) {
           qd[iterateBy] = iterateByPropValue
           form[iterateBy] = iterateByPropValue
         }
         qd.xirr = xirrVal
         qd.irr = irrVal
         qd = sanitize(qd).sanitized
-        quotationDetails.push(qd)
+        if (isLoan)  {
+          if (termInt === loanTermInt)
+            quotationDetails.push(qd)
+        }
+        else if (!loanTerm  ||  termInt !== loanTermInt)
+          quotationDetails.push(qd)
       }
       // if (k < configurationItems.length || (iterateBy && !currentBest && !jj)) {
       if (!jj  &&  goalProp) {
@@ -575,39 +607,100 @@ async function quotationPerTerm({form, search, currentResource, fixedProps}) {
   foundCloseGoal = goalSeekSuccess || foundCloseGoal
   let message
   let terms = ''
+  let lidx = loanTerm && quotationDetails.findIndex(qd => qd.term.id === loanTerm.id) || -1
+  let loanTerms
+  if (loanTerm) {
+    let idx = quotationDetails.findIndex(qd => qd.term.id === loanTerm.id)
+    // quotationDetails.splice(lidx, 1)
+    loanTerms = loanQuotationDetail[loanDeposit][loanTermInt]
+  }
+  // else if (loanTerm) {
+  //   quotationDetails.splice(lidx, 1)
+  //   loanTerms = loanQuotationDetail[loanDeposit][loanTermInt]
+  // }
+
+  if (realTimeCalculations)
+    delete loanQuotationDetail[originalDepositPercentage]
   if (!formErrors) {
     if (size(finalBest)) { //  &&  !goalSeekSuccess && !foundCloseGoal) {
+      let hasSuccessful
+      let hasFailed
       let i = 0
       for (let t in finalBest) {
         if (i++)
           terms += '    '
         if (finalBest[t].formErrors) {
+          hasFailed = true
           terms += `${t.split('_t')[1]} ❌`
           if (/*goalProp &&*/ t === termQuote.id)
             message = finalBest[t].formErrors[goalProp]
         }
-        else
+        else {
           terms += `${t.split('_t')[1]} ✅`
+          hasSuccessful = true
+        }
       }
       if (!formErrors)
         formErrors = {}
-      formErrors._info = `${terms}`
+      formErrors._info = {message: `${terms}`, hasSuccessful, hasFailed}
     }
   }
+  let requestedProperties = getRequestedProperties(quotationInfo)
 
+  // if (!loanTerm) {
+  //   requestedProperties.push({ name: 'loanInfo_group', hide: true })
+  //   requestedProperties.push({ name: 'loanTerm', hide: true })
+  //   requestedProperties.push({ name: 'loanDeposit', hide: true })
+  //   requestedProperties.push({ name: 'xirrLoan', hide: true })
+  //   requestedProperties.push({ name: 'irrLoan', hide: true })
+  //   requestedProperties.push({ name: 'monthlyRateLoan', hide: true })
+  //   requestedProperties.push({ name: 'monthlyPaymentLoan', hide: true })
+  //   requestedProperties.push({ name: 'finCostLoan', hide: true })
+  // }
+  // if (allowLoan) {
+  //   let valuesToIterate = [20, 25, 30, 35, 40, 50]
+  //   for (let k=0; k<configurationItems.length; k++) {
+  //     let quotConf = configurationItems[k]
+  //     let qc = cloneDeep(defaultQC)
+  //     for (let p in quotConf)
+  //       qc[p] = quotConf[p]
+
+  //     let { term } = quotConf
+  //     let termVal = term.title.split(' ')[0]
+
+  //     for (let i=0 i<valueToIterate.length; i++) {
+  //       let discountedLoanPrice = priceMx.value * (1 - blindDiscount/100)
+  //       addLoanLease({loanQuotationDetail, minXIRR, discountedLoanPrice, term, termVal: termInt, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd: quotationDetails[i], deposit:valuesToIterate[i], finCostLoan})
+  //     }
+  //   }
+  // }
   return {
     prefill: {
       terms: quotationDetails,
-      // loanQuotationDetail: loanQuotationDetail || null
+      loanQuotationDetail,
+      loanTerms
     },
+    requestedProperties,
     formErrors,
-    doTable: size(loanQuotationDetail) && {
-      loanQuotationDetail
-    },
+    doTable: realTimeCalculations && allowLoan && size(loanQuotationDetail) && 'loanQuotationDetail',
     message,
     costOfCapital,
     foundCloseGoal
   }
+}
+function getRequestedProperties(form) {
+  let requestedProperties = []
+  if (form.loanTerm)
+    return requestedProperties
+  requestedProperties.push({ name: 'loanInfo_group', hide: true })
+  requestedProperties.push({ name: 'loanTerm', hide: true })
+  requestedProperties.push({ name: 'loanDeposit', hide: true })
+  requestedProperties.push({ name: 'xirrLoan', hide: true })
+  requestedProperties.push({ name: 'irrLoan', hide: true })
+  requestedProperties.push({ name: 'monthlyRateLoan', hide: true })
+  requestedProperties.push({ name: 'monthlyPaymentLoan', hide: true })
+  requestedProperties.push({ name: 'finCostLoan', hide: true })
+  return requestedProperties
 }
 function findBest({iterations, iterateBy, goalProp, form}) {
   // debugger
@@ -689,7 +782,7 @@ function mathRound(val, digits) {
 }
 function calcMinXIRR({costOfCapital, asset, vendor, term, termProp}) {
   let minXIRR = costOfCapital.minXIRR
-  let adj
+  let adj = 0
   if (asset.xirrAdjustmentPerTerm) {
     let adjPerTerm = asset.xirrAdjustmentPerTerm.find(r => r.term.id === term.id)
     if (adjPerTerm)
@@ -752,7 +845,7 @@ function checkBounds({
   return {currentBest, inBounds: true}
 }
 
-function addToLoanQuotationDetail({
+function addLoanLease({
   loanQuotationDetail,
   term,
   termVal,
@@ -762,19 +855,19 @@ function addToLoanQuotationDetail({
   residualValuePerTerm,
   deposit,
   quotationInfo,
-  currentBest,
   minXIRR,
+  finCostLoan,
   qd
 }) {
   let {
     priceMx,
     vatRate,
-    blindDiscount
+    blindDiscount=0
   } = quotationInfo
   let {
     commissionFee: commissionFeeCalculated,
-    finCostLoan,
-    monthlyPaymentLease,
+    // finCostLoan,
+    monthlyPayment,
     monthlyPaymentLoan,
   } = qd
   let leaseIRR = []
@@ -784,7 +877,7 @@ function addToLoanQuotationDetail({
 
   let termIRR = termVal + deliveryTimeLoan
 
-  finCostLoan = finCostLoan / 100
+  // finCostLoan = finCostLoan / 100
   let initialPayment = (discountedLoanPrice * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
 
   let d = new Date()
@@ -804,7 +897,7 @@ function addToLoanQuotationDetail({
         leasea = 0
         loana = 0
       } else {
-        leasea = monthlyPaymentLease.value
+        leasea = monthlyPayment.value
         loana = monthlyPaymentLoan.value
       }
     }
@@ -820,7 +913,7 @@ function addToLoanQuotationDetail({
       loanIRR.push(deposit * priceMx.value + loanb + finCostLoan * priceMx.value)
     } else if (i > 0) {
       if (i === termIRR)
-        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPaymentLease.value) - leasea - leaseb
+        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPayment.value) - leasea - leaseb
 
       leaseIRR.push(leasea + leaseb + finalPayment)
       loanIRR.push(loana + loanb)
@@ -865,7 +958,7 @@ function addToLoanQuotationDetail({
   month = d.getTime()
   leaseXIRR.push({
     date,
-    amount: monthlyPaymentLease.value
+    amount: monthlyPayment.value
   })
   loanXIRR.push({
     date,
@@ -877,9 +970,9 @@ function addToLoanQuotationDetail({
     nextMonth(d, 1)
     date = dateformat(d.getTime(), 'yyyy-mm-dd')
     if (x < termVal-1)
-      leasea = monthlyPaymentLease.value
+      leasea = monthlyPayment.value
     else
-      leasea = monthlyPaymentLease.value + (residualValuePerTerm * priceMx.value)
+      leasea = monthlyPayment.value + (residualValuePerTerm * priceMx.value)
 
     leaseXIRR.push({
         date,
@@ -890,39 +983,36 @@ function addToLoanQuotationDetail({
         amount: monthlyPaymentLoan.value
     })
   }
-  //console.log(leaseIRR)
-  //console.log(loanIRR)
-  //console.log("leaseXIRR",leaseXIRR)
-  //console.log("loanXIRR",loanXIRR)
-
 
   let { rate } = xirr(leaseXIRR)
-  let xirrLease = Math.round(convertRate(rate, 365) * 10000) / 100
+  let xirrLease = mathRound(convertRate(rate, 365) * 100)
 
   let { rate:loanRate } = xirr(loanXIRR)
-  let xirrLoan = Math.round(convertRate(loanRate, 365) * 10000) / 100
+  let xirrLoan = mathRound(convertRate(loanRate, 365) * 100)
 
-  let irrLoan = irr(loanIRR) * 100
-  let irrLease = irr(leaseIRR) * 100
+  let irrLoan = mathRound(irr(loanIRR) * 100)
+  let irrLease = mathRound(irr(leaseIRR) * 100)
 
 
-  // console.log("term", term,"leaseIRR", irr(leaseIRR), "loanIRR", irr(loanIRR),"leaseXIRR", xirrLease, "loanXIRR", xirrLoan)
+  // console.log("term", term,"leaseIRR", irr(leaseIRR), "loanIRR", irr(loanIRR),"leaseXIRR", xirr, "loanXIRR", xirrLoan)
 
   let p = deposit * 100 + ''
   let elm = loanQuotationDetail[p]
   if (!elm)
     loanQuotationDetail[p] = {}
-  let type = getModel(quotationInfo[TYPE]).properties.loanQuotationDetail.items.ref
+  // let type = getModel(quotationInfo[TYPE]).properties.loanQuotationDetail.items.ref
   loanQuotationDetail[p][termVal] = {
-    [TYPE]: type,
-    finCostLoan: qd.finCostLoan,
+    // [TYPE]: type,
+    finCostLoan: mathRound(finCostLoan * 100, 2),
     termIRR,
-    term,
+    loanTerm: term,
+    irrLoan,
     xirrLoan,
     status: xirrLoan > minXIRR ? 'pass' : 'fail',
-    xirrLease,
-    irrLoan,
-    irrLease,
-    deposit: deposit * 100
+    // irrLease,
+    // xirrLease,
+    // initialPayment,
+    monthlyPaymentLoan,
+    loanDeposit: deposit * 100
   }
 }

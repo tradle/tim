@@ -32,6 +32,10 @@ const {
   MONEY
 } = constants.TYPES
 
+const SUCCESSFUL = 1
+const FAILED = 2
+const SUCCESSFUL_WITH_ALERT = 3
+
 import components from './components'
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
@@ -302,15 +306,15 @@ class NewResource extends Component {
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
         let { fixedProps } = this.state
         let { doTable } = params
-        let doRecalculate = this.isRecalculate(validationErrors)
+        let status = this.doRecalculate(validationErrors)
         if (recalculate) {
-          if (doRecalculate) {
+          if (status === FAILED) {
             if (message)
               Alert.alert(message)
             else
               Alert.alert(translate('goalNotFound'))
           }
-          let state = {recalculateMode: true, validationErrors, doTable: false }
+          let state = {recalculateMode: true, validationErrors, doTable: false, status }
           if (resource)
             state.resource = resource
           this.setState(state)
@@ -324,7 +328,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false, validationErrors, doTable })
+          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false, validationErrors, doTable, status })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -337,7 +341,7 @@ class NewResource extends Component {
           this.setState({ resource: r, recalculateMode: false, validationErrors, doTable })
         }
         else if (fixedProps)
-          this.setState({ resource, recalculateMode: false, validationErrors, fixedProps: {}, doTable })
+          this.setState({ resource, recalculateMode: false, validationErrors, fixedProps: {}, doTable, status })
       }
       return
     }
@@ -473,8 +477,15 @@ class NewResource extends Component {
     if (currentRoutesLength != 2)
       navigator.pop();
   }
-  isRecalculate(validationErrors) {
-    return validationErrors && validationErrors._info &&  validationErrors._info.indexOf('❌') !== -1
+  doRecalculate(validationErrors) {
+    if (!validationErrors  ||  !validationErrors._info)
+      return SUCCESSFUL
+    const { hasSuccessful, hasFailed } = validationErrors._info
+    if (!hasSuccessful)
+      return FAILED
+    if (!hasFailed)
+      return SUCCESSFUL
+    return SUCCESSFUL_WITH_ALERT
   }
   shareWith(newResource, list) {
     if (list.length)
@@ -482,14 +493,18 @@ class NewResource extends Component {
     this.props.navigator.pop()
   }
   onSavePressed() {
-    const { submitted, fixedProps, recalculateMode } = this.state
+    const { submitted, fixedProps, recalculateMode, status } = this.state
     if (submitted)
       return
     if (recalculateMode) {
       Alert.alert(translate('pleaseRecalculate'))
       return
     }
-
+    if (status === SUCCESSFUL_WITH_ALERT) {
+      this.alertNotFullSuccess(this.onSavePressed, status)
+      this.setState({status: SUCCESSFUL})
+      return
+    }
     this.state.submitted = true
     this.state.noScroll = false
     this.state.validationErrors = null
@@ -534,7 +549,7 @@ class NewResource extends Component {
       if (requestedProperties) {
         let eCols = []
         let { softRequired } = this.addRequestedProps({eCols, props})
-        softRequired.forEach(p => {
+        softRequired && softRequired.forEach(p => {
           if (required.indexOf(p) === -1)
             required.push(p)
         })
@@ -1147,16 +1162,15 @@ if (r.url)
         Alert.alert(err)
         this.state.err = null
       }
-      let doRecalculate = this.isRecalculate(validationErrors)
+      let status = this.doRecalculate(validationErrors)
 
-      if (recalculateMode ||  doRecalculate) {
+      if (recalculateMode ||  status === FAILED) {
         submit = <View style={{paddingBottom: 30}}>
                    <View style={[styles.submitButton, {backgroundColor: '#ccc'}]}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{submitTitle}</Text>
                    </View>
                  </View>
-
       }
       else if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={onPress}>
@@ -1166,13 +1180,14 @@ if (r.url)
                      </View>
                    </View>
                  </TouchableOpacity>
-      else
-        submit = <TouchableOpacity onPress={onPress} style={{paddingBottom: 30}}>
+      else {
+        submit = <TouchableOpacity onPress={this.alertNotFullSuccess.bind(this, onPress, status)} style={{paddingBottom: 30}}>
                    <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{submitTitle}</Text>
                    </View>
                  </TouchableOpacity>
+      }
 
     }
     let contentStyle = {backgroundColor: 'transparent', width, alignSelf: 'center', paddingTop: 10}
@@ -1184,14 +1199,14 @@ if (r.url)
     let form = <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
     let table
     if (doTable) {
-      let componentName = Object.keys(doTable)[0]
+      let componentName = doTable // Object.keys(doTable)[0]
       let component = components[`${componentName.charAt(0).toUpperCase()}${componentName.slice(1)}`]
       if (component) {
         let { tableParams } = this.state
-        table = React.createElement(component, {resource, tableParams, table: doTable[componentName], bankStyle, callback: (params) => {
+        table = React.createElement(component, {resource, tableParams, bankStyle, callback: (params) => {
           this.setState(params)
           if (params.resource)
-            Actions.getRequestedProperties({resource: params.resource, originatingResource: originatingMessage, fixedProps})
+            Actions.getRequestedProperties({resource: params.resource, originatingResource: originatingMessage, additionalInfo: params.additionalInfo})
         }})
       }
       this.state.doTable = null
@@ -1237,7 +1252,7 @@ if (r.url)
       else if (validationErrors && _.size(validationErrors)) {
         let info
         if (validationErrors._info)
-          info = <Text style={styles.warningText}>{validationErrors._info}</Text>
+          info = <Text style={styles.warningText}>{validationErrors._info.message}</Text>
         if (_.size(validationErrors) === 1 && info)
           errors = <View style={styles.warnings}>
                      <Text style={styles.warningText}>{translate('validationInfo')}</Text>
@@ -1304,6 +1319,18 @@ if (r.url)
         </View>
       </View>
     )
+  }
+  alertNotFullSuccess(onPress, status) {
+    if (status === SUCCESSFUL)
+      onPress
+    else
+      Alert.alert(
+        translate('youCanSubmitButNotEverythingWorked'),
+        [
+          {text: 'Ok', onPress},
+          {text: 'Cancel',  onPress: () => {}},
+        ]
+      )
   }
   // If this is a confirmation resource i.e. not props to enter only to review
   // then use OK instead of Submit
