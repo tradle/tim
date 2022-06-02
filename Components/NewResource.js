@@ -502,7 +502,7 @@ class NewResource extends Component {
     }
     if (status === SUCCESSFUL_WITH_ALERT) {
       this.alertNotFullSuccess(this.onSavePressed, status)
-      this.setState({status: SUCCESSFUL})
+      // this.setState({status: SUCCESSFUL})
       return
     }
     this.state.submitted = true
@@ -1322,12 +1322,16 @@ if (r.url)
   }
   alertNotFullSuccess(onPress, status) {
     if (status === SUCCESSFUL)
-      onPress
+      onPress()
     else
       Alert.alert(
         translate('youCanSubmitButNotEverythingWorked'),
         [
-          {text: 'Ok', onPress},
+          {text: 'Ok', onPress: () => {
+            // HACK
+            this.state.status = SUCCESSFUL
+            onPress()
+          }},
           {text: 'Cancel',  onPress: () => {}},
         ]
       )
