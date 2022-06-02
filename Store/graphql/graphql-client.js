@@ -604,6 +604,8 @@ var search = {
       }
       if (model.abstract)
         return arr
+      if (!model.inlined)
+        arr.push(TYPE)
       arr.push(`_seal {
                 txId,
                 blockchain,
