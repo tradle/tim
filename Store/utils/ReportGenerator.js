@@ -59,21 +59,23 @@ class ReportGenerator {
     let all = []
     let formNames = Object.keys(formsToProps)
     let idx = formNames.indexOf(APPLICATION)
+
     if (idx !== -1)
       formNames.splice(idx, 1)
     for (let i=formNames.length-1; i>=0; i--) {
       let forms = application.forms.filter(f => getType(f) === formNames[i])
       if (forms.length) {
-        forms.forEach(f => all.push(this.getItem({ idOrResource: f, noBacklinks: true})))
+        for (let j=0; j<forms.length; j++)
+          all.push(await this.getItem({ idOrResource: forms[j] }))
         formNames.splice(i, 1)
       }
     }
+    let forms = all
     let parentForms = formNames.length && await this.getParentForms({application, forms, formNames})
 
     if (formNames.length)
       debugger
-
-    let forms = await Promise.all(all)
+    // let forms = await Promise.all(all)
     if (parentForms)
       parentForms.forEach(f => forms.push(f))
 
