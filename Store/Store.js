@@ -3609,7 +3609,7 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
-  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource, fixedProps}) {
+  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource, additionalInfo}) {
     let rtype = resource[TYPE]
     if (/*!plugins.length  && */ !appPlugins.length)
       return
@@ -3628,6 +3628,7 @@ var Store = Reflux.createStore({
     let context = { models: this.getModels() }
     let moreInfo
     let m = originatingResource && originatingResource.lens ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
+    let fixedProps = additionalInfo && additionalInfo.fixedProps
     let showLoading = (fixedProps && _.size(fixedProps))
     if (showLoading)
       Actions.showModal({title: translate('calculationsInProgress'), showIndicator: true})
@@ -3637,7 +3638,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = await plugin(context).validateForm.call(
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource, fixedProps, search: me.isEmployee ? this.searchServer.bind(this) : null}
+          {application: _context, form: resource, currentResource, additionalInfo, search: me.isEmployee ? this.searchServer.bind(this) : null}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo

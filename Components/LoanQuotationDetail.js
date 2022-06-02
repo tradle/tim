@@ -37,8 +37,8 @@ class LoanQuotationDetail extends Component {
         return true
       }
     })
-    let { table:resource } = props
-    let {list, terms} = this.flatten(resource)
+    let { resource } = props
+    let { list, terms } = this.flatten(resource.loanQuotationDetail)
     this.state = {
       dataSource: dataSource.cloneWithRows(list),
       list,
@@ -72,14 +72,14 @@ class LoanQuotationDetail extends Component {
                 <Text style={{fontSize: 16, alignSelf: 'center'}}>{rid ? terms[rowId - 1] : ''}</Text>
               </Col>)
 
-    let style = { fontSize: 16, alignSelf: rid ? 'flex-end': 'center' }
-    for (let i=0; i<resource.length; i++) {
-      let val = resource[i]
+    let style = { fontSize: 16, alignSelf: 'center' }
+    resource.forEach((r, i) => {
       let bg = {}
       let pass
+      let val
       if (rid) {
-        val = resource[i].finCostLoan
-        pass = rid  &&  resource[i].status === 'pass'
+        val = r.finCostLoan
+        pass = rid  &&  r.status === 'pass'
         if (pass) {
           bg.backgroundColor = '#D6E7D6'
           bg.color = bankStyle.linkColor
@@ -89,7 +89,7 @@ class LoanQuotationDetail extends Component {
         if (!mantissa)
           mantissa = '00'
         else if (mantissa.length < 2)
-          for (let i=0; mantissa.length !== 2; i++) {
+          for (let j=0; mantissa.length !== 2; j++) {
             mantissa += '0'
           }
         val = `${decimal}.${mantissa}`
@@ -98,10 +98,10 @@ class LoanQuotationDetail extends Component {
       if (pass) {
         let check
         if (tableParams) {
-          if (tableParams.term.id === resource[i].term.id  &&  tableParams.depositPercentage === resource[i].deposit)
-            check = <Icon name='ios-checkmark-circle' size={25} color='green' style={styles.icon}/>
+          if (tableParams.loanTerm.id === r.loanTerm.id  &&  tableParams.loanDeposit === r.loanDeposit)
+            check = <Icon name='ios-checkmark' size={30} color='green' style={styles.icon}/>
         }
-        content = <TouchableOpacity onPress={() => this.setProps({term: resource[i].term, depositPercentage: resource[i].deposit})}>
+        content = <TouchableOpacity onPress={() => this.setProps(r)}>
                     {check}
                     {content}
                   </TouchableOpacity>
@@ -111,18 +111,19 @@ class LoanQuotationDetail extends Component {
       cols.push(<Col sm={1} md={1} lg={1} style={[styles.col, bg]} key={++id + i * 10}>
                   {content}
                 </Col>)
-    }
+    })
 
     return <Row size={resource.length + 1} style={[styles.gridRow, {backgroundColor: rid ? 'transparent' : '#cfcfcf' }]} key={id + 1} nowrap>
              {cols}
            </Row>
 
   }
-  setProps({term, depositPercentage}) {
+  setProps(loanResource) {
+    let { loanTerm, loanDeposit, finCostLoan, xirrLoan, irrLoan } = loanResource
     let { resource, callback } = this.props
     let newResource = cloneDeep(resource)
-    extend(newResource, {depositPercentage, term})
-    callback({resource: newResource, tableParams: {depositPercentage, term}})
+    extend(newResource, loanResource)
+    callback({resource: newResource, additionalInfo: {calculatingForLoan: true}, tableParams: loanResource })
   }
   render() {
     let { list } = this.state
@@ -181,6 +182,7 @@ var styles = StyleSheet.create({
     borderBottomWidth: 1
   },
   icon: {
+    // paddingRight: 10
     position: 'absolute',
     bottom: -5,
     left: 10
