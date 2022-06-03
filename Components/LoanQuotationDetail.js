@@ -77,7 +77,9 @@ class LoanQuotationDetail extends Component {
       let bg = {}
       let pass
       let val
-      if (rid) {
+      if (!rid)
+        val = r
+      else {
         val = r.finCostLoan
         pass = rid  &&  r.status === 'pass'
         if (pass) {
