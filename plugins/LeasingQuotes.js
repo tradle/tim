@@ -273,7 +273,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
     }
   }
   else if (allowLoan) {
-    valuesToIterate = [depositPercentage, 20, 25, 30, 35, 40, 50]
+    valuesToIterate = [depositPercentage, 10, 15, 20, 25, 30, 35, 40, 50]
     iterateBy = 'depositPercentage'
     realTimeCalculations = true
   }
