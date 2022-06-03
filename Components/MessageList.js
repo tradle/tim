@@ -743,7 +743,7 @@ class MessageList extends Component {
       //   showEdit = true
     }
     else
-      showEdit = !notEditable  &&   r._latest  && (!application || application.filledForCustomer) &&  !utils.isMyProduct(model)
+      showEdit = !notEditable  &&   r._latest  && (!application || application.filledForCustomer || application.draft) &&  !utils.isMyProduct(model)
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
@@ -954,7 +954,7 @@ class MessageList extends Component {
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
     // Move to a separate source: also from ApplicationView
     let assignRM
-    if (application  &&  !isRM(application) && !application.filledForCustomer) {
+    if (application  &&  !isRM(application) && !application.filledForCustomer  &&  !application.draft) {
       let hasRM = application.analyst != null
       let iconName = 'ios-person-add-outline'
       let icolor
