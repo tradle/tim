@@ -772,7 +772,7 @@ const storeUtils = {
         grid: true
       },
       {
-        message: 'applicationDrafts',
+        message: translate('applicationDrafts'),
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
