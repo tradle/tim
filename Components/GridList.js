@@ -1487,12 +1487,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let employee
     if (me.isEmployee) {
-      employee = <View style={styles.center}>
-                   <Text numberOfLines={1} style={[styles.employee, {color: bankStyle.linkColor}]}>{me.firstName + '@' + me.organization.title}</Text>
+      let orgTitle = me.counterparty ? me.counterparty.title : me.organization.title
+      employee = <View style={{justifyContent: 'center'}}>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: bankStyle.linkColor}}>{`${me.firstName}@${orgTitle}`}</Text>
                  </View>
     }
-    else
-      employee = <View/>
+
     let isAdd = allowToAdd  &&  !search
     let icon
     if (isAdd)
