@@ -202,7 +202,7 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM  &&  !utils.isMe(resource.applicant) && !resource.filledForCustomer)
+    if (!isRM  &&  !utils.isMe(resource.applicant) && !resource.filledForCustomer  &&  !resource.draft)
       assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
