@@ -99,8 +99,9 @@ class LoanQuotationDetail extends Component {
       let content = <Text style={style}>{val}</Text>
       if (pass) {
         let check
-        if (tableParams) {
-          if (tableParams.loanTerm.id === r.loanTerm.id  &&  tableParams.loanDeposit === r.loanDeposit)
+        let checkParams = tableParams || source
+        if (checkParams) {
+          if (checkParams.loanTerm  &&  checkParams.loanTerm.id === r.loanTerm.id  &&  checkParams.loanDeposit === r.loanDeposit)
             check = <Icon name='ios-checkmark' size={30} color='green' style={styles.icon}/>
         }
         content = <TouchableOpacity onPress={() => this.setProps(r)}>
