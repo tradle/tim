@@ -3449,6 +3449,11 @@ var Store = Reflux.createStore({
         sendParams.other = {}
       sendParams.other._dataBundle = utils.getRootHash(toChain._dataBundle)
     }
+    if (me && me.counterparty) {
+      if (!sendParams.other)
+        sendParams.other = {}
+      sendParams.other._authorOrg = utils.getRootHash(me.counterparty)
+    }
     if (!sendParams.to)
       sendParams.to = { permalink: hash }
 
@@ -5830,7 +5835,7 @@ if (!res[SIG]  &&  res._message)
   },
 
   async onGetProductList({ resource }) {
-    if (resource[TYPE] !== ORGANIZATION) {
+    if (utils.getType(resource) !== ORGANIZATION) {
       let org = resource.organization
       if (!org)
         return
@@ -7198,8 +7203,12 @@ if (!res[SIG]  &&  res._message)
   },
   async searchServer(params) {
     if (!this.client) {
-      Alert.alert(translate('serverIsUnreachable'))
-      return
+      if (me.isEmployee)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+      else {
+        Alert.alert(translate('serverIsUnreachable'))
+        return
+      }
     }
     let {direction, first, noTrigger, modelName, application,
          filterResource, endCursor, limit, bookmark} = params
@@ -8993,7 +9002,7 @@ if (!res[SIG]  &&  res._message)
       return
     if (!modelName  &&  resource)
       modelName = utils.getType(resource)
-    if (!updateMenu  &&  me.menu) {
+    if (!updateMenu  &&  me.menu && me.menu.length) {
       if (!noTrigger)
         this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
       return
