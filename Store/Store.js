@@ -7207,7 +7207,7 @@ if (!res[SIG]  &&  res._message)
         this.client = graphQL.initClient(meDriver, me.organization.url)
       else {
         Alert.alert(translate('serverIsUnreachable'))
-        return
+        return {}
       }
     }
     let {direction, first, noTrigger, modelName, application,
