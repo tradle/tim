@@ -122,9 +122,17 @@ class LoanQuotationDetail extends Component {
 
   }
   setProps(loanResource) {
-    let { loanTerm, loanDeposit, finCostLoan, xirrLoan, irrLoan } = loanResource
+    let { loanTerm, finCostLoan, xirrLoan, monthlyPaymentLoan } = loanResource
     let { resource, callback } = this.props
     let newResource = cloneDeep(resource)
+    let loanItem = newResource.terms.find(t => t.finCostLoan)
+    if (loanItem  &&  loanTerm.id !== loanItem.id) {
+      delete loanItem.finCostLoan
+      delete loanItem.xirrLoan
+      delete loanItem.monthlyPaymentLoan
+      let loanItemForNewTerm = newResource.terms.find(t => t.term.id === loanTerm.id)
+      extend(loanItemForNewTerm, {finCostLoan, xirrLoan, monthlyPaymentLoan})
+    }
     extend(newResource, loanResource)
     callback({resource: newResource, additionalInfo: {calculatingForLoan: true}, tableParams: loanResource })
   }
