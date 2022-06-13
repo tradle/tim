@@ -997,7 +997,7 @@ const NewResourceMixin = {
         fixedProps[p] = resource[p]
     })
 
-    Actions.getRequestedProperties({resource, originatingResource:originatingMessage, fixedProps})
+    Actions.getRequestedProperties({resource, originatingResource:originatingMessage, additionalInfo: {fixedProps}})
   },
   onKeyPress(onSubmit, key) {
     if (key.nativeEvent.key === 'Enter') {
