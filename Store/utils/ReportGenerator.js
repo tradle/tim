@@ -77,8 +77,10 @@ class ReportGenerator {
         if (form.loanTerm) {
           let qform = cloneDeep(form)
           let qidx = qform.terms.findIndex(t => t.term.id === qform.loanTerm.id)
-          qform.terms.splice(qidx, 1)
-          all.splice(idx, 1, qform)
+          if (qidx !== -1) {
+            qform.terms.splice(qidx, 1)
+            all.splice(idx, 1, qform)
+          }
         }
       }
       // end HACK
