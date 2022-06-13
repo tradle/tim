@@ -1,6 +1,7 @@
 import Mustache from 'mustache'
 import dateformat from 'dateformat'
 import constants from '@tradle/constants'
+import cloneDeep from 'lodash/cloneDeep'
 const {
   TYPE
 } = constants
@@ -69,6 +70,18 @@ class ReportGenerator {
           all.push(await this.getItem({ idOrResource: forms[j] }))
         formNames.splice(i, 1)
       }
+      // HACK
+      let idx = all.findIndex(r => r[TYPE].endsWith('.Quote'))
+      if (idx !== -1) {
+        let form = all[idx]
+        if (form.loanTerm) {
+          let qform = cloneDeep(form)
+          let qidx = qform.terms.findIndex(t => t.term.id === qform.loanTerm.id)
+          qform.terms.splice(qidx, 1)
+          all.splice(idx, 1, qform)
+        }
+      }
+      // end HACK
     }
     let forms = all
     let parentForms = formNames.length && await this.getParentForms({application, forms, formNames})
