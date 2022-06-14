@@ -162,7 +162,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
     asset = list && list[0]
     if (!asset) return {}
   }
-  const { listPrice, maxBlindDiscount, allowLoan, maxDeposit } = asset
+  const { listPrice, maxBlindDiscount, allowLoan, maxDeposit=50 } = asset
   if (netPrice) {
     if (netPrice.value !== listPrice.value) {
       form.netPrice = listPrice
@@ -232,7 +232,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
   let realTimeCalculations
   let originalDepositPercentage = depositPercentage
 
-  if (maxDeposit && depositPercentage > maxDeposit)
+  if (depositPercentage > maxDeposit)
     form.depositPercentage = depositPercentage = maxDeposit
   if (blindDiscount > maxBlindDiscount)
     form.blindDiscount = blindDiscount = maxBlindDiscount
@@ -272,7 +272,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
         else if (iterateBy === 'blindDiscount')
           valuesToIterate = Array(maxBlindDiscount || 100).fill().map((_, idx) => start + idx)
         else if (iterateBy === 'depositPercentage')
-          valuesToIterate = Array(maxDeposit || 100).fill().map((_, idx) => start + idx)
+          valuesToIterate = Array(maxDeposit).fill().map((_, idx) => start + idx)
         else
           valuesToIterate = Array(100).fill().map((_, idx) => start + idx)
       }
