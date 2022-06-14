@@ -312,7 +312,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
       let k = 0
       let currentBest = {}
       iterations[val] = currentBest
-      if (realTimeCalculations && ii)
+      if (realTimeCalculations && ii || iterateBy === 'depositPercentage')
         depositVal = (netPrice.value * exchangeRate * vatRate + netPrice.value * exchangeRate) * depositPercentage/100 || 0
 
       for (; k<configurationItems.length; k++) {
@@ -526,39 +526,39 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
           // boundsOnly: termVal !== termQuoteVal
         }))
         // }
-        let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
+        if (allowLoan  &&  !fixedProps) {
+          let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
 
-        // if (allowLoan) {
-        let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
-        if (monthlyPaymentLoan) {
-          qd.monthlyPaymentLoan = {
-            value: mathRound(monthlyPaymentLoan),
-            currency
+          let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
+          if (monthlyPaymentLoan) {
+            qd.monthlyPaymentLoan = {
+              value: mathRound(monthlyPaymentLoan),
+              currency
+            }
           }
-        }
-        let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
-        if (finCostLoan && allowLoan && loanTerm && termVal == loanTermInt)
-          qd.finCostLoan = mathRound(finCostLoan * 100, 2)
-        // if (realTimeCalculations) {
-          // if (ii   ||  termVal == loanTermInt)
-        addLoanLease({loanQuotationDetail, minXIRR, discountedLoanPrice, term, termVal: termInt, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, finCostLoan})
-        let result = loanQuotationDetail[depositPercentage][termVal]
-        if (realTimeCalculations && ii === 0  &&  termVal == loanTermInt) {
-          // qd.xirrLoan = mathRound(result.xirrLoan)
-          quotationInfo.xirrLoan = result.xirrLoan
-          quotationInfo.irrLoan = result.irrLoan
-          // delete loanQuotationDetail[depositPercentage]
-        }
-        else if (!isLoan) {
-          // qd.xirr = mathRound(result.xirrLease)
-          // qd.irr = mathRound(result.irrLease)
-          delete qd.monthlyPaymentLoan
-          delete qd.finCostLoan
+          let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
+          if (finCostLoan && allowLoan && loanTerm && termVal == loanTermInt)
+            qd.finCostLoan = mathRound(finCostLoan * 100, 2)
+          // if (realTimeCalculations) {
+            // if (ii   ||  termVal == loanTermInt)
+          addLoanLease({loanQuotationDetail, minXIRR, discountedLoanPrice, term, termVal: termInt, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, finCostLoan})
+
+          let result = loanQuotationDetail[depositPercentage] && loanQuotationDetail[depositPercentage][termVal]
+          if (realTimeCalculations && ii === 0  &&  termVal == loanTermInt) {
+            // qd.xirrLoan = mathRound(result.xirrLoan)
+            quotationInfo.xirrLoan = result.xirrLoan
+            quotationInfo.irrLoan = result.irrLoan
+            // delete loanQuotationDetail[depositPercentage]
+          }
+          else if (!isLoan) {
+            // qd.xirr = mathRound(result.xirrLease)
+            // qd.irr = mathRound(result.irrLease)
+            delete qd.monthlyPaymentLoan
+            delete qd.finCostLoan
+          }
         }
         if (ii)
           continue
-          // }
-        // }
         if (!inBounds) {
           currentBest = {}
           break
