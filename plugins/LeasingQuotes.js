@@ -704,7 +704,7 @@ function getRequestedProperties(form) {
 }
 function findBest({iterations, iterateBy, goalProp, form}) {
   // debugger
-  let goalPropValue = form[goalProp]
+  let goalPropValue = form[goalProp].value
   let term = form.term
   let numberOfTerms
   let filtered = {}
