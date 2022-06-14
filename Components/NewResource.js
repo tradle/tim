@@ -1024,9 +1024,12 @@ if (r.url)
     else
       itemsMeta = utils.getItemsMeta(meta);
 
+    let me = utils.getMe()
     let arrayItems
     for (let p in itemsMeta) {
       let bl = itemsMeta[p]
+      if (bl.internalUse &&  (!me.isEmployee || me.counterparty))
+        continue
       // if (search && !bl.inlined || (bl.items.ref && !utils.getModel(bl.items.ref).inlined))
       //   continue
       if (!this.checkRequestedProperties(p))
@@ -1070,7 +1073,7 @@ if (r.url)
     let height = utils.dimensions(NewResource).height
     let formStyle = isRegistration
                   ? {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
-                  : {justifyContent: 'flex-start', width: width}
+                  : {justifyContent: 'flex-start', width}
     // let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons
     // if (jsonProps  &&  jsonProps.length) {
