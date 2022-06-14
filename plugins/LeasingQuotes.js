@@ -27,7 +27,9 @@ module.exports = function LeasingQuotes ({ models }) {
       const ftype = form[TYPE]
       if (!ftype.endsWith('.Quote')) return
 
-      let { fixedProps, calculatingForLoan } = additionalInfo || {}
+      let { fixedProps, calculatingForLoan, first } = additionalInfo || {}
+      if (first)
+        return
       if (calculatingForLoan) {
         return {
           form,
@@ -160,7 +162,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
     asset = list && list[0]
     if (!asset) return {}
   }
-  const { listPrice, maxBlindDiscount, allowLoan } = asset
+  const { listPrice, maxBlindDiscount, allowLoan, maxDeposit } = asset
   if (netPrice) {
     if (netPrice.value !== listPrice.value) {
       form.netPrice = listPrice
@@ -230,8 +232,11 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
   let realTimeCalculations
   let originalDepositPercentage = depositPercentage
 
+  if (maxDeposit && depositPercentage > maxDeposit)
+    form.depositPercentage = depositPercentage = maxDeposit
   if (blindDiscount > maxBlindDiscount)
     form.blindDiscount = blindDiscount = maxBlindDiscount
+
   if (fixedProps  &&  Object.keys(fixedProps).length) {
     let goalSeekProps = model.goalSeek.filter(p => fixedProps[p] == null &&  !properties[p].readOnly)
     iterateBy = goalSeekProps.length && goalSeekProps[0]
@@ -266,6 +271,8 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
         }
         else if (iterateBy === 'blindDiscount')
           valuesToIterate = Array(maxBlindDiscount || 100).fill().map((_, idx) => start + idx)
+        else if (iterateBy === 'depositPercentage')
+          valuesToIterate = Array(maxDeposit || 100).fill().map((_, idx) => start + idx)
         else
           valuesToIterate = Array(100).fill().map((_, idx) => start + idx)
       }
@@ -726,23 +733,43 @@ function findBest({iterations, iterateBy, goalProp, form}) {
     // if (j === numberOfTerms)
     //   filtered[t] = iterations[t]
   }
-  for (let i=numberOfTerms; i>0 && !size(filtered); i--) {
-    let s = successfulTerms[i]
-    if (s)
-      filtered[i] = s
-  }
-  if (!size(filtered))
-    return {valueToIterate: -1, currentBest: Object.values(iterations)[0], foundCloseGoal: false}
-  filtered = Object.values(filtered)[0]
-  if (size(filtered) === 1) {
-    let val = Object.keys(filtered)[0]
-    return {valueToIterate: val, currentBest: filtered[val], foundCloseGoal: true}
-  }
-  let finalBest = {}
   let { properties } = getModel(form[TYPE])
+  let finalBests = {}
+  for (let p in successfulTerms) {
+    let values = successfulTerms[p]
+    if (size(Object.values(values)) === 1) {
+      debugger
+      let val = Object.keys(values)[0]
+      return {valueToIterate: val, currentBest: values[val], foundCloseGoal: true}
+    }
+    let { finalBest, currentIterateBy } = getFinalBest({values, term, goalProp, goalPropValue})
+    finalBests[p] = {finalBest, currentIterateBy}
+  }
+  if (!size(finalBests))
+    return {valueToIterate: -1, currentBest: Object.values(iterations)[0], foundCloseGoal: false}
+  let finalBest, currentIterateBy
+  for (let p in finalBests) {
+    let {finalBest:curBest, currentIterateBy:curIterateBy} = finalBests[p]
+    if (!finalBest) {
+      finalBest = curBest
+      currentIterateBy = curIterateBy
+    }
+    else {
+      let currentVal = curBest[goalProp]
+      let finalBestVal = finalBest[goalProp]
+      if (Math.abs(currentVal - goalPropValue) < Math.abs(finalBestVal - goalPropValue)) {
+        finalBest = curBest
+        currentIterateBy = curIterateBy
+      }
+    }
+  }
+  return { valueToIterate: currentIterateBy, finalBest, foundCloseGoal: true }
+}
+function getFinalBest({values, term, goalProp, goalPropValue}) {
   let currentIterateBy
-  for (let key in filtered) {
-    let rr = filtered[key]
+  let finalBest = {}
+  for (let key in values) {
+    let rr = values[key]
     for (let c in rr) {
       for (let t in rr) {
         if (t !== term.id)
@@ -762,7 +789,7 @@ function findBest({iterations, iterateBy, goalProp, form}) {
       }
     }
   }
-  return { valueToIterate: currentIterateBy, finalBest, foundCloseGoal: true }
+  return { finalBest, currentIterateBy }
 }
 function nextMonth(date, numberOfMonths) {
   let m = date.getMonth() + numberOfMonths
