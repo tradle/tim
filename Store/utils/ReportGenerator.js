@@ -174,7 +174,7 @@ class ReportGenerator {
           if (!r)
             break
           r = await this.getItem({ idOrResource: r, noBacklinks: true })
-          pForm = r[0]
+          pForm = r
         }
 
         let propValue = pForm[property]
