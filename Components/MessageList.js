@@ -32,6 +32,7 @@ import MyProductMessageRow from './MyProductMessageRow'
 import VerificationMessageRow from './VerificationMessageRow'
 import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
+
 import FormErrorRow from './FormErrorRow'
 import QRCode from './QRCode'
 import TourRow from './TourRow'
@@ -345,6 +346,7 @@ class MessageList extends Component {
       navigator.popToRoute(routes[1])
       return
     }
+
     if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       let doUpdate
       if (utils.getType(chatWith) === ORGANIZATION  &&  resource.organization) {
@@ -426,8 +428,8 @@ class MessageList extends Component {
     if (!utils.isMessage(resource))
       return
     // HACK for Agent to not to receive messages from one customer in the chat for another
-    if (utils.isAgent()  &&  this.state.currentContext  &&  resource._context) {
-      if (this.state.currentContext.contextId !== resource._context.contextId)
+    if (utils.isAgent()  &&  currentContext  &&  resource._context) {
+      if (currentContext.contextId !== resource._context.contextId)
         return
     }
     let { application, originatingMessage } = this.props
@@ -929,21 +931,23 @@ class MessageList extends Component {
     let { list, isLoading, context, isConnected, isForgetting, allLoaded, pairingData,
           isModalOpen, onlineStatus, loadEarlierMessages, customStyle, allContexts,
           currentContext, menuIsShown } = this.state
-
     if (currentContext)
       context = currentContext
     let styles = createStyles({ bankStyle })
 
     let alert = <View />
+    let content
+
     let hideTextInput
     if (modelName === ORGANIZATION)
       hideTextInput = !utils.hasSupportLine(resource)
     else if (application)
-      hideTextInput = !isRM(application) &&  !application.filledForCustomer
-      // hideTextInput = !isRM(application)
-    // HACK for RM
-    // hideTextInput = false
-    let content
+      hideTextInput = !isRM(application) &&  !filledForCustomer && !isApplicationDraft
+
+    let { assignRM, draft:isApplicationDraft, filledForCustomer } = application || {}
+
+    let actionSheet = (!hideTextInput || filledForCustomer || isApplicationDraft) && this.renderActionSheet()
+    let rightPanel, menuPanel
     if (!list || !list.length) {
       if (application  ||  navigator.isConnected  &&  utils.getType(resource) === ORGANIZATION) {
         if (isLoading)
@@ -953,29 +957,29 @@ class MessageList extends Component {
     let stepIndicator = this.getStepIndicator(context)
     let isContext = resource  &&  utils.isContext(utils.getType(resource))
     // Move to a separate source: also from ApplicationView
-    let assignRM
-    if (application  &&  !isRM(application) && !application.filledForCustomer  &&  !application.draft) {
-      let hasRM = application.analyst != null
-      let iconName = 'ios-person-add-outline'
-      let icolor
-      let rmStyle
-      if (hasRM) {
-        iconName = 'ios-person'
-        icolor =  isAndroid() &&  '#CA9DF2' || '#ffffff'
-        rmStyle = styles.hasRM
+    if (application) {
+      if (!isRM(application) && !filledForCustomer  &&  !isApplicationDraft) {
+        let hasRM = application.analyst != null
+        let iconName = 'ios-person-add-outline'
+        let icolor
+        let rmStyle
+        if (hasRM) {
+          iconName = 'ios-person'
+          icolor =  isAndroid() &&  '#CA9DF2' || '#ffffff'
+          rmStyle = styles.hasRM
+        }
+        else {
+          icolor = bankStyle.linkColor
+          rmStyle = styles.noRM
+        }
+        assignRM = <View style={styles.footer}>
+                      <TouchableOpacity onPress={() => this.assignRM(application)}>
+                        <View style={[buttonStyles.menuButton, rmStyle]}>
+                          <Icon name={iconName} color={icolor} size={30}/>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
       }
-      else {
-        icolor = bankStyle.linkColor
-        rmStyle = styles.noRM
-      }
-      assignRM = <View style={styles.footer}>
-                    <TouchableOpacity onPress={() => this.assignRM(application)}>
-                      <View style={[buttonStyles.menuButton, rmStyle]}>
-                        <Icon name={iconName} color={icolor} size={30}/>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-
     }
 
     if (!content) {
@@ -1040,7 +1044,6 @@ class MessageList extends Component {
     let sepStyle = { height: 1, backgroundColor: 'transparent' }
     if (!allLoaded  && !navigator.isConnected  &&  isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
-    let actionSheet = (!hideTextInput || application.filledForCustomer) && this.renderActionSheet()
     let network
     if (originatingMessage)
        network = <NetworkInfoProvider connected={isConnected} resource={resource} online={onlineStatus} />
@@ -1098,34 +1101,18 @@ class MessageList extends Component {
     }
     let navBarMenu
     let separator = getContentSeparator(bankStyle)
+    let progressInfo = <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
     if (menuIsShown) {
-      navBarMenu = this.showMenu(this.props, navigator)
-      return (
-        <PageView style={[platformStyles.container, bgStyle, {justifyContent: 'flex-start', flexDirection: 'row'}]} separator={separator} bankStyle={bankStyle}>
-          <View style={platformStyles.pageMenu}>
-            {navBarMenu}
-          </View>
-          <View style={platformStyles.pageContentWithMenu}>
-            {backgroundImage}
-            {network}
-            <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
-            <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
-            {stepIndicator}
-            <View style={ sepStyle } />
-            {content}
-            {qrcode}
-            {actionSheet}
-            {alert}
-            {assignRM}
-          </View>
-        </PageView>
-      )
+      navBarMenu = <View style={{flex: 1, height: '100%', backgroundColor: 'transparent'}}>
+                     {this.showMenu(this.props, navigator)}
+                   </View>
     }
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
+        {navBarMenu}
         {backgroundImage}
         {network}
-        <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
+        {progressInfo}
         <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
         {stepIndicator}
         <View style={ sepStyle } />
@@ -1163,29 +1150,6 @@ class MessageList extends Component {
     return
     if (!utils.getMe()._showStepIndicator ||  !context  ||  !context._formsTypes)
       return
-// const customStyles = {
-//   stepIndicatorSize: 25,
-//   currentStepIndicatorSize:30,
-//   separatorStrokeWidth: 2,
-//   currentStepStrokeWidth: 3,
-//   stepStrokeCurrentColor: '#fe7013',
-//   stepStrokeWidth: 3,
-//   stepStrokeFinishedColor: '#fe7013',
-//   stepStrokeUnFinishedColor: '#aaaaaa',
-//   separatorFinishedColor: '#fe7013',
-//   separatorUnFinishedColor: '#aaaaaa',
-//   stepIndicatorFinishedColor: '#fe7013',
-//   stepIndicatorUnFinishedColor: '#ffffff',
-//   stepIndicatorCurrentColor: '#ffffff',
-//   stepIndicatorLabelFontSize: 13,
-//   currentStepIndicatorLabelFontSize: 13,
-//   stepIndicatorLabelCurrentColor: '#fe7013',
-//   stepIndicatorLabelFinishedColor: '#ffffff',
-//   stepIndicatorLabelUnFinishedColor: '#aaaaaa',
-//   labelColor: '#999999',
-//   labelSize: 13,
-//   currentStepLabelColor: '#fe7013'
-// }
     const { list, step, bankStyle } = this.state
     let rgb = utils.hexToRgb(bankStyle.linkColor)
     rgb = Object.values(rgb).join(',')
@@ -1214,17 +1178,10 @@ class MessageList extends Component {
     const forms = model.forms
     let allSteps = forms.length
     let startingPosition = Math.floor(context._formsTypes.length / MAX_STEPS) * MAX_STEPS
-    // let labels = []
-    // for (let i=startingPosition, j=0; i<allSteps  &&  j<MAX_STEPS; j++, i++) {
-    //   if (i === context._formsTypes - 1)
-    //     labels.push(utils.getModel(model.forms[i]).title)
-    // }
-    // let number
     let stepCount
     if (allSteps < MAX_STEPS)
       stepCount = allSteps
     else {
-      let lastFormR
       for (let i=list.length - 1; i>=0; i--) {
         let l = list[i]
         if (l[TYPE] === FORM_REQUEST) {
@@ -1275,29 +1232,35 @@ class MessageList extends Component {
   getActionSheetItems() {
     const { resource } = this.props
     let application = this.state.application || this.props.application
+    const { additionalForms, productList } = this.state
     const buttons = []
     const push = btn => buttons.push({ ...btn, index: buttons.length })
-
+    let isApplicationDraft
     if (application) {
-      if ((!isRM(application) && !application.filledForCustomer) ||  !this.state.additionalForms)//this.hasAdditionalForms(application))
-        return
+      if ((!isRM(application) && !application.filledForCustomer) ||  !additionalForms) { //this.hasAdditionalForms(application))
+        if (application.draft)
+          isApplicationDraft = true
+        else
+          return
+      }
+      else {
+        push({
+          title: translate('formChooser'),
+          callback: () => this.chooseFormForApplication()
+        })
 
-      push({
-        title: translate('formChooser'),
-        callback: () => this.chooseFormForApplication()
-      })
+        push({
+          title: translate('cancel'),
+          callback: () => {}
+        })
 
-      push({
-        title: translate('cancel'),
-        callback: () => {}
-      })
-
-      return buttons
+        return buttons
+      }
     }
 
     let me = utils.getMe()
-    let isDraft = me.isEmployee  &&  utils.getId(this.props.resource) === utils.getId(me.organization)
-    if (this.state.productList) {
+    let isDraft = isApplicationDraft || (me.isEmployee  &&  utils.getId(resource) === utils.getId(me.organization))
+    if (productList  &&  !isApplicationDraft) {
       let title
       if (isDraft)
         title = 'prefillTheProduct'
@@ -1325,7 +1288,9 @@ class MessageList extends Component {
     if (isDraft) {
       let { list, context, currentContext } = this.state
       let ctx = currentContext || context
-      if (ctx  &&  list  &&  list[list.length - 1][TYPE] !== PRODUCT_REQUEST) {
+      if (!ctx && application)
+        ctx = application._context
+      if (ctx  &&  list  &&  list.length &&  list[list.length - 1][TYPE] !== PRODUCT_REQUEST) {
         push({
           title: translate('submitDraft', translate(utils.getModel(ctx.requestFor))),
           callback: () => {
@@ -1543,7 +1508,7 @@ class MessageList extends Component {
   generateMenu(show) {
     if (!show || !this.ActionSheet)
       return <View/>
-    let home = utils.getMe().isEmployee  &&  this.addHomeButton()
+    let home = utils.getMe().isEmployee  &&  !this.state.noChat && this.addHomeButton()
 
     return  <View style={{flexDirection: 'row'}}>
               {home}
@@ -1557,8 +1522,10 @@ class MessageList extends Component {
     let application = this.state.application || this.props.application
 
     if (application) {
-      if ((!isRM(application) && !application.filledForCustomer)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
-        return
+      if (!application.draft) {
+        if ((!isRM(application) && !application.filledForCustomer)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
+          return
+      }
     }
     return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />

@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import t from 'tcomb-form-native'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
+import ActionSheet from 'react-native-actionsheet'
 
 import {
   View,
@@ -174,6 +175,7 @@ class NewResource extends Component {
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
+           this.state.enumProp !== nextState.enumProp        ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.recalculateMode !== nextState.recalculateMode ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo   ||
@@ -1212,7 +1214,7 @@ if (r.url)
             Actions.getRequestedProperties({resource: params.resource, originatingResource: originatingMessage, additionalInfo: params.additionalInfo})
         }})
       }
-      this.state.doTable = null
+      // this.state.doTable = null
     }
     let content =
       <ScrollView style={contentStyle}
@@ -1301,11 +1303,17 @@ if (r.url)
     }
     if (!isRegistration) {
       contentSeparator.width = utils.getContentWidth(NewResource)
+      let { enumProp } = this.state
+      let actionSheet = this.renderActionSheet()
+
       return <PageView style={[platformStyles.container, styles.message]} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}
+               {actionSheet}
+               <View onLayout={
+                 enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+               }/>
              </PageView>
-
     }
 
     let title = <View style={styles.logo}>
@@ -1314,9 +1322,9 @@ if (r.url)
 
 
     return (
-      <View style={{height: height, width: width, backgroundColor: bankStyle.BACKGROUND_COLOR}}>
+      <View style={{height, width, backgroundColor: bankStyle.BACKGROUND_COLOR}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
-        <View style={{justifyContent: 'center', alignItems: 'center', height: height}}>
+        <View style={{justifyContent: 'center', alignItems: 'center', height}}>
           {title}
           {content}
         </View>
@@ -1647,6 +1655,124 @@ if (r.url)
     properties.forEach((p) => {
       this.state.resource[p] = value[p];
     })
+  }
+  renderActionSheet() {
+    const buttons = this.getActionSheetItems()
+    // if (!buttons || !buttons.length) return
+    const { enumProp, resource } = this.state
+    const { bankStyle } = this.props
+    let titles = buttons && buttons.map((b) => b.title) || []
+    // let titles = buttons && buttons.map((b) => <Text style={{color: 'darkred'}}>{b.title}</Text>) || []
+    // let titles = [
+    //   'Apple',
+    //   <Text style={{color: 'yellow'}}>Banana</Text>,
+    //   'Watermelon',
+    //   <Text style={{color: 'red'}}>Durian</Text>,
+    //   'Cancel',
+    // ]
+    let styles = {
+      titleBox: {
+        width: 780,
+        height: 40,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        backgroundColor: '#eee',
+        color: bankStyle.linkColor
+      },
+      titleText: {
+        fontSize: 20,
+        color: bankStyle.accent
+      },
+      overlay: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        opacity: 0.3,
+        backgroundColor: '#000'
+      },
+      wrapper: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      body: {
+        // flex: 1,
+        width: 780,
+        alignItems: 'center',
+        alignSelf: 'flex-end',
+        backgroundColor: 'transparent'
+      },
+      buttonBox: {
+        width: 780,
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff'
+      },
+      buttonText: {
+        fontSize: 18
+      },
+      cancelButtonBox: {
+        width: 780,
+        height: 50,
+        // borderRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+        marginTop: 6,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'aliceblue'
+      }
+    }
+    let model = utils.getModel(resource[TYPE])
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        tintColor={bankStyle.linkColor}
+        styles={styles}
+        options={titles}
+        title={enumProp && translate(model.properties[enumProp], model)}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          buttons[index].callback && buttons[index].callback(enumProp, index)
+        }}
+      />
+    )
+  }
+  getActionSheetItems() {
+    const { enumProp, resource } = this.state
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
+    const buttons = []
+    if (!enumProp) {
+      push({
+        title: translate('cancel'),
+        callback: () => this.setState({enumProp: null})
+      })
+      return buttons
+    }
+    let { ref } = utils.getModel(resource[TYPE]).properties[enumProp]
+    let enumList = utils.getModel(ref).enum
+    if (!enumList) return []
+
+    enumList.forEach(elm => push({
+      title: utils.translateEnum(elm),
+      callback: (prop, index) => {
+        let { id, title } = enumList[index]
+        this.setChosenValue(enumProp, {id: `${ref}_${id}`, title })
+        this.setState({enumProp: null})
+      }
+    }))
+    if (buttons.length)
+      push({
+        title: translate('cancel'),
+        callback: () => this.setState({enumProp: null})
+      })
+
+    return buttons
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
