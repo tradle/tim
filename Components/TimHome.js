@@ -347,7 +347,7 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    let {action, activity, isConnected, models, me,
+    let {action, activity, isConnected, models, me, currentContext,
         isRegistration, provider, termsAccepted, url, importingData} = params
     var {navigator, bankStyle} = this.props
     let { wasDeepLink } = this.state
@@ -369,7 +369,7 @@ class TimHome extends Component {
       utils.setModels(models);
       return
     case 'applyForProduct':
-      this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink})
+      this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink, currentContext})
       break
     case 'openURL':
       this.setState({isDeepLink: true})
@@ -462,7 +462,6 @@ class TimHome extends Component {
         sortProperty: 'lastMessageTime',
         officialAccounts: true,
         bankStyle,
-        noMenu: true,
         locale,
         currency
       };
@@ -623,7 +622,7 @@ class TimHome extends Component {
       })
   }
 
-  showChatPage({resource, formStub, termsAccepted, action, showProfile}) {
+  showChatPage({resource, formStub, termsAccepted, action, showProfile, currentContext}) {
     if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(resource, ENV.landingPage)
       return
@@ -690,6 +689,7 @@ class TimHome extends Component {
         },
         passProps: {
           resource,
+          currentContext,
           modelName: MESSAGE,
           currency,
           bankStyle:  style

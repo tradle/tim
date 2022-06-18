@@ -941,7 +941,7 @@ if (r.url)
     }
 
     let meta =  this.props.model
-    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark, noChat } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -1196,6 +1196,8 @@ if (r.url)
 
     }
     let contentStyle = {backgroundColor: 'transparent', width, alignSelf: 'center', paddingTop: 10}
+    if (noChat)
+      contentStyle.height = '100%'
     if (arrayItems) {
       arrayItems = <View style={styles.arrayItems}>
                      {arrayItems}
@@ -1270,7 +1272,7 @@ if (r.url)
                    </View>
       }
       else
-        errors = <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
+        errors = !noChat && <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
     }
     const droppable = Object.keys(properties).find(key => {
       const prop = properties[key]
@@ -1305,6 +1307,16 @@ if (r.url)
       contentSeparator.width = utils.getContentWidth(NewResource)
       let { enumProp } = this.state
       let actionSheet = this.renderActionSheet()
+      if (noChat) {
+        return <View style={[styles.message, {height: '100%', paddingBottom: 50}]}>
+                 {errors}
+                 {content}
+                 {actionSheet}
+                 <View onLayout={
+                   enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+                 }/>
+               </View>
+      }
 
       return <PageView style={[platformStyles.container, styles.message]} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
@@ -1322,7 +1334,7 @@ if (r.url)
 
 
     return (
-      <View style={{height, width, backgroundColor: bankStyle.BACKGROUND_COLOR}}>
+      <View style={{height: noChat ? '100%' : height, width, backgroundColor: bankStyle.BACKGROUND_COLOR}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', alignItems: 'center', height}}>
           {title}

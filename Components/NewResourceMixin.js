@@ -1392,7 +1392,7 @@ const NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle } = this.props
+    let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle, noChat } = this.props
     let { required, errors, component } = params
     let { missedRequiredOrErrorValue, inFocus, fixedProps, recalculateMode } = this.state
     let resource = params.resource ||  this.state.resource
@@ -1433,6 +1433,8 @@ const NewResourceMixin = {
                <RefPropertyEditor {...this.props}
                              resource={resource}
                              onChange={onChange}
+                             customChooser={this.customChooser.bind(this)}
+                             noChat={noChat}
                              prop={prop}
                              bookmark={bookmark}
                              photo={this.state[pName + '_photo']}
@@ -1450,6 +1452,9 @@ const NewResourceMixin = {
              </View>
              {check}
             </View>
+  },
+  customChooser(enumProp) {
+    this.setState({enumProp})
   },
   addGoalSeek(prop) {
     let { resource, fixedProps, recalculateMode } = this.state
@@ -1600,7 +1605,7 @@ const NewResourceMixin = {
       }
     }
     let state = {
-      resource: resource,
+      resource,
       prop: propName
     }
     if (!doDelete) {

@@ -43,14 +43,20 @@ export default StyleSheet.create({
     // marginTop: 10
   },
   pageMenu: {
-    width: 300,
     // flex: 1,
+    width: 300,
     borderRightWidth: 2,
+    // height: '100%',
     backgroundColor: 'transparent',
-    borderRightColor: '#f0f0f0'
+    borderRightColor: '#eee'
   },
   pageContentWithMenu: {
-    flex: 3,
+    flex: 1,
+    // flex: 3,
+    // width: 800,
+    // paddingRight: 10,
+    zIndex: 1000,
+    // marginLeft: 20
   }
 })
 

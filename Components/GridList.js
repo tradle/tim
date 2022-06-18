@@ -230,6 +230,8 @@ class GridList extends Component {
   }
   _handleBacklink(props) {
     let { resource, prop, application, backlinkList } = props
+    if (!resource)
+      return
     if (resource[prop.name]) {
       if (backlinkList)
         this.state.dataSource = this.state.dataSource.cloneWithRows(backlinkList)
@@ -244,7 +246,7 @@ class GridList extends Component {
 
     if (application) {
       if (prop.name === this.props.prop.name) {
-        if (!application[prop.name]  &&  !this.props.application[prop.name])
+        if (!application[prop.name]  &&  (!this.props.application || !this.props.application[prop.name]))
           return
         let rows = (!application[prop.name]  &&  [])  ||  application[prop.name]
         this.state.dataSource = this.state.dataSource.cloneWithRows(rows)
@@ -256,7 +258,7 @@ class GridList extends Component {
       else
         this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
     }
-    else {
+    else if (resource) {
       let params = this.getParamsForBacklinkList(props)
       Actions.list(params)
     }
@@ -264,6 +266,7 @@ class GridList extends Component {
   getParamsForBacklinkList(props) {
     let { modelName, _readOnly, sortProperty,
           resource, prop, application, isAggregation, isChooser, listView } = props
+
     let params = {
       modelName: modelName,
       // limit: 10
@@ -336,6 +339,7 @@ class GridList extends Component {
       });
       return
     }
+
     if (isMenu  &&  list) {
       this.state.isLoading = false
       this.state.dataSource = this.state.dataSource.cloneWithRows(list)
@@ -352,7 +356,7 @@ class GridList extends Component {
         // Actions.listModels({modelName})
       }
       if (isBacklink) { //  &&  application) {
-        if (resource[prop.name]) {
+        if (resource && resource[prop.name]) {
           this.state.isLoading = false
           // Case when came from the stats page.
           if (checkFilter  &&  backlinkList)
@@ -375,6 +379,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
         return
       }
     }
+
+    if (!resource)
+      return
     let params = this.getParamsForBacklinkList(this.props)
     StatusBar.setHidden(false);
     if (isBacklink)
@@ -1227,7 +1234,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, isMenu, modelName, prop, lazy, application, bookmark,
+    let { isModel, isBacklink, isForwardlink, isMenu, modelName, prop, lazy, application, bookmark, noChat,
           exploreData, currency, locale, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1348,6 +1355,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 search={search}
                 resource={resource}
+                noChat={noChat}
                 chosen={this.state.chosen} />
       )
     }
@@ -1675,7 +1683,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { filter, dataSource, isLoading, list, isConnected,
           allLoaded, serverOffline, allowToAdd } = state
     let { isChooser, modelName, isModel, application, search, _readOnly,
-          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle, isMenu } = props
+          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle, isMenu, noChat } = props
     let model = utils.getModel(modelName);
     let me = utils.getMe()
 
@@ -1690,14 +1698,16 @@ console.log('GridList.componentWillMount: filterResource', resource)
       if (isBacklink  &&  application)
         showLoadingIndicator = false
       else if (isBacklink  ||  isForwardlink) {
-        let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
-        let cnt = resource['_' + pName + 'Count']
-        if (!cnt) {
-          if (!resource[pName]  || !resource[pName].length)
+        if (resource) {
+          let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
+          let cnt = resource['_' + pName + 'Count']
+          if (!cnt) {
+            if (!resource[pName]  || !resource[pName].length)
+              showLoadingIndicator = false
+          }
+          else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
             showLoadingIndicator = false
-        }
-        else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
-          showLoadingIndicator = false
+          }
         }
       }
       if (showLoadingIndicator)
@@ -1781,6 +1791,18 @@ console.log('GridList.componentWillMount: filterResource', resource)
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : uiUtils.getContentSeparator(bankStyle)
     let contentSeparator = getContentSeparator(bankStyle)
+    if (noChat) {
+      return (
+        <View style={isBacklink || isForwardlink || isMenu ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu && contentSeparator} bankStyle={bankStyle}>
+          {network}
+          {searchBar}
+          {content}
+          {!isEmptyItemsTab && loading}
+          {footer}
+          {actionSheet}
+        </View>
+      )
+    }
     return (
       <PageView style={isBacklink || isForwardlink || isMenu ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu && contentSeparator} bankStyle={bankStyle}>
         {network}
