@@ -328,7 +328,8 @@ class FormRequestRow extends Component {
     let me = utils.getMe()
     if (!me.isEmployee ||  !shareables) {
       let isMyProduct = isFormRequest  &&  utils.isMyProduct(resource.form)
-      if (prop  ||  isMyProduct  ||  (application  &&  !this.canEmployeePrefill(resource))  ||  resource._documentCreated)
+      let notLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource) && !application.draft)
+      if (prop  ||  isMyProduct  ||  notLink)
         messageBody = msgContent
       else
         messageBody = <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}}>
@@ -812,7 +813,7 @@ class FormRequestRow extends Component {
 
     let switchToContext = me.isEmployee  &&  context  &&  product  && context.to.organization  &&  context.to.organization.id === me.organization.id
 
-    let isReadOnly = application != null
+    let isReadOnly = application != null && !application.draft
 
     let canPrefill = this.canEmployeePrefill(resource)
     if (canPrefill)
@@ -820,9 +821,7 @@ class FormRequestRow extends Component {
     else if (!isReadOnly)
       isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
 
-    let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct  || resource.form === PRODUCT_REQUEST
-
-    let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource))
+    let noLink = resource._documentCreated ||  (application  &&  !this.canEmployeePrefill(resource) && !application.draft)
     let params = { resource, message, bankStyle, noLink }
     let messagePart = parseMessage(params)
     if (typeof messagePart === 'string')
@@ -1065,7 +1064,7 @@ class FormRequestRow extends Component {
   }
   canEmployeePrefill(resource) {
     let { application } = this.props
-    return !resource._documentCreated  &&  application  &&  utils.isRM(application)
+    return !resource._documentCreated  &&  application  &&  (utils.isRM(application) || application.draft || application.filledForCustomer)
   }
   moveToTheNextForm(form) {
    Alert.alert(
