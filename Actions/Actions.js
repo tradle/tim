@@ -25,6 +25,7 @@ var asyncActions = [
   'getItemsToMatch',
 
   'refreshApplication',
+  'getApplication',
 
   'removeIdentity',
   'showIdentityList',
