@@ -1485,6 +1485,11 @@ var Store = Reflux.createStore({
         }
         else if (utils.isReadOnlyChat(r))   //  &&  r._readOnly)
           this.addMessagesToChat(utils.getId(r.from), r, true)
+        else if (me.isEmployee  &&  r.from.organization) {
+          // debugger
+          let orgId = utils.getId(r.from.organization)
+          this.addMessagesToChat(orgId, r, true)
+        }
         if (r.contextId)
           contextIdToResourceId[r.contextId] = r
       }
@@ -1595,7 +1600,7 @@ var Store = Reflux.createStore({
           }
           productToForms[product][r.form] = i
         }
-        if (utils.isContext(r)) {
+        if (utils.isContext(r) && !me.isEmployee) {
           let productIdx = productApp[product]
           if (productIdx  &&  !removed) {
             removeMsg.push(productIdx)
@@ -2389,7 +2394,7 @@ var Store = Reflux.createStore({
       me.employeePass = await this.onGetItem({resource: me.employeePass, noTrigger: true})
       if (me.employeePass.counterparty)
         me.counterparty = me.employeePass.counterparty
-      await this.onGetMenu({noTrigger: true, updateMenu: true})
+      await this.onGetMenu({updateMenu: true})
     }
     return results
       .filter(r => r.state === 'fulfilled')
@@ -4219,8 +4224,22 @@ if (!res[SIG]  &&  res._message)
     let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
     Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(utils.getDisplayName({resource}))}`)
   },
+  async onGetApplication(params) {
+    let {resource, action, backlink, forwardlink, filterResource, prop, isBacklink} = params
+    if (!filterResource)
+      return await this.getApplication(params)
+    let p = _.cloneDeep(params)
+    p.noTrigger = true
+    let { list } = await this.searchServer(p)
+    if (!list || !list.length) return
+    p.resource = list[0]
+    if (isBacklink)
+      p.backlink = prop
+    let application =  await this.getApplication(p)
+    this.trigger({action: 'getApplication', resource, application})
+  },
   async getApplication(params) {
-    let {resource, action, backlink, forwardlink} = params
+    let {resource, action, backlink, forwardlink, noChat} = params
     let blProp = backlink ||  forwardlink
     let props = utils.getModel(APPLICATION).properties
     let prop
@@ -4298,7 +4317,7 @@ if (!res[SIG]  &&  res._message)
             r[name] = active.concat(inactive)
           }
         }
-        if (blProp !== prop) {
+        if (blProp !== prop && !noChat) {
           list = await this.getObjects(r[blProp.name], blProp)
           if (list.length) {
             let m = utils.getModel(blProp.items.ref)
@@ -4354,8 +4373,8 @@ if (!res[SIG]  &&  res._message)
         delete c.from
         let rep = this.getRepresentative(retParams.provider)
         let isRM = utils.isRM(r)
-        // debugger
-        if (isRM || r.filledForCustomer) {
+        // Do not allow the third party employee to create application from another one
+        if (!me.counterparty && (isRM || r.filledForCustomer)) {
           retParams.nextStep = {
             ...c,
             associatedResource: utils.getId(certificate),
@@ -4410,7 +4429,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
   },
   async getObjects(list, prop) {
-    if (!list.length)
+    if (!list || !list.length)
       return []
     let links
     if (prop) {
@@ -5351,6 +5370,9 @@ if (!res[SIG]  &&  res._message)
     async function handleDocumentCreated(returnVal) {
       let rtype = utils.getType(returnVal)
       if (rtype === FORM_REQUEST) {
+        // Check if this Form request was sent to me and not to another employee
+        if (returnVal.to.id !== utils.getId(utils.getMe()))
+          return
         let ptype = returnVal.product
         if (ptype === REFRESH_PRODUCT)
           await handleRefresh()
@@ -5760,8 +5782,8 @@ if (!res[SIG]  &&  res._message)
       }
       await this.insurePublishingIdentity(org)
     }
-    await this.onAddChatItem({resource, noTrigger: true,  })
-    this.trigger({ action: 'applyForProduct', provider: org })
+    resource = await this.onAddChatItem({resource, noTrigger: true})
+    this.trigger({ action: 'applyForProduct', provider: org, currentContext: resource })
   },
   async onGetIdentity({prop, permalink, link, firstName, lastName }) {
     let identityId = utils.makeId(IDENTITY, permalink, link)
@@ -6963,8 +6985,11 @@ if (!res[SIG]  &&  res._message)
           let contextIdToContext = {}
           if (/*res[TYPE] === FORM_REQUEST  &&  */ res._context) {
             context = res._context
-            if (context.contextId)
+            if (context.contextId) {
+              let c = result.find(r => r[TYPE] === PRODUCT_REQUEST && r.contextId === context.contextId)
+              if (c) context = c
               continue
+            }
             let c = this._getItem(context)
             if (!c) {
               let cId = utils.getId(context)
@@ -9002,10 +9027,12 @@ if (!res[SIG]  &&  res._message)
       return
     if (!modelName  &&  resource)
       modelName = utils.getType(resource)
-    if (!updateMenu  &&  me.menu && me.menu.length) {
+    if (me.menu && me.menu.length) {
       if (!noTrigger)
         this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
-      return
+      if (!updateMenu)
+        return
+      noTrigger = true
     }
     let org = this.getRepresentative(me.organization)
     // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
