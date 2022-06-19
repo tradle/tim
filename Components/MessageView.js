@@ -69,7 +69,8 @@ class MessageView extends Component {
       backlink: tab,
       // showDetails: true,
       showDetails: false,
-      bankStyle: bankStyle || defaultBankStyle
+      bankStyle: bankStyle || defaultBankStyle,
+      menuIsShown: utils.getMe().isEmployee
     };
     let currentRoutes = navigator.getCurrentRoutes();
     let len = currentRoutes.length;
@@ -127,12 +128,12 @@ class MessageView extends Component {
       this.verifyOrCreateError()
       return
     }
-    if (action === 'getMenu') {
-      if (params.modelName !== utils.getType(this.props.resource)) return
-      const { menuIsShown=false } = this.state
-      this.setState({menuIsShown: !menuIsShown})
-      return
-    }
+    // if (action === 'getMenu') {
+    //   if (params.modelName !== utils.getType(this.props.resource)) return
+    //   const { menuIsShown=false } = this.state
+    //   this.setState({menuIsShown: !menuIsShown})
+    //   return
+    // }
     if (action === 'getItem') {
       if (error) {
         Alert.alert(error)
