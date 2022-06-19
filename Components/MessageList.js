@@ -1061,7 +1061,7 @@ class MessageList extends Component {
       }
     }
 
-    if (!content) {
+    if (!content  &&  !noChat) {
       let h = utils.dimensions(MessageList).height
       let maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
@@ -1185,13 +1185,8 @@ class MessageList extends Component {
                    </View>
     }
     if (noChat) {
-      return (
-        <PageView style={[platformStyles.container, bgStyle, {alignItems: 'center', height: '100%'}]} separator={separator} bankStyle={bankStyle}>
-          {backgroundImage}
-          <ChatContext chat={resource} noChat={noChat} form={lastFr && lastFr.form} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
-          <View style={{height: '100%', alignSelf: 'center', width: '100%', flexDirection:'row'}}>
-            {navBarMenu}
-            <View style={[platformStyles.pageContentWithMenu, {flex: 3}]}>
+      if (content)
+        content = <View style={[platformStyles.pageContentWithMenu, {flex: 3}]}>
               {network}
               {progressInfo}
               <View style={ sepStyle } />
@@ -1201,7 +1196,15 @@ class MessageList extends Component {
               {alert}
               {assignRM}
             </View>
-            <View style={{flex: 1}}>
+
+      return (
+        <PageView style={[platformStyles.container, bgStyle, {alignItems: 'center', height: '100%'}]} separator={separator} bankStyle={bankStyle}>
+          {backgroundImage}
+          <ChatContext chat={resource} noChat={noChat} form={lastFr && lastFr.form} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
+          <View style={{height: '100%', alignSelf: 'center', width: '100%', flexDirection:'row'}}>
+            {navBarMenu}
+            {content}
+            <View style={{flex: content ? 1 : 3}}>
               {rightPanel}
               {menuPanel}
             </View>
@@ -1256,10 +1259,14 @@ class MessageList extends Component {
 
   getNoChatParams() {
     let { currentContext:context, application, list } = this.state
+    if (!application)
+      application = this.props.application
+
     if (!application &&  (!list || !list.length))
       return {}
     let l, lastFr
     let contextId = context ? context : application._context
+
     if (list) {
       l = list.filter(r => r._context  &&  r._context.contextId === context.contextId).reverse()
       lastFr = l.find(r => r[TYPE] === FORM_REQUEST && !r._documentCreated)
@@ -1269,13 +1276,13 @@ class MessageList extends Component {
       lastFr = l.reverse().find(r => utils.getType(r) === FORM_REQUEST)
       this.state.list = list
     }
-    // let lastFr = l.find(r => r[TYPE] === FORM_REQUEST && !r._documentCreated)
+      // let lastFr = l.find(r => r[TYPE] === FORM_REQUEST && !r._documentCreated)
     let forms = l.filter(r => utils.getType(r) !== PRODUCT_REQUEST  &&  utils.isSubclassOf(utils.getModel(utils.getType(r)), FORM))
     forms = _.uniqBy(forms, ROOT_HASH)
-    if (lastFr)
-      return { lastFr, forms }
 
-    lastFr = list.find(r => r._context  &&  r._context.contextId === context.contextId  &&  r[TYPE] === APPLICATION_SUBMITTED)
+    let applicationSubmitted = list.find(r => r._context  &&  r._context.contextId === context.contextId  &&  r[TYPE] === APPLICATION_SUBMITTED)
+    if (applicationSubmitted)
+      lastFr = applicationSubmitted
     if (lastFr)
       return {lastFr, forms }
     return { forms }
@@ -1349,17 +1356,19 @@ class MessageList extends Component {
       }
       let styles = createStyles({ bankStyle })
       // debugger
-      formPanel = <NewResource
-               navigator={navigator}
-               model={utils.getLensedModelForType(m.id)}
-               resource={form}
-               originatingMessage={formRequest}
-               chat={resource}
-               country={country}
-               currency={currency || utils.getCompanyCurrency()}
-               locale={locale || utils.getCompanyLocale()}
-               bankStyle={bankStyle}
-               noChat={true}/>
+      formPanel = <View style={{flex: 2, height: '100%', paddingLeft: 10}}>
+                    <NewResource
+                       navigator={navigator}
+                       model={utils.getLensedModelForType(m.id)}
+                       resource={form}
+                       originatingMessage={formRequest}
+                       chat={resource}
+                       country={country}
+                       currency={currency || utils.getCompanyCurrency()}
+                       locale={locale || utils.getCompanyLocale()}
+                       bankStyle={bankStyle}
+                       noChat={true}/>
+                  </View>
     }
 
     let rightPanel
@@ -1382,11 +1391,7 @@ class MessageList extends Component {
     if (actionSheet)
       menu = this.generateMenu(true)
     return {
-      centerPanel: (
-             <View style={{flex: 2, height: '100%', paddingLeft: 10}}>
-               {formPanel}
-             </View>
-             ),
+      centerPanel: formPanel,
       rightPanel,
       menuPanel: (
              <View style={{position: 'absolute', bottom: 60, right: 20}}>
