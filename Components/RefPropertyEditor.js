@@ -237,8 +237,14 @@ class RefPropertyEditor extends Component {
     else {
       let ref = prop.ref  ||  prop.items.ref
       let refM = utils.getModel(ref)
-      if (!utils.isEnum(ref)  &&  !utils.isSubclassOf(refM, TREE)  &&  (prop.inlined  ||  refM.inlined)) {
+      let isEnum = utils.isEnum(ref)
+      if (!isEnum  &&  !utils.isSubclassOf(refM, TREE)  &&  (prop.inlined  ||  refM.inlined)) {
         actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
+                       {content}
+                     </TouchableOpacity>
+      }
+      else if (isEnum  &&  this.props.customChooser  &&  refM.enum.length < 20) {
+        actionItem = <TouchableOpacity onPress={() => this.props.customChooser(prop.name)}>
                        {content}
                      </TouchableOpacity>
       }
