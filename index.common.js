@@ -400,18 +400,18 @@ var NavigationBarRouteMapper = {
                </TouchableOpacity>
 
     let menu
-    let { noMenu, modelName, model, resource } = route.passProps
-    let me = utils.getMe()
+    // let { noMenu, modelName, model, resource } = route.passProps
+    // let me = utils.getMe()
 
-    if (isWeb()  &&  me  &&  me.isEmployee && !noMenu && NO_MENU_COMPONENTS.indexOf(componentName) === -1) {
-      menu = <TouchableOpacity
-               hitSlop={HIT_SLOP}
-               onPress={() => Actions.getMenu({resource, modelName: modelName || (model && model.id)})}>
-               <View style={platformStyles.navBarRightButton}>
-                 <Icon name='md-menu' size={30} color={color} style={platformStyles.navBarIcon}/>
-               </View>
-             </TouchableOpacity>
-    }
+    // if (isWeb()  &&  me  &&  me.isEmployee && !noMenu && NO_MENU_COMPONENTS.indexOf(componentName) === -1) {
+    //   menu = <TouchableOpacity
+    //            hitSlop={HIT_SLOP}
+    //            onPress={() => Actions.getMenu({resource, modelName: modelName || (model && model.id)})}>
+    //            <View style={platformStyles.navBarRightButton}>
+    //              <Icon name='md-menu' size={30} color={color} style={platformStyles.navBarIcon}/>
+    //            </View>
+    //          </TouchableOpacity>
+    // }
     let refreshApplication
     if (componentName === 'ApplicationView'  &&  route.refreshHandler) {
       refreshApplication = <TouchableOpacity

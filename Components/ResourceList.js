@@ -10,6 +10,7 @@ import {
   Modal
   // Text,
 } from 'react-native'
+
 import PropTypes from 'prop-types';
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -92,8 +93,9 @@ class ResourceList extends Component {
       }
     })
 
-    let { prop, filter, serverOffline, navigator, bankStyle,
+    let { prop, filter, serverOffline, navigator, bankStyle, modelName,
           multiChooser, isRegistration, resource, chat, onDone } = this.props
+    let me = utils.getMe()
     this.state = {
       isLoading: true,
       dataSource,
@@ -109,6 +111,7 @@ class ResourceList extends Component {
       hasPartials: false,
       hasBookmarks: false,
       hasTestProviders: false,
+      menuIsShown: me.menu && modelName === ORGANIZATION,
       bankStyle
     };
     // if (props.isBacklink  &&  props.backlinkList) {
@@ -254,7 +257,7 @@ class ResourceList extends Component {
   }
 
   onListUpdate(params) {
-    let { navigator } = this.props
+    let { navigator, modelName } = this.props
     let action = params.action;
     if (action === 'addApp') {
       let routes = navigator.getCurrentRoutes()
@@ -266,9 +269,7 @@ class ResourceList extends Component {
       return
     }
     if (action === 'getMenu') {
-      if (params.modelName !== this.props.modelName) return
-      const { menuIsShown=false } = this.state
-      this.setState({menuIsShown: !menuIsShown})
+      this.setState({menuIsShown: utils.getMe().isEmployee && modelName === ORGANIZATION})
       return
     }
     if (params.error)
@@ -301,7 +302,7 @@ class ResourceList extends Component {
       this.setState({isConnected: params.isConnected})
       return
     }
-    let { modelName, officialAccounts, isDeepLink } = this.props
+    let { officialAccounts, isDeepLink } = this.props
     if (action === 'newStyles'  &&  modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
       return
@@ -530,9 +531,9 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    if (this.state.menuIsShown !== nextState.menuIsShown)
-      return true
     if (utils.resized(this.props, nextProps))
+      return true
+    if (this.state.menuIsShown !== nextState.menuIsShown)
       return true
     if (this.state.isModalOpen  !== nextState.isModalOpen)
       return true
@@ -1181,7 +1182,7 @@ class ResourceList extends Component {
           <View style={platformStyles.pageMenu}>
             {navBarMenu}
           </View>
-          <View style={platformStyles.pageContentWithMenu}>
+          <View style={{flex: 1}}>
             {network}
             {searchBar}
             <View style={(searchBar || !hasNetworkRow) &&  styles.separator} />

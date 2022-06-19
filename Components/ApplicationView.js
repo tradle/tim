@@ -84,7 +84,8 @@ class ApplicationView extends Component {
       isConnected: navigator.isConnected,
       bankStyle,
       backlink: tab,
-      checkFilter
+      checkFilter,
+      menuIsShown: utils.getMe().isEmployee
     }
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -126,10 +127,10 @@ class ApplicationView extends Component {
         templates
       })
       break
-    case 'getMenu':
-      const { menuIsShown=false } = this.state
-      this.setState({menuIsShown: !menuIsShown})
-      break
+    // case 'getMenu':
+    //   const { menuIsShown=false } = this.state
+    //   this.setState({menuIsShown: !menuIsShown})
+    //   break
     case 'exploreBacklink':
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         if (backlink.items.backlink) {
@@ -438,6 +439,7 @@ class ApplicationView extends Component {
       aspects: FACIAL_MATCH,
       dateChecked: new Date().getTime(),
       application: resource,
+      menuIsShown: true,
       status: {
         id: STATUS + '_' + status.id,
         title: status.title
