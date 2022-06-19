@@ -92,7 +92,7 @@ class VerificationRow extends Component {
 
   render() {
     let {resource, isChooser, lazy, parentResource, onSelect, search, searchCriteria,
-         prop, modelName, multiChooser, bankStyle, locale } = this.props
+         prop, modelName, multiChooser, bankStyle, locale, noChat } = this.props
     let rType = utils.getType(resource)
     let model = utils.getModel(rType);
     let isMyProduct = utils.isMyProduct(model)
@@ -351,7 +351,7 @@ vicon = null
       }
       if (dn) {
         let isProfile = parentResource  &&  parentResource[TYPE] === PROFILE
-        if (isForm  &&  isProfile) {
+        if (isForm  &&  (isProfile || noChat)) {
           titleComponent = <View style={{justifyContent: 'center'}}>
                              <Text style={styles.rTitle}>{dn}</Text>
                              <Text style={{paddingTop: 3, color: '#aaaaaa'}}>{translate(model)}</Text>
