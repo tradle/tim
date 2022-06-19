@@ -9027,13 +9027,18 @@ if (!res[SIG]  &&  res._message)
       return
     if (!modelName  &&  resource)
       modelName = utils.getType(resource)
-    if (me.menu && me.menu.length) {
+    if (!updateMenu  &&  me.menu && me.menu.length) {
       if (!noTrigger)
         this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
-      if (!updateMenu)
-        return
-      noTrigger = true
+      return
     }
+    // if (me.menu && me.menu.length) {
+    //   if (!noTrigger)
+    //     this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
+    //   if (!updateMenu)
+    //     return
+    //   noTrigger = true
+    // }
     let org = this.getRepresentative(me.organization)
     // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
     let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('sharedBookmarks'))
