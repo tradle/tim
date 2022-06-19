@@ -162,7 +162,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
     asset = list && list[0]
     if (!asset) return {}
   }
-  const { listPrice, maxBlindDiscount, allowLoan, maxDeposit=50 } = asset
+  const { listPrice, maxBlindDiscount, allowLoan } = asset
   if (netPrice) {
     if (netPrice.value !== listPrice.value) {
       form.netPrice = listPrice
@@ -187,13 +187,6 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
   if (!list || !list.length) return {}
   let costOfCapital = list[0]
 
-  let quotationDetails = []
-  let loanQuotationDetail = {}
-
-  let ftype = getType(form)
-  let model = getModel(ftype)
-  let properties = model.properties
-  let termsPropRef = properties.terms.items.ref
   let {
     deliveryFactor: configurationItems,
     minimumDeposit,
@@ -201,6 +194,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
     presentValueFactor,
     monthlyRateLease = 0,
     monthlyRateLoan = 0,
+    maxDeposit=50,
     minXIRR
   } = costOfCapital
   let vendor
@@ -236,6 +230,10 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
     form.depositPercentage = depositPercentage = maxDeposit
   if (blindDiscount > maxBlindDiscount)
     form.blindDiscount = blindDiscount = maxBlindDiscount
+
+  let ftype = getType(form)
+  let model = getModel(ftype)
+  let properties = model.properties
 
   if (fixedProps  &&  Object.keys(fixedProps).length) {
     let goalSeekProps = model.goalSeek.filter(p => fixedProps[p] == null &&  !properties[p].readOnly)
@@ -293,6 +291,9 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
   let finalBest = {}
   let valueToIterate
   let loanTermInt = loanTerm && parseInt(loanTerm.title.split(' ')[0])
+  let quotationDetails = []
+  let loanQuotationDetail = {}
+  let termsPropRef = properties.terms.items.ref
   for (let jj=0; jj<2; jj++) {
     for (let ii=0; ii<valuesToIterate.length; ii++) {
       let val = valuesToIterate[ii]
