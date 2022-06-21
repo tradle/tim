@@ -51,12 +51,12 @@ import formDefaults from '../data/formDefaults'
 
 const SEARCH_LIMIT = 10
 
-var {
+const {
   TYPE,
   ROOT_HASH,
 } = constants
 
-var {
+const {
   PROFILE,
   ORGANIZATION,
   FINANCIAL_PRODUCT,
@@ -81,7 +81,7 @@ const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const MODIFICATION = 'tradle.Modification'
 const LANGUAGE = 'tradle.Language'
 
-var excludeFromBrowsing = [
+const excludeFromBrowsing = [
   FORM,
   ENUM,
   // BOOKMARK,
@@ -110,7 +110,7 @@ var excludeFromBrowsing = [
   PROFILE
 ]
 
-var cnt = 0
+let cnt = 0
 
 class GridList extends Component {
   static propTypes = {
@@ -177,7 +177,7 @@ class GridList extends Component {
       resource: search  &&  resource,
       isGrid, //:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
       isDraft: bookmark  &&  bookmark.bookmark.draft,
-      menuIsShown: utils.getMe().menu && modelName === ORGANIZATION,
+      menuIsShown:  !isBacklink && utils.getMe().menu && modelName === ORGANIZATION,
     }
     // if (modelName === BOOKMARKS_FOLDER) {
     //   this.state.list = resource.list
@@ -487,7 +487,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let me = utils.getMe()
     if (action === 'getMenu') {
-      this.setState({menuIsShown: me.isEmployee && modelName === ORGANIZATION})
+      this.setState({menuIsShown: !isBacklink && me.isEmployee && modelName === ORGANIZATION})
       return
     }
     let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
@@ -1814,7 +1814,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       )
     }
     let navBarMenu
-    if (me.isEmployee && !isMenu) {
+    if (me.isEmployee && !isMenu && !isBacklink) {
       navBarMenu = <View style={styles.menu}>
                      {this.showMenu(this.props, navigator)}
                    </View>
