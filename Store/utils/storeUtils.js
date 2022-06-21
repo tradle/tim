@@ -692,6 +692,8 @@ const storeUtils = {
     return stub
   },
   getEmployeeBookmarks({ me, botPermalink }) {
+    if (me.counterparty)
+      return
     const from = buildRef(me)
     const etype = 'tradle.ClientOnboardingTeam'
     const amodel = getModel(APPLICATION)
