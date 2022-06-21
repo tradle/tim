@@ -142,7 +142,7 @@ class GridList extends Component {
         return true
       }
     })
-    let {resource, modelName, prop, filter, isBacklink, isChooser, isModel,
+    let {resource, modelName, prop, filter, isBacklink, isChooser, isModel, isMenu,
          serverOffline, search, bookmark, checksCategory, checkFilter} = this.props
     let model = utils.getModel(modelName)
 
@@ -177,13 +177,10 @@ class GridList extends Component {
       resource: search  &&  resource,
       isGrid, //:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
       isDraft: bookmark  &&  bookmark.bookmark.draft,
-      menuIsShown:  !isBacklink && utils.getMe().menu && modelName === ORGANIZATION,
     }
-    // if (modelName === BOOKMARKS_FOLDER) {
-    //   this.state.list = resource.list
-    //   this.state.isLoading = false
-    //   this.state.dataSource = this.state.dataSource.cloneWithRows(resource.list)
-    // }
+    let me = utils.getMe()
+    if (me.menu  &&  !isMenu  && !isBacklink)
+      this.state.navBarMenu = this.showMenu(this.props, this.props.navigator)
 
     if (props.multiChooser) {
       this.state.chosen = {}
@@ -340,7 +337,6 @@ class GridList extends Component {
       });
       return
     }
-
     if (isMenu  &&  list) {
       this.state.isLoading = false
       this.state.dataSource = this.state.dataSource.cloneWithRows(list)
@@ -487,7 +483,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let me = utils.getMe()
     if (action === 'getMenu') {
-      this.setState({menuIsShown: !isBacklink && me.isEmployee && modelName === ORGANIZATION})
+      let navBarMenu = this.showMenu(this.props, navigator)
+
+      this.setState({ navBarMenu })
       return
     }
     let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
@@ -741,7 +739,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return true
     if (this.state.checksCategory !== nextState.checksCategory)
       return true
-    if (this.state.menuIsShown !== nextState.menuIsShown)
+    if (this.state.navBarMenu !== nextState.navBarMenu)
       return true
     if (this.props.checksCategory !== nextProps.checksCategory)
       return true
@@ -1815,9 +1813,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let navBarMenu
     if (me.isEmployee && !isMenu && !isBacklink) {
-      navBarMenu = <View style={styles.menu}>
-                     {this.showMenu(this.props, navigator)}
-                   </View>
+       navBarMenu = <View style={styles.menu}>
+                      {this.state.navBarMenu}
+                    </View>
     }
     let style
     if (isBacklink || isForwardlink)
