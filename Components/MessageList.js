@@ -1795,7 +1795,8 @@ class MessageList extends Component {
     });
   }
   generateMenu(show) {
-    if (!show || !this.ActionSheet)
+    let { noChat } = this.state
+    if (noChat || !show || !this.ActionSheet)
       return <View/>
     let home = utils.getMe().isEmployee  &&  !this.state.noChat && this.addHomeButton()
 
