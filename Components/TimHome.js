@@ -49,7 +49,7 @@ try {
 } catch (err) {
   // no version info available
 }
-const actions = ['chat', 'profile', 'applyForProduct', 'r']
+const actions = ['chat', 'profile', 'applyForProduct', 'r', 'list']
 var {
   TYPE
 } = constants
@@ -343,6 +343,8 @@ class TimHome extends Component {
     if (components[afterAuthRoute.componentName].displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
+    // if (!utils.getMe().counterparty)
+    // Actions.getHomePage()
     return this.showFirstPage()
   }
 
@@ -371,6 +373,30 @@ class TimHome extends Component {
     case 'applyForProduct':
       this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink, currentContext})
       break
+    // case 'homePage':
+    //   debugger
+    //   let me = utils.getMe()
+    //   if (me.isEmployee) {
+    //     locale = utils.getCompanyLocale()
+    //     currency = utils.getCompanyCurrency()
+    //   }
+    //   let { resource } = params
+    //   navigator.push({
+    //     title: resource.message,
+    //     backButtonTitle: 'Back',
+    //     componentName: 'GridList',
+    //     passProps: {
+    //       modelName: resource.bookmark[TYPE],
+    //       // to: resource.to,
+    //       resource: resource.bookmark,
+    //       bookmark: resource,
+    //       search: true,
+    //       bankStyle: me.isEmployee && me.organization.style || defaultBankStyle,
+    //       currency,
+    //       locale
+    //     }
+    //   })
+    //   break
     case 'openURL':
       this.setState({isDeepLink: true})
       Actions.openURL(url)
@@ -451,10 +477,46 @@ class TimHome extends Component {
     _.extend(bankStyle, defaultBankStyle)
     if (me.isEmployee  &&  me.organization.style)
       _.extend(bankStyle, me.organization.style)
+    let { navigator } = this.props
     let locale, currency
     if (me.isEmployee) {
       locale = utils.getCompanyLocale()
       currency = utils.getCompanyCurrency()
+      // if (me.organization.homePage) {
+      //   this.props.navigator.push({
+      //     title: me.homePage.message,
+      //     componentName: 'GridList',
+      //     backButtonTitle: 'Back',
+      //     passProps: {
+      //       modelName: me.homePage.bookmark[TYPE],
+      //       resource: me.homePage.bookmark,
+      //       bookmark: me.homePage,
+      //       bankStyle: me.organization.style || defaultBankStyle,
+      //       currency,
+      //       locale,
+      //       search: true
+      //     },
+      //   })
+      //   return
+      // }
+
+      if (me.organization.homePage) {
+        navigator.push({
+          title: translate(utils.getModel(me.homePage)),
+          componentName: 'GridList',
+          backButtonTitle: 'Back',
+          passProps: {
+            modelName: me.homePage,
+            to: me.organization,
+            bankStyle: me.organization.style || defaultBankStyle,
+            currency,
+            locale,
+            navigator,
+            search: true
+          },
+        })
+        return
+      }
     }
     let passProps = {
         filter: '',
@@ -469,7 +531,6 @@ class TimHome extends Component {
     Actions.hasPartials()
     Actions.hasBookmarks()
     // return
-    let { navigator } = this.props
     let profileTitle
     if (me.organization)
       profileTitle = me.organization.title
@@ -549,6 +610,23 @@ class TimHome extends Component {
         //   url: this.state.url
         // })
         Actions.getProvider(qs)
+        break
+      case 'list':
+        if (qs.exploreData) {
+          this.props.navigator.push({
+            title: 'Explore data',
+            componentName: 'GridList',
+            backButtonTitle: 'Back',
+            passProps: {
+              modelName: MESSAGE,
+              bankStyle: defaultBankStyle,
+              isModel: true,
+              noMenu: true,
+              search: true,
+              exploreData: true
+            },
+          })
+        }
         break
       case 'r':
         Actions.getResourceFromLink(qs)
@@ -639,10 +717,10 @@ class TimHome extends Component {
     extend(style, defaultBankStyle)
     if (resource.style)
       extend(style, resource.style)
-
-    if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
-      return
-
+    // if (!utils.getMe().counterparty) {
+      if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', currentContext, callback: this.showChatPage.bind(this)}))
+        return
+    // }
     let route
     if (formStub) {
       let fModel = utils.getModel(utils.getType(formStub))
