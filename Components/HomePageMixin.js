@@ -140,7 +140,7 @@ debugger
       }
     })
   },
-  showTourOrSplash({resource, formStub, showProfile, termsAccepted, action, callback, style}) {
+  showTourOrSplash({resource, formStub, showProfile, termsAccepted, action, callback, style, currentContext}) {
     let { navigator, bankStyle } = this.props
     if (resource._tour  &&  !resource._noTour) {
       StatusBar.setHidden(true)
@@ -166,7 +166,7 @@ debugger
             resource._noSplash = true
             Actions.addItem({resource: resource})
             // resource._noSplash = true
-            callback({resource, formStub, termsAccepted, action: 'replace', showProfile})
+            callback({resource, formStub, termsAccepted, action: 'replace', showProfile, currentContext})
           }
         }
       })
@@ -195,7 +195,7 @@ debugger
       resolvePromise()
       resource._noSplash = true
       Actions.addItem({resource: resource})
-      callback({resource, formStub, termsAccepted, action: 'replace', showProfile})
+      callback({resource, formStub, termsAccepted, action: 'replace', showProfile, currentContext})
     }, 2000)
     return true
   },
