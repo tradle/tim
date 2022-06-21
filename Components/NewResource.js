@@ -1412,7 +1412,7 @@ if (r.url)
       // if (!this.floatingProps)
       //   this.floatingProps = {}
       // this.floatingProps[propName] = resource[propName]
-      var r = {}
+      let r = {}
       _.extend(r, resource)
       this.setState({resource: r})
     })

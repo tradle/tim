@@ -15,7 +15,7 @@ import _ from 'lodash'
 import constants from '@tradle/constants'
 
 import utils from '../utils/utils'
-var translate = utils.translate
+const translate = utils.translate
 import myStyles from '../styles/styles'
 import NewResourceMixin from './NewResourceMixin'
 import PageView from './PageView'
@@ -250,7 +250,7 @@ class NewItem extends Component {
     }
     let { enumProp } = this.state
     let actionSheet = this.renderActionSheet(metadata.items.ref)
-    var width = utils.getContentWidth(NewItem)
+    let width = utils.getContentWidth(NewItem)
     return (
       <PageView style={[platformStyles.container]}>
         <ScrollView style={{backgroundColor: 'transparent', width, alignSelf: 'center', paddingTop: 10}}
