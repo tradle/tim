@@ -57,6 +57,7 @@ const {
 } = constants.TYPES
 const CHECK = 'tradle.Check'
 const STATUS = 'tradle.Status'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
@@ -344,11 +345,36 @@ class ApplicationTabs extends Component {
 
     let progress = this.getProgress(resource)
     let progressColor = '#a0d0a0' //bankStyle.linkColor
+    let isDraft = resource.draft
+    let progressView = <View style={styles.progress}>
+                         <Text style={styles.title}>{translate(isDraft ? 'draftProgress' : 'progress')}</Text>
+                         <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
+                       </View>
+
+    let buttons
+    if (isDraft  &&  resource.submissions) {
+      let context = resource._context
+      let completed
+      if (resource.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED)) {
+        completed = <TouchableOpacity onPress={() => Actions.submitCompletedApplication({context})}>
+                      <View style={styles.complete}>
+                        <Text style={styles.completeText}>{translate('finishDraft')}</Text>
+                      </View>
+                    </TouchableOpacity>
+      }
+      buttons = <View style={styles.buttons}>
+                  {completed}
+                  <TouchableOpacity onPress={() => Actions.submitDraftApplication({context})}>
+                  <View style={styles.send}>
+                    <Text style={styles.sendText}>{translate('letClientFinish')}</Text>
+                  </View>
+                  </TouchableOpacity>
+                </View>
+
+    }
     return <View style={[styles.row, {justifyContent: 'space-between'}]}>
-             <View style={styles.progress}>
-               <Text style={styles.title}>{translate('progress')}</Text>
-               <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
-             </View>
+             {progressView}
+             {buttons}
            </View>
   }
   getChecksBar(styles) {
@@ -540,6 +566,42 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       opacity: 0.9,
       shadowRadius: 5,
       shadowColor: '#afafaf',
+    },
+    complete: {
+      backgroundColor: bankStyle.accentColor || '#fff',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 200,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      marginRight: 20,
+      borderWidth: 1,
+      borderColor: bankStyle.accentColor || bankStyle.linkColor
+    },
+    completeText: {
+      fontSize: 18,
+      color: '#fff',
+      alignSelf: 'center'
+    },
+    send: {
+      backgroundColor: '#fff',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 200,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      marginRight: 20,
+      borderWidth: 1,
+      borderColor: bankStyle.linkColor
+    },
+    sendText: {
+      fontSize: 18,
+      color: bankStyle.linkColor,
+      alignSelf: 'center'
     },
   })
 })
