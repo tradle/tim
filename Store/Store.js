@@ -969,12 +969,24 @@ var Store = Reflux.createStore({
         if (o  &&  o.url)
           me.organization.url = o.url
       }
+      // if (me.counterparty && org.homePage)
+      //   me.organization.homePage = org.homePage
       utils.setCompanyLocaleAndCurrency(org)
     }
     let dictionaryDomains = this.getDictionaryDomains()
     await utils.setMe({meRes: me, dictionaryDomains, providerDictionaries})
     this._resolveWithMe(me)
   },
+  // async onGetHomePage() {
+  //   debugger
+  //   await this._loadedResourcesDefer.promise
+  //   await this._enginePromise
+  //   let { list } = await this.searchServer({modelName: BOOKMARK, filterResource: {shared: true, homePage: true}})
+  //   if (list && list.length) {
+  //     me.homePage = list[0]
+  //     this.trigger({action: 'homePage', resource: list[0]})
+  //   }
+  // },
   getDictionaryDomains() {
     let dictionaries = {}
     SERVICE_PROVIDERS.forEach(sp => {
@@ -2470,6 +2482,7 @@ var Store = Reflux.createStore({
       org: utils.getId(sp.org),
       url: originalUrl,
       style: sp.style,
+      homePage: sp.homePage,
       permalink: sp.bot.permalink,
       sandbox: sp.sandbox,
       // publicConfig: sp.publicConfig,
@@ -2504,17 +2517,17 @@ var Store = Reflux.createStore({
       identity: sp.bot.pub
     })
 
-    var okey
+    let okey
     if (sp.org) {
       if (!sp.org[ROOT_HASH])
         sp.org[ROOT_HASH] = protocol.linkString(sp.org)
       okey = utils.getId(sp.org)
     }
 
-    var hash = protocol.linkString(sp.bot.pub)
-    var ikey = utils.makeId(IDENTITY, hash)
-    var batch = []
-    var org = this._getItem(okey)
+    let hash = protocol.linkString(sp.bot.pub)
+    let ikey = utils.makeId(IDENTITY, hash)
+    let batch = []
+    let org = this._getItem(okey)
     if (org) {
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
@@ -2558,7 +2571,8 @@ var Store = Reflux.createStore({
       org._optionalPairing = true
     if (sp.allowedMimeTypes)
       org._allowedMimeTypes = sp.allowedMimeTypes
-
+    if (sp.homePage)
+      org.homePage = sp.homePage
     await this.configProvider(config, sp, org)
     await this.resetForEmployee(me, org)
     batch.push({type: 'put', key: okey, value: org})
@@ -2660,11 +2674,11 @@ var Store = Reflux.createStore({
     if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
       return
     let myOrg = me.organization
-    if (myOrg._canShareContext === org._canShareContext &&
-        myOrg._hasSupportLine === org._hasSupportLine)
-      return
-    myOrg._canShareContext = org._canShareContext
-    myOrg._hasSupportLine = org._hasSupportLine
+    if (myOrg._canShareContext !== org._canShareContext ||
+        myOrg._hasSupportLine !== org._hasSupportLine) {
+      myOrg._canShareContext = org._canShareContext
+      myOrg._hasSupportLine = org._hasSupportLine
+    }
     await this.setMe(me)
     await this.dbPut(utils.getId(me), me)
   },
@@ -4224,6 +4238,7 @@ if (!res[SIG]  &&  res._message)
     let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
     Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(utils.getDisplayName({resource}))}`)
   },
+
   async onGetApplication(params) {
     let {resource, action, backlink, forwardlink, filterResource, prop, isBacklink} = params
     if (!filterResource)
@@ -9041,8 +9056,8 @@ if (!res[SIG]  &&  res._message)
     // }
     let org = this.getRepresentative(me.organization)
     // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
-    let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('sharedBookmarks'))
-    let sharedFolder = folders[0]
+    // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('sharedBookmarks'))
+    // let sharedFolder = folders[0]
     // let initFolderIdx = folders.findIndex(bf => bf.message === translate('initialBookmarks'))
     // let initFolder = folders[initFolderIdx]
     // let sharedFolderIdx = folders.findIndex(bf => bf.message === translate('sharedBookmarks'))
@@ -12138,38 +12153,39 @@ if (!res[SIG]  &&  res._message)
       me,
       botPermalink: rep[ROOT_HASH]
     })
-    let bookmarksList = []
-    const from = this.buildRef(me)
-    let folder = {
-      [TYPE]: BOOKMARKS_FOLDER,
-      message: translate('initialBookmarks'),
-      // list: bookmarksList.map(b => this.buildRef(b)),
-      from,
-      to: rep
-    }
-    let f = await this.onAddChatItem({resource: folder, noTrigger: true, doNotSend: true})
-    let folderStub = this.buildRef(f)
-    for (const bookmark of bookmarks) {
-      // can we do this in parallel?
-      bookmark.folder = folderStub
-      bookmark.to = rep
-      let b = await this.onAddChatItem({resource: bookmark, noTrigger: true, employeeSetup: true})
-      bookmarksList.push(b)
-    }
-    f = await this.onGetItem({resource: f})
-    f.list = bookmarksList
+    if (bookmarks) {
+      let bookmarksList = []
+      const from = this.buildRef(me)
+      let folder = {
+        [TYPE]: BOOKMARKS_FOLDER,
+        message: translate('initialBookmarks'),
+        // list: bookmarksList.map(b => this.buildRef(b)),
+        from,
+        to: rep
+      }
+      let f = await this.onAddChatItem({resource: folder, noTrigger: true, doNotSend: true})
+      let folderStub = this.buildRef(f)
+      for (const bookmark of bookmarks) {
+        // can we do this in parallel?
+        bookmark.folder = folderStub
+        bookmark.to = rep
+        let b = await this.onAddChatItem({resource: bookmark, noTrigger: true, employeeSetup: true})
+        bookmarksList.push(b)
+      }
+      f = await this.onGetItem({resource: f})
+      f.list = bookmarksList
 
-    await this.onAddChatItem({resource: f, noTrigger: true, doNotSend: true})
-    // debugger
-    // delete folder.list
-    let folders = ['personalBookmarks', 'sharedBookmarks']
-    for (let i=0; i<folders.length; i++) {
-      folder.message = translate(folders[i])
-      if (i === 1)
-        folder.shared = true
-      await this.onAddChatItem({resource: folder, noTrigger: true})
+      await this.onAddChatItem({resource: f, noTrigger: true, doNotSend: true})
+      // debugger
+      // delete folder.list
+      let folders = ['personalBookmarks', 'sharedBookmarks']
+      for (let i=0; i<folders.length; i++) {
+        folder.message = translate(folders[i])
+        if (i === 1)
+          folder.shared = true
+        await this.onAddChatItem({resource: folder, noTrigger: true})
+      }
     }
-
     let meId = utils.getId(me)
     if (me.firstName === FRIEND) {
       let result = []
