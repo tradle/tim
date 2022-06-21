@@ -176,7 +176,8 @@ class GridList extends Component {
       notFoundMap: {},
       resource: search  &&  resource,
       isGrid, //:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
-      isDraft: bookmark  &&  bookmark.bookmark.draft
+      isDraft: bookmark  &&  bookmark.bookmark.draft,
+      menuIsShown: utils.getMe().menu && modelName === ORGANIZATION,
     }
     // if (modelName === BOOKMARKS_FOLDER) {
     //   this.state.list = resource.list
@@ -431,7 +432,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { action, error, list, resource, endCursor, isConnected, noMove, addAllowed, cancelled } = params
     if (error)
       return;
-    let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink } = this.props
+    let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink, isMenu } = this.props
     if (action === 'connectivity') {
       this.setState({ isConnected })
       return
@@ -484,8 +485,15 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this._talkToEmployee(params)
       return
     }
+    let me = utils.getMe()
+    if (action === 'getMenu') {
+      this.setState({menuIsShown: me.isEmployee && modelName === ORGANIZATION})
+      return
+    }
     let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
     if (action === 'list') {
+      if (isMenu && list !== me.menu)
+        return
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
         this._emptyListHandler(params)
@@ -732,6 +740,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (!_.isEqual(this.state.resource, nextState.resource))
       return true
     if (this.state.checksCategory !== nextState.checksCategory)
+      return true
+    if (this.state.menuIsShown !== nextState.menuIsShown)
       return true
     if (this.props.checksCategory !== nextProps.checksCategory)
       return true
@@ -1680,9 +1690,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
   }
   render() {
     let { props, state } = this
-    let { filter, dataSource, isLoading, list, isConnected,
+    let { filter, dataSource, isLoading, list, isConnected, menuIsShown,
           allLoaded, serverOffline, allowToAdd } = state
-    let { isChooser, modelName, isModel, application, search, _readOnly,
+    let { isChooser, modelName, isModel, application, search, _readOnly, navigator,
           isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle, isMenu, noChat } = props
     let model = utils.getModel(modelName);
     let me = utils.getMe()
@@ -1803,14 +1813,30 @@ console.log('GridList.componentWillMount: filterResource', resource)
         </View>
       )
     }
+    let navBarMenu
+    if (me.isEmployee && !isMenu) {
+      navBarMenu = <View style={styles.menu}>
+                     {this.showMenu(this.props, navigator)}
+                   </View>
+    }
+    let style
+    if (isBacklink || isForwardlink)
+      style = {flex: 1}
+    else if (isMenu)
+      style = {flex: 1}
+    else
+      style = platformStyles.container
     return (
-      <PageView style={isBacklink || isForwardlink || isMenu ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu && contentSeparator} bankStyle={bankStyle}>
-        {network}
-        {searchBar}
-        {content}
-        {!isEmptyItemsTab && loading}
-        {footer}
-        {actionSheet}
+      <PageView style={[style, {justifyContent: 'flex-start', flexDirection: 'row'}]} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu && contentSeparator} bankStyle={bankStyle}>
+        {navBarMenu}
+        <View style={[platformStyles.pageContentWithMenu, {flex: 4}]}>
+          {network}
+          {searchBar}
+          {content}
+          {!isEmptyItemsTab && loading}
+          {footer}
+          {actionSheet}
+        </View>
       </PageView>
     );
   }
@@ -2015,6 +2041,12 @@ var styles = StyleSheet.create({
     marginTop: 0,
     width: 30,
     height: 30
+  },
+  menu: {
+    flex: 1,
+    height: '100%',
+    // width: '300',
+    backgroundColor: '#f7f7f7'
   }
 });
 
