@@ -211,7 +211,7 @@ var styles = StyleSheet.create({
     // paddingRight: 10
     position: 'absolute',
     bottom: -5,
-    left: 10
+    left: 5
   },
 });
 
