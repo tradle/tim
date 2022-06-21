@@ -11,6 +11,7 @@ import t from 'tcomb-form-native'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import _ from 'lodash'
+
 import constants from '@tradle/constants'
 
 import utils from '../utils/utils'
@@ -247,18 +248,24 @@ class NewItem extends Component {
         }
       }
     }
+    let { enumProp } = this.state
+    let actionSheet = this.renderActionSheet(metadata.items.ref)
     var width = utils.getContentWidth(NewItem)
     return (
       <PageView style={[platformStyles.container]}>
-        <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop: 10}}
+        <ScrollView style={{backgroundColor: 'transparent', width, alignSelf: 'center', paddingTop: 10}}
                     ref='scrollView' {...this.scrollviewProps}
                     keyboardShouldPersistTaps="always"
                     keyboardDismissMode={'on-drag'}>
-          <View style={{marginLeft: 10, marginRight: 20, marginBottom: 15 }}>
+          <View style={{marginLeft: 10, marginRight: 10, marginBottom: 15 }}>
             <Form ref='form' type={Model} options={options} />
           </View>
         </ScrollView>
-        {error}
+       {actionSheet}
+       <View onLayout={
+         enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+       }/>
+       {error}
       </PageView>
     );
   }
