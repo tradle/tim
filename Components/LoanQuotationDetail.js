@@ -45,6 +45,21 @@ class LoanQuotationDetail extends Component {
       terms
     }
   }
+  componentWillReceiveProps(props) {
+    let { resource } = props
+    if (this.props.resource.loanQuotationDetail === resource.loanQuotationDetail)
+      return
+    let { list, terms } = this.flatten(resource.loanQuotationDetail)
+    this.state = {
+      dataSource: this.state.dataSource.cloneWithRows(list),
+      list,
+      terms
+    }
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.resource.loanQuotationDetail !== nextProps.resource.loanQuotationDetail)
+     return true
+  }
   flatten(resource) {
     let header = Object.keys(resource)
     let values = Object.values(resource)
