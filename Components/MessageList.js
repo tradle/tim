@@ -415,25 +415,6 @@ class MessageList extends Component {
     if (!list)
       return
 
-    if (noChat && !appl) {
-      let l = list.slice().reverse()
-      let r = l.find(r => r[TYPE] === PRODUCT_REQUEST)
-      let isProductRequest = r !== null
-      if (!r)
-        r = l.find(r => r[TYPE] === APPLICATION_SUBMITTED)
-
-      if (r) {
-        Actions.getApplication({
-          modelName: APPLICATION,
-          resource: chatWith,
-          search: true,
-          prop: utils.getModel(APPLICATION).properties.forms,
-          isBacklink: true,
-          noChat,
-          filterResource: {draft: true, context: isProductRequest ? r.contextId : r._context.contextId, limit: 1}})
-      }
-    }
-
     if (this.state.bankStyle   &&  params.bankStyle)
       _.extend(this.state.bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
@@ -480,8 +461,46 @@ class MessageList extends Component {
       if (currentContext.contextId !== resource._context.contextId)
         return
     }
+    let { resource:chatWith, navigator, bankStyle, currency, locale } = this.props
+    let requestedApplication
+    if (noChat) {
+      if (!this.state.application) {
+        if (!this.state.requestedApplication) {
+          let prop = utils.getModel(APPLICATION).properties.forms
+          Actions.getApplication({
+            modelName: APPLICATION,
+            resource: chatWith,
+            search: true,
+            prop: utils.getModel(APPLICATION).properties.forms,
+            isBacklink: true,
+            noChat,
+            filterResource: {draft: true, context: resource._context ? resource._context.contextId : resource.context, limit: 1}
+          })
+          requestedApplication = true
+        }
+      }
+      else if (resource[TYPE] === APPLICATION_SUBMITTED) {
+        debugger
+        let application = this.state.application
+        let title = utils.getDisplayName({resource: application})
+        navigator.replace({
+          title,
+          componentName: 'ApplicationView',
+          backButtonTitle: 'Back',
+          refreshHandler: this.refreshApplication.bind(this, application),
+          passProps: {
+            resource: application,
+            search: true,
+            bankStyle,
+            currency,
+            locale
+          }
+        })
+        return
+      }
+    }
+
     let { application, originatingMessage } = this.props
-    let chatWith = this.props.resource
     let rtype = resource  &&  utils.getType(resource)
     if (rtype === NEXT_FORM_REQUEST) {
       let list = this.state.list
@@ -521,11 +540,6 @@ class MessageList extends Component {
       if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
         replace = true
     }
-    // else if (noChat) {
-    //   let prop = utils.getModel(APPLICATION).properties.forms
-    //   Actions.getApplication({modelName: APPLICATION, resource: this.state.application, search: true, prop, isBacklink: true, noChat})
-    // }
-
 
     let insert = action === 'insertItem'  &&  timeShared
     let list
@@ -546,7 +560,8 @@ class MessageList extends Component {
       utils.pinFormRequest(list)
     let state = {
       // addedItem: addedItem,
-      list
+      list,
+      requestedApplication
     }
     if (doRefreshApplication)
       state.doRefreshApplication = doRefreshApplication
@@ -1283,21 +1298,6 @@ class MessageList extends Component {
     let applicationSubmitted = list.find(r => r._context  &&  r._context.contextId === context.contextId  &&  r[TYPE] === APPLICATION_SUBMITTED)
     if (applicationSubmitted)
       lastFr = applicationSubmitted
-    if (lastFr)
-      return {lastFr, forms }
-    return { forms }
-    // return { lastFr: forms[0], forms }
-  }
-  getNoChatParams1(list) {
-    const { currentContext:context } = this.state
-    let l = list.filter(r => r._context  &&  r._context.contextId === context.contextId).reverse()
-    let lastFr = l.find(r => r[TYPE] === FORM_REQUEST && !r._documentCreated)
-    let forms = l.filter(r => r[TYPE] !== PRODUCT_REQUEST  &&  utils.isSubclassOf(utils.getModel(r[TYPE]), FORM))
-    forms = _.uniqBy(forms, ROOT_HASH)
-    if (lastFr)
-      return { lastFr, forms }
-
-    lastFr = list.find(r => r._context  &&  r._context.contextId === context.contextId  &&  r[TYPE] === APPLICATION_SUBMITTED)
     if (lastFr)
       return {lastFr, forms }
     return { forms }
