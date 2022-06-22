@@ -619,16 +619,10 @@ class ShowPropertiesView extends Component {
         value = translate(utils.getModel(utils.getType(val)))
       let type = utils.getType(val)
       let m = utils.getModel(type)
-      let typeRow
-      // if (pMeta.title.toLowerCase() !== m.title.toLowerCase())
-      //   typeRow = <Text style={[styles.title, styles.smallLetters]}>{translate(m)}</Text>
-      val = <View>
-              <TouchableOpacity style={{flexDirection: 'row', width: hasGroups ? '45%' : '100%'}} onPress={showRefResource.bind(this, val, pMeta)}>
-                <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
-                <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
-              </TouchableOpacity>
-              {typeRow}
-            </View>
+      val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
+              <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
+              <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
+            </TouchableOpacity>
 
       return { val, isRef: true }
     }

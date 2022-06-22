@@ -1688,7 +1688,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
   }
   render() {
     let { props, state } = this
-    let { filter, dataSource, isLoading, list, isConnected, menuIsShown,
+    let { filter, dataSource, isLoading, list, isConnected,
           allLoaded, serverOffline, allowToAdd } = state
     let { isChooser, modelName, isModel, application, search, _readOnly, navigator,
           isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle, isMenu, noChat } = props
@@ -1813,7 +1813,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let navBarMenu
     if (me.isEmployee && !isMenu && !isBacklink) {
-       navBarMenu = <View style={styles.menu}>
+       navBarMenu = <View style={platformStyles.pageLeftMenu}>
                       {this.state.navBarMenu}
                     </View>
     }
