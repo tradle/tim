@@ -289,7 +289,7 @@ var originalMe;
 var currentEmployees = {}
 
 // var PORT = 51086
-var TIM_PATH_PREFIX = 'me'
+const TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
 // const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 const ON_RECEIVED_PROGRESS = 0.66
@@ -969,8 +969,8 @@ var Store = Reflux.createStore({
         if (o  &&  o.url)
           me.organization.url = o.url
       }
-      // if (me.counterparty && org.homePage)
-      //   me.organization.homePage = org.homePage
+      if (me.counterparty && org.homePage)
+        me.organization.homePage = org.homePage
       utils.setCompanyLocaleAndCurrency(org)
     }
     let dictionaryDomains = this.getDictionaryDomains()
@@ -2321,7 +2321,7 @@ var Store = Reflux.createStore({
 
     // Make sure not to get all providers from this server
     // but the ones customer requested before
-    var providerIds
+    let providerIds
     if (!id) {
       let settings = this._getItem(SETTINGS + '_1')
       if (settings  &&  settings.urlToId  &&  settings.urlToId[originalUrl])
@@ -2379,7 +2379,7 @@ var Store = Reflux.createStore({
       newProviders = true
     }
 
-    var promises = []
+    let promises = []
     json.providers.forEach(sp => {
       this.parseProvider(sp, params, providerIds, newProviders)
       promises.push(this.addInfo({sp, url: originalUrl, newServer, notTestProvider}))
@@ -2593,7 +2593,7 @@ var Store = Reflux.createStore({
     //   org.name = 'Bank of America'
     this._setItem(okey, org)
     if (!list[ikey]) {
-      var profile = {
+      let profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
         [CUR_HASH]: hash,
@@ -2617,7 +2617,7 @@ var Store = Reflux.createStore({
       else
         profile.bot = true
       // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
-      var identity = {
+      let identity = {
         [ROOT_HASH]:   hash,
         txId: sp.bot.txId
       }
@@ -2628,7 +2628,7 @@ var Store = Reflux.createStore({
         delete identity.name
       }
 
-      var pkey = utils.getId(profile)
+      let pkey = utils.getId(profile)
 
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
@@ -2640,10 +2640,10 @@ var Store = Reflux.createStore({
       // list[okey].value.contacts = []
     }
 
-    var pkey = utils.makeId(PROFILE, hash)
+    let pkey = utils.makeId(PROFILE, hash)
 
-    var curOkeyVal = this._getItem(okey)
-    var newContact = {
+    let curOkeyVal = this._getItem(okey)
+    let newContact = {
       id:     pkey,
       // title: list[pkey].value.formatted
     }
@@ -2742,14 +2742,14 @@ var Store = Reflux.createStore({
   async addContact(data, hash, noMessage) {
     data = utils.clone(data)
 
-    var ikey = utils.makeId(IDENTITY, hash)
-    var pkey = utils.makeId(PROFILE, hash)
+    let ikey = utils.makeId(IDENTITY, hash)
+    let pkey = utils.makeId(PROFILE, hash)
 
-    var profile = this._getItem(pkey)
-    var identity = this._getItem(ikey)
+    let profile = this._getItem(pkey)
+    let identity = this._getItem(ikey)
 
-    var batch = []
-    var newContact = !profile  ||  !identity
+    let batch = []
+    let newContact = !profile  ||  !identity
     if (newContact) {
       if (data.name === '')
         data.name = data.identity.name && data.identity.name.formatted
@@ -2774,7 +2774,7 @@ var Store = Reflux.createStore({
         profile.firstName = `[${translate('nameUnknown')}]`
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
-      var identity = data.identity
+      let identity = data.identity
       identity[ROOT_HASH] = hash
       identity[CUR_HASH] = hash
 
@@ -2804,7 +2804,7 @@ var Store = Reflux.createStore({
       await db.batch(batch)
   },
   findKey (keys, where) {
-    var match
+    let match
     keys.some(function (k) {
       for (let p in where) {
         if (k[p] !== where[p]) return false
@@ -2818,7 +2818,7 @@ var Store = Reflux.createStore({
   },
   async onStart() {
     this.triggerBusy()
-    var self = this;
+    let self = this;
     const [hasTouchID] = await Promise.all([
       LocalAuth.hasTouchID(),
       this.ready
@@ -2859,15 +2859,15 @@ var Store = Reflux.createStore({
       r.to = application._context.from
       r._context = application._context
     }
-    var self = this
+    let self = this
     let m = this.getModel(r[TYPE])
     let isContext = utils.isContext(m) // r[TYPE] === PRODUCT_APPLICATION
-    var props = m.properties;
+    let props = m.properties;
     if (!r._time)
       r._time = new Date().getTime();
-    var toOrg
+    let toOrg
     // r.to could be from the paired device
-    var to = this._getItem(r.to) || r.to
+    let to = this._getItem(r.to) || r.to
     let toType
     if (to)
       toType = utils.getType(to)
@@ -2878,7 +2878,7 @@ var Store = Reflux.createStore({
       // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
       //   return
       if (!orgRep) {
-        var params = {
+        let params = {
           action: 'addMessage',
           error: 'No ' + r.to.name + ' representative was found'
         }
@@ -2894,8 +2894,8 @@ var Store = Reflux.createStore({
     }
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
-    var rr = {};
-    var context
+    let rr = {};
+    let context
     if (r._context) {
       rr._context = r._context
       context = this.findContext(r._context)
@@ -2964,10 +2964,10 @@ var Store = Reflux.createStore({
       delete toChain.from
       delete toChain.to
     }
-    var batch = []
-    var error
-    var welcomeMessage
-    // var promise = Q(protocol.linkString(toChain))
+    let batch = []
+    let error
+    let welcomeMessage
+    // let promise = Q(protocol.linkString(toChain))
     let hash
     if (application  &&  utils.isRM(application)) {
       hash = utils.getRootHash(application.applicant)
@@ -2980,7 +2980,7 @@ var Store = Reflux.createStore({
     // let hash = applicant[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = utils.makeId(IDENTITY, hash)
+    let toId = utils.makeId(IDENTITY, hash)
     rr._sendStatus = this.isConnected ? SENDING : QUEUED
     // let firstTime
     await this._loadedResourcesDefer.promise
@@ -5832,7 +5832,9 @@ if (!res[SIG]  &&  res._message)
     let application = list[0]
     application.draftCompleted = true
 
-    await this.onAddChatItem({resource: application})
+    let resource = await this.onAddChatItem({resource: application})
+    if (resource)
+      this.trigger({action: 'updateItem', resource})
   },
   async onSubmitCompletedApplication({context}) {
     let contextId = context.contextId
@@ -5858,7 +5860,7 @@ if (!res[SIG]  &&  res._message)
     application.processingDataBundle = false
     application.filledForCustomer = true
 
-    await this.onAddChatItem({resource: application})
+    let resource = await this.onAddChatItem({resource: application})
     await utils.promiseDelay(2000)
     await this.onAddChatItem({resource: {
       [TYPE]: APPLICATION_COMPLETED,
@@ -5869,6 +5871,8 @@ if (!res[SIG]  &&  res._message)
       application,
       _context: context
     }})
+    if (resource)
+      this.trigger({action: 'updateItem', resource})
   },
 
   async onGetProductList({ resource }) {

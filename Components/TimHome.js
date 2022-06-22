@@ -499,14 +499,14 @@ class TimHome extends Component {
       //   })
       //   return
       // }
-
-      if (me.organization.homePage) {
+      let { homePage } = me.organization
+      if (homePage) {
         navigator.push({
-          title: translate(utils.getModel(me.homePage)),
+          title: translate(utils.getModel(homePage)),
           componentName: 'GridList',
           backButtonTitle: 'Back',
           passProps: {
-            modelName: me.homePage,
+            modelName: homePage,
             to: me.organization,
             bankStyle: me.organization.style || defaultBankStyle,
             currency,
