@@ -109,7 +109,7 @@ class MessageList extends Component {
       bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: me._showStepIndicator,
       currentContext,
-      menuIsShown: me.isEmployee,
+      // menuIsShown: me.isEmployee,
       noChat
     }
     if (application  &&  (isRM(application) ||  application.filledForCustomer)) {
@@ -234,11 +234,10 @@ class MessageList extends Component {
       navigator.pop()
       return
     }
-    // if (action === 'getMenu') {
-    //   if (params.modelName !== this.props.modelName) return
-    //   this.setState({menuIsShown: true})
-    //   return
-    // }
+    if (action === 'getMenu') {
+      this.setState({menuIsShown: utils.getMe().isEmployee && true})
+      return
+    }
     let chatWith = this.props.resource
     if (action === 'syncDevicesIsDone') {
       if (to  &&  getRootHash(to) === getRootHash(chatWith))
@@ -1005,11 +1004,6 @@ class MessageList extends Component {
           isModalOpen, onlineStatus, loadEarlierMessages, customStyle, allContexts,
           currentContext, menuIsShown, noChat } = this.state
 
-    // if (me.counterparty && context) {
-    //   this.state.currentContext = context
-    //   this.state.noChat = true
-    //   noChat = true
-    // }
     let me = utils.getMe()
 
     menuIsShown = me.isEmployee //noChat ? true : menuIsShown
@@ -1201,7 +1195,7 @@ class MessageList extends Component {
     let separator = getContentSeparator(bankStyle)
     let progressInfo = !noChat && <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
     if (menuIsShown) {
-      navBarMenu = <View style={{flex: 1, height: '100%', backgroundColor: 'transparent'}}>
+      navBarMenu = <View style={platformStyles.pageLeftMenu}>
                      {this.showMenu(this.props, navigator)}
                    </View>
     }
@@ -1239,10 +1233,8 @@ class MessageList extends Component {
       return (
         <PageView style={[platformStyles.container, bgStyle, {justifyContent: 'flex-start', flexDirection: 'row'}]} separator={separator} bankStyle={bankStyle}>
             {backgroundImage}
-          <View style={platformStyles.pageMenu}>
             {navBarMenu}
-          </View>
-          <View style={platformStyles.pageContentWithMenu}>
+          <View style={[platformStyles.pageContentWithMenu, {flex: 4}]}>
             {network}
             <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
             <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts}/>
