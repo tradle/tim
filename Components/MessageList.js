@@ -481,6 +481,12 @@ class MessageList extends Component {
       }
       else if (resource[TYPE] === APPLICATION_SUBMITTED) {
         debugger
+        let routes = navigator.getCurrentRoutes()
+        if (routes.length > 1 && routes[routes.length - 2].componentName === 'ApplicationView') {
+          navigator.pop()
+          return
+        }
+        debugger
         let application = this.state.application
         let title = utils.getDisplayName({resource: application})
         navigator.replace({
