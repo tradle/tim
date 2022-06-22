@@ -22,6 +22,7 @@ import ResourceMixin from './ResourceMixin'
 import ApplicationTreeRow from './ApplicationTreeRow'
 import ApplicationTreeHeader from './ApplicationTreeHeader'
 import PageView from './PageView'
+import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator, getGridCols } from '../utils/uiUtils'
 import { showScoreDetails, loadMoreContentAsync, onScrollEvent } from './utils/gridUtils'
 import { translate, getModel, getDisplayName, makeModelTitle, getMe, getEnumValueId } from '../utils/utils'
@@ -173,6 +174,9 @@ class ApplicationsGrid extends Component {
       let { bankStyle, navigator } = this.props
       showScoreDetails({application, applicantName, bankStyle, navigator})
       return
+    case 'getMenu':
+      this.setState({menuIsShown: getMe().isEmployee && true})
+      return
     }
   }
   componentWillMount() {
@@ -200,6 +204,8 @@ class ApplicationsGrid extends Component {
     if (!_.isEqual(this.state.resource, nextState.resource)) {
       return true
     }
+    if (this.state.menuIsShown !== nextState.menuIsShown)
+      return true
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.dataSource.getRowCount() !== nextState.dataSource.getRowCount())
@@ -308,12 +314,22 @@ class ApplicationsGrid extends Component {
         canLoadMore={true}
         showsVerticalScrollIndicator={false} />;
 
+    let navBarMenu
+    if (me.isEmployee) {
+      let { navigator } = this.props
+      navBarMenu = <View style={platformStyles.pageLeftMenu}>
+                     {this.showMenu(this.props, navigator)}
+                   </View>
+    }
     let { bankStyle } = this.props
     let contentSeparator = getContentSeparator(bankStyle)
     return (
-      <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
-        <View style={styles.separator} />
-        {content}
+      <PageView style={[platformStyles.container, {justifyContent: 'flex-start', flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+        {navBarMenu}
+        <View style={[platformStyles.pageContentWithMenu, {flex: 4}]}>
+          <View style={styles.separator} />
+          {content}
+        </View>
       </PageView>
     );
   }
@@ -323,6 +339,7 @@ class ApplicationsGrid extends Component {
 }
 reactMixin(ApplicationsGrid.prototype, Reflux.ListenerMixin)
 reactMixin(ApplicationsGrid.prototype, ResourceMixin)
+reactMixin(ApplicationsGrid.prototype, HomePageMixin)
 ApplicationsGrid = makeResponsive(ApplicationsGrid)
 ApplicationsGrid = makeStylish(ApplicationsGrid)
 

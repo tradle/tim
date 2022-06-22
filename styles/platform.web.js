@@ -50,6 +50,13 @@ export default StyleSheet.create({
     backgroundColor: 'transparent',
     borderRightColor: '#eee'
   },
+  pageLeftMenu: {
+    flex: 1,
+    height: '100%',
+    backgroundColor: '#f7f7f7',
+    borderRightWidth: 1,
+    borderRightColor: '#ccc'
+  },
   pageContentWithMenu: {
     flex: 1,
     // flex: 3,

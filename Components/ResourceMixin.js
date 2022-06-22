@@ -54,6 +54,8 @@ const DEFAULT_CURRENCY_SYMBOL = '$'
 const PHOTO = 'tradle.Photo'
 const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
+const MAX_URL_LENGTH = 40
+
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
     'address': ['full']
@@ -482,8 +484,11 @@ var ResourceMixin = {
               <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
             </View>
     }
-    if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
+    if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)) {
+      if (pMeta.range === 'url')
+        return <Text onPress={this.onPress.bind(this, val)} numberOfLines={1}  ellipsizeMode='head' style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
       return <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
+    }
     if (pMeta.markdown) {
       return <View style={styles.container}>
               <Markdown markdownStyles={uiUtils.getMarkdownStyles(bankStyle)}>
