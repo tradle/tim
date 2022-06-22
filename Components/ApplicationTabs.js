@@ -356,7 +356,7 @@ class ApplicationTabs extends Component {
       let context = resource._context
       let completed
       if (resource.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED)) {
-        completed = <TouchableOpacity onPress={() => Actions.submitCompletedApplication({context})}>
+        completed = <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitCompletedApplication, context)}>
                       <View style={styles.complete}>
                         <Text style={styles.completeText}>{translate('finishDraft')}</Text>
                       </View>
@@ -364,7 +364,7 @@ class ApplicationTabs extends Component {
       }
       buttons = <View style={styles.buttons}>
                   {completed}
-                  <TouchableOpacity onPress={() => Actions.submitDraftApplication({context})}>
+                  <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitDraftApplication, context)}>
                   <View style={styles.send}>
                     <Text style={styles.sendText}>{translate('letClientFinish')}</Text>
                   </View>
@@ -376,6 +376,16 @@ class ApplicationTabs extends Component {
              {progressView}
              {buttons}
            </View>
+  }
+  confirm(fn, context) {
+    Alert.alert(
+      translate('pleaseConfirm'),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => console.log('Cancel')},
+        {text: 'OK', onPress: () => fn({context})}
+      ]
+    )
   }
   getChecksBar(styles) {
     let { resource, bankStyle } = this.props

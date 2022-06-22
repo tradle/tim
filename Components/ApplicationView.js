@@ -56,6 +56,7 @@ const MANUAL_VISUAL_COMPARISON_CHECK = 'tradle.ManualVisualComparisonCheck'
 const STATUS = 'tradle.Status'
 const VISUAL_VERIFICATION_METHOD = 'tradle.VisualPhotosVerificationMethod'
 const API = 'tradle.Api'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
 const VERIFICATION_PROVIDER = 'Manual visual comparison'
 const FACIAL_MATCH = 'facial similarity'
@@ -146,6 +147,12 @@ class ApplicationView extends Component {
       if (this.state.backlink)
         this.setState({showDetails: true, backlink: null, checkFilter: null, checksCategory: null})
       break
+    case 'updateItem':
+      if (utils.getRootHash(resource) === hash) {
+        Actions.hideModal()
+        this.setState({resource, isLoading: false})
+      }
+      break
     case 'assignRM_Confirmed':
       if (utils.getRootHash(application) === hash) {
         Actions.hideModal()
@@ -234,12 +241,14 @@ class ApplicationView extends Component {
     }
 
     let chatButton
-    if (resource._context)
-      chatButton = <TouchableOpacity onPress={this.openApplicationChat.bind(this, resource)} style={[styles.openChatPadding]}>
-                      <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
-                        <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
-                      </View>
-                    </TouchableOpacity>
+    if (resource._context) {
+      if (!resource.submissions || !resource.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED))
+        chatButton = <TouchableOpacity onPress={this.openApplicationChat.bind(this, resource)} style={[styles.openChatPadding]}>
+                        <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
+                          <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
+                        </View>
+                      </TouchableOpacity>
+    }
 
     let tree
     if (resource.tree  &&  resource.tree.top.nodes) {
@@ -298,7 +307,7 @@ class ApplicationView extends Component {
     if (menuIsShown)
       return (
         <PageView style={[platformStyles.container, {flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
-          <View style={platformStyles.pageMenu}>
+          <View style={[platformStyles.pageMenu, {backgroundColor: '#f7f7f7'}]}>
             {navBarMenu}
           </View>
           <View style={platformStyles.pageContentWithMenu}>
