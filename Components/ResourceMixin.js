@@ -469,7 +469,7 @@ var ResourceMixin = {
     else if (units  &&  units.charAt(0) != '[')
       val += ' ' + units
 
-    let descStyle = hasGroups ? styles.descriptionGroup : styles.description
+    let descStyle = styles.description // hasGroups ? styles.descriptionGroup : styles.description
     if (val === NOT_SPECIFIED)
       return <Text style={[descStyle, {color: bankStyle.linkColor}]}>{val}</Text>
     if (typeof val === 'number')
