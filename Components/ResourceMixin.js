@@ -1065,6 +1065,7 @@ var ResourceMixin = {
       componentName: isApplication ? APPLICATION_VIEW : MESSAGE_VIEW,
       backButtonTitle: 'Back',
       title,
+      refreshHandler: this.refreshApplication.bind(this, r),
       passProps: {
         bankStyle,
         resource: r,
