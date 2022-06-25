@@ -237,7 +237,7 @@ debugger
   showMenu(passProps, navigator) {
     let menu = utils.getMe().menu
     if (!menu)
-      return
+      return <View/>
     const { bankStyle, lazy, currency, locale } = passProps
     return <GridList
             lazy={lazy}
