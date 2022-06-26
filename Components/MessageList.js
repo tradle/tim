@@ -113,6 +113,7 @@ class MessageList extends Component {
       bankStyle: bankStyle && _.clone(bankStyle) || {},
       showStepIndicator: me._showStepIndicator,
       currentContext,
+      application,
       // menuIsShown: me.isEmployee,
       noChat
     }
@@ -244,7 +245,7 @@ class MessageList extends Component {
     let chatWith = this.props.resource
     if (action === 'syncDevicesIsDone') {
       if (to  &&  getRootHash(to) === getRootHash(chatWith))
-        this.props.navigator.pop()
+        navigator.pop()
       return
     }
     let { doRefreshApplication, isModalOpen, onlineStatus, isLoading } = this.state
@@ -688,6 +689,8 @@ debugger
     if (!this.state.list  &&  !nextState.list)
       return false
     if (!this.state.list || !nextState.list)
+      return true
+    if (this.state.isLoading !== nextState.isLoading)
       return true
     if (this.state.menuIsShown !== nextState.menuIsShown)
       return true
@@ -1219,7 +1222,7 @@ debugger
                    </View>
     }
     if (noChat) {
-      if (content)
+      if (content) {
         content = <View style={[platformStyles.pageContentWithMenu, {flex: 3}]}>
               {network}
               {progressInfo}
@@ -1230,6 +1233,7 @@ debugger
               {alert}
               {assignRM}
             </View>
+      }
 
       return (
         <PageView style={[platformStyles.container, bgStyle, {alignItems: 'center', height: '100%'}]} separator={separator} bankStyle={bankStyle}>
@@ -1297,10 +1301,12 @@ debugger
       return {}
     let l, lastFr
     let contextId = context ? context.contextId : application.context
+    let isFormError
 
     if (list) {
       l = list.filter(r => r._context  &&  r._context.contextId === contextId).reverse()
-      lastFr = l.find(r => r[TYPE] === FORM_REQUEST && !r._documentCreated)
+      lastFr = l.find(r => (r[TYPE] === FORM_REQUEST || r[TYPE] === FORM_ERROR) && !r._documentCreated)
+      isFormError = lastFr && lastFr[TYPE] === FORM_ERROR
     }
     else {
       list = application.submissions.map(s => s.submission)
@@ -1317,7 +1323,7 @@ debugger
       lastFr = applicationSubmitted
 
     if (lastFr) {
-      if (!applicationSubmitted) {
+      if (!applicationSubmitted  &&  !isFormError) {
         let product = utils.getModel(lastFr.product)
         if (product.multiEntryForms && product.multiEntryForms.indexOf(lastFr.form) !== -1)
           canSkip = forms.find(f => f[TYPE] === lastFr.form) != null
@@ -1350,17 +1356,19 @@ debugger
     let formPanel
     let prop = utils.getModel(APPLICATION).properties.forms
     let applicationSubmitted
+    let isFormError = formRequest[TYPE] === FORM_ERROR
     let m
     if (formRequest[TYPE] !== APPLICATION_SUBMITTED) {
       let form
-      if (formRequest[TYPE] !== FORM_REQUEST) {
+      if (formRequest[TYPE] !== FORM_REQUEST && !isFormError) {
         form = formRequest
         formRequest = null
         m = utils.getModel(form[TYPE])
       }
       else {
+        let ftype = isFormError ? formRequest.prefill[TYPE] : formRequest.form
         form = {
-          [TYPE]: formRequest.form,
+          [TYPE]: ftype,
           from: utils.getMe(),
           to: formRequest.from,
           _context: formRequest._context
@@ -1368,7 +1376,7 @@ debugger
 
         if (formRequest.prefill)
           _.extend(form, formRequest.prefill)
-        m = utils.getModel(formRequest.form)
+        m = utils.getModel(ftype)
       }
       let styles = createStyles({ bankStyle })
       // debugger
@@ -1445,6 +1453,7 @@ debugger
       meta: utils.getModel(resource[TYPE])
     }
     Actions.addChatItem(params)
+    this.setState({isLoading: true})
   }
   hasMenuButton() {
     return !!this.getActionSheetItems()
