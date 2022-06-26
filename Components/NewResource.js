@@ -940,7 +940,7 @@ if (r.url)
     }
 
     let meta =  this.props.model
-    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark, noChat } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark, noChat, canSkip } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -1217,6 +1217,17 @@ if (r.url)
       }
       // this.state.doTable = null
     }
+    let skipButton
+    if (canSkip) {
+      skipButton = <TouchableOpacity onPress={canSkip}>
+                     <View style={styles.submitButton}>
+                       <View style={styles.bar}>
+                         <Text style={styles.submitText}>{translate('next')}</Text>
+                       </View>
+                     </View>
+                   </TouchableOpacity>
+
+    }
     let content =
       <ScrollView style={contentStyle}
                   ref='scrollView' {...this.scrollviewProps}>
@@ -1233,8 +1244,9 @@ if (r.url)
             {loadingVideo}
           </View>
         </View>
-        <View style={styles.submit}>
+        <View style={[styles.submit, {width}]}>
           {submit}
+          {skipButton}
         </View>
         {wait}
       </ScrollView>
@@ -1808,8 +1820,10 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       bottom: 10
     },
     submit: {
-      width: 340,
-      alignSelf: 'center'
+      // width: 340,
+      alignSelf: 'center',
+      justifyContent: 'space-around',
+      flexDirection: 'row'
     },
     submitButton: {
       backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
