@@ -4344,12 +4344,14 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
-    else {
-      let list = r.forms.filter(form => {
-        let ftype = utils.getType(form)
-        return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
-      })
-      r.forms = list
+    else if (r.forms) {
+      if (r.forms) {
+        list = r.forms.filter(form => {
+          let ftype = utils.getType(form)
+          return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
+        })
+        r.forms = list
+      }
     }
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
@@ -4389,7 +4391,7 @@ if (!res[SIG]  &&  res._message)
         let rep = this.getRepresentative(retParams.provider)
         let isRM = utils.isRM(r)
         // Do not allow the third party employee to create application from another one
-        if (!me.counterparty && (isRM || r.filledForCustomer)) {
+        if (!me.counterparty  && (isRM || r.filledForCustomer)) {
           retParams.nextStep = {
             ...c,
             associatedResource: utils.getId(certificate),
@@ -11354,7 +11356,7 @@ if (!res[SIG]  &&  res._message)
             // if (!reviewableResources)
             shareables = await this.getShareableResources({foundResources: [val], to: val.from, context: val._context})
           }
-          this.trigger({action: 'addItem', resource: val, shareableResources: shareables, reviewableResources, productToForms: productToForms})
+          this.trigger({action: 'addItem', resource: val, shareableResources: shareables, reviewableResources, productToForms})
         }
       }
       else {
