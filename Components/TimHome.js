@@ -705,7 +705,12 @@ class TimHome extends Component {
       this.showLandingPage(resource, ENV.landingPage)
       return
     }
-    let { navigator, currency } = this.props
+    let { navigator } = this.props
+
+    let style, locale, currency
+    if (resource[TYPE] === ORGANIZATION)
+       ({ currency, style, locale } = resource)
+
     // Check if the current page is the same we need
     let routes = navigator.getCurrentRoutes()
     let currentRoute = routes[routes.length - 1]
@@ -713,8 +718,9 @@ class TimHome extends Component {
       if (utils.getId(currentRoute.passProps.resource) === utils.getId(resource))
         return
     }
-    let style = {}
-    extend(style, defaultBankStyle)
+    if (!style)
+      style = {...defaultBankStyle}
+
     if (resource.style)
       extend(style, resource.style)
     // if (!utils.getMe().counterparty) {
@@ -740,6 +746,7 @@ class TimHome extends Component {
           isDeepLink: true,
           to: resource,
           currency,
+          locale,
           bankStyle:  style
         }
       }
@@ -762,7 +769,8 @@ class TimHome extends Component {
           passProps: {
             bankStyle: style,
             resource,
-            currency
+            currency,
+            locale
           }
         },
         passProps: {
@@ -770,6 +778,7 @@ class TimHome extends Component {
           currentContext,
           modelName: MESSAGE,
           currency,
+          locale,
           bankStyle:  style
         }
       }
