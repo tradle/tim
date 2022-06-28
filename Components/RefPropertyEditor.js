@@ -243,7 +243,7 @@ class RefPropertyEditor extends Component {
                        {content}
                      </TouchableOpacity>
       }
-      else if (isEnum  &&  this.props.customChooser  &&  refM.enum.length < 20) {
+      else if (isEnum   &&  !prop.items  &&  this.props.customChooser  &&  refM.enum.length < 20) {
         actionItem = <TouchableOpacity onPress={() => this.props.customChooser(prop.name)}>
                        {content}
                      </TouchableOpacity>
@@ -586,7 +586,7 @@ class RefPropertyEditor extends Component {
       title: this.getPropertyLabel(prop), //m.title,
       componentName: 'GridList',
       backButtonTitle: 'Back',
-      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
+      sceneConfig:  isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
         filter,
         prop,
