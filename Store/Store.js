@@ -4251,6 +4251,7 @@ if (!res[SIG]  &&  res._message)
     if (isBacklink)
       p.backlink = prop
     let application =  await this.getApplication(p)
+
     this.trigger({action: 'getApplication', resource, application})
   },
   async getApplication(params) {
@@ -7256,7 +7257,7 @@ if (!res[SIG]  &&  res._message)
         return {}
       }
     }
-    let {direction, first, noTrigger, modelName, application,
+    let {direction, first, noTrigger, modelName, application, all,
          filterResource, endCursor, limit, bookmark} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
@@ -7284,7 +7285,7 @@ if (!res[SIG]  &&  res._message)
         filterResource.archived = false
         if (!filterResource._org  &&  !filterResource.context)
           filterResource._org = myBot[ROOT_HASH]
-        if (typeof filterResource.draft === 'undefined')
+        if (typeof filterResource.draft === 'undefined' && !all)
           filterResource.draft = false
       }
     }
@@ -11422,6 +11423,17 @@ if (!res[SIG]  &&  res._message)
       setTimeout(() => {
         this.trigger({action: 'offerKillSwitchAfterApplication'})
       }, 2000)
+    }
+    else if (val[TYPE] === APPLICATION_SUBMITTED) {
+      let rl = await this.searchServer({
+                 modelName: APPLICATION,
+                 resource: val.from,
+                 noTrigger: true,
+                 all: true,
+                 filterResource: {[TYPE]: APPLICATION, context: val.context, limit: 1}
+              })
+      if (rl.list && rl.list.length)
+        Actions.refreshApplication({resource: rl.list[0]})
     }
   },
   // isYuki(fromOrg) {
