@@ -1283,7 +1283,8 @@ if (r.url)
                    </View>
       }
       else
-        errors = !noChat && <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
+        errors = <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
+        // errors = !noChat && <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
     }
     const droppable = Object.keys(properties).find(key => {
       const prop = properties[key]
