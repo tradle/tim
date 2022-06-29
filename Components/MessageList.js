@@ -117,7 +117,7 @@ class MessageList extends Component {
       // menuIsShown: me.isEmployee,
       noChat
     }
-    if (application  &&  (isRM(application) ||  application.filledForCustomer)) {
+    if (application  &&  (isRM(application) ||  application.filledForCustomer || application.draft)) {
       let additionalForms = this.getAdditionalForms(application)
       if (additionalForms.length)
         this.state.additionalForms = additionalForms.map(f => ({id: f}))
@@ -1033,9 +1033,6 @@ debugger
       context = currentContext
     let styles = createStyles({ bankStyle })
 
-    let alert = <View />
-    let content, lastFr, loading
-
     let { assignRM, draft:isApplicationDraft, filledForCustomer } = application || {}
 
     let hideTextInput
@@ -1044,7 +1041,8 @@ debugger
     else if (application)
       hideTextInput = !isRM(application) &&  !filledForCustomer && !isApplicationDraft
     let actionSheet = (!hideTextInput || filledForCustomer || isApplicationDraft) && this.renderActionSheet()
-    let rightPanel, menuPanel
+    let rightPanel, menuPanel, content, lastFr
+
     if (!list || !list.length) {
       if (application  ||  navigator.isConnected  &&  utils.getType(resource) === ORGANIZATION) {
         if (isLoading) {
@@ -1224,15 +1222,11 @@ debugger
     if (noChat) {
       if (content) {
         content = <View style={[platformStyles.pageContentWithMenu, {flex: 3}]}>
-              {network}
-              {progressInfo}
-              <View style={ sepStyle } />
-              {content}
-              {loading}
-              {qrcode}
-              {alert}
-              {assignRM}
-            </View>
+                    {network}
+                    {progressInfo}
+                    <View style={ sepStyle } />
+                    {content}
+                  </View>
       }
 
       return (
@@ -1265,7 +1259,6 @@ debugger
             {content}
             {qrcode}
             {actionSheet}
-            {alert}
             {assignRM}
           </View>
         </PageView>
@@ -1283,7 +1276,6 @@ debugger
         {content}
         {qrcode}
         {actionSheet}
-        {alert}
         {assignRM}
       </PageView>
     )
@@ -1581,8 +1573,13 @@ debugger
     let isApplicationDraft
     if (application) {
       if ((!isRM(application) && !application.filledForCustomer) ||  !additionalForms) { //this.hasAdditionalForms(application))
-        if (application.draft)
+        if (application.draft) {
+          push({
+            title: translate('formChooser'),
+            callback: () => this.chooseFormForApplication()
+          })
           isApplicationDraft = true
+        }
         else
           return
       }
@@ -1682,7 +1679,7 @@ debugger
     Actions.stepIndicatorPress({context: currentContext || context, step, to: this.props.resource})
   }
   chooseFormForApplication() {
-    let { application, navigator } = this.props
+    let { application, navigator, resource } = this.props
     let { additionalForms, bankStyle } = this.state
     let model = utils.getModel(application.requestFor)
     navigator.push({
@@ -1693,62 +1690,11 @@ debugger
       passProps: {
         strings:  additionalForms, // model.additionalForms,
         bankStyle,
-        callback:  this.requestForm.bind(this),
+        callback:  val => this.requestForm({val, resource, application, isChat: true}),
         isReplace: application.filledForCustomer
       }
     })
   }
-  requestForm(val) {
-    const { navigator, application, resource, country, locale, currency, bankStyle } = this.props
-    let m = utils.getModel(val)
-
-    if (isRM(application)) {
-      let msg = {
-        [TYPE]: FORM_REQUEST,
-        message: m.formRequestMessage
-                ? translate(m.formRequestMessage)
-                : translate('fillTheForm', translate(m)),
-            // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
-        product: m.id,
-        form: val,
-        from: utils.getMe(),
-        to: application.applicant,
-        _context: application._context,
-        context: application.context
-      }
-      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
-      return
-    }
-    if (application  &&  application.filledForCustomer) {
-      navigator.push({
-        title: translate(m),
-        componentName: 'NewResource',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: utils.getLensedModelForType(val),
-          application,
-          resource: {
-            [TYPE]: val,
-            from: utils.getMe(),
-            to: resource.to,
-            _context: resource
-          },
-          chat: resource,
-          currency,
-          country,
-          locale,
-          bankStyle
-        }
-      })
-      // utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
-    }
-    // msg._t = constants.TYPES.SIMPLE_MESSAGE
-    // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
-    // resource[prop.name] = val
-    // Actions.addChatItem({resource: resource, disableFormRequest: oResource})
-  }
-
   renderActionSheet() {
     const buttons = this.getActionSheetItems()
     if (!buttons || !buttons.length) return
@@ -1874,24 +1820,6 @@ debugger
     return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
-  }
-  getAdditionalForms(application) {
-    let m = utils.getModel(application.requestFor)
-    if (m.additionalForms != null)
-      return m.additionalForms
-    let additionalForms = m.forms.filter(f => {
-      if (f === SELFIE)
-        return true
-      let m = utils.getModel(f)
-      let scanner = utils.getPropertiesWithAnnotation(m, 'scanner')
-      if (Object.keys(scanner))
-        return true
-      let signature = utils.getPropertiesWithAnnotation(m, 'signature')
-      if (Object.keys(signature))
-        return true
-      return false
-    })
-    return additionalForms.length  &&  additionalForms
   }
   // hasAdditionalForms(application) {
   //   let m = utils.getModel(application.requestFor)

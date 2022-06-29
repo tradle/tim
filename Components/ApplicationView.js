@@ -26,10 +26,24 @@ const {
 
 import utils, {
   getFontSize as fontSize,
-  translate
+  translate,
+  getRootHash,
+  getMe,
+  getType,
+  isInlined,
+  isAndroid,
+  isMe,
+  getContentWidth,
+  getStatusMessageForCheck,
+  getLensedModelForType,
+  getDisplayName,
+  getModel,
+  styleFactory,
+  onNextTransitionEnd
 } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 
+import Navigator from './Navigator'
 import ApplicationTabs from './ApplicationTabs'
 import PageView from './PageView'
 import Actions from '../Actions/Actions'
@@ -57,6 +71,7 @@ const STATUS = 'tradle.Status'
 const VISUAL_VERIFICATION_METHOD = 'tradle.VisualPhotosVerificationMethod'
 const API = 'tradle.Api'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const FORM_REQUEST = 'tradle.FormRequest'
 
 const VERIFICATION_PROVIDER = 'Manual visual comparison'
 const FACIAL_MATCH = 'facial similarity'
@@ -78,7 +93,7 @@ class ApplicationView extends Component {
     super(props);
     this._lazyId = LAZY_ID + INSTANCE_ID++
 
-    let { resource, action, backlink, tab, checkFilter, navigator, bankStyle } = props
+    let { resource, action, backlink, tab, checkFilter, navigator, bankStyle, application, callback } = props
     this.state = {
       resource,
       isLoading: true,
@@ -86,8 +101,15 @@ class ApplicationView extends Component {
       bankStyle,
       backlink: tab,
       checkFilter,
-      menuIsShown: utils.getMe().isEmployee
+      menuIsShown: getMe().isEmployee
     }
+    if (resource.status !== 'started') {
+      let additionalForms = this.getAdditionalForms(resource)
+      if (additionalForms.length)
+        this.state.additionalForms = additionalForms.map(f => ({id: f}))
+    }
+    if (application && callback)
+      this.state.callback = callback
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
 
@@ -101,9 +123,9 @@ class ApplicationView extends Component {
   componentWillMount() {
     let { resource, search, backlink, tab } = this.props
 
-    let rtype = utils.getType(resource)
-    let m = utils.getModel(rtype)
-    if (utils.isInlined(m))
+    let rtype = getType(resource)
+    let m = getModel(rtype)
+    if (isInlined(m))
       return
     Actions.getItem( {resource, search, backlink: backlink || tab} )
   }
@@ -113,8 +135,8 @@ class ApplicationView extends Component {
   handleEvent(params) {
     let {resource, action, backlink, application, style, provider, nextStep, templates} = params
 
-    const hash = utils.getRootHash(this.props.resource)
-    if (resource  &&  utils.getRootHash(resource) !== hash)
+    const hash = getRootHash(this.props.resource)
+    if (resource  &&  getRootHash(resource) !== hash)
       return
 
     switch (action) {
@@ -148,13 +170,13 @@ class ApplicationView extends Component {
         this.setState({showDetails: true, backlink: null, checkFilter: null, checksCategory: null})
       break
     case 'updateItem':
-      if (utils.getRootHash(resource) === hash) {
+      if (getRootHash(resource) === hash) {
         Actions.hideModal()
         this.setState({resource, isLoading: false})
       }
       break
     case 'assignRM_Confirmed':
-      if (utils.getRootHash(application) === hash) {
+      if (getRootHash(application) === hash) {
         Actions.hideModal()
         this.setState({resource: application, isLoading: false})
       }
@@ -175,7 +197,7 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown,
-          showDetails, locale, nextStep, templates } = this.state
+          showDetails, locale, nextStep, templates, additionalForms } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -194,14 +216,13 @@ class ApplicationView extends Component {
       // if (!resource[TYPE])
       //   return <View/>
     }
-    let isAndroid = utils.isAndroid()
-    let color = isAndroid ? bankStyle.linkColor : '#ffffff'
+    let color = isAndroid() ? bankStyle.linkColor : '#ffffff'
     let iconName = 'ios-person-add-outline'
     let icolor
     let rmStyle
     if (hasRM) {
       iconName = 'ios-person'
-      icolor =  isAndroid && (isRM && bankStyle.linkColor || '#CA9DF2') || '#ffffff'
+      icolor =  isAndroid() && (isRM && bankStyle.linkColor || '#CA9DF2') || '#ffffff'
       rmStyle = styles.hasRM
     }
     else {
@@ -210,26 +231,36 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM  &&  !utils.isMe(resource.applicant) && !resource.filledForCustomer  &&  !resource.draft)
+    if (!isRM  &&  !isMe(resource.applicant) && !resource.filledForCustomer  &&  !resource.draft)
       assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
                   </TouchableOpacity>
-    let home, print
-    if (utils.getMe().isEmployee)
+    let home, print, reqForm
+    if (getMe().isEmployee)
       home = this.addHomeButton()
     let actionSheet = templates  && this.renderActionSheet()
-    if (actionSheet)
+    let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(true) //ForAdditionalForms()
+
+    if (actionSheet) {
       print = <TouchableOpacity onPress={() => this.ActionSheet.show()} style={styles.homeButton}>
                <View style={[buttonStyles.homeButton]}>
                  <Icon name='ios-print-outline' color={bankStyle.linkColor} size={33}/>
                </View>
              </TouchableOpacity>
+    }
+    if (actionSheetForAdditionalForms) {
+      reqForm = <TouchableOpacity onPress={() => this.ActionSheet1.show()} style={styles.homeButton}>
+               <View style={[buttonStyles.homeButton]}>
+                 <Icon name='ios-add' color={bankStyle.linkColor} size={35}/>
+               </View>
+             </TouchableOpacity>
+    }
     let photoId, selfie
     if (resource.forms) {
-      photoId = resource.forms.find(r => utils.getType(r) === PHOTO_ID)
-      selfie = resource.forms.find(r => utils.getType(r)  === SELFIE)
+      photoId = resource.forms.find(r => getType(r) === PHOTO_ID)
+      selfie = resource.forms.find(r => getType(r)  === SELFIE)
     }
     let compareImages
     if (photoId  &&  selfie) {
@@ -242,7 +273,7 @@ class ApplicationView extends Component {
 
     let chatButton
     if (resource._context) {
-      if (!resource.submissions || !resource.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED))
+      if (!resource.submissions || !resource.submissions.find(r => getType(r.submission) === APPLICATION_SUBMITTED))
         chatButton = <TouchableOpacity onPress={this.openApplicationChat.bind(this, resource)} style={[styles.openChatPadding]}>
                         <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                           <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
@@ -266,16 +297,19 @@ class ApplicationView extends Component {
                  </View>
              </TouchableOpacity>
     }
+    let requestForm
     let copyButton = this.generateCopyLinkButton(resource)
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
                     {print}
                     {actionSheet}
+                    {actionSheetForAdditionalForms}
                     {tree}
                     {copyButton}
                     {compareImages}
                     {chatButton}
+                    {reqForm}
                     {assignRM}
                     {nextApp}
                   </View>
@@ -283,7 +317,7 @@ class ApplicationView extends Component {
     let navBarMenu
     if (menuIsShown)
       navBarMenu = this.showMenu(this.props, navigator)
-    let width = utils.getContentWidth(ApplicationView)
+    let width = getContentWidth(ApplicationView)
     let content = <ScrollView  ref='this' style={{width, alignSelf: 'center'}} name={this._lazyId}>
                    {network}
                    {loading}
@@ -311,7 +345,7 @@ class ApplicationView extends Component {
             {navBarMenu}
           </View>
           <View style={platformStyles.pageContentWithMenu}>
-            <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
+            <ScrollView  ref='this' style={{width: getContentWidth(ApplicationView), alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
               {network}
               {loading}
               {content}
@@ -323,7 +357,7 @@ class ApplicationView extends Component {
 
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
-        <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
+        <ScrollView  ref='this' style={{width: getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
           {network}
           {loading}
           {content}
@@ -332,14 +366,17 @@ class ApplicationView extends Component {
       </PageView>
      );
   }
-  renderActionSheet() {
-    const buttons = this.getActionSheetItems()
+  renderActionSheet(isAdditionalForms) {
+    const buttons = isAdditionalForms ? this.getActionSheetItemsForAdditionalForms() : this.getActionSheetItems()
     if (!buttons || !buttons.length) return
     let titles = buttons.map((b) => b.title)
     return (
       <ActionSheet
         ref={(o) => {
-          this.ActionSheet = o
+          if (isAdditionalForms)
+            this.ActionSheet1 = o
+          else
+            this.ActionSheet = o
         }}
         options={titles}
         cancelButtonIndex={buttons.length - 1}
@@ -369,11 +406,41 @@ class ApplicationView extends Component {
 
     return buttons
   }
+
+  getActionSheetItemsForAdditionalForms() {
+    const { additionalForms } = this.state
+    let application = this.state.resource || this.props.resource
+    const { navigator } = this.props
+
+    const buttons = []
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
+
+    if (!additionalForms)
+      return buttons
+    additionalForms.forEach(f => {
+      let fm = utils.getModel(f.id)
+      push({
+        title: translate(fm),
+        callback: () => this.requestForm({
+          val: f.id,
+          resource: application._context || application.request,
+          application,
+          callback: () => navigator.pop()
+        })
+      })
+    })
+    push({
+      title: translate('cancel'),
+      callback: () => {}
+    })
+
+    return buttons
+  }
   applyForNext(params) {
     const { type } = params
     const { navigator } = this.props
     Alert.alert(
-      translate('applyForNextProduct', translate(utils.getModel(type))), // + utils.getDisplayName({ resource }),
+      translate('applyForNextProduct', translate(getModel(type))), // + getDisplayName({ resource }),
       null,
       [
         {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -420,7 +487,7 @@ class ApplicationView extends Component {
         rightButtonTitle: 'VerifyOrCorrect',
         onRightButtonPress: () => {
           Alert.alert(
-            translate('createManualMatchCheck'), // + utils.getDisplayName({ resource }),
+            translate('createManualMatchCheck'), // + getDisplayName({ resource }),
             null,
             [
               {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -435,8 +502,8 @@ class ApplicationView extends Component {
   createManualCheckAndVerification(photoID, selfie) {
     let { navigator } = this.props
     let resource = this.state.resource || this.props.resource
-    let me = utils.getMe();
-    let statusModel = utils.getModel(STATUS)
+    let me = getMe();
+    let statusModel = getModel(STATUS)
     let status = statusModel.enum.find(r => r.id === 'pass')
     let r = {
       [TYPE]: MANUAL_VISUAL_COMPARISON_CHECK,
@@ -454,7 +521,7 @@ class ApplicationView extends Component {
         title: status.title
       }
     }
-    r.message = utils.getStatusMessageForCheck({check: r})
+    r.message = getStatusMessageForCheck({check: r})
     let params = {to: resource.to, resource: r, application: resource}
     if (resource._context) {
       params.context = resource._context
@@ -481,7 +548,7 @@ class ApplicationView extends Component {
 
     let r = {
       [TYPE]: VERIFICATION,
-      from: utils.getMe(),
+      from: getMe(),
       document: photoId,
       to: applicant,
       method,
@@ -526,8 +593,8 @@ class ApplicationView extends Component {
         }},
         {text: translate('Approve'), onPress: () => {
           Actions.hideModal()
-          let title = translate(utils.getModel(resource.product || resource.requestFor))
-          let me = utils.getMe()
+          let title = translate(getModel(resource.product || resource.requestFor))
+          let me = getMe()
           let msg = {
             [TYPE]: APPROVAL,
             application: resource,
@@ -545,7 +612,7 @@ class ApplicationView extends Component {
   deny() {
     let resource = this.state.resource || this.props.resource
     let isApplication = resource[TYPE] === APPLICATION
-    let applicantTitle = utils.getDisplayName({ resource: resource.applicant || resource.from })
+    let applicantTitle = getDisplayName({ resource: resource.applicant || resource.from })
     Alert.alert(
       translate('denyApplication', applicantTitle),
       null,
@@ -555,8 +622,8 @@ class ApplicationView extends Component {
         }},
         {text: translate('Deny'), onPress: () => {
           Actions.hideModal()
-          let title = translate(utils.getModel(resource.product ||  resource.requestFor))
-          let me = utils.getMe()
+          let title = translate(getModel(resource.product ||  resource.requestFor))
+          let me = getMe()
           let msg = {
             [TYPE]: DENIAL,
             application: resource,
@@ -573,13 +640,13 @@ class ApplicationView extends Component {
   showTree() {
     let { bankStyle, navigator, currency, locale } = this.props
     let resource = this.state.resource || this.props.resource
-    let me = utils.getMe()
+    let me = getMe()
     let title
     let aTitle = resource.applicantName || resource.applicant.title
     if (aTitle)
-      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName({ resource })
+      title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + getDisplayName({ resource })
     else
-      title = me.organization.title  + '  --  ' + utils.getDisplayName({ resource })
+      title = me.organization.title  + '  --  ' + getDisplayName({ resource })
 
     navigator.push({
       title,
@@ -599,7 +666,7 @@ reactMixin(ApplicationView.prototype, ResourceMixin);
 reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
-var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
+var createStyles = styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
   let isAndroid = Platform.OS === 'android'
   let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
   let paddingRight = Platform.OS === 'android' ? 0 : 10
@@ -659,3 +726,52 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
 })
 
 module.exports = ApplicationView;
+  // requestForm(val) {
+  //   const { navigator, country, locale, currency, bankStyle } = this.props
+  //   const application = this.state.resource
+  //   let m = getModel(val)
+
+  //   if (utils.isRM(application)) {
+  //     let msg = {
+  //       [TYPE]: FORM_REQUEST,
+  //       message: m.formRequestMessage
+  //               ? translate(m.formRequestMessage)
+  //               : translate('fillTheForm', translate(m)),
+  //           // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+  //       product: m.id,
+  //       form: val,
+  //       from: getMe(),
+  //       to: application.applicant,
+  //       _context: application._context,
+  //       context: application.context
+  //     }
+  //     onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
+  //     return
+  //   }
+  //   if (application.filledForCustomer || application.draft) {
+  //     navigator.push({
+  //       title: translate(m),
+  //       componentName: 'NewResource',
+  //       backButtonTitle: 'Back',
+  //       rightButtonTitle: 'Done',
+  //       passProps: {
+  //         model: getLensedModelForType(val),
+  //         application,
+  //         resource: {
+  //           [TYPE]: val,
+  //           from: getMe(),
+  //           to: application.from,
+  //           _context: application._context,
+  //         },
+  //         callback: () => {
+  //           navigator.pop()
+  //           // setTimeout(this.refreshApplication(application), 300)
+  //         },
+  //         currency,
+  //         country,
+  //         locale,
+  //         bankStyle
+  //       }
+  //     })
+  //   }
+  // }

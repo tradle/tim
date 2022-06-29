@@ -11425,15 +11425,18 @@ if (!res[SIG]  &&  res._message)
       }, 2000)
     }
     else if (val[TYPE] === APPLICATION_SUBMITTED) {
-      let rl = await this.searchServer({
+      let {list: rl} = await this.searchServer({
                  modelName: APPLICATION,
                  resource: val.from,
                  noTrigger: true,
                  all: true,
                  filterResource: {[TYPE]: APPLICATION, context: val.context, limit: 1}
               })
-      if (rl.list && rl.list.length)
-        Actions.refreshApplication({resource: rl.list[0]})
+      debugger
+      if (rl && rl.length)
+        await this.onGetItem({resource: rl[0], search: true})
+      // if (rl.list && rl.list.length)
+      //   Actions.refreshApplication({resource: rl.list[0]})
     }
   },
   // isYuki(fromOrg) {

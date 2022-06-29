@@ -12,7 +12,7 @@ import {
 
 import constants from '@tradle/constants'
 
-import utils, { translate, isWhitelabeled } from '../utils/utils'
+import utils, { translate, isWhitelabeled, isRM } from '../utils/utils'
 import { getGridCols } from '../utils/uiUtils'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -33,10 +33,76 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PHOTO = 'tradle.Photo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const SELFIE = 'tradle.Selfie'
+const FORM_REQUEST = 'tradle.FormRequest'
 
 var HomePageMixin = {
   refreshApplication(resource) {
     Actions.refreshApplication({resource})
+  },
+  getAdditionalForms(application) {
+    let m = utils.getModel(application.requestFor)
+    if (m.additionalForms != null)
+      return m.additionalForms
+    let additionalForms = m.forms.filter(f => {
+      if (f === SELFIE)
+        return true
+      let m = utils.getModel(f)
+      let scanner = utils.getPropertiesWithAnnotation(m, 'scanner')
+      if (Object.keys(scanner))
+        return true
+      let signature = utils.getPropertiesWithAnnotation(m, 'signature')
+      if (Object.keys(signature))
+        return true
+      return false
+    })
+    return additionalForms.length  &&  additionalForms
+  },
+  requestForm({val, resource, application, isChat, callback}) {
+    const { navigator, country, locale, currency, bankStyle } = this.props
+    let m = utils.getModel(val)
+
+    if (isRM(application)) {
+      let msg = {
+        [TYPE]: FORM_REQUEST,
+        message: m.formRequestMessage
+                ? translate(m.formRequestMessage)
+                : translate('fillTheForm', translate(m)),
+            // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+        product: m.id,
+        form: val,
+        from: utils.getMe(),
+        to: application.applicant,
+        _context: resource,
+        context: application.context
+      }
+      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
+      return
+    }
+    if (application  &&  application.filledForCustomer) {
+      navigator.push({
+        title: translate(m),
+        componentName: 'NewResource',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getLensedModelForType(val),
+          application,
+          resource: {
+            [TYPE]: val,
+            from: utils.getMe(),
+            to: resource.to,
+            _context: resource
+          },
+          chat: isChat && resource,
+          callback,
+          currency,
+          country,
+          locale,
+          bankStyle
+        }
+      })
+    }
   },
   scanFormsQRCode(opts) {
     return new Promise((resolve, reject) => {
