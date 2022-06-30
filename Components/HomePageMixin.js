@@ -79,7 +79,7 @@ var HomePageMixin = {
       utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
       return
     }
-    if (application  &&  application.filledForCustomer) {
+    if (application  &&  (application.filledForCustomer || application.draft)) {
       navigator.push({
         title: translate(m),
         componentName: 'NewResource',
