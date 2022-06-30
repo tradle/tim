@@ -103,11 +103,6 @@ class ApplicationView extends Component {
       checkFilter,
       menuIsShown: getMe().isEmployee
     }
-    if (resource.status !== 'started') {
-      let additionalForms = this.getAdditionalForms(resource)
-      if (additionalForms.length)
-        this.state.additionalForms = additionalForms.map(f => ({id: f}))
-    }
     if (application && callback)
       this.state.callback = callback
     let currentRoutes = navigator.getCurrentRoutes()
@@ -197,7 +192,7 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown,
-          showDetails, locale, nextStep, templates, additionalForms } = this.state
+          showDetails, locale, nextStep, templates } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -240,9 +235,9 @@ class ApplicationView extends Component {
     let home, print, reqForm
     if (getMe().isEmployee)
       home = this.addHomeButton()
-    let actionSheet = templates  && this.renderActionSheet()
-    let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(true) //ForAdditionalForms()
 
+
+    let actionSheet = templates  && this.renderActionSheet()
     if (actionSheet) {
       print = <TouchableOpacity onPress={() => this.ActionSheet.show()} style={styles.homeButton}>
                <View style={[buttonStyles.homeButton]}>
@@ -250,6 +245,13 @@ class ApplicationView extends Component {
                </View>
              </TouchableOpacity>
     }
+    let additionalForms
+    if (resource.status !== 'started') {
+      let additionalForms = this.getAdditionalForms(resource)
+      if (additionalForms.length)
+        additionalForms = additionalForms.map(f => ({id: f}))
+    }
+    let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(true) //ForAdditionalForms()
     if (actionSheetForAdditionalForms) {
       reqForm = <TouchableOpacity onPress={() => this.ActionSheet1.show()} style={styles.homeButton}>
                <View style={[buttonStyles.homeButton]}>
