@@ -247,11 +247,13 @@ class ApplicationView extends Component {
     }
     let additionalForms
     if (resource.status !== 'started') {
-      let additionalForms = this.getAdditionalForms(resource)
+      additionalForms = this.getAdditionalForms(resource)
       if (additionalForms.length)
         additionalForms = additionalForms.map(f => ({id: f}))
+      else
+        additionalForms = null
     }
-    let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(true) //ForAdditionalForms()
+    let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(additionalForms) //ForAdditionalForms()
     if (actionSheetForAdditionalForms) {
       reqForm = <TouchableOpacity onPress={() => this.ActionSheet1.show()} style={styles.homeButton}>
                <View style={[buttonStyles.homeButton]}>
@@ -368,14 +370,14 @@ class ApplicationView extends Component {
       </PageView>
      );
   }
-  renderActionSheet(isAdditionalForms) {
-    const buttons = isAdditionalForms ? this.getActionSheetItemsForAdditionalForms() : this.getActionSheetItems()
+  renderActionSheet(additionalForms) {
+    const buttons = additionalForms ? this.getActionSheetItemsForAdditionalForms(additionalForms) : this.getActionSheetItems()
     if (!buttons || !buttons.length) return
     let titles = buttons.map((b) => b.title)
     return (
       <ActionSheet
         ref={(o) => {
-          if (isAdditionalForms)
+          if (additionalForms)
             this.ActionSheet1 = o
           else
             this.ActionSheet = o
@@ -409,8 +411,7 @@ class ApplicationView extends Component {
     return buttons
   }
 
-  getActionSheetItemsForAdditionalForms() {
-    const { additionalForms } = this.state
+  getActionSheetItemsForAdditionalForms(additionalForms) {
     let application = this.state.resource || this.props.resource
     const { navigator } = this.props
 
