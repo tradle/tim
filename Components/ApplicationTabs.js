@@ -20,7 +20,8 @@ import { Text } from './Text'
 import ProgressBar from './ProgressBar'
 import utils, {
   translate,
-  getEnumValueId
+  getEnumValueId,
+  isSubclassOf
 } from '../utils/utils'
 
 import buttonStyles from '../styles/buttonStyles'
@@ -57,7 +58,6 @@ const {
 } = constants.TYPES
 const CHECK = 'tradle.Check'
 const STATUS = 'tradle.Status'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
@@ -353,22 +353,26 @@ class ApplicationTabs extends Component {
 
     let buttons
     if (isDraft  &&  resource.submissions) {
+      let {letClient, finishDraft} = this.props
       let context = resource._context
-      let completed
-      if (resource.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED)) {
-        completed = <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitCompletedApplication, context)}>
+      let finishDraftButton, letClientButton
+      if (finishDraft)
+        finishDraftButton = <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitCompletedApplication, context)}>
                       <View style={styles.complete}>
                         <Text style={styles.completeText}>{translate('finishDraft')}</Text>
                       </View>
                     </TouchableOpacity>
-      }
+      if (letClient)
+        letClientButton = <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitDraftApplication, context)}>
+                      <View style={styles.send}>
+                        <Text style={styles.sendText}>{translate('letClientFinish')}</Text>
+                      </View>
+                    </TouchableOpacity>
+
+      let hasFormSubmission = resource
       buttons = <View style={styles.buttons}>
-                  {completed}
-                  <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitDraftApplication, context)}>
-                  <View style={styles.send}>
-                    <Text style={styles.sendText}>{translate('letClientFinish')}</Text>
-                  </View>
-                  </TouchableOpacity>
+                  {finishDraftButton}
+                  {letClientButton}
                 </View>
 
     }
