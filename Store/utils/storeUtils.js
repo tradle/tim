@@ -685,8 +685,10 @@ const storeUtils = {
   makeStub(sub) {
     let stub = {
       id: sub.id  ||  [sub[TYPE], sub._permalink, sub._link].join('_'),
-      title: sub.title || sub._displayName
     }
+    let title = sub.title || sub._displayName
+    if (title)
+      stub.title = title
     if (sub._refId)
       stub._refId = sub._refId
     return stub
