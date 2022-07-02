@@ -74,16 +74,16 @@ let viewCols = {
     icon: 'ios-thunderstorm-outline',
     color: 'green'
   },
-  'assignedToTeam': 'Team',
+  // 'assignedToTeam': 'Team',
   'score': {
     label: 'IRR',
     link: 'showScoreDetails'
   },
-  'scoreType': 'risk',
-  'node_depth': {
-    label:'Depth',
-    type: 'number',
-  },
+  // 'scoreType': 'risk',
+  // 'node_depth': {
+  //   label:'Depth',
+  //   type: 'number',
+  // },
   'elapsed': {
     label:'Delayed',
     type: 'number',
