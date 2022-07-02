@@ -128,7 +128,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider, nextStep, templates} = params
+    let {resource, action, backlink, application, style, provider, nextStep, templates, letClient, finishDraft} = params
 
     const hash = getRootHash(this.props.resource)
     if (resource  &&  getRootHash(resource) !== hash)
@@ -141,6 +141,8 @@ class ApplicationView extends Component {
         isLoading: false,
         bankStyle: style || this.state.bankStyle,
         locale: provider && provider.locale,
+        letClient,
+        finishDraft,
         nextStep,
         templates
       })
@@ -192,7 +194,7 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown,
-          showDetails, locale, nextStep, templates } = this.state
+          showDetails, locale, nextStep, templates, letClient, finishDraft } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -330,6 +332,8 @@ class ApplicationView extends Component {
                                      navigator={navigator}
                                      currency={currency}
                                      locale={locale}
+                                     letClient={letClient}
+                                     finishDraft={finishDraft}
                                      backlink={!showDetails && backlink}
                                      checksCategory={this.state.checksCategory}
                                      showCategory={this.showCategory.bind(this)}
@@ -428,7 +432,11 @@ class ApplicationView extends Component {
           val: f.id,
           resource: application._context || application.request,
           application,
-          callback: () => navigator.pop()
+          callback: () => {
+            Actions.showModal({title: translate('refreshApplication'), showIndicator: true})
+            setTimeout(Actions.hideModal, 1000)
+            navigator.pop()
+          }
         })
       })
     })
