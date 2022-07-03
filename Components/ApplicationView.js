@@ -434,7 +434,6 @@ class ApplicationView extends Component {
           application,
           callback: () => {
             Actions.showModal({title: translate('refreshApplication'), showIndicator: true})
-            setTimeout(Actions.hideModal, 1000)
             navigator.pop()
           }
         })
