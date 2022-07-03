@@ -46,7 +46,7 @@
     "@tradle/errors": "^1.1.1",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.4.0",
-    "@tradle/lens": "^1.3.1",
+    "@tradle/lens": "^1.3.2",
     "@tradle/models": "github:tradle/models",
     "@tradle/models-cloud": "github:tradle/models-cloud",
     "@tradle/models-corporate-onboarding": "github:tradle/models-corporate-onboarding",

@@ -25,7 +25,7 @@ import PageView from './PageView'
 import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator, getGridCols } from '../utils/uiUtils'
 import { showScoreDetails, loadMoreContentAsync, onScrollEvent } from './utils/gridUtils'
-import { translate, getModel, getDisplayName, makeModelTitle, getMe, getEnumValueId } from '../utils/utils'
+import { translate, getModel, getDisplayName, makeModelTitle, getMe, getEnumValueId, getLensedModelForType } from '../utils/utils'
 import buttonStyles from '../styles/buttonStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import StyleSheet from '../StyleSheet'
@@ -69,11 +69,11 @@ let viewCols = {
       }
     }
   },
-  'numberOfCheckOverrides': {
-    description: '# of overrides',
-    icon: 'ios-thunderstorm-outline',
-    color: 'green'
-  },
+  // 'numberOfCheckOverrides': {
+  //   description: '# of overrides',
+  //   icon: 'ios-thunderstorm-outline',
+  //   color: 'green'
+  // },
   // 'assignedToTeam': 'Team',
   'score': {
     label: 'IRR',
@@ -294,7 +294,7 @@ class ApplicationsGrid extends Component {
       )
   }
   render() {
-    let model = getModel(APPLICATION);
+    let model = getLensedModelForType(APPLICATION);
     let me = getMe()
     let { allLoaded, depth } = this.state
     let content = <ListView onScroll={this.onScroll.bind(this)}
