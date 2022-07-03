@@ -17,7 +17,7 @@ import LinearGradient from 'react-native-linear-gradient'
 
 import constants from '@tradle/constants'
 
-import utils, { translate, translateEnum, isEnum, isStub, isForm, getRootHash } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub, isForm, getRootHash, getLensedModelForType } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import { Text } from './Text'
@@ -102,9 +102,9 @@ class ShowPropertiesView extends Component {
     let { checkProperties, excludedProperties, bankStyle, currency, locale, isItem, isVerifier } = this.props
     var modelName = utils.getType(resource)
     if (!model)
-      model = this.props.model  ||  utils.getModel(modelName)
+      model = this.props.model  ||  getLensedModelForType(modelName)
     if (model.id !== modelName  &&  !utils.isSubclassOf(modelName, model.id))
-      model = utils.getModel(modelName)
+      model = getLensedModelForType(modelName)
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
