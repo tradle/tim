@@ -4410,6 +4410,19 @@ if (!res[SIG]  &&  res._message)
     let templates = this.getTemplatesList({application: r})
     if (templates)
       retParams.templates = templates
+    if (application.draft) {
+      let finishDraft, letClient
+      if (application.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED)) {
+        retParams.finishDraft = true
+        retParams.letClient = true
+      }
+      else if (application.submissions.find(r => {
+          let rtype = utils.getType(r.submission)
+          return rtype !== PRODUCT_REQUEST && utils.isSubclassOf(rtype, FORM)
+        })) {
+        retParams.letClient = true
+      }
+    }
     this.trigger(retParams)
     return r
   },
@@ -11125,6 +11138,7 @@ if (!res[SIG]  &&  res._message)
     let valId = utils.getId(val)
     let inDB = this._getItem(valId)
 
+    let me = utils.getMe()
     if (inDB) {
       if (obj.txId) {
         inDB.txId = obj.txId
@@ -11135,7 +11149,6 @@ if (!res[SIG]  &&  res._message)
         return
       }
       let msgContext = obj.object  &&  obj.object.context
-      let me = utils.getMe()
       if (me.isEmployee  ||  !msgContext)
         return
       let context = utils.getId(inDB._context)
@@ -11182,7 +11195,6 @@ if (!res[SIG]  &&  res._message)
     fromId = utils.makeId(PROFILE, fromId)
     let from = this._getItem(fromId)
 
-    let me = utils.getMe()
     if (utils.getId(me) === fromId)
       val._time = val._time || obj.timestamp
     else {
@@ -11424,7 +11436,7 @@ if (!res[SIG]  &&  res._message)
         this.trigger({action: 'offerKillSwitchAfterApplication'})
       }, 2000)
     }
-    else if (val[TYPE] === APPLICATION_SUBMITTED) {
+    else if (me.isEmployee && val[TYPE] === APPLICATION_SUBMITTED) {
       let {list: rl} = await this.searchServer({
                  modelName: APPLICATION,
                  resource: val.from,
@@ -11433,8 +11445,11 @@ if (!res[SIG]  &&  res._message)
                  filterResource: {[TYPE]: APPLICATION, context: val.context, limit: 1}
               })
       debugger
-      if (rl && rl.length)
-        await this.onGetItem({resource: rl[0], search: true})
+      if (rl && rl.length) {
+        Actions.showModal({title: translate('refreshApplication'), showIndicator: true})
+        await this.onGetItem({resource: rl[0], search: true, backlink: utils.getModel(APPLICATION).properties.forms})
+        Actions.hideModal()
+      }
       // if (rl.list && rl.list.length)
       //   Actions.refreshApplication({resource: rl.list[0]})
     }
