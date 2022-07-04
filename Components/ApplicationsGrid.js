@@ -119,7 +119,7 @@ class ApplicationsGrid extends Component {
         return true
       }
     })
-    let m = getModel(APPLICATION)
+    let m = getLensedModelForType(APPLICATION)
     let gridCols = getGridCols(m)
     let vCols = _.cloneDeep(viewCols)
     gridCols.forEach(p => {
