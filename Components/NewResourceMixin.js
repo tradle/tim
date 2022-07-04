@@ -22,7 +22,7 @@ import ActionSheet from 'react-native-actionsheet'
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate, isWeb, enumValue, getLensedModelForType } from '../utils/utils'
+import utils, { translate, isWeb, enumValue, getLensedModelForType, buildStubByEnumTitleOrId } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
@@ -2176,11 +2176,12 @@ const NewResourceMixin = {
       return buttons
     }
     let { ref } = utils.getModel(rtype).properties[enumProp]
-    let enumList = utils.getModel(ref).enum
+    let refM = utils.getModel(ref)
+    let enumList = refM.enum
     if (!enumList) return []
 
     enumList.forEach(elm => push({
-      title: utils.translateEnum(elm),
+      title: utils.translateEnum(buildStubByEnumTitleOrId(refM, elm.title)),
       callback: (prop, index) => {
         let { id, title } = enumList[index]
         this.setChosenValue(enumProp, {id: `${ref}_${id}`, title })
