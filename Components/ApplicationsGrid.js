@@ -75,10 +75,10 @@ let viewCols = {
   //   color: 'green'
   // },
   // 'assignedToTeam': 'Team',
-  'score': {
-    label: 'IRR',
-    link: 'showScoreDetails'
-  },
+  // 'score': {
+  //   label: 'IRR',
+  //   link: 'showScoreDetails'
+  // },
   // 'scoreType': 'risk',
   // 'node_depth': {
   //   label:'Depth',
