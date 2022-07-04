@@ -12,8 +12,8 @@ import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
-import utils, {
-  translate, translateForGrid
+import {
+  translate, translateForGrid, getType, getModel
 } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 import { circled } from '../styles/utils'
@@ -34,7 +34,7 @@ class ApplicationTreeHeader extends Component {
     let { gridCols, depth, sizes, offset } = this.props
     if (!gridCols)
       return <View />
-    const model = utils.getModel(APPLICATION)
+    const model = getModel(APPLICATION)
     const props = model.properties
     let gCols = Object.keys(gridCols)
     let self = this
@@ -142,13 +142,13 @@ class ApplicationTreeHeader extends Component {
   }
   getIcon(val) {
     let { icon, color } = val
-    let type = utils.getType(icon)
+    let type = getType(icon)
     if (!type)
       return {icon, color}
     let id = icon.split('_')[1]
-    let m = utils.getModel(type)
+    let m = getModel(type)
     if (m) {
-      let elm = utils.getModel(type).enum.find(e => e.id === id)
+      let elm = getModel(type).enum.find(e => e.id === id)
       if (elm) {
         icon = elm.icon
         color = elm.color
