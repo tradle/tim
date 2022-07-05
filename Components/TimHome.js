@@ -489,7 +489,7 @@ class TimHome extends Component {
           componentName: 'GridList',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Profile',
-          onRightButtonPress: this.profileOnRightButtonClick({bankStyle, locale, currency}),
+          onRightButtonPress: this.rightButtonForProfile({bankStyle, locale, currency}),
           passProps: {
             modelName: homePage,
             to: me.organization,
@@ -527,36 +527,11 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       componentName: 'ResourceList',
       rightButtonTitle: 'Profile',
+      onRightButtonPress: this.rightButtonForProfile({bankStyle, locale, currency}),
       passProps,
-      onRightButtonPress: () => navigator.push({
-        title: profileTitle,
-        componentName: 'ResourceView',
-        backButtonTitle: 'Back',
-        passProps: {
-          bankStyle,
-          backlink: utils.getModel(me[TYPE]).properties.myForms,
-          resource: me,
-          locale,
-          currency
-        },
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: me.firstName,
-          componentName: 'NewResource',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel(me[TYPE]),
-            resource: me,
-            bankStyle,
-            locale,
-            currency
-          }
-        },
-      })
     });
   }
-  profileOnRightButtonClick({bankStyle, locale, currency}) {
+  rightButtonForProfile({bankStyle, locale, currency}) {
     const { navigator } = this.props
     let me = utils.getMe()
     let profileTitle
