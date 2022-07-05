@@ -482,29 +482,14 @@ class TimHome extends Component {
     if (me.isEmployee) {
       locale = utils.getCompanyLocale()
       currency = utils.getCompanyCurrency()
-      // if (me.organization.homePage) {
-      //   this.props.navigator.push({
-      //     title: me.homePage.message,
-      //     componentName: 'GridList',
-      //     backButtonTitle: 'Back',
-      //     passProps: {
-      //       modelName: me.homePage.bookmark[TYPE],
-      //       resource: me.homePage.bookmark,
-      //       bookmark: me.homePage,
-      //       bankStyle: me.organization.style || defaultBankStyle,
-      //       currency,
-      //       locale,
-      //       search: true
-      //     },
-      //   })
-      //   return
-      // }
       let { homePage } = me.organization
       if (homePage) {
         navigator.push({
           title: translate(utils.getModel(homePage)),
           componentName: 'GridList',
           backButtonTitle: 'Back',
+          rightButtonTitle: 'Profile',
+          onRightButtonPress: this.profileOnRightButtonClick({bankStyle, locale, currency}),
           passProps: {
             modelName: homePage,
             to: me.organization,
@@ -570,6 +555,41 @@ class TimHome extends Component {
         },
       })
     });
+  }
+  profileOnRightButtonClick({bankStyle, locale, currency}) {
+    const { navigator } = this.props
+    let me = utils.getMe()
+    let profileTitle
+    if (me.organization)
+      profileTitle = me.organization.title
+    else
+      profileTitle = utils.getDisplayName({ resource: me })
+    return () => navigator.push({
+      title: profileTitle,
+      componentName: 'ResourceView',
+      backButtonTitle: 'Back',
+      passProps: {
+        bankStyle,
+        backlink: utils.getModel(me[TYPE]).properties.myForms,
+        resource: me,
+        locale,
+        currency
+      },
+      rightButtonTitle: 'Edit',
+      onRightButtonPress: {
+        title: me.firstName,
+        componentName: 'NewResource',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getModel(me[TYPE]),
+          resource: me,
+          bankStyle,
+          locale,
+          currency
+        }
+      },
+    })
   }
   showFirstPage(noResetNavStack) {
     let { firstPage, isDeepLink, qs } = this.state
