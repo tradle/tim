@@ -151,7 +151,7 @@ class CheckRow extends Component {
   }
   getTitleComponent(model) {
     let { resource, application, modelName } = this.props
-    let dn = utils.getDisplayName({ resource })
+    let dn = null // utils.getDisplayName({ resource })
     let title
     if (utils.getModel(modelName).abstract)
       title = translate(model)
@@ -237,14 +237,16 @@ class CheckRow extends Component {
                             <Icon color={'#ffffff'} size={20} name={checkOverrideStatus.icon} />
                           </View>
       dnTitle = <View style={{flexDirection: 'row'}}>
-                 <Text style={styles.rTitleCrossed}>{dn}</Text>
+                 <Text style={styles.rTitleCrossed}>{title}</Text>
                  <Text style={styles.rTitle}>{checkOverrideStatus.title}</Text>
                </View>
     }
     else
-      dnTitle = <Text style={styles.rTitle}>{dn}</Text>
+      dnTitle = <Text style={styles.rTitle}>{title}</Text>
 
-    let providerProp = <Text style={styles.checkDescription}>{'Provider: ' + (provider || translate(model))}</Text>
+    let providerTr = model.properties.provider ? translate(model.properties.provider, model) : translate('Provider')
+
+    let providerProp = <Text style={styles.checkDescription}>{`${providerTr}: ${provider || translate(model)}`}</Text>
     return <View style={styles.titleView}>
              <View>
              {checkIcon}
