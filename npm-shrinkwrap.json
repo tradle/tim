@@ -2930,6 +2930,11 @@
       "from": "fast-levenshtein@>=2.0.4 <2.1.0",
       "resolved": "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz"
     },
+    "fast-xml-parser": {
+      "version": "4.0.8",
+      "from": "fast-xml-parser@latest",
+      "resolved": "https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-4.0.8.tgz"
+    },
     "fastparse": {
       "version": "1.1.1",
       "from": "fastparse@>=1.1.1 <2.0.0",
@@ -7629,6 +7634,11 @@
       "from": "strip-json-comments@>=2.0.1 <2.1.0",
       "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz",
       "dev": true
+    },
+    "strnum": {
+      "version": "1.0.5",
+      "from": "strnum@>=1.0.5 <2.0.0",
+      "resolved": "https://registry.npmjs.org/strnum/-/strnum-1.0.5.tgz"
     },
     "strong-data-uri": {
       "version": "1.0.6",

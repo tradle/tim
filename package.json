@@ -27,7 +27,7 @@
     "precommit": "npm run lint",
     "prepush": "npm run lint",
     "update:models": "npm i -S tradle/models tradle/custom-models tradle/models-corporate-onboarding tradle/models-onfido tradle/models-products-bot && ./reshrink.sh",
-    "translate:strings": "node ./scripts/translateStrings -d ./utils",
+    "translate:strings": "node ./scripts/translateStrings -d ./utils -l es",
     "translate:xmlstrings": "node ./scripts/translateStrings -d ./android/app/src/main/res/values -l vi,bn,fil,es,fr,nl,ru,km -f",
     "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android",
     "nibble": "eslint-nibble Components/ Store/ utils/ index.common.js"
@@ -94,6 +94,7 @@
     "es6-symbol": "~3.1.1",
     "events": "^1.1.0",
     "extend": "~2.0.1",
+    "fast-xml-parser": "^4.0.8",
     "financial": "^0.1.3",
     "getusermedia": "2.0.1",
     "graphql-request": "^1.8.2",
