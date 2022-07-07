@@ -11446,7 +11446,7 @@ if (!res[SIG]  &&  res._message)
               })
       debugger
       if (rl && rl.length) {
-        Actions.showModal({title: translate('refreshApplication'), showIndicator: true})
+        // Actions.showModal({title: translate('refreshInProgress'), showIndicator: true})
         await this.onGetItem({resource: rl[0], search: true, backlink: utils.getModel(APPLICATION).properties.forms})
         Actions.hideModal()
       }

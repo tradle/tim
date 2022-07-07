@@ -433,7 +433,7 @@ class ApplicationView extends Component {
           resource: application._context || application.request,
           application,
           callback: () => {
-            Actions.showModal({title: translate('refreshApplication'), showIndicator: true})
+            Actions.showModal({title: translate('refreshInProgress'), showIndicator: true})
             navigator.pop()
           }
         })
