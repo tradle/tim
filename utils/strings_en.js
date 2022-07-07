@@ -330,6 +330,7 @@ module.exports = {
     "boundsError": "The goal can not be achived:\n{1}",
     "noIteratorPresent": "No iterator property was assigned. Please uncheck one of the checkboxes and try again",
     "youCanSubmitButNotEverythingWorked": "Warning: Only a subset of terms satisfy boundary conditions",
+    "refreshInProgress": "Refresh in progress",
     // Bookmarks
     "myCases": "My cases",
     "applicationsHasFailedChecks": "Applications with failed Checks",
