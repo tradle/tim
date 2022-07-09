@@ -232,7 +232,7 @@
     "@tradle/models": {
       "version": "4.10.12",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ebe5260912ce10be7aacc867f84158f2f363d3b0"
+      "resolved": "git://github.com/tradle/models.git#1e9ef3135ba1a68d998f5c7232711cdbea3b7433"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -307,9 +307,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.1.41",
+      "version": "7.1.42",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.41.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.42.tgz",
       "dependencies": {
         "@tradle/constants": {
           "version": "2.5.1",
@@ -1512,6 +1512,11 @@
           "resolved": "https://registry.npmjs.org/xtend/-/xtend-3.0.0.tgz"
         }
       }
+    },
+    "call-bind": {
+      "version": "1.0.2",
+      "from": "call-bind@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/call-bind/-/call-bind-1.0.2.tgz"
     },
     "caller-path": {
       "version": "0.1.0",
@@ -3210,6 +3215,11 @@
       "from": "get-caller-file@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/get-caller-file/-/get-caller-file-1.0.2.tgz"
     },
+    "get-intrinsic": {
+      "version": "1.1.2",
+      "from": "get-intrinsic@>=1.0.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.1.2.tgz"
+    },
     "get-stdin": {
       "version": "4.0.1",
       "from": "get-stdin@>=4.0.1 <5.0.0",
@@ -3439,6 +3449,11 @@
       "version": "1.0.1",
       "from": "has-localstorage@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/has-localstorage/-/has-localstorage-1.0.1.tgz"
+    },
+    "has-symbols": {
+      "version": "1.0.3",
+      "from": "has-symbols@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.0.3.tgz"
     },
     "has-unicode": {
       "version": "2.0.1",
@@ -6608,14 +6623,14 @@
       "resolved": "http://registry.npmjs.org/react-native-web-linear-gradient/-/react-native-web-linear-gradient-1.1.2.tgz"
     },
     "react-native-web-webview": {
-      "version": "0.2.5",
+      "version": "0.2.9",
       "from": "react-native-web-webview@>=0.2.5 <0.3.0",
-      "resolved": "https://registry.npmjs.org/react-native-web-webview/-/react-native-web-webview-0.2.5.tgz",
+      "resolved": "https://registry.npmjs.org/react-native-web-webview/-/react-native-web-webview-0.2.9.tgz",
       "dependencies": {
         "qs": {
-          "version": "6.5.2",
+          "version": "6.11.0",
           "from": "qs@>=6.5.1 <7.0.0",
-          "resolved": "https://registry.npmjs.org/qs/-/qs-6.5.2.tgz"
+          "resolved": "https://registry.npmjs.org/qs/-/qs-6.11.0.tgz"
         }
       }
     },
@@ -7263,6 +7278,18 @@
       "version": "0.3.0",
       "from": "shelljs@>=0.3.0 <0.4.0",
       "resolved": "http://registry.npmjs.org/shelljs/-/shelljs-0.3.0.tgz"
+    },
+    "side-channel": {
+      "version": "1.0.4",
+      "from": "side-channel@>=1.0.4 <2.0.0",
+      "resolved": "http://registry.npmjs.org/side-channel/-/side-channel-1.0.4.tgz",
+      "dependencies": {
+        "object-inspect": {
+          "version": "1.12.2",
+          "from": "object-inspect@>=1.9.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.12.2.tgz"
+        }
+      }
     },
     "signal-exit": {
       "version": "3.0.2",
