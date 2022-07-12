@@ -1075,8 +1075,18 @@ var utils = {
         if (!resource[p]  &&  !prop.displayAs)
           continue
         let dn
-        if (prop.ref  &&  utils.isEnum(prop.ref))
-          dn = utils.translateEnum(resource[p])
+        if (prop.ref  &&  utils.isEnum(prop.ref)) {
+          if (typeof resource[p] === 'string') {
+            try {
+              let val = enumValue({model: utils.getModel(prop.ref), value: resource[p]})
+              dn = val && utils.translateEnum(val) || resource[p]
+            } catch (err) {
+              dn = utils.translate(resource[p])
+            }
+          }
+          else
+            dn = utils.translateEnum(resource[p])
+        }
         else if (prop.range === 'model')
           dn = utils.translate(utils.getModel(resource[p]))
         else if (rType === BOOKMARK)
