@@ -66,6 +66,8 @@ var search = {
     // let version = versionId ? '($modelsVersionId: String!)' : ''
     // let allowVar = allow ? '($allow: String!)' : ''
     let str =''
+    if (versionId && !versionId.length)
+      versionId = null
     if (versionId && allow)
       str = '($modelsVersionId: String!, $allow: String!)'
     else if (versionId)
@@ -316,14 +318,20 @@ var search = {
       if (data.result) {
         return { result:  data.result }
       }
-      ({ error='',  excludeProps={}, retry=true, mapping={}, versionId='' } = await this.checkError(data, model))
+      let checkErrorResult = await this.checkError(data, model)
+      if (model.id.indexOf('Asset') !== -1)
+        debugger
+      ({ error='',  excludeProps={}, retry=true, mapping={}} = checkErrorResult)
+      if (params.preventRecursion)
+        continue
       if (excludeProps.length) {
         params.excludeProps = excludeProps
         params.mapping = mapping
         return await this.searchServer(params)
       }
-      if (versionId  &&  versionId !== this.versionId) {
+      if (checkErrorResult.versionId  &&  checkErrorResult.versionId !== versionId) {
         params.versionId = versionId
+        params.preventRecursion = true
         return await this.searchServer(params)
       }
       if (error  &&  error === NETWORK_FAILURE  ||  !retry)
@@ -1090,6 +1098,9 @@ var search = {
     let variables
     if (versionId)
       variables = { modelsVersionId: versionId }
+    else if (table.indexOf('Asset') !== -1)
+      debugger
+
     if (allow) {
       if (!variables)
         variables = {}
