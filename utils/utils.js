@@ -2548,7 +2548,7 @@ var utils = {
     let rProps = []
     for (let p in props) {
       let pRef = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
-      if (pRef === ref  ||  utils.isSubclassOf(pRef, ref))
+      if (pRef && (pRef === ref  ||  utils.isSubclassOf(pRef, ref)))
         rProps.push(props[p])
     }
     return rProps
