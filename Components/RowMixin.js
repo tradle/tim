@@ -70,8 +70,12 @@ var RowMixin = {
       }
       else {
         let m = utils.getModel(prop.ref)
-        if (utils.isEnum(m))
-          val = translateEnum(resource[prop.name])
+        if (utils.isEnum(m)) {
+          if (typeof resource[prop.name] === 'string')
+            val = resource[prop.name]
+          else
+            val = translateEnum(resource[prop.name])
+        }
       }
     }
     let model = utils.getModel(resource[TYPE])
