@@ -129,6 +129,7 @@ const SELF_INTRODUCTION = 'tradle.SelfIntroduction'
 const SELFIE = 'tradle.Selfie'
 const PHOTO_ID = 'tradle.PhotoID'
 const LANGUAGE = 'tradle.Language'
+const EMPLOYEE_ROLES = 'tradle.EmployeeRoles'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
@@ -915,6 +916,45 @@ var utils = {
           return true
       }
     }
+  },
+  getPermissions({modelName, property}) {
+    let me = utils.getMe()
+    let allowAll = {create: true, edit: true}
+    if (!me.isEmployee || !me.counterparty)
+      return allowAll
+    if (!me.employeePass || !me.employeePass.role)
+      return {}
+
+    let m = utils.getModel(modelName)
+    let allow = (property && property.allow) || m.allow
+    if (!allow)
+      return allowAll
+
+    let ctype = utils.getType(me.counterparty)
+    let role = getEnumValueId({model: utils.getModel(EMPLOYEE_ROLES), value: me.employeePass.role})
+    if (!role)
+      return allowAll
+    let roles = utils.getModel(EMPLOYEE_ROLES).enum.map(r => r.id)
+    let actions = ['edit', 'create']
+    let retParams = {}
+    for (let i=0; i<actions.length; i++) {
+      let action = actions[i]
+      if (!allow[action]) {
+        retParams[action] = true
+        continue
+      }
+      if (typeof allow[action] === 'boolean') {
+        retParams[action] = allow[action]
+        continue
+      }
+      if (!allow[action][ctype])
+        retParams[action] = false
+      else if (allow[action][ctype][role] === undefined)
+        retParams[action] = false
+      else
+        retParams[action] = allow[action][ctype][role]
+    }
+    return retParams
   },
   getFontSize(fontSize) {
     // return fontSize

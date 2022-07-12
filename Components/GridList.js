@@ -425,7 +425,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
   }
   onAction(params) {
-    let { action, error, list, resource, endCursor, isConnected, noMove, addAllowed, cancelled } = params
+    let { action, error, list, resource, endCursor, isConnected, noMove, permissions, cancelled } = params
     if (error)
       return;
     let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink, isMenu } = this.props
@@ -575,7 +575,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       allLoaded,
       endCursor,
       noMove,
-      addAllowed
+      permissions
     }
     if (this.state.endCursor)
       state.prevEndCursor = this.state.endCursor
@@ -652,7 +652,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       navigator.push(route)
   }
   _emptyListHandler(params) {
-    let { resource, query, alert, errorMessage, addAllowed } = params
+    let { resource, query, alert, errorMessage, permissions } = params
     let { modelName, isModel, search, prop, exploreData } = this.props
 
     if (alert) {
@@ -668,10 +668,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
           return
         if (resource[TYPE] !== modelName) {
           this.errorAlert('noResourcesForCriteria')
-          this.setState({ isLoading: false, addAllowed })
+          this.setState({ isLoading: false, permissions })
           return
         }
-        this.setState({ resource, isLoading: false, addAllowed })
+        this.setState({ resource, isLoading: false, permissions })
         this.errorAlert('noResourcesForCriteria')
         return
       }
@@ -685,23 +685,23 @@ console.log('GridList.componentWillMount: filterResource', resource)
             this.errorAlert('noResourcesForCriteria')
         // }, 1)
       }
-      this.setState({refreshing: false, addAllowed, isLoading: false})
+      this.setState({refreshing: false, permissions, isLoading: false})
       return
     }
     if (this.state.allowToAdd) {
-      this.setState({isLoading: false, list: null, addAllowed})
+      this.setState({isLoading: false, list: null, permissions})
       return
     }
-    if (addAllowed) {
+    if (permissions) {
       if (params.modelName === modelName)
-        this.setState({isLoading: false, list: null, addAllowed})
+        this.setState({isLoading: false, list: null, permissions})
     }
     if (exploreData) {
       if (!resource  ||  resource[TYPE] !== modelName) {
-        this.setState({ isLoading: false, addAllowed })
+        this.setState({ isLoading: false, permissions })
         return
       }
-      this.setState({ resource, addAllowed })
+      this.setState({ resource, permissions })
       this.errorAlert('noResourcesForCriteria')
     }
   }
@@ -749,7 +749,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return true
     if (this.state.chosen !== nextState.chosen)
       return true
-    if (this.state.addAllowed !== nextState.addAllowed)
+    if (this.state.permissions !== nextState.permissions)
       return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop.name !== nextProps.prop.name)
@@ -992,16 +992,18 @@ console.log('GridList.componentWillMount: filterResource', resource)
       passProps: {
         resource,
         search,
+        permissions,
         locale,
         currency,
         application,
         bankStyle: bankStyle || defaultBankStyle
       }
     }
+    const { permissions } = this.state
     if (utils.getMe().isEmployee) {
       if (utils.isSubclassOf(rType, 'tradle.Configuration'))
         this.addEdit({resource, title, route, style: bankStyle})
-      else if (this.state.addAllowed)
+      else if (permissions && permissions.edit)
         this.addEdit({resource, title, route, style: bankStyle})
     }
     let isRM = utils.isRM(application)
@@ -1032,7 +1034,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     // Edit verifications
     let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
-    if (!canEdit  &&  !isVerification  &&  !rModel.notEditable)
+    if (!canEdit  &&  !isVerification  &&  !rModel.notEditable && (!permissions || permissions.edit))
       canEdit = utils.isMyMessage({resource})
     // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
     // if (canEdit) {
@@ -1047,6 +1049,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
           passProps: {
             model: rModel,
             resource,
+            // permissions,
             // search: !isBacklink  &&  search,
             serverOffline,
             currency,
@@ -1492,8 +1495,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { isModel, modelName, prop, search, bookmark, isBacklink, bankStyle } = this.props
     if (isModel) // || bookmark)
       return
-    let { resource, isDraft, allowToAdd, addAllowed } = this.state
-    if (prop  &&  !allowToAdd  &&  !addAllowed)
+    let { resource, isDraft, allowToAdd, permissions } = this.state
+    if (prop  &&  !allowToAdd  &&  !permissions)
       return
     let me = utils.getMe()
     let model = utils.getModel(modelName);
@@ -1526,7 +1529,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                     <Icon name={icon}  size={33}  color={color}/>
                   </View>
                 </TouchableOpacity>
-    else if (this.state.addAllowed) {
+    else if (this.state.permissions) {
       menuBtn = <TouchableOpacity onPress={() => isAdd ? this.addNewResource(utils.getModel(bookmark.bookmark[TYPE])) : this.ActionSheet.show()}>
                   <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
                     <Icon name={icon}  size={33}  color={color}/>
@@ -1865,14 +1868,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { search, modelName, prop, isBacklink, isForwardlink, bookmark, exploreData } = this.props
     if (isForwardlink)
       return
-    let { allowToAdd, isDraft, addAllowed } = this.state
+    let { allowToAdd, isDraft, permissions } = this.state
     let buttons
     if (bookmark) {
       if (!isDraft) {
         if (!bookmark.bookmark[TYPE])
           return
         let bm = utils.getModel(bookmark.bookmark[TYPE])
-        if (this.state.addAllowed) {
+        if (this.state.permissions) {
           buttons = [{
             text: translate('Bookmark'),
             // text: translate('addNew', translate(bm)),
@@ -1915,11 +1918,12 @@ console.log('GridList.componentWillMount: filterResource', resource)
         }
       ]
     }
-    if (!addAllowed && !buttons)
+    if (!permissions && !buttons)
       return
 
     let model = utils.getModel(modelName)
-    if (addAllowed) {
+    if (permissions  &&  permissions.create) {
+
       if (!buttons)
         buttons = []
       buttons.push({

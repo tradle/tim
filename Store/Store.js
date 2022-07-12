@@ -489,6 +489,10 @@ var Store = Reflux.createStore({
       this._resolveWithMe = resolve
     })
 
+    this._employeeCertPromise = new Promise(resolve => {
+      this._resolveEmployeeCert = resolve
+    })
+
     this._pushSemaphore = createSemaphore().go()
 // debugger
     if (ENV.registerForPushNotifications) {
@@ -943,11 +947,12 @@ var Store = Reflux.createStore({
       changed = true
     }
     // HACK for the case if employee removed
-    if (me.isEmployee  &&  !me.organization) {
-      delete me.isEmployee
-      changed = true
+    if (me.isEmployee)   {
+      if (!me.organization) {
+        delete me.isEmployee
+        changed = true
+      }
     }
-
     if (changed)
       await this.dbPut(utils.getId(me), me)
 
@@ -1716,6 +1721,7 @@ var Store = Reflux.createStore({
       this.subscribeForPushNotifications(providers.map(p => p.hash))
       return providers
     }))
+
     debug('end fetching provider info from', serverUrls)
     return result
   },
@@ -2403,9 +2409,27 @@ var Store = Reflux.createStore({
       if (!this.client)
         this.client = graphQL.initClient(meDriver, me.organization.url)
       me.menu = null
-      me.employeePass = await this.onGetItem({resource: me.employeePass, noTrigger: true})
+      if (me.employeePass) {
+        if (utils.isStub(me.employeePass))
+          me.employeePass = await this.onGetItem({resource: me.employeePass, noTrigger: true})
+      }
+      else {
+        try {
+          let res = await this.searchServer({
+            modelName: MY_EMPLOYEE_PASS,
+            noTrigger: true,
+            filterResource: {owner: {id: `${IDENTITY}_${me[ROOT_HASH]}_${me[ROOT_HASH]}`}}
+          })
+          me.employeePass = res.list[0]
+        } catch (err) {
+          debugger
+        }
+      }
+      this._resolveEmployeeCert(me.employeePass)
+
       if (me.employeePass.counterparty)
         me.counterparty = me.employeePass.counterparty
+
       await this.onGetMenu({updateMenu: true})
     }
     return results
@@ -2567,6 +2591,9 @@ var Store = Reflux.createStore({
     }
     if (sp.tour)
       org._tour = sp.tour
+    if (sp.applicationTours)
+      org._applicationTours = sp.applicationTours
+
     if (sp.optionalPairing)
       org._optionalPairing = true
     if (sp.allowedMimeTypes)
@@ -4373,8 +4400,12 @@ if (!res[SIG]  &&  res._message)
     if (list)
       retParams.list = list
     let org = r.to.organization
-    if (org)
+    if (org) {
       retParams.provider = this._getItem(org)
+      let { _applicationTours: applicationTours } = retParams.provider
+      if (applicationTours)
+        retParams.tour = applicationTours[r.requestFor]
+    }
     const { certificate } = r
 
     if (certificate) {
@@ -7111,7 +7142,7 @@ if (!res[SIG]  &&  res._message)
                       isTest,
                       modelName,
                       spinner,
-                      addAllowed: this.isAddAllowed(modelName),
+                      permissions: this.getPermissions({modelName}),
                       isAggregation
                     }
     if (prop)
@@ -7119,8 +7150,11 @@ if (!res[SIG]  &&  res._message)
     retParams.first = first
     this.trigger(retParams);
   },
-  isAddAllowed(modelName) {
-    return ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
+  getPermissions({modelName, property}) {
+    let isAllowed = ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
+    if (!isAllowed)
+      return false
+    return utils.getPermissions({modelName, property})
   },
   handleChatResult({result, orgId, modelName}) {
     if (modelName !== MESSAGE)
@@ -7263,8 +7297,14 @@ if (!res[SIG]  &&  res._message)
   },
   async searchServer(params) {
     if (!this.client) {
-      if (me.isEmployee)
-        this.client = graphQL.initClient(meDriver, me.organization.url)
+      if (me.isEmployee) {
+        if (params.modelName !== MY_EMPLOYEE_PASS) {
+          if (!me.employeePass) // || utils.isStub(me.employeePass))
+            await this._employeeCertPromise
+        }
+        if (!this.client)
+          this.client = graphQL.initClient(meDriver, me.organization.url)
+      }
       else {
         Alert.alert(translate('serverIsUnreachable'))
         return {}
@@ -7306,10 +7346,10 @@ if (!res[SIG]  &&  res._message)
     _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
     let list
     let { result, error, retry } = await graphQL.searchServer(params)
-    let addAllowed = this.isAddAllowed(modelName)
+    let permissions = this.getPermissions({modelName})
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, addAllowed, modelName})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, permissions, modelName})
       return { list, errorMessage: error, query: params }
     }
 
@@ -7326,7 +7366,7 @@ if (!res[SIG]  &&  res._message)
     }
 
     if (!noTrigger)
-      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, addAllowed})
+      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, permissions})
 
     return {list, endCursor: newCursor}
   },
@@ -12181,6 +12221,11 @@ if (!res[SIG]  &&  res._message)
     me.organization = this.buildRef(org)
     this.resetForEmployee(me, org)
     me.employeePass = this.buildRef(myEmployeeBadge)
+    me.employeePass.role = myEmployeeBadge.role
+
+    this._resolveEmployeeCert(myEmployeeBadge)
+
+    // me.employeePass.role = myEmployeeBadge.role
     if (myEmployeeBadge.counterparty)
       me.counterparty = myEmployeeBadge.counterparty
 
