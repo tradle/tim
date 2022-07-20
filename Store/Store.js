@@ -118,6 +118,7 @@ const excludeWhenSignAndSend = [
   '_lens'
 ]
 const AUTHOR_ORG = '_authorOrg'
+const AUTHOR_ORG_TYPE = '_authorOrgType'
 // const MSG_LINK = '_msg'
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
@@ -1783,6 +1784,7 @@ var Store = Reflux.createStore({
     let org = me.counterparty
     if (org) {
       object[AUTHOR_ORG] = utils.getRootHash(org)
+      object[AUTHOR_ORG_TYPE] = utils.getType(org)
       return
     }
     let props = utils.getPropertiesWithRef(COUNTERPARTY, utils.getModel(object[TYPE]))
@@ -1790,8 +1792,10 @@ var Store = Reflux.createStore({
       for (let i=0; i<props.length  &&  !object[AUTHOR_ORG]; i++) {
     debugger
         org = object[props[i].name]
-        if (org)
+        if (org) {
           object[AUTHOR_ORG] = org._permalink
+          object[AUTHOR_ORG_TYPE] = utils.getType(org)
+        }
       }
     }
   },

@@ -605,7 +605,7 @@ var search = {
     if (utils.isInlined(model))
       arr = [] //[TYPE] //, '_link', '_permalink']
     else {
-      arr = ['_permalink', '_link', '_p', '_time', '_author', '_org', '_authorOrg', '_authorTitle', '_time']
+      arr = ['_permalink', '_link', '_p', '_time', '_author', '_org', '_authorOrg', '_authorOrgType', '_authorTitle', '_time']
       if (model.id !== PUB_KEY  &&  !inlined) {
         let newarr = arr.concat(TYPE, SIG)
         arr = newarr
