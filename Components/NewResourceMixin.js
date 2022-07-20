@@ -110,7 +110,8 @@ const NewResourceMixin = {
       else
         props = meta.items.properties
     }
-    let eCols = this.getEditCols(props, meta)
+    let prefill = originatingMessage && originatingMessage.prefill
+    let eCols = this.getEditCols(props, meta, prefill)
 
     let showReadOnly = data._dataBundle !== null
     if (!showReadOnly) {
@@ -119,7 +120,7 @@ const NewResourceMixin = {
         // prop is readOnly if explicitely has readOnly on it or
         // it is a _group property with 'list' of props annotation
         if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list) {
-          if (!originatingMessage || !originatingMessage.prefill)
+          if (!prefill)
             showReadOnly = false
         }
       })
@@ -597,7 +598,7 @@ const NewResourceMixin = {
     }
     return { eCols, softRequired }
   },
-  getEditCols(props, model) {
+  getEditCols(props, model, prefill) {
     const { editCols, exploreData, bookmark, search } = this.props
     const isMessage = model.id === MESSAGE
     if (editCols)
@@ -606,7 +607,7 @@ const NewResourceMixin = {
       return model.viewCols
 
     let isSearch = exploreData  ||  (bookmark && search)
-    let eCols = utils.getEditCols(model, exploreData).map(p => p.name)
+    let eCols = utils.getEditCols({model, exploreData, prefill}).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
         return model.required.slice()

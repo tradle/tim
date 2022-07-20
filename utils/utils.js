@@ -1326,7 +1326,7 @@ var utils = {
     else
       return resource[p] + '';
   },
-  getEditCols(model, exploreData) {
+  getEditCols({model, exploreData, prefill}) {
     let { editCols, properties } = model
     let eCols = []
     let isWeb = utils.isWeb()
@@ -1334,7 +1334,7 @@ var utils = {
       let viewCols = utils.getViewCols(model)
       if (viewCols) {
         viewCols.forEach(p => {
-          if (exploreData || !properties[p].readOnly)
+          if (exploreData || prefill || !properties[p].readOnly)
             eCols.push(properties[p])
         })
       }
