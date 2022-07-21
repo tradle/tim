@@ -607,7 +607,7 @@ const NewResourceMixin = {
       return model.viewCols
 
     let isSearch = exploreData  ||  (bookmark && search)
-    let eCols = utils.getEditCols({model, exploreData, prefill}).map(p => p.name)
+    let eCols = utils.getEditCols(model, exploreData).map(p => p.name)
     if (!eCols.length) {
       if (model.required)
         return model.required.slice()

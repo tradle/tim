@@ -614,10 +614,16 @@ class NewResource extends Component {
     if (context)
       json._context = context
     if (originatingMessage) {
-      if (originatingMessage.lens)
-        json._lens = originatingMessage.lens
-      if (originatingMessage.prefill)
+      const { lens, prefill } = originatingMessage
+      if (lens)
+        json._lens = lens
+      if (prefill) {
         json._sourceOfData = originatingMessage
+        for (let p in prefill) {
+          if (!json[p] && props[p].readOnly)
+            json[p] = prefill[p]
+        }
+      }
     }
 if (r.url)
   debugger

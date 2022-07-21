@@ -851,7 +851,7 @@ debugger
           containerResource: r,
           resource: r[prefill.name],
           prop: prefill,
-          model: utils.getModel(r[prefill.name][TYPE]),
+          model: utils.getLensedModel(r[prefill.name][TYPE]),
           bankStyle,
         }
       }
