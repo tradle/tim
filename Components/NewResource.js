@@ -610,21 +610,21 @@ class NewResource extends Component {
 
     let r = {}
     _.extend(r, resource)
-    let context = r._context ||  (originatingMessage  &&  originatingMessage._context)
-    if (context)
-      json._context = context
     if (originatingMessage) {
       const { lens, prefill } = originatingMessage
       if (lens)
         json._lens = lens
       if (prefill) {
-        json._sourceOfData = originatingMessage
         for (let p in prefill) {
-          if (!json[p] && props[p].readOnly)
+          if (!json[p] && p.charAt(0) !== '_' && props[p] && props[p].readOnly)
             json[p] = prefill[p]
         }
+        json._sourceOfData = originatingMessage
       }
     }
+    let context = r._context ||  (originatingMessage  &&  originatingMessage._context)
+    if (context)
+      json._context = context
 if (r.url)
   debugger
     // delete r.url
