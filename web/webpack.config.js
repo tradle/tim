@@ -52,10 +52,10 @@ var common = {
     alias: {
       core: path.join(__dirname, 'core'),
       q: "bluebird-q",
-      "react-native": "react-web",
+      "react-native": "react-native-web",
       "victory-native": "victory",
       // 'react-native': 'react-web/lib/react-web.js',
-      "react-web/Libraries/Utilities/dismissKeyboard": noopFnPath,
+      // "react-web/Libraries/Utilities/dismissKeyboard": noopFnPath,
       ReactART: "react-art",
       RCTNativeAppEventEmitter: emptyObjPath,
       Keyboard: emptyObjPath
@@ -172,8 +172,8 @@ if (!isHot) {
         path: /node_modules\/(react|react-dom)\// //|react-native-[a-zA-Z-_]+)\//
       },
       {
-        name: "react-web",
-        path: /node_modules\/(react-web|immutable|animated)\//
+        name: "react-native-web",
+        path: /node_modules\/(react-native-web|immutable|animated)\//
       },
       {
         name: "crypto",
