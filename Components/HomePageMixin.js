@@ -20,6 +20,7 @@ import GridHeader from './GridHeader'
 import GridList from './GridList'
 import buttonStyles from '../styles/buttonStyles'
 import Navigator from './Navigator'
+import { Text } from './Text'
 
 const {
   TYPE
@@ -456,6 +457,7 @@ console.log('HomePageMixin: filterResource', resource)
              <View style={buttonStyles.homeButton}>
                <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
              </View>
+             <Text style={{fontSize: 10, color: bankStyle.linkColor, alignSelf: 'center'}}>{translate('home')}</Text>
            </TouchableOpacity>
   },
   applyForProduct() {

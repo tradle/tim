@@ -503,7 +503,8 @@ var ResourceMixin = {
     return <Text style={descStyle}>{val}</Text>;
   },
   generateCopyLinkButton(resource) {
-    const { linkColor } = this.props.bankStyle
+    const { bankStyle } = this.props
+    const { linkColor } = bankStyle
     // if (params && params.isIcon) {
     let paddingRight = utils.isAndroid() ? 0 : 10
     let style = {
@@ -515,6 +516,7 @@ var ResourceMixin = {
              <View style={[buttonStyles.treeButton, style]}>
                <Icon name='ios-copy-outline' size={30} color={linkColor} style={styles.conversationsIcon} />
              </View>
+             <Text style={{fontSize: 10, color: bankStyle.linkColor, alignSelf: 'center'}}>{translate('copyLink')}</Text>
            </TouchableOpacity>
     // }
 
