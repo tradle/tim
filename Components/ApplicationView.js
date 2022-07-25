@@ -128,7 +128,7 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider, nextStep, templates, letClient, finishDraft} = params
+    let {resource, action, backlink, application, style, provider, tour, nextStep, templates, letClient, finishDraft} = params
 
     const hash = getRootHash(this.props.resource)
     if (resource  &&  getRootHash(resource) !== hash)
@@ -144,7 +144,8 @@ class ApplicationView extends Component {
         letClient,
         finishDraft,
         nextStep,
-        templates
+        templates,
+        tour
       })
       break
     // case 'getMenu':
@@ -193,7 +194,7 @@ class ApplicationView extends Component {
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown,
+    let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown, tour,
           showDetails, locale, nextStep, templates, letClient, finishDraft } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
@@ -286,22 +287,31 @@ class ApplicationView extends Component {
                         </View>
                       </TouchableOpacity>
     }
+    let takeTour
+    if (tour) {
+      takeTour = <TouchableOpacity onPress={this.takeTour.bind(this)} style={styles.tree}>
+                  <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                    <Icon name='ios-train-outline' size={30} color={bankStyle.linkColor} />
+                  </View>
+                 </TouchableOpacity>
+
+    }
 
     let tree
     if (resource.tree  &&  resource.tree.top.nodes) {
       tree = <TouchableOpacity onPress={() => this.showTree()} style={styles.tree}>
-                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
-                   <Icon name='ios-options-outline' size={30} color={bankStyle.linkColor} />
-                 </View>
+               <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                 <Icon name='ios-options-outline' size={30} color={bankStyle.linkColor} />
+               </View>
              </TouchableOpacity>
     }
     let nextApp
     if (/*isRM  &&  */nextStep) {
       nextApp = <TouchableOpacity onPress={() => this.applyForNext(nextStep)} style={styles.tree}>
-                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
-                   <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
-                 </View>
-             </TouchableOpacity>
+                  <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                    <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
+                  </View>
+               </TouchableOpacity>
     }
     let requestForm
     let copyButton = this.generateCopyLinkButton(resource)
@@ -316,6 +326,7 @@ class ApplicationView extends Component {
                     {compareImages}
                     {chatButton}
                     {reqForm}
+                    {takeTour}
                     {assignRM}
                     {nextApp}
                   </View>
@@ -478,6 +489,32 @@ class ApplicationView extends Component {
         template
       }
     });
+  }
+  takeTour() {
+    const { navigator, bankStyle } = this.props
+    const { tour } = this.state
+
+    navigator.push({
+      title: "",
+      componentName: 'TourPage',
+      backButtonTitle: null,
+      // backButtonTitle: __DEV__ ? 'Back' : null,
+      passProps: {
+        bankStyle,
+        noTransitions: true,
+        customStyles: {
+          nextButtonText: {
+            fontSize: 23,
+            fontWeight: 'bold',
+            fontFamily: 'Arial',
+          },
+        },
+        tour,
+        // callback: () => {
+        //   navigator.pop()
+        // }
+      }
+    })
   }
   compareImages(photoId, selfie) {
     let { navigator, bankStyle } = this.props
