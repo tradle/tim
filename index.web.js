@@ -65,7 +65,7 @@ function init () {
   if (!console.table) console.table = console.log
 
   require('whatwg-fetch')
-  // require('./web/shims/deviceEventEmitter')
+  require('./web/shims/deviceEventEmitter')
   require('./web/shims/orientation')
   require('./index.common')
 
