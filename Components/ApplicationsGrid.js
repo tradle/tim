@@ -187,7 +187,7 @@ class ApplicationsGrid extends Component {
       bookmark,
       search: true,
       first: true,
-      limit: this.limit * 2
+      limit: this.limit // * 2
     })
   }
   async _loadMoreContentAsync() {
