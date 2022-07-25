@@ -14,6 +14,8 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 import ActionSheet from 'react-native-actionsheet'
 
+import { Text } from './Text'
+
 import constants from '@tradle/constants'
 const {
   TYPE,
@@ -246,6 +248,7 @@ class ApplicationView extends Component {
                <View style={[buttonStyles.homeButton]}>
                  <Icon name='ios-print-outline' color={bankStyle.linkColor} size={33}/>
                </View>
+               <Text style={styles.buttonText}>{translate('print')}</Text>
              </TouchableOpacity>
     }
     let additionalForms
@@ -259,10 +262,11 @@ class ApplicationView extends Component {
     let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(additionalForms) //ForAdditionalForms()
     if (actionSheetForAdditionalForms) {
       reqForm = <TouchableOpacity onPress={() => this.ActionSheet1.show()} style={styles.homeButton}>
-               <View style={[buttonStyles.homeButton]}>
-                 <Icon name='ios-add' color={bankStyle.linkColor} size={35}/>
-               </View>
-             </TouchableOpacity>
+                 <View style={[buttonStyles.homeButton]}>
+                   <Icon name='ios-add' color={bankStyle.linkColor} size={35}/>
+                 </View>
+                 <Text style={styles.buttonText}>{translate('home')}</Text>
+               </TouchableOpacity>
     }
     let photoId, selfie
     if (resource.forms) {
@@ -275,6 +279,7 @@ class ApplicationView extends Component {
                         <View style={buttonStyles.homeButton}>
                           <Icon name='md-git-compare' color={bankStyle.linkColor} size={30}/>
                         </View>
+                       <Text style={styles.buttonText}>{translate('compare')}</Text>
                       </TouchableOpacity>
     }
 
@@ -285,6 +290,7 @@ class ApplicationView extends Component {
                         <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                           <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                         </View>
+                        <Text style={styles.buttonText}>{translate('chat')}</Text>
                       </TouchableOpacity>
     }
     let takeTour
@@ -293,6 +299,7 @@ class ApplicationView extends Component {
                   <View style={[styles.treeButton, buttonStyles.treeButton]}>
                     <Icon name='ios-train-outline' size={30} color={bankStyle.linkColor} />
                   </View>
+                  <Text style={styles.buttonText}>{translate('tour')}</Text>
                  </TouchableOpacity>
 
     }
@@ -303,6 +310,7 @@ class ApplicationView extends Component {
                <View style={[styles.treeButton, buttonStyles.treeButton]}>
                  <Icon name='ios-options-outline' size={30} color={bankStyle.linkColor} />
                </View>
+                <Text style={styles.buttonText}>{translate('tree')}</Text>
              </TouchableOpacity>
     }
     let nextApp
@@ -311,6 +319,7 @@ class ApplicationView extends Component {
                   <View style={[styles.treeButton, buttonStyles.treeButton]}>
                     <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
                   </View>
+                  <Text style={styles.buttonText}>{translate('application')}</Text>
                </TouchableOpacity>
     }
     let requestForm
@@ -752,8 +761,13 @@ var createStyles = styleFactory(ApplicationView, function ({ dimensions, hasRM, 
       alignSelf: 'flex-start',
       paddingRight: paddingRight
     },
+    buttonText: {
+      fontSize: 10,
+      color: bankStyle.linkColor,
+      alignSelf: 'center'
+    },
     openChatPadding: {
-      paddingRight: paddingRight
+      paddingRight
     },
     conversationButton: {
       backgroundColor: bgcolor,
