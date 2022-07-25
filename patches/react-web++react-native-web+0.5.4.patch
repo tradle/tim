@@ -1,0 +1,33 @@
+diff --git a/node_modules/react-web/node_modules/react-native-web/.DS_Store b/node_modules/react-web/node_modules/react-native-web/.DS_Store
+new file mode 100644
+index 0000000..3bc3844
+Binary files /dev/null and b/node_modules/react-web/node_modules/react-native-web/.DS_Store differ
+diff --git a/node_modules/react-web/node_modules/react-native-web/dist/.DS_Store b/node_modules/react-web/node_modules/react-native-web/dist/.DS_Store
+new file mode 100644
+index 0000000..aa6d5f2
+Binary files /dev/null and b/node_modules/react-web/node_modules/react-native-web/dist/.DS_Store differ
+diff --git a/node_modules/react-web/node_modules/react-native-web/dist/modules/.DS_Store b/node_modules/react-web/node_modules/react-native-web/dist/modules/.DS_Store
+new file mode 100644
+index 0000000..aa79520
+Binary files /dev/null and b/node_modules/react-web/node_modules/react-native-web/dist/modules/.DS_Store differ
+diff --git a/node_modules/react-web/node_modules/react-native-web/dist/modules/ScrollResponder/index.js b/node_modules/react-web/node_modules/react-native-web/dist/modules/ScrollResponder/index.js
+index 5da48e4..634e951 100644
+--- a/node_modules/react-web/node_modules/react-native-web/dist/modules/ScrollResponder/index.js
++++ b/node_modules/react-web/node_modules/react-native-web/dist/modules/ScrollResponder/index.js
+@@ -380,9 +380,13 @@ var ScrollResponderMixin = {
+       animated = _ref.animated;
+     }
+     var node = this.scrollResponderGetScrollableNode();
+-    _UIManager2.default.updateView(node, { style: { scrollBehavior: !animated ? 'auto' : 'smooth' } }, this);
+-    node.scrollLeft = x || 0;
+-    node.scrollTop = y || 0;
++    var node = this.scrollResponderGetScrollableNode();
++    if (typeof node.scroll === 'function') {
++      node.scroll({ top: y || 0, left: x || 0, behavior: !animated ? 'auto' : 'smooth' });
++    } else {
++      node.scrollLeft = x || 0;
++      node.scrollTop = y || 0;
++    }
+   },
+ 
+   /**
