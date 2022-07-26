@@ -24,7 +24,7 @@ class TourPage extends Component {
     customStyles: PropTypes.object
   };
   render() {
-    const {pages, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
+    const {pages, dotColor, activeDotColor, leftTextColor, rightTextColor, nextBtnLabel} = this.props.tour
     if (!pages)
       return <View/>
     StatusBar.setHidden(true)
@@ -56,7 +56,7 @@ class TourPage extends Component {
         return pp
       })
     }
-
+    let next = nextBtnLabel || '>'
     let props = {
       onNextBtnClick: this.nextBtnHandle,
       onDoneBtnClick: this.doneBtnHandle,
@@ -64,6 +64,7 @@ class TourPage extends Component {
       onSlideChange: this.onSlideChangeHandle,
       skipBtnLabel: translate('Skip'),
       doneBtnLabel: translate('Done'),
+      nextBtnLabel: translate(nextBtnLabel),
       showSkipButton: typeof showSkipButton === 'undefined' ? true : showSkipButton,
       showDoneButton: typeof showDoneButton === 'undefined' ? true : showDoneButton,
       showDots: typeof showDots === 'undefined' ? true : showDots,
