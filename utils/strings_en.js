@@ -400,6 +400,14 @@ module.exports = {
     "prefillTheProduct": "Choose the application to prefill for the prospect",
     "importedData": "Click here to see {1} resources imported from {2} on your profile page.",
     "requestedDataImport": "Importing data from {1}",
+    // action icons
+    "Home": "Home",
+    "Print": "Print",
+    "copyLink": "Copy Link",
+    "Add": "Add",
+    "Application": "Application",
+    "Tour": "Tour",
+    "Chat": "Chat",
     // Tours buttons
     "Skip": "Skip",
     "Done": "Done",
