@@ -690,8 +690,11 @@ const NewResourceMixin = {
       if (!r[pname])
         r[pname] = {}
       r[pname].value = val
+      if (!r[pname].currency)
+        r[pname].currency = this.props.currency
+
       if (!this.floatingProps[pname].currency)
-        this.floatingProps[pname].currency = r[pname].currency || (resource[pname] && resource[pname].currency)
+        this.floatingProps[pname].currency = r[pname].currency // || (resource[pname] && resource[pname].currency)
     }
     else if (pref == DURATION) {
       if (!this.floatingProps[pname])
