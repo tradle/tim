@@ -7314,7 +7314,7 @@ if (!res[SIG]  &&  res._message)
         return {}
       }
     }
-    let {direction, first, noTrigger, modelName, application, all,
+    let {direction, first, noTrigger, modelName, application, all, exploreData,
          filterResource, endCursor, limit, bookmark} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
@@ -7345,6 +7345,8 @@ if (!res[SIG]  &&  res._message)
         if (typeof filterResource.draft === 'undefined' && !all)
           filterResource.draft = false
       }
+      if (modelName === BOOKMARK && !me.counterparty && exploreData)
+        params.allow = BOOKMARK
     }
 
     _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
