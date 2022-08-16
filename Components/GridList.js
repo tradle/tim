@@ -328,7 +328,7 @@ class GridList extends Component {
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, navigator, search, application, prop, bookmark, backlinkList, checkFilter,
+    let { chat, resource, navigator, search, application, prop, bookmark, backlinkList, checkFilter, exploreData,
           modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser, isMenu, list } = this.props
 
     if (chat) {
@@ -369,6 +369,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
           modelName,
           filterResource: resource,
           bookmark,
+          exploreData,
           search: true,
           first: true,
           limit: this.limit
@@ -985,6 +986,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       title = (dn ? dn + ' -- '  : '') + title;
     }
     const isCheck = utils.isSubclassOf(rModel, CHECK)
+    const { permissions } = this.state
     let route = {
       title: title,
       componentName: isCheck  &&  'CheckView'  ||  'MessageView',
@@ -999,7 +1001,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
         bankStyle: bankStyle || defaultBankStyle
       }
     }
-    const { permissions } = this.state
     if (utils.getMe().isEmployee) {
       if (utils.isSubclassOf(rType, 'tradle.Configuration'))
         this.addEdit({resource, title, route, style: bankStyle})
@@ -1705,7 +1706,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let loading
     if (isLoading  &&  !isModel) {
-      let showLoadingIndicator = true
+      let showLoadingIndicator = !search
       if (isBacklink  &&  application)
         showLoadingIndicator = false
       else if (isBacklink  ||  isForwardlink) {

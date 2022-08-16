@@ -113,9 +113,14 @@ class BookmarkRow extends Component {
     // if (resource._author === utils.getRootHash(utils.getMe()) && folder.message !== translate('Initial Bookmarks'))
     //   isCancellable = true
     if (exploreData) {
+      let counterparty
+      let me = utils.getMe()
+      if (!me.counterparty && resource._authorOrg)
+        counterparty = <Icon name='ios-star'  size={20}  color={bankStyle.accentColor} style={{marginRight: -7}}/>
       action = <View style={{flexDirection: 'row'}}>
                  {action}
-                 <TouchableOpacity onPress={this.props.onEdit.bind(this)} style={{paddingLeft: 5, justifyContent: 'center'}}>
+                 <TouchableOpacity onPress={this.props.onEdit.bind(this)} style={{paddingLeft: 5, justifyContent: 'center', flexDirection: 'row'}}>
+                   {counterparty}
                    <Icon name='md-create'  size={27}  color='darkblue'/>
                  </TouchableOpacity>
                </View>
