@@ -515,7 +515,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
           currentBest[term.id].min = {}
         currentBest[term.id].min.xirr = minXIRR
         currentBest[term.id].xirr = xirrVal
-        let isLoan = (allowLoan  &&  loanTerm  &&  termInt === loanTermInt)
+        let isLoan = (allowLoan  &&  loanTerm  &&  termInt === loanTermInt &&  loanDeposit === depositPercentage)
         // if (termVal === termQuoteVal) {
         let inBounds
         ;({formErrors, foundCloseGoal, currentBest, inBounds} = checkBounds({
@@ -536,7 +536,6 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
         // }
         if (allowLoan  &&  !fixedProps) {
           let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
-
           let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
           if (monthlyPaymentLoan) {
             qd.monthlyPaymentLoan = {
@@ -545,7 +544,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
             }
           }
           let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
-          if (finCostLoan && allowLoan && loanTerm && termVal == loanTermInt)
+          if (finCostLoan && loanTerm && termVal == loanTermInt)
             qd.finCostLoan = mathRound(finCostLoan * 100, 2)
           // if (realTimeCalculations) {
             // if (ii   ||  termVal == loanTermInt)
@@ -559,8 +558,8 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
             // delete loanQuotationDetail[depositPercentage]
           }
           else if (!isLoan) {
-            // qd.xirr = mathRound(result.xirrLease)
-            // qd.irr = mathRound(result.irrLease)
+            qd.xirrLease = mathRound(result.xirrLease)
+            qd.irrLease = mathRound(result.irrLease)
             delete qd.monthlyPaymentLoan
             delete qd.finCostLoan
           }
@@ -712,7 +711,9 @@ function getRequestedProperties(form) {
 }
 function findBest({iterations, iterateBy, goalProp, form}) {
   // debugger
-  let goalPropValue = form[goalProp].value
+  let goalPropValue = form[goalProp]
+  if (typeof goalPropValue === 'object')
+    goalPropValue = goalPropValue.value
   let term = form.term
   let numberOfTerms
   let filtered = {}
@@ -738,11 +739,13 @@ function findBest({iterations, iterateBy, goalProp, form}) {
   let finalBests = {}
   for (let p in successfulTerms) {
     let values = successfulTerms[p]
-    if (size(Object.values(values)) === 1) {
+    if (size(Object.values(values)) === 1)
       debugger
-      let val = Object.keys(values)[0]
-      return {valueToIterate: val, currentBest: values[val], foundCloseGoal: true}
-    }
+    // if (size(Object.values(values)) === 1) {
+    //   debugger
+    //   let val = Object.keys(values)[0]
+    //   return {valueToIterate: val, currentBest: values[val], foundCloseGoal: true}
+    // }
     let { finalBest, currentIterateBy } = getFinalBest({values, term, goalProp, goalPropValue})
     finalBests[p] = {finalBest, currentIterateBy}
   }
@@ -1037,8 +1040,8 @@ function addLoanLease({
     irrLoan,
     xirrLoan,
     status: xirrLoan > minXIRR ? 'pass' : 'fail',
-    // irrLease,
-    // xirrLease,
+    irrLease,
+    xirrLease,
     // initialPayment,
     monthlyPaymentLoan,
     loanDeposit: deposit * 100
