@@ -897,8 +897,10 @@ function addLoanLease({
   } = quotationInfo
   let {
     commissionFee: commissionFeeCalculated,
+    initialPayment: initialPaymentLease,
+    monthlyPaymentLease,
     // finCostLoan,
-    monthlyPayment,
+    // monthlyPayment,
     monthlyPaymentLoan,
   } = qd
   let leaseIRR = []
@@ -909,7 +911,7 @@ function addLoanLease({
   let termIRR = termVal + deliveryTimeLoan
 
   // finCostLoan = finCostLoan / 100
-  let initialPayment = (discountedLoanPrice * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
+  let initialPaymentLoan = (discountedLoanPrice * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
 
   let d = new Date()
   let month = d.getTime()
@@ -928,7 +930,7 @@ function addLoanLease({
         leasea = 0
         loana = 0
       } else {
-        leasea = monthlyPayment.value
+        leasea = monthlyPaymentLease.value
         loana = monthlyPaymentLoan.value
       }
     }
@@ -944,7 +946,7 @@ function addLoanLease({
       loanIRR.push(deposit * priceMx.value + loanb + finCostLoan * priceMx.value)
     } else if (i > 0) {
       if (i === termIRR)
-        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPayment.value) - leasea - leaseb
+        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPaymentLease.value) - leasea - leaseb
 
       leaseIRR.push(leasea + leaseb + finalPayment)
       loanIRR.push(loana + loanb)
@@ -975,11 +977,11 @@ function addLoanLease({
   month = month1
   leaseXIRR.push({
     date,
-    amount: initialPayment
+    amount: initialPaymentLease.value
   })
   loanXIRR.push({
     date,
-    amount: initialPayment
+    amount: initialPaymentLoan
   })
 
   d = new Date()
@@ -989,7 +991,7 @@ function addLoanLease({
   month = d.getTime()
   leaseXIRR.push({
     date,
-    amount: monthlyPayment.value
+    amount: monthlyPaymentLease.value
   })
   loanXIRR.push({
     date,
@@ -1001,9 +1003,9 @@ function addLoanLease({
     nextMonth(d, 1)
     date = dateformat(d.getTime(), 'yyyy-mm-dd')
     if (x < termVal-1)
-      leasea = monthlyPayment.value
+      leasea = monthlyPaymentLease.value
     else
-      leasea = monthlyPayment.value + (residualValuePerTerm * priceMx.value)
+      leasea = monthlyPaymentLease.value + (residualValuePerTerm * priceMx.value)
 
     leaseXIRR.push({
         date,
