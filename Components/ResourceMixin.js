@@ -567,7 +567,7 @@ var ResourceMixin = {
     const backgroundColor = isAndroid ? '#ffffff' : bankStyle.menuBgColor
     let width = utils.dimensions(component).width
     if (this.state.menuIsShown) {
-      debugger
+      // debugger
       width = '100%'
     }
     return (
