@@ -607,7 +607,7 @@ var utils = {
 
     if (isInlined) return _.isEqual(r1, r2)
 
-    let properties = utils.getModel(r1[TYPE]).properties
+    let properties = utils.getModel(utils.getType(r1)).properties
     let exclude = ['_time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in properties) {
       let prop = properties[p]
