@@ -457,19 +457,24 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
             currency
           }
         }
-        let deliveryTimeLoan = dtID.split('dt')[1] - 1
         let deposit = depositPercentage/100
         let delayedFundingVal = delayedFunding && parseInt(delayedFunding.id.split('_df')[1]) || 0
 
 
         let termInt = parseInt(termVal)
-        let monthlyPaymentLease = pmt(monthlyRateLease, termInt, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTimeLoan - delayedFundingVal)) * (1 - (deposit + blindDiscountVal)), residualValuePerTerm * priceMx.value, 0)
-        if (monthlyPaymentLease && monthlyPaymentLease !== Infinity) {
-          qd.monthlyPaymentLease = {
-            value: mathRound(monthlyPaymentLease),
-            currency
-          }
-        }
+
+        addLease({
+          monthlyRateLease,
+          termVal:termInt,
+          delayedFundingVal,
+          residualValuePerTerm,
+          deposit,
+          depositValue: depositVal,
+          quotationInfo,
+          minXIRR,
+          qd
+        })
+
         let payPerMonth = qd.monthlyPayment.value * (1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
         let blindPayment = priceMx.value * blindDiscountVal
@@ -535,33 +540,38 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
         }))
         // }
         if (allowLoan  &&  !fixedProps) {
-          let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
-          let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
-          if (monthlyPaymentLoan) {
-            qd.monthlyPaymentLoan = {
-              value: mathRound(monthlyPaymentLoan),
-              currency
-            }
-          }
-          let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
-          if (finCostLoan && loanTerm && termVal == loanTermInt)
-            qd.finCostLoan = mathRound(finCostLoan * 100, 2)
-          // if (realTimeCalculations) {
-            // if (ii   ||  termVal == loanTermInt)
-          addLoanLease({loanQuotationDetail, minXIRR, discountedLoanPrice, term, termVal: termInt, deliveryTimeLoan, delayedFundingVal, residualValuePerTerm, quotationInfo, qd, deposit, finCostLoan})
+          // let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
+          // let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termInt
+          // if (monthlyPaymentLoan) {
+          //   qd.monthlyPaymentLoan = {
+          //     value: mathRound(monthlyPaymentLoan),
+          //     currency
+          //   }
+          // }
+          // let finCostLoan = (pv(monthlyRateLoan, termInt, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
+          // if (finCostLoan && loanTerm && termVal == loanTermInt)
+          //   qd.finCostLoan = mathRound(finCostLoan * 100, 2)
+          // // if (realTimeCalculations) {
+          //   // if (ii   ||  termVal == loanTermInt)
+          addLoan({
+            loanQuotationDetail,
+            monthlyRateLoan,
+            loanTerm: loanTermInt,
+            minXIRR,
+            term,
+            termVal: termInt,
+            deliveryTime,
+            delayedFundingVal,
+            residualValuePerTerm,
+            quotationInfo,
+            qd,
+            deposit,
+          })
 
           let result = loanQuotationDetail[depositPercentage] && loanQuotationDetail[depositPercentage][termVal]
           if (realTimeCalculations && ii === 0  &&  termVal == loanTermInt) {
-            // qd.xirrLoan = mathRound(result.xirrLoan)
             quotationInfo.xirrLoan = result.xirrLoan
             quotationInfo.irrLoan = result.irrLoan
-            // delete loanQuotationDetail[depositPercentage]
-          }
-          else if (!isLoan) {
-            qd.xirrLease = mathRound(result.xirrLease)
-            qd.irrLease = mathRound(result.irrLease)
-            delete qd.monthlyPaymentLoan
-            delete qd.finCostLoan
           }
         }
         if (ii)
@@ -876,18 +886,18 @@ function checkBounds({
   return {currentBest, inBounds: true}
 }
 
-function addLoanLease({
+function addLoan({
   loanQuotationDetail,
+  monthlyRateLoan,
+  loanTerm,
   term,
   termVal,
-  deliveryTimeLoan,
-  delayedFundingVal,
-  discountedLoanPrice,
+  deliveryTime,
   residualValuePerTerm,
+  delayedFundingVal,
   deposit,
   quotationInfo,
   minXIRR,
-  finCostLoan,
   qd
 }) {
   let {
@@ -897,60 +907,57 @@ function addLoanLease({
   } = quotationInfo
   let {
     commissionFee: commissionFeeCalculated,
-    initialPayment: initialPaymentLease,
-    monthlyPaymentLease,
-    // finCostLoan,
-    // monthlyPayment,
-    monthlyPaymentLoan,
   } = qd
-  let leaseIRR = []
   let loanIRR = []
-  let leaseXIRR = []
   let loanXIRR = []
 
+  let blindDiscountVal = blindDiscount/100
+  let currency = priceMx.currency
+
+  let discountedLoanPrice = priceMx.value * (1 - blindDiscountVal)
+  let monthlyPaymentLoan = (discountedLoanPrice - deposit * discountedLoanPrice) / termVal
+  let isLoan = loanTerm && termVal == loanTerm
+  if (monthlyPaymentLoan && isLoan) {
+    qd.monthlyPaymentLoan = {
+      value: mathRound(monthlyPaymentLoan),
+      currency
+    }
+  }
+
+  let finCostLoan = (pv(monthlyRateLoan, termVal, monthlyPaymentLoan, residualValuePerTerm, 0) / (priceMx.value * (1 - deposit)) + 1) * (1 - deposit)
+  if (finCostLoan && isLoan)
+    qd.finCostLoan = mathRound(finCostLoan * 100, 2)
+
+  let dtId = deliveryTime.id.split('_')[1]
+  let deliveryTimeLoan = dtId.split('dt')[1] - 1
   let termIRR = termVal + deliveryTimeLoan
 
-  // finCostLoan = finCostLoan / 100
   let initialPaymentLoan = (discountedLoanPrice * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
 
   let d = new Date()
   let month = d.getTime()
   let month1 = month;
 
-  let leasea = 0
-  let leaseb = 0
   let loana = 0
   let loanb = 0
-  let finalPayment = 0
 
   // IRR lease and loan
   for (let i=0; i <= termIRR; i++) {
     if (deliveryTimeLoan < i) {
-      if (i - deliveryTimeLoan > termIRR) {
-        leasea = 0
+      if (i - deliveryTimeLoan > termIRR)
         loana = 0
-      } else {
-        leasea = monthlyPaymentLease.value
-        loana = monthlyPaymentLoan.value
-      }
+      else
+        loana = monthlyPaymentLoan
     }
-    if (delayedFundingVal === i) {
-      leaseb = -priceMx.value
+    if (delayedFundingVal === i)
       loanb = -priceMx.value
-    } else {
-      leaseb = 0
+    else
       loanb = 0
-    }
-    if (i === 0) {
-      leaseIRR.push(deposit * priceMx.value + leaseb)
-      loanIRR.push(deposit * priceMx.value + loanb + finCostLoan * priceMx.value)
-    } else if (i > 0) {
-      if (i === termIRR)
-        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPaymentLease.value) - leasea - leaseb
 
-      leaseIRR.push(leasea + leaseb + finalPayment)
+    if (i === 0)
+      loanIRR.push(deposit * priceMx.value + loanb + finCostLoan * priceMx.value)
+    else if (i > 0)
       loanIRR.push(loana + loanb)
-    }
   }
 
   // XIRR lease and loan
@@ -958,27 +965,15 @@ function addLoanLease({
   month = d.getTime()
   let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
-  leaseXIRR.push({
-    date,
-    amount: -priceMx.value
-  })
   loanXIRR.push({
     date,
     amount: -priceMx.value
-  })
-  leaseXIRR.push({
-    date,
-    amount: priceMx.value * blindDiscount / 100
   })
   loanXIRR.push({
     date,
     amount: -priceMx.value * finCostLoan * -1
   })
   month = month1
-  leaseXIRR.push({
-    date,
-    amount: initialPaymentLease.value
-  })
   loanXIRR.push({
     date,
     amount: initialPaymentLoan
@@ -989,13 +984,133 @@ function addLoanLease({
   date = dateformat(d.getTime(), 'yyyy-mm-dd')
   nextMonth(d, 1 + deliveryTimeLoan)
   month = d.getTime()
-  leaseXIRR.push({
-    date,
-    amount: monthlyPaymentLease.value
-  })
   loanXIRR.push({
     date,
-    amount: monthlyPaymentLoan.value
+    amount: monthlyPaymentLoan
+  })
+
+  for (let x=1; x < termVal; x++) {
+    nextMonth(d, 1)
+    date = dateformat(d.getTime(), 'yyyy-mm-dd')
+    loanXIRR.push({
+      date,
+      amount: monthlyPaymentLoan
+    })
+  }
+
+  let { rate:loanRate } = xirr(loanXIRR)
+  let xirrLoan = mathRound(convertRate(loanRate, 365) * 100)
+  let irrLoan = mathRound(irr(loanIRR) * 100)
+
+  let p = deposit * 100 + ''
+  let elm = loanQuotationDetail[p]
+  if (!elm)
+    loanQuotationDetail[p] = {}
+  loanQuotationDetail[p][termVal] = {
+    finCostLoan: mathRound(finCostLoan * 100, 2),
+    termIRR,
+    loanTerm: term,
+    irrLoan,
+    xirrLoan,
+    status: xirrLoan > minXIRR ? 'pass' : 'fail',
+    monthlyPaymentLoan: {
+      value: mathRound(monthlyPaymentLoan),
+      currency
+    },
+    loanDeposit: deposit * 100
+  }
+}
+
+function addLease({
+  termVal,
+  monthlyRateLease,
+  delayedFundingVal,
+  residualValuePerTerm,
+  deposit,
+  depositValue,
+  quotationInfo,
+  minXIRR,
+  qd
+}) {
+  let {
+    deliveryTime,
+    priceMx,
+    vatRate,
+    fundedInsurance,
+    blindDiscount=0
+  } = quotationInfo
+  let {
+    commissionFee: commissionFeeCalculated,
+  } = qd
+  let leaseIRR = []
+  let leaseXIRR = []
+  let blindDiscountVal = blindDiscount/100
+
+  let dtId = deliveryTime.id.split('_')[1]
+  deliveryTime = dtId.split('dt')[1] - 1
+
+  let insurance = fundedInsurance.value
+
+  let monthlyPaymentLease = pmt(monthlyRateLease, termVal, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTime - delayedFundingVal)) * (1 - (deposit + blindDiscountVal)), residualValuePerTerm * priceMx.value, 0)
+  let initialPayment = deposit === 0 && monthlyPaymentLease + insurance ||  depositValue / (1 + vatRate)
+
+  let d = new Date()
+  let month = d.getTime()
+  let month1 = month;
+
+  let leasea = 0
+  let leaseb = 0
+  let finalPayment = 0
+
+  let termIRR = termVal
+  // IRR lease
+  for (let i=0; i <= termIRR; i++) {
+    if (deliveryTime < i) {
+      if (i - deliveryTime > termIRR)
+        leasea = 0
+      else
+        leasea = monthlyPaymentLease
+    }
+    if (delayedFundingVal === i)
+      leaseb = -priceMx.value
+    else
+      leaseb = 0
+    if (i === 0)
+      leaseIRR.push(deposit * priceMx.value + leaseb)
+    else if (i > 0) {
+      if (i === termIRR)
+        finalPayment = (residualValuePerTerm * priceMx.value + monthlyPaymentLease) - leasea - leaseb
+
+      leaseIRR.push(leasea + leaseb + finalPayment)
+    }
+  }
+
+  nextMonth(d, delayedFundingVal)
+  month = d.getTime()
+  let date = dateformat(d.getTime(), 'yyyy-mm-dd')
+
+  leaseXIRR.push({
+    date,
+    amount: -priceMx.value
+  })
+  leaseXIRR.push({
+    date,
+    amount: priceMx.value * blindDiscount / 100
+  })
+  month = month1
+  leaseXIRR.push({
+    date,
+    amount: initialPayment
+  })
+
+  d = new Date()
+  month = d.getTime()
+  date = dateformat(d.getTime(), 'yyyy-mm-dd')
+  nextMonth(d, 1 + deliveryTime)
+  month = d.getTime()
+  leaseXIRR.push({
+    date,
+    amount: monthlyPaymentLease
   })
   leasea = 0
 
@@ -1003,49 +1118,27 @@ function addLoanLease({
     nextMonth(d, 1)
     date = dateformat(d.getTime(), 'yyyy-mm-dd')
     if (x < termVal-1)
-      leasea = monthlyPaymentLease.value
+      leasea = monthlyPaymentLease
     else
-      leasea = monthlyPaymentLease.value + (residualValuePerTerm * priceMx.value)
+      leasea = monthlyPaymentLease + (residualValuePerTerm * priceMx.value)
 
     leaseXIRR.push({
-        date,
-        amount: leasea
-    })
-    loanXIRR.push({
-        date,
-        amount: monthlyPaymentLoan.value
+      date,
+      amount: leasea
     })
   }
 
   let { rate } = xirr(leaseXIRR)
   let xirrLease = mathRound(convertRate(rate, 365) * 100)
-
-  let { rate:loanRate } = xirr(loanXIRR)
-  let xirrLoan = mathRound(convertRate(loanRate, 365) * 100)
-
-  let irrLoan = mathRound(irr(loanIRR) * 100)
   let irrLease = mathRound(irr(leaseIRR) * 100)
 
-
-  // console.log("term", term,"leaseIRR", irr(leaseIRR), "loanIRR", irr(loanIRR),"leaseXIRR", xirr, "loanXIRR", xirrLoan)
-
-  let p = deposit * 100 + ''
-  let elm = loanQuotationDetail[p]
-  if (!elm)
-    loanQuotationDetail[p] = {}
-  // let type = getModel(quotationInfo[TYPE]).properties.loanQuotationDetail.items.ref
-  loanQuotationDetail[p][termVal] = {
-    // [TYPE]: type,
-    finCostLoan: mathRound(finCostLoan * 100, 2),
-    termIRR,
-    loanTerm: term,
-    irrLoan,
-    xirrLoan,
-    status: xirrLoan > minXIRR ? 'pass' : 'fail',
+  let currency = priceMx.currency
+  extend(qd, {
+    monthlyPaymentLease: {
+      value: mathRound(monthlyPaymentLease),
+      currency
+    },
     irrLease,
     xirrLease,
-    // initialPayment,
-    monthlyPaymentLoan,
-    loanDeposit: deposit * 100
-  }
+  })
 }
