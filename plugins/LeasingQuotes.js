@@ -395,7 +395,12 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
         }
 
         let insurance = fundedInsurance.value
-        let initialPayment = depositPercentage === 0 && monthlyPayment + insurance ||  depositVal / (1 + vatRate)
+        // let initialPayment = depositPercentage === 0 && monthlyPayment + insurance ||  depositVal / (1 + vatRate)
+        let initialPayment
+        if (deposit === 0)
+          initialPayment = (monthlyPayment + insurance) / (1 + vatRate)
+        else
+          initialPayment = depositValue / (1 + vatRate)
 
         let commissionFeeCalculated = priceMx.value * commissionFeePercent / 100
         let initialPaymentVat = (initialPayment + commissionFeeCalculated) * vatRate
@@ -1052,7 +1057,13 @@ function addLease({
   let insurance = fundedInsurance.value
 
   let monthlyPaymentLease = pmt(monthlyRateLease, termVal, -priceMx.value / Math.pow((1 - monthlyRateLease), (deliveryTime - delayedFundingVal)) * (1 - (deposit + blindDiscountVal)), residualValuePerTerm * priceMx.value, 0)
-  let initialPayment = deposit === 0 && monthlyPaymentLease + insurance ||  depositValue / (1 + vatRate)
+
+  let initialPayment
+  if (deposit === 0)
+    initialPayment = (monthlyPaymentLease + insurance) / (1 + vatRate)
+  else
+    initialPayment = depositValue / (1 + vatRate)
+
 
   let d = new Date()
   let month = d.getTime()
