@@ -468,18 +468,19 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
 
         let termInt = parseInt(termVal)
 
-        addLease({
-          monthlyRateLease,
-          termVal:termInt,
-          delayedFundingVal,
-          residualValuePerTerm,
-          deposit,
-          depositValue: depositVal,
-          quotationInfo,
-          minXIRR,
-          qd
-        })
-
+        if (termVal === termQuoteVal  &&  depositPercentage === originalDepositPercentage) {
+          addLease({
+            monthlyRateLease,
+            termVal:termInt,
+            delayedFundingVal,
+            residualValuePerTerm,
+            deposit,
+            depositValue: depositVal,
+            quotationInfo,
+            minXIRR,
+            qd
+          })
+        }
         let payPerMonth = qd.monthlyPayment.value * (1 + vatRate)
         let initPayment = depositValue && depositValue.value > 0 ? qd.totalInitialPayment.value : payPerMonth
         let blindPayment = priceMx.value * blindDiscountVal
@@ -494,8 +495,8 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
 
         let data = [
           {amount: -priceMx.value, date},
-          {amount: initPayment, date},
-          {amount: blindPayment, date}
+          {amount: blindPayment, date},
+          {amount: initPayment, date}
         ]
         let m = d.getMonth()
         let firstMonth = deliveryTime.id.split('_')[1].split('dt')[1]
@@ -1047,8 +1048,6 @@ function addLease({
   let {
     commissionFee: commissionFeeCalculated,
   } = qd
-  let leaseIRR = []
-  let leaseXIRR = []
   let blindDiscountVal = blindDiscount/100
 
   let dtId = deliveryTime.id.split('_')[1]
@@ -1064,6 +1063,9 @@ function addLease({
   else
     initialPayment = depositValue / (1 + vatRate)
 
+
+  let leaseIRR = []
+  let leaseXIRR = []
 
   let d = new Date()
   let month = d.getTime()
@@ -1106,7 +1108,7 @@ function addLease({
   })
   leaseXIRR.push({
     date,
-    amount: priceMx.value * blindDiscount / 100
+    amount: priceMx.value * blindDiscountVal
   })
   month = month1
   leaseXIRR.push({
