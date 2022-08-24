@@ -400,7 +400,7 @@ async function quotationPerTerm({form, search, currentResource, additionalInfo})
         if (deposit === 0)
           initialPayment = (monthlyPayment + insurance) / (1 + vatRate)
         else
-          initialPayment = depositValue / (1 + vatRate)
+          initialPayment = depositVal / (1 + vatRate)
 
         let commissionFeeCalculated = priceMx.value * commissionFeePercent / 100
         let initialPaymentVat = (initialPayment + commissionFeeCalculated) * vatRate
