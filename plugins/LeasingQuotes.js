@@ -1116,19 +1116,18 @@ function addLease({
     amount: initialPayment
   })
 
-  d = new Date()
+  nextMonth(d, 1 + deliveryTime)
   month = d.getTime()
   leaseXIRR.push({
     date: dateformat(d.getTime(), 'yyyy-mm-dd'),
     amount: monthlyPaymentLease
   })
 
-  nextMonth(d, 1 + deliveryTime)
-  month = d.getTime()
   leasea = 0
   let n = deposit === 0 ? termVal - 1 : termVal
 
   for (let x=1; x < n; x++) {
+    nextMonth(d, 1)
     if (x < n-1)
       leasea = monthlyPaymentLease
     else
@@ -1138,7 +1137,6 @@ function addLease({
       date: dateformat(d.getTime(), 'yyyy-mm-dd'),
       amount: leasea
     })
-    nextMonth(d, 1)
   }
 
   let { rate } = xirr(leaseXIRR)
