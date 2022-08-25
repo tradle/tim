@@ -1126,9 +1126,10 @@ function addLease({
   nextMonth(d, 1 + deliveryTime)
   month = d.getTime()
   leasea = 0
+  let n = deposit === 0 ? termVal - 1 : termVal
 
-  for (let x=1; x < termVal; x++) {
-    if (x < termVal-1)
+  for (let x=1; x < n; x++) {
+    if (x < n-1)
       leasea = monthlyPaymentLease
     else
       leasea = monthlyPaymentLease + (residualValuePerTerm * priceMx.value)
