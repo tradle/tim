@@ -1118,27 +1118,26 @@ function addLease({
 
   d = new Date()
   month = d.getTime()
-  date = dateformat(d.getTime(), 'yyyy-mm-dd')
-  nextMonth(d, 1 + deliveryTime)
-  month = d.getTime()
   leaseXIRR.push({
-    date,
+    date: dateformat(d.getTime(), 'yyyy-mm-dd'),
     amount: monthlyPaymentLease
   })
+
+  nextMonth(d, 1 + deliveryTime)
+  month = d.getTime()
   leasea = 0
 
   for (let x=1; x < termVal; x++) {
-    nextMonth(d, 1)
-    date = dateformat(d.getTime(), 'yyyy-mm-dd')
     if (x < termVal-1)
       leasea = monthlyPaymentLease
     else
       leasea = monthlyPaymentLease + (residualValuePerTerm * priceMx.value)
 
     leaseXIRR.push({
-      date,
+      date: dateformat(d.getTime(), 'yyyy-mm-dd'),
       amount: leasea
     })
+    nextMonth(d, 1)
   }
 
   let { rate } = xirr(leaseXIRR)
