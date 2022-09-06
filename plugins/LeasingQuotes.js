@@ -941,8 +941,6 @@ function addLoan({
   let initialPaymentLoan = (discountedLoanPrice * deposit) + (commissionFeeCalculated.value * (1 + vatRate))
 
   let d = new Date()
-  let month = d.getTime()
-  let month1 = month;
 
   let loana = 0
   let loanb = 0
@@ -968,7 +966,6 @@ function addLoan({
 
   // XIRR lease and loan
   nextMonth(d, delayedFundingVal)
-  month = d.getTime()
   let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
   loanXIRR.push({
@@ -979,17 +976,14 @@ function addLoan({
     date,
     amount: -priceMx.value * finCostLoan * -1
   })
-  month = month1
   loanXIRR.push({
     date,
     amount: initialPaymentLoan
   })
 
   d = new Date()
-  month = d.getTime()
   date = dateformat(d.getTime(), 'yyyy-mm-dd')
   nextMonth(d, 1 + deliveryTimeLoan)
-  month = d.getTime()
   loanXIRR.push({
     date,
     amount: monthlyPaymentLoan
@@ -1068,8 +1062,6 @@ function addLease({
   let leaseXIRR = []
 
   let d = new Date()
-  let month = d.getTime()
-  let month1 = month;
 
   let leasea = 0
   let leaseb = 0
@@ -1099,7 +1091,6 @@ function addLease({
   }
 
   nextMonth(d, delayedFundingVal)
-  month = d.getTime()
   let date = dateformat(d.getTime(), 'yyyy-mm-dd')
 
   leaseXIRR.push({
@@ -1110,14 +1101,12 @@ function addLease({
     date,
     amount: priceMx.value * blindDiscountVal
   })
-  month = month1
   leaseXIRR.push({
     date,
     amount: initialPayment
   })
 
   nextMonth(d, 1 + deliveryTime)
-  month = d.getTime()
   leaseXIRR.push({
     date: dateformat(d.getTime(), 'yyyy-mm-dd'),
     amount: monthlyPaymentLease
@@ -1126,18 +1115,20 @@ function addLease({
   leasea = 0
   let n = deposit === 0 ? termVal - 1 : termVal
 
-  for (let x=1; x < n; x++) {
+  for (let x = 1; x < n - 1; x++) {
     nextMonth(d, 1)
-    if (x < n-1)
-      leasea = monthlyPaymentLease
-    else
-      leasea = monthlyPaymentLease + (residualValuePerTerm * priceMx.value)
-
+    leasea = monthlyPaymentLease
     leaseXIRR.push({
       date: dateformat(d.getTime(), 'yyyy-mm-dd'),
       amount: leasea
     })
   }
+  // Final payment
+  nextMonth(d, 1)
+  leaseXIRR.push({
+    date: dateformat(d.getTime(), 'yyyy-mm-dd'),
+    amount: monthlyPaymentLease + (residualValuePerTerm * priceMx.value)
+  })
 
   let { rate } = xirr(leaseXIRR)
   let xirrLease = mathRound(convertRate(rate, 365) * 100)
