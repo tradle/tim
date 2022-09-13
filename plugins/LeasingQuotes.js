@@ -1040,7 +1040,7 @@ function addLease({
     blindDiscount=0
   } = quotationInfo
   let {
-    commissionFee: commissionFeeCalculated,
+    commissionFee,
   } = qd
   let blindDiscountVal = blindDiscount/100
 
@@ -1057,6 +1057,9 @@ function addLease({
   else
     initialPayment = depositValue / (1 + vatRate)
 
+  let commissionFeeValue = commissionFee.value
+  let initialPaymentVat = (initialPayment + commissionFeeValue) * vatRate
+  let totalInitialPayment = commissionFeeValue + initialPayment + initialPaymentVat
 
   let leaseIRR = []
   let leaseXIRR = []
@@ -1103,7 +1106,7 @@ function addLease({
   })
   leaseXIRR.push({
     date,
-    amount: initialPayment
+    amount: totalInitialPayment
   })
 
   nextMonth(d, 1 + deliveryTime)
