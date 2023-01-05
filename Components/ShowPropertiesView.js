@@ -631,17 +631,6 @@ class ShowPropertiesView extends Component {
 
     return { val }
   }
-  // showPDF({photo}) {
-  //   let route = {
-  //     backButtonTitle: 'Back',
-  //     componentName: 'ArticleView',
-  //     passProps: {
-  //       href: photo.url
-  //     },
-  //     // sceneConfig: Navigator.SceneConfigs.FadeAndroid,
-  //   }
-  //   this.props.navigator.push(route)
-  // }
   showScoreDetails() {
     let m = utils.getModel(APPLICATION)
     let { navigator, bankStyle, resource } = this.props

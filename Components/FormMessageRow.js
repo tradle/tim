@@ -15,7 +15,7 @@ import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
 const { IDENTITY } = constants.TYPES
-var { TYPE, SIG } = constants
+const { TYPE, SIG } = constants
 
 import utils, { translate } from '../utils/utils'
 import PhotoList from './PhotoList'
@@ -88,10 +88,10 @@ class FormMessageRow extends Component {
     let isShared = this.isShared()
     let isSharedContext
 
-    var len = photos  &&  photos.length;
-    var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    var photoStyle = {}
-    var width = utils.getMessageWidth(FormMessageRow)
+    let len = photos  &&  photos.length;
+    let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
+    let photoStyle = {}
+    let width = utils.getMessageWidth(FormMessageRow)
     if (application)
       width -= 50 // provider icon and padding
     if (inRow > 0) {
@@ -155,7 +155,7 @@ class FormMessageRow extends Component {
     let isMyMessage = this.isMyMessage()
 
     let isShared = this.isShared()
-    var width = utils.getMessageWidth(FormMessageRow)
+    let width = utils.getMessageWidth(FormMessageRow)
 
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
 
