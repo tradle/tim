@@ -1192,7 +1192,7 @@ debugger
            <View style={{alignSelf: 'center', justifyContent: 'center'}}>
             <TouchableOpacity onPress={this.showChoiceAlert.bind(this)}>
               <View style={styles.button}>
-                <Text style={styles.buttonText}>{translate('cancelPairing')}</Text>
+                <Text style={styles.buttonText}>{translate('cancelDevicePairing')}</Text>
               </View>
             </TouchableOpacity>
          </View>

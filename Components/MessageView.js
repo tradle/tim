@@ -44,7 +44,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
-import ApplicantLegalEntityConsent from './ApplicantLegalEntityConsent'
+// import ApplicantLegalEntityConsent from './ApplicantLegalEntityConsent'
 
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 const PRINTABLE = 'tradle.Printable'
