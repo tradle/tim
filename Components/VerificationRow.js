@@ -68,15 +68,15 @@ class VerificationRow extends Component {
   };
   constructor(props) {
     super(props);
+
     let isChosen = false
+    this.state = {
+      isChosen
+    }
     if (props.multiChooser) {
       // multivalue ENUM property
       if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
         this.state.isChosen = true
-    }
-
-    this.state = {
-      isChosen
     }
   }
 
