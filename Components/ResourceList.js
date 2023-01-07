@@ -139,6 +139,7 @@ class ResourceList extends Component {
     }
     this.selectResource = this.selectResource.bind(this)
     this.onSettingsPressed = this.onSettingsPressed.bind(this)
+    this.onAddContact = this.onAddContact.bind(this)
     this.openSharedContextChat = this.openSharedContextChat.bind(this)
   }
   done() {
@@ -997,7 +998,27 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        model: model,
+        model,
+        bankStyle: this.mergeStyle(this.props.style),
+        callback: () => {
+          this.props.navigator.pop()
+          Actions.list({modelName: this.props.modelName})
+        }
+        // callback: this.register.bind(this)
+      },
+    }
+
+    this.props.navigator.push(route)
+  }
+  onAddContact() {
+    let model = utils.getModel('tradle.EmailAddress')
+    let route = {
+      componentName: 'NewResource',
+      title: translate('newContact'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model,
         bankStyle: this.mergeStyle(this.props.style),
         callback: () => {
           this.props.navigator.pop()
@@ -1231,6 +1252,10 @@ class ResourceList extends Component {
       if (!ENV.allowAddServer) return
       let hideText = this.state.hideMode ? 'cancelHideResource' : 'hideResource'
       buttons = [
+        {
+          text: translate('addContact'),
+          onPress: this.onAddContact
+        },
         {
           text: translate('addServerUrl'),
           onPress: this.onSettingsPressed

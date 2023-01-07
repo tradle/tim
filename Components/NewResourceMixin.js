@@ -1551,7 +1551,9 @@ const NewResourceMixin = {
       if (isEnum)
         value = value.map(v => utils.buildRef(v))
       else
-        value = Array.isArray(value) && value || [value]
+        value = Array.isArray(value) ? value : Object.values(value)
+        // value = Array.isArray(value) && value || [value]
+
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value
@@ -1570,7 +1572,7 @@ const NewResourceMixin = {
           resource[propName] = [resource[propName], value]
       }
       else
-        resource[propName] = value
+        resource[propName] = Array.isArray(value) && value || [value]
     }
     else if (isArray || isMultichooser) {
       let hasReset

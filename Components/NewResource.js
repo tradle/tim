@@ -855,13 +855,16 @@ if (r.url)
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: 'Back',
         componentName: 'GridList',
+        rightButtonTitle: 'Done',
         passProps: {
           modelName: bl.items.ref,
           to: this.state.resource.to,
           resource: this.state.resource,
           isChooser: true,
           prop: bl,
+          multiChooser: true,
           callback: this.setChosenValue,
+          onDone: this.done.bind(this, bl.name),
           bankStyle,
           currency
         }
@@ -882,6 +885,10 @@ if (r.url)
         currency
       }
     });
+  }
+  done(propName, values) {
+    this.setChosenValue(propName, values)
+    this.props.navigator.pop()
   }
   editItem(pMeta, item) {
     let resource = this.state.resource
@@ -1322,7 +1329,7 @@ if (r.url)
       )
     }
     if (!isRegistration) {
-      contentSeparator.width = utils.getContentWidth(NewResource)
+      contentSeparator.width = '100%'
       let { enumProp } = this.state
       let actionSheet = this.renderActionSheet(resource[TYPE])
       if (noChat) {
