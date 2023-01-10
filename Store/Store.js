@@ -59,6 +59,7 @@ const DELETE = -1
 
 const ALLOW_TO_ADD = [
   'tradle.Asset',
+  'tradle.Product',
   'tradle.Vendor',
   'tradle.Contract',
   'tradle.Configuration',
