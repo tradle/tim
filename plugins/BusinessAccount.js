@@ -22,7 +22,7 @@ module.exports = function LegalEntity ({ models }) {
       form
     }) {
       if (!application) return
-
+return
       const type = form[TYPE]
       switch (type) {
       case CONTROLLING_ENTITY:
