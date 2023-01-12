@@ -199,7 +199,11 @@ class ReportGenerator {
             break
           }
           if (isEnum(ref) || ii === prop.length - 1) {
-            val = propValue.title
+            if (Array.isArray(propValue)) {
+              val = propValue.map(v => v.title)
+            }
+            else
+              val = propValue.title
             break
           }
         }
