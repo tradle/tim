@@ -919,8 +919,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
   selectMessage(resource, isEdit) {
     let { modelName, search, bankStyle, navigator, currency, locale, prop,
-          returnRoute, callback, application, isBacklink, serverOffline } = this.props
-    if (callback) {
+          returnRoute, callback, application, isBacklink, serverOffline, multiChooser } = this.props
+    // for multichooser RL the callback is setting value. For that we want to see the resource itself
+    if (callback && !multiChooser) {
       // debugger
       callback(prop, resource); // HACK for now
       if (returnRoute)
