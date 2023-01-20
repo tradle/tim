@@ -1310,10 +1310,13 @@ if (r.url)
       // let them upload, because there is none in web
       return prop.component != null
     })
+    let { enumProp } = this.state
+
     if (droppable) {
       const prop = properties[droppable]
       // contentSeparator.width = utils.getContentWidth(NewResource)
       // return (
+      let actionSheet = this.renderActionSheet(resource[TYPE])
       return (
         <PageView style={[platformStyles.container, styles.message]} separator={contentSeparator}>
           <DropPage
@@ -1322,15 +1325,18 @@ if (r.url)
             style={platformStyles.container}
             onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
           >
+            <View onLayout={
+                   enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+                 }/>
             {errors}
             {content}
+            {actionSheet}
           </DropPage>
         </PageView>
       )
     }
     if (!isRegistration) {
       contentSeparator.width = '100%'
-      let { enumProp } = this.state
       let actionSheet = this.renderActionSheet(resource[TYPE])
       if (noChat) {
         return <View style={[styles.message, {height: '100%', paddingBottom: 50}]}>
