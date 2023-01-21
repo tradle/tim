@@ -1497,14 +1497,16 @@ if (r.url)
     )
   }
   doCancel(pMeta, item) {
-    let list = this.state.resource[pMeta.name];
+    let { resource } = this.state
+    let list = resource[pMeta.name];
     for (let i=0; i<list.length; i++) {
       if (_.isEqual(list[i], item)) {
         list.splice(i, 1);
         this.setState({
-          resource: this.state.resource,
+          resource,
           itemsChangesCounter: list.length
         })
+        Actions.getRequestedProperties({resource, originatingResource: this.props.originatingMessage})
         return
       }
     }
