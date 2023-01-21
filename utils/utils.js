@@ -1370,7 +1370,8 @@ var utils = {
     let rCols = []
     cols.forEach((p) => {
       if (!isView) {
-        if (properties[p].readOnly)
+        // Showing readOnly props that have formula in edit mode
+        if (properties[p].readOnly && !properties[p].set)
           return
         if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
           return
