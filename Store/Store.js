@@ -3694,7 +3694,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = await plugin(context).validateForm.call(
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource, additionalInfo, getItem: me.isEmployee ? this.onGetItem.bind(this) : null, search: me.isEmployee ? this.searchServer.bind(this) : null}
+          {application: _context, form: resource, currentResource, additionalInfo, search: me.isEmployee ? this.searchServer.bind(this) : null}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
