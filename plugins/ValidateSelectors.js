@@ -1,6 +1,18 @@
 import { cloneDeep } from 'lodash'
-import { TYPE } from '@tradle/constants'
-import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum, isSubclassOf } from '../utils/utils'
+import { TYPE, ROOT_HASH } from '@tradle/constants'
+import {
+  getModel,
+  getPropertiesWithAnnotation,
+  getEditCols,
+  getId,
+  getType,
+  ungroup,
+  isEmpty,
+  isEnum,
+  isSubclassOf,
+  isInlined,
+  getRootHash
+} from '../utils/utils'
 
 const MONEY = 'tradle.Money'
 const BOOKMARK = 'tradle.Bookmark'
@@ -10,7 +22,8 @@ module.exports = function ValidateSelector ({ models }) {
   return {
     validateForm: async function validateForm ({
       application,
-      form
+      form,
+      search
     }) {
       let ftype = form[TYPE]
       if (!application  &&  form[TYPE] !== BOOKMARK && !isSubclassOf(ftype, ASSET))
@@ -101,6 +114,10 @@ module.exports = function ValidateSelector ({ models }) {
         let prop = set[p]
         let formula = normalizeFormula({ formula: prop.set })
         let setF = new Function(...keys, `return ${formula}`);
+        let deps = getVariables(formula, props)
+        let dontSet = await findResourceTypeValues({deps, props, form, keys, values, search})
+        if (dontSet)
+          continue
         let val
         try {
           let v = values.slice()
@@ -122,7 +139,6 @@ module.exports = function ValidateSelector ({ models }) {
         } catch (err) {
           val = null
         }
-        let deps = getVariables(formula, props)
         let vidx = keys.indexOf(p)
         if (!val) {
           if (val !== false || prop.type !== 'boolean') {
@@ -160,6 +176,22 @@ module.exports = function ValidateSelector ({ models }) {
           for (let i=0; i<vars.length; i++) {
             let pName = vars[i]
             let prop = props[pName]
+            if (prop.type === 'array') {
+              let currency
+              // find currency in the items that the property value was calculated with
+              let f = form[pName][0]
+              for (let c in f) {
+                if (typeof f[c] === 'object' && f[c].currency) {
+                  currency = f[c].currency
+                  break
+                }
+              }
+              form[p] = {
+                value: val,
+                currency
+              }
+              continue
+            }
             if (!form[pName] || prop.ref !== MONEY)
               continue
             form[p] = {
@@ -249,12 +281,177 @@ function normalizeEnums({ form }) {
 
   return resource
 }
+async function findResourceTypeValues({deps, props, form, keys, values, search}) {
+  let propToForm = {}
+  let promises = []
+  let vals = []
+  for (let i=0; i<deps.length; i++) {
+    let dep = deps[i]
+    if (!form[dep])
+      continue
+    if (props[dep].type !== 'object' &&  props[dep].type !== 'array')
+      continue
+    let ref = props[dep].ref || props[dep].items.ref
+    if (isEnum(ref) || isInlined(getModel(ref)))
+      continue
+    if (props[dep].type === 'object') {
+      // Do not try to set value for the formula for which value didn't change
+      return form[dep] && !form[dep][ROOT_HASH]
+      // if (form[dep] && !form[dep][ROOT_HASH]) {
+      //   if (!propToForm[dep])
+      //     propToForm[dep] = form[dep]
+      //   let fkey = getId(form[dep])
+      //   if (forms[fkey])
+      //     continue
+      //   // let result = await getItem({resource: form[dep], noTrigger: true})
 
+      //   let { list } = await search({modelName: getType(form[dep]), filterResource: {_permalink: getRootHash(form[dep])}, noTrigger: true})
+
+      //   vals.push(list[0])
+      // }
+    }
+    if (props[dep].type === 'array') {
+      propToForm[dep] = []
+      let arr = form[dep]
+      if (!arr.find(r => !r[ROOT_HASH]))
+        vals = arr
+      else {
+        // Do not try to set value for the formula for which items didn't change
+        if (!arr.find(r => r[ROOT_HASH]))
+          return true
+
+        let { list } = await search({modelName: ref, noTrigger: true})
+
+        for (let j=0; j<arr.length; j++) {
+          let f = arr[j]
+          if (!f[ROOT_HASH]) {
+            if (!propToForm[dep])
+              propToForm[dep].push(f)
+            let rootHash = getRootHash(f)
+            let result = list.find(l => getRootHash(l) === rootHash)
+            // let result = await getItem({resource: f, noTrigger: true})
+            vals.push(result)
+          }
+        }
+      }
+    }
+    if (vals.length) {
+      // let vals = await Promise.all(promises)
+      deps.forEach(dep => {
+        if (props[dep].type !== 'object' &&  props[dep].type !== 'array')
+          return
+        if (props[dep].type === 'object') {
+          if (form[dep] && !form[dep][ROOT_HASH]) {
+            let fkey = getId(form[dep])
+            let f = vals.filter(v => getId(v) === fkey)
+            if (f) {
+              let idx = keys.indexOf(dep)
+              values[idx] = f
+              form[dep] = f
+            }
+          }
+        }
+        else if (props[dep].type === 'array') {
+          let arrIds = form[dep].map(a => getId(a))
+          let arr = vals.filter(v => arrIds.find(aId => getId(v) === aId))
+          if (arr.length) {
+            let idx = keys.indexOf(dep)
+            form[dep].forEach((f, i) => {
+              if (!f[ROOT_HASH]) {
+                form[dep][i] = arr.find(a => getId(a) === f.id)
+              }
+            })
+            values[idx] = form[dep]
+          }
+        }
+      })
+    }
+  }
+}
 function normalizeFormula({ formula }) {
   return formula.replace(/\s=\s/g, ' === ').replace(/\s!=\s/g, ' !== ')
 }
 function getVariables(formula, props) {
   const re = /[a-z_]\w*(?!\w*\s*\()/ig
   let vars = formula.match(re)
-  return vars.filter(v => props[v])
+  let propsOnly = vars.filter(v => props[v])
+  if (!propsOnly.length)
+    return propsOnly
+  let filtered = []
+  propsOnly.forEach(p => {
+    if (filtered.indexOf(p) === -1)
+      filtered.push(p)
+  })
+  return filtered
 }
+/*
+        let propToForm = {}
+        let vals = []
+        for (let i=0; i<deps.length; i++) {
+          let dep = deps[i]
+          if (props[dep].type !== 'object' &&  props[dep].type !== 'array')
+            return
+          let ref = props[dep].ref || props[dep].items.ref
+          if (isEnum(ref))
+            return
+          if (props[dep].type === 'object') {
+            if (form[dep] && !form[dep][ROOT_HASH]) {
+              if (!propToForm[dep])
+                propToForm[dep] = form[dep]
+              let fkey = getId(form[dep])
+              if (forms[fkey])
+                return
+              let result = await getItem({resource: form[dep], noTrigger: true})
+              vals.push(result)
+            }
+          }
+          if (props[dep].type === 'array') {
+            if (form[dep])
+              propToForm[dep] = []
+            let arr = form[dep]
+            for (let j=0; j<arr.length; j++) {
+              let f = arr[j]
+              if (!f[ROOT_HASH]) {
+                if (!propToForm[dep])
+                  propToForm[dep].push(f)
+                let fkey = getId(f)
+                if (forms[fkey])
+                  return
+                let result = await getItem({resource: f, noTrigger: true})
+                vals.push(result)
+              }
+            }
+          }
+          if (vals.length) {
+            // let vals = await Promise.all(promises)
+            deps.forEach(dep => {
+              if (props[dep].type !== 'object' &&  props[dep].type !== 'array')
+                return
+              if (props[dep].type === 'object') {
+                if (form[dep] && !form[dep][ROOT_HASH]) {
+                  let fkey = getId(form[dep])
+                  let f = vals.filter(v => getId(v) === fkey)
+                  if (f) {
+                    let idx = keys.indexOf(dep)
+                    values[idx] = f
+                    form[dep] = f
+                  }
+                }
+              }
+              else if (props[dep].type === 'array') {
+                let arrIds = form[dep].map(a => getId(a))
+                let arr = vals.filter(v => arrIds.find(aId => getId(v) === aId))
+                if (arr.length) {
+                  let idx = keys.indexOf(dep)
+                  form[dep].forEach((f, i) => {
+                    if (!f[ROOT_HASH]) {
+                      form[dep][i] = arr.find(a => getId(a) === f.id)
+                    }
+                  })
+                  values[idx] = form[dep]
+                }
+              }
+            })
+          }
+        }
+*/
