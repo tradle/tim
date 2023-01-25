@@ -1705,7 +1705,7 @@ const NewResourceMixin = {
         this.floatingProps = {}
       this.floatingProps[propName] = resource[propName]
     }
-    else if (prop.items.ref) {
+    else if (prop.items && prop.items.ref) {
       resource[propName] = null
     }
     else {
