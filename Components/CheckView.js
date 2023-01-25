@@ -25,6 +25,7 @@ import utils, {
   dimensions,
   isStub,
   getMe,
+  getId,
   isRM,
   getEnumValueId,
   getPropertiesWithRef,
@@ -78,15 +79,14 @@ class CheckView extends Component {
   }
   componentWillMount() {
     let { resource, search, application } = this.props
-    Actions.getItem({ resource, search, application })
+    Actions.getItem({ resource, search, application: application || resource.application })
   }
 
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.isLoading !== nextState.isLoading)
-      return true
+    return this.state.isLoading !== nextState.isLoading
   }
   onAction(params) {
     let { action, currency, style, country, backlink, isConnected } = params
@@ -97,7 +97,7 @@ class CheckView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource)) {
+    if (getId(params.resource) !== getId(resource)) {
       if (getRootHash(resource) !== getRootHash(params.resource))
         return
     }
@@ -119,6 +119,8 @@ class CheckView extends Component {
         _.extend(styleMerged, style)
         state.bankStyle = styleMerged
       }
+      if (params.application)
+        state.application = params.application
       this.setState(state)
     }
   }
@@ -191,7 +193,7 @@ class CheckView extends Component {
                                 <TouchableOpacity
                                       onPress={() => this.createCheckOverride(checkOverrideProp[0])}>
                                   <View style={styles.overrideButton}>
-                                    <Text style={styles.overrideButtonText}>{translate('override')}</Text>
+                                    <Text style={styles.overrideButtonText}>{translate('resolve')}</Text>
                                   </View>
                                 </TouchableOpacity>
                               </View>
@@ -242,7 +244,9 @@ class CheckView extends Component {
   }
 
   createCheckOverride(prop) {
-    const { navigator, bankStyle, application } = this.props
+    let { navigator, bankStyle, application } = this.props
+    if (!application)
+      application = this.state.application
     const { resource } = this.state
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
     const statusModel = utils.getModel(OVERRIDE_STATUS)
@@ -254,10 +258,11 @@ class CheckView extends Component {
     else // if (checkStatus.indexOf('_fail') !== -1)
       status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
 
+    let { to, _context } = application
     let r = {
       from: getMe(),
-      to: application.to,
-      _context: application._context,
+      to,
+      _context,
       [TYPE]: model.id,
       check: buildRef(resource),
       application,
