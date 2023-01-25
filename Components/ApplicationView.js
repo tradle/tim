@@ -285,7 +285,7 @@ class ApplicationView extends Component {
 
     let chatButton
     if (resource._context) {
-      if (!resource.submissions || !resource.submissions.find(r => getType(r.submission) === APPLICATION_SUBMITTED))
+      // if (!resource.submissions || !resource.submissions.find(r => getType(r.submission) === APPLICATION_SUBMITTED))
         chatButton = <TouchableOpacity onPress={this.openApplicationChat.bind(this, resource)} style={[styles.openChatPadding]}>
                         <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                           <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
