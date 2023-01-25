@@ -4219,6 +4219,8 @@ if (!res[SIG]  &&  res._message)
     let list, style
     if (application) {
       if (!r._context) {
+        if (utils.isStub(application))
+          application = await this.getApplication({resource: application, noBacklinks: true})
         let context = await this.getContext(application.context, r)
         if (context)
           r._context = context
@@ -4247,7 +4249,7 @@ if (!res[SIG]  &&  res._message)
         }
       })
     }
-    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
+    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style, application}
     if (list)
       retParams.list = list
     let org = r.to.organization
@@ -4287,7 +4289,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger({action: 'getApplication', resource, application})
   },
   async getApplication(params) {
-    let {resource, action, backlink, forwardlink, noChat} = params
+    let {resource, action, backlink, forwardlink, noChat, noBacklinks} = params
     let blProp = backlink ||  forwardlink
     let props = utils.getModel(APPLICATION).properties
     let prop
@@ -4310,7 +4312,7 @@ if (!res[SIG]  &&  res._message)
       r = resource
     }
     else
-      r = await this._getItemFromServer({idOrResource: rId, backlink: prop})
+      r = await this._getItemFromServer({idOrResource: rId, backlink: prop, noBacklinks})
 
     if (!r)
       return
