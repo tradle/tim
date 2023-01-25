@@ -313,6 +313,7 @@ module.exports = {
     "outgoingMessages": "Outgoing Messages",
     "pleaseChoose": "Please choose",
     "override": "Override",
+    "resolve": "Resolve",
     "olderResourceVersion": "This is the older version of this resource",
     "reset": "Reset {1}",
     "completeOnboardingApplication": "Please complete the onboarding application",
