@@ -242,7 +242,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#78a06a1f4fd38577f024252d168acf0d1645f755"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#90a8d7bfd542685ac8c04fde1905123653bf5dea"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
