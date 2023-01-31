@@ -89,7 +89,7 @@ class CheckView extends Component {
     return this.state.isLoading !== nextState.isLoading
   }
   onAction(params) {
-    let { action, currency, style, country, backlink, isConnected } = params
+    let { action, currency, style, country, backlink, isConnected, template } = params
     if (action == 'connectivity') {
       this.setState({isConnected})
       return
@@ -123,6 +123,8 @@ class CheckView extends Component {
         state.application = params.application
       this.setState(state)
     }
+    else if (action === 'getTemplate')
+      this.printReport(template, application)
   }
 
   getRefResource(resource, prop) {
@@ -155,6 +157,7 @@ class CheckView extends Component {
                         showRefResource={this.getRefResource}
                         excludedProperties={excludedProperties}
                         currency={currency}
+                        application={application}
                         isVerifier={isVerifier}
                         bankStyle={bankStyle}
                         navigator={navigator} />

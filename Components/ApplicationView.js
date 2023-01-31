@@ -421,10 +421,11 @@ class ApplicationView extends Component {
 
     if (!templates)
       return buttons
+    let application = this.state.resource || this.props.resource
     templates.forEach(template =>
       push({
         title: template.title,
-        callback: () => this.printReport(template)
+        callback: () => this.printReport(template, application)
       })
     )
     push({
@@ -483,21 +484,6 @@ class ApplicationView extends Component {
         }}
       ]
     )
-  }
-  printReport(template) {
-    const { navigator, bankStyle, locale } = this.props
-    const { resource:application } = this.state
-    navigator.push({
-      title: "",
-      componentName: 'PrintReport',
-      backButtonTitle: null,
-      passProps: {
-        application,
-        bankStyle,
-        locale,
-        template
-      }
-    });
   }
   takeTour() {
     const { navigator, bankStyle } = this.props

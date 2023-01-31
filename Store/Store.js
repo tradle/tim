@@ -4272,7 +4272,6 @@ if (!res[SIG]  &&  res._message)
     let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
     Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(utils.getDisplayName({resource}))}`)
   },
-
   async onGetApplication(params) {
     let {resource, action, backlink, forwardlink, filterResource, prop, isBacklink} = params
     if (!filterResource)
@@ -4725,7 +4724,7 @@ if (!res[SIG]  &&  res._message)
     }
   },
 
-  async onOpenURL(url) {
+  async onOpenURL(url, application, resource) {
     let URL = parseURL(url.replace('/#', ''))
     let pathname = URL.pathname || URL.hostname
     if (!pathname) {
@@ -4735,7 +4734,7 @@ if (!res[SIG]  &&  res._message)
     pathname = pathname.replace(/^\//, '')
 
     let query = URL.query
-    let qs = query && require('querystring').parse(query) || {}
+    let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
 
     switch(pathname) {
     case 'chat':
@@ -4746,7 +4745,10 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: pathname})
       break
     case 'r':
-      await this.getItemFromDeepLink(qs)
+      if (qs.template)
+        await this.printNotarazedReport(qs, application, resource)
+      else
+        await this.getItemFromDeepLink(qs)
       break
     case 'applyForProduct':
       await this.onApplyForProduct(qs)
@@ -6004,7 +6006,29 @@ if (!res[SIG]  &&  res._message)
     }
     return newProvider
   },
+  async printNotarazedReport({ link, permalink, type, template }, application, resource) {
+    if (!me.isEmployee || !template || type !== APPLICATION)
+      return
+    if (!this.client)
+      this.client = graphQL.initClient(meDriver, me.organization.url)
+    if (!application)
+       application = await this.getApplication({resource: {
+          [TYPE]: APPLICATION,
+          [ROOT_HASH]: permalink,
+          [CUR_HASH]: link
+        }, noTrigger: true})
+    let templates = this.getTemplatesList({application})
+    if (!templates)
+      return
+    let templ = templates.find(t =>  t.title === template)
+    if (!templ)
+      return
+    let url = me.organization.url
+    let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
 
+    this.trigger({action: 'getTemplate', template: templ, application, resource })
+    //await this.onGetReport({application, template: templ.template, locale: sp.locale || ENV.locale})
+  },
   async onGetReport({application, template, locale}) {
     if (!me.isEmployee)
       return

@@ -62,7 +62,8 @@ class ShowPropertiesView extends Component {
     currency: PropTypes.string,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
-    excludedProperties: PropTypes.array
+    excludedProperties: PropTypes.array,
+    application: PropTypes.object
   };
   constructor(props) {
     super(props);

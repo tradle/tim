@@ -459,7 +459,7 @@ var ResourceMixin = {
     }
   },
   renderSimpleProp({val, pMeta, modelName, component, hasGroups, showResourceProperty}) {
-    let { bankStyle } = this.props
+    let { bankStyle, application } = this.props
     if (Array.isArray(val))
       return this.renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty})
 
@@ -484,10 +484,21 @@ var ResourceMixin = {
               <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
             </View>
     }
-    if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)) {
-      if (pMeta.range === 'url')
-        return <Text onPress={this.onPress.bind(this, val)} numberOfLines={1}  ellipsizeMode='head' style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
-      return <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>;
+    if (typeof val === 'string'  &&  pMeta.type !== 'object') {
+      if (pMeta.range === 'url') {
+        if (val.indexOf('/r?') !== -1) {
+          return <TouchableOpacity onPress={this. onReport.bind(this, val, application)}>
+                   <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('link')}</Text>
+                 </TouchableOpacity>
+        }
+
+        if (val.indexOf('http://') === -1  &&  val.indexOf('https://') === -1)
+          val = `https://${val}`
+        return <TouchableOpacity onPress={this.onPress.bind(this, val)}>
+                 <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
+               </TouchableOpacity>
+      }
+      return <TouchableOpacity onPress={this.onPress.bind(this, val)}><Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text></TouchableOpacity>
     }
     if (pMeta.markdown) {
       return <View style={styles.container}>
@@ -501,6 +512,23 @@ var ResourceMixin = {
     else if (pMeta.range === 'password')
       val = '*********'
     return <Text style={descStyle}>{val}</Text>;
+  },
+  onReport(val, application) {
+    Actions.openURL(val, application, this.props.resource)
+  },
+  printReport(template, application) {
+    const { navigator, bankStyle, locale } = this.props
+    navigator.push({
+      title: "",
+      componentName: 'PrintReport',
+      backButtonTitle: null,
+      passProps: {
+        application,
+        bankStyle,
+        locale,
+        template
+      }
+    });
   },
   generateCopyLinkButton(resource) {
     const { bankStyle } = this.props

@@ -202,7 +202,7 @@ class TimHome extends Component {
       let params = this.parseAdditionalParameters(query)
       _.extend(qs, params)
     }
-    let state = {firstPage, qs, isDeepLink: true, linkText}
+    let state = {firstPage, qs, isDeepLink: true, linkText, url}
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -567,7 +567,7 @@ class TimHome extends Component {
     })
   }
   showFirstPage(noResetNavStack) {
-    let { firstPage, isDeepLink, qs } = this.state
+    let { firstPage, isDeepLink, qs, url } = this.state
     let state = {}
     if (isDeepLink) {
       state.firstPage = ENV.initWithDeepLink
@@ -624,7 +624,7 @@ class TimHome extends Component {
         }
         break
       case 'r':
-        Actions.getResourceFromLink(qs)
+        Actions.openURL(url)
         break
       case 'ImportData':
         Actions.getProvider(qs)
