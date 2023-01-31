@@ -66,8 +66,10 @@ class ReportGenerator {
     for (let i=formNames.length-1; i>=0; i--) {
       let forms = application.forms.filter(f => getType(f) === formNames[i])
       if (forms.length) {
-        for (let j=0; j<forms.length; j++)
-          all.push(await this.getItem({ idOrResource: forms[j] }))
+        for (let j=0; j<forms.length; j++) {
+          let r = await this.getItem({ idOrResource: forms[j] })
+          all.push(r)
+        }
         formNames.splice(i, 1)
       }
       // HACK
