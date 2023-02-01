@@ -12625,6 +12625,8 @@ if (!res[SIG]  &&  res._message)
         me = data.value
       }
       let rtype = data.value[TYPE]
+      if (rtype  &&  !utils.getModel(rtype))
+        return
       if (rtype === PROFILE) {
         if (data.value.securityCode)
           employees[data.value.securityCode] = data.value
