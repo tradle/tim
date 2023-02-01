@@ -514,7 +514,7 @@ var ResourceMixin = {
     return <Text style={descStyle}>{val}</Text>;
   },
   onReport(val, application) {
-    Actions.openURL(val, application, this.props.resource)
+    Actions.openURL(val, application || this.props.resource.application, this.props.resource)
   },
   printReport(template, application) {
     const { navigator, bankStyle, locale } = this.props
