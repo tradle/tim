@@ -34,6 +34,7 @@ import Markdown from './Markdown'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const SHARE_CONTEXT = 'tradle.ShareContext'
+const APPLICATION = 'tradle.Application'
 const APPLICATION_COMPLETED = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 // const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
@@ -558,6 +559,16 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
     }
+    if (model.id === APPLICATION) {
+      let color = bankStyle.myMessageLinkColor
+      let content = <Text style={[chatStyles.resourceTitle, {color}]}>{resource.filledForCustomer ? translate('applicationCompletedForClient') : translate('applicationForwardedToClient')}</Text>
+      content = <TouchableOpacity underlayColor='transparent' onPress={this.props.onSelect.bind(this, {resource: resource.application})}  key={this.getNextKey()}>
+                  {content}
+                </TouchableOpacity>
+      let msg = <View key={this.getNextKey()}>{content}</View>
+      renderedRow.push(msg);
+      return null
+    }
     if (model.id === BOOKMARK) {
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate(resource._p ? 'bookmarkWasUpdated' : 'bookmarkWasCreated')}</Text>
@@ -566,6 +577,7 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return {onPressCall: () => uiUtils.showBookmarks(this.props)}
     }
+
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     if (isForgetting) {
       let msg = <View key={this.getNextKey()}>
