@@ -89,7 +89,7 @@ class MessageRow extends Component {
     let { resource, to, bankStyle, navigator } = this.props
     let styles = createStyles({bankStyle})
 
-    let isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
+    let isMyMessage = this.isMyMessage() || resource[TYPE] === APPLICATION //  &&  !isRemediationCompleted
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
