@@ -4220,7 +4220,7 @@ if (!res[SIG]  &&  res._message)
     if (application) {
       if (!r._context) {
         if (utils.isStub(application))
-          application = await this.getApplication({resource: application, noBacklinks: true})
+          application = await this.getApplication({resource: application}) //, noBacklinks: true})
         let context = await this.getContext(application.context, r)
         if (context)
           r._context = context
@@ -4745,7 +4745,7 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: pathname})
       break
     case 'r':
-      if (qs.template)
+      if (qs.template && qs.template.length)
         await this.printNotarazedReport(qs, application, resource)
       else
         await this.getItemFromDeepLink(qs)
