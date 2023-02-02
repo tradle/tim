@@ -6011,7 +6011,7 @@ if (!res[SIG]  &&  res._message)
       return
     if (!this.client)
       this.client = graphQL.initClient(meDriver, me.organization.url)
-    if (!application)
+    if (!application || utils.isStub(application))
        application = await this.getApplication({resource: {
           [TYPE]: APPLICATION,
           [ROOT_HASH]: permalink,

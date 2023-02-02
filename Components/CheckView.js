@@ -124,7 +124,7 @@ class CheckView extends Component {
       this.setState(state)
     }
     else if (action === 'getTemplate')
-      this.printReport(template, application)
+      this.printReport(template, params.application)
   }
 
   getRefResource(resource, prop) {
