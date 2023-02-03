@@ -4735,7 +4735,6 @@ if (!res[SIG]  &&  res._message)
 
     let query = URL.query
     let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
-
     switch(pathname) {
     case 'chat':
       this.onGetProvider(qs)
@@ -4745,10 +4744,16 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: pathname})
       break
     case 'r':
-      if (qs.template && qs.template.length)
-        await this.printNotarazedReport(qs, application, resource)
-      else
+      let idx = url.indexOf('&-template=')
+      if (idx === -1)
         await this.getItemFromDeepLink(qs)
+      else {
+        let idx1 = url.indexOf('&', idx + 1)
+        if (idx1 === -1)
+          idx1 = url.length
+        let template = decodeURIComponent(url.slice(idx, idx1).split('=')[1])
+        await this.printNotarazedReport({...qs, template}, application, resource)
+      }
       break
     case 'applyForProduct':
       await this.onApplyForProduct(qs)
