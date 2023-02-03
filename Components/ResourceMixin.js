@@ -498,7 +498,7 @@ var ResourceMixin = {
                  <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
                </TouchableOpacity>
       }
-      return <TouchableOpacity onPress={this.onPress.bind(this, val)}><Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text></TouchableOpacity>
+      return <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
     }
     if (pMeta.markdown) {
       return <View style={styles.container}>
