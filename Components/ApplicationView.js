@@ -208,7 +208,7 @@ class ApplicationView extends Component {
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
     let loading
     if (isLoading) {
-      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+      loading = <View style={{position: 'absolute', bottom: 150, alignSelf: 'center' }}>
         {this.showLoading({bankStyle, component: ApplicationView})}
       </View>
       if (!resource[TYPE])
@@ -346,7 +346,6 @@ class ApplicationView extends Component {
     let width = getContentWidth(ApplicationView)
     let content = <ScrollView  ref='this' style={{width, alignSelf: 'center'}} name={this._lazyId}>
                    {network}
-                   {loading}
                    <ApplicationTabs  lazy={this._lazyId}
                                      resource={resource}
                                      navigator={navigator}
@@ -375,8 +374,8 @@ class ApplicationView extends Component {
           <View style={platformStyles.pageContentWithMenu}>
             <ScrollView  ref='this' style={{width: getContentWidth(ApplicationView), alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
               {network}
-              {loading}
               {content}
+              {loading}
             </ScrollView>
             {footer}
           </View>
@@ -387,8 +386,8 @@ class ApplicationView extends Component {
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         <ScrollView  ref='this' style={{width: getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
           {network}
-          {loading}
           {content}
+          {loading}
         </ScrollView>
        {footer}
       </PageView>
