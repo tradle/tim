@@ -197,7 +197,13 @@ class ReportGenerator {
         if (ref) {
           let refModel = getModel(ref)
           if (refModel.inlined) {
-            val = this.getValue({resource, form: pForm, prop: property, locale})
+            if (ii === prop.length - 1)
+              val = this.getValue({resource, form: pForm, prop: property, locale})
+            else {
+              // val = propValue
+              pForm = propValue
+              continue
+            }
             break
           }
           if (isEnum(ref) || ii === prop.length - 1) {
