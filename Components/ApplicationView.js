@@ -265,7 +265,7 @@ class ApplicationView extends Component {
                  <View style={[buttonStyles.homeButton]}>
                    <Icon name='ios-add' color={bankStyle.linkColor} size={35}/>
                  </View>
-                 <Text style={styles.buttonText}>{translate('home')}</Text>
+                 <Text style={styles.buttonText}>{translate('requestForm')}</Text>
                </TouchableOpacity>
     }
     let photoId, selfie
