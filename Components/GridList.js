@@ -1051,6 +1051,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
           passProps: {
             model: rModel,
             resource,
+            application,
             // permissions,
             // search: !isBacklink  &&  search,
             serverOffline,
