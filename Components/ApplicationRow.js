@@ -163,23 +163,17 @@ class ApplicationRow extends Component {
 
     let icon = <Icon name={iname} size={30} color={icolor}/>
     let icon0
-    switch (resource.status) {
-      case 'approved':
-        icon0 = <Icon name='ios-done-all' size={30} color={bankStyle  &&  bankStyle.confirmationColor || '#02A5A5'}/>
-        break
-      case 'denied':
-        icon0 = <Icon name='ios-close' size={25} color='red'/>
-        break
-      case 'started':
-        icon0 = <Icon name='ios-code-working' size={25} color={bankStyle  &&  bankStyle.linkColor || '#7AAAC3'}/>
-        break
-      case 'completed':
-        icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
-        break
-      case 'In review':
-        icon0 = <Icon name='ios-eye-outline' size={25} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
-        break
-    }
+    let { status, manualEdit } = resource
+    if (status === 'approved')
+      icon0 = <Icon name='ios-done-all' size={30} color={bankStyle  &&  bankStyle.confirmationColor || '#02A5A5'}/>
+    else if (status === 'denied')
+      icon0 = <Icon name='ios-close' size={25} color='red'/>
+    else if (manualEdit)
+      icon0 = <Icon name='ios-eye-outline' size={25} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
+    else if (status === 'started')
+      icon0 = <Icon name='ios-code-working' size={25} color={bankStyle  &&  bankStyle.linkColor || '#7AAAC3'}/>
+    else if (status ===  'completed')
+      icon0 = <Icon name='ios-checkmark' size={30} color={bankStyle  &&  bankStyle.confirmationColor ||  '#129307'}/>
 
     let icons = <View style={{flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
             {icon1}

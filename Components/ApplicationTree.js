@@ -193,7 +193,7 @@ class ApplicationTree extends Component {
     let minutes = 60000
 
     for (let p in nodes) {
-      let { _displayName, _permalink, top } = nodes[p]
+      let { _displayName='', _permalink, top } = nodes[p]
       let node = _.omit(nodes[p], ['top']) //, '_link', '_permalink', '_displayName'])
       if (top) {
         if (top[TYPE] === PHOTO_ID)
