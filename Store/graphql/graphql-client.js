@@ -455,14 +455,23 @@ var search = {
             `
     }
     let query = queryHeader + eq + neq + queryFooter
+    let model = utils.getModel(MESSAGE)
 
-    try {
-      let result = await this.execute({client, query, table})
-      return result  &&  result.result
-    } catch (err) {
-      debugger
-    }
+    let error, mapping, retry = true
+    // for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
+      try {
+        let result = await this.execute({client, query, table})
+        if (result.result)
+          return result.result
 
+        let checkErrorResult = await this.checkError(result, model)
+
+        // if (error  &&  error === NETWORK_FAILURE  ||  !retry)
+        //   break
+      } catch (err) {
+        debugger
+      }
+    // }
   },
 
   async getBookmarkChat(params) {
