@@ -459,7 +459,7 @@ var ResourceMixin = {
     }
   },
   renderSimpleProp({val, pMeta, modelName, component, hasGroups, showResourceProperty}) {
-    let { bankStyle, application } = this.props
+    let { bankStyle, application, to } = this.props
     if (Array.isArray(val))
       return this.renderSimpleArrayProp({val, pMeta, modelName, component, showResourceProperty})
 
@@ -487,7 +487,7 @@ var ResourceMixin = {
     if (typeof val === 'string'  &&  pMeta.type !== 'object') {
       if (pMeta.range === 'url') {
         if (val.indexOf('/r?') !== -1) {
-          return <TouchableOpacity onPress={this. onReport.bind(this, val, application)}>
+          return <TouchableOpacity onPress={this. onReport.bind(this, val, application, to)}>
                    <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('link')}</Text>
                  </TouchableOpacity>
         }
@@ -514,7 +514,8 @@ var ResourceMixin = {
     return <Text style={descStyle}>{val}</Text>;
   },
   onReport(val, application) {
-    Actions.openURL(val, application || this.props.resource.application, this.props.resource)
+    const {to, resource} = this.props
+    Actions.openURL(val, application || resource.application, resource, to)
   },
   printReport(template, application) {
     const { navigator, bankStyle, locale } = this.props

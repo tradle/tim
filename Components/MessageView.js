@@ -112,7 +112,7 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let { action, currency, style, country, backlink, isConnected, error } = params
+    let { action, currency, style, country, backlink, isConnected, error, template } = params
     if (action == 'connectivity') {
       this.setState({isConnected})
       return
@@ -164,6 +164,8 @@ class MessageView extends Component {
       }
       this.setState(state)
     }
+    else if (action === 'getTemplate')
+      this.printReport(template, params.context)
     else if (action === 'exploreBacklink') {
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         let r = params.resource || this.state.resource

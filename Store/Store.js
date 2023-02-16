@@ -4444,7 +4444,7 @@ if (!res[SIG]  &&  res._message)
     }
     const application = r
     const { applicant:applicantIdentity } = application
-    let templates = this.getTemplatesList({application: r})
+    let templates = this.getTemplatesList({requestFor: r.requestFor})
     if (templates)
       retParams.templates = templates
     if (application.draft) {
@@ -4463,14 +4463,15 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
     return r
   },
-  getTemplatesList({application}) {
-    if (!me.isEmployee)
-      return
-    let url = me.organization.url
+  getTemplatesList({requestFor, url}) {
+    // if (!me.isEmployee)
+    //   return
+    if (!url && me.isEmployee)
+      url = me.organization.url
     let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
     if (!sp  ||  !sp.templates || !sp.templates.length)
       return
-    const { requestFor } = application
+    // const { requestFor } = application
     return sp.templates.filter(r => r.applicationFor === requestFor)
   },
   convertCreditScore(r) {
@@ -4724,7 +4725,7 @@ if (!res[SIG]  &&  res._message)
     }
   },
 
-  async onOpenURL(url, application, resource) {
+  async onOpenURL(url, application, resource, chat) {
     let URL = parseURL(url.replace('/#', ''))
     let pathname = URL.pathname || URL.hostname
     if (!pathname) {
@@ -4752,7 +4753,7 @@ if (!res[SIG]  &&  res._message)
         if (idx1 === -1)
           idx1 = url.length
         let template = decodeURIComponent(url.slice(idx, idx1).split('=')[1])
-        await this.printNotarazedReport({...qs, template}, application, resource)
+        await this.printNotarazedReport({...qs, template}, application, resource, chat)
       }
       break
     case 'applyForProduct':
@@ -6011,32 +6012,45 @@ if (!res[SIG]  &&  res._message)
     }
     return newProvider
   },
-  async printNotarazedReport({ link, permalink, type, template }, application, resource) {
-    if (!me.isEmployee || !template || type !== APPLICATION)
+  async printNotarazedReport({ link, permalink, type, template }, application, resource, to) {
+    if (/*!me.isEmployee || */!template || type !== APPLICATION)
       return
-    if (!this.client)
-      this.client = graphQL.initClient(meDriver, me.organization.url)
-    if (!application || utils.isStub(application))
-       application = await this.getApplication({resource: {
-          [TYPE]: APPLICATION,
-          [ROOT_HASH]: permalink,
-          [CUR_HASH]: link
-        }, noTrigger: true})
-    let templates = this.getTemplatesList({application})
+    let requestFor, context, url
+    if (me.isEmployee) {
+      if (!this.client)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+      if (!application || utils.isStub(application))
+         application = await this.getApplication({resource: {
+            [TYPE]: APPLICATION,
+            [ROOT_HASH]: permalink,
+            [CUR_HASH]: link
+          }, noTrigger: true})
+      ({requestFor} = application)
+      url = me.organization.url
+    }
+    else {
+      let r = {
+        id: utils.makeId(PRODUCT_REQUEST, permalink, link)
+      }
+      context = await this.onGetItem({resource: r, noTrigger: true})
+      context.forms  = await this.searchMessages({modelName: FORM, to, context})
+      url = to.url
+      ;({requestFor} = context)
+    }
+    let templates = this.getTemplatesList({requestFor, url})
     if (!templates)
       return
     let templ = templates.find(t =>  t.title === template)
     if (!templ)
       return
-    let url = me.organization.url
     let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
 
-    this.trigger({action: 'getTemplate', template: templ, application, resource })
+    this.trigger({action: 'getTemplate', template: templ, application, context, resource })
     //await this.onGetReport({application, template: templ.template, locale: sp.locale || ENV.locale})
   },
   async onGetReport({application, template, locale}) {
-    if (!me.isEmployee)
-      return
+    // if (!me.isEmployee)
+    //   return
     let reports = new ReportGenerator({application, template, locale, getItem: this._getItemFromServer, getApplication: this.getApplication})
     let html = await reports.genReport()
     this.trigger({action: 'report', application, html})
@@ -13194,7 +13208,7 @@ debug(`deleteItemFromDB: ${itemId}`)
     if (!multiEntryForms)
       return
     if (me.isEmployee) {
-      let formRequests = await this.searchServer({modelName: MESSAGE, to, filterResource: {_payloadType: FORM_REQUEST}, context: context, noTrigger: true })
+      let formRequests = await this.searchServer({modelName: MESSAGE, to, filterResource: {_payloadType: FORM_REQUEST}, context, noTrigger: true })
       // let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 100, context: context, noTrigger: true})
       if (!formRequests  ||  !formRequests.list  ||  !formRequests.list.length)
         return
@@ -13204,13 +13218,13 @@ debug(`deleteItemFromDB: ${itemId}`)
       let form = lastFormRequest[lastFormRequest.length - 1].form
       if (multiEntryForms.indexOf(form) === -1)
         return
-      let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context, noTrigger: true })
+      let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context, noTrigger: true })
       if (!res  ||  !res.list  || !res.list.length)
         return
       let productToForms = {[product]: {[form]: res.list.map((r) => utils.getId(r))}}
       return productToForms
     }
-    let allForms = await this.searchMessages({modelName: FORM, to: to, context: context})
+    let allForms = await this.searchMessages({modelName: FORM, to, context})
     if (!allForms)
       return
     let productToForms = {}

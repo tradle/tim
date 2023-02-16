@@ -823,6 +823,7 @@ debugger
         isChat: true,
         lensId: lensId,
         application,
+        to: resource,
         currency: this.calcCurrency(),
         locale: resource.locale,
         country: resource.country,

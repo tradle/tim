@@ -15,6 +15,7 @@ import {
   getCurrentHash,
   formatCurrency,
   isEnum,
+  getMe,
   translate,
 } from '../../utils/utils'
 
@@ -57,6 +58,7 @@ class ReportGenerator {
       else
         formsToProps[form][prop] = ''
     })
+    let isEmployee = getMe().isEmployee
     let all = []
     let formNames = Object.keys(formsToProps)
     let idx = formNames.indexOf(APPLICATION)
@@ -67,7 +69,7 @@ class ReportGenerator {
       let forms = application.forms.filter(f => getType(f) === formNames[i])
       if (forms.length) {
         for (let j=0; j<forms.length; j++) {
-          let r = await this.getItem({ idOrResource: forms[j] })
+          let r = isEmployee ? await this.getItem({ idOrResource: forms[j] }) : forms[j]
           all.push(r)
         }
         formNames.splice(i, 1)
@@ -133,6 +135,8 @@ class ReportGenerator {
     }
   }
   async getParentForms({application, forms, formNames}) {
+    if (!getMe().isEmployee)
+      return
     let parentForms = []
     if (application.parent) {
       let { forms:pForms } = await this.getApplication({resource: application.parent, backlink: getModel(APPLICATION).properties.forms})
@@ -165,6 +169,7 @@ class ReportGenerator {
       let val
       let pForm = form
       let notFound = false
+      let pModel
       for (let ii=0; ii<prop.length  &&  !notFound; ii++) {
         let property = prop[ii]
         // Check if backlink
@@ -180,14 +185,13 @@ class ReportGenerator {
         }
 
         let propValue = pForm[property]
-        if (!propValue)
-          continue
+        let ftype = getType(pForm)
+        let pModel = ftype && getModel(getType(pForm))
 
-        let pModel = getModel(getType(pForm))
-        let p = pModel.properties[property]
+        let p = pModel && pModel.properties[property]
         if (typeof propValue !== 'object') {
           val = propValue
-          if (p.type === 'date')
+          if (p && p.type === 'date')
             val = dateformat(new Date(pForm[property]), 'dd mmm yyyy')
           break
         }
