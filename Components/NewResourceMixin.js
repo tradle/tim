@@ -663,7 +663,7 @@ const NewResourceMixin = {
       pname = `${metadata.name}_${pname}`
 
     if(ptype === 'number'  &&  !search) {
-      let val = Number(value)
+      let val = this.normalizeNumber(value)
       let idx = value.indexOf('.')
       if (idx !== -1) {
         // debugger
@@ -683,9 +683,8 @@ const NewResourceMixin = {
     if (pref == MONEY) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
-      if (isNaN(value.charAt(0)))
-        value = value.slice(1)
-      let val = Number(value)
+      let val = this.normalizeNumber(value)
+      // let val = Number(value)
       this.floatingProps[pname].value = val
       if (!r[pname])
         r[pname] = {}
@@ -699,7 +698,7 @@ const NewResourceMixin = {
     else if (pref == DURATION) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
-      let val = Number(value)
+      let val = this.normalizeNumber(value)
       this.floatingProps[pname].value = val
       if (!r[pname])
         r[pname] = {}
@@ -764,7 +763,18 @@ const NewResourceMixin = {
   //     }
   //   })
   // },
+  normalizeNumber(value) {
+    if (!value)
+      return
+    if (!isNaN(value.charAt(0)))
+      return value
+    if (value.charAt(0) !== '.')
+      return value
+    if (isNaN(`0${value}`))
+      return value.slice(1)
 
+    return `0${value}`
+  },
   myTextTemplate(params) {
     let label = translate(params.prop, params.model)
     let bankStyle = this.props.bankStyle
