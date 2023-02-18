@@ -180,11 +180,14 @@ class FormRequestRow extends Component {
     let onPressCall
     let isFormRequest = resource[TYPE] === FORM_REQUEST
 
-    let props = utils.getEditableProperties(resource)
-    let prop = props.length === 1  &&  props[0]
+    const formModel = utils.getModel(resource.form)
+    let prop
+    if (!formModel.editCols || formModel.editCols.length === 1) {
+      let props = utils.getEditableProperties(resource)
+      prop = props.length === 1  &&  props[0]
+    }
     let hasMoreProps
     if (!prop  &&  isFormRequest) {
-      const formModel = utils.getModel(resource.form)
       const editCols = formModel.editCols
       // if (editCols  &&  editCols.length === 1) {
       //   let p = formModel.properties[editCols[0]]
