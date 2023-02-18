@@ -206,7 +206,7 @@ class RefPropertyEditor extends Component {
                     {icon}
                   </View>
 
-    let help = paintHelp(prop)
+    let help = paintHelp({prop, styles})
     let actionItem
     if (isBookmarkSealed || (!exploreData  &&  (isImmutable || isReadOnly)))
       actionItem = content

@@ -940,7 +940,7 @@ if (r.url)
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let editProps = utils.getEditableProperties(resource)
-    if (editProps.length) {
+    if (editProps.length && editProps.length === 1 && !utils.getModel(resource[TYPE]).editCols) {
       let eProp = editProps[0]
       if (eProp.signature) {
         return  <View style={{flex: 1}}>
@@ -1597,7 +1597,7 @@ if (r.url)
           {actionableItem}
         </View>
         {this.paintError({prop: bl})}
-        {this.paintHelp(bl)}
+        {this.paintHelp({prop: bl})}
       </View>
     );
   }
@@ -1673,7 +1673,7 @@ if (r.url)
           </View>
         </View>
         {this.paintError({prop: bl})}
-        {this.paintHelp(bl)}
+        {this.paintHelp({prop: bl})}
       </View>
     );
   }

@@ -30,6 +30,7 @@ import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
 const DEFAULT_CURRENCY = 'USD'
+var component
 
 const {
   MONEY,
@@ -76,7 +77,7 @@ const NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
+    let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark, bankStyle } = this.props
     let CURRENCY_SYMBOL = this.getCurrency()
     let { component, formErrors, model, data, validationErrors, editable } = params
 
@@ -164,6 +165,8 @@ const NewResourceMixin = {
     let isNew = !data[ROOT_HASH]
     let me = utils.getMe()
     let goalSeek = meta.goalSeek || []
+
+    let styles = createStyles({bankStyle})
 
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
@@ -253,7 +256,8 @@ const NewResourceMixin = {
                     errors: formErrors,
                     component,
                     editable: !propNotEditable || search,
-                    value: val
+                    value: val,
+                    styles
                   })
 
           if (val)
@@ -278,6 +282,7 @@ const NewResourceMixin = {
                     component,
                     editable: !propNotEditable || search,
                     errors: formErrors,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -309,6 +314,7 @@ const NewResourceMixin = {
                     label,
                     prop:  props[p],
                     model: meta,
+                    styles
                   })
         }
         else if (type === 'string'  &&  props[p].markdown) {
@@ -320,6 +326,7 @@ const NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     editable: editable && !propNotEditable || search,
+                    styles
                   })
         }
         else if (type === 'string'  &&  props[p].signature) {
@@ -333,6 +340,7 @@ const NewResourceMixin = {
                     component,
                     doSet: eCols.length > 1,
                     editable: editable && !propNotEditable || search,
+                    styles
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
@@ -352,6 +360,7 @@ const NewResourceMixin = {
                     component,
                     editable: editable && !propNotEditable || search || false,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
+                    styles
                   })
           // }
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -404,7 +413,8 @@ const NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -441,7 +451,8 @@ const NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -460,7 +471,8 @@ const NewResourceMixin = {
                     errors: formErrors,
                     doSet: eCols.length > 1,
                     component,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
           continue
         }
@@ -489,7 +501,8 @@ const NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
 
         }
@@ -503,6 +516,7 @@ const NewResourceMixin = {
               resource: bookmark && search &&  data,
               component,
               chooser: options.fields[p].onFocus,
+              styles
             })
         }
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
@@ -521,7 +535,8 @@ const NewResourceMixin = {
           prop:  'video',
           errors: formErrors,
           component,
-          required: !maybe
+          required: !maybe,
+          styles
         })
     }
     return options;
@@ -776,21 +791,21 @@ const NewResourceMixin = {
     return `0${value}`
   },
   myTextTemplate(params) {
-    let label = translate(params.prop, params.model)
+    const { prop, model, styles } = params
+    let label = translate(prop, model)
     let bankStyle = this.props.bankStyle
-    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     return (
       <View style={{paddingVertical: 10}}>
       <View style={{flexDirection: 'row', paddingVertical: 5}}>
-        <View style={[styles.accent, {borderLeftColor: bankStyle.accentColor || 'orange'}]}/>
-        <Text style={[styles.dividerText, {color: linkColor, fontFamily: bankStyle.headerFont}]}>{label}</Text>
+        <View style={styles.accent}/>
+        <Text style={styles.dividerText}>{label}</Text>
       </View>
       </View>
     );
   },
 
   myMarkdownTextInputTemplate(params) {
-    let { prop, value, editable } = params
+    let { prop, value, editable, styles } = params
     let { bankStyle } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
@@ -803,7 +818,7 @@ const NewResourceMixin = {
 
     let lStyle = { color: lcolor, fontSize: 20}
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
-    let help = this.paintHelp(prop)
+    let help = this.paintHelp({prop, styles})
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -853,7 +868,7 @@ const NewResourceMixin = {
   },
 
   mySignatureTemplate(params) {
-    let {prop, required, model, value, doSet} = params
+    let {prop, required, model, value, doSet, styles} = params
     let label = translate(prop, model)
     if (required)
       label += ' *'
@@ -863,7 +878,7 @@ const NewResourceMixin = {
     if (value)
       lcolor = '#555555'
 
-    let help = this.paintHelp(prop)
+    let help = this.paintHelp({prop, styles})
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -908,7 +923,7 @@ const NewResourceMixin = {
   },
 
   myTextInputTemplate(params) {
-    let {prop, required, model, editable, keyboard, value} = params
+    let {prop, required, model, editable, keyboard, value, styles} = params
     let label = translate(prop, model)
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
@@ -944,12 +959,12 @@ const NewResourceMixin = {
     let help
     if (prop.ref !== MONEY  &&  prop.ref !== DURATION) {
       if (fval == null || fval === value)
-        help = this.paintHelp(prop)
+        help = this.paintHelp({prop, styles})
       else {
        if (prop.type === 'number' &&  fval === parseFloat(value))
-          help = this.paintHelp(prop)
+          help = this.paintHelp({prop, styles})
         else
-          help = this.paintHelp(prop, fval)
+          help = this.paintHelp({prop, fixedValue: fval, styles})
       }
     }
     if (!help)
@@ -958,9 +973,22 @@ const NewResourceMixin = {
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
 
+    if (prop.readOnly && prop.range === 'url'  && value) {
+      if (utils.isReportLink(value)) {
+        return (
+          <View style={{paddingVertical: 10}}>
+             <Text style={styles.linkLabel}>{label}</Text>
+             <TouchableOpacity onPress={this. onReport.bind(this, value, resource._context, utils.getMe().organization)}>
+               <Text style={styles.linkText}>{translate('link')}</Text>
+             </TouchableOpacity>
+          </View>
+        );
+      }
+    }
+
     // if (!prop.ref && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
     if (recalculateMode)
-      check = this.addGoalSeek(prop)
+      check = this.addGoalSeek(prop, styles)
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
@@ -1024,8 +1052,10 @@ const NewResourceMixin = {
         onSubmit()
     }
   },
-  paintHelp(prop, fixedValue) {
+  paintHelp({prop, fixedValue, styles}) {
     const { bankStyle, locale } = this.props
+    if (!styles)
+      styles = createStyles({bankStyle})
     const { resource, fixedProps } = this.state
     const pname = prop.name
     let addToHelp
@@ -1068,13 +1098,13 @@ const NewResourceMixin = {
     if (params.noError)
       return
     let {missedRequiredOrErrorValue, isRegistration} = this.state
-    let {prop} = params
+    const { errors, styles, prop } = params
     let err = missedRequiredOrErrorValue
             ? missedRequiredOrErrorValue[prop.name]
             : null
     if (!err) {
-      if (params.errors  &&  params.errors[prop.name])
-        err = params.errors[params.prop.name]
+      if (errors  &&  errors[prop.name])
+        err = errors[prop.name]
       else
         return
     }
@@ -1104,7 +1134,7 @@ const NewResourceMixin = {
   },
 
   myBooleanTemplate(params) {
-    let {prop, model, value, required, component, editable} = params
+    let {prop, model, value, required, component, editable, styles} = params
     let { search, bankStyle } = this.props
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
@@ -1152,7 +1182,7 @@ const NewResourceMixin = {
               {switchC}
             </View>
           </View>
-          {this.paintHelp(prop)}
+          {this.paintHelp({prop, styles})}
           {this.paintError(params)}
         </View>
       )
@@ -1192,14 +1222,14 @@ const NewResourceMixin = {
           </View>
           </TouchableOpacity>
         </View>
-        {this.paintHelp(prop)}
+        {this.paintHelp({prop, styles})}
         {this.paintError(params)}
       </View>
     )
   },
 
   myDateTemplate(params) {
-    let { prop, required, component, editable } = params
+    let { prop, required, component, editable, styles } = params
     let { search, bankStyle, bookmark } = this.props
 
     let resource = this.state.resource
@@ -1287,7 +1317,7 @@ const NewResourceMixin = {
       addStyle = {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
     }
 
-    let help = this.paintHelp(prop)
+    let help = this.paintHelp({prop, styles})
     return (
       <View key={this.getNextKey()} ref={prop.name} style={{paddingBottom: 10}}>
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}, addStyle || {}]}>
@@ -1408,7 +1438,7 @@ const NewResourceMixin = {
     if (!this.floatingProps)
       this.floatingProps = {}
     let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle, noChat } = this.props
-    let { required, errors, component } = params
+    let { required, errors, component, styles } = params
     let { missedRequiredOrErrorValue, inFocus, fixedProps, recalculateMode } = this.state
     let resource = params.resource ||  this.state.resource
     let props
@@ -1441,7 +1471,7 @@ const NewResourceMixin = {
     let check
     // if (model && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1  &&  resource[pName])
     if (recalculateMode)
-      check = this.addGoalSeek(prop)
+      check = this.addGoalSeek(prop, styles)
 
     return <View style={{flexDirection: 'row'}}>
              <View style={{flex: 1}}>
@@ -1471,7 +1501,7 @@ const NewResourceMixin = {
   customChooser(enumProp) {
     this.setState({enumProp})
   },
-  addGoalSeek(prop) {
+  addGoalSeek(prop, styles) {
     let { resource, fixedProps, recalculateMode } = this.state
     let { bankStyle } = this.props
     let pName = prop.name
@@ -1728,7 +1758,7 @@ const NewResourceMixin = {
 
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
-    let { required, model, value, prop, editable, errors, component } = params
+    let { required, model, value, prop, editable, errors, component, styles } = params
     let { search, locale, bankStyle } = this.props
     let isReadOnly = utils.isReadOnly(prop)
     let { fixedProps, recalculateMode } = this.state
@@ -1752,7 +1782,7 @@ const NewResourceMixin = {
     let check
     // if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
     if (recalculateMode)
-      check = this.addGoalSeek(prop)
+      check = this.addGoalSeek(prop, styles)
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1765,6 +1795,7 @@ const NewResourceMixin = {
                   editable,
                   component,
                   keyboard,
+                  styles
                 })
 
     let currency
@@ -1778,7 +1809,8 @@ const NewResourceMixin = {
                     required,
                     value:    symbol,
                     component,
-                    noError: true
+                    noError: true,
+                    styles
                   })
     }
     let goalValue
@@ -1797,14 +1829,14 @@ const NewResourceMixin = {
             {check}
         </View>
         {this.paintError({prop, errors})}
-        {this.paintHelp(prop, goalValue)}
+        {this.paintHelp({prop, fixedValue: goalValue, styles})}
       </View>
     );
   },
 
 
   myDurationInputTemplate(params) {
-    let { required, model, value, prop, editable, errors, component } = params
+    let { required, model, value, prop, editable, errors, component, styles } = params
     let { search, locale } = this.props
     let isReadOnly = utils.isReadOnly(prop)
 
@@ -1851,7 +1883,7 @@ const NewResourceMixin = {
           {durationType}
       </View>
       {this.paintError({prop, errors})}
-      {this.paintHelp(prop)}
+      {this.paintHelp({prop, styles})}
       </View>
     );
   },
@@ -1871,7 +1903,7 @@ const NewResourceMixin = {
     return this.renderSimpleProp({val: value, pMeta: prop, modelName: prop.items.ref, component})
   },
   myEnumTemplate(params) {
-    let { prop, enumProp, errors } = params
+    let { prop, enumProp, errors, styles } = params
     let error
     if (!params.noError) {
       let err = this.state.missedRequiredOrErrorValue
@@ -2232,7 +2264,10 @@ const formField = {
   borderColor: '#dddddd',
   borderRadius: 6,
 }
-const styles= StyleSheet.create({
+const createStyles = utils.styleFactory(component, function ({ bankStyle }) {
+    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
+
+return StyleSheet.create({
   enumProp: {
     marginTop: 15,
   },
@@ -2407,7 +2442,8 @@ const styles= StyleSheet.create({
     marginBottom: 5,
     fontSize: 26,
     fontWeight: '500',
-    color: '#ffffff'
+    color: linkColor,
+    fontFamily: bankStyle.headerFont
   },
   font14: {
     fontSize: 14
@@ -2466,7 +2502,19 @@ const styles= StyleSheet.create({
   accent: {
     width: 12,
     borderLeftWidth: 5,
+    borderLeftColor: bankStyle.accentColor || 'orange'
+  },
+  linkText: {
+    fontSize: 20,
+    paddingLeft: 10,
+    color: bankStyle.linkColor
+  },
+  linkLabel: {
+    paddingLeft: 10,
+    color: '#aaa',
+    paddingBottom: 10
   }
+})
 })
 
 module.exports = NewResourceMixin
