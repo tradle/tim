@@ -841,6 +841,9 @@ var utils = {
   isMyProduct(type) {
     return utils.isSubclassOf(type, MY_PRODUCT)
   },
+  isReportLink(value) {
+    return value.indexOf('/r?') !== -1 && value.indexOf('&-template=') !== -1
+  },
   isForm(type) {
     return utils.isSubclassOf(type, FORM)
   },
@@ -1340,7 +1343,7 @@ var utils = {
       }
       return eCols
     }
-    return utils.getColsWithUngroupList({cols: editCols, properties})
+    return utils.getColsWithUngroupList({cols: editCols, model})
     // editCols.forEach((p) => {
     //   if (properties[p].readOnly)
     //     return
@@ -1365,13 +1368,15 @@ var utils = {
     // })
     // return eCols
   },
-  getColsWithUngroupList({cols, properties, isView}) {
+  getColsWithUngroupList({cols, model, isView}) {
+    let properties = model.properties
+    let editCols = !isView && model.editCols
     let isWeb = utils.isWeb()
     let rCols = []
     cols.forEach((p) => {
       if (!isView) {
         // Showing readOnly props that have formula in edit mode
-        if (properties[p].readOnly && !properties[p].set)
+        if (properties[p].readOnly && !properties[p].set && (!editCols || editCols.indexOf(p) === -1))
           return
         if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
           return
@@ -1399,7 +1404,7 @@ var utils = {
     let { viewCols, properties } = model
     let vCols = []
     if (viewCols)
-      return utils.getColsWithUngroupList({cols: viewCols, properties, isView: true})
+      return utils.getColsWithUngroupList({cols: viewCols, model, isView: true})
     let cols = utils.getAllCols({properties, isView: true})
     if (cols  && cols.length)
       return cols.map(p => properties[p])
@@ -2745,6 +2750,7 @@ var utils = {
     if (!model)
       return []
     const props = model.properties
+
     let eCols = []
     for (let p in props) {
       let prop = props[p]
