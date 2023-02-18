@@ -486,7 +486,21 @@ console.log('HomePageMixin: filterResource', resource)
         callback
       }
     })
-  }
+  },
+  printReport(template, application) {
+    const { navigator, bankStyle, locale } = this.props
+    navigator.push({
+      title: "",
+      componentName: 'PrintReport',
+      backButtonTitle: null,
+      passProps: {
+        application,
+        bankStyle: bankStyle || defaultBankStyle,
+        locale,
+        template
+      }
+    });
+  },
 }
 
 module.exports = HomePageMixin

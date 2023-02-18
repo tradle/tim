@@ -123,8 +123,6 @@ class CheckView extends Component {
         state.application = params.application
       this.setState(state)
     }
-    else if (action === 'getTemplate')
-      this.printReport(template, params.application)
   }
 
   getRefResource(resource, prop) {

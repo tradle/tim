@@ -349,11 +349,14 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    let {action, activity, isConnected, models, me, currentContext,
-        isRegistration, provider, termsAccepted, url, importingData} = params
+    let {action, activity, isConnected, models, me, currentContext, template, application,
+        isRegistration, provider, termsAccepted, url, importingData, context} = params
     var {navigator, bankStyle} = this.props
     let { wasDeepLink } = this.state
     switch(action) {
+    case 'getTemplate':
+      this.printReport(template, context || application)
+      return
     case 'busy':
       this.setState({
         busyWith: activity

@@ -486,8 +486,8 @@ var ResourceMixin = {
     }
     if (typeof val === 'string'  &&  pMeta.type !== 'object') {
       if (pMeta.range === 'url') {
-        if (val.indexOf('/r?') !== -1) {
-          return <TouchableOpacity onPress={this. onReport.bind(this, val, application, to)}>
+        if (utils.isReportLink(val)) {
+          return <TouchableOpacity onPress={this.onReport.bind(this, val, application, to)}>
                    <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('link')}</Text>
                  </TouchableOpacity>
         }
@@ -512,24 +512,6 @@ var ResourceMixin = {
     else if (pMeta.range === 'password')
       val = '*********'
     return <Text style={descStyle}>{val}</Text>;
-  },
-  onReport(val, application) {
-    const {to, resource} = this.props
-    Actions.openURL(val, application || resource.application, resource, to)
-  },
-  printReport(template, application) {
-    const { navigator, bankStyle, locale } = this.props
-    navigator.push({
-      title: "",
-      componentName: 'PrintReport',
-      backButtonTitle: null,
-      passProps: {
-        application,
-        bankStyle,
-        locale,
-        template
-      }
-    });
   },
   generateCopyLinkButton(resource) {
     const { bankStyle } = this.props
@@ -1245,6 +1227,10 @@ var ResourceMixin = {
         <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer')}</Text>
       </TouchableOpacity>
     )
+  },
+  onReport(val, application) {
+    const {to, resource} = this.props
+    Actions.openURL(val, application || resource.application, resource, to)
   },
 }
 
