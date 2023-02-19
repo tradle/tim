@@ -185,6 +185,8 @@ class ReportGenerator {
         }
 
         let propValue = pForm[property]
+        if (!propValue)
+          break
         let ftype = getType(pForm)
         let pModel = ftype && getModel(getType(pForm))
 

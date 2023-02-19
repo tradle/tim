@@ -6062,8 +6062,10 @@ if (!res[SIG]  &&  res._message)
         }
         context = await this.onGetItem({resource: r, noTrigger: true})
       }
+      if (!to)
+        to = context.to.organization
       context.forms  = await this.searchMessages({modelName: FORM, to, context})
-      url = to && to.url || this._getItem(context.to.organization).url
+      url = to && to.url || this._getItem(to).url
       ;({requestFor} = context)
     }
     let templates = this.getTemplatesList({requestFor, url})
