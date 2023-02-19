@@ -1,15 +1,17 @@
-
 import React, { Component } from 'react'
+import {
+  ListView,
+  Alert,
+} from 'react-native'
+import PropTypes from 'prop-types'
+
+import Actions from '../Actions/Actions'
 import StringRow from './StringRow'
 import utils, { translate } from '../utils/utils'
 
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
 import { getContentSeparator } from '../utils/uiUtils'
-import {
-  ListView,
-} from 'react-native'
-import PropTypes from 'prop-types'
 
 class StringChooser extends Component {
   static propTypes = {
@@ -30,9 +32,13 @@ class StringChooser extends Component {
   }
 
   selectResource(modelId) {
-    if (!this.props.isReplace  &&  !this.props.notModel)
-      this.props.navigator.pop();
-    this.props.callback(modelId)
+    const { isReplace, notModel, showLink, callback, navigator } = this.props
+    if (!isReplace  &&  !notModel)
+      navigator.pop();
+    if (showLink)
+      Actions.getApplyForProductLink(modelId)
+    else
+      callback(modelId)
   }
   renderRow(product)  {
     if (typeof product === 'string')

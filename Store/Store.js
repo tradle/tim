@@ -4272,6 +4272,29 @@ if (!res[SIG]  &&  res._message)
     let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
     Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(utils.getDisplayName({resource}))}`)
   },
+  async onGetApplyForProductLink(modelId) {
+    if (!me.isEmployee)
+      return
+    let org = this._getItem(me.organization)
+    let provider = this.getRepresentative(org)[ROOT_HASH]
+
+    let baseUrl
+    if (utils.isWeb())
+      baseUrl = __DEV__ ? 'http://localhost:3001' : ENV.APP_URL
+    else
+      baseUrl = `https://${ENV.deepLinkHost}`
+
+    let linkToCopy = links.getApplyForProductLink({
+      provider,
+      path: 'applyForProduct',
+      platform: utils.isWeb() ? 'web' : 'mobile',
+      baseUrl,
+      product: modelId,
+      host: org.url,
+    })
+    Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(translate(utils.getModel(modelId)))}`)
+  },
+
   async onGetApplication(params) {
     let {resource, action, backlink, forwardlink, filterResource, prop, isBacklink} = params
     if (!filterResource)
@@ -5937,7 +5960,7 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: 'updateItem', resource})
   },
 
-  async onGetProductList({ resource }) {
+  async onGetProductList({ resource, noTrigger, linkToApply }) {
     if (utils.getType(resource) !== ORGANIZATION) {
       let org = resource.organization
       if (!org)
@@ -5971,7 +5994,9 @@ if (!res[SIG]  &&  res._message)
     if (!me.isEmployee)
       plist = plist.filter(p => !utils.getModel(utils.getType(p)).internalUse)
     productListR.chooser.oneOf = plist
-    this.trigger({action: 'productList', resource: productListR, to: resource})
+    if (!noTrigger)
+      this.trigger({action: linkToApply ? 'linkToApply' : 'productList', resource: productListR, to: resource})
+    return productListR
   },
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
@@ -6020,21 +6045,25 @@ if (!res[SIG]  &&  res._message)
       if (!this.client)
         this.client = graphQL.initClient(meDriver, me.organization.url)
       if (!application || utils.isStub(application))
-         application = await this.getApplication({resource: {
+         application = await this._getItemFromServer({idOrResource: {
             [TYPE]: APPLICATION,
             [ROOT_HASH]: permalink,
             [CUR_HASH]: link
-          }, noTrigger: true})
-      ({requestFor} = application)
+          }})
+      ;({requestFor} = application)
       url = me.organization.url
     }
     else {
-      let r = {
-        id: utils.makeId(PRODUCT_REQUEST, permalink, link)
+      if (application)
+        context = application
+      else {
+        let r = {
+          id: utils.makeId(PRODUCT_REQUEST, permalink, link)
+        }
+        context = await this.onGetItem({resource: r, noTrigger: true})
       }
-      context = await this.onGetItem({resource: r, noTrigger: true})
       context.forms  = await this.searchMessages({modelName: FORM, to, context})
-      url = to.url
+      url = to && to.url || this._getItem(context.to.organization).url
       ;({requestFor} = context)
     }
     let templates = this.getTemplatesList({requestFor, url})
@@ -7364,7 +7393,6 @@ if (!res[SIG]  &&  res._message)
          filterResource, endCursor, limit, bookmark} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
-
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
     if (!filterResource)
       filterResource = {}
@@ -9159,29 +9187,9 @@ if (!res[SIG]  &&  res._message)
         this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
       return
     }
-    // if (me.menu && me.menu.length) {
-    //   if (!noTrigger)
-    //     this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
-    //   if (!updateMenu)
-    //     return
-    //   noTrigger = true
-    // }
     let org = this.getRepresentative(me.organization)
-    // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }) //.filter(bf => bf.message === translate('initialBookmarks') ||  bf.message === translate('sharedBookmarks'))
-    // let folders = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('sharedBookmarks'))
-    // let sharedFolder = folders[0]
-    // let initFolderIdx = folders.findIndex(bf => bf.message === translate('initialBookmarks'))
-    // let initFolder = folders[initFolderIdx]
-    // let sharedFolderIdx = folders.findIndex(bf => bf.message === translate('sharedBookmarks'))
-    // let sharedFolder = folders[sharedFolderIdx]
-    // let personalFolderIdx = folders.findIndex(bf => bf.message === translate('personalBookmarks'))
-    // let personalFolder = folders[personalFolderIdx]
-    // debugger
-    // let { list: initB } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
     let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
 
-    // let personalB = this.filterOutInitialBookmarks(initFolder, initB)
-    // me.menu = [ personalFolder, ...personalB, sharedFolder, ...sharedB]
     me.menu = sharedB
     await this.setMe(me)
     if (!noTrigger)

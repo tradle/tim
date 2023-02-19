@@ -349,13 +349,16 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    let {action, activity, isConnected, models, me, currentContext, template, application,
+    let {action, activity, isConnected, models, me, currentContext, template, application, resource,
         isRegistration, provider, termsAccepted, url, importingData, context} = params
     var {navigator, bankStyle} = this.props
     let { wasDeepLink } = this.state
     switch(action) {
     case 'getTemplate':
       this.printReport(template, context || application)
+      return
+    case 'linkToApply':
+      this.linkToApply(resource)
       return
     case 'busy':
       this.setState({
@@ -1045,6 +1048,20 @@ class TimHome extends Component {
         </TouchableOpacity>
       </View>
     );
+  }
+  linkToApply(resource) {
+    const { navigator, bankStyle } = this.props
+    navigator.push({
+      title: translate('linkToApplyForProduct'),
+      componentName: 'StringChooser',
+      backButtonTitle: 'Back',
+      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings:  resource.chooser.oneOf,
+        bankStyle: bankStyle || defaultBankStyle,
+        showLink: true
+      }
+    });
   }
   renderVersion() {
     return (

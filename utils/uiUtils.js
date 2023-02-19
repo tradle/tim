@@ -10,7 +10,7 @@ import constants from '@tradle/constants'
 import extend from 'lodash/extend'
 
 var { TYPE } = constants
-import { translate, getModel, isMyProduct, ungroup,
+import { translate, getModel, isMyProduct, ungroup, getMe,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
@@ -30,6 +30,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const GRID_LIST = 'GridList'
 const APPLICATIONS_GRID = 'ApplicationsGrid'
 const NEW_RESOURCE = 'NewResource'
+const PRODUCT_LIST = 'tradle.ProductList'
 
 var component
 
@@ -38,6 +39,12 @@ var uiUtils = {
     let { resource, navigator, bankStyle, currency, searchFunction } = params
     let btype = resource.bookmark[TYPE]
     let bm = getModel(btype)
+
+    if (btype === PRODUCT_LIST) {
+      Actions.getProductList({resource: getMe().organization, linkToApply: true})
+      return
+    }
+
     let route = {
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',

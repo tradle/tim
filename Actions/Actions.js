@@ -98,6 +98,7 @@ var asyncActions = [
   'submitCompletedApplication',
   'noPairing',
   'getResourceLink',
+  'getApplyForProductLink',
   'getReport'
 ]
 
