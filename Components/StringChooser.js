@@ -33,10 +33,16 @@ class StringChooser extends Component {
 
   selectResource(modelId) {
     const { isReplace, notModel, showLink, callback, navigator } = this.props
-    if (!isReplace  &&  !notModel)
-      navigator.pop();
-    if (showLink)
+    if (showLink) {
+      Actions.showModal({title: translate('copyingLink'), showIndicator: true})
       Actions.getApplyForProductLink(modelId)
+      setTimeout(() => {
+        Actions.hideModal()
+        navigator.pop()
+      }, 2000)
+    }
+    else if (!isReplace  &&  !notModel)
+      navigator.pop();
     else
       callback(modelId)
   }
