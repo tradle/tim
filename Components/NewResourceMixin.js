@@ -981,6 +981,7 @@ const NewResourceMixin = {
              <TouchableOpacity onPress={this. onReport.bind(this, value, resource._context, utils.getMe().organization)}>
                <Text style={styles.linkText}>{translate('link')}</Text>
              </TouchableOpacity>
+             {help}
           </View>
         );
       }
