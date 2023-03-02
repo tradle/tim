@@ -30,7 +30,6 @@ class StringChooser extends Component {
       dataSource: dataSource.cloneWithRows(props.strings),
     };
   }
-
   selectResource(modelId) {
     const { isReplace, notModel, showLink, callback, navigator } = this.props
     if (showLink) {
@@ -40,11 +39,11 @@ class StringChooser extends Component {
         Actions.hideModal()
         navigator.pop()
       }, 2000)
+      return
     }
-    else if (!isReplace  &&  !notModel)
+    if (!isReplace  &&  !notModel)
       navigator.pop();
-    else
-      callback(modelId)
+    callback(modelId)
   }
   renderRow(product)  {
     if (typeof product === 'string')
