@@ -128,7 +128,7 @@ class MessageRow extends Component {
     else {
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell,  noBg  && styles.noBg || styles.bg]
+          addStyle = [chatStyles.myCell, noBg  && styles.noBg || styles.bg]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
@@ -138,6 +138,7 @@ class MessageRow extends Component {
         else {
           let mstyle = {
             borderColor: '#efefef',
+            width: '98%',
             backgroundColor: isDataBundle ? bankStyle.currentContextBackgroundColor : '#ffffff',
             borderTopLeftRadius: 0
           }
@@ -784,8 +785,10 @@ class MessageRow extends Component {
                  startInLoadingState={true}
                  automaticallyAdjustContentInsets={false} />)
             }
-            else
-              vCols.push(<Text style={[style, {color: '#757575'}]} key={this.getNextKey()}>{resource[v]}</Text>)
+            else {
+              let color = isMyMessage ? bankStyle.contextTextColor : '#757575'
+              vCols.push(<Text style={[style, {color}]} key={this.getNextKey()}>{resource[v]}</Text>)
+            }
           }
           else
             vCols.push(row)
