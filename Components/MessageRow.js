@@ -128,7 +128,7 @@ class MessageRow extends Component {
     else {
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell, noBg  && styles.noBg || styles.bg]
+          addStyle = [chatStyles.myCell, noBg  && styles.noBg || styles.bg, {width: '100%'}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
@@ -138,7 +138,7 @@ class MessageRow extends Component {
         else {
           let mstyle = {
             borderColor: '#efefef',
-            width: '98%',
+            width: '100%',
             backgroundColor: isDataBundle ? bankStyle.currentContextBackgroundColor : '#ffffff',
             borderTopLeftRadius: 0
           }
