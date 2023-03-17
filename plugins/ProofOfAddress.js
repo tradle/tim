@@ -3,8 +3,8 @@ import { getModel, getPropertiesWithAnnotation, isSubclassOf } from '../utils/ut
 
 const COUNTRY = 'tradle.Country'
 const FORM = 'tradle.Form'
-const PHONE_BILL = 'tradle.PhoneBill'
 const PROOF_OF_ADDRESS = 'tradle.ProofOfAddress'
+const UTILITY_BILL = 'tradle.UtilityBill'
 
 module.exports = function ProofOfAddress ({ models }) {
   return {
@@ -47,19 +47,22 @@ function getPropsForProofOfAddress(form) {
   ]
   let setProps = propsArr.filter(p => form[p])
   if (setProps.length <= 2) {
-    return {
-      requestedProperties: [
-        { name: 'country' },
-        { name: 'document' }
-      ]
-    }
+    let requestedProperties = [
+      { name: 'document' }
+    ]
+
+    if (form[TYPE] !== UTILITY_BILL)
+      requestedProperties.push({ name: 'country' })
+
+    return { requestedProperties }
   }
-  let props = getModel(form[TYPE]).properties
-  let requestedProperties = []
-  propsArr.forEach(p => {
-    if (props[p])
-      requestedProperties.push({ name: p })
-  })
-  return { requestedProperties }
+
+  // let props = getModel(form[TYPE]).properties
+  // let requestedProperties = []
+  // propsArr.forEach(p => {
+  //   if (props[p])
+  //     requestedProperties.push({ name: p })
+  // })
+  // return { requestedProperties }
 }
 
