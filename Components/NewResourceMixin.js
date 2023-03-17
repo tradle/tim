@@ -1829,7 +1829,7 @@ const NewResourceMixin = {
             {currency}
             {check}
         </View>
-        {this.paintError({prop, errors})}
+        {this.paintError(params)}
         {this.paintHelp({prop, fixedValue: goalValue, styles})}
       </View>
     );
@@ -1883,7 +1883,7 @@ const NewResourceMixin = {
           {val}
           {durationType}
       </View>
-      {this.paintError({prop, errors})}
+      {this.paintError(params)}
       {this.paintHelp({prop, styles})}
       </View>
     );
@@ -2095,6 +2095,7 @@ const NewResourceMixin = {
   },
   normalizePhoneNumber(value) {
     // value = value.replace(/[^a-zA-Z0-9]+$/g, '').split('')
+    value = value.replace(/[\(\)]/g, '')
     let vArr = value.split('')
     let val = ''
     let hasError

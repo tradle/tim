@@ -262,7 +262,7 @@ class RefPropertyEditor extends Component {
           {propLabel}
           {actionItem}
         </View>
-        {paintError({errors: error && {[pName]: error} || null, prop: prop, paddingBottom: 0})}
+        {paintError({errors: error && {[pName]: error} || null, prop: prop, paddingBottom: 0, styles})}
         {help}
       </View>
     );
