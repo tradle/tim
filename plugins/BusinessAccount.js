@@ -22,7 +22,7 @@ module.exports = function LegalEntity ({ models }) {
       form
     }) {
       if (!application) return
-return
+// return
       const type = form[TYPE]
       switch (type) {
       case CONTROLLING_ENTITY:
@@ -125,8 +125,15 @@ function getPropsForLegalEntity(form, models) {
   }
   // let addRegion = countryCode && country.id.split('_')[1] === 'US'
 
-  if (isNew(form)) {
+  if (isNew(form) || !form.registrationNumber) {
     let requestedProperties = [
+      { name: 'companyName', required: true  },
+      { name: 'companyFormationDocument', required: true  },
+      { name: 'articlesOfAssociationDocument', required: true },
+    ]
+    return { requestedProperties }
+
+     requestedProperties = [
         { name: 'companyName', required: true  },
         { name: 'registrationNumber', required: true },
         { name: 'DBAName' },
