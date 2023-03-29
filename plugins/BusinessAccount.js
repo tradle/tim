@@ -133,12 +133,12 @@ function getPropsForLegalEntity(form, models) {
     ]
     return { requestedProperties }
 
-     requestedProperties = [
-        { name: 'companyName', required: true  },
-        { name: 'registrationNumber', required: true },
-        { name: 'DBAName' },
-        { name: 'formerlyKnownAs'}
-      ]
+   requestedProperties = [
+      { name: 'companyName', required: true  },
+      { name: 'registrationNumber', required: true },
+      { name: 'DBAName' },
+      { name: 'formerlyKnownAs'}
+    ]
 
     if (streetAddress)
       requestedProperties.push({name: 'streetAddress'})
@@ -175,7 +175,9 @@ function getPropsForLegalEntity(form, models) {
     { name: 'companyPhone', required: false },
     { name: 'DBAName', required: false },
     { name: 'formerlyKnownAs'},
-    { name: 'alsoKnownAs' }
+    { name: 'alsoKnownAs' },
+    { name: 'companyFormationDocument', required: true  },
+    { name: 'articlesOfAssociationDocument', required: true },
   ]
   let { typeOfOwnership } = form
   if (typeOfOwnership  &&  getEnumValueId({ model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership}) === 'publiclyTraded')
