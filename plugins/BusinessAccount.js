@@ -19,7 +19,8 @@ module.exports = function LegalEntity ({ models }) {
   return {
     validateForm: async function validateForm ({
       application,
-      form
+      form,
+      dontUseExternalAI
     }) {
       if (!application) return
 // return
@@ -30,7 +31,7 @@ module.exports = function LegalEntity ({ models }) {
       case OWNERSHIP:
         return getPropsForOwnership(form)
       case LEGAL_ENTITY:
-        return getPropsForLegalEntity(form, this.models)
+        return getPropsForLegalEntity(form, this.models, dontUseExternalAI)
       case LEGAL_DOCUMENT_INTERSECTION:
         return getPropsForLegalDocumentI(form)
       default:
@@ -107,7 +108,7 @@ function getPropsForLegalDocument(form) {
   }
   return ret
 }
-function getPropsForLegalEntity(form, models) {
+function getPropsForLegalEntity(form, models, dontUseExternalAI) {
   let m = models[form[TYPE]]
   if (m.lens) {
     let lens= getLens(m.lens)
@@ -126,14 +127,16 @@ function getPropsForLegalEntity(form, models) {
   // let addRegion = countryCode && country.id.split('_')[1] === 'US'
 
   if (isNew(form) || !form.registrationNumber) {
-    let requestedProperties = [
-      { name: 'companyName', required: true  },
-      { name: 'companyFormationDocument', required: true  },
-      { name: 'articlesOfAssociationDocument', required: true },
-    ]
-    return { requestedProperties }
+    if (!dontUseExternalAI) {
+      let requestedProperties = [
+        { name: 'companyName', required: true  },
+        { name: 'companyFormationDocument', required: true  },
+        { name: 'articlesOfAssociationDocument', required: true },
+      ]
+      return { requestedProperties }
+    }
 
-   requestedProperties = [
+    let requestedProperties = [
       { name: 'companyName', required: true  },
       { name: 'registrationNumber', required: true },
       { name: 'DBAName' },

@@ -3688,13 +3688,20 @@ var Store = Reflux.createStore({
     let showLoading = (fixedProps && _.size(fixedProps))
     if (showLoading)
       Actions.showModal({title: translate('calculationsInProgress'), showIndicator: true})
+    let toOrg = resource.to && resource.to.organization
+    let dontUseExternalAI
+    if (toOrg) {
+      toOrg = this._getItem(toOrg)
+      let org = SERVICE_PROVIDERS.find(sp => sp.url === toOrg.url)
+      dontUseExternalAI = org.dontUseExternalAI
+    }
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
       moreInfo = await plugin(context).validateForm.call(
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource, additionalInfo, search: me.isEmployee ? this.searchServer.bind(this) : null}
+          {application: _context, form: resource, currentResource, additionalInfo, dontUseExternalAI, search: me.isEmployee ? this.searchServer.bind(this) : null}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
