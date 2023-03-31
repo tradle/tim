@@ -2509,6 +2509,7 @@ var Store = Reflux.createStore({
     let newSp = {
       id: sp.id,
       org: utils.getId(sp.org),
+      dontUseExternalAI: sp.dontUseExternalAI,
       url: originalUrl,
       style: sp.style,
       homePage: sp.homePage,
