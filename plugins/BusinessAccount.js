@@ -131,7 +131,7 @@ function getPropsForLegalEntity(form, models, dontUseExternalAI) {
       let requestedProperties = [
         { name: 'companyName', required: true  },
         { name: 'companyFormationDocument', required: true  },
-        { name: 'articlesOfAssociationDocument', required: true },
+        // { name: 'articlesOfAssociationDocument', required: true },
       ]
       return { requestedProperties }
     }
@@ -171,6 +171,8 @@ function getPropsForLegalEntity(form, models, dontUseExternalAI) {
     // { name: 'companyType'},
     { name: 'companyEmail', required: true },
     { name: 'companyWebsite', required: true },
+    { name: 'companyFormationDocument', required: true  },
+    { name: 'articlesOfAssociationDocument', required: true },
     { name: 'address_group'},
     { name: 'region', hide: !addRegion, required: addRegion },
     { name: 'taxIdNumber', required: false },
@@ -179,8 +181,6 @@ function getPropsForLegalEntity(form, models, dontUseExternalAI) {
     { name: 'DBAName', required: false },
     { name: 'formerlyKnownAs'},
     { name: 'alsoKnownAs' },
-    { name: 'companyFormationDocument', required: true  },
-    { name: 'articlesOfAssociationDocument', required: true },
   ]
   let { typeOfOwnership } = form
   if (typeOfOwnership  &&  getEnumValueId({ model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership}) === 'publiclyTraded')
