@@ -126,7 +126,7 @@ function getPropsForLegalEntity(form, models, dontUseExternalAI) {
   }
   // let addRegion = countryCode && country.id.split('_')[1] === 'US'
 
-  if (isNew(form) || !form.registrationNumber) {
+  if (isNew(form) || (dontUseExternalAI && !form.registrationNumber)) {
     if (!dontUseExternalAI) {
       let requestedProperties = [
         { name: 'companyName', required: true  },
