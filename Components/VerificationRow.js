@@ -10,7 +10,6 @@ import {
   // LazyloadImage as Image
 } from 'react-native-lazyload'
 import LinearGradient from 'react-native-linear-gradient'
-
 // import ImageComponent from './Image'
 import Image from './Image'
 
@@ -27,6 +26,7 @@ import constants from '@tradle/constants'
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
 import RowMixin from './RowMixin'
+import HomePageMixin from './HomePageMixin'
 import StyleSheet from '../StyleSheet'
 import appStyle from '../styles/appStyle.json'
 import { Text } from './Text'
@@ -392,7 +392,12 @@ vicon = null
                          </View>
 
     }
-
+    let prerequisiteFor
+    if (model.prerequisiteFor) {
+      prerequisiteFor = <TouchableOpacity onPress={this.applyForProduct.bind(this)} style={styles.button}>
+                          <Icon name='ios-sunny-outline'  size={25} color={bankStyle.linkColor} />
+                        </TouchableOpacity>
+    }
     let header = <View style={[styles.header, styles.contentBg, {flexDirection: 'row'}]} key={this.getNextKey()}>
                    <View style={[styles.row, {flex: 6.5, marginTop: 8, paddingBottom: 5}]}>
                      {photo}
@@ -405,6 +410,7 @@ vicon = null
                          </View>
                          {supportingDocuments}
                          {multiChooserIcon}
+                         {prerequisiteFor}
                        </View>
                        {sharedFrom}
                        <View style={styles.verifiedByAndDateStyle}>
@@ -605,6 +611,7 @@ vicon = null
 }
 
 reactMixin(VerificationRow.prototype, RowMixin);
+reactMixin(VerificationRow.prototype, HomePageMixin);
 
 var styles = StyleSheet.create({
   textContainer: {
@@ -782,6 +789,13 @@ var styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: 'white'
+  },
+  button: {
+    ...circled(30),
+    shadowOpacity: 0.7,
+    opacity: 0.9,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
   },
   verifiedByLG: {
     flex: 1,
