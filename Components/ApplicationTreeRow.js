@@ -18,6 +18,7 @@ import { Text } from './Text'
 import Actions from '../Actions/Actions'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
+import HomePageMixin from './HomePageMixin'
 import {
   translate,
   getEnumValueId,
@@ -319,6 +320,7 @@ class ApplicationTreeRow extends Component {
 reactMixin(ApplicationTreeRow.prototype, Reflux.ListenerMixin);
 reactMixin(ApplicationTreeRow.prototype, RowMixin)
 reactMixin(ApplicationTreeRow.prototype, ResourceMixin)
+reactMixin(ApplicationTreeRow.prototype, HomePageMixin)
 ApplicationTreeRow = makeResponsive(ApplicationTreeRow)
 
 var styles = StyleSheet.create({
