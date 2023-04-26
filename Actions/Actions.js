@@ -25,6 +25,7 @@ var asyncActions = [
   'getItemsToMatch',
 
   'refreshApplication',
+  'getApplication',
 
   'removeIdentity',
   'showIdentityList',
@@ -68,6 +69,7 @@ var asyncActions = [
   'hasPartials',
   'hasBookmarks',
   'getBookmarks',
+  'getMenu',
   'viewChat',
 
   'exploreBacklink',
