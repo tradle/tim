@@ -12,13 +12,15 @@ import {
 
 import constants from '@tradle/constants'
 
-import utils, { translate, isWhitelabeled } from '../utils/utils'
+import utils, { translate, isWhitelabeled, isRM } from '../utils/utils'
 import { getGridCols } from '../utils/uiUtils'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
+import GridList from './GridList'
 import buttonStyles from '../styles/buttonStyles'
-
+import Navigator from './Navigator'
+import { Text } from './Text'
 
 const {
   TYPE
@@ -29,12 +31,79 @@ const {
 } = constants.TYPES
 
 const APPLICATION = 'tradle.Application'
+const BOOKMARK = 'tradle.Bookmark'
 const PHOTO = 'tradle.Photo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const SELFIE = 'tradle.Selfie'
+const FORM_REQUEST = 'tradle.FormRequest'
 
 var HomePageMixin = {
   refreshApplication(resource) {
     Actions.refreshApplication({resource})
+  },
+  getAdditionalForms(application) {
+    let m = utils.getModel(application.requestFor)
+    if (m.additionalForms != null)
+      return m.additionalForms
+    let additionalForms = m.forms.filter(f => {
+      if (f === SELFIE)
+        return true
+      let m = utils.getModel(f)
+      let scanner = utils.getPropertiesWithAnnotation(m, 'scanner')
+      if (Object.keys(scanner))
+        return true
+      let signature = utils.getPropertiesWithAnnotation(m, 'signature')
+      if (Object.keys(signature))
+        return true
+      return false
+    })
+    return additionalForms.length  &&  additionalForms
+  },
+  requestForm({val, resource, application, isChat, callback}) {
+    const { navigator, country, locale, currency, bankStyle } = this.props
+    let m = utils.getModel(val)
+
+    if (isRM(application)) {
+      let msg = {
+        [TYPE]: FORM_REQUEST,
+        message: m.formRequestMessage
+                ? translate(m.formRequestMessage)
+                : translate('fillTheForm', translate(m)),
+            // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+        product: m.id,
+        form: val,
+        from: utils.getMe(),
+        to: application.applicant,
+        _context: resource,
+        context: application.context
+      }
+      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg}))
+      return
+    }
+    if (application  &&  (application.filledForCustomer || application.draft)) {
+      navigator.push({
+        title: translate(m),
+        componentName: 'NewResource',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getLensedModelForType(val),
+          application,
+          resource: {
+            [TYPE]: val,
+            from: utils.getMe(),
+            to: resource.to,
+            _context: resource
+          },
+          chat: isChat && resource,
+          callback,
+          currency,
+          country,
+          locale,
+          bankStyle
+        }
+      })
+    }
   },
   scanFormsQRCode(opts) {
     return new Promise((resolve, reject) => {
@@ -80,12 +149,11 @@ var HomePageMixin = {
     if (!to)
       return
     let style = this.mergeStyle(to.style)
-
+debugger
     let title = to.name
     let { wasDeepLink, qs={} } = this.state
     if (isWhitelabeled())
       title = qs.title || title
-
     var route = {
       title,
       componentName: 'MessageList',
@@ -99,6 +167,7 @@ var HomePageMixin = {
         dictionary,
       }
     }
+
     if (wasDeepLink && qs.schema === 'ImportData') {
       Actions.importData(qs)
       if (!isWhitelabeled())
@@ -120,6 +189,8 @@ var HomePageMixin = {
         })
       }
     }
+    else
+      route.backButtonTitle = 'Back'
     // this.props.navigator.push(route)
     this.props.navigator.replace(route)
   },
@@ -136,7 +207,7 @@ var HomePageMixin = {
       }
     })
   },
-  showTourOrSplash({resource, formStub, showProfile, termsAccepted, action, callback, style}) {
+  showTourOrSplash({resource, formStub, showProfile, termsAccepted, action, callback, style, currentContext}) {
     let { navigator, bankStyle } = this.props
     if (resource._tour  &&  !resource._noTour) {
       StatusBar.setHidden(true)
@@ -162,7 +233,7 @@ var HomePageMixin = {
             resource._noSplash = true
             Actions.addItem({resource: resource})
             // resource._noSplash = true
-            callback({resource, formStub, termsAccepted, action: 'replace', showProfile})
+            callback({resource, formStub, termsAccepted, action: 'replace', showProfile, currentContext})
           }
         }
       })
@@ -191,7 +262,7 @@ var HomePageMixin = {
       resolvePromise()
       resource._noSplash = true
       Actions.addItem({resource: resource})
-      callback({resource, formStub, termsAccepted, action: 'replace', showProfile})
+      callback({resource, formStub, termsAccepted, action: 'replace', showProfile, currentContext})
     }, 2000)
     return true
   },
@@ -230,7 +301,22 @@ var HomePageMixin = {
       }
     })
   },
-
+  showMenu(passProps, navigator) {
+    let menu = utils.getMe().menu
+    if (!menu)
+      return <View/>
+    const { bankStyle, lazy, currency, locale } = passProps
+    return <GridList
+            lazy={lazy}
+            modelName={BOOKMARK}
+            bankStyle={bankStyle}
+            list={menu}
+            isMenu={true}
+            listView={true}
+            currency={currency || utils.getCompanyCurrency()}
+            locale={locale || utils.getCompanyLocale()}
+            navigator={navigator} />
+  },
   renderGridHeader() {
     let { modelName, navigator, multiChooser, bookmark, isBacklink } = this.props
     if ((modelName === APPLICATION  &&  bookmark && !bookmark.grid) || isBacklink)
@@ -362,15 +448,59 @@ console.log('HomePageMixin: filterResource', resource)
   },
   addHomeButton() {
     let { bankStyle, navigator } = this.props
-    if (!__DEV__ || !bankStyle) return
+    // if (!__DEV__ || !bankStyle) return
+    if (!bankStyle)
+      bankStyle = defaultBankStyle
     let routes = navigator.getCurrentRoutes()
     let style = {alignSelf: 'flex-start', paddingRight: Platform.OS === 'android' ? 0 : 10, paddingBottom: 15, paddingLeft: 10}
     return <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={style}>
              <View style={buttonStyles.homeButton}>
                <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
              </View>
+             <Text style={{fontSize: 10, color: bankStyle.linkColor, alignSelf: 'center'}}>{translate('home')}</Text>
            </TouchableOpacity>
-  }
+  },
+  applyForProduct() {
+    let { resource } = this.props
+    let rType = utils.getType(resource)
+    let model = utils.getModel(rType);
+
+    Actions.applyForProduct({
+      provider: utils.getMe().organization,
+      _ref: utils.buildRef(resource),
+      product: model.prerequisiteFor
+    })
+  },
+  showSubclasses({list, callback, notModel, title }) {
+    let { model, bankStyle, navigator } = this.props
+
+    navigator.push({
+      title,
+      componentName: 'StringChooser',
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings: list, // model.additionalForms,
+        notModel,
+        bankStyle,
+        callback
+      }
+    })
+  },
+  printReport(template, application) {
+    const { navigator, bankStyle, locale } = this.props
+    navigator.push({
+      title: "",
+      componentName: 'PrintReport',
+      backButtonTitle: null,
+      passProps: {
+        application,
+        bankStyle: bankStyle || defaultBankStyle,
+        locale,
+        template
+      }
+    });
+  },
 }
 
 module.exports = HomePageMixin
