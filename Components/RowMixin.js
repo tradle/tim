@@ -55,6 +55,7 @@ var RowMixin = {
   },
   getPropRow(prop, resource, val, isVerification) {
     let { currency, isAggregation, bankStyle, locale } = this.props
+    let model = utils.getModel(resource[TYPE])
     if (prop.ref) {
       if (prop.ref === MONEY) {
         if (currency && locale) {
@@ -70,11 +71,14 @@ var RowMixin = {
       }
       else {
         let m = utils.getModel(prop.ref)
-        if (utils.isEnum(m))
-          val = translateEnum(resource[prop.name])
+        if (utils.isEnum(m)) {
+          if (typeof resource[prop.name] === 'string')
+            val = translate(prop, model)
+          else
+            val = translateEnum(resource[prop.name])
+        }
       }
     }
-    let model = utils.getModel(resource[TYPE])
 
     let style = {flexDirection: 'row', justifyContent: 'center'}
     let propTitle = translate(prop, model)
@@ -100,7 +104,7 @@ var RowMixin = {
     let isForm = utils.isForm(model)
     let isMyMessage = this.isMyMessage()
     if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-      style = [style, { paddingVertical: 3}]
+      style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
     let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
     let ratio = value.length / propTitle.length
     let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
@@ -152,7 +156,7 @@ var RowMixin = {
       if (!title)
         title = 'U'  // for UNKNOWN
       return <View style={{paddingRight: 3}}>
-               <View style={[{backgroundColor: bankStyle.linkColor}, styles.cellRoundImage]}>
+               <View style={[{color: '#ffffff', backgroundColor: bankStyle.linkColor}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
                </View>
              </View>
@@ -349,17 +353,6 @@ var RowMixin = {
       this.setState({isChosen: true})
       this.props.chosen[id] = resource
     }
-  },
-  applyForProduct() {
-    let { resource } = this.props
-    let rType = utils.getType(resource)
-    let model = utils.getModel(rType);
-
-    Actions.applyForProduct({
-      provider: utils.getMe().organization,
-      _ref: utils.buildRef(resource),
-      product: model.prerequisiteFor
-    })
   }
 }
 
@@ -376,7 +369,7 @@ var styles = StyleSheet.create({
   },
   descriptionB: {
     fontSize: 15,
-    color: '#757575',
+    // color: '#757575',
     fontWeight: '500'
   },
   msgImage: {
