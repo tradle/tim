@@ -49,7 +49,7 @@ try {
 } catch (err) {
   // no version info available
 }
-const actions = ['chat', 'profile', 'applyForProduct', 'r']
+const actions = ['chat', 'profile', 'applyForProduct', 'r', 'list']
 var {
   TYPE
 } = constants
@@ -321,13 +321,19 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    let { action, activity, isConnected, models, me,
-        isRegistration, provider, termsAccepted, url, importingData } = params
+    let { action, activity, isConnected, models, me, currentContext, template, application, resource,
+        isRegistration, provider, termsAccepted, url, importingData, context } = params
     const { navigator, bankStyle } = this.props
 
     let { wasDeepLink } = this.state
     switch(action) {
-  case 'busy':
+    case 'getTemplate':
+      this.printReport(template, context || application)
+      return
+    case 'linkToApply':
+      this.linkToApply(resource)
+      return
+    case 'busy':
       this.setState({
         busyWith: activity
       })
@@ -344,7 +350,7 @@ class TimHome extends Component {
       utils.setModels(models);
       return
     case 'applyForProduct':
-      this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink})
+      this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink, currentContext})
       break
     case 'openURL':
       this.setState({isDeepLink: true})
@@ -413,10 +419,31 @@ class TimHome extends Component {
     _.extend(bankStyle, defaultBankStyle)
     if (me.isEmployee  &&  me.organization.style)
       _.extend(bankStyle, me.organization.style)
+    let { navigator } = this.props
     let locale, currency
     if (me.isEmployee) {
       locale = utils.getCompanyLocale()
       currency = utils.getCompanyCurrency()
+      let { homePage } = me.organization
+      if (homePage) {
+        navigator.push({
+          title: translate(utils.getModel(homePage)),
+          componentName: 'GridList',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Profile',
+          onRightButtonPress: this.rightButtonForProfile({bankStyle, locale, currency}),
+          passProps: {
+            modelName: homePage,
+            to: me.organization,
+            bankStyle: me.organization.style || defaultBankStyle,
+            currency,
+            locale,
+            navigator,
+            search: true
+          },
+        })
+        return
+      }
     }
     let passProps = {
         filter: '',
@@ -443,37 +470,47 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       componentName: 'ResourceList',
       rightButtonTitle: 'Profile',
+      onRightButtonPress: this.rightButtonForProfile({bankStyle, locale, currency}),
       passProps,
-      onRightButtonPress: () => navigator.push({
-        title: profileTitle,
-        componentName: 'ResourceView',
-        backButtonTitle: 'Back',
-        passProps: {
-          bankStyle,
-          backlink: utils.getModel(me[TYPE]).properties.myForms,
-          resource: me,
-          locale,
-          currency
-        },
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: me.firstName,
-          componentName: 'NewResource',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel(me[TYPE]),
-            resource: me,
-            bankStyle,
-            locale,
-            currency
-          }
-        },
-      })
     });
   }
+  rightButtonForProfile({bankStyle, locale, currency}) {
+    const { navigator } = this.props
+    let me = utils.getMe()
+    let profileTitle
+    if (me.organization)
+      profileTitle = me.organization.title
+    else
+      profileTitle = utils.getDisplayName({ resource: me })
+    return () => navigator.push({
+      title: profileTitle,
+      componentName: 'ResourceView',
+      backButtonTitle: 'Back',
+      passProps: {
+        bankStyle,
+        backlink: utils.getModel(me[TYPE]).properties.myForms,
+        resource: me,
+        locale,
+        currency
+      },
+      rightButtonTitle: 'Edit',
+      onRightButtonPress: {
+        title: me.firstName,
+        componentName: 'NewResource',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getModel(me[TYPE]),
+          resource: me,
+          bankStyle,
+          locale,
+          currency
+        }
+      },
+    })
+  }
   showFirstPage(noResetNavStack) {
-    let { firstPage, isDeepLink, qs } = this.state
+    let { firstPage, isDeepLink, qs, url } = this.state
     let state = {}
     if (isDeepLink) {
       state.firstPage = ENV.initWithDeepLink
@@ -512,13 +549,30 @@ class TimHome extends Component {
         // })
         Actions.getProvider(qs)
         break
+      case 'list':
+        if (qs.exploreData) {
+          this.props.navigator.push({
+            title: 'Explore data',
+            componentName: 'GridList',
+            backButtonTitle: 'Back',
+            passProps: {
+              modelName: MESSAGE,
+              bankStyle: defaultBankStyle,
+              isModel: true,
+              noMenu: true,
+              search: true,
+              exploreData: true
+            },
+          })
+        }
+        break
+      case 'r':
+        Actions.openURL(url)
+        break
       case 'ImportData':
         Actions.getProvider(qs)
         // this.showChatPage({resource: qs.provider, action: state.wasDeepLink ? 'push' : 'replace', showProfile: state.wasDeepLink})
         // Actions.importData(qs)
-        break
-      case 'r':
-        Actions.getResourceFromLink(qs)
         break
       case 'applyForProduct':
         Actions.applyForProduct(qs)
@@ -582,12 +636,17 @@ class TimHome extends Component {
       })
   }
 
-  showChatPage({resource, formStub, termsAccepted, action, showProfile}) {
+  showChatPage({resource, formStub, termsAccepted, action, showProfile, currentContext}) {
     if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(resource, ENV.landingPage)
       return
     }
-    let { navigator, currency } = this.props
+    let { navigator } = this.props
+
+    let style, locale, currency
+    if (resource[TYPE] === ORGANIZATION)
+       ({ currency, style, locale } = resource)
+
     // Check if the current page is the same we need
     let routes = navigator.getCurrentRoutes()
     let currentRoute = routes[routes.length - 1]
@@ -595,13 +654,13 @@ class TimHome extends Component {
       if (utils.getId(currentRoute.passProps.resource) === utils.getId(resource))
         return
     }
-    let style = {}
-    extend(style, defaultBankStyle)
+    if (!style)
+      style = {...defaultBankStyle}
+
     if (resource.style)
       extend(style, resource.style)
 
-
-    if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
+    if (this.showTourOrSplash({resource, formStub, showProfile, termsAccepted, action: action || 'push', currentContext, callback: this.showChatPage.bind(this)}))
       return
 
     let route
@@ -622,8 +681,9 @@ class TimHome extends Component {
           resource: formStub,
           isDeepLink: true,
           to: resource,
-          currency: currency,
-          bankStyle:  style
+          currency,
+          locale,
+          bankStyle: style
         }
       }
       if (isApplication)
@@ -645,13 +705,16 @@ class TimHome extends Component {
           passProps: {
             bankStyle: style,
             resource,
-            currency
+            currency,
+            locale
           }
         },
         passProps: {
           resource,
+          currentContext,
           modelName: MESSAGE,
           currency,
+          locale,
           bankStyle:  style
         }
       }
@@ -727,7 +790,7 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
-        isDeepLink: wasDeepLink,
+        isDeepLink: wasDeepLink  &&  !qs.stub,
         isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
@@ -739,7 +802,7 @@ class TimHome extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
-          title: title,
+          title,
           componentName: 'NewResource',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -901,7 +964,20 @@ class TimHome extends Component {
       </View>
     );
   }
-
+  linkToApply(resource) {
+    const { navigator, bankStyle } = this.props
+    navigator.push({
+      title: translate('linkToApplyForProduct'),
+      componentName: 'StringChooser',
+      backButtonTitle: 'Back',
+      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings:  resource.chooser.oneOf,
+        bankStyle: bankStyle || defaultBankStyle,
+        showLink: true
+      }
+    });
+  }
   renderVersion() {
     return (
       <View>
