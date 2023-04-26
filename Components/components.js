@@ -32,6 +32,9 @@ module.exports = {
   get ScoreDetails() {
     return require('./ScoreDetails')
   },
+  get LoanQuotationDetail() {
+    return require('./LoanQuotationDetail')
+  },
   get CreditScoreDetails() {
     return require('./CreditScoreDetails')
   },
@@ -124,7 +127,10 @@ module.exports = {
   },
   get TimHome() {
     return require('./TimHome')
-  }
+  },
+  // get ApplicantLegalEntityConsent() {
+  //   return require('./ApplicantLegalEntityConsent')
+  // },
 }
 
 // module.exports = new Proxy(components, {
