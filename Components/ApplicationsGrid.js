@@ -22,9 +22,10 @@ import ResourceMixin from './ResourceMixin'
 import ApplicationTreeRow from './ApplicationTreeRow'
 import ApplicationTreeHeader from './ApplicationTreeHeader'
 import PageView from './PageView'
+import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator, getGridCols } from '../utils/uiUtils'
 import { showScoreDetails, loadMoreContentAsync, onScrollEvent } from './utils/gridUtils'
-import { translate, getModel, getDisplayName, makeModelTitle, getMe, getEnumValueId } from '../utils/utils'
+import { translate, getModel, getDisplayName, makeModelTitle, getMe, getEnumValueId, getLensedModelForType } from '../utils/utils'
 import buttonStyles from '../styles/buttonStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import StyleSheet from '../StyleSheet'
@@ -68,21 +69,21 @@ let viewCols = {
       }
     }
   },
-  'numberOfCheckOverrides': {
-    description: '# of overrides',
-    icon: 'ios-thunderstorm-outline',
-    color: 'green'
-  },
-  'assignedToTeam': 'Team',
-  'score': {
-    label: 'IRR',
-    link: 'showScoreDetails'
-  },
-  'scoreType': 'risk',
-  'node_depth': {
-    label:'Depth',
-    type: 'number',
-  },
+  // 'numberOfCheckOverrides': {
+  //   description: '# of overrides',
+  //   icon: 'ios-thunderstorm-outline',
+  //   color: 'green'
+  // },
+  // 'assignedToTeam': 'Team',
+  // 'score': {
+  //   label: 'IRR',
+  //   link: 'showScoreDetails'
+  // },
+  // 'scoreType': 'risk',
+  // 'node_depth': {
+  //   label:'Depth',
+  //   type: 'number',
+  // },
   'elapsed': {
     label:'Delayed',
     type: 'number',
@@ -118,7 +119,7 @@ class ApplicationsGrid extends Component {
         return true
       }
     })
-    let m = getModel(APPLICATION)
+    let m = getLensedModelForType(APPLICATION)
     let gridCols = getGridCols(m)
     let vCols = _.cloneDeep(viewCols)
     gridCols.forEach(p => {
@@ -173,6 +174,9 @@ class ApplicationsGrid extends Component {
       let { bankStyle, navigator } = this.props
       showScoreDetails({application, applicantName, bankStyle, navigator})
       return
+    case 'getMenu':
+      this.setState({menuIsShown: getMe().isEmployee && true})
+      return
     }
   }
   componentWillMount() {
@@ -183,7 +187,7 @@ class ApplicationsGrid extends Component {
       bookmark,
       search: true,
       first: true,
-      limit: this.limit * 2
+      limit: this.limit // * 2
     })
   }
   async _loadMoreContentAsync() {
@@ -200,6 +204,8 @@ class ApplicationsGrid extends Component {
     if (!_.isEqual(this.state.resource, nextState.resource)) {
       return true
     }
+    if (this.state.menuIsShown !== nextState.menuIsShown)
+      return true
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.dataSource.getRowCount() !== nextState.dataSource.getRowCount())
@@ -288,7 +294,7 @@ class ApplicationsGrid extends Component {
       )
   }
   render() {
-    let model = getModel(APPLICATION);
+    let model = getLensedModelForType(APPLICATION);
     let me = getMe()
     let { allLoaded, depth } = this.state
     let content = <ListView onScroll={this.onScroll.bind(this)}
@@ -303,16 +309,27 @@ class ApplicationsGrid extends Component {
         initialListSize={20}
         renderScrollComponent={props => <InfiniteScrollView {...props} allLoaded={allLoaded}/>}
         onLoadMoreAsync={this._loadMoreContentAsync}
+        scrollRenderAhead={10}
         pageSize={20}
         canLoadMore={true}
         showsVerticalScrollIndicator={false} />;
 
+    let navBarMenu
+    if (me.isEmployee) {
+      let { navigator } = this.props
+      navBarMenu = <View style={platformStyles.pageLeftMenu}>
+                     {this.showMenu(this.props, navigator)}
+                   </View>
+    }
     let { bankStyle } = this.props
     let contentSeparator = getContentSeparator(bankStyle)
     return (
-      <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
-        <View style={styles.separator} />
-        {content}
+      <PageView style={[platformStyles.container, {justifyContent: 'flex-start', flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+        {navBarMenu}
+        <View style={[platformStyles.pageContentWithMenu, {flex: 4}]}>
+          <View style={styles.separator} />
+          {content}
+        </View>
       </PageView>
     );
   }
@@ -322,6 +339,7 @@ class ApplicationsGrid extends Component {
 }
 reactMixin(ApplicationsGrid.prototype, Reflux.ListenerMixin)
 reactMixin(ApplicationsGrid.prototype, ResourceMixin)
+reactMixin(ApplicationsGrid.prototype, HomePageMixin)
 ApplicationsGrid = makeResponsive(ApplicationsGrid)
 ApplicationsGrid = makeStylish(ApplicationsGrid)
 
