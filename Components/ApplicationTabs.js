@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Alert
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -18,7 +19,8 @@ import { Text } from './Text'
 import ProgressBar from './ProgressBar'
 import utils, {
   translate,
-  getEnumValueId
+  getEnumValueId,
+  isSubclassOf
 } from '../utils/utils'
 
 // import buttonStyles from '../styles/buttonStyles'
@@ -287,13 +289,51 @@ class ApplicationTabs extends Component {
 
     let progress = this.getProgress(resource)
     let progressColor = '#a0d0a0' //bankStyle.linkColor
+    let isDraft = resource.draft
+    let progressView = <View style={styles.progress}>
+                         <Text style={styles.title}>{translate(isDraft ? 'draftProgress' : 'progress')}</Text>
+                         <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
+                       </View>
 
+    let buttons
+    if (isDraft  &&  resource.submissions) {
+      let {letClient, finishDraft} = this.props
+      let context = resource._context
+      let finishDraftButton, letClientButton
+      if (finishDraft)
+        finishDraftButton = <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitCompletedApplication, context)}>
+                      <View style={styles.complete}>
+                        <Text style={styles.completeText}>{translate('finishDraft')}</Text>
+                      </View>
+                    </TouchableOpacity>
+      if (letClient)
+        letClientButton = <TouchableOpacity onPress={this.confirm.bind(this, Actions.submitDraftApplication, context)}>
+                      <View style={styles.send}>
+                        <Text style={styles.sendText}>{translate('letClientFinish')}</Text>
+                      </View>
+                    </TouchableOpacity>
+
+      let hasFormSubmission = resource
+      buttons = <View style={styles.buttons}>
+                  {finishDraftButton}
+                  {letClientButton}
+                </View>
+
+    }
     return <View style={[styles.row, {justifyContent: 'space-between'}]}>
-             <View style={styles.progress}>
-               <Text style={styles.title}>{translate('progress')}</Text>
-               <ProgressBar progress={progress} width={200} color={progressColor} borderWidth={1} borderRadius={3} height={5} showProgress={true} />
-             </View>
+             {progressView}
+             {buttons}
            </View>
+  }
+  confirm(fn, context) {
+    Alert.alert(
+      translate('pleaseConfirm'),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => console.log('Cancel')},
+        {text: 'OK', onPress: () => fn({context})}
+      ]
+    )
   }
   getChecksBar(styles) {
     let { resource, bankStyle } = this.props
@@ -459,6 +499,42 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       opacity: 0.9,
       shadowRadius: 5,
       shadowColor: '#afafaf',
+    },
+    complete: {
+      backgroundColor: bankStyle.accentColor || '#fff',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 200,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      marginRight: 20,
+      borderWidth: 1,
+      borderColor: bankStyle.accentColor || bankStyle.linkColor
+    },
+    completeText: {
+      fontSize: 18,
+      color: '#fff',
+      alignSelf: 'center'
+    },
+    send: {
+      backgroundColor: '#fff',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 200,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      marginRight: 20,
+      borderWidth: 1,
+      borderColor: bankStyle.linkColor
+    },
+    sendText: {
+      fontSize: 18,
+      color: bankStyle.linkColor,
+      alignSelf: 'center'
     },
   })
 })
