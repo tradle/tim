@@ -13,6 +13,7 @@ import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
+import HomePageMixin from './HomePageMixin'
 
 import RowMixin from './RowMixin'
 import utils, { translate, getEnumValueId } from '../utils/utils'
@@ -53,7 +54,7 @@ class GridRow extends Component {
       isConnected: navigator.isConnected,
       resource,
     }
-    if (props.multiChooser) {
+    if (multiChooser) {
       // multivalue ENUM property
       if (chosen  &&  chosen[utils.getId(resource)])
         this.state.isChosen = true
@@ -90,9 +91,10 @@ class GridRow extends Component {
         this.setState({application, resource: application})
       break
     case 'updateRow':
-      if (utils.getRootHash(resource) === utils.getRootHash(this.props.resource)) {
-        if (forceUpdate)
-          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource})
+      let hash = utils.getRootHash(params.resource)
+      if (hash === utils.getRootHash(this.props.resource)) {
+        if (params.forceUpdate)
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
         else
           this.setState({unread: resource._unread})
       }
@@ -170,7 +172,7 @@ class GridRow extends Component {
     let justifyContent = isMessage ? 'flex-start' : 'center'
     let prerequisiteFor
     if (model.prerequisiteFor) {
-      prerequisiteFor = <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={`${key}_prereq`}>
+      prerequisiteFor = <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + '_prereq'}>
                           <View style={{paddingLeft: 5}}>
                             <TouchableOpacity onPress={this.applyForProduct.bind(this)} style={styles.button}>
                               <Icon name='ios-sunny-outline'  size={25} color={bankStyle.linkColor} />
@@ -188,7 +190,7 @@ class GridRow extends Component {
                       {content}
                     </View>
         }
-        return <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={`${key}${v}`}>
+        return <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent}]} key={key + v}>
                  {content}
                </Col>
       })
@@ -219,6 +221,7 @@ class GridRow extends Component {
                  </View>
                </Col>)
     }
+
     let row = <Row size={size} style={styles.gridRow, {backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
                 {cols}
               </Row>
@@ -362,7 +365,6 @@ class GridRow extends Component {
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }
   }
-
   formatMessageProperty(pName) {
     let { resource } = this.props
     let pval = resource[pName]
@@ -435,6 +437,7 @@ class GridRow extends Component {
 }
 reactMixin(GridRow.prototype, Reflux.ListenerMixin);
 reactMixin(GridRow.prototype, RowMixin)
+reactMixin(GridRow.prototype, HomePageMixin)
 GridRow = makeResponsive(GridRow)
 
 var styles = StyleSheet.create({
@@ -459,14 +462,14 @@ var styles = StyleSheet.create({
     paddingRight: 7,
     borderBottomWidth: 1
   },
-  thumb: {
-    width: 40,
-    height: 40
-  },
   icon: {
     width: 25,
     height: 25,
     marginTop: -3
+  },
+  thumb: {
+    width: 40,
+    height: 40
   },
   multiChooser: {
     justifyContent: 'center',

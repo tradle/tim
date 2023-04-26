@@ -84,7 +84,6 @@ class GridItemsList extends Component {
           <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} resource={this.props.resource}/>
         </View>
         </ScrollView>
-
         <View style={styles.footer}>
           <ImageInput
             ref={input => this._imageInput = input}

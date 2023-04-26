@@ -21,7 +21,6 @@ const PHOTO = 'tradle.Photo'
 
 class GridHeader extends Component {
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     gridCols: PropTypes.array.isRequired,
     multiChooser: PropTypes.bool,
@@ -93,7 +92,7 @@ class GridHeader extends Component {
       if (isSortable)
         title = <TouchableOpacity onPress={() => this.props.sort(p)}>
                   {title}
-                 </TouchableOpacity>
+                </TouchableOpacity>
 
       return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p}>
                {title}
