@@ -15,6 +15,8 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 import ActionSheet from 'react-native-actionsheet'
 
+import { Text } from './Text'
+
 import constants from '@tradle/constants'
 const {
   TYPE,
@@ -27,10 +29,24 @@ const {
 
 import utils, {
   getFontSize as fontSize,
-  translate
+  translate,
+  getRootHash,
+  getMe,
+  getType,
+  isInlined,
+  isAndroid,
+  isMe,
+  getContentWidth,
+  getStatusMessageForCheck,
+  getLensedModelForType,
+  getDisplayName,
+  getModel,
+  styleFactory,
+  onNextTransitionEnd
 } from '../utils/utils'
 import { getContentSeparator } from '../utils/uiUtils'
 
+import Navigator from './Navigator'
 import ApplicationTabs from './ApplicationTabs'
 import PageView from './PageView'
 import Actions from '../Actions/Actions'
@@ -57,6 +73,8 @@ const MANUAL_VISUAL_COMPARISON_CHECK = 'tradle.ManualVisualComparisonCheck'
 const STATUS = 'tradle.Status'
 const VISUAL_VERIFICATION_METHOD = 'tradle.VisualPhotosVerificationMethod'
 const API = 'tradle.Api'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const FORM_REQUEST = 'tradle.FormRequest'
 
 const VERIFICATION_PROVIDER = 'Manual visual comparison'
 const FACIAL_MATCH = 'facial similarity'
@@ -78,15 +96,18 @@ class ApplicationView extends Component {
     super(props);
     this._lazyId = LAZY_ID + INSTANCE_ID++
 
-    let { resource, action, backlink, tab, checkFilter, navigator, bankStyle } = props
+    let { resource, action, backlink, tab, checkFilter, navigator, bankStyle, application, callback } = props
     this.state = {
       resource,
       isLoading: true,
       isConnected: navigator.isConnected,
       bankStyle,
       // backlink,
-      checkFilter
+      checkFilter,
+      menuIsShown: getMe().isEmployee
     }
+    if (application && callback)
+      this.state.callback = callback
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
 
@@ -100,9 +121,9 @@ class ApplicationView extends Component {
   componentWillMount() {
     let { resource, search, backlink, tab } = this.props
 
-    let rtype = utils.getType(resource)
-    let m = utils.getModel(rtype)
-    if (utils.isInlined(m))
+    let rtype = getType(resource)
+    let m = getModel(rtype)
+    if (isInlined(m))
       return
     Actions.getItem( {resource, search, backlink: backlink || tab} )
   }
@@ -110,22 +131,24 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, backlink, application, style, provider, nextStep, templates, wasFilledByEmployee} = params
+    let {resource, action, backlink, application, style, provider, tour, nextStep, templates, letClient, finishDraft} = params
 
-    const hash = utils.getRootHash(this.props.resource)
-    if (resource  &&  utils.getRootHash(resource) !== hash)
+    const hash = getRootHash(this.props.resource)
+    if (resource  &&  getRootHash(resource) !== hash)
       return
 
     switch (action) {
     case 'getItem':
       this.setState({
-        resource: resource,
+        resource,
         isLoading: false,
         bankStyle: style || this.state.bankStyle,
         locale: provider && provider.locale,
+        letClient,
+        finishDraft,
         nextStep,
         templates,
-        wasFilledByEmployee
+        tour
       })
       break
     case 'exploreBacklink':
@@ -143,8 +166,14 @@ class ApplicationView extends Component {
       if (this.state.backlink)
         this.setState({showDetails: true, backlink: null, checkFilter: null, checksCategory: null})
       break
+    case 'updateItem':
+      if (getRootHash(resource) === hash) {
+        Actions.hideModal()
+        this.setState({resource, isLoading: false})
+      }
+      break
     case 'assignRM_Confirmed':
-      if (utils.getRootHash(application) === hash) {
+      if (getRootHash(application) === hash) {
         Actions.hideModal()
         this.setState({resource: application, isLoading: false})
       }
@@ -157,14 +186,15 @@ class ApplicationView extends Component {
            this.state.isLoading   !== nextState.isLoading      ||
            this.state.backlink    !== nextState.backlink       ||
            this.state.checkFilter !== nextState.checkFilter    ||
-           this.state.checksCategory !== nextState.checksCategory  ||
-           this.state.wasFilledByEmployee !== nextState.wasFilledByEmployee
+           this.state.menuIsShown !== nextState.menuIsShown    ||
+           this.state.checksCategory !== nextState.checksCategory
+
       return true
   }
 
   render() {
-    let { resource, backlink, isLoading, hasRM, isConnected,
-          showDetails, locale, nextStep, templates, wasFilledByEmployee } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected, menuIsShown, tour,
+          showDetails, locale, nextStep, templates, letClient, finishDraft } = this.state
     let { navigator, bankStyle, currency, tab } = this.props
 
     hasRM = hasRM  ||  resource.analyst
@@ -184,13 +214,13 @@ class ApplicationView extends Component {
       //   return <View/>
     }
     let isAndroid = utils.isAndroid()
-    let color = isAndroid ? bankStyle.linkColor : '#ffffff'
+    let color = isAndroid() ? bankStyle.linkColor : '#ffffff'
     let iconName = 'ios-person-add-outline'
     let icolor
     let rmStyle
     if (hasRM) {
       iconName = 'ios-person'
-      icolor =  isAndroid && (isRM && bankStyle.linkColor || '#CA9DF2') || '#ffffff'
+      icolor =  isAndroid() && (isRM && bankStyle.linkColor || '#CA9DF2') || '#ffffff'
       rmStyle = styles.hasRM
     }
     else {
@@ -199,27 +229,47 @@ class ApplicationView extends Component {
     }
 
     let assignRM
-    if (!isRM  &&  !utils.isMe(resource.applicant) && !wasFilledByEmployee)
+    if (!isRM  &&  !isMe(resource.applicant) && !resource.filledForCustomer  &&  !resource.draft)
        assignRM = <TouchableOpacity onPress={() => this.assignRM(resource ||  this.props.resource)}>
                     <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
                   </TouchableOpacity>
-    let home, print
+    let home, print, reqForm
     if (utils.getMe().isEmployee)
       home = this.addHomeButton()
 
+
     let actionSheet = templates  && this.renderActionSheet()
-    if (actionSheet)
+    if (actionSheet) {
       print = <TouchableOpacity onPress={() => this.ActionSheet.show()} style={styles.homeButton}>
                <View style={[buttonStyles.homeButton]}>
                  <Icon name='ios-print-outline' color={bankStyle.linkColor} size={33}/>
                </View>
+               <Text style={styles.buttonText}>{translate('print')}</Text>
              </TouchableOpacity>
+    }
+    let additionalForms
+    if (resource.status !== 'started') {
+      additionalForms = this.getAdditionalForms(resource)
+      if (additionalForms.length)
+        additionalForms = additionalForms.map(f => ({id: f}))
+      else
+        additionalForms = null
+    }
+    let actionSheetForAdditionalForms = additionalForms && this.renderActionSheet(additionalForms) //ForAdditionalForms()
+    if (actionSheetForAdditionalForms) {
+      reqForm = <TouchableOpacity onPress={() => this.ActionSheet1.show()} style={styles.homeButton}>
+                 <View style={[buttonStyles.homeButton]}>
+                   <Icon name='ios-add' color={bankStyle.linkColor} size={35}/>
+                 </View>
+                 <Text style={styles.buttonText}>{translate('requestForm')}</Text>
+               </TouchableOpacity>
+    }
     let photoId, selfie
     if (resource.forms) {
-      photoId = resource.forms.find(r => utils.getType(r) === PHOTO_ID)
-      selfie = resource.forms.find(r => utils.getType(r)  === SELFIE)
+      photoId = resource.forms.find(r => getType(r) === PHOTO_ID)
+      selfie = resource.forms.find(r => getType(r)  === SELFIE)
     }
     let compareImages
     if (photoId  &&  selfie) {
@@ -227,32 +277,48 @@ class ApplicationView extends Component {
                         <View style={buttonStyles.homeButton}>
                           <Icon name='md-git-compare' color={bankStyle.linkColor} size={30}/>
                         </View>
+                        <Text style={styles.buttonText}>{translate('compare')}</Text>
                       </TouchableOpacity>
     }
 
     let chatButton
-    if (resource._context)
+    if (resource._context) {
+      // if (!resource.submissions || !resource.submissions.find(r => getType(r.submission) === APPLICATION_SUBMITTED))
       chatButton = <TouchableOpacity onPress={this.openApplicationChat.bind(this, resource)} style={[styles.openChatPadding]}>
                       <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                         <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                       </View>
+                      <Text style={styles.buttonText}>{translate('chat')}</Text>
                     </TouchableOpacity>
+    }
+    let takeTour
+    if (tour) {
+      takeTour = <TouchableOpacity onPress={this.takeTour.bind(this)} style={styles.tree}>
+                  <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                    <Icon name='ios-train-outline' size={30} color={bankStyle.linkColor} />
+                  </View>
+                  <Text style={styles.buttonText}>{translate('tour')}</Text>
+                 </TouchableOpacity>
+
+    }
 
     let tree
     if (resource.tree  &&  resource.tree.top.nodes) {
       tree = <TouchableOpacity onPress={() => this.showTree()} style={styles.tree}>
-                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
-                   <Icon name='ios-options-outline' size={30} color={bankStyle.linkColor} />
-                 </View>
+               <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                 <Icon name='ios-options-outline' size={30} color={bankStyle.linkColor} />
+               </View>
+               <Text style={styles.buttonText}>{translate('tree')}</Text>
              </TouchableOpacity>
     }
     let nextApp
-    if (/*isRM  && */ nextStep) {
+    if (/*isRM  &&  */nextStep) {
       nextApp = <TouchableOpacity onPress={() => this.applyForNext(nextStep)} style={styles.tree}>
-                 <View style={[styles.treeButton, buttonStyles.treeButton]}>
-                   <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
-                 </View>
-             </TouchableOpacity>
+                  <View style={[styles.treeButton, buttonStyles.treeButton]}>
+                    <Icon name='ios-sunny-outline' size={30} color={bankStyle.linkColor} />
+                  </View>
+                  <Text style={styles.buttonText}>{translate('application')}</Text>
+               </TouchableOpacity>
     }
     let copyButton = this.generateCopyLinkButton(resource)
     let footer = <View style={styles.footer}>
@@ -260,48 +326,108 @@ class ApplicationView extends Component {
                     {home}
                     {print}
                     {actionSheet}
+                    {actionSheetForAdditionalForms}
                     {tree}
                     {copyButton}
                     {compareImages}
                     {chatButton}
+                    {reqForm}
+                    {takeTour}
                     {assignRM}
+                    {nextApp}
                   </View>
                 </View>
+    let navBarMenu
+    if (menuIsShown)
+      navBarMenu = this.showMenu(this.props, navigator)
+    let content = <ScrollView  ref='this' name={this._lazyId}>
+                   {network}
+                   <ApplicationTabs  lazy={this._lazyId}
+                                     resource={resource}
+                                     navigator={navigator}
+                                     currency={currency}
+                                     locale={locale}
+                                     letClient={letClient}
+                                     finishDraft={finishDraft}
+                                     backlink={!showDetails && backlink}
+                                     checksCategory={this.state.checksCategory}
+                                     showCategory={this.showCategory.bind(this)}
+                                     checkFilter={this.state.checkFilter}
+                                     filterChecks={this.filterChecks.bind(this)}
+                                     showDetails={showDetails}
+                                     approve={this.approve}
+                                     deny={this.deny}
+                                     bankStyle={bankStyle}/>
+                 </ScrollView>
     let contentSeparator = getContentSeparator(bankStyle)
+    if (menuIsShown)
+      return (
+        <PageView style={[platformStyles.container, {flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+          <SafeAreaView style={styles.container}>
+          <View style={[platformStyles.pageMenu, {backgroundColor: '#f7f7f7'}]}>
+            {navBarMenu}
+          </View>
+          <View style={platformStyles.pageContentWithMenu}>
+            <ScrollView  ref='this' style={{width: getContentWidth(ApplicationView), alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
+              {network}
+              {content}
+              {loading}
+            </ScrollView>
+            {footer}
+          </View>
+          </SafeAreaView>
+        </PageView>
+       );
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
-        <SafeAreaView style={styles.container}>
-        {network}
-        {loading}
-        <ScrollView  ref='this' name={this._lazyId}>
-          <ApplicationTabs  lazy={this._lazyId}
-                            resource={resource}
-                            navigator={navigator}
-                            currency={currency}
-                            locale={locale}
-                            backlink={!showDetails && backlink}
-                            checksCategory={this.state.checksCategory}
-                            showCategory={this.showCategory.bind(this)}
-                            checkFilter={this.state.checkFilter}
-                            filterChecks={this.filterChecks.bind(this)}
-                            showDetails={showDetails}
-                            approve={this.approve}
-                            deny={this.deny}
-                            bankStyle={bankStyle}/>
-        </ScrollView>
+         <SafeAreaView style={styles.container}>
+         {network}
+         {loading}
+         {content}
        </SafeAreaView>
        {footer}
       </PageView>
      );
+
+    // return (
+    //   <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
+    //     <SafeAreaView style={styles.container}>
+    //     {network}
+    //     {loading}
+    //     <ScrollView  ref='this' name={this._lazyId}>
+    //       <ApplicationTabs  lazy={this._lazyId}
+    //                         resource={resource}
+    //                         navigator={navigator}
+    //                         currency={currency}
+    //                         locale={locale}
+    //                         letClient={letClient}
+    //                         finishDraft={finishDraft}
+    //                         backlink={!showDetails && backlink}
+    //                         checksCategory={this.state.checksCategory}
+    //                         showCategory={this.showCategory.bind(this)}
+    //                         checkFilter={this.state.checkFilter}
+    //                         filterChecks={this.filterChecks.bind(this)}
+    //                         showDetails={showDetails}
+    //                         approve={this.approve}
+    //                         deny={this.deny}
+    //                         bankStyle={bankStyle}/>
+    //     </ScrollView>
+    //    </SafeAreaView>
+    //    {footer}
+    //   </PageView>
+    //  );
   }
-  renderActionSheet() {
-    const buttons = this.getActionSheetItems()
+  renderActionSheet(additionalForms) {
+    const buttons = additionalForms ? this.getActionSheetItemsForAdditionalForms(additionalForms) : this.getActionSheetItems()
     if (!buttons || !buttons.length) return
     let titles = buttons.map((b) => b.title)
     return (
       <ActionSheet
         ref={(o) => {
-          this.ActionSheet = o
+          if (additionalForms)
+            this.ActionSheet1 = o
+          else
+            this.ActionSheet = o
         }}
         options={titles}
         cancelButtonIndex={buttons.length - 1}
@@ -318,12 +444,45 @@ class ApplicationView extends Component {
 
     if (!templates)
       return buttons
+    let application = this.state.resource || this.props.resource
     templates.forEach(template =>
       push({
         title: template.title,
-        callback: () => this.printReport(template)
+        callback: () => this.printReport(template, application)
       })
     )
+    push({
+      title: translate('cancel'),
+      callback: () => {}
+    })
+
+    return buttons
+  }
+
+  getActionSheetItemsForAdditionalForms(additionalForms) {
+    let application = this.state.resource || this.props.resource
+    const { navigator } = this.props
+
+    const buttons = []
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
+
+    if (!additionalForms)
+      return buttons
+    additionalForms.forEach(f => {
+      let fm = utils.getModel(f.id)
+      push({
+        title: translate(fm),
+        callback: () => this.requestForm({
+          val: f.id,
+          resource: application._context || application.request,
+          application,
+          callback: () => {
+            Actions.showModal({title: translate('refreshInProgress'), showIndicator: true})
+            navigator.pop()
+          }
+        })
+      })
+    })
     push({
       title: translate('cancel'),
       callback: () => {}
@@ -335,7 +494,7 @@ class ApplicationView extends Component {
     const { type } = params
     const { navigator } = this.props
     Alert.alert(
-      translate('applyForNextProduct', translate(utils.getModel(type))), // + utils.getDisplayName({ resource }),
+      translate('applyForNextProduct', translate(getModel(type))), // + getDisplayName({ resource }),
       null,
       [
         {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -349,21 +508,33 @@ class ApplicationView extends Component {
       ]
     )
   }
-  printReport(template) {
-    const { navigator, bankStyle, locale } = this.props
-    const { resource:application } = this.state
+  takeTour() {
+    const { navigator, bankStyle } = this.props
+    const { tour } = this.state
+
     navigator.push({
       title: "",
-      componentName: 'PrintReport',
+      componentName: 'TourPage',
       backButtonTitle: null,
+      // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
-        application,
         bankStyle,
-        locale,
-        template
+        noTransitions: true,
+        customStyles: {
+          nextButtonText: {
+            fontSize: 23,
+            fontWeight: 'bold',
+            fontFamily: 'Arial',
+          },
+        },
+        tour,
+        // callback: () => {
+        //   navigator.pop()
+        // }
       }
-    });
+    })
   }
+
   compareImages(photoId, selfie) {
     let { navigator, bankStyle } = this.props
     let resource = this.state.resource || this.props.resource
@@ -398,7 +569,7 @@ class ApplicationView extends Component {
     let { navigator } = this.props
     let resource = this.state.resource || this.props.resource
     let me = utils.getMe();
-    let statusModel = utils.getModel(STATUS)
+    let statusModel = getModel(STATUS)
     let status = statusModel.enum.find(r => r.id === 'pass')
     let r = {
       [TYPE]: MANUAL_VISUAL_COMPARISON_CHECK,
@@ -410,12 +581,13 @@ class ApplicationView extends Component {
       aspects: FACIAL_MATCH,
       dateChecked: new Date().getTime(),
       application: resource,
+      menuIsShown: true,
       status: {
         id: STATUS + '_' + status.id,
         title: status.title
       }
     }
-    r.message = utils.getStatusMessageForCheck({check: r})
+    r.message = getStatusMessageForCheck({check: r})
     let params = {to: resource.to, resource: r, application: resource}
     if (resource._context) {
       params.context = resource._context
@@ -442,7 +614,7 @@ class ApplicationView extends Component {
 
     let r = {
       [TYPE]: VERIFICATION,
-      from: utils.getMe(),
+      from: getMe(),
       document: photoId,
       to: applicant,
       method,
@@ -487,8 +659,8 @@ class ApplicationView extends Component {
         }},
         {text: translate('Approve'), onPress: () => {
           Actions.hideModal()
-          let title = translate(utils.getModel(resource.product || resource.requestFor))
-          let me = utils.getMe()
+          let title = translate(getModel(resource.product || resource.requestFor))
+          let me = getMe()
           let msg = {
             [TYPE]: APPROVAL,
             application: resource,
@@ -506,7 +678,7 @@ class ApplicationView extends Component {
   deny() {
     let resource = this.state.resource || this.props.resource
     let isApplication = resource[TYPE] === APPLICATION
-    let applicantTitle = utils.getDisplayName({ resource: resource.applicant || resource.from })
+    let applicantTitle = getDisplayName({ resource: resource.applicant || resource.from })
     Alert.alert(
       translate('denyApplication', applicantTitle),
       null,
@@ -516,8 +688,8 @@ class ApplicationView extends Component {
         }},
         {text: translate('Deny'), onPress: () => {
           Actions.hideModal()
-          let title = translate(utils.getModel(resource.product ||  resource.requestFor))
-          let me = utils.getMe()
+          let title = translate(getModel(resource.product ||  resource.requestFor))
+          let me = getMe()
           let msg = {
             [TYPE]: DENIAL,
             application: resource,
@@ -534,13 +706,13 @@ class ApplicationView extends Component {
   showTree() {
     let { bankStyle, navigator, currency, locale } = this.props
     let resource = this.state.resource || this.props.resource
-    let me = utils.getMe()
+    let me = getMe()
     let title
     let aTitle = resource.applicantName || resource.applicant.title
     if (aTitle)
-       title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName({ resource })
+       title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + getDisplayName({ resource })
     else
-      title = me.organization.title  + '  --  ' + utils.getDisplayName({ resource })
+      title = me.organization.title  + '  --  ' + getDisplayName({ resource })
 
     navigator.push({
       title,
@@ -560,7 +732,7 @@ reactMixin(ApplicationView.prototype, ResourceMixin);
 reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
-var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
+var createStyles = styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
   let isAndroid = Platform.OS === 'android'
   let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
   let paddingRight = Platform.OS === 'android' ? 0 : 10
@@ -578,7 +750,7 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
     },
     footer: {
       height: 45,
-      backgroundColor: '#efefef',
+      // backgroundColor: '#efefef',
       borderColor: '#eeeeee',
       borderWidth: 1,
       alignItems: 'flex-end',
@@ -602,8 +774,13 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
       alignSelf: 'flex-start',
       paddingRight: paddingRight
     },
+    buttonText: {
+      fontSize: 10,
+      color: bankStyle.linkColor,
+      alignSelf: 'center'
+    },
     openChatPadding: {
-      paddingRight: paddingRight
+      paddingRight
     },
     conversationButton: {
       backgroundColor: bgcolor,
