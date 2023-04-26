@@ -5,6 +5,7 @@ module.exports = [
   require('./PaymentCard'),
   require('./ProofOfAddress'),
   require('./CheckOverride'),
+  require('./Counterparty'),
   require('./ValidateSelectors'),
-  require('./LeasingQuotes')
+  require('./LeasingQuotes'),
 ]
