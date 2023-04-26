@@ -55,6 +55,7 @@ var RowMixin = {
   },
   getPropRow(prop, resource, val, isVerification) {
     let { currency, isAggregation, bankStyle, locale } = this.props
+    let model = utils.getModel(resource[TYPE])
     if (prop.ref) {
       if (prop.ref === MONEY) {
         if (currency && locale) {
@@ -72,13 +73,12 @@ var RowMixin = {
         let m = utils.getModel(prop.ref)
         if (utils.isEnum(m)) {
           if (typeof resource[prop.name] === 'string')
-            val = resource[prop.name]
+            val = translate(prop, model) //resource[prop.name]
           else
             val = translateEnum(resource[prop.name])
         }
       }
     }
-    let model = utils.getModel(resource[TYPE])
 
     let style = {flexDirection: 'row', justifyContent: 'center'}
     let propTitle = translate(prop, model)
