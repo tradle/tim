@@ -1,5 +1,4 @@
 import {
-  // WebView,
   View,
   Text,
   ScrollView,
@@ -12,13 +11,13 @@ import { WebView } from '@tradle/react-native-webview'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import StyleSheet from '../StyleSheet'
+import platformStyles from '../styles/platform'
 
 // import defaultBankStyle from '../styles/bankStyle.json'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, {
   translate
 } from '../utils/utils'
-
 
 class ArticleView extends Component {
   static propTypes = {
@@ -50,7 +49,8 @@ class ArticleView extends Component {
     let { bankStyle, actionBarTitle, href, url, action } = this.props
     bankStyle = bankStyle || defaultBankStyle
     let isWeb = utils.isWeb()
-    let wView = <WebView style={isWeb && {flex: 1} || styles.webView}
+    let style = isWeb ? {marginTop: 65, flex: 1} : styles.webView
+    let wView = <WebView style={style}
                   source={href ? {uri: href} : url}
                   useWebKit={true}
                   startInLoadingState={true}
