@@ -92,10 +92,6 @@ class AttestationItemsList extends Component {
     let { to, action, list, products, resource, requestForRefresh } = params
     if (!resource || resource[TYPE] !== ATTESTATION_ITEM)
       return
-    // if (!to)
-    //   to = resource.to  &&  resource.to.organization
-    // if (utils.getId(to) !== utils.getId(this.props.to))
-    //   return
     if (!list)
       list = this.state.list
     if (!products)
@@ -170,14 +166,6 @@ class AttestationItemsList extends Component {
         originatingMessage: resource,
         callback: (value) => {
           debugger
-          // reviewed[rowId] = {...resource, ...value}
-
-          // let list = this.state.list
-          // list.splice(rowId, 1, reviewed[rowId])
-          // this.setState({
-          //   // list: newList,
-          //   dataSource: this.state.dataSource.cloneWithRows(list) //(this.state.list)
-          // })
           navigator.pop()
           navigator.pop()
         }
