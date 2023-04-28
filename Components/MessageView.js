@@ -38,6 +38,7 @@ import PageView from './PageView'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
+import HomePageMixin from './HomePageMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
@@ -64,7 +65,8 @@ class MessageView extends Component {
       // backlink,
       // showDetails: true,
       showDetails: false,
-      bankStyle: bankStyle || defaultBankStyle
+      bankStyle: bankStyle || defaultBankStyle,
+      menuIsShown: utils.getMe().isEmployee
     };
     let currentRoutes = navigator.getCurrentRoutes();
     let len = currentRoutes.length;
@@ -106,7 +108,7 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let { action, currency, style, country, backlink, isConnected, error } = params
+    let { action, currency, style, country, backlink, isConnected, error, template } = params
     if (action == 'connectivity') {
       this.setState({isConnected})
       return
@@ -172,13 +174,18 @@ class MessageView extends Component {
     let { defaultPropertyValues, bankStyle, navigator, search, allowedMimeTypes, currency, locale } = this.props
     let resource = this.state.resource
     let ref = itemBl.items.ref
+
+    let blModel = utils.getModel(ref)
+    if (model.abstract) {
+      let subList = utils.getAllSubclasses(model.id)
+      let callback =  val => this.createNewResource({model: utils.getModel(val)})
+      this.showSubclasses({ list: subList, callback, notModel: true, title: translate(model) })
+      return
+    }
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     let r = {[TYPE]: ref};
     let rType = resource[TYPE]
-    // let rModel = utils.getModel(rType)
-
-    let blModel = utils.getModel(ref)
 
     let refProps = utils.getPropertiesWithRef(rType, blModel)
     let containerProp = refProps.filter(prop => prop.name === itemBl.items.backlink)[0].name
@@ -327,7 +334,7 @@ class MessageView extends Component {
     navigator.push(route)
   }
   render() {
-    let { backlink, bankStyle, resource, isLoading, error } = this.state
+    let { backlink, bankStyle, resource, isLoading, error, menuIsShown } = this.state
     if (isLoading)
       return this.showLoading({bankStyle, component: MessageView})
     let { lensId, style, navigator, currency, isVerifier, isDeepLink,
@@ -490,6 +497,31 @@ class MessageView extends Component {
                       </Markdown>
                     </View>
     }
+    let navBarMenu
+    if (menuIsShown) {
+      navBarMenu = this.showMenu(this.props, navigator)
+      return <PageView style={[platformStyles.container, {height, flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+          <View style={platformStyles.pageMenu}>
+            {navBarMenu}
+          </View>
+          <View style={platformStyles.pageContentWithMenu}>
+            <ScrollView
+              ref='messageView'
+              keyboardShouldPersistTaps="always"
+              style={{alignSelf: 'flex-start'}}>
+              {dateView}
+              {description}
+              {warning}
+              {bigPhoto}
+              {photoStrip}
+              {actionPanel}
+            </ScrollView>
+            {title}
+            {footer}
+            {actionSheet}
+          </View>
+        </PageView>
+    }
     return (
       <PageView style={[platformStyles.container]} separator={contentSeparator} bankStyle={bankStyle} >
       <SafeAreaView style={styles.container}>
@@ -537,7 +569,7 @@ class MessageView extends Component {
     if (!backlink  ||  !backlink.allowToAdd)
       return
     let me = utils.getMe()
-    let resource = this.props.resource
+    let resource = this.state.resource || this.props.resource
 
     // Allow employee to add backlinks only to the resource he created
     if (me  &&  me.isEmployee  &&  !utils.isMyMessage({resource})) //  &&  resource[TYPE] !== DRAFT_APPLICATION)
@@ -594,6 +626,7 @@ class MessageView extends Component {
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
+reactMixin(MessageView.prototype, HomePageMixin);
 MessageView = makeResponsive(MessageView)
 
 var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {
