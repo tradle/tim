@@ -33,6 +33,7 @@ import Markdown from './Markdown'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const SHARE_CONTEXT = 'tradle.ShareContext'
+const APPLICATION = 'tradle.Application'
 const APPLICATION_COMPLETED = 'tradle.ApplicationCompleted'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 // const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
@@ -87,15 +88,17 @@ class MessageRow extends Component {
     let { resource, to, bankStyle, navigator } = this.props
     let styles = createStyles({bankStyle})
 
-    let rtype = utils.getType(resource)
-    let isBookmark = rtype === BOOKMARK
-    let isMyMessage = this.isMyMessage()
+    let isMyMessage = this.isMyMessage() || resource[TYPE] === APPLICATION //  &&  !isRemediationCompleted
+    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let renderedRow = [];
     let ret = this.formatRow(isMyMessage, renderedRow, styles);
     let onPressCall = ret ? ret.onPressCall : null
 
+    let rtype = utils.getType(resource)
     let isConfirmation = rtype === CONFIRMATION
+    let isBookmark = rtype === BOOKMARK
     let isSimpleMessage = rtype === SIMPLE_MESSAGE
 
     let photoUrls = [];
@@ -155,7 +158,7 @@ class MessageRow extends Component {
       }
     }
     let properties = model.properties
-     let photoListStyle = {height: 3}
+    let photoListStyle = {height: 3}
     if (properties.photos) {
       if (resource.photos) {
         let len = resource.photos.length;
@@ -217,7 +220,7 @@ class MessageRow extends Component {
       // let viewStyle = isSimpleMessage ? {} : {flexDirection: 'row'}
       // viewStyle.alignSelf = isMyMessage ? 'flex-end' : 'flex-start'
       if (message) {
-        if ((message.charAt(0) === '['  ||  longMessage)   &&  !isDeepLink)
+        if ((/*message.charAt(0) === '['  || */ longMessage)   &&  !isDeepLink)
           viewStyle.width = msgWidth
       }
       if (!isSimpleMessage)
@@ -272,9 +275,7 @@ class MessageRow extends Component {
     let photoList, separator
     if (len) {
       let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3
-      let photoStyle = {};
-      // let height;
-
+      let photoStyle = {}
       if (inRow > 0) {
         if (inRow === 1) {
           let ww = Math.max(240, msgWidth / 2)
@@ -312,17 +313,6 @@ class MessageRow extends Component {
         {sendStatus}
       </View>
     )
-    // return (
-    //   <View style={[viewStyle, {backgroundColor: bankStyle.BACKGROUND_COLOR}]}>
-    //     {date}
-    //     {messageBody}
-    //     <View style={photoListStyle}>
-    //       <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={navigator} numberInRow={inRow} />
-    //     </View>
-    //     {sendStatus}
-    //     {shareables}
-    //   </View>
-    // )
   }
 
   editVerificationRequest() {
@@ -574,14 +564,25 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
     }
+    if (model.id === APPLICATION) {
+      let color = bankStyle.myMessageLinkColor
+      let content = <Text style={[chatStyles.resourceTitle, {color}]}>{resource.filledForCustomer ? translate('applicationCompletedForClient') : translate('applicationForwardedToClient')}</Text>
+      content = <TouchableOpacity underlayColor='transparent' onPress={this.props.onSelect.bind(this, {resource: resource.application})}  key={this.getNextKey()}>
+                  {content}
+                </TouchableOpacity>
+      let msg = <View key={this.getNextKey()}>{content}</View>
+      renderedRow.push(msg);
+      return null
+    }
     if (model.id === BOOKMARK) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate(resource._p ? 'bookmarkWasChanged' : 'bookmarkWasCreated')}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate(resource._p ? 'bookmarkWasUpdated' : 'bookmarkWasCreated')}</Text>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || translate(model)}</Text>
                 </View>
       renderedRow.push(msg);
       return {onPressCall: () => uiUtils.showBookmarks(this.props)}
     }
+
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     if (isForgetting) {
       let msg = <View key={this.getNextKey()}>
@@ -791,8 +792,10 @@ class MessageRow extends Component {
                 useWebKit={true}
                 automaticallyAdjustContentInsets={false} />)
             }
-            else
-              vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>)
+            else {
+              let color = isMyMessage ? bankStyle.contextTextColor : '#757575'
+              vCols.push(<Text style={[style, {color}]} key={this.getNextKey()}>{resource[v]}</Text>)
+            }
           }
           else
             vCols.push(row)
