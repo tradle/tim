@@ -37,7 +37,7 @@ class ChatContext extends Component {
   }
 
   render() {
-    let { context, application, allContexts, bankStyle, chat, contextChooser, shareWith } = this.props
+    let { context, application, allContexts, bankStyle, chat, contextChooser, shareWith, noChat, form } = this.props
     if (!context)
       return <View/>
     const { requestFor } = context
@@ -66,6 +66,12 @@ class ChatContext extends Component {
     if (isAgent  &&  product === EMPLOYEE_ONBOARDING)
       product = AGENT_ONBOARDING
 
+    let title = translate(utils.getModel(product))
+    if (noChat && form)
+      title += ` - ${translate(utils.getModel(form))}`
+    let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>
+                    {title}
+                  </Text>
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
     let style = me.hasOwnProperty('_stepIndicator') &&  me._showStepIndicator &&  context._formsCount  &&  styles.contextBarWithSteps ||  styles.contextBar
@@ -77,16 +83,15 @@ class ChatContext extends Component {
     //             </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
-    if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson)) {
-      share = <View/>
-    }
+    if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson));
     else {
       share = <TouchableOpacity onPress={shareWith} style={{position: 'absolute', right: 10, padding: 10}}>
                 <Icon size={22} name='md-share' color={bankStyle.shareContextTextColor} style={{marginRight: 10, paddingLeft: 20}} />
               </TouchableOpacity>
     }
-    let stepIndicator = this.getStepIndicator({context, bankStyle, application})
+    let stepIndicator = !noChat && this.getStepIndicator({context, bankStyle, application})
 
+    // let bar = {backgroundColor: allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor, width: '100%'}
     let bar = {marginTop: -1, backgroundColor: allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
     return (
             <PageView>
