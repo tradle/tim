@@ -25,6 +25,7 @@ import utils, {
   dimensions,
   isStub,
   getMe,
+  getId,
   isRM,
   getEnumValueId,
   getPropertiesWithRef,
@@ -84,11 +85,10 @@ class CheckView extends Component {
     this.listenTo(Store, 'onAction');
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.isLoading !== nextState.isLoading)
-      return true
+    return this.state.isLoading !== nextState.isLoading
   }
   onAction(params) {
-    let { action, currency, style, country, backlink, isConnected } = params
+    let { action, currency, style, country, backlink, isConnected, template } = params
     if (action == 'connectivity') {
       this.setState({isConnected})
       return
@@ -96,7 +96,7 @@ class CheckView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource)) {
+    if (getId(params.resource) !== getId(resource)) {
       if (getRootHash(resource) !== getRootHash(params.resource))
         return
     }
@@ -118,6 +118,8 @@ class CheckView extends Component {
         _.extend(styleMerged, style)
         state.bankStyle = styleMerged
       }
+      if (params.application)
+        state.application = params.application
       this.setState(state)
     }
   }
@@ -127,7 +129,7 @@ class CheckView extends Component {
   }
 
   render() {
-    let { backlink, bankStyle, resource } = this.state
+    let { backlink, bankStyle, resource, isLoading } = this.state
     let { navigator, application, currency } = this.props
     const styles = createStyles({bankStyle})
 
@@ -152,6 +154,7 @@ class CheckView extends Component {
                         showRefResource={this.getRefResource}
                         excludedProperties={excludedProperties}
                         currency={currency}
+                        application={application}
                         bankStyle={bankStyle}
                         navigator={navigator} />
 
@@ -182,24 +185,32 @@ class CheckView extends Component {
                             </View>
                           </TouchableOpacity>
     }
-    else if (!this.state.isLoading) { //  &&  isRM(application)) {
+    else if (!isLoading) { //  &&  isRM(application)) {
       let checkOverrideProp = getPropertiesWithRef(CHECK_OVERRIDE, rmodel)
       if (checkOverrideProp.length) {
         checkOverrideButton = <View style={styles.footer}>
-                                <TouchableOpacity
-                                      onPress={() => this.createCheckOverride(checkOverrideProp[0])}>
+                                <TouchableOpacity onPress={() => this.createCheckOverride(checkOverrideProp[0])}>
                                   <View style={styles.overrideButton}>
-                                    <Text style={styles.overrideButtonText}>{translate('override')}</Text>
+                                    <Text style={styles.overrideButtonText}>{translate('resolve')}</Text>
                                   </View>
                                 </TouchableOpacity>
                               </View>
       }
     }
+    let loading
+    if (isLoading) {
+      loading = <View style={{position: 'absolute', bottom: 100, alignSelf: 'center' }}>
+                  {this.showLoading({bankStyle, component: CheckView})}
+                </View>
+      if (!resource[TYPE])
+        return loading
+    }
+
+    let actionSheet = this.renderCopyLinkActionSheet(resource)
+    let footer = this.renderMenu(CheckView)
 
     let { height, width } = dimensions(CheckView)
     let contentSeparator = getContentSeparator(bankStyle)
-    let actionSheet = this.renderCopyLinkActionSheet(resource)
-    let footer = this.renderMenu(CheckView)
     return (
       <PageView style={[platformStyles.container, {height, width, alignItems: 'center', borderTopColor: bankStyle.linkColor, borderTopWidth: 1}]} separator={contentSeparator} bankStyle={bankStyle} >
         <ScrollView
@@ -209,8 +220,9 @@ class CheckView extends Component {
           {propertySheet}
           {checkOverrideButton}
         </ScrollView>
-        {footer}
-        {actionSheet}
+          {loading}
+          {footer}
+          {actionSheet}
       </PageView>
     );
   }
@@ -228,7 +240,9 @@ class CheckView extends Component {
   }
 
   createCheckOverride(prop) {
-    const { navigator, bankStyle, application } = this.props
+    let { navigator, bankStyle, application } = this.props
+    if (!application)
+      application = this.state.application
     const { resource } = this.state
     const model = utils.getModel(prop.ref  ||  prop.items.ref)
     const statusModel = utils.getModel(OVERRIDE_STATUS)
@@ -240,10 +254,11 @@ class CheckView extends Component {
     else // if (checkStatus.indexOf('_fail') !== -1)
       status = buildStubByEnumTitleOrId(statusModel, values.find(r => r.id === 'pass').id)
 
+    let { to, _context } = application
     let r = {
       from: getMe(),
-      to: application.to,
-      _context: application._context,
+      to,
+      _context,
       [TYPE]: model.id,
       check: buildRef(resource),
       application,
