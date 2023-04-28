@@ -52,12 +52,12 @@ import formDefaults from '../data/formDefaults'
 
 const SEARCH_LIMIT = 10
 
-var {
+const {
   TYPE,
   ROOT_HASH,
 } = constants
 
-var {
+const {
   PROFILE,
   ORGANIZATION,
   FINANCIAL_PRODUCT,
@@ -82,7 +82,7 @@ const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const MODIFICATION = 'tradle.Modification'
 const LANGUAGE = 'tradle.Language'
 
-var excludeFromBrowsing = [
+const excludeFromBrowsing = [
   FORM,
   ENUM,
   // BOOKMARK,
@@ -111,7 +111,7 @@ var excludeFromBrowsing = [
   PROFILE
 ]
 
-var cnt = 0
+let cnt = 0
 
 class GridList extends Component {
   static propTypes = {
@@ -127,6 +127,8 @@ class GridList extends Component {
     isRegistration: PropTypes.bool,
     isBacklink: PropTypes.bool,
     isForwardlink: PropTypes.bool,
+    isMenu: PropTypes.bool,
+    list: PropTypes.array
     // backlinkList: PropTypes.array
   };
   constructor(props) {
@@ -141,7 +143,7 @@ class GridList extends Component {
         return true
       }
     })
-    let {resource, modelName, prop, filter, isBacklink, isChooser, isModel,
+    let {resource, modelName, prop, filter, isBacklink, isChooser, isModel, isMenu,
          serverOffline, search, bookmark, checksCategory, checkFilter} = this.props
     let model = utils.getModel(modelName)
 
@@ -175,8 +177,12 @@ class GridList extends Component {
       notFoundMap: {},
       resource: search  &&  resource,
       isGrid, //:  !this.isSmallScreen  &&  !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION,
-      isDraft: bookmark  &&  bookmark.bookmark.draft
+      isDraft: bookmark  &&  bookmark.bookmark.draft,
     }
+    let me = utils.getMe()
+    if (me.menu  &&  !isMenu  && !isBacklink)
+      this.state.navBarMenu = this.showMenu(this.props, this.props.navigator)
+
     if (props.multiChooser) {
       this.state.chosen = {}
       if (prop  &&  resource[prop.name])
@@ -223,6 +229,8 @@ class GridList extends Component {
   }
   _handleBacklink(props) {
     let { resource, prop, application, backlinkList } = props
+    if (!resource)
+      return
     if (resource[prop.name]) {
       if (backlinkList)
         this.state.dataSource = this.state.dataSource.cloneWithRows(backlinkList)
@@ -237,7 +245,7 @@ class GridList extends Component {
 
     if (application) {
       if (prop.name === this.props.prop.name) {
-        if (!application[prop.name]  &&  !this.props.application[prop.name])
+        if (!application[prop.name]  &&  (!this.props.application || !this.props.application[prop.name]))
           return
         let rows = (!application[prop.name]  &&  [])  ||  application[prop.name]
         this.state.dataSource = this.state.dataSource.cloneWithRows(rows)
@@ -249,7 +257,7 @@ class GridList extends Component {
       else
         this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
     }
-    else {
+    else if (resource) {
       let params = this.getParamsForBacklinkList(props)
       Actions.list(params)
     }
@@ -257,6 +265,7 @@ class GridList extends Component {
   getParamsForBacklinkList(props) {
     let { modelName, _readOnly, sortProperty,
           resource, prop, application, isAggregation, isChooser, listView } = props
+
     let params = {
       modelName: modelName,
       // limit: 10
@@ -325,12 +334,17 @@ class GridList extends Component {
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, navigator, search, application, prop, bookmark, backlinkList, checkFilter,
-          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
+    let { chat, resource, navigator, search, application, prop, bookmark, backlinkList, checkFilter, exploreData,
+          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser, isMenu, list } = this.props
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
       });
+      return
+    }
+    if (isMenu  &&  list) {
+      this.state.isLoading = false
+      this.state.dataSource = this.state.dataSource.cloneWithRows(list)
       return
     }
     if ((resource && modelName === BOOKMARK) || modelName === BOOKMARKS_FOLDER) {
@@ -344,7 +358,7 @@ class GridList extends Component {
         // Actions.listModels({modelName})
       }
       if (isBacklink) { //  &&  application) {
-        if (resource[prop.name]) {
+        if (resource && resource[prop.name]) {
           this.state.isLoading = false
           // Case when came from the stats page.
           if (checkFilter  &&  backlinkList)
@@ -360,6 +374,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
           modelName,
           filterResource: resource,
           bookmark,
+          exploreData,
           search: true,
           first: true,
           limit: this.limit
@@ -367,6 +382,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
         return
       }
     }
+
+    if (!resource)
+      return
     let params = this.getParamsForBacklinkList(this.props)
     StatusBar.setHidden(false);
     if (isBacklink)
@@ -412,10 +430,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
   }
   onAction(params) {
-    let { action, error, list, resource, endCursor, isConnected, noMove, addAllowed, cancelled } = params
+    let { action, error, list, resource, endCursor, isConnected, noMove, permissions, cancelled } = params
     if (error)
-      return;
-    let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink } = this.props
+      return
+    let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink, isMenu } = this.props
     if (action === 'connectivity') {
       this.setState({ isConnected })
       return
@@ -468,8 +486,17 @@ console.log('GridList.componentWillMount: filterResource', resource)
       this._talkToEmployee(params)
       return
     }
+    let me = utils.getMe()
+    if (action === 'getMenu') {
+      let navBarMenu = this.showMenu(this.props, navigator)
+
+      this.setState({ navBarMenu })
+      return
+    }
     let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, exploreData } = this.props
     if (action === 'list') {
+      if (isMenu && list !== me.menu)
+        return
       // First time connecting to server. No connection no providers yet loaded
       if (!list  ||  !list.length) {
         this._emptyListHandler(params)
@@ -553,7 +580,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       allLoaded,
       endCursor,
       noMove,
-      addAllowed
+      permissions
     }
     if (this.state.endCursor)
       state.prevEndCursor = this.state.endCursor
@@ -629,8 +656,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
       navigator.push(route)
   }
   _emptyListHandler(params) {
-    let { resource, query, alert, errorMessage, addAllowed } = params
+    let { resource, query, alert, errorMessage, permissions } = params
     let { modelName, isModel, search, prop, exploreData } = this.props
+
     if (alert) {
       Alert.alert(alert)
       return
@@ -644,10 +672,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
           return
         if (resource[TYPE] !== modelName) {
           this.errorAlert('noResourcesForCriteria')
-          this.setState({ isLoading: false, addAllowed })
+          this.setState({ isLoading: false, permissions })
           return
         }
-        this.setState({ resource, isLoading: false, addAllowed })
+        this.setState({ resource, isLoading: false, permissions })
         this.errorAlert('noResourcesForCriteria')
         return
       }
@@ -661,23 +689,23 @@ console.log('GridList.componentWillMount: filterResource', resource)
             this.errorAlert('noResourcesForCriteria')
         // }, 1)
       }
-      this.setState({refreshing: false, addAllowed})
+      this.setState({refreshing: false, permissions, isLoading: false})
       return
     }
     if (this.state.allowToAdd) {
-      this.setState({isLoading: false, list: null, addAllowed})
+      this.setState({isLoading: false, list: null, permissions})
       return
     }
-    if (addAllowed) {
+    if (permissions) {
       if (params.modelName === modelName)
-        this.setState({isLoading: false, list: null, addAllowed})
+        this.setState({isLoading: false, list: null, permissions})
     }
     if (exploreData) {
       if (!resource  ||  resource[TYPE] !== modelName) {
-        this.setState({ isLoading: false, addAllowed })
+        this.setState({ isLoading: false, permissions })
         return
       }
-      this.setState({ resource })
+      this.setState({ resource, permissions })
       this.errorAlert('noResourcesForCriteria')
     }
   }
@@ -715,13 +743,15 @@ console.log('GridList.componentWillMount: filterResource', resource)
       return true
     if (this.state.checksCategory !== nextState.checksCategory)
       return true
-    if (this.props.checksCategory !== nextProps.checksCategory)
+    if (this.state.navBarMenu !== nextState.navBarMenu)
       return true
     if (this.props.checkFilter !== nextProps.checkFilter)
       return true
     if (this.props.orientation !== nextProps.orientation)
       return true
     if (this.state.chosen !== nextState.chosen)
+      return true
+    if (this.state.permissions !== nextState.permissions)
       return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop.name !== nextProps.prop.name)
@@ -775,6 +805,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (!isApplication  &&  !isMyProduct && utils.isMessage(resource)  ||  utils.isStub(resource)) {
       this.selectMessage(resource, isEdit)
       return;
+    }
+    if (isMyProduct) {
+      this._selectResource(resource);
+      return
     }
     let { prop } = this.props
     if (prop  &&  !isApplication) {
@@ -885,8 +919,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
 
   selectMessage(resource, isEdit) {
     let { modelName, search, bankStyle, navigator, currency, locale, prop,
-          returnRoute, callback, application, isBacklink, serverOffline } = this.props
-    if (callback) {
+          returnRoute, callback, application, isBacklink, serverOffline, multiChooser } = this.props
+    if (callback && !multiChooser) {
       callback(prop, resource); // HACK for now
       if (returnRoute)
         navigator.popToRoute(returnRoute);
@@ -953,6 +987,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
 
     const isCheck = utils.isSubclassOf(rModel, CHECK)
+    const { permissions } = this.state
     let route = {
       title: title,
       componentName: isCheck  &&  'CheckView'  ||  'MessageView',
@@ -960,6 +995,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       passProps: {
         resource,
         search,
+        permissions,
         locale,
         currency,
         application,
@@ -969,7 +1005,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (utils.getMe().isEmployee) {
       if (utils.isSubclassOf(rType, 'tradle.Configuration'))
         this.addEdit({resource, title, route, style: bankStyle})
-      else if (this.state.addAllowed)
+      else if (permissions && permissions.edit)
         this.addEdit({resource, title, route, style: bankStyle})
     }
 
@@ -1001,7 +1037,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     // Edit verifications
     let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
-    if (!canEdit  &&  !isVerification  &&  !rModel.notEditable)
+    if (!canEdit  &&  !isVerification  &&  !rModel.notEditable && (!permissions || permissions.edit))
       canEdit = utils.isMyMessage({resource})
     // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
     // if (canEdit) {
@@ -1016,7 +1052,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
           passProps: {
             model: rModel,
             resource,
-            search: !isBacklink  &&  search,
+            application,
+            // permissions,
+            // search: !isBacklink  &&  search,
             serverOffline,
             currency,
             locale,
@@ -1211,7 +1249,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       else
         return <View/>
     }
-    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, application, bookmark,
+    let { isModel, isBacklink, isForwardlink, isMenu, modelName, prop, lazy, application, bookmark, noChat,
           exploreData, currency, locale, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
@@ -1239,7 +1277,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let isGrid = this.state.isGrid
     if (isGrid) {
       let viewCols = getGridCols(model)
-      if (modelName === MESSAGE)
+      // Overwrite viewCols for MESSAGE after renderHeader call
+      if (model.id === MESSAGE)
         viewCols = ['_provider', '_payloadType', '_context', '_time']
       if (viewCols)
         return (
@@ -1310,7 +1349,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 currency={currency}
                 isChooser={isChooser}
                 resource={resource}
-                folder={this.props.resource}/>
+                isMenu={isMenu}
+                folder={this.props.resource || resource}/>
       )
       return (<VerificationRow
                 lazy={lazy}
@@ -1328,6 +1368,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 search={search}
                 resource={resource}
+                noChat={noChat}
                 chosen={this.state.chosen} />
       )
     }
@@ -1454,23 +1495,23 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { isModel, modelName, prop, search, bookmark, isBacklink, bankStyle } = this.props
     if (isModel) // || bookmark)
       return
-    let { resource, isDraft, allowToAdd, addAllowed } = this.state
-    if (prop  &&  !prop.allowToAdd  &&  !addAllowed)
+    let { resource, isDraft, allowToAdd, permissions } = this.state
+    if (prop  &&  !allowToAdd  &&  !permissions)
       return
     let me = utils.getMe()
     let model = utils.getModel(modelName);
     let noMenuButton
     if (!prop  &&  model.id !== ORGANIZATION  &&  model.id !== BOOKMARKS_FOLDER) {
-       noMenuButton = (!search &&  !isModel  &&  (!resource || !Object.keys(resource).length))
+      noMenuButton = (!search &&  !isModel  &&  (!resource || !Object.keys(resource).length))
     }
     let employee
     if (me.isEmployee) {
+      let orgTitle = me.counterparty ? me.counterparty.title : me.organization.title
       employee = <View style={[styles.center, {paddingLeft: 10, maxWidth: utils.dimensions(GridList).width - 90}]}>
-                   <Text numberOfLines={1} style={[styles.employee, {color: bankStyle.linkColor}]}>{me.firstName + '@' + me.organization.title}</Text>
+                   <Text style={[styles.employee, {color: bankStyle.linkColor}]}>{`${me.firstName}@${orgTitle}`}</Text>
                  </View>
     }
-    else
-      employee = <View/>
+
     let isAdd = allowToAdd  &&  !search
     let icon
     if (isAdd)
@@ -1488,7 +1529,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                     <Icon name={icon}  size={33}  color={color}/>
                   </View>
                 </TouchableOpacity>
-    else if (this.state.addAllowed) {
+    else if (permissions) {
       menuBtn = <TouchableOpacity onPress={() => isAdd ? this.addNewResource(utils.getModel(bookmark.bookmark[TYPE])) : this.ActionSheet.show()}>
                   <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
                     <Icon name={icon}  size={33}  color={color}/>
@@ -1564,6 +1605,10 @@ console.log('GridList.componentWillMount: filterResource', resource)
   }
   addNew() {
     let { modelName, prop, resource, bankStyle, navigator, isChooser, currency, locale } = this.props
+    if (modelName === BOOKMARKS_FOLDER) {
+      this.bookmark(true)
+      return
+    }
     let model = utils.getModel(modelName);
     let r;
     this.setState({hideMode: false})
@@ -1648,8 +1693,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { props, state } = this
     let { filter, dataSource, isLoading, list, isConnected,
           allLoaded, serverOffline, allowToAdd } = state
-    let { isChooser, modelName, isModel, application, search, _readOnly,
-          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = props
+    let { isChooser, modelName, isModel, application, search, _readOnly, navigator,
+          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle, isMenu, noChat } = props
     let model = utils.getModel(modelName);
     let me = utils.getMe()
 
@@ -1660,18 +1705,20 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     let loading
     if (isLoading  &&  !isModel) {
-      let showLoadingIndicator = true
+      let showLoadingIndicator = !search
       if (isBacklink  &&  application)
         showLoadingIndicator = false
       else if (isBacklink  ||  isForwardlink) {
-        let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
-        let cnt = resource['_' + pName + 'Count']
-        if (!cnt) {
-          if (!resource[pName]  || !resource[pName].length)
+        if (resource) {
+          let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
+          let cnt = resource['_' + pName + 'Count']
+          if (!cnt) {
+            if (!resource[pName]  || !resource[pName].length)
+              showLoadingIndicator = false
+          }
+          else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
             showLoadingIndicator = false
-        }
-        else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
-          showLoadingIndicator = false
+          }
         }
       }
       if (showLoadingIndicator)
@@ -1689,6 +1736,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                     model={model}
                     isLoading={isLoading}>
                   </NoResources>
+                  {loading}
                 </View>
     }
     else {
@@ -1714,7 +1762,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let footer = actionSheet && this.renderFooter()
     let searchBar
 
-    if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
+    if (SearchBar  &&  !isBacklink  &&  !isForwardlink  &&  !isMenu) {
       let hasSearch = isModel  ||  utils.isEnum(model)
       // Check if the starting - no filter list - is small
       if (hasSearch  &&  (!filter  &&  list  &&  list.length < SEARCH_LIMIT))
@@ -1754,14 +1802,42 @@ console.log('GridList.componentWillMount: filterResource', resource)
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : uiUtils.getContentSeparator(bankStyle)
     let contentSeparator = getContentSeparator(bankStyle)
+    if (noChat) {
+      return (
+        <View style={isBacklink || isForwardlink || isMenu ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu && contentSeparator} bankStyle={bankStyle}>
+          {network}
+          {searchBar}
+          {content}
+          {!isEmptyItemsTab && loading}
+          {footer}
+          {actionSheet}
+        </View>
+      )
+    }
+    let navBarMenu
+    if (me.isEmployee && !isMenu && !isBacklink) {
+       navBarMenu = <View style={platformStyles.pageLeftMenu}>
+                      {this.state.navBarMenu}
+                    </View>
+    }
+    let style
+    if (isBacklink || isForwardlink)
+      style = {flex: 1}
+    else if (isMenu)
+      style = {flex: 1}
+    else
+      style = platformStyles.container
     return (
-      <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={(this.state.allowToAdd  || (!isBacklink && !isForwardlink && !isEmptyItemsTab)) && contentSeparator} bankStyle={bankStyle}>
+      <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={(this.state.allowToAdd  || (!isBacklink && !isForwardlink && !isEmptyItemsTab && !isMenu)) && contentSeparator} bankStyle={bankStyle}>
         <SafeAreaView style={styles.container}>
+        {navBarMenu}
+        <View style={[platformStyles.pageContentWithMenu, {flex: 4}]}>
         {network}
         {searchBar}
         <View style={styles.separator} />
         {content}
         {!isEmptyItemsTab && loading}
+        </View>
         </SafeAreaView>
         {footer}
         {actionSheet}
@@ -1795,15 +1871,14 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let { search, modelName, prop, isBacklink, isForwardlink, bookmark, exploreData } = this.props
     if (isForwardlink)
       return
-    let { allowToAdd, isDraft, addAllowed } = this.state
+    let { allowToAdd, isDraft, permissions } = this.state
     let buttons
     if (bookmark) {
       if (!isDraft) {
         if (!bookmark.bookmark[TYPE])
           return
         let bm = utils.getModel(bookmark.bookmark[TYPE])
-        if (addAllowed) {
-          this.state.addAddNew = true
+        if (permissions) {
           buttons = [{
             text: translate('Bookmark'),
             // text: translate('addNew', translate(bm)),
@@ -1846,11 +1921,11 @@ console.log('GridList.componentWillMount: filterResource', resource)
         }
       ]
     }
-    if (!addAllowed && !buttons)
+    if (!permissions && !buttons)
       return
 
     let model = utils.getModel(modelName)
-    if (addAllowed) {
+    if (permissions && permissions.create) {
       if (!buttons)
         buttons = []
       buttons.push({
@@ -1972,6 +2047,12 @@ var styles = StyleSheet.create({
     marginTop: 0,
     width: 30,
     height: 30
+  },
+  menu: {
+    flex: 1,
+    height: '100%',
+    // width: '300',
+    backgroundColor: '#f7f7f7'
   }
 });
 
