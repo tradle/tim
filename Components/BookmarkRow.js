@@ -72,20 +72,21 @@ class BookmarkRow extends Component {
   }
 
   render() {
-    let {resource, lazy, onSelect, prop, bankStyle, isChooser, noMove, folder, exploreData } = this.props
+    let {resource, isMenu, lazy, onSelect, prop, bankStyle, isChooser, noMove, folder, exploreData } = this.props
+    let styles = createStyles({bankStyle, isMenu})
     if (resource[TYPE] === BOOKMARKS_FOLDER) {
       let count
-      if (!resource.shared && !isChooser  &&  resource.list  &&  resource.list.length) {
+      if (!resource.shared && !isChooser  &&  resource.list  &&  resource.list.length && !isMenu) {
         count = <View style={[styles.count, {backgroundColor: bankStyle.linkColor}]}>
                  <Text style={styles.countText}>{resource.list.length}</Text>
                </View>
 
       }
-      return <View style={styles.header}>
+      return <View style={[isMenu && styles.menu || styles.header]}>
                <View style={styles.rowContent}>
                  <TouchableOpacity onPress={isChooser ? this.props.onSelect.bind(this) : this.showBookmarks.bind(this)}>
-                   <View style={{flex: 1}}>
-                     <Text style={[styles.rTitle, {paddingVertical: 10}]}>{resource.message}</Text>
+                   <View style={{flex: 1, paddingTop: isMenu ? 10 : 0}}>
+                     <Text style={[styles.rTitle, {paddingVertical: 10, fontWeight: isMenu && '600' || '400'}]}>{resource.message}</Text>
                    </View>
                  </TouchableOpacity>
                  {count}
@@ -107,23 +108,32 @@ class BookmarkRow extends Component {
     //   action = <TouchableOpacity onPress={this.props.onMove.bind(this)} style={{justifyContent: 'center'}}>
     //              <Icon name='ios-exit-outline'  size={30}  color={bankStyle.linkColor}  style={{marginTop: 5}}/>
     //            </TouchableOpacity>
-    let isCancellable = folder.message !== translate('Initial Bookmarks')
+    let isCancellable = !isMenu  &&  folder.message !== translate('Initial Bookmarks')
     // Don't allow to cancel somebody else's bookmark
     // if (resource._author === utils.getRootHash(utils.getMe()) && folder.message !== translate('Initial Bookmarks'))
     //   isCancellable = true
     if (exploreData) {
-      action = <View style={{flexDirection: 'row', height: 30}}>
+      let counterparty
+      let me = utils.getMe()
+      if (!me.counterparty && resource._authorOrg)
+        counterparty = <Icon name='ios-star'  size={20}  color={bankStyle.accentColor} style={{marginRight: -7}}/>
+      action = <View style={{flexDirection: 'row'}}>
                  {action}
-                 <TouchableOpacity onPress={this.props.onEdit.bind(this)} style={{paddingLeft: 5, justifyContent: 'center'}}>
-                   <Icon name='md-create'  size={25}  color='darkblue' style={{margintop: -3, marginLeft: -5}}/>
+                 <TouchableOpacity onPress={this.props.onEdit.bind(this)} style={{paddingLeft: 5, justifyContent: 'center', flexDirection: 'row'}}>
+                   {counterparty}
+                   <Icon name='md-create'  size={27}  color='darkblue'/>
                  </TouchableOpacity>
                </View>
     }
     else if (isCancellable) {
-      action = <TouchableOpacity onPress={this.props.onCancel.bind(this)} style={{justifyContent: 'center'}}>
-                 <Icon name='ios-close-circle'  size={25}  color='red'  style={{marginTop: -3}}/>
-               </TouchableOpacity>
+      action = <View style={{flexDirection: 'row'}}>
+                 {action}
+                 <TouchableOpacity onPress={this.props.onCancel.bind(this)} style={{paddingLeft: 5, justifyContent: 'center'}}>
+                   <Icon name='md-close-circle'  size={27}  color='red'/>
+                 </TouchableOpacity>
+               </View>
     }
+
     // let shared = resource.shared && this._isMine(resource) && <Icon name={'md-share'}  size={20}  color='#cccccc' style={{marginRight: 5, marginTop: 10}}/>
     if (resource.message) {
       titleComponent = <View style={{flex: 1}}>
@@ -133,14 +143,17 @@ class BookmarkRow extends Component {
                        </View>
     }
     else
-      this.formatBookmark(model, resource.bookmark, renderedRows)
-    return <View style={styles.header} key={this.getNextKey()}>
+      this.formatBookmark(model, resource.bookmark, renderedRows, styles)
+    return <View style={isMenu ? styles.menu : styles.header} key={this.getNextKey()}>
             <View style={styles.rowContent}>
-              <View style={styles.title}>
-                {titleComponent}
-                {renderedRows}
+              <View style={{flexDirection: 'row'}}>
+                {isMenu && <Icon name='md-bookmark' size={23} style={{color: bankStyle.linkColor, paddingRight: 5, paddingLeft: 15, marginTop: 10}}/>}
+                <View style={styles.title}>
+                  {titleComponent}
+                  {renderedRows}
+                </View>
               </View>
-              <View style={styles.count}>
+              <View style={styles.action}>
                 {action}
               </View>
             </View>
@@ -163,7 +176,7 @@ class BookmarkRow extends Component {
       }
     })
   }
-  formatBookmark(model, resource, renderedRow) {
+  formatBookmark(model, resource, renderedRow, styles) {
     let properties = model.properties;
     let viewCols = [];
     for (let p in resource) {
@@ -187,7 +200,7 @@ class BookmarkRow extends Component {
       let ref = properties[v].ref
       if (ref) {
         if (resource[v])
-          this.formatRef(resource[v], properties[v], vCols, units)
+          this.formatRef(resource[v], properties[v], vCols, units, styles)
         return;
       }
       let row
@@ -241,7 +254,7 @@ class BookmarkRow extends Component {
     else
       renderedRow.push(<Text style={[styles.rTitle, {paddingVertical: 10}]}>{translate(model)}</Text>)
   }
-  formatRef(pValue, prop, vCols, units) {
+  formatRef(pValue, prop, vCols, units, styles) {
     if (!pValue)
       return
     const { resource, locale, currency  } = this.props
@@ -289,59 +302,63 @@ class BookmarkRow extends Component {
 reactMixin(BookmarkRow.prototype, RowMixin);
 reactMixin(BookmarkRow.prototype, Reflux.ListenerMixin);
 
-var styles = StyleSheet.create({
-  title: {
-    flexDirection: 'column',
-    flex: 1,
-    justifyContent: 'center'
-  },
-  header: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderBottomColor: '#f0f0f0',
-    borderBottomWidth: 1,
-    paddingBottom: 5
-  },
-  rTitle: {
-    fontSize: 18,
-    color: '#555555',
-  },
-  resourceTitle: {
-    fontSize: 16,
-    fontWeight: '400',
-  },
-  resourceTitleS: {
-    fontSize: 14,
-    paddingTop: 3
-  },
-  resourceTitleL: {
-    fontSize: 16,
-    fontWeight: '400',
-    paddingRight: 5,
-    color: '#999999',
-  },
-  rowContent: {
-    flex: 1,
-    // flexDirection: 'row',
-    // justifyContent: 'space-between',
-    paddingTop: 5,
-    marginHorizontal: 10,
-    minHeight: 40
-  },
-  count: {
-    position: 'absolute',
-    top: 15,
-    justifyContent: 'center',
-    right: 0,
-    width: 20,
-    height:20,
-    borderRadius: 10
-  },
-  countText: {
-    fontSize: 12,
-    alignSelf: 'center',
-    color: '#ffffff'
-  },
-});
-
+const createStyles = utils.styleFactory(BookmarkRow, function ({ dimensions, bankStyle, isMenu }) {
+  return StyleSheet.create({
+    title: {
+      flexDirection: 'column',
+      flex: 1,
+      justifyContent: 'center'
+    },
+    header: {
+      flex: 1,
+      backgroundColor: '#ffffff',
+      borderBottomColor: '#f0f0f0',
+      borderBottomWidth: 1,
+      paddingBottom: 5
+    },
+    menu: {
+      flex: 1
+    },
+    rTitle: {
+      fontSize: 18,
+      color: '#555555',
+    },
+    resourceTitle: {
+      fontSize: 16,
+      fontWeight: '400',
+    },
+    resourceTitleS: {
+      fontSize: 14,
+      paddingTop: 3
+    },
+    resourceTitleL: {
+      fontSize: 16,
+      fontWeight: '400',
+      paddingRight: 5,
+      color: '#999999',
+    },
+    rowContent: {
+      flex: 1,
+      // flexDirection: 'row',
+      // justifyContent: 'space-between',
+      paddingTop: 5,
+      marginHorizontal: 10,
+      minHeight: 40
+    },
+    count: {
+      position: 'absolute',
+      top: 15,
+      justifyContent: 'center',
+      right: 0,
+      width: 20,
+      height:20,
+      borderRadius: 10
+    },
+    countText: {
+      fontSize: 12,
+      alignSelf: 'center',
+      color: '#ffffff'
+    },
+  })
+})
 module.exports = BookmarkRow;
