@@ -11,10 +11,11 @@ import t from 'tcomb-form-native'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import _ from 'lodash'
+
 import constants from '@tradle/constants'
 
 import utils from '../utils/utils'
-var translate = utils.translate
+const translate = utils.translate
 import myStyles from '../styles/styles'
 import NewResourceMixin from './NewResourceMixin'
 import PageView from './PageView'
@@ -208,6 +209,8 @@ class NewItem extends Component {
       this.state.options = null;
     return !hasError;
   }
+  onEndEditing(prop, value) {
+  }
   render() {
     let {err, metadata, bankStyle} = this.props;
     let error
@@ -246,8 +249,9 @@ class NewItem extends Component {
         }
       }
     }
+    let { enumProp } = this.state
+    let actionSheet = this.renderActionSheet(metadata.items.ref)
     let contentSeparator = getContentSeparator(bankStyle)
-
     return (
       <PageView style={[platformStyles.container]}  separator={contentSeparator} bankStyle={bankStyle}>
         <ScrollView style={{backgroundColor: 'transparent', paddingVertical: 10}}
@@ -258,6 +262,10 @@ class NewItem extends Component {
             <Form ref='form' type={Model} options={options} />
           </View>
         </ScrollView>
+        {actionSheet}
+        <View onLayout={
+          enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+        }/>
         {error}
       </PageView>
     );
