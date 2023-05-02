@@ -35,6 +35,11 @@ const {
   MONEY
 } = constants.TYPES
 
+const SUCCESSFUL = 1
+const FAILED = 2
+const SUCCESSFUL_WITH_ALERT = 3
+
+import components from './components'
 import utils, { translate } from '../utils/utils'
 import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
 import Markdown from './Markdown'
@@ -92,8 +97,8 @@ class NewResource extends Component {
   };
 
   constructor(props) {
-    super(props);
-    let r = {};
+    super(props)
+    let r = {}
     let { resource, originatingMessage, model, isPrefilled } = props
     if (resource)
       r = utils.clone(resource) //extend(true, r, props.resource)
@@ -109,7 +114,8 @@ class NewResource extends Component {
       isLoadingVideo: false,
       isPrefilled,
       modal: {},
-      termsAccepted: isRegistration ? false : true
+      termsAccepted: isRegistration ? false : true,
+      fixedProps: {}
     }
     if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
       if (originatingMessage.message)
@@ -166,10 +172,14 @@ class NewResource extends Component {
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
+           this.state.enumProp !== nextState.enumProp        ||
            this.state.isUploading !== nextState.isUploading  ||
-           this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
-           this.state.inFocus !== nextState.inFocus                ||
-           this.state.disableEditing !== nextState.disableEditing  ||
+           this.state.recalculateMode !== nextState.recalculateMode ||
+           this.state.isLoadingVideo !== nextState.isLoadingVideo   ||
+           this.state.keyboardSpace !== nextState.keyboardSpace     ||
+           this.state.inFocus !== nextState.inFocus                 ||
+           this.state.disableEditing !== nextState.disableEditing   ||
+           !_.isEqual(this.state.fixedProps, nextState.fixedProps)  ||
            this.state.requestedProperties !== nextState.requestedProperties ||
            this.state.validationErrors !== nextState.validationErrors       ||
            this.state.itemsChangesCounter !== nextState.itemsChangesCounter ||
@@ -182,8 +192,7 @@ class NewResource extends Component {
   }
   componentWillMount() {
     let { resource, isUploading, prop } = this.state
-    let { isPrefilled, exploreData, originatingMessage, containerResource } = this.props    // Profile gets changed every time there is a new photo added through for ex. Selfie
-   // Profile gets changed every time there is a new photo added through for ex. Selfie
+    let { isPrefilled, exploreData, originatingMessage: originatingResource, containerResource } = this.props
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource})
 
@@ -192,7 +201,7 @@ class NewResource extends Component {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource})
       else
-        Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
+        Actions.getRequestedProperties({resource, originatingResource})
     }
     else if (resource.id) {
       if (!model.inlined)
@@ -214,7 +223,7 @@ class NewResource extends Component {
           exclude = true
         Actions.getTemporary(resource[TYPE], exclude)
         if (!exploreData)
-          Actions.getRequestedProperties({resource, originatingResource: originatingMessage})
+          Actions.getRequestedProperties({resource, originatingResource})
       }
     }
     if (!this.props.exploreData  &&  Platform.OS === 'ios') {
@@ -254,7 +263,8 @@ class NewResource extends Component {
   }
 
   onAction(params) {
-    let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
+    let { resource, action, error, requestedProperties, deleteProperties,
+          message, validationErrors, recalculate } = params
     let { navigator, prop, containerResource, callback, originatingMessage, bankStyle, model, currency, chat, isRefresh } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
@@ -278,10 +288,23 @@ class NewResource extends Component {
         navigator.pop()
     }
     if (action === 'formEdit') {
-
       if (!resource  ||  (utils.getType(this.state.resource) === utils.getType(resource) && utils.getId(this.state.resource) === utils.getId(resource))) {
-      // if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
-        if (requestedProperties) {
+        let { fixedProps } = this.state
+        let { doTable } = params
+        let status = this.doRecalculate(validationErrors)
+        if (recalculate) {
+          if (status === FAILED) {
+            if (message)
+              Alert.alert(message)
+            else
+              Alert.alert(translate('goalNotFound'))
+          }
+          let state = {recalculateMode: true, validationErrors, doTable: false, status }
+          if (resource)
+            state.resource = resource
+          this.setState(state)
+        }
+        else if (requestedProperties) {
           let r = resource ||  this.state.resource
           if (originatingMessage  &&  originatingMessage.prefill)
             _.defaults(r, originatingMessage.prefill)
@@ -290,7 +313,7 @@ class NewResource extends Component {
               delete this.floatingProps[p]
               delete r[p]
             })
-           this.setState({requestedProperties, resource: r, message: message || this.state.message })
+          this.setState({requestedProperties, resource: r, message: message || this.state.message, recalculateMode: false, validationErrors, doTable, status })
         }
         else if (params.prop  &&  params.value) {
           // set scanned qrCode prop
@@ -300,8 +323,11 @@ class NewResource extends Component {
           if (!this.floatingProps)
             this.floatingProps = {}
           this.floatingProps[pName] = params.value
-          this.setState({resource: r})
+
+          this.setState({ resource: r, recalculateMode: false, validationErrors, doTable })
         }
+        else if (fixedProps)
+          this.setState({ resource, recalculateMode: false, validationErrors, fixedProps: {}, doTable, status })
       }
       return
     }
@@ -437,15 +463,34 @@ class NewResource extends Component {
     if (currentRoutesLength != 2)
       navigator.pop();
   }
+  doRecalculate(validationErrors) {
+    if (!validationErrors  ||  !validationErrors._info)
+      return SUCCESSFUL
+    const { hasSuccessful, hasFailed } = validationErrors._info
+    if (!hasSuccessful)
+      return FAILED
+    if (!hasFailed)
+      return SUCCESSFUL
+    return SUCCESSFUL_WITH_ALERT
+  }
   shareWith(newResource, list) {
     if (list.length)
       Actions.share(newResource, list)
     this.props.navigator.pop()
   }
   onSavePressed() {
-    if (this.state.submitted)
+    const { submitted, fixedProps, recalculateMode, status } = this.state
+    if (submitted)
       return
-
+    if (recalculateMode) {
+      Alert.alert(translate('pleaseRecalculate'))
+      return
+    }
+    if (status === SUCCESSFUL_WITH_ALERT) {
+      this.alertNotFullSuccess(this.onSavePressed, status)
+      // this.setState({status: SUCCESSFUL})
+      return
+    }
     this.state.submitted = true
     this.state.noScroll = false
     this.state.validationErrors = null
@@ -464,7 +509,7 @@ class NewResource extends Component {
     this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (let p in this.floatingProps) {
-        if (isNew  ||  resource[p] !== this.floatingProps[p])
+        // if (isNew  ||  resource[p] !== this.floatingProps[p])
           json[p] = this.floatingProps[p]
       }
     }
@@ -493,27 +538,20 @@ class NewResource extends Component {
     let reqProperties = this.state.requestedProperties || this.props.requestedProperties
     if (reqProperties) {
       let { requestedProperties } = reqProperties
-      let eCols = []
       if (requestedProperties) {
         let eCols = []
         let { softRequired } = this.addRequestedProps({eCols, props})
-        softRequired.forEach(p => {
+        softRequired && softRequired.forEach(p => {
           if (required.indexOf(p) === -1)
             required.push(p)
         })
       }
-      // for (let p in requestedProperties) {
-      //   if (p.indexOf('_group') !== -1) {
-      //     // props[p].list.forEach(p => {
-      //     //   if (!requestedProperties[p])
-      //     //     required.push(p)
-      //     // })
-      //   }
-      //   else if (required.indexOf(p) === -1) {
-      //     if (requestedProperties[p].required)
-      //       required.push(p)
-      //   }
-      // }
+    }
+    if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR  &&  errs) {
+      Object.keys(errs).forEach(prop => {
+        if (!required.includes(prop))
+          required.push(prop)
+      })
     }
     if (!required.length  &&  !reqProperties) {
       const props = model.properties
@@ -563,15 +601,21 @@ class NewResource extends Component {
 
     let r = {}
     _.extend(r, resource)
+    if (originatingMessage) {
+      const { lens, prefill } = originatingMessage
+      if (lens)
+        json._lens = lens
+      if (prefill) {
+        for (let p in prefill) {
+          if (!json[p] && p.charAt(0) !== '_' && props[p] && props[p].readOnly)
+            json[p] = prefill[p]
+        }
+        json._sourceOfData = originatingMessage
+      }
+    }
     let context = r._context ||  (originatingMessage  &&  originatingMessage._context)
     if (context)
       json._context = context
-    if (originatingMessage) {
-      if (originatingMessage.lens)
-        json._lens = originatingMessage.lens
-      if (originatingMessage.prefill)
-        json._sourceOfData = originatingMessage
-    }
 
 if (r.url)
   debugger
@@ -802,13 +846,16 @@ if (r.url)
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: 'Back',
         componentName: 'GridList',
+        rightButtonTitle: 'Done',
         passProps: {
           modelName: bl.items.ref,
           to: this.state.resource.to,
           resource: this.state.resource,
           isChooser: true,
           prop: bl,
+          multiChooser: true,
           callback: this.setChosenValue,
+          onDone: this.done.bind(this, bl.name),
           bankStyle,
           currency
         }
@@ -829,6 +876,10 @@ if (r.url)
         currency
       }
     });
+  }
+  done(propName, values) {
+    this.setChosenValue(propName, values)
+    this.props.navigator.pop()
   }
   editItem(pMeta, item) {
     let resource = this.state.resource
@@ -873,14 +924,14 @@ if (r.url)
   }
 
   render() {
-    let { message, isUploading, resource, disableEditing, isRegistration, validationErrors,
-          termsAccepted, isLoadingVideo, err, missedRequiredOrErrorValue } = this.state
+    let { message, isUploading, resource, disableEditing, isRegistration, validationErrors, doTable,
+          termsAccepted, isLoadingVideo, err, missedRequiredOrErrorValue, fixedProps, recalculateMode } = this.state
     if (isUploading)
        return <View/>
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let editProps = utils.getEditableProperties(resource)
-    if (editProps.length) {
+    if (editProps.length && editProps.length === 1 && !utils.getModel(resource[TYPE]).editCols) {
       let eProp = editProps[0]
       if (eProp.signature) {
         return  <View style={{flex: 1}}>
@@ -893,7 +944,7 @@ if (r.url)
     }
 
     let meta =  this.props.model
-    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh, bookmark, noChat, canSkip } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -905,14 +956,14 @@ if (r.url)
      const { properties } = meta
     if (bookmark  &&  bookmark.bookmark) {
       for (let p in bookmark.bookmark) {
-        if (properties[p]) {
-          let bPropVal = bookmark.bookmark[p]
-          if (properties[p].ref  &&  utils.isEnum(properties[p].ref)  &&  !Array.isArray(bPropVal))
-            data[p] = [bPropVal]
-          else
-            data[p] = bPropVal
-          resource[p] = bPropVal
-        }
+        if (!properties[p])
+          continue
+        let bPropVal = bookmark.bookmark[p]
+        if (properties[p].ref  &&  utils.isEnum(properties[p].ref)  &&  !Array.isArray(bPropVal))
+          data[p] = [bPropVal]
+        else
+          data[p] = bPropVal
+        resource[p] = bPropVal
       }
     }
     let editable
@@ -979,11 +1030,22 @@ if (r.url)
     else
       itemsMeta = utils.getItemsMeta(meta);
 
+    let me = utils.getMe()
     let arrayItems
     for (let p in itemsMeta) {
+      let bl = itemsMeta[p]
+      if (bl.internalUse &&  (!me.isEmployee || me.counterparty))
+        continue
       if (!this.checkRequestedProperties(p))
         continue
       let bl = itemsMeta[p]
+      if (bl.internalUse &&  (!me.isEmployee || me.counterparty))
+        continue
+      // if (search && !bl.inlined || (bl.items.ref && !utils.getModel(bl.items.ref).inlined))
+      //   continue
+      if (!this.checkRequestedProperties(p))
+        continue
+
       if (bl.icon === 'ios-telephone-outline') {
         bl.icon = 'ios-call-outline'
       }
@@ -1019,11 +1081,9 @@ if (r.url)
                     </View>
                  </TouchableOpacity>
                </View>
-    let formStyle
-    if (isRegistration)
-      formStyle = {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
-    else
-      formStyle = styles.noRegistration
+    let formStyle = isRegistration
+                  ? {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
+                  : {justifyContent: 'flex-start'}
     // let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons
     // if (jsonProps  &&  jsonProps.length) {
@@ -1084,7 +1144,17 @@ if (r.url)
         Alert.alert(err)
         this.state.err = null
       }
-      if (bankStyle  &&  bankStyle.submitBarInFooter)
+      let status = this.doRecalculate(validationErrors)
+
+      if (recalculateMode || status === FAILED) {
+        submit = <View style={{paddingBottom: 30}}>
+                   <View style={[styles.submitButton, {backgroundColor: '#ccc'}]}>
+                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
+                     <Text style={styles.submitText}>{submitTitle}</Text>
+                   </View>
+                 </View>
+      }
+      else if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={onPress}>
                    <View style={styles.submitBarInFooter}>
                      <View style={styles.bar}>
@@ -1092,27 +1162,47 @@ if (r.url)
                      </View>
                    </View>
                  </TouchableOpacity>
-      else
-        submit = <TouchableOpacity onPress={onPress} style={{paddingBottom: 30}}>
+      else {
+        submit = <TouchableOpacity onPress={this.alertNotFullSuccess.bind(this, onPress, status)} style={{paddingBottom: 30}}>
                    <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{submitTitle}</Text>
                    </View>
                  </TouchableOpacity>
-
+      }
     }
+
     if (arrayItems) {
       arrayItems = <View style={styles.arrayItems}>
                      {arrayItems}
                    </View>
     }
     let form = <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
-    // if (!utils.isWeb()) {
-    //   form = <KeyboardAvoidingView behavior='position' style={{flex:1}} keyboardVerticalOffset={100} enabled>
-    //           <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
-    //         </KeyboardAvoidingView>
-    // }
+    let table
+    if (doTable) {
+      let componentName = doTable // Object.keys(doTable)[0]
+      let component = components[`${componentName.charAt(0).toUpperCase()}${componentName.slice(1)}`]
+      if (component) {
+        let { tableParams } = this.state
+        table = React.createElement(component, {resource, tableParams, bankStyle, callback: (params) => {
+          this.setState(params)
+          if (params.resource)
+            Actions.getRequestedProperties({resource: params.resource, originatingResource: originatingMessage, additionalInfo: params.additionalInfo})
+        }})
+      }
+      // this.state.doTable = null
+    }
+    let skipButton
+    if (canSkip) {
+      skipButton = <TouchableOpacity onPress={canSkip}>
+                     <View style={styles.submitButton}>
+                       <View style={styles.bar}>
+                         <Text style={styles.submitText}>{translate('next')}</Text>
+                       </View>
+                     </View>
+                   </TouchableOpacity>
 
+    }
     let content =
       <ScrollView style={styles.scroll}
                   ref='scrollView' {...this.scrollviewProps}
@@ -1133,6 +1223,7 @@ if (r.url)
               {form}
               {formsToSign}
               {button}
+              {table}
               {arrayItems}
               {jsons}
               {loadingVideo}
@@ -1141,6 +1232,7 @@ if (r.url)
         </View>
         <View style={styles.submit}>
           {submit}
+          {skipButton}
         </View>
         {wait}
       </ScrollView>
@@ -1158,15 +1250,44 @@ if (r.url)
                    <Text style={styles.errorsText}>{translate(message)}</Text>
                  </View>
       }
-      else if (params.validationErrors) {
-        errors = <View style={styles.errors}>
-                   <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
-                 </View>
+      else if (validationErrors && _.size(validationErrors)) {
+        let info
+        if (validationErrors._info)
+          info = <Text style={styles.warningText}>{validationErrors._info.message}</Text>
+        if (_.size(validationErrors) === 1 && info)
+          errors = <View style={styles.warnings}>
+                     <Text style={styles.warningText}>{translate('validationInfo')}</Text>
+                     {info}
+                   </View>
+        else
+          errors = <View style={styles.errors}>
+                     <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
+                     {info}
+                   </View>
+      }
+      else
+        errors = !noChat  &&  <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
+
+      let { enumProp } = this.state
+      let actionSheet = this.renderActionSheet(resource[TYPE])
+      if (noChat) {
+        return <View style={[styles.message, {height: '100%', paddingBottom: 50}]}>
+                 {errors}
+                 {content}
+                 {actionSheet}
+                 <View onLayout={
+                   enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+                 }/>
+               </View>
       }
 
       return <PageView style={[platformStyles.container, {backgroundColor: '#f3f3f3'}]} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}
+               {actionSheet}
+               <View onLayout={
+                 enumProp  &&  this.ActionSheet && this.ActionSheet.show()
+               }/>
              </PageView>
 
     }
@@ -1185,6 +1306,22 @@ if (r.url)
         </View>
       </View>
     )
+  }
+  alertNotFullSuccess(onPress, status) {
+    if (status === SUCCESSFUL)
+      onPress()
+    else
+      Alert.alert(
+        translate('youCanSubmitButNotEverythingWorked'),
+        [
+          {text: 'Ok', onPress: () => {
+            // HACK
+            this.state.status = SUCCESSFUL
+            onPress()
+          }},
+          {text: 'Cancel',  onPress: () => {}},
+        ]
+      )
   }
   // If this is a confirmation resource i.e. not props to enter only to review
   // then use OK instead of Submit
@@ -1440,10 +1577,27 @@ if (r.url)
       </View>
     );
   }
-  onEndEditing(prop, event) {
-    if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
-      this.state.resource[prop] = event.nativeEvent.text;
+  // onEndEditing(prop, event) {
+  //   if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
+  //     this.state.resource[prop] = event.nativeEvent.text;
+  // }
+  onEndEditing(prop, value) {
+    // if (this.state.resource[prop]  ||  text.length)
+    //   this.state.resource[prop] = text;
+    const { fixedProps, resource } = this.state
+    const { originatingMessage: originatingResource, search, model } = this.props
+    const { name, type, readOnly } = prop
+    let isGoalProp = readOnly && model.goalSeek && model.goalSeek.indexOf(name) !== -1
+    if (isGoalProp)
+      this.setState({recalculateMode: true})
+
+    else if (!search  &&  resource[TYPE] !== SETTINGS) {
+      // if 'string' no need to check if requested properties changed on entering every letter
+      if (type !== 'string' || value.length <= 1)
+        Actions.getRequestedProperties({resource, originatingResource, fixedProps})
+    }
   }
+
   onChange(value, properties) {
     if (!properties)
       return
@@ -1451,6 +1605,7 @@ if (r.url)
       this.state.resource[p] = value[p];
     })
   }
+
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 reactMixin(NewResource.prototype, NewResourceMixin);
@@ -1623,7 +1778,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       alignSelf: 'center'
     },
     errors: {
-      height: 45,
+      height: 55,
       justifyContent: 'center',
       backgroundColor: bankStyle.errorBgColor || '#990000',
       alignSelf: 'stretch',
@@ -1632,6 +1787,20 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
+      alignSelf: 'center',
+      fontSize: 16
+    },
+    warnings: {
+      height: 55,
+      justifyContent: 'center',
+      backgroundColor: 'lightyellow',
+      width: utils.getContentWidth(NewResource),
+      alignItems: 'center',
+      paddingHorizontal: 7
+    },
+    warningText: {
+      color: bankStyle.linkColor,
+      paddingVertical: 3,
       fontSize: 16
     },
     sendIcon: {
