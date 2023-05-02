@@ -17,18 +17,20 @@ import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
 import DatePicker from 'react-native-datepicker'
+import ActionSheet from 'react-native-actionsheet'
 
 import constants from '@tradle/constants'
 
 import { Text, getFontMapping } from './Text'
-import utils, { translate, isWeb, enumValue, getLensedModelForType } from '../utils/utils'
+import utils, { translate, isWeb, enumValue, getLensedModelForType, buildStubByEnumTitleOrId } from '../utils/utils'
 import { getMarkdownStyles } from '../utils/uiUtils'
 import StyleSheet from '../StyleSheet'
 import RefPropertyEditor from './RefPropertyEditor'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
-const DEFAULT_CURRENCY = 'USD';
+const DEFAULT_CURRENCY = 'USD'
+var component
 
 const {
   MONEY,
@@ -44,6 +46,7 @@ const {
 } = constants
 
 const INTERSECTION = 'tradle.Intersection'
+const FILE = 'tradle.File'
 const DURATION = 'tradle.Duration'
 
 const PHOTO = 'tradle.Photo'
@@ -52,8 +55,8 @@ const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
 
-var cnt = 0;
-var propTypesMap = {
+let cnt = 0;
+const propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
   'date': t.Dat,
@@ -62,7 +65,7 @@ var propTypesMap = {
 
 const DEFAULT_LINK_COLOR = '#a94442'
 
-var NewResourceMixin = {
+const NewResourceMixin = {
   onScroll(e) {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   },
@@ -70,7 +73,7 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark } = this.props
+    let { editCols, originatingMessage, search, exploreData, errs, isRefresh, bookmark, bankStyle } = this.props
     let CURRENCY_SYMBOL = this.getCurrency()
     let { component, formErrors, model, data, validationErrors, editable } = params
 
@@ -105,7 +108,8 @@ var NewResourceMixin = {
       else
         props = meta.items.properties
     }
-    let eCols = this.getEditCols(props, meta)
+    let prefill = originatingMessage && originatingMessage.prefill
+    let eCols = this.getEditCols(props, meta, prefill)
 
     let showReadOnly = data._dataBundle !== null
     if (!showReadOnly) {
@@ -114,14 +118,14 @@ var NewResourceMixin = {
         // prop is readOnly if explicitely has readOnly on it or
         // it is a _group property with 'list' of props annotation
         if (prop  &&  !utils.isReadOnly(prop)  &&  !p.endsWith('_group')  && !prop.list) {
-          if (!originatingMessage || !originatingMessage.prefill)
+          if (!prefill)
             showReadOnly = false
         }
       })
     }
     let requestedProperties, excludeProperties
     if (this.state.requestedProperties)
-       ({requestedProperties, excludeProperties} = this.state.requestedProperties)
+      ({requestedProperties, excludeProperties} = this.state.requestedProperties)
 
     let softRequired
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
@@ -160,6 +164,10 @@ var NewResourceMixin = {
     let resource = this.state.resource
     let isNew = !data[ROOT_HASH]
     let me = utils.getMe()
+    let goalSeek = meta.goalSeek || []
+
+    let styles = createStyles({bankStyle})
+
     for (let i=0; i<eCols.length; i++) {
       let p = eCols[i]
       if (!isMessage && (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink)))
@@ -168,8 +176,12 @@ var NewResourceMixin = {
       if (meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
-      if (!me.isEmployee  &&  props[p].internalUse)
+      if (props[p].internalUse &&  (!me.isEmployee || me.counterparty))
         continue
+
+      if (props[p].hiddenFromClient  &&  !me.isEmployee)
+        continue
+
       let maybe = !required  ||  !required.includes(p)
       if (maybe) {
         if (p.indexOf('_group') === -1  &&  softRequired.includes(p))
@@ -218,7 +230,7 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      let propNotEditable = isReadOnly  ||  (props[p].immutable  &&  data[p]  && !isNew)
+      let propNotEditable = (isReadOnly && goalSeek.indexOf(p) === -1)  ||  (props[p].immutable  &&  data[p]  && !isNew)
 
       if (props[p].description)
         options.fields[p].help = props[p].description;
@@ -250,7 +262,8 @@ var NewResourceMixin = {
                     errors: formErrors,
                     component,
                     editable: !propNotEditable || search,
-                    value: val
+                    value: val,
+                    styles
                   })
 
           if (val)
@@ -275,6 +288,7 @@ var NewResourceMixin = {
                     component,
                     editable: !propNotEditable || search,
                     errors: formErrors,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -306,6 +320,7 @@ var NewResourceMixin = {
                     label,
                     prop:  props[p],
                     model: meta,
+                    styles
                   })
         }
         else if (type === 'string'  &&  props[p].markdown) {
@@ -317,6 +332,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: formErrors,
                     editable: editable && !propNotEditable || search,
+                    styles
                   })
         }
         else if (type === 'string'  &&  props[p].signature) {
@@ -330,24 +346,28 @@ var NewResourceMixin = {
                     component,
                     doSet: eCols.length > 1,
                     editable: editable && !propNotEditable || search,
+                    styles
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
-          if (val)
+          if (val || val === 0)
             val += ''
           else
             val = null
           let keyboard = props[p].keyboard  ||  options.fields[p].keyboardType  ||  (!search && type === 'number' ? 'numeric' : 'default')
+
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label,
                     prop:  props[p],
                     model: meta,
                     value: val,
                     required: !maybe,
+                    onSubmitEditing: onSubmitEditing.bind(this),
                     errors: formErrors,
                     component,
                     editable: editable && !propNotEditable || search || false,
                     keyboard,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -401,6 +421,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     editable: !propNotEditable,
                     errors: formErrors,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -437,7 +458,8 @@ var NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -456,7 +478,8 @@ var NewResourceMixin = {
                     errors: formErrors,
                     component,
                     doSet: eCols.length > 1,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
           continue
         }
@@ -485,7 +508,8 @@ var NewResourceMixin = {
                     component,
                     required: !maybe,
                     errors: formErrors,
-                    editable: !propNotEditable
+                    editable: !propNotEditable,
+                    styles
                   })
         }
         else {
@@ -498,10 +522,10 @@ var NewResourceMixin = {
               resource: bookmark && search &&  data,
               component,
               chooser: options.fields[p].onFocus,
+              styles
             })
-
-          options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
         }
+        options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
     }
 
@@ -516,7 +540,8 @@ var NewResourceMixin = {
           prop:  'video',
           errors: formErrors,
           component,
-          required: !maybe
+          required: !maybe,
+          styles
         })
     }
     return options;
@@ -531,6 +556,23 @@ var NewResourceMixin = {
     eCols = eCols.filter(p => requestedProperties[p])
     let softRequired = []
     let groupped = []
+    let hasNotHidden
+    for (let p in requestedProperties) {
+      if (!requestedProperties[p].hide) {
+        hasNotHidden = true
+        break
+      }
+    }
+    if (!hasNotHidden) {
+      for (let i=eCols.length - 1; i>=0; i--) {
+        let p = eCols[i]
+        if (requestedProperties[p])
+          eCols.splice(i, 1)
+      }
+      return { eCols }
+    }
+
+    eCols = eCols.filter(p => requestedProperties[p])
     for (let p in requestedProperties) {
       // if (eCols.some((prop) => prop.name === p) {
       let idx = p.indexOf('_group')
@@ -548,7 +590,7 @@ var NewResourceMixin = {
 
       eCols.push(p)
       let isRequired = requestedProperties[p].required
-      if (idx === -1  &&   utils.isReadOnly(props[p]));
+      if (idx === -1  &&  utils.isReadOnly(props[p]));
         // showReadOnly = true
       else if (props[p].list) {
         props[p].list.forEach((pp) => {
@@ -576,7 +618,7 @@ var NewResourceMixin = {
     }
     return { eCols, softRequired }
   },
-  getEditCols(props, model) {
+  getEditCols(props, model, prefill) {
     const { editCols, exploreData, bookmark, search } = this.props
     const isMessage = model.id === MESSAGE
     if (editCols)
@@ -627,21 +669,24 @@ var NewResourceMixin = {
   },
   changeValue(prop, value) {
     const { originatingMessage: originatingResource } = this.props
-    let { name: pname, ref: pref, type: ptype } = prop
+    let { name: pname, ref: pref, type: ptype, readOnly } = prop
 
     if (ptype === 'string'  &&  !value.trim().length)
     // debugger
     if(ptype === 'string'  &&  !value.trim().length)
       value = ''
-    const { resource, missedRequiredOrErrorValue } = this.state
+    const { resource, missedRequiredOrErrorValue, fixedProps, recalculateMode } = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
     let { metadata, parentMeta } = this.props
     if (metadata  &&  parentMeta)
       pname = `${metadata.name}_${pname}`
+    else if (this.props.prop  &&  this.props.prop.inlined) {
+      pname = `${this.props.prop.name}_${pname}`
+    }
 
     if(ptype === 'number'  &&  !search) {
-      let val = Number(value)
+      let val = this.normalizeNumber(value)
       let idx = value.indexOf('.')
       if (idx !== -1) {
         // Some strange HACK
@@ -651,29 +696,33 @@ var NewResourceMixin = {
           return
         while(value.charAt(idx) === '0') idx++
 
-        if (idx === len)
+        if (idx === len  &&  val === this.state.resource[pname])
           return
       }
       value = val
     }
+
     if (!this.floatingProps)
       this.floatingProps = {}
     if (pref == MONEY) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
-      let val = Number(value)
+      let val = this.normalizeNumber(value)
       this.floatingProps[pname].value = val
 
       if (!r[pname])
         r[pname] = {}
       r[pname].value = val
+      if (!r[pname].currency)
+        r[pname].currency = this.props.currency
+
       if (!this.floatingProps[pname].currency)
-        this.floatingProps[pname].currency = r[pname].currency || (resource[pname] && resource[pname].currency)
+        this.floatingProps[pname].currency = r[pname].currency // || (resource[pname] && resource[pname].currency)
     }
     else if (pref == DURATION) {
       if (!this.floatingProps[pname])
         this.floatingProps[pname] = {}
-      let val = Number(value)
+      let val = this.normalizeNumber(value)
       this.floatingProps[pname].value = val
       if (!r[pname])
         r[pname] = {}
@@ -708,31 +757,55 @@ var NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[pname]
-    if (!search  &&  r[TYPE] !== SETTINGS) {
+
+    let isFixedProp = readOnly
+    if (readOnly) { //fixedProps && fixedProps[pname] != null) {
+      for (let p in fixedProps) {
+        if (p !== pname)
+          delete fixedProps[p]
+      }
+
+      fixedProps[pname] = value
+      isFixedProp = true
+    }
+    if (!isFixedProp && !search  &&  r[TYPE] !== SETTINGS) {
       // if 'string' no need to check if requested properties changed on entering every letter
-      if (ptype !== 'string' || value.length <= 1)
-        Actions.getRequestedProperties({resource: r, originatingResource})
+      if (ptype === 'boolean')
+        Actions.getRequestedProperties({resource: r, originatingResource, additionalInfo: {fixedProps}})
     }
     this.setState({
       resource: r,
-      inFocus: pname
+      inFocus: pname,
+      recalculateMode: recalculateMode || isFixedProp
     })
   },
+  normalizeNumber(value) {
+    if (!value)
+      return
+    if (!isNaN(value.charAt(0)))
+      return value
+    if (value.charAt(0) !== '.')
+      return value
+    if (isNaN(`0${value}`))
+      return value.slice(1)
 
+    return `0${value}`
+  },
   myTextTemplate(params) {
-    let label = translate(params.prop, params.model)
+    const { prop, model, styles } = params
+    let label = translate(prop, model)
     let bankStyle = this.props.bankStyle
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     return (
       <View style={{flexDirection: 'row', paddingVertical: 5, paddingLeft: 15}}>
-        <View style={[styles.accent, {borderLeftColor: bankStyle.accentColor || 'orange'}]}/>
-        <Text style={[styles.dividerText, {color: linkColor}]}>{label}</Text>
+        <View style={styles.accent}/>
+        <Text style={styles.dividerText}>{label}</Text>
       </View>
     );
   },
 
   myMarkdownTextInputTemplate(params) {
-    let { prop, value, editable } = params
+    let { prop, value, editable, styles } = params
     let { bankStyle } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
@@ -745,7 +818,7 @@ var NewResourceMixin = {
 
     let lStyle = { color: lcolor, fontSize: 20}
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
-    let help = this.paintHelp(prop)
+    let help = this.paintHelp({prop, styles})
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -795,7 +868,7 @@ var NewResourceMixin = {
   },
 
   mySignatureTemplate(params) {
-    let {prop, required, model, value, doSet} = params
+    let {prop, required, model, value, doSet, styles} = params
     let label = translate(prop, model)
     if (required)
       label += ' *'
@@ -809,7 +882,7 @@ var NewResourceMixin = {
     if (value)
       lcolor = '#555555'
 
-    let help = this.paintHelp(prop)
+    let help = this.paintHelp({prop, styles})
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -819,7 +892,7 @@ var NewResourceMixin = {
       // let lStyle = [styles.labelStyle, { paddingBottom: 10, color: lcolor, fontSize: 12}]
       let lStyle = { paddingBottom: 10, color: lcolor, fontSize: 12}
       title = utils.translate('Please click here to change signature')
-      let {width, height} = value //utils.dimensions(params.component)
+      let { width, height } = value
       let h = 70
       let w
       if (width > height)
@@ -854,7 +927,7 @@ var NewResourceMixin = {
   },
 
   myTextInputTemplate(params) {
-    let {prop, required, model, editable, keyboard, value} = params
+    let {prop, required, model, editable, keyboard, value, styles} = params
     let label = translate(prop, model)
 
     if (prop.units) {
@@ -866,31 +939,69 @@ var NewResourceMixin = {
       label += ' *'
     let lStyle = styles.labelStyle
 
+    let { fixedProps, recalculateMode, isRegistration, resource } = this.state
     let maxChars = (utils.dimensions(params.component).width - 40)/utils.getFontSize(9)
-    if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
+    if (maxChars < label.length  &&  (!resource[prop.name] || !resource[prop.name].length))
       lStyle = [lStyle, {marginTop: 0}]
 
     let { lcolor, bcolor } = this.getLabelAndBorderColor(prop.name)
-    if (this.state.isRegistration)
+    if (isRegistration)
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
-    let help = prop.ref !== MONEY  &&  prop.ref !== DURATION  && this.paintHelp(prop)
     let st = { paddingBottom: 10 }
     // Especially for money type props
     if (!help)
       st.flex = 5
     let icon
     let { bankStyle } = this.props
+
+    let check
+    let fval = fixedProps && fixedProps[prop.name]
+    if (!editable && (fval || fval === 0))
+      editable = true
+
+    let help
+    if (prop.ref !== MONEY  &&  prop.ref !== DURATION) {
+      if (fval == null || fval === value)
+        help = this.paintHelp({prop, styles})
+      else {
+       if (prop.type === 'number' &&  fval === parseFloat(value))
+          help = this.paintHelp({prop, styles})
+        else
+          help = this.paintHelp({prop, fixedValue: fval, styles})
+      }
+    }
     if (!help)
       st = {...st, flex: 5}
+
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+
+    if (prop.readOnly && prop.range === 'url'  && value) {
+      if (utils.isReportLink(value)) {
+        return (
+          <View style={{paddingVertical: 10}}>
+             <Text style={styles.linkLabel}>{label}</Text>
+             <TouchableOpacity onPress={this. onReport.bind(this, value, resource._context, utils.getMe().organization)}>
+               <Text style={styles.linkText}>{translate('link')}</Text>
+             </TouchableOpacity>
+             {help}
+          </View>
+        );
+      }
+    }
+
+    // if (!prop.ref && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    if (recalculateMode)
+      check = this.addGoalSeek(prop, styles)
 
     let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.range !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     let addStyle = editable ? {} : {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'}
     return (
       <View style={st}>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+        <View style={{flex: 1}}>
         <FloatLabel
           labelStyle={[lStyle, fontF, {color: lcolor}]}
           autoCorrect={false}
@@ -904,25 +1015,71 @@ var NewResourceMixin = {
           value={value}
           keyboardShouldPersistTaps='always'
           keyboardType={keyboard || 'default'}
-          onChangeText={this.changeValue.bind(this, prop)}
+          onChangeText={(e) => {
+            this.changeValue(prop, e)
+            // this.detectStoppedTyping(prop, e)
+          }}
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
         {icon}
         {this.paintError(params)}
         {help}
+        </View>
+        <View>
+        {check}
+        </View>
+        </View>
       </View>
     );
   },
-  paintHelp(prop) {
-    if (!prop.description)
+  checkGoalSeeker(prop, value) {
+    const { model, originatingMessage } = this.props
+    const { goalSeek, properties } = model
+
+    let { resource } = this.state
+    let fixedProps = { ...this.state.fixedProps }
+    goalSeek.forEach(p => {
+      if (p !== prop.name  &&  !properties[p].readOnly)
+        fixedProps[p] = resource[p]
+    })
+
+    Actions.getRequestedProperties({resource, originatingResource:originatingMessage, additionalInfo: {fixedProps}})
+  },
+  paintHelp({prop, fixedValue, styles}) {
+    const { bankStyle, locale } = this.props
+    if (!styles)
+      styles = createStyles({bankStyle})
+    const { resource, fixedProps } = this.state
+    const pname = prop.name
+    let addToHelp
+    if (fixedValue  &&  resource[pname] !== fixedValue) {
+      let fval = fixedProps[pname]
+      let rval
+      if (prop.ref === MONEY)
+        rval = resource[pname].value
+      else
+        rval = resource[pname]
+      let percent = Math.round((rval/fval*100 - 100)*100)/100
+
+      addToHelp = <Text style={{color: bankStyle.linkColor, fontSize: 16, fontWeight: '600'}}>
+                    {translate('goalValue', percent, fixedValue)}
+                  </Text>
+    }
+    if (!prop.description) {
+      if (addToHelp)
+        return <View style={prop.ref ? styles.help2 : styles.help}>
+                 {addToHelp}
+              </View>
       return <View style={styles.help1}/>
+    }
 
     return (
       <View style={styles.help}>
         <Markdown markdownStyles={getMarkdownStyles(this.props.bankStyle, false)}>
           {translate(prop, this.props.model, true)}
         </Markdown>
+        {addToHelp}
       </View>
     )
   },
@@ -931,16 +1088,20 @@ var NewResourceMixin = {
     if (params.noError)
       return
     let {missedRequiredOrErrorValue, isRegistration} = this.state
+    const { errors, styles, prop } = params
     let {prop} = params
     let err = missedRequiredOrErrorValue
             ? missedRequiredOrErrorValue[prop.name]
             : null
     if (!err) {
-      if (params.errors  &&  params.errors[prop.name])
-        err = params.errors[params.prop.name]
+      if (errors  &&  errors[prop.name])
+        err = errors[prop.name]
       else
         return
     }
+    let isWarning = err.startsWith('Warning: ')
+    if (isWarning)
+      err = err.slice(9)
     if (isRegistration) {
       let estyle = [styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]
       return <View style={estyle} key={this.getNextKey()}>
@@ -953,18 +1114,18 @@ var NewResourceMixin = {
     let addStyle = {
       paddingVertical: 3,
       marginTop: prop.type === 'object' ||  prop.type === 'date' ||  prop.items ? 0 : 2,
-      backgroundColor: bankStyle.errorBgColor  ||  '#990000',
+      backgroundColor: isWarning ? 'lightyellow' : bankStyle.errorBgColor  ||  '#990000',
       paddingHorizontal: 10,
     }
     return <View style={styles.err} key={this.getNextKey()}>
              <View style={addStyle}>
-               <Text style={styles.font14, {paddingLeft: 5, color: bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
+               <Text style={styles.font14, {paddingLeft: 5, color: isWarning ? bankStyle.linkColor : bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
              </View>
            </View>
   },
 
   myBooleanTemplate(params) {
-    let {prop, model, value, required, component, editable} = params
+    let {prop, model, value, required, component, editable, styles} = params
     let { search, bankStyle } = this.props
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
@@ -1048,13 +1209,13 @@ var NewResourceMixin = {
           {switchC}
         </View>
         {this.paintError(params)}
-        {this.paintHelp(prop)}
+        {this.paintHelp({prop, styles})}
       </View>
     )
   },
 
   myDateTemplate(params) {
-    let { prop, required, component, editable } = params
+    let { prop, required, component, editable, styles } = params
     let { search, bankStyle, bookmark } = this.props
 
     let resource = this.state.resource
@@ -1099,7 +1260,7 @@ var NewResourceMixin = {
     let datePicker
     if (!editable  &&  !search) {
       datePicker = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
-                     <Text style={styles.dateText}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
+                     <Text style={[styles.dateText]}>{dateformat(localizedDate, 'mmmm dd, yyyy')}</Text>
                    </View>
     }
     else {
@@ -1136,7 +1297,7 @@ var NewResourceMixin = {
     if (!editable)
       icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
 
-    let help = this.paintHelp(prop)
+    let help = this.paintHelp({prop, styles})
     return (
       <View key={this.getNextKey()} ref={prop.name} style={styles.bottom10}>
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || isWeb() ?  0 : 10}]}>
@@ -1149,6 +1310,7 @@ var NewResourceMixin = {
        </View>
       )
   },
+
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle
     let lcolor, bcolor
@@ -1205,14 +1367,9 @@ var NewResourceMixin = {
       // let newState = {};
       let date
       const {action, year, month, day} = await DatePickerAndroid.open(options);
-      if (action !== DatePickerAndroid.dismissedAction) {
-      //   newState[stateKey + 'Text'] = 'dismissed';
-      // } else {
+      if (action !== DatePickerAndroid.dismissedAction)
         date = new Date(year, month, day);
-        // newState[stateKey + 'Text'] = date.toLocaleDateString();
-        // newState[stateKey + 'Date'] = date;
-      }
-      // this.setState(newState);
+
       this.changeTime(prop, date)
     } catch ({code, message}) {
       console.warn(`Error in example '${stateKey}': `, message);
@@ -1239,8 +1396,10 @@ var NewResourceMixin = {
 
     let { metadata, parentMeta } = this.props
     let pname = prop.name
-    if (metadata &&  parentMeta)
+    if (metadata  &&  parentMeta)
       pname = `${metadata.name}_${pname}`
+    else if (this.props.prop  &&  this.props.prop.inlined)
+      pname = `${this.props.prop.name}_${pname}`
 
     if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
@@ -1257,9 +1416,10 @@ var NewResourceMixin = {
   myCustomTemplate(params) {
     if (!this.floatingProps)
       this.floatingProps = {}
-    let { model, metadata, isRefresh, bookmark, allowedMimeTypes } = this.props
-    let { required, errors, component } = params
-    let { missedRequiredOrErrorValue, resource, inFocus } = this.state
+    let { model, metadata, isRefresh, bookmark, allowedMimeTypes, bankStyle, noChat } = this.props
+    let { required, errors, component, styles } = params
+    let { missedRequiredOrErrorValue, inFocus, fixedProps, recalculateMode } = this.state
+    let resource = params.resource ||  this.state.resource
     let props
     if (model)
       props = model.properties
@@ -1270,19 +1430,35 @@ var NewResourceMixin = {
     let pName = params.prop
     let prop = props[pName]
     let ref = prop.ref || prop.items.ref
-    let isMedia = pName === 'video' ||  pName === 'photos'  ||  ref === PHOTO  ||  utils.isSubclassOf(ref, 'tradle.File')
+    let isMedia = pName === 'video' ||  pName === 'photos'  ||  ref === PHOTO   ||  ref === FILE ||  utils.isSubclassOf(ref, FILE)
     let onChange
     if (isMedia)
       onChange = this.setState.bind(this)
-    else
+    else {
+      if (resource[pName]) {
+        let pmodel = utils.getModel(ref)
+        if (!pmodel.enum)
+          this.floatingProps[pName] = resource[pName]
+      }
       onChange = this.setChosenValue.bind(this)
+    }
     let error = missedRequiredOrErrorValue  &&  missedRequiredOrErrorValue[pName]
     if (!error  &&  params.errors  &&  params.errors[pName])
       error = params.errors[pName]
 
-    return <RefPropertyEditor {...this.props}
-                             resource={params.resource ||   this.state.resource}
+    let fval = fixedProps && fixedProps[pName]
+    let check
+    // if (model && model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1  &&  resource[pName])
+    if (recalculateMode)
+      check = this.addGoalSeek(prop, styles)
+
+    return <View style={{flexDirection: 'row'}}>
+             <View style={{flex: 1}}>
+               <RefPropertyEditor {...this.props}
+                             resource={resource}
                              onChange={onChange}
+                             customChooser={this.customChooser.bind(this)}
+                             noChat={noChat}
                              prop={prop}
                              bookmark={bookmark}
                              photo={this.state[pName + '_photo']}
@@ -1297,6 +1473,31 @@ var NewResourceMixin = {
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
                              styles={styles}/>
+             </View>
+             {check}
+            </View>
+  },
+  addGoalSeek(prop, styles) {
+    let { resource, fixedProps, recalculateMode } = this.state
+    let { bankStyle } = this.props
+    let pName = prop.name
+    let isEnum = prop.ref && utils.getModel(prop.ref).enum
+    let style
+    if (isEnum)
+      style = {justifyContent: 'center', paddingLeft: 5, marginTop: -10}
+    else if (prop.ref)
+      style = {justifyContent: 'center', paddingLeft: 5}
+    else
+      style = {justifyContent: 'center', paddingLeft: 5, paddingTop: 17}
+    let icon
+    if (recalculateMode  &&  !prop.readOnly)
+      icon = 'md-calculator'
+
+    return <View style={style}>
+             <TouchableOpacity underlayColor='transparent' onPress={this.checkGoalSeeker.bind(this, prop, resource[pName])}>
+               <Icon name={icon}  size={30}  color={prop.readOnly ? bankStyle.accentColor : bankStyle.linkColor} />
+             </TouchableOpacity>
+           </View>
   },
   setDefaultValue(prop, data, isHidden) {
     let p = prop.name
@@ -1365,7 +1566,8 @@ var NewResourceMixin = {
       if (isEnum)
         value = value.map(v => utils.buildRef(v))
       else
-        value = Array.isArray(value) && value || [value]
+        value = Array.isArray(value) ? value : Object.values(value)
+        // value = Array.isArray(value) && value || [value]
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value
@@ -1384,7 +1586,7 @@ var NewResourceMixin = {
           resource[propName] = [resource[propName], value]
       }
       else
-        resource[propName] = value
+        resource[propName] = Array.isArray(value) && value || [value]
     }
     else if (isArray || isMultichooser) {
       let hasReset
@@ -1425,7 +1627,7 @@ var NewResourceMixin = {
       }
     }
     let state = {
-      resource: resource,
+      resource,
       prop: propName
     }
     if (!doDelete) {
@@ -1518,7 +1720,7 @@ var NewResourceMixin = {
         this.floatingProps = {}
       this.floatingProps[propName] = resource[propName]
     }
-    else if (prop.items.ref) {
+    else if (prop.items && prop.items.ref) {
       resource[propName] = null
     }
     else {
@@ -1531,19 +1733,30 @@ var NewResourceMixin = {
 
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
-    let { required, model, value, prop, editable, errors, component } = params
+    let { required, model, value, prop, editable, errors, component, styles } = params
     let { search, locale, bankStyle } = this.props
     let isReadOnly = utils.isReadOnly(prop)
+    let { fixedProps, recalculateMode } = this.state
+    let fval = fixedProps && fixedProps[prop.name]
+    if (fval || fval === 0) {
+      editable = true
+      isReadOnly = false
+    }
 
     let v
     if (!value.value)
       v = ''
-    else if (isReadOnly)
+    else if (isReadOnly && !fval)
       v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''
 
     let keyboard = isReadOnly || search ? null : 'numeric'
+
+    let check
+    // if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
+    if (recalculateMode)
+      check = this.addGoalSeek(prop, styles)
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1556,6 +1769,7 @@ var NewResourceMixin = {
                   editable,
                   component,
                   keyboard,
+                  styles
                 })
 
     let currency
@@ -1571,76 +1785,45 @@ var NewResourceMixin = {
                     // errors:   errors,
                     component,
                     // noError:  errors && errors[prop],
-                    noError: true
+                    noError: true,
+                    styles
                   })
     }
+    let goalValue
+    if (fval  &&  !fval.value  &&  fval !== value.value + '') {
+      goalValue = utils.formatCurrency({
+        value: fval,
+        currency: value.currency
+      })
+    }
+
     return (
       <View>
         <View style={styles.moneyInput}>
             {val}
             {currency}
+            {check}
         </View>
-        {this.paintError({prop, errors})}
-        {this.paintHelp(prop)}
+        {this.paintError(params)}
+        {this.paintHelp({prop, fixedValue: goalValue, styles})}
       </View>
     );
   },
-  myInlinedResourcesTemplate(params) {
-    let { value, editable, prop, component } = params
-    if (editable) return  <View />
-    if (prop.grid)
-      return this.renderSimpleGrid(value, prop, component)
 
-    this.renderSimpleProp({val: value, pMeta: prop, modelName: prop.items.ref, component})
-  },
-
-  myEnumTemplate(params) {
-    let { prop, enumProp, errors } = params
-    let error
-    if (!params.noError) {
-      let err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[prop.name]
-              : null
-      if (!err  &&  errors  &&  errors[prop.name])
-        err = errors[prop.name]
-      error = err
-                ? <View style={styles.enumErrorLabel} />
-                : <View />
-    }
-    else
-      error = <View/>
-    let value = prop ? params.value : this.state.resource[enumProp.name]
-    let bankStyle = this.props.bankStyle
-    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
-    // let help = this.paintHelp(prop, true)
-    return (
-      <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
-        <TouchableOpacity onPress={this.enumChooser.bind(this, prop, enumProp)}>
-          <View>
-            <View style={styles.chooserContentStyle}>
-              <Text style={styles.enumText}>{value}</Text>
-              <Icon name='ios-arrow-down'  size={15}  color={linkColor}  style={[styles.arrowIcon, styles.enumProp]} />
-            </View>
-           {error}
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
-  },
   myDurationInputTemplate(params) {
-    let { required, model, value, prop, editable, errors, component } = params
+    let { required, model, value, prop, editable, errors, component, styles } = params
     let { search, locale } = this.props
     let isReadOnly = utils.isReadOnly(prop)
 
     let v
     if (!value.value)
       v = ''
-    // else if (isReadOnly)
-    //   v = utils.formatCurrency(value, locale)
+    else if (isReadOnly)
+      v = utils.formatCurrency(value, locale)
     else
       v = value.value + ''
 
-    let keyboard = isReadOnly || search ? null : 'numeric'
+    let keyboard = isReadOnly  ||  search ? null : 'numeric'
 
     let val = this.myTextInputTemplate({
                   prop,
@@ -1671,11 +1854,11 @@ var NewResourceMixin = {
     return (
       <View>
         <View style={styles.moneyInput}>
-            {val}
-            {durationType}
+          {val}
+          {durationType}
         </View>
-        {this.paintError({prop, errors})}
-        {this.paintHelp(prop)}
+        {this.paintError(params)}
+        {this.paintHelp({prop, styles})}
       </View>
     );
   },
@@ -1686,6 +1869,47 @@ var NewResourceMixin = {
     if (typeof currency === 'string')
       return currency
     return currency.symbol
+  },
+  myInlinedResourcesTemplate(params) {
+    let { value, editable, prop, component } = params
+    if (editable) return  <View />
+    if (prop.grid)
+      return this.renderSimpleGrid(value, prop, component)
+
+    return this.renderSimpleProp({val: value, pMeta: prop, modelName: prop.items.ref, component})
+  },
+  myEnumTemplate(params) {
+    let { prop, enumProp, errors, styles } = params
+    let error
+    if (!params.noError) {
+      let err = this.state.missedRequiredOrErrorValue
+              ? this.state.missedRequiredOrErrorValue[prop.name]
+              : null
+      if (!err  &&  errors  &&  errors[prop.name])
+        err = errors[prop.name]
+      error = err
+                ? <View style={styles.enumErrorLabel} />
+                : <View />
+    }
+    else
+      error = <View/>
+    let value = prop ? params.value : this.state.resource[enumProp.name]
+    let bankStyle = this.props.bankStyle
+    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
+    // let help = this.paintHelp(prop, true)
+    return (
+      <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
+        <TouchableOpacity onPress={this.enumChooser.bind(this, prop, enumProp)}>
+          <View>
+            <View style={styles.chooserContentStyle}>
+              <Text style={styles.enumText}>{value}</Text>
+              <Icon name='ios-arrow-down'  size={15}  color={linkColor}  style={[styles.arrowIcon, styles.enumProp]} />
+            </View>
+           {error}
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
   },
   enumChooser(prop, enumProp, event) {
     let resource = this.state.resource;
@@ -1785,7 +2009,7 @@ var NewResourceMixin = {
       else if (prop.units && prop.units === '[min - max]') {
         let v = value[p].split('-').map(coerceNumber)
         if (v.length === 1)
-          this.checkNumber(v, prop, err)
+          this.checkNumber(v[0], prop, err)
         else if (v.length === 2) {
           this.checkNumber(v[0], prop, err)
           if (err[p])
@@ -1807,6 +2031,12 @@ var NewResourceMixin = {
           deleteProps.push(p)
         if (!(new RegExp(prop.pattern).test(value[p])))
           err[prop.name] = translate('invalidProperty', prop.title)
+      }
+      else if (prop.range === 'phone'  &&  isWeb()) {
+        let { val, hasError } = this.normalizePhoneNumber(value[p])
+        if (hasError)
+          err[prop.name] = translate('invalidProperty', prop.title)
+        value[p] = val
       }
     }
     if (deleteProps)
@@ -1835,6 +2065,159 @@ var NewResourceMixin = {
       err[p] = error
     return error
   },
+  normalizePhoneNumber(value) {
+    // value = value.replace(/[^a-zA-Z0-9]+$/g, '').split('')
+    value = value.replace(/[\(\)]/g, '')
+    let vArr = value.split('')
+    let val = ''
+    let hasError
+    for (let i=0; i<vArr.length; i++) {
+      let v = vArr[i]
+      if (v >= '0'  &&  v <= '9' || (v === '+'  &&  i === 0)) {
+        val += v
+        continue
+      }
+      if (v === ' ' || v === '-') {
+        ({ i, val } = this.addToPhoneNumber(vArr, i, val))
+        continue
+      }
+      hasError = true
+      val += v
+    }
+    return { val, hasError }
+  },
+  addToPhoneNumber(vArr, i, val) {
+    let v = vArr[i]
+    if (i) {
+      let ch = vArr[i - 1]
+      let ch2 = i < vArr.length && vArr[i + 1]
+      if (ch >= '0' && ch <= '9') {
+        // if (!ch2 || (ch2 >= '0' && ch2 <= '9'))
+          val += v
+      }
+    }
+    for (; i<vArr.length && vArr[i] === v; i++);
+    return { i: --i, val }
+  },
+  renderActionSheet(rtype) {
+    const buttons = this.getActionSheetItems(rtype)
+    // if (!buttons || !buttons.length) return
+    const { enumProp } = this.state
+    const { bankStyle } = this.props
+    let titles = buttons && buttons.map((b) => b.title) || []
+    // let titles = buttons && buttons.map((b) => <Text style={{color: 'darkred'}}>{b.title}</Text>) || []
+    // let titles = [
+    //   'Apple',
+    //   <Text style={{color: 'yellow'}}>Banana</Text>,
+    //   'Watermelon',
+    //   <Text style={{color: 'red'}}>Durian</Text>,
+    //   'Cancel',
+    // ]
+    let styles = {
+      titleBox: {
+        width: 780,
+        height: 40,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        backgroundColor: '#eee',
+        color: bankStyle.linkColor
+      },
+      titleText: {
+        fontSize: 20,
+        color: bankStyle.accent
+      },
+      overlay: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        opacity: 0.3,
+        backgroundColor: '#000'
+      },
+      wrapper: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      body: {
+        // flex: 1,
+        width: 780,
+        alignItems: 'center',
+        alignSelf: 'flex-end',
+        backgroundColor: 'transparent'
+      },
+      buttonBox: {
+        width: 780,
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff'
+      },
+      buttonText: {
+        fontSize: 18
+      },
+      cancelButtonBox: {
+        width: 780,
+        height: 50,
+        // borderRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+        marginTop: 6,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'aliceblue'
+      }
+    }
+    let model = utils.getModel(rtype)
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        tintColor={bankStyle.linkColor}
+        styles={styles}
+        options={titles}
+        title={enumProp && translate(model.properties[enumProp], model)}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          buttons[index].callback && buttons[index].callback(enumProp, index)
+        }}
+      />
+    )
+  },
+  getActionSheetItems(rtype) {
+    const { enumProp } = this.state
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
+    const buttons = []
+    if (!enumProp) {
+      push({
+        title: translate('cancel'),
+        callback: () => this.setState({enumProp: null})
+      })
+      return buttons
+    }
+    let { ref } = utils.getModel(rtype).properties[enumProp]
+    let refM = utils.getModel(ref)
+    let enumList = refM.enum
+    if (!enumList) return []
+
+    enumList.forEach(elm => push({
+      title: utils.translateEnum(buildStubByEnumTitleOrId(refM, elm.title)),
+      callback: (prop, index) => {
+        let { id, title } = enumList[index]
+        this.setChosenValue(enumProp, {id: `${ref}_${id}`, title })
+        this.setState({enumProp: null})
+      }
+    }))
+    if (buttons.length)
+      push({
+        title: translate('cancel'),
+        callback: () => this.setState({enumProp: null})
+      })
+
+    return buttons
+  }
 }
 function coerceNumber (obj, p) {
   const val = obj[p]
@@ -1849,246 +2232,268 @@ const formField = {
   borderColor: '#dddddd',
   borderRadius: 6,
 }
-var styles= StyleSheet.create({
-  enumProp: {
-    marginTop: 15,
-  },
-  enumText: {
-    marginTop: 10,
-    marginLeft: 20,
-    marginRight: 3,
-    color: '#757575',
-    fontSize: 20
-  },
-  labelStyle: {
-    paddingLeft: 10,
-  },
-  arrowIcon: {
-    width: 15,
-    height: 15,
-    // marginVertical: 2
-  },
-  formInput: {
-    ...formField,
-    marginHorizontal: 15
-  },
-  booleanContainer: {
-    ...formField,
-    // minHeight: 60,
-    paddingTop: 5,
-    paddingHorizontal: 10,
-    marginHorizontal: 15,
-    justifyContent: 'center',
-    flex: 1
-  },
-  booleanContentStyle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  datePicker: {
-    justifyContent: 'flex-start',
-    alignSelf: 'stretch',
-    paddingHorizontal: 10,
-    paddingRight: 22
-  },
-  chooserContainer: {
-    // ...formField,
-    minHeight: 60,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 10,
-    position: 'relative',
-    flex: 1
-  },
-  chooserContentStyle: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    borderRadius: 4
-  },
-  enumElement: {
-    width: 40,
-    marginTop: 20,
-    height: 45
-  },
-  enumErrorLabel: {
-    paddingLeft: 5,
-    height: 14,
-    backgroundColor: 'transparent'
-  },
-  regInput: {
-    borderWidth: 0,
-    height: 50,
-    fontSize: 20,
-    color: '#eeeeee'
-  },
-  textInput: {
-    borderWidth: 0,
-    color: '#555555',
-    fontSize: 20
-  },
-  thumb: {
-    width: 40,
-    height: 40,
-    marginRight: 2,
-    borderRadius: 5,
-  },
-  err: {
-    paddingHorizontal: 15,
-    // backgroundColor: 'transparent'
-  },
-  element: {
-    position: 'relative'
-  },
-  labelClean: {
-    marginTop: 21,
-    color: '#AAA',
-    position: 'absolute',
-    fontSize: 20,
-    top: 7
-  },
-  labelDirty: {
-    marginTop: 21,
-    // marginLeft: 10,
-    paddingLeft: 10,
-    color: '#AAA',
-    position: 'absolute',
-    fontSize: 12,
-    top: -17,
-  },
-  photoIcon: {
-    position: 'absolute',
-    right: 0,
-    bottom: 3
-  },
-  lockIcon: {
-    position: 'absolute',
-    right: 0,
-    bottom: 5
-  },
-  photoIconEmpty: {
-    position: 'absolute',
-    right: 0,
-    marginTop: 15
-  },
-  readOnly: {
-    position: 'absolute',
-    right: 25,
-    top: 20
-  },
-  immutable: {
-    marginTop: 15,
-    paddingRight: 10
-  },
-  input: {
-    backgroundColor: 'transparent',
-    color: '#aaaaaa',
-    fontSize: 20,
-  },
-  textAfterImage: {
-    backgroundColor: 'transparent',
-    color: '#aaaaaa',
-    fontSize: 20,
-    marginTop: 17,
-    marginLeft: 7
-  },
-  customIcon: {
-    // marginTop: 20,
-    position: 'absolute',
-    right: isWeb() && 10 || 0,
-    alignSelf: 'center'
-  },
-  dateInput: {
-    flex: 1,
-    height: 35,
-    paddingBottom: 5,
-    // marginTop: 5,
-    // borderWidth: 1,
-    borderColor: 'transparent',
-    // borderBottomColor: '#eeeeee',
-    alignItems: 'flex-start',
-    justifyContent: 'center'
-  },
-  dateText: {
-    fontSize: 20,
-    color: '#555555',
-  },
-  // font18: {
-  //   fontSize: 18,
-  // },
-  font20: {
-    fontSize: 20,
-  },
-  dateIcon: {
-    // position: 'absolute',
-    // right: 0,
-    // top: 5
-  },
-  divider: {
-    // justifyContent: 'center',
-    borderColor: 'transparent',
-    borderWidth: 1.5,
-    marginTop: 10,
-    // marginHorizontal: 10,
-    paddingHorizontal: 13,
-    marginBottom: 5
-  },
-  dividerText: {
-    marginBottom: 5,
-    fontSize: 26,
-    fontWeight: '500',
-    color: '#ffffff'
-  },
-  font14: {
-    fontSize: 14
-  },
-  booleanLabel: {
-    color: '#aaaaaa',
-    fontSize: 20
-  },
-  booleanText: {
-    fontSize: 20
-  },
-  dateLabel: {
-    marginLeft: 10,
-    fontSize: 12,
-    marginTop: 5,
-    paddingBottom: 5
-  },
-  noItemsText: {
-    fontSize: 20,
-    color: '#AAAAAA',
-  },
-  markdown: {
-    backgroundColor: '#f7f7f7',
-    padding: 10
-    // paddingVertical: 10,
-  },
-  container: {
-    flex: 1
-  },
-  help1: {
-    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
-    paddingHorizontal: 15,
-  },
-  help: {
-    backgroundColor: '#f3f3f3',
-    paddingHorizontal: 20,
-    paddingBottom: 15
-  },
-  bottom10: {
-    paddingBottom: 10
-  },
-  floatingLabel: {
-    marginTop: 20
-  },
-  moneyInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  accent: {
-    width: 12,
-    borderLeftWidth: 5,
-  }
+
+const createStyles = utils.styleFactory(component, function ({ bankStyle }) {
+    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
+
+  return StyleSheet.create({  enumProp: {
+      marginTop: 15,
+    },
+    enumText: {
+      marginTop: 10,
+      marginLeft: 20,
+      marginRight: 3,
+      color: '#757575',
+      fontSize: 20
+    },
+    labelStyle: {
+      paddingLeft: 10,
+    },
+    arrowIcon: {
+      width: 15,
+      height: 15,
+      // marginVertical: 2
+    },
+    formInput: {
+      ...formField,
+      marginHorizontal: 15
+    },
+    booleanContainer: {
+      ...formField,
+      // minHeight: 60,
+      paddingTop: 5,
+      paddingHorizontal: 10,
+      marginHorizontal: 15,
+      justifyContent: 'center',
+      flex: 1
+    },
+    booleanContentStyle: {
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    datePicker: {
+      justifyContent: 'flex-start',
+      alignSelf: 'stretch',
+      paddingHorizontal: 10,
+      paddingRight: 22
+    },
+    chooserContainer: {
+      // ...formField,
+      minHeight: 60,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginHorizontal: 10,
+      position: 'relative',
+      flex: 1
+    },
+    chooserContentStyle: {
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      borderRadius: 4
+    },
+    enumElement: {
+      width: 40,
+      marginTop: 20,
+      height: 45
+    },
+    enumErrorLabel: {
+      paddingLeft: 5,
+      height: 14,
+      backgroundColor: 'transparent'
+    },
+    regInput: {
+      borderWidth: 0,
+      height: 50,
+      fontSize: 20,
+      color: '#eeeeee'
+    },
+    textInput: {
+      borderWidth: 0,
+      color: '#555555',
+      fontSize: 20
+    },
+    thumb: {
+      width: 40,
+      height: 40,
+      marginRight: 2,
+      borderRadius: 5,
+    },
+    err: {
+      paddingHorizontal: 15,
+      // backgroundColor: 'transparent'
+    },
+    element: {
+      position: 'relative'
+    },
+    labelClean: {
+      marginTop: 21,
+      color: '#AAA',
+      position: 'absolute',
+      fontSize: 20,
+      top: 7
+    },
+    labelDirty: {
+      marginTop: 21,
+      // marginLeft: 10,
+      paddingLeft: 10,
+      color: '#AAA',
+      position: 'absolute',
+      fontSize: 12,
+      top: -17,
+    },
+    photoIcon: {
+      position: 'absolute',
+      right: 0,
+      bottom: 3
+    },
+    lockIcon: {
+      position: 'absolute',
+      right: 0,
+      bottom: 5
+    },
+    photoIconEmpty: {
+      position: 'absolute',
+      right: 0,
+      marginTop: 15
+    },
+    readOnly: {
+      position: 'absolute',
+      right: 25,
+      top: 20
+    },
+    immutable: {
+      marginTop: 15,
+      paddingRight: 10
+    },
+    input: {
+      backgroundColor: 'transparent',
+      color: '#aaaaaa',
+      fontSize: 20,
+    },
+    textAfterImage: {
+      backgroundColor: 'transparent',
+      color: '#aaaaaa',
+      fontSize: 20,
+      marginTop: 17,
+      marginLeft: 7
+    },
+    customIcon: {
+      // marginTop: 20,
+      position: 'absolute',
+      right: isWeb() && 10 || 0,
+      alignSelf: 'center'
+    },
+    dateInput: {
+      flex: 1,
+      height: 35,
+      paddingBottom: 5,
+      // marginTop: 5,
+      // borderWidth: 1,
+      borderColor: 'transparent',
+      // borderBottomColor: '#eeeeee',
+      alignItems: 'flex-start',
+      justifyContent: 'center'
+    },
+    dateText: {
+      fontSize: 20,
+      color: '#555555',
+    },
+    // font18: {
+    //   fontSize: 18,
+    // },
+    font20: {
+      fontSize: 20,
+    },
+    dateIcon: {
+      // position: 'absolute',
+      // right: 0,
+      // top: 5
+    },
+    divider: {
+      // justifyContent: 'center',
+      borderColor: 'transparent',
+      borderWidth: 1.5,
+      marginTop: 10,
+      // marginHorizontal: 10,
+      paddingHorizontal: 13,
+      marginBottom: 5
+    },
+    dividerText: {
+      marginBottom: 5,
+      fontSize: 26,
+      fontWeight: '500',
+      color: linkColor,
+      fontFamily: bankStyle.headerFont
+    },
+    font14: {
+      fontSize: 14
+    },
+    booleanLabel: {
+      color: '#aaaaaa',
+      fontSize: 20
+    },
+    booleanText: {
+      fontSize: 20
+    },
+    dateLabel: {
+      marginLeft: 10,
+      fontSize: 12,
+      marginTop: 5,
+      paddingBottom: 5
+    },
+    noItemsText: {
+      fontSize: 20,
+      color: '#AAAAAA',
+    },
+    markdown: {
+      backgroundColor: '#f7f7f7',
+      padding: 10
+      // paddingVertical: 10,
+    },
+    container: {
+      flex: 1
+    },
+    help1: {
+      backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
+      paddingHorizontal: 15,
+    },
+    help2: {
+      backgroundColor: '#f3f3f3',
+      paddingHorizontal: 10,
+      marginTop: -10,
+      paddingBottom: 15
+    },
+    help: {
+      backgroundColor: '#f3f3f3',
+      paddingHorizontal: 20,
+      paddingBottom: 15
+    },
+    bottom10: {
+      paddingBottom: 10
+    },
+    floatingLabel: {
+      marginTop: 20
+    },
+    moneyInput: {
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    accent: {
+      width: 12,
+      borderLeftWidth: 5,
+      borderLeftColor: bankStyle.accentColor || 'orange'
+    },
+    linkText: {
+      fontSize: 20,
+      paddingLeft: 10,
+      color: bankStyle.linkColor
+    },
+    linkLabel: {
+      paddingLeft: 10,
+      color: '#aaa',
+      paddingBottom: 10
+    }
+  })
 })
 
 module.exports = NewResourceMixin
