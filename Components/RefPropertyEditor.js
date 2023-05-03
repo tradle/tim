@@ -40,6 +40,7 @@ import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
 import Image from './Image'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
+import HomePageMixin from './HomePageMixin'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
@@ -65,11 +66,12 @@ class RefPropertyEditor extends Component {
       return false
     if (this.props.inFocus !== nextProps.inFocus)
       return true
-     let pName = prop.name
+    let pName = prop.name
     if (!_.isEqual(nextProps.resource[pName], this.props.resource[pName]))
       return true
-    if (nextProps.error) {
-      if (!this.props.error || this.props.error !== nextProps.error)
+
+    if (nextProps.error !== this.props.error) {
+      // if (!this.props.error || this.props.error !== nextProps.error)
         return true
     }
     // in case document type was changed a different scanning could be replaced by taking a photo and vice versa
@@ -80,8 +82,8 @@ class RefPropertyEditor extends Component {
     return false
   }
   render() {
-    let { prop, parentMeta, metadata, resource, error, styles, model, bankStyle, country, labelAndBorder, isRefresh,
-          search, photo, component, paintError, paintHelp, required, exploreData, bookmark, allowedMimeTypes } = this.props
+    let { prop, parentMeta, metadata, resource, error, styles, model, bankStyle, country, labelAndBorder, bookmark, isRefresh,
+          search, photo, component, paintError, paintHelp, required, exploreData, allowedMimeTypes, floatingProps } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -98,11 +100,11 @@ class RefPropertyEditor extends Component {
     if (required  &&  prop.ref === COUNTRY  &&  country) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName]  &&  country) {
-         resource[pName] = country
-        this.props.floatingProps[pName] = country
+        resource[pName] = country
+        floatingProps[pName] = country
       }
       else if (isInlineArray && resource[ipName])
-        this.props.floatingProps[ipName] = resource[ipName]
+        floatingProps[ipName] = resource[ipName]
     }
     let val
     if (isInlineArray) {
@@ -115,19 +117,27 @@ class RefPropertyEditor extends Component {
         val = null
     }
     let pLabel = this.getPropertyLabel(prop) + (!search  &&  required ? ' *' : '')
-    let label, propLabel, isImmutable
+    let label, propLabel
+    let isImmutable = prop.immutable  &&  resource[ROOT_HASH]
+
     if (!val)
       label = pLabel
-    else if (utils.getModel(prop.ref || prop.items.ref).abstract)
-      label = translate(utils.getModel(utils.getType(val)))
+    else if (utils.getModel(prop.ref || prop.items.ref).abstract) {
+      let vtype = utils.getType(val)
+      let vm = utils.getModel(vtype)
+      if (typeof val === 'object'  &&  vtype  &&  !vm.abstract)
+        label = this.getRefLabel(prop, val, resource)
+      else
+        label = translate(vm)
+      propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
+    }
     else {
-      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto)
         label = pLabel
       else if (isFile  &&  resource[pName].name)
         label = resource[pName].name
       if (!label)
-        label = this.getRefLabel(prop, val)
+        label = this.getRefLabel(prop, val, resource)
       propLabel = <Text style={[styles.labelDirty, { color: lcolor}]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
@@ -209,7 +219,7 @@ class RefPropertyEditor extends Component {
                     {icon}
                   </View>
 
-    let help = paintHelp(prop)
+    let help = paintHelp({prop, styles})
     let actionItem
     if (isBookmarkSealed || (!exploreData  &&  (isImmutable || isReadOnly)))
       actionItem = content
@@ -222,19 +232,20 @@ class RefPropertyEditor extends Component {
       if (useImageInput({resource, prop, isFile})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
         if (isDocument) {
+          let mimeTypes
           if (isRefresh) {
             actionItem = <TouchableOpacity onPress={() => this.onDocument(pName, resource[pName])}>
                            {content}
                          </TouchableOpacity>
           }
           else {
-          let mimeTypes
-          if (prop.allowedMimeTypes) {
-            let mt = allowedMimeTypes || []
-            mimeTypes = [...prop.allowedMimeTypes, ...mt]
-          }
-          else
-            mimeTypes = allowedMimeTypes
+            let mimeTypes
+            if (prop.allowedMimeTypes) {
+              let mt = allowedMimeTypes || []
+              mimeTypes = [...prop.allowedMimeTypes, ...mt]
+            }
+            else
+              mimeTypes = allowedMimeTypes
 
             actionItem = <DocumentInput style={aiStyle} onDocument={item => this.onDocument(pName, item)} allowedMimeTypes={mimeTypes}>
                            {content}
@@ -259,8 +270,14 @@ class RefPropertyEditor extends Component {
     else {
       let ref = prop.ref  ||  prop.items.ref
       let refM = utils.getModel(ref)
-      if (!utils.isEnum(ref)  &&  !utils.isSubclassOf(refM, TREE)  &&  (prop.inlined  ||  refM.inlined)) {
+      let isEnum = utils.isEnum(ref)
+      if (!isEnum  &&  !utils.isSubclassOf(refM, TREE)  &&  (prop.inlined  ||  refM.inlined)) {
         actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
+                       {content}
+                     </TouchableOpacity>
+      }
+      else if (isEnum   &&  !prop.items  &&  this.props.customChooser && !exploreData &&  refM.enum.length < 20) {
+        actionItem = <TouchableOpacity onPress={() => this.props.customChooser(prop.name)}>
                        {content}
                      </TouchableOpacity>
       }
@@ -271,15 +288,15 @@ class RefPropertyEditor extends Component {
       }
     }
     let addStyle = hasLock ? {backgroundColor: bankStyle.backgroundColor || '#f7f7f7'} : {}
-    actionItem = <View style={{marginTop: 10}}>{actionItem}</View>
+
     return (
       <View key={pName} style={{margin: 0, marginBottom: 10}} ref={pName}>
         <View style={[styles.formInput, addStyle, {borderColor: bcolor, minHeight: 60}]}>
           {propLabel}
           {actionItem}
         </View>
-          {paintError({errors: error && {[pName]: error} || null , prop: prop, paddingBottom: 0})}
-          {help}
+        {paintError({errors: error && {[pName]: error} || null, prop: prop, paddingBottom: 0, styles})}
+        {help}
       </View>
     );
   }
@@ -588,9 +605,21 @@ class RefPropertyEditor extends Component {
     this.setState({ r })
     Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
   }
-  chooser(prop, propName,event) {
+  chooser(prop, propName, event, pRef) {
     let { isRegistration } = this.state
     let { resource, model, bankStyle, search, navigator, originatingMessage, onChange, exploreData } = this.props
+
+    let propRef = pRef || prop.ref || prop.items.ref
+    let m = utils.getModel(propRef);
+
+    if (m.abstract) {
+      let subList = utils.getAllSubclasses(m.id)
+      let callback = val =>  this.chooser(prop, propName, event, utils.getModel(val).id)
+
+      this.showSubclasses({ list: subList, callback, notModel: true, title: translate(model) })
+      return
+    }
+
     if (model  &&  !resource) {
       resource = {};
       resource[TYPE] = model.id;
@@ -625,7 +654,7 @@ class RefPropertyEditor extends Component {
         isChooser:      true,
         modelName:      propRef,
         isModel:        m.abstract  &&  exploreData,
-        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        returnRoute:    !pRef && currentRoutes[currentRoutes.length - 1],
         callback:       onChange
       }
     }
@@ -636,8 +665,8 @@ class RefPropertyEditor extends Component {
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
     }
-
-    navigator.push(route)
+    // navigator.push(route)
+    navigator[pRef ? 'replace' : 'push'](route)
   }
   multiChooser(prop, values) {
     const { navigator, onChange } = this.props
@@ -687,155 +716,5 @@ function getDocumentTypeFromTitle (title='') {
   }
 }
 reactMixin(RefPropertyEditor.prototype, PhotoCarouselMixin);
+reactMixin(RefPropertyEditor.prototype, HomePageMixin);
 module.exports = RefPropertyEditor;
-  // async showBlinkIDScanner(prop) {
-  //   let { resource } = this.props
-  //   const { documentType, country } = resource
-  //   const type = getDocumentTypeFromTitle(documentType.title)
-  //   let recognizers
-  //   let tooltip
-  //   let firstSideInstructions, secondSideInstructions
-  //   let scanBothSides
-  //   // let isPassport
-  //   // HACK
-  //   if (!recognizers  &&  prop === 'otherSideScan')
-  //     recognizers = BlinkID.recognizers.documentFace
-  //   else {
-  //     switch (type) {
-  //     case 'passport':
-  //       tooltip = translate('centerPassport')
-  //       // isPassport = true
-  //       // machine readable travel documents (passport)
-  //       recognizers = BlinkID.recognizers.mrtd
-  //       firstSideInstructions = translate('scanPassport')
-  //       break
-  //     case 'card':
-  //       firstSideInstructions = translate('centerIdCard')
-  //       // machine readable travel documents (passport)
-  //       // should be combined
-  //       // if (country.title === 'Bangladesh')
-  //       //   recognizers = BlinkID.recognizers.mrtd
-  //       //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
-  //       // else if (country.title === "Philippines")
-  //       //   recognizers = BlinkID.recognizers.pdf417
-  //       // else
-  //         // recognizers = BlinkID.recognizers.mrtd
-  //       recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
-  //       break
-  //     case 'license':
-  //     case 'licence':
-  //       firstSideInstructions = translate('centerLicence')
-  //       if (country.title === 'United States') {
-  //         secondSideInstructions = translate('documentBackSide')
-  //         recognizers = BlinkID.recognizers.usdlCombined
-  //         // recognizers = BlinkID.recognizers.usdl
-  //       }
-  //       else if (country.title === 'New Zealand')
-  //         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
-  //       else if (country.title === 'Australia') {
-  //         scanBothSides = true
-  //         recognizers = [BlinkID.recognizers.australiaFront, BlinkID.recognizers.australiaBack]
-  //       }
-  //       else {
-  //         recognizers = BlinkID.recognizers.eudl
-  //       }
-  //       break
-  //     default:
-  //       tooltip = translate('centerID')
-  //       break
-  //     }
-  //   }
-
-  //   const blinkIDOpts = {
-  //     // quality: 0.2,
-  //     // base64: true,
-  //     // timeout: ENV.blinkIDScanTimeoutInternal,
-  //     documentType,
-  //     country,
-  //     firstSideInstructions,
-  //     secondSideInstructions,
-  //     scanBothSides,
-  //     recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
-  //   }
-
-  //   Analytics.sendEvent({
-  //     category: 'widget',
-  //     action: 'scan_document',
-  //     label: `blinkid:${type}`
-  //   })
-
-  //   let result
-  //   try {
-  //     result = await BlinkID.scan(blinkIDOpts)
-  //   } catch (err) {
-  //     debug('scan failed:', err.message)
-  //     debugger
-  //   }
-  //   if (!result)
-  //     return
-
-  //   const r = _.cloneDeep(resource)
-  //   if (result.image) {
-  //     r[prop] = {
-  //       url: result.image.base64,
-  //     }
-  //   }
-  //   if (result.backImage) {
-  //     // HACK
-  //     if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
-  //       r.otherSideScan = {
-  //         url: result.backImage.base64,
-  //       }
-  //     }
-  //   }
-  //   if (result.images) {
-  //     let { faceImage, signatureImage } = result.images
-  //     if (faceImage)
-  //       r.faceImage = { url: faceImage }
-  //     if (signatureImage)
-  //       r.signatureImage = { url: signatureImage }
-  //   }
-
-  //   let dateOfExpiry //, dateOfBirth, documentNumber
-  //   ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
-  //     const scan = result[docType]
-  //     if (!scan) return
-
-  //     // const { personal, document } = scan
-  //     // documentNumber = document.documentNumber
-  //     // if (personal.dateOfBirth)
-  //     //   dateOfBirth = personal.dateOfBirth
-  //     // if (document.dateOfIssue) {
-  //     //   document.dateOfIssue = formatDate(document.dateOfIssue)
-  //     // }
-  //     const { document } = scan
-  //     if (document.dateOfExpiry)
-  //       dateOfExpiry = document.dateOfExpiry
-
-  //     r[prop + 'Json'] = scan
-  //     return
-  //   })
-
-  //   if (dateOfExpiry && dateOfExpiry < Date.now()) {
-  //     // give the BlinkID view time to disappear
-  //     // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-  //     await utils.promiseDelay(800)
-  //     Alert.alert(
-  //       translate('documentExpiredTitle'),
-  //       translate('documentExpiredMessage')
-  //     )
-
-  //     return
-  //   }
-  //   // let chipScan
-  //   // if (isPassport  &&  Platform.OS === 'android') {
-  //   //   Alert.alert('Please press the back of your android phone against the passport')
-  //   //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
-  //   // }
-
-  //   let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
-  //   if (docScannerProps  &&  docScannerProps.length)
-  //     r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
-  //   this.afterScan(r, prop)
-  // }
-
