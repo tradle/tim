@@ -18,7 +18,7 @@ import LinearGradient from 'react-native-linear-gradient'
 
 import constants from '@tradle/constants'
 
-import utils, { translate, translateEnum, isEnum, isStub, isForm, getRootHash } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub, isForm, getRootHash, getLensedModelForType } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -37,6 +37,7 @@ const CHECK_OVERRIDE = 'tradle.CheckOverride'
 const APPLICATION = 'tradle.Application'
 const DURATION = 'tradle.Duration'
 const VERIFICATION = 'tradle.Verification'
+const PDF_ICON = 'https://tradle-public-images.s3.amazonaws.com/pdf-icon.png' //https://tradle-public-images.s3.amazonaws.com/Pdf.png'
 
 const {
   TYPE,
@@ -60,7 +61,8 @@ class ShowPropertiesView extends Component {
     currency: PropTypes.string,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
-    excludedProperties: PropTypes.array
+    excludedProperties: PropTypes.array,
+    application: PropTypes.object
   };
   constructor(props) {
     super(props);
@@ -98,9 +100,9 @@ class ShowPropertiesView extends Component {
     let { checkProperties, excludedProperties, bankStyle, currency, locale, isItem, isVerifier } = this.props
     var modelName = utils.getType(resource)
     if (!model)
-      model = this.props.model  ||  utils.getModel(modelName)
+      model = this.props.model  ||  getLensedModelForType(modelName)
     if (model.id !== modelName  &&  !utils.isSubclassOf(modelName, model.id))
-      model = utils.getModel(modelName)
+      model = getLensedModelForType(modelName)
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
@@ -156,16 +158,20 @@ class ShowPropertiesView extends Component {
     let propsDisplayed
     vCols.forEach(pMeta => {
       let p = pMeta.name
-      if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
-        return;
+      if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1) {
+        return
+      }
 
       // var pMeta = props[p];
-      if (pMeta  &&  utils.isHidden(p, resource))
+      if (pMeta  &&  utils.isHidden(p, resource)) {
         return
+      }
       if (!pMeta)
         pMeta = ObjectModel.properties[p]
-      if (!me.isEmployee  &&  pMeta.internalUse)
+
+      if (pMeta.internalUse &&  (!me.isEmployee || me.counterparty))
         return
+
       let val = resource[p]
       if (pMeta.range === 'json') {
         if (this.renderJsonProp(val, model, pMeta, viewCols))
@@ -194,7 +200,9 @@ class ShowPropertiesView extends Component {
           )
           if (!isVerifier) {
             hasGroups = true
-            groups.push(viewCols.length)
+            groups.push(propsIn.length)
+
+            // groups.push(viewCols.length - 1)
           }
           propsIn.push(p)
           return
@@ -202,7 +210,7 @@ class ShowPropertiesView extends Component {
         else if (checkProperties) {
           if (pMeta.items) {
             if (pMeta.items.ref  &&  !utils.isEnum(pMeta.items.ref)) {
-              propsIn.push(p)
+              propsIn.splice(propsIn.length - 1, 1)
               return
             }
           }
@@ -252,8 +260,9 @@ class ShowPropertiesView extends Component {
         isItems = Array.isArray(val)
         let iref = isItems  &&  pMeta.items.ref
         if (iref) {
-          if (iref === PHOTO)
+          if (iref === PHOTO  &&  pMeta.range === 'photo') {
             return
+          }
           if (isEnum(iref)) {
             let values = val.map((v) => translateEnum(v)).join(', ')
             viewCols.push(
@@ -296,9 +305,10 @@ class ShowPropertiesView extends Component {
 
       if (hasGroups)
         style.push({flex: 1})
+
       viewCols.push(
         <View key={this.getNextKey()}>
-           <View style={{flexDirection: isDirectionRow ? 'row' : 'column'}}>
+           <View style={isItem ? {} : {flexDirection: isDirectionRow ? 'row' : 'column'}}>
              <View style={[style, {flexDirection: 'column'}]}>
                {title}
                {val}
@@ -407,16 +417,16 @@ class ShowPropertiesView extends Component {
  */
       }
       else {
-        let size1 = Math.round(size / 2)
+        let colSize = Math.round(size / 2)
         let groupBody = <View styles={{flex: 1}}>
                           {i === 0  &&  this.getDateView({resource, styles})}
                           {cols.slice(0, 1)}
                           <View style={{flexDirection: 'row', paddingBottom: 10}}>
                             <View style={{padding: 5, flex: 1, borderRightColor:'#ccc', borderRightWidth: 1}}>
-                              {cols.slice(1, size1)}
+                              {cols.slice(1, colSize)}
                             </View>
                             <View style={{padding: 5, flex: 1, width: isSmall ? '50%' : '100%'}}>
-                              {cols.slice(size1 + 1)}
+                              {cols.slice(colSize + 1)}
                             </View>
                           </View>
                         </View>
@@ -527,7 +537,7 @@ class ShowPropertiesView extends Component {
     let { ref } = pMeta
     if (!ref)
       ref = pMeta.items  &&  pMeta.items.ref
-    if (ref === PHOTO) {
+    if (ref === PHOTO  && pMeta.range !== 'document') {
       if (vCols.length === 1  &&  resource._time  &&  !isForm(utils.getModel(resource[TYPE])))
         viewCols.push(
           <View  key={this.getNextKey()} style={{padding: 10}}>
@@ -569,6 +579,19 @@ class ShowPropertiesView extends Component {
                 <Icon name='ios-open-outline' size={15} color='#aaaaaa' style={styles.link}/>
               </TouchableOpacity>
         return { val, isRef: true }
+      }
+      if (pMeta.range === 'document') {
+        let model = utils.getModel(resource[TYPE])
+        let v
+        if (val.name)
+          v = <Text style={[styles.title, styles.linkTitle]}>{val.name}</Text>
+        else
+          v = <Image resizeMode='cover' style={{width: 43, height: 43, opacity: 0.8}} source={PDF_ICON} />
+
+        val = <TouchableOpacity onPress={this.showPDF.bind(this, {photo: val})} style={{justifyContent: 'flex-end'}}>
+                {v}
+              </TouchableOpacity>
+        return {val, isRef: false}
       }
       if (!val[TYPE])
         val[TYPE] = ref
