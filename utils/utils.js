@@ -9,7 +9,7 @@ import {
   Platform,
   StyleSheet
 } from 'react-native'
-
+import _ from 'lodash'
 import querystring from 'querystring'
 import traverse from 'traverse'
 import DeviceInfo from 'react-native-device-info'
@@ -22,7 +22,6 @@ import _collect from 'stream-collector'
 import moment from 'moment'
 import dateformat from 'dateformat'
 import Backoff from 'backoff'
-import _ from 'lodash'
 import levelErrors from 'levelup/lib/errors'
 import Cache from 'lru-cache'
 // import mutexify from 'mutexify'
@@ -39,7 +38,7 @@ import {
   utils as tradleUtils
 } from '@tradle/engine'
 import constants from '@tradle/constants'
-import { calcLinks, omitVirtual } from '@tradle/build-resource'
+import { id, calcLinks, omitVirtual, enumValue } from '@tradle/build-resource'
 import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
@@ -77,7 +76,7 @@ var strMap = {
   'The company was not found. Please fill out the form': 'fillOutTheForm',
   'Please take a **selfie** picture of your face': 'takeAPicture',
   'For your convenience we prefilled some fields. Please review and submit': 'prefilledForCustomer',
-  'Is it your company? Please review and correct the data below': 'reviewScannedPropertiesWarning',
+  'Is it your company? Please review and correct the data below for': 'reviewScannedPropertiesWarning',
   'Please overwrite if data can`t be reused': 'overwriteIfCantReuse',
   'FinCrime needs to review this application': 'finCrimeReview',
   'Add another': 'addAnother',
@@ -96,7 +95,6 @@ var {
 var {
   VERIFICATION,
   MONEY,
-  FORM,
   ORGANIZATION,
   SIMPLE_MESSAGE,
   PROFILE,
@@ -130,6 +128,7 @@ const SELF_INTRODUCTION = 'tradle.SelfIntroduction'
 const SELFIE = 'tradle.Selfie'
 const PHOTO_ID = 'tradle.PhotoID'
 const LANGUAGE = 'tradle.Language'
+const EMPLOYEE_ROLES = 'tradle.EmployeeRoles'
 
 var dictionary, language, strings //= dictionaries[Strings.language]
 
@@ -140,6 +139,7 @@ var DEFAULT_FETCH_TIMEOUT = 5000
 var defaultPropertyValues = {}
 var hidePropertyInEdit = {}
 
+const IS_URL_REGEX = /^https?:\/\//
 const getVersionInAppStore = Platform.select({
   ios: async () => {
     const bundleId = DeviceInfo.getBundleId()
@@ -243,9 +243,6 @@ var utils = {
   getCompanyCurrency() {
     return companyCurrency
   },
-  // getModelsForStub() {
-  //   return modelsForStub
-  // },
   normalizeGetInfoResponse(json) {
     if (!json.providers) {
       json = {
@@ -487,7 +484,7 @@ var utils = {
     let val
     if (translations) {
       if (needDescription)
-        val = translations[model.id + '_d'] || translations.Default_d
+        val = translations[model.id + '_d'] || translations.Default
       else
         val = translations[model.id] || translations.Default
     }
@@ -505,6 +502,15 @@ var utils = {
       return model.title ? model.title : utils.makeModelTitle(model, isPlural)
 
     return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
+  },
+  translateModelDescription(model) {
+    let me = utils.getMe()
+    let lang = me  &&  me.languageCode
+    let desc = dictionary && dictionary.descriptions && dictionary.descriptions[model.id]
+    if (lang === 'en' ||  !desc)
+      return model.description
+
+    return desc
   },
   translateForGrid({model, isPlural, property}) {
     if (property) {
@@ -584,7 +590,7 @@ var utils = {
 
     if (isInlined) return _.isEqual(r1, r2)
 
-    let properties = utils.getModel(r1[TYPE]).properties
+    let properties = utils.getModel(utils.getType(r1)).properties
     let exclude = ['_time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in properties) {
       let prop = properties[p]
@@ -602,7 +608,7 @@ var utils = {
           return false
       }
       else if (typeof r1[p] === 'object') {
-        if (!r2[p])
+        if (!r2[p]  ||  !properties[p]) // internal props like _context
           return false
         if (prop.ref === MONEY) {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
@@ -818,6 +824,9 @@ var utils = {
   isMyProduct(type) {
     return utils.isSubclassOf(type, MY_PRODUCT)
   },
+  isReportLink(value) {
+    return value.indexOf('/r?') !== -1 && value.indexOf('&-template=') !== -1
+  },
   isForm(type) {
     return utils.isSubclassOf(type, FORM)
   },
@@ -874,7 +883,7 @@ var utils = {
         r.from.organization.id === myOrgId) {
       return false
     }
-    let fromOrgId = utils.getId(r.from.organization)
+    let fromOrgId = r.from.organization && utils.getId(r.from.organization)
     if (r.from.organization) {
       if (myOrgId === fromOrgId) {
         if (to  &&  utils.getId(to) === myOrgId)
@@ -891,6 +900,45 @@ var utils = {
           return true
       }
     }
+  },
+  getPermissions({modelName, property}) {
+    let me = utils.getMe()
+    let allowAll = {create: true, edit: true}
+    if (!me.isEmployee || !me.counterparty)
+      return allowAll
+    if (!me.employeePass || !me.employeePass.role)
+      return {}
+
+    let m = utils.getModel(modelName)
+    let allow = (property && property.allow) || m.allow
+    if (!allow)
+      return allowAll
+
+    let ctype = utils.getType(me.counterparty)
+    let role = getEnumValueId({model: utils.getModel(EMPLOYEE_ROLES), value: me.employeePass.role})
+    if (!role)
+      return allowAll
+    let roles = utils.getModel(EMPLOYEE_ROLES).enum.map(r => r.id)
+    let actions = ['edit', 'create']
+    let retParams = {}
+    for (let i=0; i<actions.length; i++) {
+      let action = actions[i]
+      if (!allow[action]) {
+        retParams[action] = true
+        continue
+      }
+      if (typeof allow[action] === 'boolean') {
+        retParams[action] = allow[action]
+        continue
+      }
+      if (!allow[action][ctype])
+        retParams[action] = false
+      else if (allow[action][ctype][role] === undefined)
+        retParams[action] = false
+      else
+        retParams[action] = allow[action][ctype][role]
+    }
+    return retParams
   },
   getFontSize(fontSize) {
     // return fontSize
@@ -1012,8 +1060,18 @@ var utils = {
         if (!resource[p]  &&  !prop.displayAs)
           continue
         let dn
-        if (prop.ref  &&  utils.isEnum(prop.ref))
-          dn = utils.translateEnum(resource[p])
+        if (prop.ref  &&  utils.isEnum(prop.ref)) {
+          if (typeof resource[p] === 'string') {
+            try {
+              let val = enumValue({model: utils.getModel(prop.ref), value: resource[p]})
+              dn = val && utils.translateEnum(val) || resource[p]
+            } catch (err) {
+              dn = utils.translate(resource[p])
+            }
+          }
+          else
+            dn = utils.translateEnum(resource[p])
+        }
         else if (prop.range === 'model')
           dn = utils.translate(utils.getModel(resource[p]))
         else if (rType === BOOKMARK)
@@ -1044,7 +1102,7 @@ var utils = {
       }
       if (utils.isContainerProp(prop, resourceModel))
         continue
-       let dn = utils.getStringValueForProperty({resource, meta: props[p], locale})
+      let dn = utils.getStringValueForProperty({resource, meta: props[p], locale})
       if (dn) {
         displayName += displayName.length ? ' ' + dn : dn;
         if (propsUsed)
@@ -1175,16 +1233,16 @@ var utils = {
   getCurrencyName(c) {
     let currencyName
     let mm = utils.getModel(MONEY)
-    const { currency } = mm.properties
-    let foundCurrency = currency.oneOf.find(r => Object.keys(r)[0] === c)
-    return foundCurrency  &&  Object.keys(foundCurrency)[0]
+
+    let formattedCurrency = mm.properties.currency.oneOf.find(r => {
+      let cName = Object.keys(r)[0]
+      if (r[cName] === c) {
+        currencyName = cName
+        return true
+      }
+    })
+    return currencyName
   },
-  // getCurrencySymbol(currencyCode) {
-  //   let mm = utils.getModel(MONEY)
-  //   const { currency } = mm.properties
-  //   let foundCurrency = currency.oneOf.find(r => Object.keys(r)[0] === currencyCode)
-  //   return foundCurrency  &&  Object.values(foundCurrency)[0]
-  // },
   getPropByTitle(props, propTitle) {
     let propTitleLC = propTitle.toLowerCase()
     for (let p in props) {
@@ -1266,14 +1324,17 @@ var utils = {
       }
       return eCols
     }
-    return utils.getColsWithUngroupList({cols: editCols, properties})
+    return utils.getColsWithUngroupList({cols: editCols, model})
   },
-  getColsWithUngroupList({cols, properties, isView}) {
+  getColsWithUngroupList({cols, model, isView}) {
+    let properties = model.properties
+    let editCols = !isView && model.editCols
     let isWeb = utils.isWeb()
     let rCols = []
     cols.forEach((p) => {
       if (!isView) {
-        if (properties[p].readOnly)
+        // Showing readOnly props that have formula in edit mode
+        if (properties[p].readOnly && !properties[p].set && (!editCols || editCols.indexOf(p) === -1))
           return
         if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
           return
@@ -1301,7 +1362,7 @@ var utils = {
     let { viewCols, properties } = model
     let vCols = []
     if (viewCols)
-      return utils.getColsWithUngroupList({cols: viewCols, properties, isView:true})
+      return utils.getColsWithUngroupList({cols: viewCols, model, isView: true})
     let cols = utils.getAllCols({properties, isView: true})
     if (cols  &&  cols.length)
       return cols.map(p => properties[p])
@@ -1415,22 +1476,6 @@ var utils = {
       return s.substring(0, i)
     }
   },
-  // templateIt1(prop, resource) {
-  //   let pgroup = prop.group
-  //   let group = []
-  //   let hasSetProps
-  //   pgroup.forEach((p) => {
-  //     let v =  resource[p] ? resource[p] : ''
-  //     if (v)
-  //       hasSetProps = true
-  //     group.push(v)
-  //   })
-  //   if (!hasSetProps)
-  //     return
-  //   else
-  //     return utils.template(prop.displayAs, group).trim()
-  // },
-
   // parentModel for array type props
   templateIt(prop, resource, parentModel) {
     var template = prop.displayAs;
@@ -1670,17 +1715,20 @@ var utils = {
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? _.cloneDeep(resource) : resource
     let m = utils.getModel(res[TYPE])
+    let isMe = utils.getMe() === resource
     // if (!m.interfaces)
     //   res = utils.optimizeResource1(resource, doNotChangeOriginal)
     // else {
-      var properties = m.properties
-      var exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
+      const properties = m.properties
+      const exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
       let isContext = utils.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
       let isBookmark = m.id === BOOKMARK
       Object.keys(res).forEach(p => {
+        if (isMe && p === 'menu')
+          return
         if (p === '_context'  &&  res._context) {
           res._context = utils.buildRef(res._context)
           return
@@ -1834,7 +1882,7 @@ var utils = {
   // },
   isEmployee(resource) {
     let me = utils.getMe()
-    if (!me.isEmployee)
+    if (!me  ||  !me.isEmployee)
       return false
     return utils.compareOrg(me.organization, resource)
   },
@@ -2287,7 +2335,9 @@ var utils = {
     }
   },
   resized: function (props, nextProps) {
-    return props.orientation !== nextProps.orientation
+    return props.orientation !== nextProps.orientation ||
+          props.width !== nextProps.width              ||
+          props.height !== nextProps.height
   },
   restartApp: function () {
     return NativeModules.CodePush.restartApp(false)
@@ -2404,7 +2454,7 @@ var utils = {
     let rProps = []
     for (let p in props) {
       let pRef = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
-      if (pRef === ref  ||  utils.isSubclassOf(pRef, ref))
+      if (pRef && (pRef === ref  ||  utils.isSubclassOf(pRef, ref)))
         rProps.push(props[p])
     }
     return rProps
@@ -2885,25 +2935,10 @@ debugger
     const {width} = utils.dimensions(component)
     return width < MAX_WIDTH
   },
-
   getMessageWidth(component) {
     let width = component ? utils.dimensions(component).width : utils.dimensions().width
     return Math.floor(width * 0.8)
   },
-  // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
-  //   if (utils.isWeb()) {
-  //     const { width=0, height=0 } = shadowOffset
-  //     const spreadRadius = 0
-  //     const color = shadowColor.startsWith('rgb') ? shadowColor : require('./hex-to-rgb')(shadowColor)
-  //     return `${width}px ${height}px ${shadowRadius}px ${spreadRadius}px rgba(0,0,0,0.12)`,
-  //   }
-  // }
-
-  // isResourceInMyData(r) {
-  //   let toId = utils.getId(r.to)
-  //   let fromId = utils.getId(r.from)
-  //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
-  // },
   getStatusMessageForCheck({ check }) {
     const model = utils.getModel(STATUS);
     const { aspects } = check;
@@ -3002,179 +3037,3 @@ function dateFromParts (parts) {
 }
 
 module.exports = utils;
-/*
-  fromMicroBlink: function (result) {
-    const { mrtd, usdl, eudl, image } = result
-    if (mrtd) {
-      return {
-        [TYPE]: 'tradle.Passport',
-        givenName: mrtd.secondaryId,
-        surname: mrtd.primaryId,
-        nationality: {
-          id: 'tradle.Country_abc',
-          title: mrtd.nationality.slice(0, 2)
-        },
-        issuingCountry: {
-          id: 'tradle.Country_abc',
-          title: mrtd.issuer.slice(0, 2)
-        },
-        passportNumber: mrtd.documentNumber,
-        sex: {
-          id: 'tradle.Sex_abc',
-          title: mrtd.sex === 'M' ? 'Male' : 'Female'
-        },
-        dateOfExpiry: mrtd.dateOfExpiry,
-        dateOfBirth: mrtd.dateOfBirth,
-        photos: [
-          {
-            url: image.base64,
-            // width: image.width,
-            // height: image.height,
-            // isVertical: image.width < image.height
-          }
-        ]
-      }
-    }
-  },
-  fromAnyline: function (result) {
-    const { scanMode, cutoutBase64, data } = result
-    // as produced by newtondev-mrz-parser
-    // {
-    //       documentCode: documentCode,
-    //       documentType: 'PASSPORT',
-    //       documentTypeCode: documentType,
-    //       issuer: issuerOrg,
-    //       names: names,
-    //       documentNumber: documentNumber,
-    //       nationality: nationality,
-    //       dob: dob,
-    //       sex: sex,
-    //       checkDigit: {
-    //         documentNumber: {value: checkDigit1, valid: checkDigitVerify1},
-    //         dob: {value: checkDigit2, valid: checkDigitVerify2},
-    //         expiry: {value: checkDigit3, valid: checkDigitVerify3},
-    //         personalNumber: {value: checkDigit4, valid: checkDigitVerify4},
-    //         finalCheck: {value: checkDigit5, valid: checkDigitVerify5},
-    //         valid: (checkDigitVerify1 && checkDigitVerify2 && checkDigitVerify3 && checkDigitVerify4 && checkDigitVerify5)
-    //       },
-    //       expiry: expiry,
-    //       personalNumber: personalNumber
-    //     }
-
-    // if (scanMode === 'MRZ') {
-    //   const { names, nationality, issuer, dob, expiry, sex, documentNumber, personalNumber } = data
-    //   return {
-    //     [TYPE]: 'tradle.Passport',
-    //     givenName: names[0],
-    //     surname: names.lastName,
-    //     passportNumber: documentNumber || personalNumber,
-    //     nationality: {
-    //       id: 'tradle.Country_abc',
-    //       title: nationality.abbr.slice(0, 2)
-    //     },
-    //     issuingCountry: {
-    //       id: 'tradle.Country_abc',
-    //       title: issuer.abbr.slice(0, 2)
-    //     },
-    //     sex: {
-    //       id: 'tradle.Sex_abc',
-    //       title: sex.full
-    //     },
-    //     // todo: set offset by country
-    //     dateOfExpiry: dateFromParts(expiry),
-    //     dateOfBirth: dateFromParts(dob),
-    //     photos: [
-    //       {
-    //         url: cutoutBase64
-    //       }
-    //     ]
-    //   }
-    // }
-
-    if (scanMode === 'MRZ') {
-      // as returned by the `mrz` package
-      // {
-      //   "isValid": true,
-      //   "format": "TD3",
-      //   "documentType": {
-      //     "code": "P",
-      //     "label": "Passport",
-      //     "type": "",
-      //     "isValid": true
-      //   },
-      //   "issuingCountry": {
-      //     "code": "UTO",
-      //     "isValid": false,
-      //     "error": "The country code \"UTO\" is unknown"
-      //   },
-      //   "lastname": "ERIKSSON",
-      //   "firstname": "ANNA MARIA",
-      //   "nationality": {
-      //     "code": "UTO",
-      //     "isValid": false,
-      //     "error": "The country code \"UTO\" is unknown"
-      //   },
-      //   "birthDate": {
-      //     "year": "69",
-      //     "month": "08",
-      //     "day": "06",
-      //     "isValid": true
-      //   },
-      //   "sex": {
-      //     "code": "F",
-      //     "label": "Féminin",
-      //     "isValid": true
-      //   },
-      //   "expirationDate": {
-      //     "year": "94",
-      //     "month": "06",
-      //     "day": "23",
-      //     "isValid": true
-      //   },
-      //   "personalNumber": {
-      //     "value": "ZE184226B",
-      //     "isValid": true
-      //   }
-      // }
-
-      const {
-        issuingCountry,
-        nationality,
-        lastname,
-        firstname,
-        birthDate,
-        sex,
-        expirationDate,
-        documentNumber,
-        personalNumber
-      } = data
-
-      return {
-        [TYPE]: 'tradle.Passport',
-        givenName: firstname.split(' ')[0],
-        surname: lastname,
-        passportNumber: documentNumber || personalNumber,
-        nationality: {
-          id: 'tradle.Country_abc',
-          title: nationality.code.slice(0, 2)
-        },
-        issuingCountry: {
-          id: 'tradle.Country_abc',
-          title: issuingCountry.code.slice(0, 2)
-        },
-        sex: {
-          id: 'tradle.Sex_abc',
-          title: sex.code === 'M' ? 'Male' : 'Female'
-        },
-        // todo: set offset by country
-        dateOfExpiry: dateFromParts(expirationDate),
-        dateOfBirth: dateFromParts(birthDate),
-        photos: [
-          {
-            url: cutoutBase64
-          }
-        ]
-      }
-    }
-  },
-*/
