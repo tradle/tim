@@ -10,7 +10,7 @@ import constants from '@tradle/constants'
 import extend from 'lodash/extend'
 
 var { TYPE } = constants
-import { translate, getModel, isMyProduct, ungroup,
+import { translate, getModel, isMyProduct, ungroup, getMe,
          styleFactory, getDisplayName, makeModelTitle } from '../utils/utils'
 
 import Store from '../Store/Store'
@@ -21,13 +21,16 @@ import NetworkInfoProvider from '../Components/NetworkInfoProvider'
 import PageView from '../Components/PageView'
 import chatStyles from '../styles/chatStyles'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+import Actions from '../Actions/Actions'
 
 const PHOTO = 'tradle.Photo'
+const APPLICATION = 'tradle.Application'
 const FORM_REQUEST = 'tradle.FormRequest'
 
 const GRID_LIST = 'GridList'
 const APPLICATIONS_GRID = 'ApplicationsGrid'
 const NEW_RESOURCE = 'NewResource'
+const PRODUCT_LIST = 'tradle.ProductList'
 
 var component
 
@@ -36,10 +39,16 @@ var uiUtils = {
     let { resource, navigator, bankStyle, currency, searchFunction } = params
     let btype = resource.bookmark[TYPE]
     let bm = getModel(btype)
+
+    if (btype === PRODUCT_LIST) {
+      Actions.getProductList({resource: getMe().organization, linkToApply: true})
+      return
+    }
+
     let route = {
       title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
-      componentName: resource.grid && APPLICATIONS_GRID || GRID_LIST,
+      componentName: btype === APPLICATION && resource.grid ? APPLICATIONS_GRID : GRID_LIST,
       passProps: {
         modelName: btype,
         bookmark: resource,
@@ -81,6 +90,10 @@ var uiUtils = {
   },
 
   showLoading(params) {
+    // let { message } = params
+    // Actions.showModal({title: message || translate('inProgress'), showIndicator: true})
+    // setTimeout(() => Actions.hideModal(), 1000)
+    // return
     if (!params.component)
       return
     let { component, style, message, bankStyle, isConnected, resource } = params
@@ -136,7 +149,7 @@ var uiUtils = {
     newParams.idx = idx
     newParams.message = message2.trim()
     let msg = `${uiUtils.parseMessage(newParams)}`
-    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{`${translate(message1)} `}
+    return <Text key={key} style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageOpaqueTextColor}]}>{`${translate(message1)} `}
              <Text style={{color: linkColor}}>{formTitle}</Text>
              <Text>{msg}</Text>
            </Text>
