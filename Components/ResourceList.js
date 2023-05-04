@@ -11,6 +11,7 @@ import {
   Modal
   // Text,
 } from 'react-native'
+
 import PropTypes from 'prop-types';
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -93,8 +94,9 @@ class ResourceList extends Component {
       }
     })
 
-    let { prop, filter, serverOffline, navigator, bankStyle,
+    let { prop, filter, serverOffline, navigator, bankStyle, modelName,
           multiChooser, isRegistration, resource, chat, onDone } = this.props
+    let me = utils.getMe()
     this.state = {
       isLoading: true,
       dataSource,
@@ -110,6 +112,7 @@ class ResourceList extends Component {
       hasPartials: false,
       hasBookmarks: false,
       hasTestProviders: false,
+      menuIsShown: me.menu && modelName === ORGANIZATION,
       bankStyle
     };
     // if (props.isBacklink  &&  props.backlinkList) {
@@ -134,6 +137,7 @@ class ResourceList extends Component {
     }
     this.selectResource = this.selectResource.bind(this)
     this.onSettingsPressed = this.onSettingsPressed.bind(this)
+    this.onAddContact = this.onAddContact.bind(this)
     this.openSharedContextChat = this.openSharedContextChat.bind(this)
   }
   done() {
@@ -160,10 +164,9 @@ class ResourceList extends Component {
       else
         this.state.dataSource = this.state.dataSource.cloneWithRows([])
     }
-    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
+    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider))))
       Actions.list({modelName: ORGANIZATION})
       // this.state.customStyles = props.customStyles
-    }
   }
   componentWillUnmount() {
     if (this.props.navigator.getCurrentRoutes().length === 1)
@@ -254,7 +257,7 @@ class ResourceList extends Component {
   }
 
   onListUpdate(params) {
-    let { navigator } = this.props
+    let { navigator, modelName } = this.props
     let action = params.action;
     if (action === 'addApp') {
       let routes = navigator.getCurrentRoutes()
@@ -263,6 +266,10 @@ class ResourceList extends Component {
       if (params.error)
         Alert.alert(params.error)
       // Actions.list(ORGANIZATION)
+      return
+    }
+    if (action === 'getMenu') {
+      this.setState({menuIsShown: utils.getMe().isEmployee && modelName === ORGANIZATION})
       return
     }
     if (params.error)
@@ -295,7 +302,7 @@ class ResourceList extends Component {
       this.setState({isConnected: params.isConnected})
       return
     }
-    let { modelName, officialAccounts, isDeepLink } = this.props
+    let { officialAccounts, isDeepLink } = this.props
     if (action === 'newStyles'  &&  modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
       return
@@ -523,6 +530,8 @@ class ResourceList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
+      return true
+    if (this.state.menuIsShown !== nextState.menuIsShown)
       return true
     if (this.state.isModalOpen  !== nextState.isModalOpen)
       return true
@@ -790,7 +799,7 @@ class ResourceList extends Component {
         rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel(resource[TYPE]),
-          bankStyle: this.props.style,
+          bankStyle: this.state.bankStyle || defaultBankStyle,
           resource: me
         }
       };
@@ -813,7 +822,7 @@ class ResourceList extends Component {
           model,
           resource,
           search: true,
-          bankStyle: this.state.bankStyle,
+          bankStyle: this.state.bankStyle || defaultBankStyle,
         }
       })
       // filter = filter.substring(idx + 1).trim()
@@ -914,6 +923,7 @@ class ResourceList extends Component {
   renderTestProviders() {
     if (!this.state.hasTestProviders  ||  this.props.isTest)
       return <View/>
+
     return (
       <View>
         <View style={styles.testProvidersRow} key={'testProviders_1'}>
@@ -963,8 +973,9 @@ class ResourceList extends Component {
 
     let employee
     if (me.isEmployee) {
+      let orgTitle = me.counterparty ? me.counterparty.title : me.organization.title
       employee = <View style={{justifyContent: 'center', alignSelf: 'center', maxWidth: utils.dimensions(ResourceList).width - 90}}>
-                   <Text numberOfLines={1} style={{color: bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
+                   <Text numberOfLines={1} style={{color: bankStyle.linkColor}}>{`${me.firstName}@${orgTitle}`}</Text>
                  </View>
     }
     return (
@@ -987,7 +998,27 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        model: model,
+        model,
+        bankStyle: this.mergeStyle(this.props.style),
+        callback: () => {
+          this.props.navigator.pop()
+          Actions.list({modelName: this.props.modelName})
+        }
+        // callback: this.register.bind(this)
+      },
+    }
+
+    this.props.navigator.push(route)
+  }
+  onAddContact() {
+    let model = utils.getModel('tradle.EmailAddress')
+    let route = {
+      componentName: 'NewResource',
+      title: translate('newContact'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model,
         bankStyle: this.mergeStyle(this.props.style),
         callback: () => {
           this.props.navigator.pop()
@@ -1079,8 +1110,8 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, bankStyle } = this.props
-    let { isModalOpen } = this.state
+    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, bankStyle, navigator } = this.props
+    let { isModalOpen, menuIsShown } = this.state
     let model = utils.getModel(modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1137,6 +1168,10 @@ class ResourceList extends Component {
       hasNetworkRow = this.state.isConnected && !this.state.serverOffline
     }
 
+    let navBarMenu
+    if (menuIsShown)
+      navBarMenu = this.showMenu(this.props, navigator)
+
     let { qr } = this.state
     let { width, height } = utils.dimensions(ResourceList)
     let w = 350
@@ -1164,19 +1199,39 @@ class ResourceList extends Component {
       borderBottomColor: '#eee',
       borderBottomWidth: 1
     }
-    return (
-      <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
-      <SafeAreaView style={styles.container}>
-        {network}
-        {searchBar}
-        <View style={(searchBar  ||  hasNetworkRow) && styles.separator} />
-        {content}
-        {qrcode}
-      </SafeAreaView>
-        {footer}
-        {actionSheet}
-      </PageView>
-    );
+    if (menuIsShown) {
+      return (
+        // <PageView style={style} separator={contentSeparator}>
+        <PageView style={[{justifyContent: 'flex-start', flexDirection: 'row'}, platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
+          <View style={platformStyles.pageMenu}>
+            {navBarMenu}
+          </View>
+          <View style={{flex: 1}}>
+            {network}
+            {searchBar}
+            <View style={(searchBar  ||  !hasNetworkRow) &&  styles.separator} />
+            {content}
+            {qrcode}
+            {footer}
+            {actionSheet}
+          </View>
+        </PageView>
+      )
+    }
+    else
+      return (
+        <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
+        <SafeAreaView style={styles.container}>
+          {network}
+          {searchBar}
+          <View style={(searchBar || hasNetworkRow) && styles.separator} />
+          {content}
+          {qrcode}
+        </SafeAreaView>
+          {footer}
+          {actionSheet}
+        </PageView>
+      )
   }
   _onRefresh() {
     if (this.state.list  &&  this.state.list.length > LIMIT)
@@ -1202,6 +1257,10 @@ class ResourceList extends Component {
       if (!ENV.allowAddServer) return
       let hideText = this.state.hideMode ? 'cancelHideResource' : 'hideResource'
       buttons = [
+        {
+          text: translate('addContact'),
+          onPress: this.onAddContact
+        },
         {
           text: translate('addServerUrl'),
           onPress: this.onSettingsPressed
@@ -1475,6 +1534,7 @@ class ResourceList extends Component {
       passProps: {
         strings:   productList.chooser.oneOf,
         bankStyle,
+        noMenu: true,
         forScan: true,
         callback:  (val) => {
           this.showProductQR(val)
@@ -1520,6 +1580,7 @@ class ResourceList extends Component {
         modelName: MESSAGE,
         bankStyle: this.state.bankStyle,
         isModel: true,
+        noMenu: true,
         search: true,
         exploreData: true
       },
@@ -1542,6 +1603,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         modelName: BOOKMARKS_FOLDER,
+        noMenu: true,
         locale,
         bankStyle: bankStyle || this.state.bankStyle
       },
