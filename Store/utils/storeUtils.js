@@ -41,6 +41,8 @@ const {
   ROOT_HASH,
   CUR_HASH
 } = constants
+const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
+
 const STYLES_PACK = 'tradle.StylesPack'
 const BOOKMARK = 'tradle.Bookmark'
 const APPLICATION = 'tradle.Application'
@@ -52,7 +54,6 @@ const JURISDICTION = 'tradle.Jurisdiction'
 const COUNTRY = 'tradle.Country'
 const DATA_BUNDLE = 'tradle.DataBundle'
 
-const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
 let dictionary
 
@@ -447,7 +448,6 @@ const storeUtils = {
     let reset
     let rmodel = resource ? getModel(getType(resource)) : m
     if (resource  &&  !hasReset  &&  isChooser  &&  resource[prop.name]) {
-      let rmodel = getModel(resource[TYPE])
       reset = {
         [TYPE]: modelName,
         [ROOT_HASH]: '__reset',
@@ -645,14 +645,17 @@ const storeUtils = {
   makeStub(sub) {
     let stub = {
       id: sub.id  ||  [sub[TYPE], sub._permalink, sub._link].join('_'),
-      title: sub.title || sub._displayName
     }
+    let title = sub.title || sub._displayName
+    if (title)
+      stub.title = title
     if (sub._refId)
       stub._refId = sub._refId
     return stub
   },
-
   getEmployeeBookmarks({ me, botPermalink }) {
+    if (me.counterparty)
+      return
     const from = buildRef(me)
     const etype = 'tradle.ClientOnboardingTeam'
     const amodel = getModel(APPLICATION)
@@ -734,7 +737,7 @@ const storeUtils = {
         grid: true
       },
       {
-        message: 'applicationDrafts',
+        message: translate('applicationDrafts'),
         bookmark: {
           [TYPE]: APPLICATION,
           _org: botPermalink,
