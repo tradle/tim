@@ -458,7 +458,6 @@ class TimHome extends Component {
     Actions.hasPartials()
     Actions.hasBookmarks()
     // return
-    let { navigator } = this.props
     let profileTitle
     if (me.organization)
       profileTitle = me.organization.title

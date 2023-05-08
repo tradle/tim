@@ -187,8 +187,6 @@ class FormRequestRow extends Component {
       let props = utils.getEditableProperties(resource)
       prop = props.length === 1  &&  props[0]
     }
-    let props = utils.getEditableProperties(resource)
-    let prop = props.length === 1  &&  props[0]
     let hasMoreProps
     if (!prop  &&  isFormRequest) {
       const formModel = utils.getModel(resource.form)

@@ -629,8 +629,6 @@ class RefPropertyEditor extends Component {
     // let value = parent.refs.form.input // this.refs.form.input;
 
     let filter = event.nativeEvent.text;
-    let propRef = prop.ref || prop.items.ref
-    let m = utils.getModel(propRef);
     let currentRoutes = navigator.getCurrentRoutes();
 
     if (originatingMessage) {

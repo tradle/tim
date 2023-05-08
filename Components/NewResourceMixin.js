@@ -1089,7 +1089,6 @@ const NewResourceMixin = {
       return
     let {missedRequiredOrErrorValue, isRegistration} = this.state
     const { errors, styles, prop } = params
-    let {prop} = params
     let err = missedRequiredOrErrorValue
             ? missedRequiredOrErrorValue[prop.name]
             : null
@@ -1274,7 +1273,12 @@ const NewResourceMixin = {
             locale={utils.getMe().languageCode || 'en'}
             date={localizedDate}
             onDateChange={(date) => {
-              this.changeTime(params.prop, moment.utc(date, format).toDate())
+              if (!(date instanceof Date)) {
+                date = moment.utc(date, format).toDate()
+              }
+
+              this.changeTime(params.prop, date)
+              // this.changeTime(params.prop, moment.utc(date, format).toDate())
             }}
             customStyles={{
               dateInput: styles.dateInput,
@@ -1476,6 +1480,9 @@ const NewResourceMixin = {
              </View>
              {check}
             </View>
+  },
+  customChooser(enumProp) {
+    this.setState({enumProp})
   },
   addGoalSeek(prop, styles) {
     let { resource, fixedProps, recalculateMode } = this.state

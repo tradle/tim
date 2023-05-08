@@ -89,8 +89,6 @@ class MessageRow extends Component {
     let styles = createStyles({bankStyle})
 
     let isMyMessage = this.isMyMessage() || resource[TYPE] === APPLICATION //  &&  !isRemediationCompleted
-    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let renderedRow = [];
     let ret = this.formatRow(isMyMessage, renderedRow, styles);

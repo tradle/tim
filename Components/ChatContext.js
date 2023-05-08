@@ -72,7 +72,6 @@ class ChatContext extends Component {
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>
                     {title}
                   </Text>
-    let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
     let style = me.hasOwnProperty('_stepIndicator') &&  me._showStepIndicator &&  context._formsCount  &&  styles.contextBarWithSteps ||  styles.contextBar
     // if (isAgent  ||  (context  &&  isShareContext || application))

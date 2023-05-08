@@ -1038,9 +1038,6 @@ if (r.url)
         continue
       if (!this.checkRequestedProperties(p))
         continue
-      let bl = itemsMeta[p]
-      if (bl.internalUse &&  (!me.isEmployee || me.counterparty))
-        continue
       // if (search && !bl.inlined || (bl.items.ref && !utils.getModel(bl.items.ref).inlined))
       //   continue
       if (!this.checkRequestedProperties(p))
@@ -1794,7 +1791,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       height: 55,
       justifyContent: 'center',
       backgroundColor: 'lightyellow',
-      width: utils.getContentWidth(NewResource),
       alignItems: 'center',
       paddingHorizontal: 7
     },

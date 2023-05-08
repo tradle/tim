@@ -1145,7 +1145,6 @@ debugger
        network = <NetworkInfoProvider connected={isConnected} resource={resource} online={onlineStatus} />
     if (!context  &&  isContext)
       context = resource
-    let separator = getContentSeparator(bankStyle)
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
     let hash = getRootHash(progressInfoR)
@@ -1799,24 +1798,6 @@ debugger
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
-  getAdditionalForms(application) {
-    let m = utils.getModel(application.requestFor)
-    if (m.additionalForms != null)
-      return m.additionalForms
-    let additionalForms = m.forms.filter(f => {
-      if (f === SELFIE)
-        return true
-      let m = utils.getModel(f)
-      let scanner = utils.getPropertiesWithAnnotation(m, 'scanner')
-      if (Object.keys(scanner))
-        return true
-      let signature = utils.getPropertiesWithAnnotation(m, 'signature')
-      if (Object.keys(signature))
-        return true
-      return false
-    })
-    return additionalForms.length  &&  additionalForms
-  }
   // hasAdditionalForms(application) {
   //   let m = utils.getModel(application.requestFor)
   //   return m.additionalForms != null
@@ -1935,7 +1916,7 @@ debugger
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 reactMixin(MessageList.prototype, TimerMixin)
 reactMixin(MessageList.prototype, HomePageMixin)
-reactMixin(MessageList.prototype, NewResourceMixin);
+// reactMixin(MessageList.prototype, NewResourceMixin);
 
 MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
