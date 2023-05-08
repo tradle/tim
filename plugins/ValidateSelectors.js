@@ -1,9 +1,10 @@
 import { cloneDeep } from 'lodash'
 import { TYPE } from '@tradle/constants'
-import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum } from '../utils/utils'
+import { getModel, getPropertiesWithAnnotation, getEditCols, ungroup, isEmpty, isEnum, isSubclassOf } from '../utils/utils'
 
 const MONEY = 'tradle.Money'
 const BOOKMARK = 'tradle.Bookmark'
+const ASSET = 'tradle.Asset'
 
 module.exports = function ValidateSelector ({ models }) {
   return {
@@ -11,7 +12,8 @@ module.exports = function ValidateSelector ({ models }) {
       application,
       form
     }) {
-      if (!application  &&  form[TYPE] !== BOOKMARK)
+      let ftype = form[TYPE]
+      if (!application  &&  form[TYPE] !== BOOKMARK && !isSubclassOf(ftype, ASSET))
         return
       let m = this.models[form[TYPE]]
       if (!m)
