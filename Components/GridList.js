@@ -1507,8 +1507,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let employee
     if (me.isEmployee) {
       let orgTitle = me.counterparty ? me.counterparty.title : me.organization.title
+      let title = `${me.firstName}@${orgTitle}`
       employee = <View style={[styles.center, {paddingLeft: 10, maxWidth: utils.dimensions(GridList).width - 90}]}>
-                   <Text style={[styles.employee, {color: bankStyle.linkColor}]}>{`${me.firstName}@${orgTitle}`}</Text>
+                   <Text style={[styles.employee, {color: bankStyle.linkColor}]}>{title}</Text>
                  </View>
     }
 
