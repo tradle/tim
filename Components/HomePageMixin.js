@@ -17,7 +17,7 @@ import { getGridCols } from '../utils/uiUtils'
 import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import GridHeader from './GridHeader'
-import GridList from './GridList'
+// import GridList from './GridList'
 import buttonStyles from '../styles/buttonStyles'
 import Navigator from './Navigator'
 import { Text } from './Text'
@@ -302,20 +302,20 @@ debugger
     })
   },
   showMenu(passProps, navigator) {
-    let menu = utils.getMe().menu
-    if (!menu)
-      return <View/>
-    const { bankStyle, lazy, currency, locale } = passProps
-    return <GridList
-            lazy={lazy}
-            modelName={BOOKMARK}
-            bankStyle={bankStyle}
-            list={menu}
-            isMenu={true}
-            listView={true}
-            currency={currency || utils.getCompanyCurrency()}
-            locale={locale || utils.getCompanyLocale()}
-            navigator={navigator} />
+    // let menu = utils.getMe().menu
+    // if (!menu)
+    //   return <View/>
+    // const { bankStyle, lazy, currency, locale } = passProps
+    // return <GridList
+    //         lazy={lazy}
+    //         modelName={BOOKMARK}
+    //         bankStyle={bankStyle}
+    //         list={menu}
+    //         isMenu={true}
+    //         listView={true}
+    //         currency={currency || utils.getCompanyCurrency()}
+    //         locale={locale || utils.getCompanyLocale()}
+    //         navigator={navigator} />
   },
   renderGridHeader() {
     let { modelName, navigator, multiChooser, bookmark, isBacklink } = this.props
