@@ -43,7 +43,15 @@ import ChatContext from './ChatContext'
 import NewResourceMixin from './NewResourceMixin'
 import HomePageMixin from './HomePageMixin'
 import { showLoading, getContentSeparator } from '../utils/uiUtils'
-import utils, { translate, isIphone10orMore, isAndroid, isWeb, isRM, isWhitelabeled, getRootHash } from '../utils/utils'
+import utils, {
+  translate,
+  isIphone10orMore,
+  isAndroid,
+  isWeb,
+  isRM,
+  isWhitelabeled,
+  getRootHash
+} from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -821,7 +829,7 @@ debugger
         bankStyle,
         resource: r,
         isChat: true,
-        lensId: lensId,
+        lensId,
         application,
         to: resource,
         currency: this.calcCurrency(),
@@ -911,8 +919,6 @@ debugger
     let { application, isAggregation, originatingMessage, currency, locale, navigator, isModalOpen, bankStyle } = this.props
     if (!bankStyle)
       bankStyle = this.state.bankStyle
-    // if (resource[TYPE] === 'tradle.legal.LegalEntity' && resource.name === 'OCTOPUS')
-    //   return
     let model = utils.getModel(utils.getType(resource))
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
@@ -980,7 +986,7 @@ debugger
     let rcurrency = resource.currency
     if (rcurrency)
       rcurrency = rcurrency.id
-    return rcurrency || (currency && currency.id)
+    return rcurrency || (currency  &&  currency.id)
   }
   addedMessage(text) {
     Actions.list({

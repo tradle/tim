@@ -351,7 +351,7 @@ class TimHome extends Component {
   async handleEvent(params) {
     let {action, activity, isConnected, models, me, currentContext, template, application, resource,
         isRegistration, provider, termsAccepted, url, importingData, context} = params
-    var {navigator, bankStyle} = this.props
+    const {navigator, bankStyle} = this.props
     let { wasDeepLink } = this.state
     switch(action) {
     case 'getTemplate':

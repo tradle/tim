@@ -201,7 +201,7 @@ class RefPropertyEditor extends Component {
       hasLock = true
       icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.readOnly} />
     }
-    let content = <View  style={styles.chooserContainer}>
+    let content = <View style={styles.chooserContainer}>
                     {propView}
                     {icon}
                   </View>
@@ -214,7 +214,7 @@ class RefPropertyEditor extends Component {
       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                      {content}
                    </TouchableOpacity>
-    else if (isVideo ||  isPhoto  ||  isFile) {
+    else if (isVideo  ||  isPhoto  ||  isFile) {
       // HACK
       if (useImageInput({resource, prop, isFile})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
@@ -270,6 +270,7 @@ class RefPropertyEditor extends Component {
   onDocument(propName, item) {
     const { model, navigator } = this.props
     const { type, fileName, url, isText } = item
+
     if (type &&  type.indexOf('pdf') !== -1  || fileName.endsWith('.pdf')) {
       this.props.navigator.push({
         title: translate(model, model.properties[propName]),
@@ -443,12 +444,15 @@ class RefPropertyEditor extends Component {
       Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return
     }
-    if (result.canceled)
+    let { canceled, documentType, scanJson, imageFront, imageFace, imageBack,
+          imageSignature, rfidImageFace, country } = result
+
+    if (canceled)
       return
 
-    if (result.documentType  &&  type !== 'other') {
+    if (documentType  &&  type !== 'other') {
       let docTypeModel = utils.getModel(ID_CARD)
-      let rDocumentType = result.documentType.charAt(0)
+      let rDocumentType = documentType.charAt(0)
       let documentType
       if (rDocumentType === 'P')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'passport')
@@ -463,34 +467,34 @@ class RefPropertyEditor extends Component {
     }
 
     const r = _.cloneDeep(resource)
-    r.scanJson = result.scanJson
-    // r.documentType = result.documentType
-    r.country = result.country
+    r.scanJson = scanJson
+    // r.documentType = documentType
+    r.country = country
 
-    if (result.imageFront) {
+    if (imageFront) {
       r[prop.name] = {
-        url: result.imageFront,
+        url: imageFront,
       }
     }
     const rtype = utils.getType(resource)
     const props = utils.getModel(rtype).properties
     const { otherSideScan, face, signature } = props
-    if (result.imageBack) {
+    if (imageBack) {
       // HACK
       if (otherSideScan) {
         r.otherSideScan = {
-          url: result.imageBack,
+          url: imageBack,
         }
       }
     }
-    if (result.imageFace  &&  face  &&  face.ref === PHOTO) {
+    if (imageFace  &&  face  &&  face.ref === PHOTO) {
       r.face = {
-        url: result.imageFace
+        url: imageFace
       }
     }
-    if (result.imageSignature  &&  signature  &&  signature.ref === PHOTO) {
+    if (imageSignature  &&  signature  &&  signature.ref === PHOTO) {
       r.signature = {
-        url: result.signature
+        url: signature
       }
     }
 
@@ -586,7 +590,7 @@ class RefPropertyEditor extends Component {
       title: this.getPropertyLabel(prop), //m.title,
       componentName: 'GridList',
       backButtonTitle: 'Back',
-      sceneConfig:  isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
+      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
         filter,
         prop,
@@ -647,7 +651,6 @@ function getDocumentTypeFromTitle (title='') {
   switch (match[1]) {
   case 'passport':
     return 'passport'
-  case 'license':
   case 'licence':
     return 'license'
   case 'card':

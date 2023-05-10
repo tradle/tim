@@ -322,7 +322,6 @@ class ApplicationView extends Component {
                   <Text style={styles.buttonText}>{translate('application')}</Text>
                </TouchableOpacity>
     }
-    let requestForm
     let copyButton = this.generateCopyLinkButton(resource)
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>

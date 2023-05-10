@@ -58,17 +58,6 @@ const ObjectModel = voc['tradle.Object']
 
 let dictionary
 
-// const FORM_BACKLINKS = (function () {
-//   // debugger
-//   let formBacklinks = []
-//   let formProps = voc[FORM].properties
-//   for (let p in formProps) {
-//     let prop = formProps[p]
-//     if (prop.items && prop.items.backlink) formBacklinks.push({ [p]: prop })
-//   }
-//   return formBacklinks
-// })()
-
 const storeUtils = {
   addModels({models, enums}) {
     // debugger
@@ -82,32 +71,6 @@ const storeUtils = {
     // this.addFormBacklinks({ models })
     this.addNameAndTitleProps(ObjectModel.id)
   },
-
-  // addFormBacklinks({ models }) {
-  //   let modelsObj = {}
-  //   if (Array.isArray(models)) {
-  //     models.forEach(m => modelsObj[m.id] = m)
-  //   }
-  //   else
-  //     modelsObj = models
-  //   for (let model in modelsObj) {
-  //     let m = modelsObj[model]
-  //     if (m.abstract || !m.subClassOf) return
-  //     let sub = m
-  //     while (sub && sub.subClassOf && sub.subClassOf !== FORM) sub = models[sub.subClassOf]
-
-  //     if (sub && sub.subClassOf) {
-  //       FORM_BACKLINKS.forEach(bl => {
-  //         let p = Object.keys(bl)[0]
-  //         if (!m.properties[p])
-  //           _.extend(m.properties, {
-  //             [p]: bl[p]
-  //           })
-  //       })
-  //     }
-  //   }
-  // },
-
   getDictionary() {
     return dictionary
   },
@@ -486,8 +449,8 @@ const storeUtils = {
       })
     }
     let reset
-    let rmodel = resource ? getModel(resource[TYPE]) : m
-    if (resource  && !hasReset  &&  isChooser  &&  resource[prop.name]) {
+    if (resource  &&  !hasReset  &&  isChooser  &&  resource[prop.name]) {
+      let rmodel = resource ? getModel(getType(resource)) : m
       reset = {
         [TYPE]: modelName,
         [ROOT_HASH]: '__reset',

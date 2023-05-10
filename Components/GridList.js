@@ -846,7 +846,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     else if (me.isEmployee)
       title = me.organization.title + '  →  ' + dn
     else
-      title = resource.name; //utils.getDisplayName(resource, model.properties);
+      title = resource.name
     let style
     if (resource.style || !bankStyle)
       style = this.mergeStyle(resource.style)
@@ -1329,7 +1329,6 @@ console.log('GridList.componentWillMount: filterResource', resource)
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 modelName={rtype}
                 application={application}
-                navigator={navigator}
                 bankStyle={bankStyle}
                 parentResource={this.props.resource}
                 resource={resource} />
@@ -1532,7 +1531,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
                     <Icon name={icon}  size={33}  color={color}/>
                   </View>
                 </TouchableOpacity>
-    else if (this.state.permissions) {
+    else if (permissions) {
       menuBtn = <TouchableOpacity onPress={() => isAdd ? this.addNewResource(utils.getModel(bookmark.bookmark[TYPE])) : this.ActionSheet.show()}>
                   <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
                     <Icon name={icon}  size={33}  color={color}/>
@@ -1574,9 +1573,9 @@ console.log('GridList.componentWillMount: filterResource', resource)
         callback: () => {
           this.props.navigator.pop()
           Actions.list({modelName})
-        },
+        }
         // callback: this.register.bind(this)
-      },
+      }
     }
 
     navigator.push(route)
@@ -1638,7 +1637,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (prop  && !model.inlined && !model.enum) { // utils.isForm(model)) {
+    if (prop  && !model.inlined && !model.enum) {
       if (!r)
         r = {}
       let pRef = prop.ref || prop.items.ref;
@@ -1765,7 +1764,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     let footer = actionSheet && this.renderFooter()
     let searchBar
 
-    if (SearchBar  &&  !isBacklink  &&  !isForwardlink && !isMenu) {
+    if (SearchBar  &&  !isBacklink  &&  !isForwardlink  &&  !isMenu) {
       let hasSearch = isModel  ||  utils.isEnum(model)
       // Check if the starting - no filter list - is small
       if (hasSearch  &&  (!filter  &&  list  &&  list.length < SEARCH_LIMIT))
@@ -1878,7 +1877,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
         if (!bookmark.bookmark[TYPE])
           return
         let bm = utils.getModel(bookmark.bookmark[TYPE])
-        if (this.state.permissions) {
+        if (permissions) {
           buttons = [{
             text: translate('Bookmark'),
             // text: translate('addNew', translate(bm)),

@@ -100,8 +100,8 @@ var {
   SIMPLE_MESSAGE,
   PROFILE,
   IDENTITY,
-  MESSAGE,
   CUSTOMER_WAITING,
+  MESSAGE,
   MODEL,
   ENUM,
   FORM
@@ -228,9 +228,6 @@ var utils = {
     let idx = _.findIndex(mm, (m) => m.title === title)
     return idx && mm[idx]
   },
-  // getModelsForStub() {
-  //   return modelsForStub
-  // },
   setCompanyLocaleAndCurrency({locale, currency}) {
     if (locale)
       companyLocale = locale
@@ -1111,8 +1108,6 @@ var utils = {
       if (!resource[p])
         continue
       let prop = props[p]
-      // if (props[p].partial)
-      //   continue
       if (utils.isEnum(resourceModel))
         return resource[p]
       if (prop.ref  &&  utils.isEnum(prop.ref)) {
@@ -1253,6 +1248,7 @@ var utils = {
   getCurrencyName(c) {
     let currencyName
     let mm = utils.getModel(MONEY)
+
     let formattedCurrency = mm.properties.currency.oneOf.find(r => {
       let cName = Object.keys(r)[0]
       if (r[cName] === c) {
@@ -1344,29 +1340,6 @@ var utils = {
       return eCols
     }
     return utils.getColsWithUngroupList({cols: editCols, model})
-    // editCols.forEach((p) => {
-    //   if (properties[p].readOnly)
-    //     return
-    //   if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
-    //     return
-    //   let idx = p.indexOf('_group')
-    //   if (idx === -1                          ||
-    //       !properties[p].list                 ||
-    //       properties[p].title.toLowerCase() !== p)
-    //     eCols.push(properties[p])
-
-    //   if (idx !== -1  &&  properties[p].list) {
-    //     let eColsCnt = eCols.length
-    //     let isLastPropGroup = eCols[eColsCnt - 1].name.indexOf('_group') !== -1
-    //     properties[p].list.forEach((p) => {
-    //       if (eCols.indexOf(properties[p]) === -1)
-    //         eCols.push(properties[p])
-    //     })
-    //     if (eColsCnt === eCols.length  &&  isLastPropGroup)
-    //       eCols.pop()
-    //   }
-    // })
-    // return eCols
   },
   getColsWithUngroupList({cols, model, isView}) {
     let properties = model.properties
@@ -1406,7 +1379,7 @@ var utils = {
     if (viewCols)
       return utils.getColsWithUngroupList({cols: viewCols, model, isView: true})
     let cols = utils.getAllCols({properties, isView: true})
-    if (cols  && cols.length)
+    if (cols  &&  cols.length)
       return cols.map(p => properties[p])
     else
       return []
@@ -1517,22 +1490,6 @@ var utils = {
       return s.substring(0, i)
     }
   },
-  // templateIt1(prop, resource) {
-  //   let pgroup = prop.group
-  //   let group = []
-  //   let hasSetProps
-  //   pgroup.forEach((p) => {
-  //     let v =  resource[p] ? resource[p] : ''
-  //     if (v)
-  //       hasSetProps = true
-  //     group.push(v)
-  //   })
-  //   if (!hasSetProps)
-  //     return
-  //   else
-  //     return utils.template(prop.displayAs, group).trim()
-  // },
-
   // parentModel for array type props
   templateIt(prop, resource, parentModel) {
     var template = prop.displayAs;
@@ -1776,8 +1733,8 @@ var utils = {
     // if (!m.interfaces)
     //   res = utils.optimizeResource1(resource, doNotChangeOriginal)
     // else {
-      let properties = m.properties
-      var exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
+      const properties = m.properties
+      const exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
       let isContext = utils.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
@@ -2256,11 +2213,6 @@ var utils = {
 
   hashPassword: function (opts) {
     if (typeof opts === 'string') opts = { password: opts }
-    // if (utils.isWeb()) {
-    //   const result = utils.kdf(opts)
-    //   return { hash: result.key, salt: result.salt }
-    // }
-
     const salt = opts.salt || utils.generateSalt()
     const saltStr = salt.toString(PASSWORD_ENC)
     const hash = crypto.createHash('sha256')
@@ -3070,21 +3022,6 @@ debugger
     else
       return true
   },
-
-  // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
-  //   if (utils.isWeb()) {
-  //     const { width=0, height=0 } = shadowOffset
-  //     const spreadRadius = 0
-  //     const color = shadowColor.startsWith('rgb') ? shadowColor : require('./hex-to-rgb')(shadowColor)
-  //     return `${width}px ${height}px ${shadowRadius}px ${spreadRadius}px rgba(0,0,0,0.12)`,
-  //   }
-  // }
-
-  // isResourceInMyData(r) {
-  //   let toId = utils.getId(r.to)
-  //   let fromId = utils.getId(r.from)
-  //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
-  // },
   getChatWidth(component) {
     return MAX_WIDTH
   },
@@ -3130,7 +3067,6 @@ debugger
         throw new ValidateResourceErrors.InvalidPropertyValue(`unsupported check status: ${safeStringify(check.status)}`)
     }
   },
-
   logger: namespace => Debug(`tradle:app:${namespace}`),
   getBlockchainExplorerUrlsForTx: ({ blockchain, networkName, txId }) => {
     const urls = _.get(BLOCKCHAIN_EXPLORERS, [blockchain, networkName]) || []

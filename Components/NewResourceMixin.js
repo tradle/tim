@@ -132,7 +132,6 @@ const NewResourceMixin = {
 
     let softRequired
 
-
     if (requestedProperties  &&  !utils.isEmpty(requestedProperties)) {
       showReadOnly = true
       ;({ eCols, softRequired } = this.addRequestedProps({eCols, params, props}))
@@ -579,9 +578,8 @@ const NewResourceMixin = {
       if (excludeProperties  &&  excludeProperties.indexOf(p) !== -1)
         continue
 
-      if (requestedProperties[p].hide) {
+      if (requestedProperties[p].hide)
         continue
-      }
 
       eCols.push(p)
       let isRequired = requestedProperties[p].required
@@ -664,8 +662,6 @@ const NewResourceMixin = {
   },
   changeValue(prop, value) {
     const { originatingMessage: originatingResource } = this.props
-    // if (utils.isReadOnly(prop))
-    //   return
     let { name: pname, ref: pref, type: ptype, readOnly } = prop
 
     if (ptype === 'string'  &&  !value.trim().length)
@@ -1256,7 +1252,7 @@ const NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
-    let st = isWeb() ? [styles.formInput, {minHeight: 60, borderColor: bcolor}] : {marginHorizontal: 15}
+    let st = isWeb() ? [styles.formInput, {minHeight: 60, borderColor: bcolor}] : [styles.formInput, {minHeight: 60, borderColor: bcolor, marginHorizontal: 15}]
 
     // convert from UTC date to local, so DatePicker displays it correctly
     // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
@@ -1419,9 +1415,8 @@ const NewResourceMixin = {
     let pname = prop.name
     if (metadata  &&  parentMeta)
       pname = `${metadata.name}_${pname}`
-    else if (this.props.prop  &&  this.props.prop.inlined) {
+    else if (this.props.prop  &&  this.props.prop.inlined)
       pname = `${this.props.prop.name}_${pname}`
-    }
 
     if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
@@ -1676,7 +1671,7 @@ const NewResourceMixin = {
     this.setState(state);
     if (!search) {
       if (utils.isForm(model))
-        Actions.getRequestedProperties({resource, currentResource: resource, originatingResource})//currentR})
+        Actions.getRequestedProperties({resource, currentResource: resource, originatingResource})
       if (!utils.isImplementing(r, INTERSECTION))
         Actions.saveTemporary(resource)
     }
@@ -1779,7 +1774,6 @@ const NewResourceMixin = {
 
     let keyboard = isReadOnly || search ? null : 'numeric'
 
-
     let check
     // if (model.goalSeek  &&  model.goalSeek.indexOf(prop.name) !== -1 && value)
     if (recalculateMode)
@@ -1835,7 +1829,6 @@ const NewResourceMixin = {
     );
   },
 
-
   myDurationInputTemplate(params) {
     let { required, model, value, prop, editable, errors, component, styles } = params
     let { search, locale } = this.props
@@ -1879,12 +1872,12 @@ const NewResourceMixin = {
     }
     return (
       <View>
-      <View style={styles.moneyInput}>
+        <View style={styles.moneyInput}>
           {val}
           {durationType}
-      </View>
-      {this.paintError(params)}
-      {this.paintHelp({prop, styles})}
+        </View>
+        {this.paintError(params)}
+        {this.paintHelp({prop, styles})}
       </View>
     );
   },
@@ -2269,254 +2262,254 @@ const formField = {
 const createStyles = utils.styleFactory(component, function ({ bankStyle }) {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
-return StyleSheet.create({
-  enumProp: {
-    marginTop: 15,
-  },
-  enumText: {
-    marginTop: 10,
-    marginLeft: 20,
-    marginRight: 3,
-    color: '#757575',
-    fontSize: 20
-  },
-  labelStyle: {
-    paddingLeft: 10,
-  },
-  arrowIcon: {
-    width: 15,
-    height: 15,
-    // marginVertical: 2
-  },
-  formInput: {
-    ...formField,
-  },
-  booleanContainer: {
-    ...formField,
-    minHeight: 60,
-    paddingTop: 5,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    flex: 1
-  },
-  booleanContentStyle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  datePicker: {
-    justifyContent: 'flex-start',
-    alignSelf: 'stretch'
-  },
-  chooserContainer: {
-    minHeight: 60,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    position: 'relative',
-    flex: 1
-  },
-  chooserContentStyle: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    borderRadius: 4
-  },
-  enumElement: {
-    width: 40,
-    marginTop: 20,
-    height: 45
-  },
-  enumErrorLabel: {
-    paddingLeft: 5,
-    height: 14,
-    backgroundColor: 'transparent'
-  },
-  regInput: {
-    borderWidth: 0,
-    height: 50,
-    fontSize: 20,
-    color: '#eeeeee'
-  },
-  textInput: {
-    borderWidth: 0,
-    color: '#555555',
-    fontSize: 20
-  },
-  thumb: {
-    width: 40,
-    height: 40,
-    marginRight: 2,
-    marginTop: 12,
-    borderRadius: 5
-  },
-  err: {
-    // paddingHorizontal: 15,
-    // backgroundColor: 'transparent'
-  },
-  element: {
-    position: 'relative'
-  },
-  labelClean: {
-    marginTop: 21,
-    color: '#AAA',
-    position: 'absolute',
-    fontSize: 20,
-    top: 7
-  },
-  labelDirty: {
-    marginTop: 21,
-    // marginLeft: 10,
-    paddingLeft: 10,
-    color: '#AAA',
-    position: 'absolute',
-    fontSize: 12,
-    top: -17,
-  },
-  photoIcon: {
-    position: 'absolute',
-    right: 10,
-    bottom: 10
-  },
-  lockIcon: {
-    position: 'absolute',
-    right: 0,
-    bottom: 5
-  },
-  photoIconEmpty: {
-    position: 'absolute',
-    right: 10,
-    marginTop: isWeb() ? 20 : 12
-  },
-  readOnly: {
-    position: 'absolute',
-    right: 10,
-    top: 20
-  },
-  immutable: {
-    marginTop: 15,
-    paddingRight: 10
-  },
-  input: {
-    backgroundColor: 'transparent',
-    color: '#aaaaaa',
-    fontSize: 20,
-  },
-  textAfterImage: {
-    backgroundColor: 'transparent',
-    color: '#aaaaaa',
-    fontSize: 20,
-    marginTop: 17,
-    marginLeft: 7
-  },
-  customIcon: {
-    position: 'absolute',
-    right: 10,
-    alignSelf: 'center'
-  },
-  dateInput: {
-    flex: 1,
-    height: 35,
-    paddingBottom: 5,
-    borderColor: 'transparent',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  dateText: {
-    fontSize: 20,
-    color: '#555555',
-    backgroundColor: 'transparent',
-  },
-  font20: {
-    fontSize: 20,
-  },
-  dateIcon: {
-    // position: 'absolute',
-    // right: 0,
-    // top: 5
-  },
-  divider: {
-    borderColor: 'transparent',
-    borderWidth: 1.5,
-    marginTop: 10,
-    paddingHorizontal: 10,
-    marginBottom: 5
-  },
-  dividerText: {
-    marginBottom: 5,
-    fontSize: 26,
-    fontWeight: '500',
-    color: linkColor,
-    fontFamily: bankStyle.headerFont
-  },
-  font14: {
-    fontSize: 14
-  },
-  booleanLabel: {
-    color: '#aaaaaa',
-    fontSize: 20
-  },
-  booleanText: {
-    fontSize: 20
-  },
-  dateLabel: {
-    marginLeft: 10,
-    fontSize: 12,
-    marginTop: 5,
-    paddingBottom: 5
-  },
-  noItemsText: {
-    fontSize: 20,
-    color: '#AAAAAA',
-  },
-  markdown: {
-    backgroundColor: '#f7f7f7',
-    padding: 10,
-  },
-  container: {
-    flex: 1
-  },
-  help1: {
-    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
-    paddingHorizontal: 10,
-  },
-  help2: {
-    backgroundColor: '#f3f3f3',
-    paddingHorizontal: 10,
-    marginTop: -10,
-    paddingBottom: 15
-  },
-  help: {
-    backgroundColor: '#f3f3f3',
-    paddingHorizontal: 10,
-    paddingTop: 7,
-    paddingBottom: 15
-  },
-  bottom10: {
-    paddingBottom: 10
-  },
-  floatingLabel: {
-    marginTop: 20,
-    marginHorizontal: -10
-  },
-  moneyInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  accent: {
-    width: 12,
-    borderLeftWidth: 5,
-    borderLeftColor: bankStyle.accentColor || 'orange'
-  },
-  linkText: {
-    fontSize: 20,
-    paddingLeft: 10,
-    color: bankStyle.linkColor
-  },
-  linkLabel: {
-    paddingLeft: 10,
-    color: '#aaa',
-    paddingBottom: 10
-  }
-})
+  return StyleSheet.create({
+    enumProp: {
+      marginTop: 15,
+    },
+    enumText: {
+      marginTop: 10,
+      marginLeft: 20,
+      marginRight: 3,
+      color: '#757575',
+      fontSize: 20
+    },
+    labelStyle: {
+      paddingLeft: 10,
+    },
+    arrowIcon: {
+      width: 15,
+      height: 15,
+      // marginVertical: 2
+    },
+    formInput: {
+      ...formField,
+    },
+    booleanContainer: {
+      ...formField,
+      minHeight: 60,
+      paddingTop: 5,
+      paddingHorizontal: 10,
+      justifyContent: 'center',
+      flex: 1
+    },
+    booleanContentStyle: {
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    datePicker: {
+      justifyContent: 'flex-start',
+      alignSelf: 'stretch'
+    },
+    chooserContainer: {
+      minHeight: 60,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: 10,
+      position: 'relative',
+      flex: 1
+    },
+    chooserContentStyle: {
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      borderRadius: 4
+    },
+    enumElement: {
+      width: 40,
+      marginTop: 20,
+      height: 45
+    },
+    enumErrorLabel: {
+      paddingLeft: 5,
+      height: 14,
+      backgroundColor: 'transparent'
+    },
+    regInput: {
+      borderWidth: 0,
+      height: 50,
+      fontSize: 20,
+      color: '#eeeeee'
+    },
+    textInput: {
+      borderWidth: 0,
+      color: '#555555',
+      fontSize: 20
+    },
+    thumb: {
+      width: 40,
+      height: 40,
+      marginRight: 2,
+      marginTop: 12,
+      borderRadius: 5
+    },
+    err: {
+      // paddingHorizontal: 15,
+      // backgroundColor: 'transparent'
+    },
+    element: {
+      position: 'relative'
+    },
+    labelClean: {
+      marginTop: 21,
+      color: '#AAA',
+      position: 'absolute',
+      fontSize: 20,
+      top: 7
+    },
+    labelDirty: {
+      marginTop: 21,
+      // marginLeft: 10,
+      paddingLeft: 10,
+      color: '#AAA',
+      position: 'absolute',
+      fontSize: 12,
+      top: -17,
+    },
+    photoIcon: {
+      position: 'absolute',
+      right: 10,
+      bottom: 10
+    },
+    lockIcon: {
+      position: 'absolute',
+      right: 0,
+      bottom: 5
+    },
+    photoIconEmpty: {
+      position: 'absolute',
+      right: 10,
+      marginTop: isWeb() ? 20 : 12
+    },
+    readOnly: {
+      position: 'absolute',
+      right: 10,
+      top: 20
+    },
+    immutable: {
+      marginTop: 15,
+      paddingRight: 10
+    },
+    input: {
+      backgroundColor: 'transparent',
+      color: '#aaaaaa',
+      fontSize: 20,
+    },
+    textAfterImage: {
+      backgroundColor: 'transparent',
+      color: '#aaaaaa',
+      fontSize: 20,
+      marginTop: 17,
+      marginLeft: 7
+    },
+    customIcon: {
+      position: 'absolute',
+      right: 10,
+      alignSelf: 'center'
+    },
+    dateInput: {
+      flex: 1,
+      height: 35,
+      paddingBottom: 5,
+      borderColor: 'transparent',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+    },
+    dateText: {
+      fontSize: 20,
+      color: '#555555',
+      backgroundColor: 'transparent',
+    },
+    font20: {
+      fontSize: 20,
+    },
+    dateIcon: {
+      // position: 'absolute',
+      // right: 0,
+      // top: 5
+    },
+    divider: {
+      borderColor: 'transparent',
+      borderWidth: 1.5,
+      marginTop: 10,
+      paddingHorizontal: 10,
+      marginBottom: 5
+    },
+    dividerText: {
+      marginBottom: 5,
+      fontSize: 26,
+      fontWeight: '500',
+      color: linkColor,
+      fontFamily: bankStyle.headerFont
+    },
+    font14: {
+      fontSize: 14
+    },
+    booleanLabel: {
+      color: '#aaaaaa',
+      fontSize: 20
+    },
+    booleanText: {
+      fontSize: 20
+    },
+    dateLabel: {
+      marginLeft: 10,
+      fontSize: 12,
+      marginTop: 5,
+      paddingBottom: 5
+    },
+    noItemsText: {
+      fontSize: 20,
+      color: '#AAAAAA',
+    },
+    markdown: {
+      backgroundColor: '#f7f7f7',
+      padding: 10,
+    },
+    container: {
+      flex: 1
+    },
+    help1: {
+      backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
+      paddingHorizontal: 10,
+    },
+    help2: {
+      backgroundColor: '#f3f3f3',
+      paddingHorizontal: 10,
+      marginTop: -10,
+      paddingBottom: 15
+    },
+    help: {
+      backgroundColor: '#f3f3f3',
+      paddingHorizontal: 10,
+      paddingTop: 7,
+      paddingBottom: 15
+    },
+    bottom10: {
+      paddingBottom: 10
+    },
+    floatingLabel: {
+      marginTop: 20,
+      marginHorizontal: -10
+    },
+    moneyInput: {
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    accent: {
+      width: 12,
+      borderLeftWidth: 5,
+      borderLeftColor: bankStyle.accentColor || 'orange'
+    },
+    linkText: {
+      fontSize: 20,
+      paddingLeft: 10,
+      color: bankStyle.linkColor
+    },
+    linkLabel: {
+      paddingLeft: 10,
+      color: '#aaa',
+      paddingBottom: 10
+    }
+  })
 })
 
 module.exports = NewResourceMixin

@@ -7,6 +7,7 @@ import {
   Linking
 } from 'react-native'
 import PropTypes from 'prop-types'
+
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
@@ -518,7 +519,7 @@ class ShowPropertiesView extends Component {
       viewCols.push(jVal)
 
     if (jVal.length) {
-      var isDirectionRow
+      let isDirectionRow
       if (checkProperties)
         isDirectionRow = true
       viewCols.push(

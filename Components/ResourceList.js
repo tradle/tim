@@ -820,7 +820,7 @@ class ResourceList extends Component {
           model,
           resource,
           search: true,
-          bankStyle: this.state.bankStyle,
+          bankStyle: this.state.bankStyle || defaultBankStyle,
         }
       })
       // filter = filter.substring(idx + 1).trim()
@@ -1278,13 +1278,6 @@ class ResourceList extends Component {
           text: translate('ApplyForProduct'),
           onPress: () => this.scanQRAndProcess('ApplyForProduct')
         })
-        buttons.push({
-          text: translate('AddNewProvider'),
-          onPress: () => this.scanQRAndProcess('AddNewProvider')
-        })
-        buttons.push({
-          text: translate('ApplyForProduct'),
-          onPress: () => this.scanQRAndProcess('ApplyForProduct')        })
       }
     }
 
