@@ -1496,7 +1496,7 @@ if (r.url)
           {actionableItem}
         </View>
         {this.paintError({prop: bl})}
-        {this.paintHelp(bl)}
+        {this.paintHelp({prop: bl})}
       </View>
     );
   }
@@ -1570,7 +1570,7 @@ if (r.url)
           </View>
         </View>
         {this.paintError({prop: bl})}
-        {this.paintHelp(bl)}
+        {this.paintHelp({prop: bl})}
       </View>
     );
   }

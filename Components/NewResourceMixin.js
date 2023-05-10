@@ -2182,8 +2182,6 @@ const NewResourceMixin = {
         ref={(o) => {
           this.ActionSheet = o
         }}
-        tintColor={bankStyle.linkColor}
-        styles={styles}
         options={titles}
         title={enumProp && translate(model.properties[enumProp], model)}
         cancelButtonIndex={buttons.length - 1}
