@@ -43,7 +43,7 @@ class ShowRefList extends Component {
   }
   render() {
     var { resource, model, backlink, backlinkList, showDocuments, showDetails, bankStyle,
-          children, navigator, lazy, currency, application, search } = this.props
+          children, navigator, lazy, currency, application, search, component } = this.props
     let rtype = utils.getType(resource)
     model = model || utils.getModel(rtype)
     var props = model.properties;
@@ -227,17 +227,19 @@ class ShowRefList extends Component {
                       {refList}
                     </ScrollableTabView>
     }
-    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
+    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
+      let style = {width: utils.dimensions(component).width}
       return   <View>
                 {separator}
                 {refListTabs}
                 {children}
                 {comment}
-                <View>
+                <View style={style}>
                   {backlinkRL}
                   {details}
                 </View>
               </View>
+    }
 
     return children || <View/>
   }

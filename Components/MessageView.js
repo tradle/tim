@@ -427,6 +427,7 @@ class MessageView extends Component {
                                  // parentResource={isPrefill && resource}
 
       actionPanel = <ShowRefList {...this.props}
+                                 component={MessageView}
                                  backlink={backlink || allowToAddBacklink}
                                  resource={r}
                                  backlinkList={this.state.backlinkList}

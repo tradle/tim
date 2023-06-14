@@ -259,6 +259,7 @@ class ResourceView extends Component {
       if (!noActionPanel  &&  utils.hasBacklinks(model) || isMyProduct)
        actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
+                                  component={ResourceView}
                                   navigator={navigator}
                                   currency={currency}
                                   bankStyle={bankStyle}

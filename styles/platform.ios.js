@@ -7,7 +7,7 @@ const isIphone10 = isIphone10orMore()
 
 const footerButton = {
   ...circled(50),
-  marginTop: -23,
+  marginTop: -30,
   shadowOpacity: 1,
   shadowRadius: 5,
   shadowColor: '#afafaf',
@@ -33,11 +33,13 @@ export default StyleSheet.create({
   },
   navBarLeftButton: {
     paddingLeft: 10,
-    paddingRight: 25,
-    marginTop: isIphone10 ? -2 : 5
+    // paddingRight: 25,
+    // marginTop: isIphone10 ? -2 : 5
   },
   navBarRightButton: {
-    paddingLeft: 25,
+    // marginTop: 5,
+    justifyContent: 'center',
+    // paddingLeft: 25,
     paddingRight: 10,
     // marginTop: isIphone10 ? 19 : 7
   },
@@ -86,7 +88,7 @@ export const MenuIcon = {
 }
 
 export function navBarTitleWidth(component) {
-  return dimensions(component).width - 150
+  return dimensions(component).width - 160
 }
 // Object.defineProperty(exports, 'MB', {
 //   icon: 'md-more',

@@ -445,7 +445,7 @@ var NavigationBarRouteMapper = {
         icon = 'ios-send'
         iconSize = 28
       }
-      viewStyle = isAndroid  &&  {paddingTop: 14}
+      viewStyle = isAndroid  ?  {paddingTop: 14} : {paddingTop: 4}
       style = {marginTop: -2}
       break
     case 'Confirm':
@@ -459,6 +459,7 @@ var NavigationBarRouteMapper = {
       break
     case 'Search':
       icon = 'md-search'
+      style= {marginTop: 4}
       break
     case 'Profile':
       isProfile = true
@@ -467,8 +468,10 @@ var NavigationBarRouteMapper = {
       icon = 'md-person'
       break
     case 'Edit':
-      iconSize = 28
-      style = {marginRight: -4, marginTop: isAndroid ? 12 : -2}
+      iconSize = 30
+      style = {marginRight: -4}
+      if (isAndroid)
+       style = {...style, marginTop: 12}
       icon = 'ios-create-outline'
       break
     case 'Share':
@@ -632,7 +635,8 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
-      let tstyle = isWeb() ? {paddingHorizontal: 5, maxWidth: width - 160} : {width, marginTop: t.length === 1 && -2 || 0}
+      let marginTop = t.length === 1 && -2 || 0
+      let tstyle = isWeb() ? {paddingHorizontal: 5, maxWidth: width - 160} : {width, marginTop}
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0].replace(/\n/, ' ')}</Text>
              </View>
@@ -640,9 +644,9 @@ var NavigationBarRouteMapper = {
     let titleStyle = tArr ? platformStyles.navBarMultiRowTitle : styles.navBarMultiRowTitle
     return (
       <View key={'index.common.js'}>
-        <View style={[{flexDirection: 'row', alignItems: 'center'}, platformStyles.navBarMargin]}>
+        <View style={[{flexDirection: 'row', marginLeft: -20}, platformStyles.navBarMargin]}>
           {photo}
-          <View style={titleStyle}>
+          <View style={[titleStyle, {marginTop: tArr ? -5 : 0}]}>
             {text}
             {tArr}
           </View>
@@ -716,8 +720,8 @@ var styles = StyleSheet.create({
     borderColor: '#cccccc',
     borderRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingRight: 10,
-    paddingLeft: 15,
+    paddingRight: 7,
+    paddingLeft: 12,
   }
 });
 TiMApp = makeResponsive(TiMApp)
