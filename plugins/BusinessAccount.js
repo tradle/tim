@@ -19,10 +19,11 @@ module.exports = function LegalEntity ({ models }) {
   return {
     validateForm: async function validateForm ({
       application,
-      form
+      form,
+      dontUseExternalAI
     }) {
       if (!application) return
-
+// return
       const type = form[TYPE]
       switch (type) {
       case CONTROLLING_ENTITY:
@@ -30,7 +31,7 @@ module.exports = function LegalEntity ({ models }) {
       case OWNERSHIP:
         return getPropsForOwnership(form)
       case LEGAL_ENTITY:
-        return getPropsForLegalEntity(form, this.models)
+        return getPropsForLegalEntity(form, this.models, dontUseExternalAI)
       case LEGAL_DOCUMENT_INTERSECTION:
         return getPropsForLegalDocumentI(form)
       default:
@@ -107,7 +108,7 @@ function getPropsForLegalDocument(form) {
   }
   return ret
 }
-function getPropsForLegalEntity(form, models) {
+function getPropsForLegalEntity(form, models, dontUseExternalAI) {
   let m = models[form[TYPE]]
   if (m.lens) {
     let lens= getLens(m.lens)
@@ -125,13 +126,22 @@ function getPropsForLegalEntity(form, models) {
   }
   // let addRegion = countryCode && country.id.split('_')[1] === 'US'
 
-  if (isNew(form)) {
-    let requestedProperties = [
+  if (isNew(form) || (dontUseExternalAI && !form.registrationNumber)) {
+    if (!dontUseExternalAI) {
+      let requestedProperties = [
         { name: 'companyName', required: true  },
-        { name: 'registrationNumber', required: true },
-        { name: 'DBAName' },
-        { name: 'formerlyKnownAs'}
+        { name: 'companyFormationDocument', required: true  },
+        // { name: 'articlesOfAssociationDocument', required: true },
       ]
+      return { requestedProperties }
+    }
+
+    let requestedProperties = [
+      { name: 'companyName', required: true  },
+      { name: 'registrationNumber', required: true },
+      { name: 'DBAName' },
+      { name: 'formerlyKnownAs'}
+    ]
 
     if (streetAddress)
       requestedProperties.push({name: 'streetAddress'})
@@ -161,6 +171,8 @@ function getPropsForLegalEntity(form, models) {
     // { name: 'companyType'},
     { name: 'companyEmail', required: true },
     { name: 'companyWebsite', required: true },
+    { name: 'companyFormationDocument', required: true  },
+    { name: 'articlesOfAssociationDocument', required: true },
     { name: 'address_group'},
     { name: 'region', hide: !addRegion, required: addRegion },
     { name: 'taxIdNumber', required: false },
@@ -168,7 +180,7 @@ function getPropsForLegalEntity(form, models) {
     { name: 'companyPhone', required: false },
     { name: 'DBAName', required: false },
     { name: 'formerlyKnownAs'},
-    { name: 'alsoKnownAs' }
+    { name: 'alsoKnownAs' },
   ]
   let { typeOfOwnership } = form
   if (typeOfOwnership  &&  getEnumValueId({ model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership}) === 'publiclyTraded')
@@ -187,10 +199,13 @@ function isNewResource(stub) {
 
 function getPropsForControllingEntity(form, models) {
   let m = models[form[TYPE]]
-  if (m.lens  &&  m.editCols) {
-    let requestedProperties = []
-    m.editCols.forEach(p => requestedProperties.push({name: p}))
-    return { requestedProperties }
+  if (m.lens) {
+    let lens= getLens(m.lens)
+    if (lens.editCols) {
+      let requestedProperties = []
+      lens.editCols.forEach(p => requestedProperties.push({name: p}))
+      return { requestedProperties }
+    }
   }
 
   let typeOfControllingEntity = form.typeOfControllingEntity
@@ -212,7 +227,6 @@ function getPropsForControllingEntity(form, models) {
   ownsTypeOfOwnership = ownsTypeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: ownsTypeOfOwnership})
   typeOfOwnership = typeOfOwnership  &&  getEnumValueId({model: getModel(TYPE_OF_OWNERSHIP), value: typeOfOwnership})
 
-
   let isTrustee = ownsTypeOfOwnership && ownsTypeOfOwnership.startsWith('trustee')
   let isFund = ownsTypeOfOwnership === 'vcFirmFundPE'
   let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
@@ -233,6 +247,7 @@ function getPropsForControllingEntity(form, models) {
       {name: 'controllingEntityPostalCode'},
       {name: 'controllingEntityCountry', required: true},
     ]
+
     requestedProperties.push({name: 'emailAddress', required: true})
     if (notificationMethod  &&  getEnumValueId({model: getModel(NOTIFICATION_METHOD), value: notificationMethod}) === 'sms')
       requestedProperties.push({name: 'phone', required: true})
@@ -245,7 +260,7 @@ function getPropsForControllingEntity(form, models) {
       requestedProperties.push({name: 'nationality'})
     }
 
-    // retProps.requestedProperties.push({name: 'notificationMethod'})
+    // requestedProperties.push({name: 'notificationMethod'})
     requestedProperties.push({name: 'isSeniorManager'})
     if (isSeniorManager)
       requestedProperties.push({name: 'seniorManagerPosition', required: true})
@@ -271,7 +286,6 @@ function getPropsForControllingEntity(form, models) {
       ])
     }
     requestedProperties.push({name: 'legalEntity', required: true})
-
     break
   case 'legalentity':
     requestedProperties = [
