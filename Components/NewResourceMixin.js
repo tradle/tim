@@ -690,7 +690,7 @@ const NewResourceMixin = {
       let idx = value.indexOf('.')
       if (idx !== -1) {
         // Some strange HACK
-        debugger
+        // debugger
         const len = value.length
         if (++idx === len)
           return
@@ -1159,7 +1159,7 @@ const NewResourceMixin = {
 
     let fontF = bankStyle && bankStyle.textFont && {fontFamily: bankStyle.textFont} || {}
     if (!editable  &&  !search) {
-      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={styles.readOnly} />
+      icon = <Icon name='ios-lock-outline' size={25} color={bankStyle.textColor} style={[styles.readOnly, {right: 0, top: 10}]} />
       switchC = <View style={{paddingVertical: 5}}>
                   <Text style={[styles.dateText, fontF]}>{value ? 'Yes' : 'No'}</Text>
                   {icon}
@@ -2004,9 +2004,12 @@ const NewResourceMixin = {
         deleteProps.push(p)
         continue
       }
-      if (prop.type === 'number')
+      if (prop.type === 'number') {
+        coerceNumber(value, p)
         this.checkNumber(value[p], prop, err)
+      }
       else if (prop.ref === MONEY) {
+        coerceNumber(value[p], 'value')
         let error = this.checkNumber(value[p], prop, err)
         if (error  &&  m.required  &&  m.required.indexOf(p) === -1)
           deleteProps.push(p)
@@ -2106,23 +2109,19 @@ const NewResourceMixin = {
     for (; i<vArr.length && vArr[i] === v; i++);
     return { i: --i, val }
   },
-  renderActionSheet(rtype) {
+  renderActionSheet(rtype, component) {
     const buttons = this.getActionSheetItems(rtype)
+    // debugger
+
     // if (!buttons || !buttons.length) return
     const { enumProp } = this.state
     const { bankStyle } = this.props
     let titles = buttons && buttons.map((b) => b.title) || []
-    // let titles = buttons && buttons.map((b) => <Text style={{color: 'darkred'}}>{b.title}</Text>) || []
-    // let titles = [
-    //   'Apple',
-    //   <Text style={{color: 'yellow'}}>Banana</Text>,
-    //   'Watermelon',
-    //   <Text style={{color: 'red'}}>Durian</Text>,
-    //   'Cancel',
-    // ]
+    let { width } = utils.getMessageWidth(component)
+    width = Math.min(width, 780)
     let styles = {
       titleBox: {
-        width: 780,
+        width,
         height: 40,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
@@ -2149,13 +2148,13 @@ const NewResourceMixin = {
       },
       body: {
         // flex: 1,
-        width: 780,
+        width,
         alignItems: 'center',
         alignSelf: 'flex-end',
         backgroundColor: 'transparent'
       },
       buttonBox: {
-        width: 780,
+        width,
         height: 50,
         alignItems: 'center',
         justifyContent: 'center',
@@ -2165,7 +2164,7 @@ const NewResourceMixin = {
         fontSize: 18
       },
       cancelButtonBox: {
-        width: 780,
+        width,
         height: 50,
         // borderRadius: 10,
         borderBottomLeftRadius: 10,
@@ -2195,6 +2194,7 @@ const NewResourceMixin = {
     const { enumProp } = this.state
     const push = btn => buttons.push({ ...btn, index: buttons.length })
     const buttons = []
+    // debugger
     if (!enumProp) {
       push({
         title: translate('cancel'),
@@ -2224,6 +2224,7 @@ const NewResourceMixin = {
     return buttons
   }
 }
+
 function coerceNumber (obj, p) {
   const val = obj[p]
   if (typeof val === 'string') {
