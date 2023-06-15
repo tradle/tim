@@ -707,11 +707,15 @@ console.log('GridList.componentWillMount: filterResource', resource)
       }
       this.setState({ resource, permissions })
       this.errorAlert('noResourcesForCriteria')
+      return
+    }
+    if (!resource && params.modelName === modelName) {
+      this.setState({isLoading: false, list: null})
     }
   }
   _addItemOrMessage(params) {
     const { action, resource } = params
-    const { modelName, isModel, isBacklink, prop } = this.props
+    const { modelName, isModel, isBacklink, prop, exploreData } = this.props
     let model = action === 'addMessage'
               ? utils.getModel(modelName)
               : utils.getModel(resource[TYPE]);
@@ -732,6 +736,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
       Actions.list({
         query: this.state.filter,
         modelName: model.id,
+        search: exploreData,
         to: this.props.resource,
         sortProperty: model.sort
       });
@@ -744,6 +749,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (this.state.checksCategory !== nextState.checksCategory)
       return true
     if (this.state.navBarMenu !== nextState.navBarMenu)
+      return true
+    if (this.props.checksCategory !== nextProps.checksCategory)
       return true
     if (this.props.checkFilter !== nextProps.checkFilter)
       return true
@@ -1508,8 +1515,8 @@ console.log('GridList.componentWillMount: filterResource', resource)
     if (me.isEmployee) {
       let orgTitle = me.counterparty ? me.counterparty.title : me.organization.title
       let title = `${me.firstName}@${orgTitle}`
-      employee = <View style={[styles.center, {paddingLeft: 10, maxWidth: utils.dimensions(GridList).width - 90}]}>
-                   <Text style={[styles.employee, {color: bankStyle.linkColor}]}>{title}</Text>
+      employee = <View style={[styles.center, {paddingLeft: 10, maxWidth: utils.dimensions(GridList).width - 150}]}>
+                   <Text numberOfLines={1} style={[styles.employee, {color: bankStyle.linkColor}]}>{title}</Text>
                  </View>
     }
 
@@ -1579,7 +1586,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
     navigator.push(route)
   }
   addNewResource(model) {
-    let { bankStyle, navigator, currency, locale } = this.props
+    let { bankStyle, navigator, currency, locale, exploreData } = this.props
     let me = utils.getMe()
     navigator.push({
       title: model.title,
@@ -1594,6 +1601,7 @@ console.log('GridList.componentWillMount: filterResource', resource)
           to: me.organization
         },
         bankStyle,
+        exploreData,
         currency,
         locale,
         callback: () => {
