@@ -170,7 +170,7 @@ class RegulaProxy {
         }
       }, error => console.log(error))
     }, error => {
-      debugger
+      // debugger
       console.log(error)
     })
   })
