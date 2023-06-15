@@ -99,10 +99,13 @@ class NewItem extends Component {
     else
       item = utils.clone(value)
     let missedRequiredOrErrorValue = this.checkRequired(metadata, item, resource)
+    let err = this.validateProperties(item)
+    for (let p in err)
+      missedRequiredOrErrorValue[p] = err[p]
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
       let state = {
-        missedRequiredOrErrorValue: missedRequiredOrErrorValue
+        missedRequiredOrErrorValue
       }
       this.setState(state)
       return;
@@ -250,7 +253,7 @@ class NewItem extends Component {
       }
     }
     let { enumProp } = this.state
-    let actionSheet = this.renderActionSheet(metadata.items.ref)
+    let actionSheet = this.renderActionSheet(metadata.items.ref, NewItem)
     let contentSeparator = getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container]}  separator={contentSeparator} bankStyle={bankStyle}>
