@@ -276,11 +276,11 @@ class RefPropertyEditor extends Component {
                        {content}
                      </TouchableOpacity>
       }
-      else if (isEnum   &&  !prop.items  &&  this.props.customChooser && !exploreData &&  refM.enum.length < 20) {
-        actionItem = <TouchableOpacity onPress={() => this.props.customChooser(prop.name)}>
-                       {content}
-                     </TouchableOpacity>
-      }
+      // else if (isEnum   &&  !prop.items  &&  this.props.customChooser && !exploreData &&  refM.enum.length < 20) {
+      //   actionItem = <TouchableOpacity onPress={() => this.props.customChooser(prop.name)}>
+      //                  {content}
+      //                </TouchableOpacity>
+      // }
       else {
         actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
                        {content}
