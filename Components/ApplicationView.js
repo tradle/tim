@@ -36,7 +36,6 @@ import utils, {
   isInlined,
   isAndroid,
   isMe,
-  getContentWidth,
   getStatusMessageForCheck,
   getLensedModelForType,
   getDisplayName,
@@ -213,7 +212,6 @@ class ApplicationView extends Component {
       // if (!resource[TYPE])
       //   return <View/>
     }
-    let isAndroid = utils.isAndroid()
     let color = isAndroid() ? bankStyle.linkColor : '#ffffff'
     let iconName = 'ios-person-add-outline'
     let icolor
@@ -360,24 +358,25 @@ class ApplicationView extends Component {
                                      bankStyle={bankStyle}/>
                  </ScrollView>
     let contentSeparator = getContentSeparator(bankStyle)
-    if (menuIsShown)
-      return (
-        <PageView style={[platformStyles.container, {flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
-          <SafeAreaView style={styles.container}>
-          <View style={[platformStyles.pageMenu, {backgroundColor: '#f7f7f7'}]}>
-            {navBarMenu}
-          </View>
-          <View style={platformStyles.pageContentWithMenu}>
-            <ScrollView  ref='this' style={{width: getContentWidth(ApplicationView), alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
-              {network}
-              {content}
-              {loading}
-            </ScrollView>
-            {footer}
-          </View>
-          </SafeAreaView>
-        </PageView>
-       );
+    let { width } = utils.dimensions(ApplicationView)
+    // if (menuIsShown)
+    //   return (
+    //     <PageView style={[platformStyles.container, {flexDirection: 'row'}]} separator={contentSeparator} bankStyle={bankStyle}>
+    //       <SafeAreaView style={styles.container}>
+    //       <View style={[platformStyles.pageMenu, {backgroundColor: '#f7f7f7'}]}>
+    //         {navBarMenu}
+    //       </View>
+    //       <View style={platformStyles.pageContentWithMenu}>
+    //         <ScrollView  ref='this' style={{width, alignSelf: menuIsShown ? 'flex-start': 'center'}} name={this._lazyId}>
+    //           {network}
+    //           {content}
+    //           {loading}
+    //         </ScrollView>
+    //         {footer}
+    //       </View>
+    //       </SafeAreaView>
+    //     </PageView>
+    //    );
     return (
       <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
          <SafeAreaView style={styles.container}>
