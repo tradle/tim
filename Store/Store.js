@@ -51,8 +51,12 @@ const QUEUED = 'Queued'
 
 const ADD = 1
 const DELETE = -1
+
 const ALLOW_TO_ADD = [
   'tradle.Asset',
+  'tradle.Product',
+  'tradle.Vendor',
+  'tradle.Contract',
   'tradle.Configuration',
   'tradle.EntityRole',
   'tradle.EmployeeRole'
@@ -110,7 +114,8 @@ const excludeWhenSignAndSend = [
   '_dataBundle',
   '_lens'
 ]
-
+const AUTHOR_ORG = '_authorOrg'
+const AUTHOR_ORG_TYPE = '_authorOrgType'
 // const MSG_LINK = '_msg'
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
@@ -246,6 +251,7 @@ const DEVICE_SYNC         = 'tradle.DeviceSync'
 const DEVICE_SYNC_DATA_BUNDLE = 'tradle.DeviceSyncDataBundle'
 const ATTESTATION         = 'tradle.Attestation'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const COUNTERPARTY        = 'tradle.Counterparty'
 
 const EXCLUDED_APPLICATION_FORMS = [
   ASSIGN_RM,
@@ -294,7 +300,7 @@ var originalMe;
 var currentEmployees = {}
 
 // var PORT = 51086
-var TIM_PATH_PREFIX = 'me'
+const TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
 // const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 const ON_RECEIVED_PROGRESS = 0.66
@@ -464,6 +470,9 @@ var Store = Reflux.createStore({
 
     this._mePromise = new Promise(resolve => {
       this._resolveWithMe = resolve
+    })
+    this._employeeCertPromise = new Promise(resolve => {
+      this._resolveEmployeeCert = resolve
     })
 
     this._pushSemaphore = createSemaphore().go()
@@ -642,6 +651,11 @@ var Store = Reflux.createStore({
       storeUtils.rewriteStubs(res)
       this.addVisualProps(res)
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
+      if (res[TYPE] === BOOKMARK) {
+        debugger
+        setTimeout(async () => await this.onGetMenu({noTrigger: true, updateMenu: true}), 1000)
+      }
+
       await this.dbPut(objId, r)
     }
     // let msg = await meDriver.objects.get(link)
@@ -939,11 +953,12 @@ var Store = Reflux.createStore({
       changed = true
     }
     // HACK for the case if employee removed
-    if (me.isEmployee  &&  !me.organization) {
-      delete me.isEmployee
-      changed = true
+    if (me.isEmployee)   {
+      if (!me.organization) {
+        delete me.isEmployee
+        changed = true
+      }
     }
-
     if (changed)
       await this.dbPut(utils.getId(me), me)
 
@@ -965,6 +980,8 @@ var Store = Reflux.createStore({
         if (o  &&  o.url)
           me.organization.url = o.url
       }
+      if (me.counterparty && org.homePage)
+        me.organization.homePage = org.homePage
       utils.setCompanyLocaleAndCurrency(org)
     }
     let dictionaryDomains = this.getDictionaryDomains()
@@ -1474,6 +1491,11 @@ var Store = Reflux.createStore({
         }
         else if (utils.isReadOnlyChat(r))   //  &&  r._readOnly)
           this.addMessagesToChat(utils.getId(r.from), r, true)
+        else if (me.isEmployee  &&  r.from.organization) {
+          // debugger
+          let orgId = utils.getId(r.from.organization)
+          this.addMessagesToChat(orgId, r, true)
+        }
         if (r.contextId)
           contextIdToResourceId[r.contextId] = r
       }
@@ -1579,7 +1601,7 @@ var Store = Reflux.createStore({
           }
           productToForms[product][r.form] = i
         }
-        if (utils.isContext(r)) {
+        if (utils.isContext(r) && !me.isEmployee) {
           let productIdx = productApp[product]
           if (productIdx  &&  !removed) {
             removeMsg.push(productIdx)
@@ -1739,13 +1761,32 @@ var Store = Reflux.createStore({
       object[ORG] = org
     }
   },
-
+  _maybePrepForCounterparty(object) {
+    let org = me.counterparty
+    if (org) {
+      object[AUTHOR_ORG] = utils.getRootHash(org)
+      object[AUTHOR_ORG_TYPE] = utils.getType(org)
+      return
+    }
+    let props = utils.getPropertiesWithRef(COUNTERPARTY, utils.getModel(object[TYPE]))
+    if (props.length) {
+      for (let i=0; i<props.length  &&  !object[AUTHOR_ORG]; i++) {
+    debugger
+        org = object[props[i].name]
+        if (org) {
+          object[AUTHOR_ORG] = org._permalink
+          object[AUTHOR_ORG_TYPE] = utils.getType(org)
+        }
+      }
+    }
+  },
   async createObject(object) {
     const node = await this._enginePromise
     const me = utils.getMe()
     if (me.isEmployee) {
       object = _.clone(object)
       this._maybePrepForEmployerBot(object)
+      this._maybePrepForCounterparty(object)
     }
     if (me._masterAuthor) {
       // debugger
@@ -1778,13 +1819,11 @@ var Store = Reflux.createStore({
         debugger
         args[0].object._masterAuthor = me._masterAuthor
       }
+      this._maybePrepForEmployerBot(args[0].object)
+      this._maybePrepForCounterparty(args[0].object)
     }
     if (method === 'sign' || method === 'send' || method === 'signAndSend') {
       await this._preSendCheck(...args)
-    }
-
-    if (method === 'sign' || method === 'signAndSend') {
-      this._maybePrepForEmployerBot(args[0].object)
     }
 
     // give animations a chance to animate
@@ -2268,7 +2307,7 @@ var Store = Reflux.createStore({
 
     // Make sure not to get all providers from this server
     // but the ones customer requested before
-    var providerIds
+    let providerIds
     if (!id) {
       let settings = this._getItem(SETTINGS + '_1')
       if (settings  &&  settings.urlToId  &&  settings.urlToId[originalUrl])
@@ -2326,7 +2365,7 @@ var Store = Reflux.createStore({
       newProviders = true
     }
 
-    var promises = []
+    let promises = []
     json.providers.forEach(sp => {
       this.parseProvider(sp, params, providerIds, newProviders)
       promises.push(this.addInfo({sp, url: originalUrl, newServer, notTestProvider}))
@@ -2345,6 +2384,33 @@ var Store = Reflux.createStore({
         list,
         modelName: ORGANIZATION
       })
+    }
+    if (me.isEmployee) {
+      if (!this.client)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+      me.menu = null
+      if (me.employeePass) {
+        if (utils.isStub(me.employeePass))
+          me.employeePass = await this.onGetItem({resource: me.employeePass, noTrigger: true})
+      }
+      else {
+        try {
+          let res = await this.searchServer({
+            modelName: MY_EMPLOYEE_PASS,
+            noTrigger: true,
+            filterResource: {owner: {id: `${IDENTITY}_${me[ROOT_HASH]}_${me[ROOT_HASH]}`}}
+          })
+          me.employeePass = res.list[0]
+        } catch (err) {
+          debugger
+        }
+      }
+      this._resolveEmployeeCert(me.employeePass)
+
+      if (me.employeePass.counterparty)
+        me.counterparty = me.employeePass.counterparty
+
+      await this.onGetMenu({updateMenu: true})
     }
     return results
       .filter(r => r.state === 'fulfilled')
@@ -2416,8 +2482,10 @@ var Store = Reflux.createStore({
     let newSp = {
       id: sp.id,
       org: utils.getId(sp.org),
+      dontUseExternalAI: sp.dontUseExternalAI,
       url: originalUrl,
       style: sp.style,
+      homePage: sp.homePage,
       permalink: sp.bot.permalink,
       sandbox: sp.sandbox,
       // publicConfig: sp.publicConfig,
@@ -2452,17 +2520,17 @@ var Store = Reflux.createStore({
       identity: sp.bot.pub
     })
 
-    var okey
+    let okey
     if (sp.org) {
       if (!sp.org[ROOT_HASH])
         sp.org[ROOT_HASH] = protocol.linkString(sp.org)
       okey = utils.getId(sp.org)
     }
 
-    var hash = protocol.linkString(sp.bot.pub)
-    var ikey = utils.makeId(IDENTITY, hash)
-    var batch = []
-    var org = this._getItem(okey)
+    let hash = protocol.linkString(sp.bot.pub)
+    let ikey = utils.makeId(IDENTITY, hash)
+    let batch = []
+    let org = this._getItem(okey)
     if (org) {
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
@@ -2502,10 +2570,17 @@ var Store = Reflux.createStore({
     }
     if (sp.tour)
       org._tour = sp.tour
+    if (sp.applicationTours)
+      org._applicationTours = sp.applicationTours
+
+
     if (sp.optionalPairing)
       org._optionalPairing = true
     if (sp.allowedMimeTypes)
       org._allowedMimeTypes = sp.allowedMimeTypes
+
+    if (sp.homePage)
+      org.homePage = sp.homePage
     if (sp.requireDeviceLocalAuth)
       org._requireDeviceLocalAuth = sp.requireDeviceLocalAuth
 
@@ -2527,7 +2602,7 @@ var Store = Reflux.createStore({
     }
     this._setItem(okey, org)
     if (!list[ikey]) {
-      var profile = {
+      let profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
         [CUR_HASH]: hash,
@@ -2551,7 +2626,7 @@ var Store = Reflux.createStore({
       else
         profile.bot = true
       // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
-      var identity = {
+      let identity = {
         [ROOT_HASH]:   hash,
         txId: sp.bot.txId
       }
@@ -2562,7 +2637,7 @@ var Store = Reflux.createStore({
         delete identity.name
       }
 
-      var pkey = utils.getId(profile)
+      let pkey = utils.getId(profile)
 
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
@@ -2574,10 +2649,10 @@ var Store = Reflux.createStore({
       // list[okey].value.contacts = []
     }
 
-    var pkey = utils.makeId(PROFILE, hash)
+    let pkey = utils.makeId(PROFILE, hash)
 
-    var curOkeyVal = this._getItem(okey)
-    var newContact = {
+    let curOkeyVal = this._getItem(okey)
+    let newContact = {
       id:     pkey,
       // title: list[pkey].value.formatted
     }
@@ -2608,11 +2683,11 @@ var Store = Reflux.createStore({
     if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
       return
     let myOrg = me.organization
-    if (myOrg._canShareContext === org._canShareContext &&
-        myOrg._hasSupportLine === org._hasSupportLine)
-      return
-    myOrg._canShareContext = org._canShareContext
-    myOrg._hasSupportLine = org._hasSupportLine
+    if (myOrg._canShareContext !== org._canShareContext ||
+        myOrg._hasSupportLine !== org._hasSupportLine) {
+      myOrg._canShareContext = org._canShareContext
+      myOrg._hasSupportLine = org._hasSupportLine
+    }
     await this.setMe(me)
     await this.dbPut(utils.getId(me), me)
   },
@@ -2676,14 +2751,14 @@ var Store = Reflux.createStore({
   async addContact(data, hash, noMessage) {
     data = utils.clone(data)
 
-    var ikey = utils.makeId(IDENTITY, hash)
-    var pkey = utils.makeId(PROFILE, hash)
+    let ikey = utils.makeId(IDENTITY, hash)
+    let pkey = utils.makeId(PROFILE, hash)
 
-    var profile = this._getItem(pkey)
-    var identity = this._getItem(ikey)
+    let profile = this._getItem(pkey)
+    let identity = this._getItem(ikey)
 
-    var batch = []
-    var newContact = !profile  ||  !identity
+    let batch = []
+    let newContact = !profile  ||  !identity
     if (newContact) {
       if (data.name === '')
         data.name = data.identity.name && data.identity.name.formatted
@@ -2708,7 +2783,7 @@ var Store = Reflux.createStore({
         profile.firstName = `[${translate('nameUnknown')}]`
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
-      var identity = data.identity
+      let identity = data.identity
       identity[ROOT_HASH] = hash
       identity[CUR_HASH] = hash
 
@@ -2738,7 +2813,7 @@ var Store = Reflux.createStore({
       await db.batch(batch)
   },
   findKey (keys, where) {
-    var match
+    let match
     keys.some(function (k) {
       for (let p in where) {
         if (k[p] !== where[p]) return false
@@ -2752,7 +2827,7 @@ var Store = Reflux.createStore({
   },
   async onStart() {
     this.triggerBusy()
-    var self = this;
+    let self = this;
     const [hasTouchID] = await Promise.all([
       LocalAuth.hasTouchID(),
       this.ready
@@ -2794,15 +2869,15 @@ var Store = Reflux.createStore({
       r.to = application._context.from
       r._context = application._context
     }
-    var self = this
+    let self = this
     let m = this.getModel(r[TYPE])
     let isContext = utils.isContext(m) // r[TYPE] === PRODUCT_APPLICATION
-    var props = m.properties;
+    let props = m.properties;
     if (!r._time)
       r._time = new Date().getTime();
-    var toOrg
+    let toOrg
     // r.to could be from the paired device
-    var to = this._getItem(r.to) || r.to
+    let to = this._getItem(r.to) || r.to
     let toType
     if (to)
       toType = utils.getType(to)
@@ -2813,7 +2888,7 @@ var Store = Reflux.createStore({
       // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
       //   return
       if (!orgRep) {
-        var params = {
+        let params = {
           action: 'addMessage',
           error: 'No ' + r.to.name + ' representative was found'
         }
@@ -2829,8 +2904,8 @@ var Store = Reflux.createStore({
     }
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
-    var rr = {};
-    var context
+    let rr = {};
+    let context
     if (r._context) {
       rr._context = r._context
       context = this.findContext(r._context)
@@ -2899,10 +2974,10 @@ var Store = Reflux.createStore({
       delete toChain.from
       delete toChain.to
     }
-    var batch = []
-    var error
-    var welcomeMessage
-    // var promise = Q(protocol.linkString(toChain))
+    let batch = []
+    let error
+    let welcomeMessage
+    // let promise = Q(protocol.linkString(toChain))
     let hash
     if (application  &&  utils.isRM(application)) {
       hash = utils.getRootHash(application.applicant)
@@ -2915,7 +2990,7 @@ var Store = Reflux.createStore({
     // let hash = applicant[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = utils.makeId(IDENTITY, hash)
+    let toId = utils.makeId(IDENTITY, hash)
     rr._sendStatus = this.isConnected ? SENDING : QUEUED
     // let firstTime
     await this._loadedResourcesDefer.promise
@@ -3382,6 +3457,11 @@ var Store = Reflux.createStore({
         sendParams.other = {}
       sendParams.other._dataBundle = utils.getRootHash(toChain._dataBundle)
     }
+    if (me && me.counterparty) {
+      if (!sendParams.other)
+        sendParams.other = {}
+      sendParams.other._authorOrg = utils.getRootHash(me.counterparty)
+    }
     if (!sendParams.to)
       sendParams.to = { permalink: hash }
 
@@ -3543,12 +3623,12 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
-  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource}) {
+  async onGetRequestedProperties({resource, currentResource, noTrigger, originatingResource, additionalInfo}) {
     let rtype = resource[TYPE]
-    if (!appPlugins.length)
+    if (/*!plugins.length  && */ !appPlugins.length)
       return
 
-    let allPlugins = []
+    let allPlugins = [] //plugins && plugins.slice() || []
     let appP = require('../plugins')
     appP.forEach(p => allPlugins.push(p))
 
@@ -3557,57 +3637,62 @@ var Store = Reflux.createStore({
       _context = this._getItem(_context.id)
     if (!_context  &&  originatingResource)
       _context = originatingResource._context
-
     // if (appPlugins)
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = { models: this.getModels() }
     let moreInfo
-    let m = originatingResource ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
-
+    let m = originatingResource && originatingResource.lens ? utils.getLensedModel(originatingResource) : utils.getLensedModelForType(rtype)
+    let fixedProps = additionalInfo && additionalInfo.fixedProps
+    let showLoading = (fixedProps && _.size(fixedProps))
+    if (showLoading)
+      Actions.showModal({title: translate('calculationsInProgress'), showIndicator: true})
+    let toOrg = resource.to && resource.to.organization
+    let dontUseExternalAI
+    if (toOrg) {
+      toOrg = this._getItem(toOrg)
+      let org = SERVICE_PROVIDERS.find(sp => sp.url === toOrg.url)
+      dontUseExternalAI = org.dontUseExternalAI
+    }
     for (let i=0; i<allPlugins.length; i++) {
       let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
       moreInfo = await plugin(context).validateForm.call(
-          // {models: {[rtype]: this.getModel(rtype)}},
           {models: {[rtype]: m}},
-          {application: _context, form: resource, currentResource, search: me.isEmployee && this.searchServer.bind(this)}
+          {application: _context, form: resource, currentResource, additionalInfo, dontUseExternalAI, search: me.isEmployee ? this.searchServer.bind(this) : null}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
       if (moreInfo  &&  moreInfo.requestedProperties)
         break
     }
+    if (showLoading)
+      Actions.hideModal()
     if (!moreInfo) {
-      this.trigger({action: 'formEdit', requestedProperties: {}})
+      this.trigger({action: 'formEdit', requestedProperties: {}, resource})
       return
     }
     // let moreInfo = plugin().validateForm({application: resource._context, form: r})
     let rProps
-    let message, deleteProperties
-    if (moreInfo) {
-      deleteProperties = moreInfo.deleteProperties
-      message = moreInfo.message
-      let requestedProperties = moreInfo.requestedProperties
-      if (requestedProperties) {
-        let rprops = {}
-        requestedProperties.forEach((r) => {
-          rprops[r.name] = {
-            message: r.message || '',
-            required: r.required,
-            hide: r.hide
-          }
-        })
-        rProps = {
-          requestedProperties: rprops,
-          excludeProperties: moreInfo.excludeProperties
+    let {message, deleteProperties, recalculate, requestedProperties, formErrors, form, doTable} = moreInfo
+    if (requestedProperties) {
+      let rprops = {}
+      requestedProperties.forEach((r) => {
+        rprops[r.name] = {
+          message: r.message || '',
+          required: r.required,
+          hide: r.hide
         }
+      })
+      rProps = {
+        requestedProperties: rprops,
+        excludeProperties: moreInfo.excludeProperties
       }
     }
 
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rProps, resource, message, deleteProperties, exclude: moreInfo.exclude})
-    // return rprops
+      this.trigger({action: 'formEdit', requestedProperties: rProps, resource:form || resource, message, deleteProperties, recalculate, doTable, validationErrors: formErrors || {}})
+    // return rProps
   },
   async onAddVerification(params) {
     let { r, dontSend, notOneClickVerification, noTrigger, application } = params
@@ -3967,7 +4052,7 @@ var Store = Reflux.createStore({
   async onShowStepIndicator() {
     let showStepIndicator = !me._showStepIndicator
     me._showStepIndicator = showStepIndicator
-    await db.put(utils.getId(me), me)
+    await this.dbPut(utils.getId(me), me)
     await this.setMe(me)
     this.trigger({action: 'showStepIndicator', showStepIndicator})
   },
@@ -4042,12 +4127,12 @@ var Store = Reflux.createStore({
     _.extend(res, r)
 if (!res[SIG]  &&  res._message)
   debugger
-    var props = backlinks || (backlink ? {[backlink.name]: backlink} : resModel.properties)
+    let props = backlinks || (backlink ? {[backlink.name]: backlink} : resModel.properties)
 
     for (let p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
         continue;
-      var items = props[p].items;
+      let items = props[p].items;
       if (!items  ||  !items.backlink)
         continue
       if (type === BOOKMARKS_FOLDER)
@@ -4095,6 +4180,8 @@ if (!res[SIG]  &&  res._message)
     let list, style
     if (application) {
       if (!r._context) {
+        if (utils.isStub(application))
+          application = await this.getApplication({resource: application}) //, noBacklinks: true})
         let context = await this.getContext(application.context, r)
         if (context)
           r._context = context
@@ -4125,24 +4212,38 @@ if (!res[SIG]  &&  res._message)
         }
       })
     }
-    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style}
+    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink, style, application}
     if (list)
       retParams.list = list
     let org = r.to.organization
-    if (org)
+    if (org) {
       retParams.provider = this._getItem(org)
+      let { _applicationTours: applicationTours } = retParams.provider
+      if (applicationTours)
+        retParams.tour = applicationTours[r.requestFor]
+    }
     this.trigger(retParams)
     return r
   },
-  getTemplatesList({application}) {
-    if (!me.isEmployee)
-      return
-    let url = me.organization.url
+  getTemplatesList({requestFor, url}) {
+    // if (!me.isEmployee)
+    //   return
+    if (!url && me.isEmployee)
+      url = me.organization.url
     let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
     if (!sp  ||  !sp.templates || !sp.templates.length)
       return
-    const { requestFor } = application
+    // const { requestFor } = application
     return sp.templates.filter(r => r.applicationFor === requestFor)
+  },
+  convertCreditScore(r) {
+    r.creditScoreDetails.forEach(cd => {
+      if (!cd.form) return
+      if (Array.isArray(cd.form))
+        cd.form = cd.form.map(f => storeUtils.makeStub(f))
+      else
+        cd.form = storeUtils.makeStub(cd.form)
+    })
   },
   async onGetResourceLink({ resource }) {
     let toR = this._getItem(resource.to)
@@ -4158,8 +4259,46 @@ if (!res[SIG]  &&  res._message)
     let linkToCopy = links.getChatLink({ path: 'chat', host: org.url, provider: permalink, rId, platform: utils.isWeb() ? 'web' : 'mobile', baseUrl })
     Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(title)}`)
   },
+  async onGetApplyForProductLink(modelId) {
+    if (!me.isEmployee)
+      return
+    let org = this._getItem(me.organization)
+    let provider = this.getRepresentative(org)[ROOT_HASH]
+
+    let baseUrl
+    if (utils.isWeb())
+      baseUrl = __DEV__ ? 'http://localhost:3001' : ENV.APP_URL
+    else
+      baseUrl = `https://${ENV.deepLinkHost}`
+
+    let linkToCopy = links.getApplyForProductLink({
+      provider,
+      path: 'applyForProduct',
+      platform: utils.isWeb() ? 'web' : 'mobile',
+      baseUrl,
+      product: modelId,
+      host: org.url,
+    })
+    Clipboard.setString(`${linkToCopy}&-deepLink=y&-linkText=${encodeURIComponent(translate(utils.getModel(modelId)))}`)
+  },
+
+  async onGetApplication(params) {
+    let {resource, action, backlink, forwardlink, filterResource, prop, isBacklink} = params
+    if (!filterResource)
+      return await this.getApplication(params)
+    let p = _.cloneDeep(params)
+    p.noTrigger = true
+    let { list } = await this.searchServer(p)
+    if (!list || !list.length) return
+    p.resource = list[0]
+    if (isBacklink)
+      p.backlink = prop
+    let application =  await this.getApplication(p)
+
+    this.trigger({action: 'getApplication', resource, application})
+  },
   async getApplication(params) {
-    let {resource, action, backlink, forwardlink} = params
+    let {resource, action, backlink, forwardlink, noChat, noBacklinks} = params
     let blProp = backlink ||  forwardlink
     let props = utils.getModel(APPLICATION).properties
     let prop
@@ -4237,7 +4376,7 @@ if (!res[SIG]  &&  res._message)
             r[name] = active.concat(inactive)
           }
         }
-        if (blProp !== prop) {
+        if (blProp !== prop && !noChat) {
           list = await this.getObjects(r[blProp.name], blProp)
           if (list.length) {
             let m = utils.getModel(blProp.items.ref)
@@ -4249,12 +4388,14 @@ if (!res[SIG]  &&  res._message)
         }
       }
     }
-    else {
-      let list = r.forms.filter(form => {
-        let ftype = utils.getType(form)
-        return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
-      })
-      r.forms = list
+    else if (r.forms) {
+      if (r.forms) {
+        list = r.forms.filter(form => {
+          let ftype = utils.getType(form)
+          return EXCLUDED_APPLICATION_FORMS.indexOf(ftype) === -1
+        })
+        r.forms = list
+      }
     }
     if (r.checksOverride)
       r.checksOverride = await this.getObjects(r.checksOverride.map(chk => this.getCurHash(chk)))
@@ -4295,9 +4436,9 @@ if (!res[SIG]  &&  res._message)
         delete c.from
         let rep = this.getRepresentative(retParams.provider)
         let isRM = utils.isRM(r)
-        debugger
-         if (isRM || r.filledForCustomer) {
-          retParams.nextStep = {
+        // Do not allow the third party employee to create application from another one
+        if (!me.counterparty && (isRM || r.filledForCustomer)) {
+           retParams.nextStep = {
             ...c,
             associatedResource: utils.getId(certificate),
             parentApplication: r[ROOT_HASH],
@@ -4311,21 +4452,24 @@ if (!res[SIG]  &&  res._message)
     }
     const application = r
     const { applicant:applicantIdentity } = application
-    retParams.wasFilledByEmployee = application.filledForCustomer
-    let templates = this.getTemplatesList({application: r})
+    let templates = this.getTemplatesList({requestFor: r.requestFor})
     if (templates)
       retParams.templates = templates
+    if (application.draft) {
+      let finishDraft, letClient
+      if (application.submissions.find(r => utils.getType(r.submission) === APPLICATION_SUBMITTED)) {
+        retParams.finishDraft = true
+        retParams.letClient = true
+      }
+      else if (application.submissions.find(r => {
+          let rtype = utils.getType(r.submission)
+          return rtype !== PRODUCT_REQUEST && utils.isSubclassOf(rtype, FORM)
+        })) {
+        retParams.letClient = true
+      }
+    }
     this.trigger(retParams)
     return r
-  },
-  convertCreditScore(r) {
-    r.creditScoreDetails.forEach(cd => {
-      if (!cd.form) return
-      if (Array.isArray(cd.form))
-        cd.form = cd.form.map(f => storeUtils.makeStub(f))
-      else
-        cd.form = storeUtils.makeStub(cd.form)
-    })
   },
   async getMessage(params) {
     var { resource } = params
@@ -4342,7 +4486,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
   },
   async getObjects(list, prop) {
-    if (!list.length)
+    if (!list || !list.length)
       return []
     let links
     if (prop) {
@@ -4568,7 +4712,7 @@ if (!res[SIG]  &&  res._message)
     }
   },
 
-  async onOpenURL(url) {
+  async onOpenURL(url, application, resource, chat) {
     let URL = parseURL(url.replace('/#', ''))
     let pathname = URL.pathname || URL.hostname
     if (!pathname) {
@@ -4578,8 +4722,7 @@ if (!res[SIG]  &&  res._message)
     pathname = pathname.replace(/^\//, '')
 
     let query = URL.query
-    let qs = query && require('querystring').parse(query) || {}
-
+    let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
     switch(pathname) {
     case 'chat':
       this.onGetProvider(qs)
@@ -4589,7 +4732,16 @@ if (!res[SIG]  &&  res._message)
       this.trigger({action: pathname})
       break
     case 'r':
-      await this.getItemFromDeepLink(qs)
+      let idx = url.indexOf('&-template=')
+      if (idx === -1)
+        await this.getItemFromDeepLink(qs)
+      else {
+        let idx1 = url.indexOf('&', idx + 1)
+        if (idx1 === -1)
+          idx1 = url.length
+        let template = decodeURIComponent(url.slice(idx, idx1).split('=')[1])
+        await this.printNotarazedReport({...qs, template}, application, resource, chat)
+      }
       break
     case 'applyForProduct':
       await this.onApplyForProduct(qs)
@@ -5200,6 +5352,10 @@ if (!res[SIG]  &&  res._message)
             self._setItem(prevResId, prevRes)
           }
         }
+        if (isBookmark) {
+          debugger
+          await self.onGetMenu({noTrigger: true, updateMenu: true})
+        }
         if (!isNew  ||  !utils.isForm(rtype)) {
           if (isBookmark) {
             if (isNew)
@@ -5312,6 +5468,9 @@ if (!res[SIG]  &&  res._message)
     async function handleDocumentCreated(returnVal) {
       let rtype = utils.getType(returnVal)
       if (rtype === FORM_REQUEST) {
+        // Check if this Form request was sent to me and not to another employee
+        if (returnVal.to.id !== utils.getId(utils.getMe()))
+          return
         let ptype = returnVal.product
         if (ptype === REFRESH_PRODUCT)
           await handleRefresh()
@@ -5412,13 +5571,15 @@ if (!res[SIG]  &&  res._message)
       refProps[rValue].push(p)
       let elm = this._getItem(rValue)
       if (!elm  && !isInBundle  &&  me.isEmployee) {
-        elm = await this._getItemFromServer({idOrResource: rValue})
+        elm = resource[p]
+        // elm = await this._getItemFromServer({idOrResource: rValue})
         foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
       }
       else {
         // HACK for scanned Identity
+        // HACK for scanned Identity and third party employees
         if (!elm) {
-          if (ref === IDENTITY)
+          if (ref === IDENTITY || ref === COUNTERPARTY)
             foundRefs.push({value: resource[p], state: 'fulfilled'})
         }
         else if (!utils.isMessage(elm))
@@ -5538,7 +5699,7 @@ if (!res[SIG]  &&  res._message)
   async handlePairing(url) {
     let identity = meDriver.identity
     let iId = utils.getId(identity)
-    await db.put(iId, identity)
+    await this.dbPut(iId, identity)
     this.setItem(iId, identity)
     var myIdentities = this._getItem(MY_IDENTITIES)
     // if (!myIdentities)
@@ -5721,7 +5882,7 @@ if (!res[SIG]  &&  res._message)
       await this.insurePublishingIdentity(org)
     }
     await this.onAddChatItem({resource, noTrigger: true,  })
-    this.trigger({ action: 'applyForProduct', provider: org })
+    this.trigger({ action: 'applyForProduct', provider: org, currentContext: resource })
   },
   async onGetIdentity({prop, permalink, link, firstName, lastName }) {
     let identityId = utils.makeId(IDENTITY, permalink, link)
@@ -5754,8 +5915,9 @@ if (!res[SIG]  &&  res._message)
     }
     let application = list[0]
     application.draftCompleted = true
-
-    await this.onAddChatItem({resource: application})
+    let resource = await this.onAddChatItem({resource: application})
+    if (resource)
+      this.trigger({action: 'updateItem', resource})
   },
   async onSubmitCompletedApplication({context}) {
     let contextId = context.contextId
@@ -5781,7 +5943,7 @@ if (!res[SIG]  &&  res._message)
     application.processingDataBundle = false
     application.filledForCustomer = true
 
-    await this.onAddChatItem({resource: application})
+    let resource = await this.onAddChatItem({resource: application})
     await utils.promiseDelay(2000)
     await this.onAddChatItem({resource: {
       [TYPE]: APPLICATION_COMPLETED,
@@ -5792,10 +5954,12 @@ if (!res[SIG]  &&  res._message)
       context: application.context,
       _context: context
     }})
+    if (resource)
+      this.trigger({action: 'updateItem', resource})
   },
 
-  async onGetProductList({ resource }) {
-    if (resource[TYPE] !== ORGANIZATION) {
+  async onGetProductList({ resource, noTrigger, linkToApply }) {
+    if (utils.getType(resource) !== ORGANIZATION) {
       let org = resource.organization
       if (!org)
         return
@@ -5828,7 +5992,9 @@ if (!res[SIG]  &&  res._message)
     if (!me.isEmployee)
       plist = plist.filter(p => !utils.getModel(utils.getType(p)).internalUse)
     productListR.chooser.oneOf = plist
-    this.trigger({action: 'productList', resource: productListR, to: resource})
+    if (!noTrigger)
+      this.trigger({action: linkToApply ? 'linkToApply' : 'productList', resource: productListR, to: resource})
+    return productListR
   },
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
@@ -5870,10 +6036,52 @@ if (!res[SIG]  &&  res._message)
     }
     return newProvider
   },
+  async printNotarazedReport({ link, permalink, type, template }, application, resource, to) {
+    if (/*!me.isEmployee || */!template || type !== APPLICATION)
+      return
+    let requestFor, context, url
+    if (me.isEmployee) {
+      if (!this.client)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+      if (!application || utils.isStub(application))
+         application = await this._getItemFromServer({idOrResource: {
+            [TYPE]: APPLICATION,
+            [ROOT_HASH]: permalink,
+            [CUR_HASH]: link
+          }})
+      ;({requestFor} = application)
+      url = me.organization.url
+    }
+    else {
+      if (application)
+        context = application
+      else {
+        let r = {
+          id: utils.makeId(PRODUCT_REQUEST, permalink, link)
+        }
+        context = await this.onGetItem({resource: r, noTrigger: true})
+      }
+      if (!to)
+        to = context.to.organization
+      context.forms  = await this.searchMessages({modelName: FORM, to, context})
+      url = to && to.url || this._getItem(to).url
+      ;({requestFor} = context)
+    }
+    let templates = this.getTemplatesList({requestFor, url})
+    if (!templates)
+      return
+    let templ = templates.find(t =>  t.title === template)
+    if (!templ)
+      return
+    let sp = SERVICE_PROVIDERS.find(sp => sp.url === url)
+
+    this.trigger({action: 'getTemplate', template: templ, application, context, resource })
+    //await this.onGetReport({application, template: templ.template, locale: sp.locale || ENV.locale})
+  },
   async onGetReport({application, template, locale}) {
     if (!me.isEmployee)
       return
-    let reports = new ReportGenerator({application, template, locale, getObjects: this.getObjects, getApplication: this.getApplication})
+    let reports = new ReportGenerator({application, template, locale, getItem: this._getItemFromServer, getApplication: this.getApplication})
     let html = await reports.genReport()
     this.trigger({action: 'report', application, html})
   },
@@ -6043,7 +6251,7 @@ debugger
     }
     // let m = this.getModel(VERIFICATION)
     let verifications = []
-    for (let i=0; i<documents.length; i) {
+    for (let i=0; i<documents.length; i++) {
       let doc = documents[i]
       let docModel = this.getModel(doc[TYPE])
       let params = {
@@ -6718,8 +6926,8 @@ debugger
         Alert.alert(error.message)
         return
       } finally {
-        // if (exploreData)
-        //   Actions.hideModal()
+        if (exploreData)
+          Actions.hideModal()
       }
     }
 
@@ -6894,8 +7102,11 @@ debugger
           let contextIdToContext = {}
           if (/*res[TYPE] === FORM_REQUEST  &&  */ res._context) {
             context = res._context
-            if (context.contextId)
+            if (context.contextId) {
+              let c = result.find(r => r[TYPE] === PRODUCT_REQUEST && r.contextId === context.contextId)
+              if (c) context = c
               continue
+            }
             let c = this._getItem(context)
             if (!c) {
               let cId = utils.getId(context)
@@ -6982,7 +7193,7 @@ debugger
                       isTest,
                       modelName,
                       spinner,
-                      addAllowed: this.isAddAllowed(modelName),
+                      permissions: this.getPermissions({modelName}),
                       isAggregation
                     }
     if (prop)
@@ -6990,8 +7201,11 @@ debugger
     retParams.first = first
     this.trigger(retParams);
   },
-  isAddAllowed(modelName) {
-    return ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
+  getPermissions({modelName, property}) {
+    let isAllowed = ALLOW_TO_ADD.filter(modelId => modelName === modelId || utils.isSubclassOf(modelName, modelId)).length
+    if (!isAllowed)
+      return false
+    return utils.getPermissions({modelName, property})
   },
   handleChatResult({result, orgId, modelName}) {
     if (modelName !== MESSAGE)
@@ -7134,10 +7348,20 @@ debugger
   },
   async searchServer(params) {
     if (!this.client) {
-      Alert.alert(translate('serverIsUnreachable'))
-      return
+      if (me.isEmployee) {
+        if (params.modelName !== MY_EMPLOYEE_PASS) {
+          if (!me.employeePass) // || utils.isStub(me.employeePass))
+            await this._employeeCertPromise
+        }
+        if (!this.client)
+          this.client = graphQL.initClient(meDriver, me.organization.url)
+      }
+      else {
+        Alert.alert(translate('serverIsUnreachable'))
+        return {}
+      }
     }
-    let {direction, first, noTrigger, modelName, application,
+    let {direction, first, noTrigger, modelName, application, all, exploreData,
          filterResource, endCursor, limit, bookmark} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
@@ -7165,18 +7389,20 @@ debugger
         filterResource.archived = false
         if (!filterResource._org  &&  !filterResource.context)
           filterResource._org = myBot[ROOT_HASH]
-        if (typeof filterResource.draft === 'undefined')
+        if (typeof filterResource.draft === 'undefined' && !all)
           filterResource.draft = false
       }
+      if (modelName === BOOKMARK && !me.counterparty && exploreData)
+        params.allow = BOOKMARK
     }
 
     _.extend(params, {client: this.client, filterResource, endCursor, noPaging: !endCursor})
     let list
     let { result, error, retry } = await graphQL.searchServer(params)
-    let addAllowed = this.isAddAllowed(modelName)
+    let permissions = this.getPermissions({modelName})
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, addAllowed, modelName})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction, first, errorMessage: error, query: retry  &&  params, permissions, modelName})
       return { list, errorMessage: error, query: params }
     }
 
@@ -7193,7 +7419,7 @@ debugger
     }
 
     if (!noTrigger)
-      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, addAllowed})
+      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first, allLoaded: len < limit, permissions})
 
     return {list, endCursor: newCursor}
   },
@@ -8906,6 +9132,24 @@ debugger
     // list.forEach(r => count += (r.list  && r.list.length || 0))
     this.trigger({action: 'hasBookmarks', count: list.length, bankStyle: style})
   },
+  async onGetMenu({noTrigger, modelName, updateMenu, resource}) {
+    if (!me.isEmployee)
+      return
+    if (!modelName  &&  resource)
+      modelName = utils.getType(resource)
+    if (!updateMenu  &&  me.menu && me.menu.length) {
+      if (!noTrigger)
+        this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
+      return
+    }
+    let org = this.getRepresentative(me.organization)
+    let { list: sharedB=[] } = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': true, 'cancelled': false}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true, limit: 20 })
+
+    me.menu = sharedB
+    await this.setMe(me)
+    if (!noTrigger)
+      this.trigger({list: me.menu, action: 'getMenu', modelName, resource})
+  },
   async onGetBookmarks({ modelName, resource, isChooser }) {
     let org = this.getRepresentative(me.organization)
     if (modelName === BOOKMARKS_FOLDER) {
@@ -8927,9 +9171,12 @@ debugger
     }
 
     if (!resource.list  ||  !resource.list.length) {
-      let initFolder = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true }).filter(bf => bf.message === translate('initialBookmarks'))
+      let initFolder = await this.searchMessages({ modelName: BOOKMARKS_FOLDER, noTrigger: true })
+      if (!initFolder || !initFolder.length)
+        return
+      initFolder = initFolder.filter(bf => bf.message === translate('initialBookmarks'))
       let initFolderLinks = initFolder[0].list.map(r => utils.getRootHash(r))
-      debugger
+      // debugger
       let result = await this.getList({ filterResource: {'_org': org[ROOT_HASH], 'shared': false, 'cancelled': false, _author: me[ROOT_HASH]}, modelName: BOOKMARK, search: true, noTrigger: true, sortProperty: 'order', asc: true })
       let list
       if (result) {
@@ -8940,7 +9187,7 @@ debugger
           return true
         })
       }
-      this.trigger({list, action: 'list', isChooser, first: true, noMove: true})
+      this.trigger({list, action: 'list', isChooser, first: true, noMove: true, modelName })
       return
     }
 
@@ -8959,6 +9206,16 @@ debugger
     }
     let noMove = resource.message === translate('initialBookmarks')
     this.trigger({list, action: 'list', isChooser, first: true, noMove})
+  },
+  filterOutInitialBookmarks(initFolder, result) {
+    let initFolderLinks = initFolder.list.map(r => utils.getRootHash(r))
+    debugger
+    let list = result  &&  result.filter(r => {
+      if (initFolderLinks.find(b => b === r[ROOT_HASH]))
+        return false
+      return true
+    })
+    return list
   },
   async moveBookmark(params) {
     let { currentFolder, resource } = params
@@ -10098,7 +10355,7 @@ debugger
       let contact
       if (isMessage) { //  &&  value[TYPE] === NAME) {
         contact = this._getItem(value.from)
-        if (!contact.bot)
+        if (contact && !contact.bot)
           contact = await this.changeName(value, contact)
       }
       if (contact)
@@ -10925,6 +11182,7 @@ debugger
     let valId = utils.getId(val)
     let inDB = this._getItem(valId)
 
+    let me = utils.getMe()
     if (inDB) {
       if (obj.txId) {
         inDB.txId = obj.txId
@@ -10935,7 +11193,6 @@ debugger
         return
       }
       let msgContext = obj.object  &&  obj.object.context
-      let me = utils.getMe()
       if (me.isEmployee  ||  !msgContext)
         return
       let context = utils.getId(inDB._context)
@@ -10980,7 +11237,6 @@ debugger
     fromId = utils.makeId(PROFILE, fromId)
     let from = this._getItem(fromId)
 
-    let me = utils.getMe()
     if (utils.getId(me) === fromId)
       val._time = val._time || obj.timestamp
     else {
@@ -11155,7 +11411,7 @@ debugger
             // if (!reviewableResources)
             shareables = await this.getShareableResources({foundResources: [val], to: val.from, context: val._context})
           }
-          this.trigger({action: 'addItem', resource: val, shareableResources: shareables, reviewableResources, productToForms: productToForms})
+          this.trigger({action: 'addItem', resource: val, shareableResources: shareables, reviewableResources, productToForms})
         }
       }
       else {
@@ -11209,6 +11465,23 @@ debugger
       setTimeout(() => {
         this.trigger({action: 'offerKillSwitchAfterApplication'})
       }, 2000)
+    }
+    else if (me.isEmployee && val[TYPE] === APPLICATION_SUBMITTED) {
+      let {list: rl} = await this.searchServer({
+                 modelName: APPLICATION,
+                 resource: val.from,
+                 noTrigger: true,
+                 all: true,
+                 filterResource: {[TYPE]: APPLICATION, context: val.context, limit: 1}
+              })
+      debugger
+      if (rl && rl.length) {
+        // Actions.showModal({title: translate('refreshInProgress'), showIndicator: true})
+        await this.onGetItem({resource: rl[0], search: true, backlink: utils.getModel(APPLICATION).properties.forms})
+        Actions.hideModal()
+      }
+      // if (rl.list && rl.list.length)
+      //   Actions.refreshApplication({resource: rl.list[0]})
     }
   },
   // isYuki(fromOrg) {
@@ -11935,43 +12208,52 @@ debugger
     me.organization = this.buildRef(org)
     this.resetForEmployee(me, org)
     me.employeePass = this.buildRef(myEmployeeBadge)
+    me.employeePass.role = myEmployeeBadge.role
+
+    this._resolveEmployeeCert(myEmployeeBadge)
+
+    // me.employeePass.role = myEmployeeBadge.role
+    if (myEmployeeBadge.counterparty)
+      me.counterparty = myEmployeeBadge.counterparty
+
     let rep = this.getRepresentative(me.organization)
     const bookmarks = storeUtils.getEmployeeBookmarks({
       me,
       botPermalink: rep[ROOT_HASH]
     })
-    let bookmarksList = []
-    const from = this.buildRef(me)
-    let folder = {
-      [TYPE]: BOOKMARKS_FOLDER,
-      message: translate('initialBookmarks'),
-      // list: bookmarksList.map(b => this.buildRef(b)),
-      from,
-      to: rep
-    }
-    let f = await this.onAddChatItem({resource: folder, noTrigger: true, doNotSend: true})
-    let folderStub = this.buildRef(f)
-    for (const bookmark of bookmarks) {
-      // can we do this in parallel?
-      bookmark.folder = folderStub
-      bookmark.to = rep
-      let b = await this.onAddChatItem({resource: bookmark, noTrigger: true, employeeSetup: true})
-      bookmarksList.push(b)
-    }
-    f = await this.onGetItem({resource: f})
-    f.list = bookmarksList
+    if (bookmarks) {
+      let bookmarksList = []
+      const from = this.buildRef(me)
+      let folder = {
+        [TYPE]: BOOKMARKS_FOLDER,
+        message: translate('initialBookmarks'),
+        // list: bookmarksList.map(b => this.buildRef(b)),
+        from,
+        to: rep
+      }
+      let f = await this.onAddChatItem({resource: folder, noTrigger: true, doNotSend: true})
+      let folderStub = this.buildRef(f)
+      for (const bookmark of bookmarks) {
+        // can we do this in parallel?
+        bookmark.folder = folderStub
+        bookmark.to = rep
+        let b = await this.onAddChatItem({resource: bookmark, noTrigger: true, employeeSetup: true})
+        bookmarksList.push(b)
+      }
+      f = await this.onGetItem({resource: f})
+      f.list = bookmarksList
 
-    await this.onAddChatItem({resource: f, noTrigger: true, doNotSend: true})
-    // debugger
-    // delete folder.list
-    let folders = ['personalBookmarks', 'sharedBookmarks']
-    for (let i=0; i<folders.length; i++) {
-      folder.message = translate(folders[i])
-      if (i === 1)
-        folder.shared = true
-      await this.onAddChatItem({resource: folder, noTrigger: true})
+      await this.onAddChatItem({resource: f, noTrigger: true, doNotSend: true})
+      // debugger
+      // delete folder.list
+      let folders = ['personalBookmarks', 'sharedBookmarks']
+      for (let i=0; i<folders.length; i++) {
+        folder.message = translate(folders[i])
+        if (i === 1)
+          folder.shared = true
+        await this.onAddChatItem({resource: folder, noTrigger: true})
+      }
     }
-
     let meId = utils.getId(me)
     if (me.firstName === FRIEND) {
       let result = []
@@ -11989,6 +12271,9 @@ debugger
     }
     this._setItem(meId, me)
     await this.dbPut(meId, me)
+    if (!this.client)
+      this.client = graphQL.initClient(meDriver, me.organization.url)
+
     disableBlockchainSync(meDriver)
   },
 
@@ -12292,6 +12577,8 @@ debugger
         me = data.value
       }
       let rtype = data.value[TYPE]
+      if (rtype  &&  !utils.getModel(rtype))
+        return
       if (rtype === PROFILE) {
         if (data.value.securityCode)
           employees[data.value.securityCode] = data.value
@@ -12864,13 +13151,13 @@ debug(`deleteItemFromDB: ${itemId}`)
       let form = lastFormRequest[lastFormRequest.length - 1].form
       if (multiEntryForms.indexOf(form) === -1)
         return
-      let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context, noTrigger: true })
+      let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context, noTrigger: true })
       if (!res  ||  !res.list  || !res.list.length)
         return
       let productToForms = {[product]: {[form]: res.list.map((r) => utils.getId(r))}}
       return productToForms
     }
-    let allForms = await this.searchMessages({modelName: FORM, to: to, context: context})
+    let allForms = await this.searchMessages({modelName: FORM, to, context})
     if (!allForms)
       return
     let productToForms = {}
