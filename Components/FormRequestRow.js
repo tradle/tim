@@ -1089,7 +1089,7 @@ class FormRequestRow extends Component {
       <View style={styles.row}>
         <Text style={[chatStyles.resourceTitle, {paddingLeft, marginTop, fontSize: 16, fontWeight: '600', color: mColor}]}>{translate('WAIT')}</Text>
         <Icon name='ios-hand' size={20} color={bankStyle.verifiedBg} style={{paddingHorizontal: 2, marginTop: marginTop - 4}}/>
-        <Text style={[chatStyles.resourceTitle, {marginTop, fontSize: 16, color: mColor, paddingLeft: 3}]}>{translate(isVerified ? 'youHaveVerifiedOneOnFile' : 'youHaveOneOnFile')}</Text>
+        <Text style={[chatStyles.resourceTitle, {marginTop, fontSize: 14, color: mColor, paddingLeft: 3}]}>{translate(isVerified ? 'youHaveVerifiedOneOnFile' : 'youHaveOneOnFile')}</Text>
       </View>
     )
   }
