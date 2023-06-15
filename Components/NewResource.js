@@ -7,6 +7,7 @@ import t from 'tcomb-form-native'
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
+import ActionSheet from 'react-native-actionsheet'
 
 import {
   View,
@@ -40,7 +41,7 @@ const FAILED = 2
 const SUCCESSFUL_WITH_ALERT = 3
 
 import components from './components'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, buildStubByEnumTitleOrId } from '../utils/utils'
 import { getContentSeparator, getMarkdownStyles } from '../utils/uiUtils'
 import Markdown from './Markdown'
 import { Text } from './Text'
@@ -515,7 +516,7 @@ class NewResource extends Component {
     }
     let { model, originatingMessage, lensId, chat, editFormRequestPrefill, currentFolder,
           doNotSend, prop, containerResource, isRefresh, application, errs,
-          navigator } = this.props
+          navigator, exploreData } = this.props
     let required = utils.ungroup({model, viewCols: model.required, edit: true})
     if (!required)
       required = []
@@ -624,6 +625,7 @@ if (r.url)
       value: json,
       resource: r,
       meta: model,
+      exploreData,
       lens: lensId,
       isRegistration: this.state.isRegistration,
       isRefresh,
@@ -1262,13 +1264,13 @@ if (r.url)
                      {info}
                    </View>
       }
-      else
-        errors = !noChat  &&  <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
+      // else
+      //   errors = !noChat  &&  <View style={[styles.errors, {backgroundColor: 'transparent'}]} />
 
       let { enumProp } = this.state
-      let actionSheet = this.renderActionSheet(resource[TYPE])
+      let actionSheet = this.renderActionSheet(resource[TYPE], NewResource)
       if (noChat) {
-        return <View style={[styles.message, {height: '100%', paddingBottom: 50}]}>
+        return <View style={[styles.message, {paddingBottom: 50}]}>
                  {errors}
                  {content}
                  {actionSheet}
@@ -1304,6 +1306,7 @@ if (r.url)
       </View>
     )
   }
+
   alertNotFullSuccess(onPress, status) {
     if (status === SUCCESSFUL)
       onPress()
