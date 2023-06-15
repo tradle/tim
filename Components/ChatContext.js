@@ -103,6 +103,7 @@ class ChatContext extends Component {
             )
   }
   getStepIndicator({context, bankStyle, application}) {
+    return
     if (application)
       return
     if (!context  ||  context._formsCount <= 1)
