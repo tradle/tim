@@ -1092,21 +1092,19 @@ debugger
         maxHeight -= 35
       if (hideTextInput)
         maxHeight -= 10
-      let marginLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
-      let marginRight = 10
       let alignSelf = menuIsShown ? 'flex-start' : 'center'
 
       // Hide TextInput for shared context since it is read-only
 
-      if (stepIndicator)
-        maxHeight -= 12
-      if (assignRM)
+      // if (stepIndicator)
+      //   maxHeight -= 12
+      // if (assignRM)
         maxHeight -= 30
 
       let textInputHeight = isIphone10orMore() ? 60 : 45
-      // content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
-      content = <GiftedMessenger style={{ marginLeft, marginRight, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      // content = <GiftedMessenger style={{ marginLeft, marginRight, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages}
@@ -1428,6 +1426,7 @@ debugger
     return !!this.getActionSheetItems()
   }
   getStepIndicator(context) {
+    return
     const { application } = this.props
     if (application)
     return

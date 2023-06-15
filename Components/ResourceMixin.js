@@ -45,7 +45,7 @@ const APPLICATION = 'tradle.Application'
 const CHECK = 'tradle.Check'
 const MODIFICATION = 'tradle.Modification'
 const DEFAULT_CURRENCY_SYMBOL = '$'
-
+const BIG_WIDTH = 700
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
     'address': ['full']
@@ -182,6 +182,8 @@ var ResourceMixin = {
     let cnt = value.length;
     let isView = component  &&  component.name === 'ShowPropertiesView'
     let isWeb = utils.isWeb()
+    let { width } = utils.dimensions(component)
+    let flexDirection = isWeb || width > BIG_WIDTH ? 'row' : 'column'
     return value.map((v) => {
       let ret = [];
       counter++;
@@ -214,7 +216,7 @@ var ResourceMixin = {
               return
             }
             displayingPart = JSON.stringify(displayingPart, null, 2)
-            ret.push(<View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+            ret.push(<View style={{flexDirection, paddingVertical: 3}}>
                        <View style={styles.itemContent}>
                          <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                          <Text style={styles.itemText}>{displayingPart}</Text>
@@ -251,7 +253,7 @@ var ResourceMixin = {
             }
             if (utils.isEnum(iref)) {
               ret.push(
-                   <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
+                   <View style={{flexDirection, paddingVertical: 3}}>
                      <View style={styles.itemContent}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <View  style={styles.enumValue} key={this.getNextKey()}>
@@ -300,8 +302,8 @@ var ResourceMixin = {
 
         if (!value)
           return
-        let item = <View style={{flexDirection: isWeb && 'row' || 'column', paddingVertical: 3}}>
-                     <View style={styles.itemContent}>
+        let item = <View style={{flexDirection, paddingVertical: 3}}>
+                     <View style={[styles.itemContent, {flexDirection}]}>
                        <Text style={skipLabel ? {height: 0} : [styles.itemText, {color: '#999999'}]}>{skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                        <Text style={styles.itemText}>{value}</Text>
                      </View>
@@ -318,7 +320,6 @@ var ResourceMixin = {
                        </TouchableOpacity>
                      </View>
           }
-          let { width } = utils.dimensions(component)
           item = <View style={{width: width - 40}}>
                    <TouchableOpacity underlayColor='transparent' onPress={editItem.bind(this, prop, v)}>
                       {item}
@@ -1183,7 +1184,7 @@ var styles = StyleSheet.create({
   cancelIcon: {
     position: 'absolute',
     top: 0,
-    right: 0
+    right: 10
   },
   prettyGroup: {
     marginVertical: 10,
