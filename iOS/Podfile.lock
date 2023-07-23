@@ -17,7 +17,7 @@ SPEC REPOS:
     - DocumentReaderFull
 
 SPEC CHECKSUMS:
-  Branch: 770a23c04d3f5410cf9231db099a444dd3060784
+  Branch: a24da7d526fc2aa64c41836dbf1aa731fa9fd2b9
   DocumentReader: 9424151f4912c1efe3276ecb495a44d871dd1d9b
   DocumentReaderFull: 62b37217835dfcf9d81e0729bfd4dda111151cf5
 
