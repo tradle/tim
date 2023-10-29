@@ -60,11 +60,11 @@ class ApplicationTabs extends Component {
     super(props);
   }
   render() {
-    var { resource, bankStyle, children, navigator, lazy, locale,
+    let { resource, bankStyle, children, navigator, lazy, locale,
           showDetails, currency, backlink, checksCategory, checkFilter } = this.props
-    var model = utils.getModel(resource[TYPE]);
-    var props = model.properties;
-    var refList = [];
+    let model = utils.getModel(resource[TYPE]);
+    let props = model.properties;
+    let refList = [];
     let propsToShow = []
 
     let currentProp = backlink
@@ -123,7 +123,7 @@ class ApplicationTabs extends Component {
       if (ref === IDENTITY)
         return
       let propTitle = translate(props[p], model)
-      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).icon;
+      let icon = props[p].icon  ||  utils.getModel(props[p].items.ref).icon;
       if (!icon) {
         if (ref === FORM)
           icon = 'ios-body-outline'
