@@ -162,7 +162,7 @@
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#dev",
     "react-native-deprecated-custom-components": "github:tradle/react-native-custom-components",
     "react-native-device-info": "^5.6.5",
-    "react-native-document-picker": "^2.3.0",
+    "react-native-document-picker": "^9.1.1",
     "react-native-document-reader-api": "^5.1.0",
     "react-native-document-reader-core-fullrfid": "^5.1.0",
     "react-native-ecc": "^2.2.0",
